@@ -1,50 +1,59 @@
 # .agentic-rules
 
-version: 1
+version: 2
 project: open-civic-signal-os
 mission: Transform community signals into transparent, auditable, executable civic backlog.
 
-## 1) Priority Order (Always)
+## 1) Decision Priority (Strict)
 
-1. Correctness
-2. Security and privacy
-3. Determinism and auditability
-4. Testability and CI reliability
-5. UX clarity
+1. Correctness and safety
+2. Public trust and auditability
+3. Determinism and contract stability
+4. Test reliability and CI signal quality
+5. UX clarity and accessibility
 6. Delivery speed
 
-## 2) Scope Discipline
+## 2) Scope and Change Budget
 
 - One objective per PR.
-- No unrelated refactors.
-- Backend issue: avoid broad frontend redesign.
-- Docs/backlog issue: avoid runtime behavior changes.
-- If scope changes, stop and update issue + acceptance criteria before coding.
+- Max one primary subsystem per PR unless explicitly requested:
+  - backend api/domain, or
+  - frontend workflow/ui, or
+  - docs/governance/automation.
+- If scope expands, stop and update acceptance criteria before coding.
+- Reject scope creep that does not move the active story outcome.
 
-## 3) Source of Truth
+## 3) Architecture and Source of Truth
 
-- Ranking logic lives in backend (Java), never frontend.
-- API contract changes require OpenAPI updates in same PR.
-- Scoring changes require formula/version traceability in docs.
-- `docs/community/current-backlog.md` is weekly execution source.
+- Ranking and scoring logic are backend-owned (Java).
+- Frontend must display, never redefine ranking formula.
+- API response shape changes require OpenAPI updates in the same PR.
+- Scoring changes require formula/version traceability in docs and changelog notes.
+- `docs/community/current-backlog.md` is weekly execution source of truth.
 
-## 4) Forbidden Commits
+## 4) Non-Negotiable Prohibitions
 
 Do not commit:
 
-- `apps/web-react/dist/*`
-- `apps/web-react/test-results/*`
-- screenshots or local audit artifacts (`*.png`, `*.jpg`) unless explicitly requested
-- editor temp files, caches, local logs
-- malformed config/docs (invalid JSON, broken markdown formatting)
+- generated artifacts: `apps/web-react/dist/*`, `apps/web-react/test-results/*`
+- local screenshots/audit outputs (`*.png`, `*.jpg`) unless issue explicitly requires artifacts
+- temp/editor/cache files and local logs
+- malformed docs/config (invalid JSON, broken markdown, malformed bullets)
 
-## 5) Dependency Policy
+Do not do:
 
-- No dependency additions by default.
-- Add dependencies only if issue requires and maintainer impact is documented.
-- Any added dependency must include:
-  - why native/project-local solution is insufficient
+- bypass or weaken validation (`skipTests` for backend validation is prohibited)
+- hidden dependency churn
+- undocumented behavior changes
+- silent contract drift between backend and frontend
+
+## 5) Dependency Governance
+
+- Default: no new dependencies.
+- If needed, PR must include:
+  - why native/project-local alternative is insufficient
   - runtime vs dev-only classification
+  - security/update footprint
   - rollback/removal plan
 
 ## 6) Quality Gates Before Push
@@ -55,49 +64,66 @@ Required:
 - `npm run backlog:current:check`
 - `npm run agent:context:check`
 
-If Java backend changed:
+Conditional:
 
-- `mvn -q test` in `apps/api-java`
+- If Java backend changed: `mvn -q test` in `apps/api-java`
+- If contract changed: run contract/ADR gate and verify OpenAPI consistency
+- If docs changed: ensure links/examples are still valid
 
-## 7) Security and Trust Rules
+## 7) Testing and Regression Rules
 
-- Minimize PII capture and exposure.
+- Every bugfix must add a regression test.
+- Every behavior change must ship with tests and docs in same PR.
+- Every trust-critical rule must include deterministic test evidence.
+- No flaky-test acceptance without mitigation note and follow-up issue.
+
+## 8) Security, Privacy, and Trust
+
+- Minimize PII collection and exposure.
 - Never leak secrets in logs/docs/examples.
 - Keep audit metadata explicit: source, timestamp, transformation/version.
-- Moderation and trust-critical decisions must be explainable and reviewable.
+- Moderation and trust-critical actions must be explainable and reviewable.
+- Prefer fail-closed behavior for invalid or ambiguous input.
 
-## 8) Testing Rules
+## 9) PR Evidence Contract (Mandatory)
 
-- Every bugfix must include a regression test.
-- Every behavior change must include test + docs update in same PR.
-- Never bypass CI checks or test execution (`skipTests` prohibited in validation).
-
-## 9) PR Evidence (Mandatory)
-
-PR description must include:
+PR body must include:
 
 - objective and story/issue ID
-- files touched by layer (backend/frontend/contracts/docs)
-- commands executed and outcomes
-- risk and rollback plan
-- migration impact (`none` if not applicable)
+- files changed by layer (backend/frontend/contracts/docs)
+- commands executed with pass/fail outcome
+- risk analysis and rollback plan
+- migration impact (`none` when not applicable)
+- explicit note if other-agent changes were included
 
-## 10) Stop Conditions
+## 10) Rejection Criteria
 
-Pause and request clarification when:
+Reject the PR if any is true:
+
+- CI fails or required checks are skipped
+- generated artifacts are committed
+- contract changed without OpenAPI/ADR alignment
+- behavior changed without test evidence
+- malformed markdown/json/config introduced
+- objective is mixed with unrelated work
+
+## 11) Stop Conditions
+
+Pause and ask for clarification when:
 
 - acceptance criteria conflict with product principles
-- task requires breaking change not approved
-- security/privacy risk is uncertain
-- contract changes are ambiguous
+- breaking change is implied but not approved
+- security/privacy impact is uncertain
+- contract intent is ambiguous
 
-## 11) Definition of Excellent
+## 12) Definition of Excellent
 
 A change is excellent only if it is:
 
 - correct
 - deterministic
 - auditable
+- secure
 - tested
 - documented
 - scoped
