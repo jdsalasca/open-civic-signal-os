@@ -166,3 +166,10 @@ Use these inputs before implementation:
 - `docs/agent/change-risk-matrix.md`
 - `docs/agent/agent-handshake-protocol.md`
 - `docs/agent/backlog-expansion-seeds.md`
+
+## Agent Evaluation Gate
+
+- Workflow: `.github/workflows/agent-evaluation.yml`
+- Script: `scripts/agent-evaluate-pr.mjs`
+- Minimum score default: `8/12`
+- PRs below threshold must be revised before merge.
