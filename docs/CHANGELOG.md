@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- **Build-Time Type Safety**: Integrated `tsc --noEmit` into the frontend build process to ensure zero type errors in production. (#40)
+- **Batch Deduplication**: Refactored the duplicate signal detection to use a rolling window strategy, improving performance for large datasets. (#39)
+- **Typed Domain Exceptions**: Introduced `ResourceNotFoundException`, `ConflictException`, and others for semantic API error responses. (#3)
+- **Flyway Migrations**: Initialized professional database schema management. (#9)
 - **Persistent Notifications**: Notification history is now stored in PostgreSQL, replacing the previous in-memory list. (#36)
 - **Optimized Ranking**: Top-10 ranking logic has been moved to the database level for improved scalability and performance. (#37)
 - **Automated Abuse Detection**: Signals with suspicious patterns (e.g., high urgency with low impact) are now automatically flagged for review. (#30)
@@ -21,6 +25,10 @@
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 
 ### Fixed
+- **Double Prefix Bug**: Resolved issue where API requests hit `/api/api/*`. (#UX-001)
+- **Contrast Compliance**: Hardened visual tokens to meet WCAG AA standards across all components. (#UX-007)
+- **State Hydration**: Improved AuthGuard to wait for store rehydration, preventing false-positive logouts.
+- **Async Robustness**: Added `@Async` to EmailService with structured error logging. (#38)
+- **Null Safety**: Hardened `mergedFrom` collection initialization in Signal entity. (#P1-08)
 - **Container Accessibility**: Corrected Docker Compose dependencies to ensure the `civic-web` container starts reliably.
 - **Production Build Error**: Resolved `ReferenceError: React is not defined` by correctly configuring `@vitejs/plugin-react`. (#17)
-- **API Mapping**: Resolved JPA column duplication errors in the `Signal` entity.

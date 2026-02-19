@@ -1,11 +1,15 @@
 package org.opencivic.signalos.web;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.EmailService;
 import org.opencivic.signalos.service.JwtService;
 import org.opencivic.signalos.web.dto.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,12 +44,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public Map<String, String> register(@Valid @RequestBody UserRegistrationRequest request) {
+    public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new RuntimeException("Username already exists");
         }
 
-        // P0-1: Prevention of privilege escalation. Public registration ALWAYS defaults to ROLE_CITIZEN.
         User user = new User(
             request.username(),
             passwordEncoder.encode(request.password()),
@@ -55,14 +58,13 @@ public class AuthController {
         user.setEnabled(true);
         userRepository.save(user);
 
-        // P2-13: Async email trigger without manual thread spawning.
         emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
 
-        return Map.of("message", "User registered successfully. Welcome to Signal OS!");
+        return ResponseEntity.ok(Map.of("message", "User registered successfully. Welcome to Signal OS!"));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
@@ -73,20 +75,47 @@ public class AuthController {
         
         User user = userRepository.findByUsername(request.username()).orElseThrow();
 
-        return new AuthResponse(accessToken, refreshToken, user.getRole(), user.getUsername());
+        // P1-5: Move Refresh Token to HttpOnly Cookie
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false) // Set to true in production with HTTPS
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60) // 7 days
+                .sameSite("Strict")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new AuthResponse(accessToken, null, user.getRole(), user.getUsername()));
     }
 
     @PostMapping("/refresh")
-    public AuthResponse refresh(@Valid @RequestBody TokenRefreshRequest request) {
-        String username = jwtService.extractUsername(request.refreshToken());
+    public ResponseEntity<AuthResponse> refresh(@CookieValue(name = "refreshToken") String refreshToken) {
+        // P1-5: Extract refresh token from cookie instead of body
+        String username = jwtService.extractUsername(refreshToken);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         
-        if (jwtService.isTokenValid(request.refreshToken(), userDetails)) {
+        if (jwtService.isTokenValid(refreshToken, userDetails)) {
             String accessToken = jwtService.generateToken(userDetails);
             User user = userRepository.findByUsername(username).orElseThrow();
-            return new AuthResponse(accessToken, request.refreshToken(), user.getRole(), user.getUsername());
+            return ResponseEntity.ok(new AuthResponse(accessToken, null, user.getRole(), user.getUsername()));
         }
         throw new RuntimeException("Invalid Refresh Token");
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        // P1-5: Clear the HttpOnly cookie on logout
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .build();
+        
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 
     @GetMapping("/me")

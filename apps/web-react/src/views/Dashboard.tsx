@@ -26,9 +26,9 @@ export function Dashboard() {
     try {
       setLoading(true);
       const [signalsRes, notificationsRes] = await Promise.all([
-        apiClient.get("/api/signals/prioritized?size=50"),
+        apiClient.get("signals/prioritized?size=50"),
         (role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN")
-          ? apiClient.get("/api/notifications/recent")
+          ? apiClient.get("notifications/recent")
           : Promise.resolve(null)
       ]);
       
@@ -40,10 +40,9 @@ export function Dashboard() {
         setNotifications(notificationsRes.data);
       }
       
-    } catch (err) {
-      toast.error("Network synchronization failed.");
+    } catch (err: any) {
+      toast.error(err.friendlyMessage || "Synchronization failed.");
     } finally {
-      // P2-17: Removed artificial delay. Feedback is now immediate.
       setLoading(false);
     }
   };
@@ -54,13 +53,13 @@ export function Dashboard() {
 
   const handleRelay = async () => {
     try {
-      const res = await apiClient.post("/api/notifications/relay/top-10");
+      const res = await apiClient.post("notifications/relay/top-10");
       if (res.status === 200) {
         toast.success("Intelligence broadcast successful!");
         loadData();
       }
-    } catch (err) {
-      toast.error("Unauthorized: Operation rejected.");
+    } catch (err: any) {
+      toast.error(err.friendlyMessage || "Relay rejected.");
     }
   };
 
@@ -68,12 +67,12 @@ export function Dashboard() {
 
   return (
     <Layout>
-      <section className="mb-6 flex flex-column lg:flex-row justify-content-between lg:align-items-center gap-4 animate-fade-in">
+      <section className="mb-6 flex flex-column lg:flex-row justify-content-between lg:align-items-center gap-4 animate-fade-in" data-testid="dashboard-hero">
         <div>
           <div className="flex align-items-center gap-2 mb-2">
             <span className="bg-cyan-900 text-cyan-400 text-xs font-bold px-2 py-1 border-round uppercase tracking-tighter">Live Intelligence</span>
             <span className="text-gray-600 text-xs">•</span>
-            <span className="text-gray-500 text-xs font-medium">Welcome back, {user}</span>
+            <span className="text-gray-500 text-xs font-medium" data-testid="welcome-message">Welcome back, {user}</span>
           </div>
           <h1 className="text-5xl font-black mb-2 tracking-tight line-height-1">
             Governance <span className="text-cyan-500">Insights</span>
@@ -88,15 +87,19 @@ export function Dashboard() {
               label="Weekly Broadcast" 
               icon="pi pi-bolt" 
               severity="danger"
-              className="px-4 py-3 shadow-6 border-none font-bold"
+              className="p-button-primary px-4 py-3 shadow-6"
               onClick={handleRelay} 
+              data-testid="broadcast-button"
+              aria-label="Send Top 10 Broadcast"
             />
           )}
           <Button 
             label="Report New Issue" 
             icon="pi pi-plus" 
-            className="px-4 py-3 bg-cyan-600 border-none shadow-6 font-bold" 
+            className="p-button-primary px-4 py-3 shadow-6" 
             onClick={() => navigate("/report")} 
+            data-testid="report-issue-button"
+            aria-label="Create New Civic Signal"
           />
         </div>
       </section>
@@ -106,18 +109,18 @@ export function Dashboard() {
       <MetricsGrid signals={loading ? [] : signals} />
 
       <div className="grid mt-2">
-        <div className="col-12 xl:col-8">
+        <div className="col-12 xl:col-8" data-testid="main-signal-table">
           <SignalTable signals={signals} loading={loading} />
         </div>
         <div className="col-12 xl:col-4">
           <div className="flex flex-column gap-4">
-            {!loading && <CategoryChart signals={signals} />}
+            {!loading && signals.length > 0 && <CategoryChart signals={signals} />}
             <DigestSidebar signals={signals} />
             {isStaff && (
               <NotificationSidebar notifications={notifications} />
             )}
             {role === "CITIZEN" && (
-              <Card title="Civic Support" className="bg-blue-900 border-none shadow-4">
+              <Card title="Civic Support" className="bg-blue-900 border-none shadow-4" data-testid="citizen-support-card">
                 <p className="text-blue-100 line-height-3 mb-4 text-sm">
                   Your votes and reports directly impact the algorithmic priority of issues in your community. Keep up the good work!
                 </p>

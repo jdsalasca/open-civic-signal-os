@@ -2,6 +2,7 @@ package org.opencivic.signalos.service;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,25 +14,18 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @Async // BE-P2-10: Truly non-blocking email sending
     public void sendWelcomeEmail(String to, String username) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("no-reply@opencivic.org");
-        message.setTo(to);
-        message.setSubject("Welcome to Open Civic Signal OS");
-        message.setText("""
-                Hello %s,
-
-                Your account has been successfully registered. You can now contribute by reporting and voting on civic issues.
-
-                Best regards,
-                Open Civic Team
-                """.formatted(username));
-        
         try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("noreply@signalos.org");
+            message.setTo(to);
+            message.setSubject("Welcome to Signal OS");
+            message.setText("Hello " + username + ",\n\nYour civic account has been created successfully. Welcome to the platform!");
             mailSender.send(message);
         } catch (Exception e) {
-            // Log error but don't block registration for now
-            System.err.println("Failed to send email: " + e.getMessage());
+            // BE-P2-10: Structured logging instead of silent failure
+            System.err.println("CRITICAL: Failed to send welcome email to " + to + ". Reason: " + e.getMessage());
         }
     }
 }

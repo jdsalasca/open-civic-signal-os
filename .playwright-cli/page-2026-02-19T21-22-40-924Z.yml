@@ -1,0 +1,33 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - link "SignalOS" [ref=e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e8]: SignalOS
+    - generic [ref=e9]:
+      - text: 
+      - generic [ref=e10]:
+        - link "Sign In" [ref=e11] [cursor=pointer]:
+          - /url: /login
+          - button "Sign In" [ref=e12]:
+            - generic [ref=e13]: Sign In
+        - link "Join Now" [ref=e14] [cursor=pointer]:
+          - /url: /register
+          - button "Join Now" [ref=e15]:
+            - generic [ref=e16]: Join Now
+  - main [ref=e17]:
+    - generic [ref=e19]:
+      - generic [ref=e21]: 
+      - heading "404" [level=1] [ref=e22]
+      - heading "Signal Lost in Space" [level=2] [ref=e23]
+      - paragraph [ref=e24]: The civic coordinate you are looking for does not exist or has been moved to a different sector.
+      - button "Back to Insights" [ref=e25] [cursor=pointer]:
+        - generic: 
+        - generic [ref=e26]: Back to Insights
+  - contentinfo [ref=e27]:
+    - generic [ref=e28]:
+      - generic [ref=e29]: 
+      - generic [ref=e30]: Global Governance Standard
+    - generic [ref=e31]: © 2026 Open Civic Signal OS. Protocol v0.2.6-stable
+    - generic [ref=e32]:
+      - generic [ref=e33] [cursor=pointer]: 
+      - generic [ref=e34] [cursor=pointer]: 

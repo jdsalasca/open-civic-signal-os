@@ -1,0 +1,50 @@
+- generic [ref=e5]:
+  - navigation [ref=e6]:
+    - link "SignalOS" [ref=e8] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e10]: SignalOS
+    - generic [ref=e11]:
+      - button "" [ref=e12] [cursor=pointer]:
+        - generic: 
+      - generic [ref=e13]:
+        - link "Sign In" [ref=e14] [cursor=pointer]:
+          - /url: /login
+          - button "Sign In" [ref=e15]:
+            - generic [ref=e16]: Sign In
+        - link "Join Now" [ref=e17] [cursor=pointer]:
+          - /url: /register
+          - button "Join Now" [ref=e18]:
+            - generic [ref=e19]: Join Now
+  - main [ref=e20]:
+    - generic [ref=e25]:
+      - generic [ref=e26]:
+        - img [ref=e27]
+        - heading "Access Portal" [level=1] [ref=e30]
+        - paragraph [ref=e31]: Open Civic Signal OS Management
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: Username
+          - generic [ref=e35]:
+            - generic [ref=e36]: 
+            - textbox "Username" [active] [ref=e37]:
+              - /placeholder: Enter your username
+        - generic [ref=e38]:
+          - generic [ref=e39]: Password
+          - generic [ref=e41]:
+            - textbox "Enter your password" [ref=e42]
+            - switch "Show Password" [checked] [ref=e44] [cursor=pointer]
+        - button "Sign In to OS" [ref=e46] [cursor=pointer]:
+          - generic: 
+          - generic [ref=e47]: Sign In to OS
+        - generic [ref=e48]:
+          - text: Don't have an account?
+          - link "Create one" [ref=e49] [cursor=pointer]:
+            - /url: /register
+  - contentinfo [ref=e50]:
+    - generic [ref=e51]:
+      - generic [ref=e52]: 
+      - generic [ref=e53]: Global Governance Standard
+    - generic [ref=e54]: © 2026 Open Civic Signal OS. Protocol v0.2.6-stable
+    - generic [ref=e55]:
+      - generic [ref=e56] [cursor=pointer]: 
+      - generic [ref=e57] [cursor=pointer]: 

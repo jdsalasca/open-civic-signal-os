@@ -1,11 +1,13 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
+// UX-001: Hardened baseURL. We avoid trailing slash to keep composition predictable.
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Request Interceptor: Attach Token
@@ -14,40 +16,51 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  // P0-2: Removed sensitive payload logs
+  
+  // UX-001: Safety check - ensure no double /api in outgoing URL
+  if (config.url?.startsWith('/api')) {
+    config.url = config.url.replace('/api', '');
+  }
+  
   return config;
 });
 
 // Response Interceptor: Handle 401/403 and Refresh Token
 apiClient.interceptors.response.use(
   (response) => {
-    // P0-2: Removed sensitive payload logs
     return response;
   },
   async (error) => {
-    // P0-2: Safe redacted error log
-    console.error(`[API Error] ${error.response?.status || 'Network Error'} on ${error.config?.url}`);
-    
     const originalRequest = error.config;
+
+    // UX-005: Root-cause analysis for error messaging
+    if (!error.response) {
+      error.friendlyMessage = "Civic API Unreachable: Please verify your connection or check service status.";
+    } else {
+      switch (error.response.status) {
+        case 401: error.friendlyMessage = "Authentication Required: Your session is invalid or expired."; break;
+        case 403: error.friendlyMessage = "Forbidden: Your role lacks clearance for this coordinate."; break;
+        case 404: error.friendlyMessage = "Not Found: The requested civic resource does not exist."; break;
+        case 409: error.friendlyMessage = "Conflict: Action rejected to maintain data integrity."; break;
+        default: error.friendlyMessage = "Civic Error: An unexpected system rejection occurred.";
+      }
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const refreshToken = useAuthStore.getState().refreshToken;
 
-      if (refreshToken) {
-        try {
-          const baseUrl = apiClient.defaults.baseURL || '';
-          const res = await axios.post(`${baseUrl}/api/auth/refresh`, { refreshToken });
-          const { accessToken } = res.data;
-          useAuthStore.getState().updateAccessToken(accessToken);
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          return apiClient(originalRequest);
-        } catch (refreshError) {
-          useAuthStore.getState().logout();
-          return Promise.reject(refreshError);
-        }
-      } else {
+      try {
+        // UX-001: Explicit relative path for refresh
+        const res = await apiClient.post('auth/refresh', {});
+        const { accessToken } = res.data;
+        
+        useAuthStore.getState().updateAccessToken(accessToken);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        
+        return apiClient(originalRequest);
+      } catch (refreshError) {
         useAuthStore.getState().logout();
+        return Promise.reject(refreshError);
       }
     }
 

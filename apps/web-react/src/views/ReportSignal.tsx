@@ -36,79 +36,80 @@ export function ReportSignal() {
 
   const onSubmit = async (data: ReportForm) => {
     try {
-      const res = await apiClient.post("/api/signals", data);
+      // UX-001: Standardized path
+      const res = await apiClient.post("signals", data);
       if (res.status === 200 || res.status === 201) {
         toast.success("Signal reported successfully!");
         navigate("/");
       }
     } catch (err: any) {
-      toast.error(`Error: ${err.response?.data?.message || "Failed to submit"}`);
+      toast.error(err.friendlyMessage || "Failed to submit signal.");
     }
   };
 
   return (
     <Layout>
-      <div className="flex justify-content-center">
+      <div className="flex justify-content-center animate-fade-in">
         <Card title="Report Civic Signal" subTitle="Provide details about the issue in your community" style={{ width: '100%', maxWidth: '800px' }}>
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid grid">
-            <div className="field col-12">
-              <label htmlFor="title" className="font-bold">Short Title</label>
+            <div className="field col-12 mb-4">
+              <label htmlFor="title" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Short Title</label>
               <Controller name="title" control={control} rules={{ required: 'Title is required.' }} 
                 render={({ field, fieldState }) => (
-                  <InputText id={field.name} {...field} placeholder="e.g. Broken bench in Central Park" className={classNames({ 'p-invalid': fieldState.error })} />
+                  <InputText id="title" {...field} placeholder="e.g. Broken bench in Central Park" className={classNames('py-3', { 'p-invalid': fieldState.error })} />
                 )} 
               />
-              {errors.title && <small className="p-error">{errors.title.message}</small>}
+              {errors.title && <small className="p-error block mt-1">{errors.title.message}</small>}
             </div>
 
-            <div className="field col-12">
-              <label htmlFor="description" className="font-bold">Detailed Description</label>
+            <div className="field col-12 mb-4">
+              <label htmlFor="description" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Detailed Description</label>
               <Controller name="description" control={control} 
                 render={({ field }) => (
-                  <InputTextarea id={field.name} {...field} rows={4} placeholder="Describe the problem..." autoResize />
+                  <InputTextarea id="description" {...field} rows={4} placeholder="Describe the problem..." autoResize className="bg-gray-900 border-gray-800" />
                 )} 
               />
             </div>
 
-            <div className="field col-12 md:col-6">
-              <label htmlFor="category" className="font-bold">Category</label>
+            <div className="field col-12 md:col-6 mb-4">
+              <label htmlFor="category" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Category</label>
               <Controller name="category" control={control} 
                 render={({ field }) => (
-                  <Dropdown id={field.name} {...field} options={categories} />
+                  <Dropdown id="category" {...field} options={categories} className="bg-gray-900 border-gray-800 py-1" />
                 )} 
               />
             </div>
 
-            <div className="field col-12 md:col-2">
-              <label htmlFor="urgency" className="font-bold">Urgency (1-5)</label>
+            <div className="field col-12 md:col-2 mb-4">
+              <label htmlFor="urgency" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Urgency</label>
               <Controller name="urgency" control={control} 
                 render={({ field }) => (
-                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons />
+                  <InputNumber id="urgency" value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons inputClassName="bg-gray-900 border-gray-800" />
                 )} 
               />
             </div>
 
-            <div className="field col-12 md:col-2">
-              <label htmlFor="impact" className="font-bold">Impact (1-5)</label>
+            <div className="field col-12 md:col-2 mb-4">
+              <label htmlFor="impact" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Impact</label>
               <Controller name="impact" control={control} 
                 render={({ field }) => (
-                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons />
+                  <InputNumber id="impact" value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons inputClassName="bg-gray-900 border-gray-800" />
                 )} 
               />
             </div>
 
-            <div className="field col-12 md:col-2">
-              <label htmlFor="affectedPeople" className="font-bold">Affected</label>
+            <div className="field col-12 md:col-2 mb-4">
+              <label htmlFor="affectedPeople" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Affected</label>
               <Controller name="affectedPeople" control={control} 
                 render={({ field }) => (
-                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} />
+                  <InputNumber id="affectedPeople" value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} inputClassName="bg-gray-900 border-gray-800" />
                 )} 
               />
             </div>
 
-            <div className="col-12 mt-4 flex gap-2">
-              <Button type="button" label="Cancel" outlined className="w-auto" onClick={() => navigate('/')} />
-              <Button type="submit" label="Submit Signal" icon="pi pi-check" severity="success" className="w-auto" />
+            <div className="col-12 mt-4 flex gap-3">
+              <Button type="button" label="Discard" outlined className="p-button-secondary border-gray-700 text-gray-400 w-auto px-5 font-bold" onClick={() => navigate('/')} />
+              <Button type="submit" label="Submit to Registry" icon="pi pi-check" className="p-button-primary w-auto px-6 shadow-4 font-bold" />
             </div>
           </form>
         </Card>

@@ -1,5 +1,8 @@
 package org.opencivic.signalos.web;
 
+import org.opencivic.signalos.exception.ConflictException;
+import org.opencivic.signalos.exception.ResourceNotFoundException;
+import org.opencivic.signalos.exception.UnauthorizedActionException;
 import org.opencivic.signalos.web.dto.ApiError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +20,22 @@ import java.util.UUID;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // P0-1: Correct import from .dto package
-    // P1-7: Improvement in semantic error mapping
+    // BE-P1-03: Mapping domain exceptions to correct HTTP status codes
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiError> handleConflict(ConflictException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedActionException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiError> handleAuth(BadCredentialsException ex) {
@@ -48,14 +65,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiError> handleDomain(RuntimeException ex) {
-        // P1-8: Generic clean message for internal domain errors
-        return buildResponse("A domain error occurred: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return buildResponse("An application error occurred: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(Exception ex) {
         String correlationId = UUID.randomUUID().toString();
-        // In prod, log actual stack trace with correlationId
         return buildResponse("An unexpected error occurred. Reference: " + correlationId, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

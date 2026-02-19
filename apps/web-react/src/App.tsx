@@ -1,15 +1,25 @@
-import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { Dashboard } from "./views/Dashboard";
-import { ReportSignal } from "./views/ReportSignal";
-import { SignalDetail } from "./views/SignalDetail";
-import { Register } from "./views/Register";
-import { Login } from "./views/Login";
-import { Moderation } from "./views/Moderation";
-import { NotFound } from "./views/NotFound";
-import { Unauthorized } from "./views/Unauthorized";
+import { ProgressBar } from "primereact/progressbar";
 import { useAuthStore } from "./store/useAuthStore";
 import { AuthGuard } from "./components/AuthGuard";
+
+// P2-16: Code-splitting for optimized bundle size and faster TTI
+const Dashboard = lazy(() => import("./views/Dashboard").then(m => ({ default: m.Dashboard })));
+const ReportSignal = lazy(() => import("./views/ReportSignal").then(m => ({ default: m.ReportSignal })));
+const SignalDetail = lazy(() => import("./views/SignalDetail").then(m => ({ default: m.SignalDetail })));
+const Register = lazy(() => import("./views/Register").then(m => ({ default: m.Register })));
+const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
+const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
+const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
+const Unauthorized = lazy(() => import("./views/Unauthorized").then(m => ({ default: m.Unauthorized })));
+
+const LoadingFallback = () => (
+  <div className="fixed top-0 left-0 w-full z-5">
+    <ProgressBar mode="indeterminate" style={{ height: '3px' }} />
+  </div>
+);
 
 export function App() {
   const { isLoggedIn } = useAuthStore();
@@ -28,23 +38,25 @@ export function App() {
           },
         }}
       />
-      <Routes>
-        <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
-        <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
-        
-        <Route element={<AuthGuard />}>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/report" element={<ReportSignal />} />
-          <Route path="/signal/:id" element={<SignalDetail />} />
-        </Route>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
+          <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
+          
+          <Route element={<AuthGuard />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/report" element={<ReportSignal />} />
+            <Route path="/signal/:id" element={<SignalDetail />} />
+          </Route>
 
-        <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>
-          <Route path="/moderation" element={<Moderation />} />
-        </Route>
-        
-        <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>
+            <Route path="/moderation" element={<Moderation />} />
+          </Route>
+          
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

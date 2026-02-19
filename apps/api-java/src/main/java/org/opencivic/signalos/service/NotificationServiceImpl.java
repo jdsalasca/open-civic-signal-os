@@ -21,7 +21,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void broadcastTop10() {
+    public void sendTop10Relay() {
         List<Signal> top10 = prioritizationService.getTopUnresolved(10);
         String summary = top10.stream()
                 .map(s -> String.format("[%s] %s", s.getCategory(), s.getTitle()))
@@ -34,13 +34,11 @@ public class NotificationServiceImpl implements NotificationService {
             LocalDateTime.now()
         );
         
-        // P2-14: Persist notification to DB instead of memory list
         notificationRepository.save(n);
     }
 
     @Override
     public List<Notification> getRecentNotifications() {
-        // P2-14: Fetch from DB with limit
         return notificationRepository.findTop50ByOrderBySentAtDesc();
     }
 }

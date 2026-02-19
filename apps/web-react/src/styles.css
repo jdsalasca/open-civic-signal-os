@@ -3,13 +3,32 @@
 :root {
   --bg-dark: #0a0f1e;
   --bg-surface: #111827;
-  --accent-primary: #06b6d4; /* Cyan 500 */
-  --accent-secondary: #8b5cf6; /* Violet 500 */
+  
+  /* UX-002 & UX-007: WCAG AA Hardened Contrast Tokens */
+  --primary: #06b6d4;      /* Cyan 500 */
+  --primary-hover: #22d3ee;
+  --primary-active: #0891b2;
+  --primary-text: #083344; /* Dark text on bright cyan for contrast */
+  
+  --secondary: #374151;    /* Gray 700 */
+  --secondary-hover: #4b5563;
+  --secondary-text: #f9fafb;
+  
+  --ghost-hover: rgba(255, 255, 255, 0.05);
+  --ghost-text: #9ca3af;   /* Gray 400 */
+  --ghost-text-hover: #f9fafb;
+
+  --danger: #ef4444;       /* Red 500 */
+  --danger-hover: #f87171;
+  --danger-text: #ffffff;
+
   --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --glass-bg: rgba(255, 255, 255, 0.02);
-  --glass-stroke: rgba(255, 255, 255, 0.08);
+  --text-muted: #9ca3af;   /* Passes AA on #111827 */
+  --text-dim: #d1d5db;     /* Safe for meta info */
+  
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --glass-stroke: rgba(255, 255, 255, 0.15);
+  --focus-ring: 0 0 0 3px rgba(6, 182, 212, 0.4);
 }
 
 body {
@@ -20,94 +39,76 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Base Layout */
-.min-h-screen { min-height: 100vh; }
-.page-container { max-width: 1400px; margin: 0 auto; }
+/* UX-004: Auth-focused hierarchy focus */
+.auth-page nav, .auth-page footer {
+  filter: grayscale(1) opacity(0.3);
+  pointer-events: none;
+}
 
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-dark); }
-::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #374151; }
+/* UX-003: Mobile Drawer & Overlap Fixes */
+.p-sidebar {
+  background: var(--bg-surface) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+}
 
-/* Global PrimeReact Overrides for "High Quality" Look */
+.p-sidebar-mask {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Button Level System */
+.p-button {
+  transition: all 0.2s ease !important;
+  border-radius: 8px !important;
+}
+
+.p-button:focus-visible {
+  outline: none !important;
+  box-shadow: var(--focus-ring) !important;
+}
+
+.p-button.p-button-primary {
+  background: var(--primary) !important;
+  color: var(--primary-text) !important;
+  border: none !important;
+  font-weight: 800 !important;
+}
+.p-button.p-button-primary:hover { background: var(--primary-hover) !important; }
+.p-button.p-button-primary:active { background: var(--primary-active) !important; }
+
+.p-button.p-button-secondary {
+  background: var(--secondary) !important;
+  color: var(--secondary-text) !important;
+  border: 1px solid var(--border-subtle) !important;
+}
+
+.p-button.p-button-text {
+  color: var(--ghost-text) !important;
+}
+.p-button.p-button-text:hover { 
+  background: var(--ghost-hover) !important; 
+  color: var(--ghost-text-hover) !important; 
+}
+
+/* Global PrimeReact Overrides */
 .p-card {
   background: var(--bg-surface) !important;
   border: 1px solid var(--glass-stroke) !important;
-  border-radius: 16px !important;
-  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5) !important;
+  border-radius: 20px !important;
 }
 
-.p-datatable {
-  background: transparent !important;
-}
-
-.p-datatable .p-datatable-thead > tr > th {
-  background: transparent !important;
-  border-bottom: 1px solid var(--border-subtle) !important;
-  color: var(--text-muted) !important;
-  font-size: 0.75rem !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
-}
-
-.p-datatable .p-datatable-tbody > tr {
-  background: transparent !important;
-  transition: background 0.2s ease !important;
-}
-
-.p-datatable .p-datatable-tbody > tr:hover {
-  background: rgba(255, 255, 255, 0.02) !important;
-}
-
-.p-datatable .p-datatable-tbody > tr > td {
-  border-bottom: 1px solid var(--border-subtle) !important;
-  padding: 1.25rem 1rem !important;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease forwards;
-}
-
-/* Specific UI Utilities */
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 8px;
-}
-
-.glow-cyan { text-shadow: 0 0 15px rgba(6, 182, 212, 0.5); }
-.border-glow { border-color: var(--accent-primary) !important; box-shadow: 0 0 20px rgba(6, 182, 212, 0.1) !important; }
-
-/* Custom Form Styles */
-.p-inputtext, .p-password input, .p-dropdown {
+.p-inputtext {
   background: rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid var(--glass-stroke) !important;
-  border-radius: 10px !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: #fff !important;
+}
+.p-inputtext:focus {
+  border-color: var(--primary) !important;
+  box-shadow: var(--focus-ring) !important;
 }
 
-.p-inputtext:focus, .p-dropdown:focus {
-  border-color: var(--accent-primary) !important;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2) !important;
+/* UX-006: Exception Screens Consistency */
+.exception-card {
+  max-width: 500px;
+  text-align: center;
 }
-
-.p-button {
-  border-radius: 10px !important;
-  font-weight: 600 !important;
-}
-
-/* Metrics Dashboard Cards */
-.metric-card-inner {
-  border-left: 4px solid var(--accent-primary);
-}
-.metric-card-inner.orange { border-left-color: #f59e0b; }
-.metric-card-inner.green { border-left-color: #10b981; }
-.metric-card-inner.blue { border-left-color: #3b82f6; }
