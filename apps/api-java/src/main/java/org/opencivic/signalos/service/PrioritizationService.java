@@ -2,12 +2,15 @@ package org.opencivic.signalos.service;
 
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.ScoreBreakdown;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public interface PrioritizationService {
-    List<Signal> getPrioritizedSignals();
+    Page<Signal> getPrioritizedSignals(Pageable pageable);
     List<Signal> getTopUnresolved(int limit);
     double calculateScore(Signal signal);
     ScoreBreakdown getBreakdown(Signal signal);
@@ -15,4 +18,7 @@ public interface PrioritizationService {
     // Duplicate detection
     Map<UUID, List<Signal>> findDuplicates();
     Signal mergeSignals(UUID targetId, List<UUID> duplicateIds);
+    
+    // Persistence
+    Signal saveSignal(Signal signal);
 }

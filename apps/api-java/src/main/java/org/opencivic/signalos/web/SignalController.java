@@ -5,6 +5,10 @@ import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.service.PrioritizationService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.SignalResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -25,10 +29,10 @@ public class SignalController {
     }
 
     @GetMapping("/prioritized")
-    public List<SignalResponse> getPrioritizedSignals() {
-        return prioritizationService.getPrioritizedSignals().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public Page<SignalResponse> getPrioritizedSignals(
+            @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable) {
+        return prioritizationService.getPrioritizedSignals(pageable)
+                .map(this::mapToResponse);
     }
 
     @GetMapping("/top-10")
@@ -50,7 +54,10 @@ public class SignalController {
             request.affectedPeople(),
             0, 0.0, null, "NEW", new ArrayList<>(), LocalDateTime.now()
         );
-        return mapToResponse(s.withScore(prioritizationService.calculateScore(s), prioritizationService.getBreakdown(s)));
+        s.setPriorityScore(prioritizationService.calculateScore(s));
+        s.setScoreBreakdown(prioritizationService.getBreakdown(s));
+        
+        return mapToResponse(prioritizationService.saveSignal(s));
     }
 
     @GetMapping("/duplicates")

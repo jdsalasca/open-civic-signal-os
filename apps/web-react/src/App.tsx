@@ -19,7 +19,7 @@ const fallbackSignals: Signal[] = [
 ];
 
 export function App() {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? ""; // Default to relative
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,14 +36,22 @@ export function App() {
 
   const loadData = async () => {
     try {
-      const signalsRes = await fetch(`${apiBaseUrl}/api/signals/prioritized`);
-      if (signalsRes.ok) setSignals(await signalsRes.json());
+      setLoading(true);
+      const [signalsRes, notificationsRes] = await Promise.all([
+        fetch(`${apiBaseUrl}/api/signals/prioritized?size=50`), // Large size for now until we add UI pagination
+        isLoggedIn 
+          ? fetch(`${apiBaseUrl}/api/notifications/recent`, { headers: getAuthHeader() })
+          : Promise.resolve(null)
+      ]);
       
-      if (isLoggedIn) {
-        const notificationsRes = await fetch(`${apiBaseUrl}/api/notifications/recent`, {
-          headers: getAuthHeader()
-        });
-        if (notificationsRes.ok) setNotifications(await notificationsRes.json());
+      if (signalsRes.ok) {
+        const data = await signalsRes.json();
+        // Extract content from Spring Data Page object
+        setSignals(data.content || []);
+      }
+      
+      if (notificationsRes && notificationsRes.ok) {
+        setNotifications(await notificationsRes.json());
       }
       
     } catch (err) {

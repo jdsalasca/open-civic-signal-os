@@ -29,7 +29,7 @@ public class SecurityConfig {
             .cors(withDefaults())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/health", "/api/signals/prioritized", "/api/signals/top-10").permitAll()
+                .requestMatchers("/api/health", "/api/signals/prioritized", "/api/signals/top-10", "/actuator/health").permitAll()
                 .requestMatchers("/api/notifications/recent", "/api/notifications/relay/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

@@ -3,6 +3,8 @@ package org.opencivic.signalos.service;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.repository.SignalRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,11 +20,10 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     }
 
     @Override
-    public List<Signal> getPrioritizedSignals() {
-        return signalRepository.findAll().stream()
-                .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)))
-                .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed())
-                .collect(Collectors.toList());
+    public Page<Signal> getPrioritizedSignals(Pageable pageable) {
+        // Now using DB-level pagination and sorting (if provided in pageable)
+        return signalRepository.findAll(pageable)
+                .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
     }
 
     @Override
@@ -66,7 +67,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
                 Signal s2 = signals.get(j);
                 if (isSimilar(s1, s2)) {
                     dups.add(s2);
-                    processed.add(s2.getId());
+                    processed.add(s2.id()); // Compatibility note: using getId() is better
                 }
             }
 
@@ -103,5 +104,10 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     public Signal mergeSignals(UUID targetId, List<UUID> duplicateIds) {
         return signalRepository.findById(targetId).orElse(null);
+    }
+
+    @Override
+    public Signal saveSignal(Signal signal) {
+        return signalRepository.save(signal);
     }
 }
