@@ -1,0 +1,16 @@
+[
+  {
+    "text": "The park bench is broken",
+    "urgency": 2,
+    "impact": 1,
+    "reach": 10,
+    "category": "infrastructure"
+  },
+  {
+    "text": "Need more police patrols",
+    "urgency": 5,
+    "impact": 5,
+    "reach": 1000,
+    "category": "safety"
+  }
+]

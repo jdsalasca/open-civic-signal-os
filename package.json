@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "prioritize": "node src/prioritize.mjs examples/feedback.json examples/prioritized-backlog.json",
+    "ingest": "node src/ingest.mjs",
     "dev:web": "npm --workspace apps/web-react run dev",
     "build:web": "npm --workspace apps/web-react run build",
     "preview:web": "npm --workspace apps/web-react run preview",

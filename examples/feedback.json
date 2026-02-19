@@ -6,7 +6,8 @@
     "impact": 4,
     "affectedPeople": 500,
     "communityVotes": 87,
-    "category": "infrastructure"
+    "category": "infrastructure",
+    "status": "NEW"
   },
   {
     "id": "sig-002",
@@ -15,7 +16,8 @@
     "impact": 5,
     "affectedPeople": 220,
     "communityVotes": 64,
-    "category": "education"
+    "category": "education",
+    "status": "IN_PROGRESS"
   },
   {
     "id": "sig-003",
@@ -24,6 +26,35 @@
     "impact": 5,
     "affectedPeople": 350,
     "communityVotes": 79,
-    "category": "safety"
+    "category": "safety",
+    "status": "NEW"
+  },
+  {
+    "id": "sig-chat-8aw86",
+    "title": "The park bench is broken",
+    "urgency": 2,
+    "impact": 1,
+    "affectedPeople": 10,
+    "communityVotes": 0,
+    "category": "infrastructure",
+    "status": "NEW",
+    "metadata": {
+      "source": "chat",
+      "ingestedAt": "2026-02-19T02:07:20.608Z"
+    }
+  },
+  {
+    "id": "sig-chat-a6yt1",
+    "title": "Need more police patrols",
+    "urgency": 5,
+    "impact": 5,
+    "affectedPeople": 1000,
+    "communityVotes": 0,
+    "category": "safety",
+    "status": "NEW",
+    "metadata": {
+      "source": "chat",
+      "ingestedAt": "2026-02-19T02:07:20.609Z"
+    }
   }
 ]

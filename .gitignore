@@ -1,3 +1,5 @@
 node_modules/
 apps/web-react/dist/
 !coverage/coverage-summary.json
+!coverage/
+!coverage/coverage-summary.json
