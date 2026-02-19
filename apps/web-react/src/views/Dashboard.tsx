@@ -5,16 +5,15 @@ import { MetricsGrid } from "../components/MetricsGrid";
 import { SignalTable } from "../components/SignalTable";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
-import { ProgressBar } from "primereact/progressbar";
+import { CategoryChart } from "../components/CategoryChart";
 import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import apiClient from "../api/axios";
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { isLoggedIn, role, user } = useAuthStore();
+  const { isLoggedIn, role } = useAuthStore();
   
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -39,9 +38,10 @@ export function Dashboard() {
       }
       
     } catch (err) {
-      toast.error("Network synchronization error.");
+      toast.error("Network synchronization failed.");
     } finally {
-      setLoading(false);
+      // Simulate slightly longer load for UX feel of computation
+      setTimeout(() => setLoading(false), 600);
     }
   };
 
@@ -53,11 +53,11 @@ export function Dashboard() {
     try {
       const res = await apiClient.post("/api/notifications/relay/top-10");
       if (res.status === 200) {
-        toast.success("Broadcast successful!");
+        toast.success("Intelligence broadcast successful!");
         loadData();
       }
     } catch (err) {
-      toast.error("Unauthorized: Operation rejected.");
+      toast.error("Permission denied.");
     }
   };
 
@@ -65,39 +65,46 @@ export function Dashboard() {
 
   return (
     <div className="page-container">
-      <section className="mb-6 flex flex-column md:flex-row justify-content-between align-items-end gap-4 animate-fade-in">
+      <section className="mb-6 flex flex-column lg:flex-row justify-content-between lg:align-items-center gap-4 animate-fade-in">
         <div>
-          <h1 className="text-5xl font-black mb-2 tracking-tight">
-            Signal <span className="text-cyan-500">Intelligence</span>
+          <h1 className="text-5xl font-black mb-2 tracking-tight line-height-1">
+            Governance <span className="text-cyan-500">Intelligence</span>
           </h1>
-          <p className="text-gray-500 text-lg max-w-30rem line-height-3">
-            Real-time algorithmic prioritization of community reported needs and infrastructure signals.
+          <p className="text-gray-500 text-lg max-w-30rem m-0">
+            Automated community signals prioritization and transparent resolution tracking.
           </p>
         </div>
         <div className="flex gap-3">
           {isStaff && (
             <Button 
-              label="Run Weekly Relay" 
+              label="Weekly Broadcast" 
               icon="pi pi-bolt" 
               severity="danger"
-              className="px-4 py-3 shadow-4 hover:shadow-6"
+              className="px-4 py-3 shadow-6 border-none"
               onClick={handleRelay} 
             />
           )}
           {role === "CITIZEN" && (
             <Button 
-              label="Report Civic Issue" 
+              label="Report Issue" 
               icon="pi pi-plus" 
-              className="px-4 py-3 bg-cyan-600 border-none shadow-4" 
+              className="px-4 py-3 bg-cyan-600 border-none shadow-6" 
               onClick={() => navigate("/report")} 
+            />
+          )}
+          {!isLoggedIn && (
+            <Button 
+              label="Get Involved" 
+              icon="pi pi-user-plus" 
+              outlined
+              className="px-4 py-3 border-cyan-500 text-cyan-400" 
+              onClick={() => navigate("/register")} 
             />
           )}
         </div>
       </section>
 
-      {loading && <ProgressBar mode="indeterminate" style={{ height: '2px', marginBottom: '24px' }} className="border-round" />}
-
-      <MetricsGrid signals={signals} />
+      <MetricsGrid signals={loading ? [] : signals} />
 
       <div className="grid mt-2">
         <div className="col-12 xl:col-8">
@@ -105,19 +112,10 @@ export function Dashboard() {
         </div>
         <div className="col-12 xl:col-4">
           <div className="flex flex-column gap-4">
+            {!loading && <CategoryChart signals={signals} />}
             <DigestSidebar signals={signals} />
-            
             {isStaff && (
               <NotificationSidebar notifications={notifications} />
-            )}
-
-            {!isLoggedIn && (
-              <Card title="Civic Participation" className="bg-cyan-900 border-none shadow-4">
-                <p className="text-cyan-100 line-height-3 mb-4">
-                  Join the platform to report issues, support community initiatives and track resolution status in real-time.
-                </p>
-                <Button label="Get Started" severity="info" className="w-full bg-cyan-500 border-none text-gray-900 font-bold" onClick={() => navigate('/register')} />
-              </Card>
             )}
           </div>
         </div>

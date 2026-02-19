@@ -211,6 +211,12 @@ If frontend files changed, also run:
 - Script: `scripts/agent-pr-hygiene.mjs`
 - PRs must include Story ID, verification evidence, and rollback plan.
 
+## Frontend UX Evidence Gate
+
+- Workflow: `.github/workflows/frontend-ux-evidence-gate.yml`
+- Script: `scripts/check-frontend-ux-evidence.mjs`
+- Rule: if PR touches `apps/web-react/**`, Playwright evidence is mandatory in PR body.
+
 
 ## Agent Input Pack
 

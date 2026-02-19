@@ -1,0 +1,36 @@
+name: Frontend UX Evidence Gate
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  ux-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Collect changed files
+        id: changed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100
+            });
+            const list = files.map((f) => f.filename).join("\n");
+            core.setOutput("changed_files", list);
+
+      - name: Validate Playwright UX evidence for frontend changes
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          CHANGED_FILES: ${{ steps.changed.outputs.changed_files }}
+        run: node scripts/check-frontend-ux-evidence.mjs
