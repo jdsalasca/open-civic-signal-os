@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 
 const requiredFiles = [
   "AGENTS.md",
@@ -20,10 +21,6 @@ const requiredFiles = [
   "packages/contracts/openapi.yaml"
 ];
 
-const forbiddenPaths = [
-  "apps/web-react/dist"
-];
-
 const errors = [];
 
 for (const path of requiredFiles) {
@@ -32,10 +29,17 @@ for (const path of requiredFiles) {
   }
 }
 
-for (const path of forbiddenPaths) {
-  if (existsSync(join(process.cwd(), path))) {
-    errors.push(`Forbidden committed path exists: ${path}`);
+function hasTrackedFiles(prefix) {
+  try {
+    const out = execSync(`git ls-files ${prefix}`, { encoding: "utf8" }).trim();
+    return out.length > 0;
+  } catch {
+    return false;
   }
+}
+
+if (hasTrackedFiles("apps/web-react/dist")) {
+  errors.push("Forbidden tracked path detected: apps/web-react/dist");
 }
 
 const agents = readFileSync(join(process.cwd(), "AGENTS.md"), "utf8");
