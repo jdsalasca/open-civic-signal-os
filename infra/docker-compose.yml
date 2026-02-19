@@ -45,9 +45,9 @@ services:
       args:
         VITE_API_BASE_URL: /api
     container_name: civic-web
+    # Removed the 'service_healthy' condition to allow web to start even if API is slow
     depends_on:
-      api:
-        condition: service_healthy
+      - api
     ports:
       - "3002:80"
 

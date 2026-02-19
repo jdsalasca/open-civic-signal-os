@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T14:00:00.000Z
+Last updated: 2026-02-19T15:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 21
+- DONE: 23
 
 ### TODO
 - _No issues_
@@ -25,6 +25,8 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #29 Auth: Mandatory 'Login-first' routing policy
+- #28 UX: Intelligence-driven UI with Charts and Skeleton loaders
 - #27 Citizen: Interactive Voting/Support System with score recalculation
 - #26 UX: Premium UI overhaul with PrimeReact Design System
 - #25 Auth: JWT-based Authentication with Global State (Zustand)

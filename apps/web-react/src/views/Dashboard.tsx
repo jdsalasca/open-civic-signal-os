@@ -6,14 +6,16 @@ import { SignalTable } from "../components/SignalTable";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
 import { CategoryChart } from "../components/CategoryChart";
+import { ProgressBar } from "primereact/progressbar";
 import { Button } from "primereact/button";
+import { Card } from "primereact/card";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import apiClient from "../api/axios";
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const { isLoggedIn, role } = useAuthStore();
+  const { role, user } = useAuthStore();
   
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -40,7 +42,6 @@ export function Dashboard() {
     } catch (err) {
       toast.error("Network synchronization failed.");
     } finally {
-      // Simulate slightly longer load for UX feel of computation
       setTimeout(() => setLoading(false), 600);
     }
   };
@@ -57,7 +58,7 @@ export function Dashboard() {
         loadData();
       }
     } catch (err) {
-      toast.error("Permission denied.");
+      toast.error("Unauthorized: Operation rejected.");
     }
   };
 
@@ -67,11 +68,16 @@ export function Dashboard() {
     <div className="page-container">
       <section className="mb-6 flex flex-column lg:flex-row justify-content-between lg:align-items-center gap-4 animate-fade-in">
         <div>
+          <div className="flex align-items-center gap-2 mb-2">
+            <span className="bg-cyan-900 text-cyan-400 text-xs font-bold px-2 py-1 border-round uppercase tracking-tighter">Live Intelligence</span>
+            <span className="text-gray-600 text-xs">•</span>
+            <span className="text-gray-500 text-xs font-medium">Welcome back, {user}</span>
+          </div>
           <h1 className="text-5xl font-black mb-2 tracking-tight line-height-1">
-            Governance <span className="text-cyan-500">Intelligence</span>
+            Governance <span className="text-cyan-500">Insights</span>
           </h1>
           <p className="text-gray-500 text-lg max-w-30rem m-0">
-            Automated community signals prioritization and transparent resolution tracking.
+            Real-time community signal prioritization and resolution lifecycle tracking.
           </p>
         </div>
         <div className="flex gap-3">
@@ -80,29 +86,20 @@ export function Dashboard() {
               label="Weekly Broadcast" 
               icon="pi pi-bolt" 
               severity="danger"
-              className="px-4 py-3 shadow-6 border-none"
+              className="px-4 py-3 shadow-6 border-none font-bold"
               onClick={handleRelay} 
             />
           )}
-          {role === "CITIZEN" && (
-            <Button 
-              label="Report Issue" 
-              icon="pi pi-plus" 
-              className="px-4 py-3 bg-cyan-600 border-none shadow-6" 
-              onClick={() => navigate("/report")} 
-            />
-          )}
-          {!isLoggedIn && (
-            <Button 
-              label="Get Involved" 
-              icon="pi pi-user-plus" 
-              outlined
-              className="px-4 py-3 border-cyan-500 text-cyan-400" 
-              onClick={() => navigate("/register")} 
-            />
-          )}
+          <Button 
+            label="Report New Issue" 
+            icon="pi pi-plus" 
+            className="px-4 py-3 bg-cyan-600 border-none shadow-6 font-bold" 
+            onClick={() => navigate("/report")} 
+          />
         </div>
       </section>
+
+      {loading && <ProgressBar mode="indeterminate" style={{ height: '2px', marginBottom: '24px' }} className="border-round" />}
 
       <MetricsGrid signals={loading ? [] : signals} />
 
@@ -116,6 +113,17 @@ export function Dashboard() {
             <DigestSidebar signals={signals} />
             {isStaff && (
               <NotificationSidebar notifications={notifications} />
+            )}
+            {role === "CITIZEN" && (
+              <Card title="Civic Support" className="bg-blue-900 border-none shadow-4">
+                <p className="text-blue-100 line-height-3 mb-4 text-sm">
+                  Your votes and reports directly impact the algorithmic priority of issues in your community. Keep up the good work!
+                </p>
+                <div className="flex align-items-center gap-2 text-blue-200">
+                  <i className="pi pi-shield"></i>
+                  <span className="text-xs font-bold uppercase tracking-wider">Citizen Verification: Active</span>
+                </div>
+              </Card>
             )}
           </div>
         </div>

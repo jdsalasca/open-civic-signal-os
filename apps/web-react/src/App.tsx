@@ -39,10 +39,12 @@ export function App() {
               <span className="text-xl font-black text-white tracking-tighter uppercase">Signal<span className="text-cyan-500">OS</span></span>
             </Link>
             
-            <div className="hidden lg:flex align-items-center gap-4 ml-4">
-              <Link to="/" className="text-gray-400 no-underline hover:text-white font-medium text-sm transition-colors transition-duration-200">Insights</Link>
-              <Link to="/report" className="text-gray-400 no-underline hover:text-white font-medium text-sm transition-colors transition-duration-200">Public Report</Link>
-            </div>
+            {isLoggedIn && (
+              <div className="hidden lg:flex align-items-center gap-4 ml-4">
+                <Link to="/" className="text-gray-400 no-underline hover:text-white font-medium text-sm transition-colors transition-duration-200">Insights</Link>
+                <Link to="/report" className="text-gray-400 no-underline hover:text-white font-medium text-sm transition-colors transition-duration-200">Public Report</Link>
+              </div>
+            )}
           </div>
 
           <div className="flex align-items-center gap-3">
@@ -76,16 +78,18 @@ export function App() {
 
         <main className="flex-grow-1 p-4 md:p-6 bg-gray-950">
           <Routes>
+            {/* Login is the landing if not authenticated */}
             <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
             
+            {/* Main views protected by AuthGuard */}
             <Route element={<AuthGuard />}>
+              <Route path="/" element={<Dashboard />} />
               <Route path="/report" element={<ReportSignal />} />
               <Route path="/signal/:id" element={<SignalDetail />} />
             </Route>
             
+            <Route path="/unauthorized" element={<Unauthorized />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

@@ -34,15 +34,24 @@ export function SignalTable({ signals, loading }: Props) {
                     rowData.status === "IN_PROGRESS" ? "warning" : "success";
     return (
       <div className="flex align-items-center">
-        <span className={`status-indicator bg-${severity === 'info' ? 'blue' : severity === 'warning' ? 'orange' : 'green'}-500 mr-2`}></span>
-        <Tag value={rowData.status} severity={severity} pt={{ root: { style: { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' } } }} />
+        <span className={`status-indicator bg-${severity === 'info' ? 'blue' : severity === 'warning' ? 'orange' : 'green'}-500 mr-2 shadow-2`}></span>
+        <Tag value={rowData.status} severity={severity} pt={{ root: { style: { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: '10px' } } }} />
       </div>
     );
   };
 
   const scoreTemplate = (rowData: Signal) => {
     if (loading) return <Skeleton width="2rem" />;
-    return <span className="font-bold text-cyan-400 text-lg">{rowData.priorityScore.toFixed(0)}</span>;
+    return (
+      <div className="flex align-items-center gap-3">
+        <span className="font-bold text-cyan-400 text-lg glow-cyan w-2rem">{rowData.priorityScore.toFixed(0)}</span>
+        <div className="hidden sm:flex flex-column gap-1 flex-grow-1" style={{ maxWidth: '60px' }}>
+           <div className="bg-gray-800 border-round overflow-hidden" style={{ height: '4px' }}>
+              <div className="bg-cyan-500 h-full" style={{ width: `${Math.min((rowData.priorityScore / 350) * 100, 100)}%` }}></div>
+           </div>
+        </div>
+      </div>
+    );
   };
 
   const titleTemplate = (s: Signal) => {
@@ -54,29 +63,33 @@ export function SignalTable({ signals, loading }: Props) {
     );
     return (
       <div className="flex flex-column py-1">
-        <span className="font-bold text-gray-100 text-base mb-1">{s.title}</span>
-        <span className="text-xs text-gray-500 uppercase tracking-tighter">ID: {s.id.substring(0,8)}</span>
+        <span className="font-bold text-gray-100 text-base mb-1 hover:text-cyan-400 transition-colors">{s.title}</span>
+        <div className="flex align-items-center gap-2">
+          <span className="text-xs text-gray-600 uppercase tracking-tighter">REF: {s.id.substring(0,8)}</span>
+          <span className="text-gray-800 text-xs">•</span>
+          <span className="text-xs text-gray-600">Manual verification pending</span>
+        </div>
       </div>
     );
   };
 
   const header = (
     <div className="flex flex-column md:flex-row justify-content-between md:align-items-center gap-3">
-      <h2 className="text-xl font-bold m-0 text-white flex align-items-center gap-3">
-        <i className="pi pi-database text-cyan-500"></i>
-        Prioritized Signals
-      </h2>
+      <div className="flex align-items-center gap-2">
+        <i className="pi pi-bolt text-yellow-500"></i>
+        <h2 className="text-xl font-bold m-0 text-white">Prioritized Feed</h2>
+      </div>
       <span className="p-input-icon-left">
-        <i className="pi pi-search" />
-        <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Quick search..." className="p-inputtext-sm w-full md:w-20rem" />
+        <i className="pi pi-search text-gray-500" />
+        <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Search community signals..." className="p-inputtext-sm w-full md:w-20rem bg-gray-950 border-gray-800 shadow-2" />
       </span>
     </div>
   );
 
   return (
-    <div className="surface-card border-round-xl border-1 border-white-alpha-10 shadow-8 overflow-hidden animate-fade-in">
+    <div className="animate-fade-in surface-section border-round-xl border-1 border-white-alpha-10 shadow-8 overflow-hidden">
       <DataTable 
-        value={loading ? Array.from({ length: 5 }) : signals} 
+        value={loading ? Array.from({ length: 6 }) : signals} 
         paginator 
         rows={10} 
         filters={filters}
@@ -91,11 +104,13 @@ export function SignalTable({ signals, loading }: Props) {
         sortOrder={-1}
         removableSort
       >
-        <Column header="Civic Need" body={titleTemplate} sortable sortField="title" />
-        <Column field="category" header="Category" sortable body={(s) => loading ? <Skeleton width="4rem" /> : s.category} />
+        <Column header="Civic Need" body={titleTemplate} sortable sortField="title" style={{ minWidth: '15rem' }} />
+        <Column field="category" header="Category" sortable body={(s) => loading ? <Skeleton width="4rem" /> : (
+          <span className="text-sm font-medium text-gray-400 uppercase tracking-tight">{s.category}</span>
+        )} />
         <Column header="Status" sortable sortField="status" body={statusTemplate} />
-        <Column header="Priority" sortable sortField="priorityScore" body={scoreTemplate} style={{ width: '8rem' }} />
-        <Column body={() => !loading && <i className="pi pi-angle-right text-gray-700" />} style={{ width: '3.5rem' }} />
+        <Column header="Intelligence Rank" sortable sortField="priorityScore" body={scoreTemplate} style={{ width: '12rem' }} />
+        <Column body={() => !loading && <i className="pi pi-arrow-up-right text-gray-700 hover:text-cyan-400 transition-colors" />} style={{ width: '3.5rem' }} />
       </DataTable>
     </div>
   );
