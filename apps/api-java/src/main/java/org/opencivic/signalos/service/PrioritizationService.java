@@ -24,4 +24,7 @@ public interface PrioritizationService {
     // Persistence & Updates
     Signal saveSignal(Signal signal);
     Optional<Signal> updateStatus(UUID id, String newStatus);
+    
+    // Voting
+    Signal voteForSignal(UUID signalId, String username);
 }

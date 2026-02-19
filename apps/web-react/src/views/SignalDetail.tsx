@@ -13,9 +13,10 @@ import apiClient from "../api/axios";
 export function SignalDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { role } = useAuthStore();
+  const { role, isLoggedIn } = useAuthStore();
   const [signal, setSignal] = useState<Signal | null>(null);
   const [loading, setLoading] = useState(true);
+  const [voting, setVoting] = useState(false);
 
   const fetchSignal = async () => {
     try {
@@ -47,6 +48,26 @@ export function SignalDetail() {
     }
   };
 
+  const handleVote = async () => {
+    if (!isLoggedIn) {
+      toast.error("Please login to support issues.");
+      navigate("/login");
+      return;
+    }
+    setVoting(true);
+    try {
+      const res = await apiClient.post(`/api/signals/${id}/vote`);
+      if (res.status === 200) {
+        toast.success("Support registered! Priority increased.");
+        fetchSignal();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Already voted or error occurred.");
+    } finally {
+      setVoting(false);
+    }
+  };
+
   if (loading) return <ProgressBar mode="indeterminate" style={{ height: '6px' }} />;
   if (!signal) return null;
 
@@ -56,10 +77,19 @@ export function SignalDetail() {
 
   return (
     <div className="form-container" style={{ maxWidth: '900px' }}>
-      <div className="flex align-items-center gap-3 mb-4">
-        <Button icon="pi pi-arrow-left" rounded text onClick={() => navigate('/')} />
-        <h1 className="text-3xl m-0">{signal.title}</h1>
-        <Tag value={signal.status} severity={getStatusSeverity(signal.status)} />
+      <div className="flex align-items-center justify-content-between mb-4">
+        <div className="flex align-items-center gap-3">
+          <Button icon="pi pi-arrow-left" rounded text onClick={() => navigate('/')} />
+          <h1 className="text-3xl m-0">{signal.title}</h1>
+          <Tag value={signal.status} severity={getStatusSeverity(signal.status)} />
+        </div>
+        <Button 
+          label="Support Issue" 
+          icon="pi pi-heart-fill" 
+          className="bg-red-500 border-none px-4" 
+          loading={voting}
+          onClick={handleVote} 
+        />
       </div>
 
       <div className="grid">
@@ -81,6 +111,10 @@ export function SignalDetail() {
               <div className="flex align-items-center gap-2">
                 <i className="pi pi-tag text-purple-400"></i>
                 <span>Category: <strong>{signal.category}</strong></span>
+              </div>
+              <div className="flex align-items-center gap-2">
+                <i className="pi pi-heart text-red-400"></i>
+                <span>Community Support: <strong>{signal.scoreBreakdown.communityVotes} votes</strong></span>
               </div>
             </div>
           </Card>
@@ -116,6 +150,12 @@ export function SignalDetail() {
                 <span className="font-bold">{signal.scoreBreakdown.impact}</span>
               </div>
               <ProgressBar value={(signal.scoreBreakdown.impact / 125) * 100} showValue={false} severity="warning" style={{ height: '4px' }} />
+
+              <div className="flex justify-content-between mb-2 mt-3">
+                <span className="text-sm">Community Votes</span>
+                <span className="font-bold">{signal.scoreBreakdown.communityVotes}</span>
+              </div>
+              <ProgressBar value={(signal.scoreBreakdown.communityVotes / 15) * 100} showValue={false} severity="success" style={{ height: '4px' }} />
             </div>
           </Card>
         </div>

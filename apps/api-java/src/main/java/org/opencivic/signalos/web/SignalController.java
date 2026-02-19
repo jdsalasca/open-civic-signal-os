@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -51,6 +52,11 @@ public class SignalController {
                 .map(this::mapToResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/vote")
+    public ResponseEntity<SignalResponse> vote(@PathVariable UUID id, Authentication authentication) {
+        return ResponseEntity.ok(mapToResponse(prioritizationService.voteForSignal(id, authentication.getName())));
     }
 
     @GetMapping("/top-10")

@@ -2,10 +2,15 @@ package org.opencivic.signalos.service;
 
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.ScoreBreakdown;
+import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.domain.Vote;
 import org.opencivic.signalos.repository.SignalRepository;
+import org.opencivic.signalos.repository.UserRepository;
+import org.opencivic.signalos.repository.VoteRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,9 +19,13 @@ import java.util.stream.Collectors;
 public class PrioritizationServiceImpl implements PrioritizationService {
 
     private final SignalRepository signalRepository;
+    private final VoteRepository voteRepository;
+    private final UserRepository userRepository;
 
-    public PrioritizationServiceImpl(SignalRepository signalRepository) {
+    public PrioritizationServiceImpl(SignalRepository signalRepository, VoteRepository voteRepository, UserRepository userRepository) {
         this.signalRepository = signalRepository;
+        this.voteRepository = voteRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -122,5 +131,26 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             signal.setStatus(newStatus);
             return signalRepository.save(signal);
         });
+    }
+
+    @Override
+    @Transactional
+    public Signal voteForSignal(UUID signalId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        Signal signal = signalRepository.findById(signalId)
+                .orElseThrow(() -> new RuntimeException("Signal not found"));
+
+        if (voteRepository.findByUserIdAndSignalId(user.getId(), signalId).isPresent()) {
+            throw new RuntimeException("User already voted for this signal");
+        }
+
+        voteRepository.save(new Vote(user.getId(), signalId));
+        
+        signal.setCommunityVotes(signal.getCommunityVotes() + 1);
+        signal.setPriorityScore(calculateScore(signal));
+        
+        return signalRepository.save(signal);
     }
 }

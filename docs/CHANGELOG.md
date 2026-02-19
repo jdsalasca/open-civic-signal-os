@@ -3,10 +3,9 @@
 ## Unreleased
 
 ### Added
+- **Citizen Voting System**: Users can now "Support" issues from the detail view. Each vote increases the community support factor and automatically recalculates the global priority score. (#27)
+- **Support Integrity**: Implemented a `votes` table to ensure each user can only vote once per signal. (#27)
 - **Premium UI Overhaul**: Replaced custom CSS with a complete **PrimeReact** design system integration. (#26)
-  - Interactive DataTables with sorting and filtering.
-  - High-hierarchy Metrics Cards with visual indicators.
-  - Sidebar groups for Critical Needs and Broadcast History.
 - **Advanced State Management**: Integrated **Zustand** for global authentication and persistent UI state. (#25)
 - **Modern API Integration**: Centralized API communication using **Axios** with interceptors for JWT Bearer tokens and 401 Auto-refresh. (#25)
 - **Full Auth System**: Migrated from memory to database-backed authentication using Spring Security and JPA. (#23)
@@ -17,4 +16,4 @@
 
 ### Fixed
 - **Production Build Error**: Resolved `ReferenceError: React is not defined` by correctly configuring `@vitejs/plugin-react`. (#17)
-- **Security & UX**: Standardized error handling and added professional Toast notifications. (#14, #16)
+- **API Mapping**: Resolved JPA column duplication errors in the `Signal` entity.
