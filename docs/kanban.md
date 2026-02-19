@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T06:00:00.000Z
+Last updated: 2026-02-19T07:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 10
+- DONE: 11
 
 ### TODO
 - _No issues_
@@ -25,6 +25,7 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #16 UX: Professional Toast Notifications with react-hot-toast
 - #15 DX: UI Componentization and React Refactoring
 - #14 DX: Global Error Handling and Standardized ApiError Response
 - #13 Security: Operator login and Spring Security integration

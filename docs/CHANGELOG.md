@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **UX: Professional Notifications**: Integrated `react-hot-toast` to provide elegant, non-intrusive feedback for login, logout, and broadcast actions. (#16)
 - **UI Componentization**: Refactored `App.tsx` into modular components (`SignalTable`, `DigestSidebar`, `NotificationSidebar`, `MetricsGrid`, `LoginModal`) for better maintainability. (#15)
 - **Standardized Error Handling**: Integrated `GlobalExceptionHandler` with a new `ApiError` format for consistent structured error responses. (#14)
 - **Spring Security Integration**: Added authentication layer for administrative actions (Broadcast/Relays). (#13)

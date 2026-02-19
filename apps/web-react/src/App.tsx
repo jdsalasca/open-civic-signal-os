@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Toaster, toast } from "react-hot-toast";
 import { Signal, Notification } from "./types";
 import { MetricsGrid } from "./components/MetricsGrid";
 import { SignalTable } from "./components/SignalTable";
@@ -38,7 +39,7 @@ export function App() {
     try {
       setLoading(true);
       const [signalsRes, notificationsRes] = await Promise.all([
-        fetch(`${apiBaseUrl}/api/signals/prioritized?size=50`), // Large size for now until we add UI pagination
+        fetch(`${apiBaseUrl}/api/signals/prioritized?size=50`),
         isLoggedIn 
           ? fetch(`${apiBaseUrl}/api/notifications/recent`, { headers: getAuthHeader() })
           : Promise.resolve(null)
@@ -46,8 +47,9 @@ export function App() {
       
       if (signalsRes.ok) {
         const data = await signalsRes.json();
-        // Extract content from Spring Data Page object
         setSignals(data.content || []);
+      } else {
+        toast.error("Failed to load signals.");
       }
       
       if (notificationsRes && notificationsRes.ok) {
@@ -56,7 +58,9 @@ export function App() {
       
     } catch (err) {
       setSignals(fallbackSignals);
-      setError(err instanceof Error ? err.message : "Unknown API error");
+      const msg = err instanceof Error ? err.message : "Unknown API error";
+      setError(msg);
+      toast.error(`Connection error: ${msg}`);
     } finally {
       setLoading(false);
     }
@@ -71,12 +75,14 @@ export function App() {
     localStorage.setItem("civic_auth", encoded);
     setIsLoggedIn(true);
     setShowLogin(false);
+    toast.success("Welcome back, Operator!");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("civic_auth");
     setIsLoggedIn(false);
     setNotifications([]);
+    toast.success("Logged out successfully.");
   };
 
   const handleRelay = async () => {
@@ -86,18 +92,19 @@ export function App() {
         headers: getAuthHeader()
       });
       if (res.ok) {
-        alert("Broadcast relay sent successfully!");
+        toast.success("Broadcast relay sent successfully!");
         loadData();
       } else {
-        alert("Unauthorized or error sending relay.");
+        toast.error("Unauthorized or error sending relay.");
       }
     } catch (err) {
-      alert("Error sending relay.");
+      toast.error("Error connecting to notification service.");
     }
   };
 
   return (
     <main className="page">
+      <Toaster position="top-right" />
       <header className="main-header">
         <div>
           <h1>Open Civic Signal OS</h1>
