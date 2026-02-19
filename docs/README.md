@@ -31,3 +31,4 @@
 - `docs/OBSERVABILITY.md`
 - `docs/RELEASE_POLICY.md`
 - `docs/CHANGELOG.md`
+- `.github/workflows/docker-images.yml`
