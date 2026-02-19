@@ -41,7 +41,7 @@ export function Dashboard() {
       setLoading(true);
       const [signalsRes, notificationsRes] = await Promise.all([
         fetch(`${apiBaseUrl}/api/signals/prioritized?size=50`),
-        auth?.role === "PUBLIC_SERVANT"
+        (auth?.role === "PUBLIC_SERVANT" || auth?.role === "SUPER_ADMIN")
           ? fetch(`${apiBaseUrl}/api/notifications/recent`, { headers: getAuthHeader() })
           : Promise.resolve(null)
       ]);
@@ -67,18 +67,33 @@ export function Dashboard() {
     loadData();
   }, [auth]);
 
-  const handleLogin = (user: string, pass: string) => {
+  const handleLogin = async (user: string, pass: string) => {
     const token = btoa(`${user}:${pass}`);
-    // Simple logic to derive role for demo
-    const role: UserRole = user === "servant" ? "PUBLIC_SERVANT" : "CITIZEN";
-    
-    localStorage.setItem("civic_auth_token", token);
-    const authData = { user, role };
-    localStorage.setItem("civic_auth_data", JSON.stringify(authData));
-    
-    setAuth(authData);
-    setShowLogin(false);
-    toast.success(`Logged in as ${role}`);
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/auth/me`, {
+        headers: { 'Authorization': `Basic ${token}` }
+      });
+
+      if (res.ok) {
+        const userData = await res.json();
+        // Standardize role extraction (it comes as { authority: "ROLE_XXX" })
+        const roleStr = userData.roles[0].authority;
+        const role: UserRole = roleStr === "ROLE_SUPER_ADMIN" ? "SUPER_ADMIN" : 
+                            roleStr === "ROLE_PUBLIC_SERVANT" ? "PUBLIC_SERVANT" : "CITIZEN";
+
+        localStorage.setItem("civic_auth_token", token);
+        const authInfo = { user, role };
+        localStorage.setItem("civic_auth_data", JSON.stringify(authInfo));
+        
+        setAuth(authInfo);
+        setShowLogin(false);
+        toast.success(`Welcome back, ${user}!`);
+      } else {
+        toast.error("Invalid credentials.");
+      }
+    } catch (err) {
+      toast.error("Auth service unavailable.");
+    }
   };
 
   const handleLogout = () => {
@@ -106,17 +121,19 @@ export function Dashboard() {
     }
   };
 
+  const isStaff = auth?.role === "PUBLIC_SERVANT" || auth?.role === "SUPER_ADMIN";
+
   return (
     <>
       <header className="main-header">
         <div>
-          <h1>Open Civic Signal OS {auth?.role === "PUBLIC_SERVANT" ? "(Staff)" : ""}</h1>
+          <h1>Open Civic Signal OS {auth?.role === "SUPER_ADMIN" ? "(SuperAdmin)" : isStaff ? "(Staff)" : ""}</h1>
           <p>Transparent civic prioritization dashboard.</p>
         </div>
         <div className="header-actions">
           {auth ? (
             <>
-              {auth.role === "PUBLIC_SERVANT" && (
+              {isStaff && (
                 <button className="relay-btn" onClick={handleRelay}>📢 Broadcast Relay</button>
               )}
               <button className="login-btn secondary" onClick={handleLogout}>Logout ({auth.user})</button>
@@ -135,7 +152,7 @@ export function Dashboard() {
         <SignalTable signals={signals} loading={loading} />
         <aside className="sidebar-group">
           <DigestSidebar signals={signals} />
-          {auth?.role === "PUBLIC_SERVANT" && <NotificationSidebar notifications={notifications} />}
+          {isStaff && <NotificationSidebar notifications={notifications} />}
           {auth?.role === "CITIZEN" && (
             <div className="card" style={{ padding: '20px' }}>
               <h3>Your Impact</h3>

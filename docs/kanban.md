@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T11:00:00.000Z
+Last updated: 2026-02-19T12:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 15
+- DONE: 18
 
 ### TODO
 - _No issues_
@@ -25,6 +25,8 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #24 Auth: Integrated User Registration with React Hook Forms
+- #23 Auth: Full Database-backed Authentication and RBAC (SuperAdmin, Servant, Citizen)
 - #22 Staff: Interactive Status Transitioning (NEW -> IN_PROGRESS -> RESOLVED)
 - #21 UX: Modern Glassmorphism Redesign and UI Overhaul
 - #20 QA: Automated Visual Audit with Playwright

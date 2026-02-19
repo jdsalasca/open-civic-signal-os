@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import { Dashboard } from "./views/Dashboard";
 import { ReportSignal } from "./views/ReportSignal";
 import { SignalDetail } from "./views/SignalDetail";
+import { Register } from "./views/Register";
 import { NotFound } from "./views/NotFound";
 
 export function App() {
@@ -22,6 +23,7 @@ export function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/report" element={<ReportSignal />} />
           <Route path="/signal/:id" element={<SignalDetail />} />
+          <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

@@ -23,7 +23,7 @@ export type Notification = {
   sentAt: string;
 };
 
-export type UserRole = "PUBLIC_SERVANT" | "CITIZEN" | "GUEST";
+export type UserRole = "SUPER_ADMIN" | "PUBLIC_SERVANT" | "CITIZEN" | "GUEST";
 
 export type AuthInfo = {
   user: string;

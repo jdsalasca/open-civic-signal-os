@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   onLogin: (user: string, pass: string) => void;
@@ -6,11 +7,17 @@ type Props = {
 };
 
 export function LoginModal({ onLogin, onClose }: Props) {
+  const navigate = useNavigate();
   const [credentials, setCredentials] = useState({ user: "", pass: "" });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin(credentials.user, credentials.pass);
+  };
+
+  const handleRegisterRedirect = () => {
+    onClose();
+    navigate("/register");
   };
 
   return (
@@ -37,7 +44,13 @@ export function LoginModal({ onLogin, onClose }: Props) {
             Cancel
           </button>
         </div>
-        <div className="hint" style={{ lineHeight: '1.4' }}>
+        
+        <p className="hint" style={{ marginTop: '10px' }}>
+          New to Signal OS? <span style={{ color: 'var(--accent-primary)', cursor: 'pointer' }} onClick={handleRegisterRedirect}>Register here</span>
+        </p>
+
+        <div className="hint" style={{ lineHeight: '1.4', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
+          <strong>Admin:</strong> admin / admin12345<br/>
           <strong>Staff:</strong> servant / servant2026<br/>
           <strong>Citizen:</strong> citizen / citizen2026
         </div>
