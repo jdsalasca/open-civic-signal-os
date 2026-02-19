@@ -19,6 +19,8 @@ export function Layout({ children }: Props) {
     navigate("/login");
   };
 
+  const isStaff = role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN";
+
   return (
     <div className="min-h-screen flex flex-column bg-gray-900 overflow-x-hidden">
       <Toast ref={toast} />
@@ -32,10 +34,17 @@ export function Layout({ children }: Props) {
             <span className="text-xl font-black text-white tracking-tighter uppercase">Signal<span className="text-cyan-500">OS</span></span>
           </Link>
           
-          <div className="hidden lg:flex align-items-center gap-4 ml-4">
-            <Link to="/" className="text-gray-400 no-underline hover:text-white font-medium text-sm transition-colors transition-duration-200">Insights</Link>
-            <Link to="/report" className="text-gray-400 no-underline hover:text-white font-medium text-sm transition-colors transition-duration-200">Public Report</Link>
-          </div>
+          {isLoggedIn && (
+            <div className="hidden lg:flex align-items-center gap-4 ml-4">
+              <Link to="/" className="text-gray-400 no-underline hover:text-white font-medium text-sm transition-colors transition-duration-200">Insights</Link>
+              <Link to="/report" className="text-gray-400 no-underline hover:text-white font-medium text-sm transition-colors transition-duration-200">Public Report</Link>
+              {isStaff && (
+                <Link to="/moderation" className="text-orange-400 no-underline hover:text-orange-300 font-bold text-sm transition-colors transition-duration-200">
+                  <i className="pi pi-shield mr-2"></i>Moderation
+                </Link>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex align-items-center gap-3">
@@ -78,8 +87,8 @@ export function Layout({ children }: Props) {
           <i className="pi pi-globe text-gray-700"></i>
           <span className="text-gray-700 text-sm font-medium uppercase tracking-widest text-xs">Global Governance Standard</span>
         </div>
-        <div className="text-gray-700 text-xs">
-          &copy; 2026 Open Civic Signal OS. Protocol v0.2.4-stable
+        <div className="text-gray-700 text-xs text-center">
+          &copy; 2026 Open Civic Signal OS. Protocol v0.2.5-stable
         </div>
         <div className="flex gap-4">
           <i className="pi pi-github text-gray-700 hover:text-gray-400 cursor-pointer"></i>

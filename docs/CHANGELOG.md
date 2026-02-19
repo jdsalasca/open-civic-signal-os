@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- **Automated Abuse Detection**: Signals with suspicious patterns (e.g., high urgency with low impact) are now automatically flagged for review. (#30)
+- **Moderation Queue**: Dedicated view for Staff and SuperAdmins to approve or reject flagged signals with internal notes. (#30)
+- **Infrastructure Secrets Management**: Migrated sensitive credentials to a unified `.env` file, removing hardcoded values from Docker Compose. (#31)
 - **Login-First Policy**: Updated routing to force authentication before accessing the dashboard or reporting issues. (#29)
 - **Governance Insights UI**: Major dashboard enhancement with real-time category distribution charts and high-quality visual hierarchy. (#28)
 - **Citizen Voting System**: Users can now "Support" issues from the detail view. Each vote increases the community support factor and automatically recalculates the global priority score. (#27)

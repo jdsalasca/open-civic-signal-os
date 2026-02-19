@@ -1,5 +1,6 @@
 package org.opencivic.signalos.config;
 
+import org.opencivic.signalos.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -41,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/health", "/actuator/health", "/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
                 .requestMatchers("/api/signals/prioritized", "/api/signals/top-10").permitAll()
                 .requestMatchers("/api/notifications/recent", "/api/notifications/relay/**").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers("/api/signals/flagged", "/api/signals/*/moderate").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers("/api/signals/**").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
                 .anyRequest().authenticated()
             )

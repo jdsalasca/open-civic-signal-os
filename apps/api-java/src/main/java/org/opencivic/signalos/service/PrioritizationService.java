@@ -17,9 +17,11 @@ public interface PrioritizationService {
     double calculateScore(Signal signal);
     ScoreBreakdown getBreakdown(Signal signal);
     
-    // Duplicate detection
+    // Duplicate & Abuse detection
     Map<UUID, List<Signal>> findDuplicates();
     Signal mergeSignals(UUID targetId, List<UUID> duplicateIds);
+    List<Signal> getFlaggedSignals();
+    Signal moderateSignal(UUID id, String action, String reason);
     
     // Persistence & Updates
     Signal saveSignal(Signal signal);

@@ -30,7 +30,8 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Page<Signal> getPrioritizedSignals(Pageable pageable) {
-        return signalRepository.findAll(pageable)
+        // Only return non-flagged and non-rejected signals to the public dashboard
+        return signalRepository.findByStatusNotIn(List.of("FLAGGED", "REJECTED"), pageable)
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
     }
 
@@ -121,7 +122,32 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     }
 
     @Override
+    public List<Signal> getFlaggedSignals() {
+        return signalRepository.findAll().stream()
+                .filter(s -> "FLAGGED".equals(s.getStatus()))
+                .map(s -> s.withScore(calculateScore(s), getBreakdown(s)))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Signal moderateSignal(UUID id, String action, String reason) {
+        Signal signal = signalRepository.findById(id).orElseThrow();
+        if ("APPROVE".equalsIgnoreCase(action)) {
+            signal.setStatus("NEW");
+        } else {
+            signal.setStatus("REJECTED");
+        }
+        signal.setModerationReason(reason);
+        return signalRepository.save(signal);
+    }
+
+    @Override
     public Signal saveSignal(Signal signal) {
+        // Basic abuse detection logic
+        if (signal.getUrgency() == 5 && signal.getAffectedPeople() < 5) {
+            signal.setStatus("FLAGGED");
+            signal.setModerationReason("Suspicious high urgency for very low population. Auto-flagged for review.");
+        }
         return signalRepository.save(signal);
     }
 

@@ -23,7 +23,10 @@ public class Signal {
     @Transient
     private ScoreBreakdown scoreBreakdown;
     
-    private String status;
+    private String status; // NEW, IN_PROGRESS, RESOLVED, FLAGGED, REJECTED
+    
+    @Column(columnDefinition = "TEXT")
+    private String moderationReason;
     
     @ElementCollection
     private List<UUID> mergedFrom;
@@ -59,12 +62,14 @@ public class Signal {
     public int getCommunityVotes() { return communityVotes; }
     public String getCategory() { return category; }
     public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
+    public String getModerationReason() { return moderationReason; }
 
     // Setters
     public void setStatus(String status) { this.status = status; }
     public void setPriorityScore(double priorityScore) { this.priorityScore = priorityScore; }
     public void setScoreBreakdown(ScoreBreakdown scoreBreakdown) { this.scoreBreakdown = scoreBreakdown; }
     public void setCommunityVotes(int communityVotes) { this.communityVotes = communityVotes; }
+    public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }
 
     public Signal withScore(double score, ScoreBreakdown breakdown) {
         this.priorityScore = score;

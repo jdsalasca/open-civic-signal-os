@@ -5,6 +5,7 @@ import { ReportSignal } from "./views/ReportSignal";
 import { SignalDetail } from "./views/SignalDetail";
 import { Register } from "./views/Register";
 import { Login } from "./views/Login";
+import { Moderation } from "./views/Moderation";
 import { NotFound } from "./views/NotFound";
 import { Unauthorized } from "./views/Unauthorized";
 import { useAuthStore } from "./store/useAuthStore";
@@ -28,15 +29,17 @@ export function App() {
         }}
       />
       <Routes>
-        {/* Auth Routes (No layout needed or different layout) */}
         <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
         <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
         
-        {/* App Routes (Layout included within views) */}
         <Route element={<AuthGuard />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/report" element={<ReportSignal />} />
           <Route path="/signal/:id" element={<SignalDetail />} />
+        </Route>
+
+        <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>
+          <Route path="/moderation" element={<Moderation />} />
         </Route>
         
         <Route path="/unauthorized" element={<Unauthorized />} />

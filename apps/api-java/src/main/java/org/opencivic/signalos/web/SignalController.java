@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,6 +58,18 @@ public class SignalController {
     @PostMapping("/{id}/vote")
     public ResponseEntity<SignalResponse> vote(@PathVariable UUID id, Authentication authentication) {
         return ResponseEntity.ok(mapToResponse(prioritizationService.voteForSignal(id, authentication.getName())));
+    }
+
+    @GetMapping("/flagged")
+    public List<SignalResponse> getFlaggedSignals() {
+        return prioritizationService.getFlaggedSignals().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/{id}/moderate")
+    public SignalResponse moderate(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+        return mapToResponse(prioritizationService.moderateSignal(id, body.get("action"), body.get("reason")));
     }
 
     @GetMapping("/top-10")
