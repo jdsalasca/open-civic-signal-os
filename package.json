@@ -14,6 +14,10 @@
     "build:web": "npm --workspace apps/web-react run build",
     "preview:web": "npm --workspace apps/web-react run preview",
     "agent:gate": "node scripts/agent-gate.mjs",
-    "quality:quick": "npm run prioritize && npm run build:web && npm run agent:gate"
+    "quality:quick": "npm run prioritize && npm run build:web && npm run agent:gate",
+    "quality:release": "node scripts/release-quality-gate.mjs"
+  },
+  "releaseQuality": {
+    "minimumCoverage": 0
   }
 }

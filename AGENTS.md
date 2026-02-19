@@ -107,3 +107,9 @@ When closing an issue, agents must include:
 - Agent gate script: `scripts/agent-gate.mjs`
 - Agent gate CI: `.github/workflows/agent-gate.yml`
 - Execution brief template: `docs/agent/EXECUTION_BRIEF_TEMPLATE.md`
+## Release Excellence
+
+- Release policy: `docs/RELEASE_POLICY.md`
+- Changelog: `docs/CHANGELOG.md`
+- Quality gate script: `scripts/release-quality-gate.mjs`
+- CI workflow: `.github/workflows/release-quality-gate.yml`
