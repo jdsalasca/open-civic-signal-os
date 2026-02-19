@@ -1,9 +1,17 @@
 {
   "name": "open-civic-signal-os",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "private": true,
   "type": "module",
   "license": "MIT",
+  "workspaces": [
+    "apps/web-react",
+    "packages/*"
+  ],
   "scripts": {
-    "prioritize": "node src/prioritize.mjs examples/feedback.json examples/prioritized-backlog.json"
+    "prioritize": "node src/prioritize.mjs examples/feedback.json examples/prioritized-backlog.json",
+    "dev:web": "npm --workspace apps/web-react run dev",
+    "build:web": "npm --workspace apps/web-react run build",
+    "preview:web": "npm --workspace apps/web-react run preview"
   }
 }

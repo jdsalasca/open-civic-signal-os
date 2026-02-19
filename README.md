@@ -4,42 +4,58 @@
 
 # Open Civic Signal OS
 
-Convert citizen and community signals into an executable, transparent, and auditable public backlog.
+Monorepo civic-tech platform that converts community signals into transparent public priorities.
 
-<p>
-  <img alt="mvp" src="https://img.shields.io/badge/status-v0.1_MVP-00b4d8" />
-  <img alt="license" src="https://img.shields.io/badge/license-MIT-1d3557" />
-</p>
+## Official Stack
 
-## Demo
+- Backend: Java 21 + Spring Boot
+- Frontend: React + TypeScript + Vite
+- Data: PostgreSQL (planned), JSON-first MVP now
+- Contracts: OpenAPI in `packages/contracts`
 
-![Open Civic Signal OS demo](assets/demo.gif)
+## Monorepo Layout
 
-## Problem
-
-Communities report needs constantly, but institutions struggle to prioritize with continuous evidence.
-
-## MVP
-
-- Feedback collector data format (`examples/feedback.json`)
-- Transparent prioritization script (`npm run prioritize`)
-- Auditable output (`examples/prioritized-backlog.json`)
+- `apps/api-java`: Spring Boot API and prioritization services
+- `apps/web-react`: public dashboard and operator console
+- `packages/contracts`: API contracts and shared schemas
+- `infra`: local environment and deployment assets
+- `docs`: strategy, ideas, architecture, and execution plans
 
 ## Quick start
+
+### Current MVP scripts
 
 ```bash
 npm install
 npm run prioritize
 ```
 
-## Public roadmap
+### Web app
 
-- https://github.com/jdsalasca/open-civic-signal-os/issues/1
-- https://github.com/jdsalasca/open-civic-signal-os/issues/2
+```bash
+cd apps/web-react
+npm install
+npm run dev
+```
 
-## Landing page
+### Java API
 
-- `docs/index.html` (ready for GitHub Pages)
+```bash
+cd apps/api-java
+./mvnw spring-boot:run
+```
+
+## Launch resources
+
+- Demo GIF: `assets/demo.gif`
+- Architecture GIF: `assets/architecture.gif`\n- Architecture SVG: `assets/stack-map.svg`
+- Landing: `docs/index.html`
+- Execution ideas: `docs/ideas.md`
+- Agent playbook: `AGENTS.md`
+
+## Roadmap issues
+
+- https://github.com/jdsalasca/open-civic-signal-os/issues
 
 ## Vision
 

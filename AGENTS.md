@@ -68,3 +68,23 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
 - Percentage of backlog items with traceable evidence.
 - Percentage of high-priority items actioned by institutions.
 - Community trust score (survey-based).
+
+## Monorepo Implementation Contract
+
+- Stack is fixed for v1: Java backend + React frontend.
+- Backend APIs own all domain calculations.
+- Frontend must not implement ranking logic independently.
+- Every feature issue should map to one of:
+  - API endpoint change
+  - Contract update
+  - UI workflow update
+
+## Agent Handoff Template
+
+When closing an issue, agents must include:
+
+- what changed in backend
+- what changed in frontend
+- which contract file changed
+- sample input/output
+- known limitations

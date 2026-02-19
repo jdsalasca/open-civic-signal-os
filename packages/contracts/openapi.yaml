@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Open Civic Signal OS API
+  version: 0.1.0
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: API up
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/signals/prioritized:
+    get:
+      summary: Get prioritized civic backlog
+      responses:
+        '200':
+          description: Prioritized list

@@ -150,3 +150,33 @@ Build the most trusted open civic execution stack: from community signals to mea
   Mitigation: transparent formula + public changelog.
 - Risk: low institutional adoption.
   Mitigation: export formats aligned to existing workflows.
+
+## Implementation Blueprint (Java + React Monorepo)
+
+### Backend (Java)
+
+- IngestController + parser services
+- PrioritizationService + score breakdown DTO
+- BacklogController + status transitions
+- ExportService for institutional bridges
+
+### Frontend (React)
+
+- Public Dashboard (read-only)
+- Operator Console (workflow actions)
+- Explainability Drawer (per signal)
+- Weekly Digest Preview
+
+### Data and Contracts
+
+- OpenAPI as source of truth
+- JSON examples for all core flows
+- Versioned formula metadata
+
+## Additional High-Impact Ideas
+
+- AI-assisted signal clustering (opt-in, never hidden)
+- Moderator copilot for conflict/duplicate resolution
+- Community leader mobile view with offline snapshots
+- SLA breach early-warning panel
+- Participatory budgeting simulator

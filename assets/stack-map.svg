@@ -1,0 +1,22 @@
+<svg width="900" height="420" viewBox="0 0 900 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="420" rx="22" fill="#0B132B"/>
+  <rect x="40" y="70" width="240" height="100" rx="14" fill="#243B53" stroke="#00B4D8"/>
+  <text x="62" y="114" fill="#E0FBFC" font-size="24" font-family="Segoe UI">Web React</text>
+  <text x="62" y="144" fill="#A8DADC" font-size="16" font-family="Segoe UI">Dashboard + Operator UI</text>
+
+  <rect x="330" y="70" width="240" height="100" rx="14" fill="#243B53" stroke="#00B4D8"/>
+  <text x="352" y="114" fill="#E0FBFC" font-size="24" font-family="Segoe UI">API Java</text>
+  <text x="352" y="144" fill="#A8DADC" font-size="16" font-family="Segoe UI">Rules + Prioritization</text>
+
+  <rect x="620" y="70" width="240" height="100" rx="14" fill="#243B53" stroke="#00B4D8"/>
+  <text x="642" y="114" fill="#E0FBFC" font-size="24" font-family="Segoe UI">Contracts</text>
+  <text x="642" y="144" fill="#A8DADC" font-size="16" font-family="Segoe UI">OpenAPI + Schemas</text>
+
+  <rect x="185" y="240" width="530" height="120" rx="16" fill="#1B263B" stroke="#90E0EF"/>
+  <text x="210" y="287" fill="#E0FBFC" font-size="24" font-family="Segoe UI">Civic Signal Pipeline</text>
+  <text x="210" y="320" fill="#A8DADC" font-size="16" font-family="Segoe UI">Ingest -> Validate -> Score -> Publish -> Track Execution</text>
+
+  <path d="M280 120H330" stroke="#90E0EF" stroke-width="4"/>
+  <path d="M570 120H620" stroke="#90E0EF" stroke-width="4"/>
+  <path d="M450 170V240" stroke="#90E0EF" stroke-width="4"/>
+</svg>

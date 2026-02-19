@@ -1,0 +1,20 @@
+version: "3.9"
+services:
+  api:
+    image: eclipse-temurin:21
+    container_name: open-civic-api-dev
+    working_dir: /workspace/apps/api-java
+    volumes:
+      - ../:/workspace
+    command: ["bash", "-lc", "mvn spring-boot:run"]
+    ports:
+      - "8080:8080"
+  web:
+    image: node:20
+    container_name: open-civic-web-dev
+    working_dir: /workspace/apps/web-react
+    volumes:
+      - ../:/workspace
+    command: ["bash", "-lc", "npm install && npm run dev -- --host 0.0.0.0 --port 5173"]
+    ports:
+      - "5173:5173"
