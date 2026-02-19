@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Signal } from "../types";
+import { Card } from "primereact/card";
 
 type Props = {
   signals: Signal[];
@@ -16,21 +17,30 @@ export function MetricsGrid({ signals }: Props) {
         : (signals.reduce((acc, s) => acc + s.priorityScore, 0) / total).toFixed(1);
 
     return [
-      { title: "Signals", value: String(total) },
-      { title: "New", value: String(newlyReported) },
-      { title: "In Progress", value: String(inProgress) },
-      { title: "Avg Score", value: avgScore },
+      { title: "Total Signals", value: String(total), icon: "pi-list", color: "text-cyan-400" },
+      { title: "Newly Reported", value: String(newlyReported), icon: "pi-plus-circle", color: "text-blue-400" },
+      { title: "Under Analysis", value: String(inProgress), icon: "pi-spin pi-cog", color: "text-orange-400" },
+      { title: "Priority Avg", value: avgScore, icon: "pi-chart-bar", color: "text-green-400" },
     ];
   }, [signals]);
 
   return (
-    <section className="grid">
-      {metrics.map((card) => (
-        <article key={card.title} className="card">
-          <h2>{card.value}</h2>
-          <p>{card.title}</p>
-        </article>
+    <div className="grid">
+      {metrics.map((m) => (
+        <div key={m.title} className="col-12 md:col-6 lg:col-3">
+          <Card className="shadow-2 border-1 border-gray-800 bg-gray-900 overflow-hidden relative">
+            <div className="flex justify-content-between mb-2">
+              <div>
+                <span className="block text-gray-500 font-medium mb-3 uppercase text-xs tracking-wider">{m.title}</span>
+                <div className={`text-3xl font-bold ${m.color}`}>{m.value}</div>
+              </div>
+              <div className="flex align-items-center justify-content-center bg-gray-800 border-round" style={{ width: '2.5rem', height: '2.5rem' }}>
+                <i className={`pi ${m.icon} text-xl ${m.color}`}></i>
+              </div>
+            </div>
+          </Card>
+        </div>
       ))}
-    </section>
+    </div>
   );
 }
