@@ -3,11 +3,12 @@ server:
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/signalos}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db:5432/signalos}
     username: ${SPRING_DATASOURCE_USERNAME:admin}
     password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true

@@ -20,7 +20,7 @@ public class Signal {
     private int communityVotes;
     private double priorityScore;
     
-    @Embedded
+    @Transient
     private ScoreBreakdown scoreBreakdown;
     
     private String status;
@@ -48,9 +48,9 @@ public class Signal {
         this.createdAt = createdAt;
     }
 
-    // Getters and Setters (Standard naming)
     public UUID getId() { return id; }
     public String getTitle() { return title; }
+    public String getDescription() { return description; }
     public String getStatus() { return status; }
     public double getPriorityScore() { return priorityScore; }
     public int getUrgency() { return urgency; }

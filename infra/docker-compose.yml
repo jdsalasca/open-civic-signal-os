@@ -1,28 +1,47 @@
+version: "3.9"
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: civic-db
+    environment:
+      POSTGRES_DB: signalos
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - civic-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d signalos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: ../apps/api-java
       dockerfile: Dockerfile
     container_name: civic-api
     environment:
-      SERVER_PORT: 8080
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/signalos
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=password
     ports:
       - "8081:8080"
-    healthcheck:
-      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
-      interval: 15s
-      timeout: 5s
-      retries: 8
+    depends_on:
+      db:
+        condition: service_healthy
 
   web:
     build:
       context: ../apps/web-react
       dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: /api
     container_name: civic-web
-    depends_on:
-      api:
-        condition: service_healthy
     ports:
-      - "3002:80"
+      - "3002:3002"
+    depends_on:
+      - api
+
+volumes:
+  civic-db-data:
