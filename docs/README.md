@@ -4,6 +4,7 @@
 
 - `docs/ideas.md`
 - `docs/community/issue-backlog.md`
+- `docs/community/current-backlog.md`
 - `docs/ROADMAP_EXECUTION.md`
 - `docs/DECISIONS.md`
 

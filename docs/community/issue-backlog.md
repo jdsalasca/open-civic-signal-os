@@ -8,6 +8,14 @@ Priority legend:
 - `P1`: growth, automation, and institutional adoption.
 - `P2`: strategic platform bets.
 
+## Current Sprint Focus (2026-02-19)
+
+1. `api: stabilize GET /signals/{id} with explicit not-found behavior`
+2. `web: complete dashboard -> signal detail navigation and explainability UI`
+3. `tests: add backend endpoint coverage for detail and prioritization stability`
+4. `ci: ensure Java backend checks run in pull requests`
+5. `docs: publish trust journey from report ingestion to ranked publish`
+
 ## P0 Issues
 
 1. `ingest: implement WhatsApp/Telegram export parser with schema validation`
