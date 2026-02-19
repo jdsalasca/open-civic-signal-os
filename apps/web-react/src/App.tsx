@@ -25,7 +25,7 @@ const fallbackSignals: Signal[] = [
   }
 ];
 
-export function App() {
+export function App() {`n  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +37,7 @@ export function App() {
   useEffect(() => {
     async function loadSignals() {
       try {
-        const response = await fetch("http://localhost:8081/api/signals/prioritized");
+        const response = await fetch(`${apiBaseUrl}/api/signals/prioritized`);
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
         }
@@ -52,7 +52,7 @@ export function App() {
     }
 
     loadSignals();
-  }, []);
+  }, [apiBaseUrl]);
 
   const categories = useMemo(() => {
     const cats = new Set(signals.map(s => s.category));
@@ -179,3 +179,4 @@ export function App() {
     </main>
   );
 }
+

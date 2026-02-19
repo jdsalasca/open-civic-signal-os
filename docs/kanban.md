@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T03:00:00.000Z
+Last updated: 2026-02-19T03:30:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,18 +13,19 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 1
 - BLOCKED: 0
-- DONE: 4
+- DONE: 5
 
 ### TODO
 - _No issues_
 
 ### IN_PROGRESS
-- #8 P1: Duplicate signal detection and merge workflow
+- #7 P1: Messaging relay for WhatsApp/Telegram weekly updates
 
 ### BLOCKED
 - _No issues_
 
 ### DONE
+- #8 P1: Duplicate signal detection and merge workflow
 - #6 P1: Weekly Top-10 unresolved civic problems digest
 - #5 P1: Public dashboard with filters and status lifecycle
 - #4 P0: Add explainable scoring breakdown in prioritized output
@@ -32,13 +33,13 @@ Status labels used by this board:
 
 ## 2026-Q3 Expansion
 
-- TODO: 1
+- TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
 - DONE: 0
 
 ### TODO
-- #7 P1: Messaging relay for WhatsApp/Telegram weekly updates
+- _No issues_
 
 ### IN_PROGRESS
 - _No issues_

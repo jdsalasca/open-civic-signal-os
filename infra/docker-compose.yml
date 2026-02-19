@@ -13,27 +13,34 @@ services:
       - civic-db-data:/var/lib/postgresql/data
 
   api:
-    build:
-      context: ../apps/api-java
-      dockerfile: Dockerfile
-    container_name: civic-api
+    image: maven:3.9.6-eclipse-temurin-21
+    container_name: civic-api-dev
+    working_dir: /app
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/signalos
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=password
+    volumes:
+      - ../apps/api-java:/app
+      - ~/.m2:/root/.m2
     ports:
       - "8081:8080"
+    command: ["mvn", "spring-boot:run"]
     depends_on:
       - db
 
   web:
-    build:
-      context: ../apps/web-react
-      dockerfile: Dockerfile
-    container_name: civic-web
+    image: node:20-alpine
+    container_name: civic-web-dev
+    working_dir: /app
+    volumes:
+      - ../apps/web-react:/app
+      - /app/node_modules # avoid local node_modules override
     ports:
       - "3002:3002"
+    # Vite HMR uses host 0.0.0.0 and port must match container expose for websocket
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3002"]
 
 volumes:
   civic-db-data:

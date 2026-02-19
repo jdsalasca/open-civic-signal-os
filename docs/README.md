@@ -16,6 +16,11 @@
 - `docs/agent/execution-checklists.md`
 - `docs/agent/advanced-diagrams.md`
 
+## Deployment
+
+- `docs/DOCKER_CLAUDE.md`
+- `CLAUDE.md`
+
 ## Excellence and Governance
 
 - `docs/ENGINEERING_STANDARDS.md`

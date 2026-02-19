@@ -15,7 +15,11 @@
     "preview:web": "npm --workspace apps/web-react run preview",
     "agent:gate": "node scripts/agent-gate.mjs",
     "quality:quick": "npm run prioritize && npm run build:web && npm run agent:gate",
-    "quality:release": "node scripts/release-quality-gate.mjs"
+    "quality:release": "node scripts/release-quality-gate.mjs",
+    "docker:prod:up": "docker compose -f infra/docker-compose.yml up --build -d",
+    "docker:prod:down": "docker compose -f infra/docker-compose.yml down",
+    "docker:dev:up": "docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up --build",
+    "docker:dev:down": "docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml down"
   },
   "releaseQuality": {
     "minimumCoverage": 0

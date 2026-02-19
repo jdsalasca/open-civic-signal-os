@@ -2,11 +2,11 @@ package org.opencivic.signalos.web;
 
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.service.PrioritizationService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/signals")
@@ -26,5 +26,15 @@ public class SignalController {
     @GetMapping("/top-10")
     public List<Signal> getTopUnresolved() {
         return prioritizationService.getTopUnresolved(10);
+    }
+
+    @GetMapping("/duplicates")
+    public Map<UUID, List<Signal>> getDuplicates() {
+        return prioritizationService.findDuplicates();
+    }
+
+    @PostMapping("/merge")
+    public Signal mergeSignals(@RequestParam UUID targetId, @RequestBody List<UUID> duplicateIds) {
+        return prioritizationService.mergeSignals(targetId, duplicateIds);
     }
 }

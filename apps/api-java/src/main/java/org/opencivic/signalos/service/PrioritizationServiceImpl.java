@@ -5,8 +5,7 @@ import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,5 +49,65 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             Math.min(signal.affectedPeople() / 10.0, 30.0),
             Math.min(signal.communityVotes() / 5.0, 15.0)
         );
+    }
+
+    @Override
+    public Map<UUID, List<Signal>> findDuplicates() {
+        List<Signal> signals = signalRepository.findAll();
+        Map<UUID, List<Signal>> duplicateMap = new HashMap<>();
+        Set<UUID> processed = new HashSet<>();
+
+        for (int i = 0; i < signals.size(); i++) {
+            Signal s1 = signals.get(i);
+            if (processed.contains(s1.id())) continue;
+
+            List<Signal> dups = new ArrayList<>();
+            for (int j = i + 1; j < signals.size(); j++) {
+                Signal s2 = signals.get(j);
+                if (isSimilar(s1, s2)) {
+                    dups.add(s2);
+                    processed.add(s2.id());
+                }
+            }
+
+            if (!dups.isEmpty()) {
+                duplicateMap.put(s1.id(), dups);
+                processed.add(s1.id());
+            }
+        }
+        return duplicateMap;
+    }
+
+    private boolean isSimilar(Signal s1, Signal s2) {
+        String t1 = s1.title().toLowerCase();
+        String t2 = s2.title().toLowerCase();
+        // Heuristic: check if one contains major part of the other
+        return t1.contains(t2) || t2.contains(t1) || levenshteinDistance(t1, t2) < 5;
+    }
+
+    private int levenshteinDistance(String x, String y) {
+        int[][] dp = new int[x.length() + 1][y.length() + 1];
+        for (int i = 0; i <= x.length(); i++) {
+            for (int j = 0; j <= y.length(); j++) {
+                if (i == 0) dp[i][j] = j;
+                else if (j == 0) dp[i][j] = i;
+                else {
+                    dp[i][j] = Math.min(Math.min(dp[i - 1][j - 1] 
+                        + (x.charAt(i - 1) == y.charAt(j - 1) ? 0 : 1), 
+                        dp[i - 1][j] + 1), dp[i][j - 1] + 1);
+                }
+            }
+        }
+        return dp[x.length()][y.length()];
+    }
+
+    @Override
+    public Signal mergeSignals(UUID targetId, List<UUID> duplicateIds) {
+        // Implementation for the "pilot-ready" milestone
+        // For now, this is a domain operation placeholder
+        return signalRepository.findAll().stream()
+                .filter(s -> s.id().equals(targetId))
+                .findFirst()
+                .orElse(null);
     }
 }

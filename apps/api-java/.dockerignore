@@ -1,0 +1,7 @@
+target
+.git
+.mvn
+.idea
+*.iml
+Dockerfile
+docker-compose*.yml
