@@ -1,0 +1,52 @@
+name: Decision request
+about: Request a product/technical decision with ADR traceability
+title: "decision: <short topic>"
+labels: ["process-improvement", "help wanted"]
+body:
+  - type: input
+    id: area
+    attributes:
+      label: Decision area
+      placeholder: API contract / policy logic / security / data model
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What changed or what conflict exists?
+    validations:
+      required: true
+
+  - type: textarea
+    id: options
+    attributes:
+      label: Options considered
+      description: List alternatives and tradeoffs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommended decision
+      description: Preferred option and why.
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Functional and technical impact
+      description: Effects on behavior/contracts/data.
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback
+    attributes:
+      label: Rollback strategy
+      description: How to safely revert if needed.
+    validations:
+      required: true

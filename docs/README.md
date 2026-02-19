@@ -34,3 +34,7 @@
 - `.github/workflows/docker-images.yml`
 - `docs/metrics-history.md`
 - `.github/workflows/agent-quality-review.yml`
+
+- docs/architecture/decision-index.md
+- docs/architecture/ADR_FUNCTIONAL_TEMPLATE.md
+- .github/workflows/contract-adr-gate.yml

@@ -1,0 +1,22 @@
+name: Contract ADR Gate
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  adr-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate contract ADR linkage
+        env:
+          GITHUB_BASE_REF: origin/${{ github.base_ref }}
+        run: node scripts/check-contract-adr.mjs

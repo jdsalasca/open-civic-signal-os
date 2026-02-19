@@ -194,3 +194,11 @@ Required references before implementation:
 - Workflow: `.github/workflows/agent-context-check.yml`
 - Script: `scripts/agent-context-check.mjs`
 - Purpose: fail PRs missing mandatory technical/functional agent context.
+
+## Domain Decision Governance
+
+- Pack: docs/agent/domain-decision-pack.md
+- ADR index: docs/architecture/decision-index.md
+- Gate: .github/workflows/contract-adr-gate.yml
+- Script: scripts/check-contract-adr.mjs
+- Rule: contract changes require ADR updates in the same PR.
