@@ -18,6 +18,7 @@ body { margin: 0; }
   border-radius: 10px;
   border: 1px solid rgba(144, 224, 239, 0.4);
   background: rgba(36, 59, 83, 0.7);
+  font-size: 0.9rem;
 }
 
 .grid {
@@ -44,6 +45,22 @@ body { margin: 0; }
   background: rgba(10, 20, 34, 0.7);
 }
 
+.controls {
+  margin-bottom: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #1c2541;
+  color: #f1faee;
+  border: 1px solid #457b9d;
+  outline: none;
+}
+
 .tableWrap { overflow: auto; }
 
 table {
@@ -54,7 +71,7 @@ table {
 
 th, td {
   border-bottom: 1px solid rgba(168, 218, 220, 0.2);
-  padding: 10px;
+  padding: 12px 10px;
   text-align: left;
   font-size: 14px;
 }
@@ -62,4 +79,27 @@ th, td {
 th {
   color: #90e0ef;
   font-weight: 700;
+  background: rgba(29, 53, 87, 0.5);
 }
+
+.breakdown-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(168, 218, 220, 0.1);
+  margin-right: 4px;
+  border: 1px solid rgba(168, 218, 220, 0.2);
+}
+
+.status-pill {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-new { background: #457b9d; color: #f1faee; }
+.status-progress { background: #e9c46a; color: #264653; }
+.status-resolved { background: #2a9d8f; color: #f1faee; }

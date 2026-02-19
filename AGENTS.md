@@ -113,3 +113,24 @@ When closing an issue, agents must include:
 - Changelog: `docs/CHANGELOG.md`
 - Quality gate script: `scripts/release-quality-gate.mjs`
 - CI workflow: `.github/workflows/release-quality-gate.yml`
+
+## Required Agent Context (Read First)
+
+Before implementing any issue, read:
+
+- `AGENTS.md`
+- `docs/ideas.md`
+- `docs/community/issue-backlog.md`
+- `docs/agent/README.md`
+- `docs/agent/user-stories.md`
+- `docs/agent/process-flows.md`
+- `docs/agent/system-design.md`
+- `docs/agent/execution-checklists.md`
+
+## Mandatory Delivery Rules
+
+- One primary objective per PR.
+- Include backend + contract + frontend impact notes.
+- Include explicit acceptance criteria and test evidence.
+- Never merge with failing CI.
+- Keep ranking logic backend-owned; frontend rendering only.

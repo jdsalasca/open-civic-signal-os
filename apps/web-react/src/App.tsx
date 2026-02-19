@@ -29,6 +29,10 @@ export function App() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Filters
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
     async function loadSignals() {
@@ -49,6 +53,21 @@ export function App() {
 
     loadSignals();
   }, []);
+
+  const categories = useMemo(() => {
+    const cats = new Set(signals.map(s => s.category));
+    return ["all", ...Array.from(cats)];
+  }, [signals]);
+
+  const statuses = ["all", "NEW", "IN_PROGRESS", "RESOLVED"];
+
+  const filteredSignals = useMemo(() => {
+    return signals.filter(s => {
+      const matchCat = filterCategory === "all" || s.category === filterCategory;
+      const matchStatus = filterStatus === "all" || s.status === filterStatus;
+      return matchCat && matchStatus;
+    });
+  }, [signals, filterCategory, filterStatus]);
 
   const metrics = useMemo(() => {
     const total = signals.length;
@@ -87,6 +106,16 @@ export function App() {
 
       <section className="tableCard">
         <h2>Prioritized Signals</h2>
+        
+        <div className="controls">
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+            {categories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
+          </select>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+            {statuses.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
+          </select>
+        </div>
+
         {loading ? <p>Loading...</p> : null}
         <div className="tableWrap">
           <table>
@@ -101,18 +130,32 @@ export function App() {
               </tr>
             </thead>
             <tbody>
-              {signals.map((signal) => (
+              {filteredSignals.map((signal) => (
                 <tr key={signal.id}>
                   <td>{signal.id}</td>
                   <td>{signal.title}</td>
                   <td>{signal.category}</td>
-                  <td>{signal.status}</td>
-                  <td>{signal.priorityScore.toFixed(1)}</td>
                   <td>
-                    U:{signal.scoreBreakdown.urgency} I:{signal.scoreBreakdown.impact} P:{signal.scoreBreakdown.affectedPeople} V:{signal.scoreBreakdown.communityVotes}
+                    <span className={`status-pill status-${signal.status.toLowerCase().replace("_", "")}`}>
+                      {signal.status}
+                    </span>
+                  </td>
+                  <td style={{ fontWeight: 'bold' }}>{signal.priorityScore.toFixed(1)}</td>
+                  <td>
+                    <span className="breakdown-tag" title="Urgency">U: {signal.scoreBreakdown.urgency}</span>
+                    <span className="breakdown-tag" title="Impact">I: {signal.scoreBreakdown.impact}</span>
+                    <span className="breakdown-tag" title="Reach">R: {signal.scoreBreakdown.affectedPeople}</span>
+                    <span className="breakdown-tag" title="Community">C: {signal.scoreBreakdown.communityVotes}</span>
                   </td>
                 </tr>
               ))}
+              {filteredSignals.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>
+                    No signals found matching your filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

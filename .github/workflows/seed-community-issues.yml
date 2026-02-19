@@ -1,0 +1,134 @@
+name: Seed Community Issues
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Seed civic backlog issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = [
+              { name: "good first issue", color: "7057ff", description: "Good for first-time contributors" },
+              { name: "help wanted", color: "008672", description: "Maintainers welcome contributions" },
+              { name: "priority:P0", color: "b60205", description: "Highest priority" },
+              { name: "priority:P1", color: "d93f0b", description: "Medium priority" },
+              { name: "priority:P2", color: "fbca04", description: "Strategic priority" },
+              { name: "type:story", color: "1d76db", description: "Detailed executable story" },
+              { name: "trust-critical", color: "5319e7", description: "Transparency/auditability critical" },
+              { name: "pilot-ready", color: "0e8a16", description: "Ready for real-world civic pilot" }
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({ owner: context.repo.owner, repo: context.repo.repo, ...label });
+              } catch (error) {
+                if (error.status !== 422) throw error;
+              }
+            }
+
+            const p0 = [
+              "ingest: implement WhatsApp/Telegram export parser with schema validation",
+              "ingest: add CSV import validator with row-level error report",
+              "scoring: publish explainable scoring breakdown API endpoint",
+              "scoring: add deterministic score regression dataset and tests",
+              "dashboard: add why-ranked-here panel per civic signal",
+              "workflow: implement submit -> validate -> rank -> publish lifecycle",
+              "audit: attach source metadata and transformation version to ranked outputs",
+              "fairness: add duplicate and vote-abuse detection rules",
+              "alerts: weekly top-issues digest for community channels",
+              "ci: add backlog reproducibility quality gate"
+            ].map((title) => ({ title, labels: ["priority:P0", "help wanted", "good first issue", "trust-critical"] }));
+
+            const p1 = [
+              "messaging: add scheduled weekly bulletin generation",
+              "dashboard: add issue aging and SLA risk panels",
+              "execution: add institutional assignment and owner workflow",
+              "analytics: add neighborhood trend and surge detection",
+              "contracts: version prioritization formula metadata",
+              "community: add participatory assembly mode screen",
+              "scripts: generate monthly transparency report",
+              "exports: municipal ticket export format adapter",
+              "security: add public data anonymization checklist enforcement",
+              "ops: create triage protocol for trust-critical incidents"
+            ].map((title) => ({ title, labels: ["priority:P1", "help wanted", "good first issue", "pilot-ready"] }));
+
+            const p2 = [
+              "budgeting: participatory budgeting simulation module",
+              "federation: city-to-city open API compatibility layer",
+              "governance: public formula change proposal workflow",
+              "trust-proof: cryptographic snapshot for published backlog",
+              "ai: optional civic signal clustering with human approval"
+            ].map((title) => ({ title, labels: ["priority:P2", "help wanted", "good first issue"] }));
+
+            const stories = [
+              "story:OCS-P0-001 build ingest adapters for web/csv/chat exports",
+              "story:OCS-P0-002 implement deterministic prioritization service with score breakdown",
+              "story:OCS-P0-003 expose prioritized backlog API with explainability fields",
+              "story:OCS-P0-004 ship public dashboard top problems and filters",
+              "story:OCS-P0-005 add full audit metadata from ingest to publish",
+              "story:OCS-P0-006 add abuse detection pipeline and moderator queue",
+              "story:OCS-P0-007 implement weekly civic digest generation",
+              "story:OCS-P0-008 add reproducibility script for ranking outputs",
+              "story:OCS-P1-001 add issue aging, trends, and SLA risk views",
+              "story:OCS-P1-002 implement municipal execution bridge and ownership",
+              "story:OCS-P1-003 version and expose formula metadata",
+              "story:OCS-P1-004 build transparency monthly report pipeline",
+              "story:OCS-P2-001 prototype assembly mode for townhall facilitation",
+              "story:OCS-P2-002 implement trust-proof snapshot for backlog publish"
+            ].map((title) => {
+              const priority = title.includes("OCS-P0-") ? "priority:P0" : title.includes("OCS-P1-") ? "priority:P1" : "priority:P2";
+              return { title, labels: [priority, "help wanted", "good first issue", "type:story"] };
+            });
+
+            const seeds = [...p0, ...p1, ...p2, ...stories];
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100
+            });
+
+            for (const seed of seeds) {
+              if (openIssues.some((issue) => issue.title === seed.title)) {
+                core.info(`Issue exists: ${seed.title}`);
+                continue;
+              }
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: seed.title,
+                labels: seed.labels,
+                body: [
+                  `Priority: ${seed.labels.find((l) => l.startsWith("priority:")) || "priority:P1"}`,
+                  "",
+                  "## Problem",
+                  "Describe current civic friction and who is affected.",
+                  "",
+                  "## Proposed change",
+                  "Define a small vertical slice.",
+                  "",
+                  "## Acceptance criteria",
+                  "- [ ] Behavior is deterministic and testable",
+                  "- [ ] Explainability/auditability preserved",
+                  "",
+                  "## Validation commands",
+                  "- [ ] npm test",
+                  "- [ ] quality gates for backend/frontend",
+                  "",
+                  "## Definition of done",
+                  "- [ ] Implementation complete",
+                  "- [ ] Tests added/updated",
+                  "- [ ] Docs updated",
+                  "- [ ] Changelog updated if behavior changed"
+                ].join("\n")
+              });
+            }

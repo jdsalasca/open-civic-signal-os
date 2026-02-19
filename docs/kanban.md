@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T01:34:51.375Z
+Last updated: 2026-02-19T02:15:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,24 +10,23 @@ Status labels used by this board:
 
 ## 2026-Q2 Foundation
 
-- TODO: 3
-- IN_PROGRESS: 0
+- TODO: 1
+- IN_PROGRESS: 1
 - BLOCKED: 0
-- DONE: 0
+- DONE: 2
 
 ### TODO
-- #5 P1: Public dashboard with filters and status lifecycle
-- #4 P0: Add explainable scoring breakdown in prioritized output
-- #3 P0: Build multi-channel ingest adapters (forms, CSV, chat exports)
+- _No issues_
 
 ### IN_PROGRESS
-- _No issues_
+- #5 P1: Public dashboard with filters and status lifecycle
 
 ### BLOCKED
 - _No issues_
 
 ### DONE
-- _No issues_
+- #4 P0: Add explainable scoring breakdown in prioritized output
+- #3 P0: Build multi-channel ingest adapters (forms, CSV, chat exports)
 
 ## 2026-Q3 Expansion
 
