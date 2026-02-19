@@ -26,7 +26,8 @@
     "agent:pr:hygiene": "node scripts/agent-pr-hygiene.mjs",
     "agent:evaluate:pr": "node scripts/agent-evaluate-pr.mjs",
     "agent:context:check": "node scripts/agent-context-check.mjs",
-    "agent:adr:check": "node scripts/check-contract-adr.mjs"
+    "agent:adr:check": "node scripts/check-contract-adr.mjs",
+    "backlog:current:check": "node scripts/check-current-backlog.mjs"
   },
   "releaseQuality": {
     "minimumCoverage": 0

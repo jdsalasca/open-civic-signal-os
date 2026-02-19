@@ -21,6 +21,7 @@ public interface PrioritizationService {
     Map<UUID, List<Signal>> findDuplicates();
     Signal mergeSignals(UUID targetId, List<UUID> duplicateIds);
     
-    // Persistence
+    // Persistence & Updates
     Signal saveSignal(Signal signal);
+    Optional<Signal> updateStatus(UUID id, String newStatus);
 }

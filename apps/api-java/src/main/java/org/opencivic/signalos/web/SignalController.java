@@ -44,6 +44,15 @@ public class SignalController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<SignalResponse> updateStatus(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+        String newStatus = body.get("status");
+        return prioritizationService.updateStatus(id, newStatus)
+                .map(this::mapToResponse)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/top-10")
     public List<SignalResponse> getTopUnresolved() {
         return prioritizationService.getTopUnresolved(10).stream()

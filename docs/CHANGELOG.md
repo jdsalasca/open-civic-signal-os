@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Staff Status Management**: Public servants can now transition signal statuses (NEW -> IN_PROGRESS -> RESOLVED) directly from the detail view. (#22)
 - **Modern Visual Redesign**: Implemented a "Glassmorphism" aesthetic with a deep dark palette, blurred backgrounds, and interactive hover effects. (#21)
 - **Typography & Icons**: Switched to 'Inter' font and added refined SVG iconography for better readability and a professional feel. (#21)
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)

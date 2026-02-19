@@ -121,6 +121,7 @@ Before implementing any issue, read:
 - `AGENTS.md`
 - `docs/ideas.md`
 - `docs/community/issue-backlog.md`
+- `docs/community/current-backlog.md`
 - `docs/agent/README.md`
 - `docs/agent/user-stories.md`
 - `docs/agent/process-flows.md`
@@ -152,7 +153,9 @@ Before implementing any issue, read:
 
 ## Agent PR Hygiene Workflow
 
-- Workflow: .github/workflows/agent-pr-hygiene.yml`n- Script: scripts/agent-pr-hygiene.mjs`n- PRs must include Story ID, verification evidence, and rollback plan.
+- Workflow: `.github/workflows/agent-pr-hygiene.yml`
+- Script: `scripts/agent-pr-hygiene.mjs`
+- PRs must include Story ID, verification evidence, and rollback plan.
 
 
 ## Agent Input Pack

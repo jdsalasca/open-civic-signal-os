@@ -61,7 +61,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     public Map<UUID, List<Signal>> findDuplicates() {
         List<Signal> signals = signalRepository.findAll();
         Map<UUID, List<Signal>> duplicateMap = new HashMap<>();
-        processed = new HashSet<>();
+        Set<UUID> processed = new HashSet<>();
 
         for (int i = 0; i < signals.size(); i++) {
             Signal s1 = signals.get(i);
@@ -83,8 +83,6 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         }
         return duplicateMap;
     }
-    
-    private Set<UUID> processed; // Fixed scope issue from previous merge
 
     private boolean isSimilar(Signal s1, Signal s2) {
         String t1 = s1.getTitle().toLowerCase();
@@ -116,5 +114,13 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     public Signal saveSignal(Signal signal) {
         return signalRepository.save(signal);
+    }
+
+    @Override
+    public Optional<Signal> updateStatus(UUID id, String newStatus) {
+        return signalRepository.findById(id).map(signal -> {
+            signal.setStatus(newStatus);
+            return signalRepository.save(signal);
+        });
     }
 }
