@@ -1,0 +1,9 @@
+{
+  "name": "open-civic-signal-os",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "prioritize": "node src/prioritize.mjs examples/feedback.json examples/prioritized-backlog.json"
+  }
+}

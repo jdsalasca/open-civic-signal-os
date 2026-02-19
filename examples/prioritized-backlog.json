@@ -1,0 +1,32 @@
+[
+  {
+    "id": "sig-003",
+    "title": "Unsafe crossing near school",
+    "urgency": 5,
+    "impact": 5,
+    "affectedPeople": 350,
+    "communityVotes": 79,
+    "category": "safety",
+    "priorityScore": 320
+  },
+  {
+    "id": "sig-001",
+    "title": "Public lighting broken in sector A",
+    "urgency": 5,
+    "impact": 4,
+    "affectedPeople": 500,
+    "communityVotes": 87,
+    "category": "infrastructure",
+    "priorityScore": 295
+  },
+  {
+    "id": "sig-002",
+    "title": "Need digital literacy workshops",
+    "urgency": 3,
+    "impact": 5,
+    "affectedPeople": 220,
+    "communityVotes": 64,
+    "category": "education",
+    "priorityScore": 249.8
+  }
+]

@@ -1,0 +1,26 @@
+name: Signal Proposal
+description: Capture a community signal that should be prioritized.
+title: "signal: "
+labels: ["signal", "community"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Community problem
+      description: What exactly is happening?
+    validations:
+      required: true
+  - type: input
+    id: affected
+    attributes:
+      label: Approx. affected people
+      placeholder: "250"
+    validations:
+      required: true
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      options: ["1", "2", "3", "4", "5"]
+    validations:
+      required: true
