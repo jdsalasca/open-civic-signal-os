@@ -69,6 +69,7 @@ Conditional:
 - If Java backend changed: `mvn -q test` in `apps/api-java`
 - If contract changed: run contract/ADR gate and verify OpenAPI consistency
 - If docs changed: ensure links/examples are still valid
+- If frontend changed: run Playwright CLI visual audit and produce evidence under `output/playwright/`
 
 ## 7) Testing and Regression Rules
 
@@ -95,6 +96,7 @@ PR body must include:
 - risk analysis and rollback plan
 - migration impact (`none` when not applicable)
 - explicit note if other-agent changes were included
+- `UX Evidence (Playwright)` section (mandatory for frontend-impacting PRs; `N/A` must be justified)
 
 ## 10) Rejection Criteria
 
@@ -128,3 +130,10 @@ A change is excellent only if it is:
 - documented
 - scoped
 - reversible
+
+## 13) Visual Value Rule
+
+Visual experience quality is treated as 70% of perceived product value.
+
+- Frontend changes without Playwright CLI evidence are considered incomplete.
+- Prefer CLI-first browser automation (`playwright-cli`) over ad-hoc claims.

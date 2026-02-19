@@ -21,7 +21,8 @@
 
 - [ ] Main script passes
 - [ ] Frontend build passes (`npm run build:web`)
-- [ ] Java build passes (`mvn -q -DskipTests package`) or blocker documented
+- [ ] Java tests pass (`mvn -q test`) or blocker documented
+- [ ] Playwright visual audit completed for frontend changes (`npm run agent:ux:pw -- ...`) or `N/A` justified
 
 ## Risks / Notes
 
@@ -30,6 +31,13 @@
 ## Rollback Plan
 
 -
+
+## UX Evidence (Playwright)
+
+- Commands:
+- Pages audited:
+- Artifacts:
+- Notes (`N/A` if no frontend impact):
 
 ## Screenshots / Output
 

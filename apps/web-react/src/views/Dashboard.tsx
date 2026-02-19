@@ -1,69 +1,45 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { Signal, Notification, UserRole } from "../types";
+import { Signal, Notification } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
 import { SignalTable } from "../components/SignalTable";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
-import { LoginModal } from "../components/LoginModal";
-import { Layout } from "../components/Layout";
 import { ProgressBar } from "primereact/progressbar";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useNavigate } from "react-router-dom";
-
-const fallbackSignals: Signal[] = [
-  {
-    id: "sig-003",
-    title: "Unsafe crossing near school",
-    description: "The zebra crossing is not visible",
-    category: "safety",
-    status: "NEW",
-    priorityScore: 320.8,
-    scoreBreakdown: { urgency: 150, impact: 125, affectedPeople: 30, communityVotes: 15.8 }
-  }
-];
+import { useAuthStore } from "../store/useAuthStore";
+import apiClient from "../api/axios";
 
 export function Dashboard() {
   const navigate = useNavigate();
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+  const { isLoggedIn, role, user } = useAuthStore();
+  
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const [auth, setAuth] = useState<{user: string, role: UserRole} | null>(() => {
-    const saved = localStorage.getItem("civic_auth_data");
-    return saved ? JSON.parse(saved) : null;
-  });
-  const [showLogin, setShowLogin] = useState(false);
-
-  const getAuthHeader = () => {
-    const token = localStorage.getItem("civic_auth_token");
-    return token ? { 'Authorization': `Basic ${token}` } : {};
-  };
 
   const loadData = async () => {
     try {
       setLoading(true);
       const [signalsRes, notificationsRes] = await Promise.all([
-        fetch(`${apiBaseUrl}/api/signals/prioritized?size=50`),
-        (auth?.role === "PUBLIC_SERVANT" || auth?.role === "SUPER_ADMIN")
-          ? fetch(`${apiBaseUrl}/api/notifications/recent`, { headers: getAuthHeader() })
+        apiClient.get("/api/signals/prioritized?size=50"),
+        (role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN")
+          ? apiClient.get("/api/notifications/recent")
           : Promise.resolve(null)
       ]);
       
-      if (signalsRes.ok) {
-        const data = await signalsRes.json();
-        setSignals(data.content || []);
+      if (signalsRes.status === 200) {
+        setSignals(signalsRes.data.content || []);
       }
       
-      if (notificationsRes && notificationsRes.ok) {
-        setNotifications(await notificationsRes.json());
+      if (notificationsRes && notificationsRes.status === 200) {
+        setNotifications(notificationsRes.data);
       }
       
     } catch (err) {
-      setSignals(fallbackSignals);
-      toast.error("Using fallback data. API connection issue.");
+      toast.error("Error connecting to services.");
     } finally {
       setLoading(false);
     }
@@ -71,65 +47,24 @@ export function Dashboard() {
 
   useEffect(() => {
     loadData();
-  }, [auth]);
-
-  const handleLogin = async (user: string, pass: string) => {
-    const token = btoa(`${user}:${pass}`);
-    try {
-      const res = await fetch(`${apiBaseUrl}/api/auth/me`, {
-        headers: { 'Authorization': `Basic ${token}` }
-      });
-
-      if (res.ok) {
-        const userData = await res.json();
-        const roleStr = userData.roles[0].authority;
-        const role: UserRole = roleStr === "ROLE_SUPER_ADMIN" ? "SUPER_ADMIN" : 
-                            roleStr === "ROLE_PUBLIC_SERVANT" ? "PUBLIC_SERVANT" : "CITIZEN";
-
-        localStorage.setItem("civic_auth_token", token);
-        const authInfo = { user, role };
-        localStorage.setItem("civic_auth_data", JSON.stringify(authInfo));
-        
-        setAuth(authInfo);
-        setShowLogin(false);
-        toast.success(`Welcome back, ${user}!`);
-      } else {
-        toast.error("Invalid credentials.");
-      }
-    } catch (err) {
-      toast.error("Auth service unavailable.");
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("civic_auth_token");
-    localStorage.removeItem("civic_auth_data");
-    setAuth(null);
-    setNotifications([]);
-    toast.success("Logged out successfully.");
-  };
+  }, [role]);
 
   const handleRelay = async () => {
     try {
-      const res = await fetch(`${apiBaseUrl}/api/notifications/relay/top-10`, { 
-        method: 'POST',
-        headers: getAuthHeader()
-      });
-      if (res.ok) {
+      const res = await apiClient.post("/api/notifications/relay/top-10");
+      if (res.status === 200) {
         toast.success("Relay sent!");
         loadData();
-      } else {
-        toast.error("Unauthorized.");
       }
     } catch (err) {
-      toast.error("Relay error.");
+      toast.error("Failed to send relay.");
     }
   };
 
-  const isStaff = auth?.role === "PUBLIC_SERVANT" || auth?.role === "SUPER_ADMIN";
+  const isStaff = role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN";
 
   return (
-    <Layout auth={auth} onLogout={handleLogout} onLoginClick={() => setShowLogin(true)}>
+    <>
       <div className="flex justify-content-between align-items-center mb-4">
         <div>
           <h1 className="text-4xl m-0">Community Backlog</h1>
@@ -161,7 +96,7 @@ export function Dashboard() {
               <NotificationSidebar notifications={notifications} />
             )}
 
-            {auth?.role === "CITIZEN" && (
+            {role === "CITIZEN" && (
               <Card title="Citizen Action" subTitle="Report new issues in your sector">
                 <Button 
                   label="Report New Issue" 
@@ -174,13 +109,6 @@ export function Dashboard() {
           </div>
         </div>
       </div>
-
-      {showLogin && (
-        <LoginModal 
-          onLogin={handleLogin} 
-          onClose={() => setShowLogin(false)} 
-        />
-      )}
-    </Layout>
+    </>
   );
 }

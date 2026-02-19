@@ -53,6 +53,7 @@
 - Frontend must build: `npm run build:web`.
 - MVP script must work: `npm run prioritize`.
 - Documentation must be updated for any behavior change.
+- Frontend-impacting changes must include Playwright CLI visual evidence (`output/playwright/*`).
 
 ## Anti-Regression Rules for Gemini
 
@@ -61,3 +62,4 @@
 - Never change unrelated layers in same PR (for example, no large CSS redesign in backend issue).
 - Never ship malformed markdown or JSON (check for escaped newline fragments and JSON parse errors).
 - Never weaken checks (`skipTests`, bypass CI, incomplete verification evidence).
+- Never ship frontend changes without Playwright CLI flow audit evidence.

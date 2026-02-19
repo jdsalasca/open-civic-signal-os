@@ -16,6 +16,7 @@
 - `docs/agent/system-design.md`
 - `docs/agent/execution-checklists.md`
 - `docs/agent/advanced-diagrams.md`
+- `docs/agent/playwright-visual-protocol.md`
 
 ## Deployment
 

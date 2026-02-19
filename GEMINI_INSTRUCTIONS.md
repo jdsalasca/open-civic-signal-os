@@ -58,6 +58,7 @@ Open Civic Signal OS converts community signals into transparent, auditable, and
 - Main script still works (`npm run prioritize`)
 - Docs updated for behavior change
 - No dead code or placeholder TODOs in core paths
+- Frontend PRs include Playwright CLI visual evidence in `output/playwright/` and PR body
 
 ## Critical anti-patterns (must avoid)
 
@@ -67,6 +68,7 @@ Open Civic Signal OS converts community signals into transparent, auditable, and
 - Do not modify docs with malformed escape sequences.
 - Do not break valid JSON in config files.
 - Do not skip tests or bypass required checks.
+- Do not merge frontend changes without Playwright visual audit evidence.
 
 ## Security and trust constraints
 

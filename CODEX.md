@@ -18,6 +18,7 @@ This file defines mandatory behavior for Codex-based implementation agents.
 - No hidden or undocumented API shape changes.
 - No CI weakening (never skip tests in backend validation).
 - No malformed docs/config (invalid JSON, broken markdown formatting).
+- Frontend-impacting PRs must include Playwright CLI visual evidence.
 
 ## Required Pre-Push Verification
 
@@ -25,6 +26,7 @@ This file defines mandatory behavior for Codex-based implementation agents.
 - `npm run backlog:current:check`
 - `npm run agent:context:check`
 - If Java backend changed: run `mvn -q test` in `apps/api-java`
+- If frontend changed: run Playwright CLI flow audit and attach evidence paths
 
 ## Scope Discipline
 
@@ -40,3 +42,4 @@ This file defines mandatory behavior for Codex-based implementation agents.
 - Contract impact:
 - Risks:
 - Rollback:
+- UX Evidence (Playwright):
