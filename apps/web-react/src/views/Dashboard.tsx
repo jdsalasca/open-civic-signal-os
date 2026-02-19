@@ -6,6 +6,11 @@ import { SignalTable } from "../components/SignalTable";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
 import { LoginModal } from "../components/LoginModal";
+import { Layout } from "../components/Layout";
+import { ProgressBar } from "primereact/progressbar";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
+import { useNavigate } from "react-router-dom";
 
 const fallbackSignals: Signal[] = [
   {
@@ -20,6 +25,7 @@ const fallbackSignals: Signal[] = [
 ];
 
 export function Dashboard() {
+  const navigate = useNavigate();
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -76,7 +82,6 @@ export function Dashboard() {
 
       if (res.ok) {
         const userData = await res.json();
-        // Standardize role extraction (it comes as { authority: "ROLE_XXX" })
         const roleStr = userData.roles[0].authority;
         const role: UserRole = roleStr === "ROLE_SUPER_ADMIN" ? "SUPER_ADMIN" : 
                             roleStr === "ROLE_PUBLIC_SERVANT" ? "PUBLIC_SERVANT" : "CITIZEN";
@@ -101,7 +106,7 @@ export function Dashboard() {
     localStorage.removeItem("civic_auth_data");
     setAuth(null);
     setNotifications([]);
-    toast.success("Logged out.");
+    toast.success("Logged out successfully.");
   };
 
   const handleRelay = async () => {
@@ -124,46 +129,58 @@ export function Dashboard() {
   const isStaff = auth?.role === "PUBLIC_SERVANT" || auth?.role === "SUPER_ADMIN";
 
   return (
-    <>
-      <header className="main-header">
+    <Layout auth={auth} onLogout={handleLogout} onLoginClick={() => setShowLogin(true)}>
+      <div className="flex justify-content-between align-items-center mb-4">
         <div>
-          <h1>Open Civic Signal OS {auth?.role === "SUPER_ADMIN" ? "(SuperAdmin)" : isStaff ? "(Staff)" : ""}</h1>
-          <p>Transparent civic prioritization dashboard.</p>
+          <h1 className="text-4xl m-0">Community Backlog</h1>
+          <p className="text-gray-500 m-0">Live signals prioritized by impact and urgency.</p>
         </div>
-        <div className="header-actions">
-          {auth ? (
-            <>
-              {isStaff && (
-                <button className="relay-btn" onClick={handleRelay}>📢 Broadcast Relay</button>
-              )}
-              <button className="login-btn secondary" onClick={handleLogout}>Logout ({auth.user})</button>
-            </>
-          ) : (
-            <button className="login-btn" onClick={() => setShowLogin(true)}>Login</button>
-          )}
-        </div>
-      </header>
+        {isStaff && (
+          <Button 
+            label="Broadcast Top 10" 
+            icon="pi pi-megaphone" 
+            severity="danger" 
+            onClick={handleRelay} 
+          />
+        )}
+      </div>
 
-      {showLogin && <LoginModal onLogin={handleLogin} onClose={() => setShowLogin(false)} />}
+      {loading && <ProgressBar mode="indeterminate" style={{ height: '4px', marginBottom: '20px' }} />}
 
       <MetricsGrid signals={signals} />
 
-      <div className="layout-split">
-        <SignalTable signals={signals} loading={loading} />
-        <aside className="sidebar-group">
-          <DigestSidebar signals={signals} />
-          {isStaff && <NotificationSidebar notifications={notifications} />}
-          {auth?.role === "CITIZEN" && (
-            <div className="card" style={{ padding: '20px' }}>
-              <h3>Your Impact</h3>
-              <p className="small-note">As a citizen, your votes and reports shape city priorities.</p>
-              <button className="relay-btn" style={{ background: '#2a9d8f' }} onClick={() => window.location.href='/report'}>
-                Submit New Signal
-              </button>
-            </div>
-          )}
-        </aside>
+      <div className="grid mt-4">
+        <div className="col-12 lg:col-8">
+          <SignalTable signals={signals} loading={loading} />
+        </div>
+        <div className="col-12 lg:col-4">
+          <div className="flex flex-column gap-4">
+            <DigestSidebar signals={signals} />
+            
+            {isStaff && (
+              <NotificationSidebar notifications={notifications} />
+            )}
+
+            {auth?.role === "CITIZEN" && (
+              <Card title="Citizen Action" subTitle="Report new issues in your sector">
+                <Button 
+                  label="Report New Issue" 
+                  icon="pi pi-plus" 
+                  className="w-full" 
+                  onClick={() => navigate("/report")} 
+                />
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
-    </>
+
+      {showLogin && (
+        <LoginModal 
+          onLogin={handleLogin} 
+          onClose={() => setShowLogin(false)} 
+        />
+      )}
+    </Layout>
   );
 }
