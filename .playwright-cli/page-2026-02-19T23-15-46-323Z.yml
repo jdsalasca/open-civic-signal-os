@@ -1,0 +1,189 @@
+- generic [ref=e2]:
+  - status [ref=e39]: ¡Bienvenido de nuevo, apiaudit175842!
+  - generic [ref=e40]:
+    - navigation [ref=e41]:
+      - generic [ref=e42]:
+        - link "SignalOS" [ref=e43] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e45]: SignalOS
+        - generic [ref=e46]:
+          - link "Perspectivas" [ref=e47] [cursor=pointer]:
+            - /url: /
+          - link "Reporte Público" [ref=e48] [cursor=pointer]:
+            - /url: /report
+          - link "Mis Contribuciones" [ref=e49] [cursor=pointer]:
+            - /url: /mine
+          - link "Configuración" [ref=e50] [cursor=pointer]:
+            - /url: /settings
+      - generic [ref=e51]:
+        - text: 
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - generic [ref=e54]: apiaudit175842
+            - generic [ref=e55]: CITIZEN
+          - generic [ref=e57]: A
+          - button "Cerrar Sesión" [ref=e58] [cursor=pointer]:
+            - generic: 
+    - main [ref=e59]:
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - generic [ref=e64]: Inteligencia en Vivo
+              - generic [ref=e65]: •
+              - generic [ref=e66]: Bienvenido de nuevo, apiaudit175842
+            - heading "Perspectivas de Gobierno" [level=1] [ref=e67]
+            - paragraph [ref=e68]: Seguimiento en tiempo real de la priorización y resolución de señales comunitarias.
+          - button "Reportar Incidencia" [ref=e70] [cursor=pointer]:
+            - generic: 
+            - generic [ref=e71]: Reportar Incidencia
+        - region "Civic Metrics Overview" [ref=e72]:
+          - 'article "Total de Señales: 3" [ref=e74]':
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - generic [ref=e79]: Total de Señales
+                - generic [ref=e80]: "3"
+              - generic [ref=e82]: 
+          - 'article "Nuevos Reportes: 3" [ref=e84]':
+            - generic [ref=e87]:
+              - generic [ref=e88]:
+                - generic [ref=e89]: Nuevos Reportes
+                - generic [ref=e90]: "3"
+              - generic [ref=e92]: 
+          - 'article "Bajo Análisis: 0" [ref=e94]':
+            - generic [ref=e97]:
+              - generic [ref=e98]:
+                - generic [ref=e99]: Bajo Análisis
+                - generic [ref=e100]: "0"
+              - generic [ref=e102]: 
+          - 'article "Promedio Prioridad: 166.0" [ref=e104]':
+            - generic [ref=e107]:
+              - generic [ref=e108]:
+                - generic [ref=e109]: Promedio Prioridad
+                - generic [ref=e110]: "166.0"
+              - generic [ref=e112]: 
+        - generic [ref=e113]:
+          - generic "Feed Priorizado" [ref=e116]:
+            - generic [ref=e118]:
+              - generic [ref=e119]:
+                - generic [ref=e120]: 
+                - heading "Feed Priorizado" [level=2] [ref=e121]
+              - generic [ref=e122]:
+                - generic [ref=e123]: 
+                - textbox "Buscar señales..." [ref=e124]
+            - table [ref=e126]:
+              - rowgroup [ref=e127]:
+                - row "Título Categoría Estado Puntaje" [ref=e128]:
+                  - columnheader "Título" [ref=e129] [cursor=pointer]:
+                    - generic [ref=e130]:
+                      - generic [ref=e131]: Título
+                      - img [ref=e133]
+                  - columnheader "Categoría" [ref=e138] [cursor=pointer]:
+                    - generic [ref=e139]:
+                      - generic [ref=e140]: Categoría
+                      - img [ref=e142]
+                  - columnheader "Estado" [ref=e147] [cursor=pointer]:
+                    - generic [ref=e148]:
+                      - generic [ref=e149]: Estado
+                      - img [ref=e151]
+                  - columnheader "Puntaje" [ref=e156] [cursor=pointer]:
+                    - generic [ref=e157]:
+                      - generic [ref=e158]: Puntaje
+                      - img [ref=e160]
+                  - columnheader [ref=e162]
+              - rowgroup [ref=e163]:
+                - 'row "bloblemas de aguas REF: 612d6598 Infraestructura NEW Puntaje: 166 " [ref=e164] [cursor=pointer]':
+                  - 'cell "bloblemas de aguas REF: 612d6598" [ref=e165]':
+                    - generic [ref=e166]:
+                      - generic [ref=e167]: bloblemas de aguas
+                      - generic [ref=e169]: "REF: 612d6598"
+                  - cell "Infraestructura" [ref=e170]
+                  - cell "NEW" [ref=e171]:
+                    - generic [ref=e174]: NEW
+                  - 'cell "Puntaje: 166" [ref=e175]':
+                    - 'group "Puntaje: 166" [ref=e176]':
+                      - generic [ref=e177]: "166"
+                  - cell "" [ref=e181]:
+                    - generic [ref=e182]: 
+                - 'row "Automated Civic Intel REF: 7aa60597 Infraestructura NEW Puntaje: 166 " [ref=e183] [cursor=pointer]':
+                  - 'cell "Automated Civic Intel REF: 7aa60597" [ref=e184]':
+                    - generic [ref=e185]:
+                      - generic [ref=e186]: Automated Civic Intel
+                      - generic [ref=e188]: "REF: 7aa60597"
+                  - cell "Infraestructura" [ref=e189]
+                  - cell "NEW" [ref=e190]:
+                    - generic [ref=e193]: NEW
+                  - 'cell "Puntaje: 166" [ref=e194]':
+                    - 'group "Puntaje: 166" [ref=e195]':
+                      - generic [ref=e196]: "166"
+                  - cell "" [ref=e200]:
+                    - generic [ref=e201]: 
+                - 'row "Mejora de Alumbrado Público REF: 8f5d2886 Infraestructura NEW Puntaje: 166 " [ref=e202] [cursor=pointer]':
+                  - 'cell "Mejora de Alumbrado Público REF: 8f5d2886" [ref=e203]':
+                    - generic [ref=e204]:
+                      - generic [ref=e205]: Mejora de Alumbrado Público
+                      - generic [ref=e207]: "REF: 8f5d2886"
+                  - cell "Infraestructura" [ref=e208]
+                  - cell "NEW" [ref=e209]:
+                    - generic [ref=e212]: NEW
+                  - 'cell "Puntaje: 166" [ref=e213]':
+                    - 'group "Puntaje: 166" [ref=e214]':
+                      - generic [ref=e215]: "166"
+                  - cell "" [ref=e219]:
+                    - generic [ref=e220]: 
+            - generic [ref=e221]:
+              - button "First Page" [disabled]:
+                - img
+              - button "Previous Page" [disabled]:
+                - img
+              - button "Page 1" [ref=e223] [cursor=pointer]: "1"
+              - button "Next Page" [disabled]:
+                - img
+              - button "Last Page" [disabled]:
+                - img
+          - generic [ref=e225]:
+            - generic [ref=e227]:
+              - generic [ref=e228]: Signal Distribution
+              - img [ref=e231]
+            - generic [ref=e233]:
+              - generic [ref=e234]: Transmisión Semanal
+              - generic [ref=e236]:
+                - generic [ref=e237]:
+                  - generic [ref=e238]: "01"
+                  - generic [ref=e239]:
+                    - heading "bloblemas de aguas" [level=4] [ref=e240]
+                    - generic [ref=e241]:
+                      - generic [ref=e242]: "166"
+                      - generic [ref=e243]: •
+                      - generic [ref=e244]: Infraestructura
+                - generic [ref=e245]:
+                  - generic [ref=e246]: "02"
+                  - generic [ref=e247]:
+                    - heading "Automated Civic Intel" [level=4] [ref=e248]
+                    - generic [ref=e249]:
+                      - generic [ref=e250]: "166"
+                      - generic [ref=e251]: •
+                      - generic [ref=e252]: Infraestructura
+                - generic [ref=e253]:
+                  - generic [ref=e254]: "03"
+                  - generic [ref=e255]:
+                    - heading "Mejora de Alumbrado Público" [level=4] [ref=e256]
+                    - generic [ref=e257]:
+                      - generic [ref=e258]: "166"
+                      - generic [ref=e259]: •
+                      - generic [ref=e260]: Infraestructura
+            - generic [ref=e262]:
+              - generic [ref=e263]: Civic Support
+              - generic [ref=e264]:
+                - paragraph [ref=e265]: Your votes and reports directly impact the algorithmic priority of issues in your community. Keep up the good work!
+                - generic [ref=e266]:
+                  - generic [ref=e267]: 
+                  - generic [ref=e268]: "Citizen Verification: Active"
+    - contentinfo [ref=e269]:
+      - generic [ref=e270]:
+        - generic [ref=e271]: 
+        - generic [ref=e272]: Estándar Global de Gobernanza
+      - generic [ref=e273]: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
+      - generic [ref=e274]:
+        - generic [ref=e275] [cursor=pointer]: 
+        - generic [ref=e276] [cursor=pointer]: 

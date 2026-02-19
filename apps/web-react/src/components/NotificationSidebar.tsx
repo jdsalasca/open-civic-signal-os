@@ -11,7 +11,7 @@ export function NotificationSidebar({ notifications }: Props) {
   const { t } = useTranslation();
 
   return (
-    <Card title="System Alerts" className="shadow-4 border-1 border-white-alpha-10 bg-gray-900">
+    <Card title={t('dashboard.system_alerts_title')} className="shadow-4 border-1 border-white-alpha-10 bg-gray-900">
       <div className="flex flex-column gap-3">
         {notifications.length === 0 ? (
           <p className="text-gray-500 text-sm italic">{t('dashboard.empty_title')}</p>

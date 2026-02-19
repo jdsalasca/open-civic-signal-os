@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Card } from "primereact/card";
+import { useTranslation } from "react-i18next";
 import { Signal } from "../types";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export function CategoryChart({ signals }: Props) {
+  const { t } = useTranslation();
   const chartData = useMemo(() => {
     const categories = signals.reduce((acc: Record<string, number>, s) => {
       acc[s.category] = (acc[s.category] || 0) + 1;
@@ -52,7 +54,7 @@ export function CategoryChart({ signals }: Props) {
   };
 
   return (
-    <Card title="Signal Distribution" className="shadow-4 border-1 border-white-alpha-10 bg-gray-900 overflow-hidden">
+    <Card title={t('dashboard.distribution_title')} className="shadow-4 border-1 border-white-alpha-10 bg-gray-900 overflow-hidden">
       <div style={{ height: "250px" }} className="flex justify-content-center">
         <Pie data={chartData} options={options} />
       </div>

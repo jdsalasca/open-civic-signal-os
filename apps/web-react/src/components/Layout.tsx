@@ -56,7 +56,7 @@ export function Layout({ children, authMode = false }: Props) {
         onHide={() => setMobileMenuVisible(false)} 
         position="left" 
         className="bg-gray-900 border-right-1 border-white-alpha-10 w-20rem"
-        aria-label={t('nav.settings')}
+        aria-label={t('nav.main_navigation')}
       >
         <div className="flex flex-column h-full p-3">
           <div className="flex align-items-center gap-2 mb-5">
@@ -120,7 +120,7 @@ export function Layout({ children, authMode = false }: Props) {
 
         <div className="flex align-items-center gap-3">
           {!authMode && isLoggedIn && (
-            <Button icon="pi pi-bars" text className="lg:hidden text-white p-0" onClick={() => setMobileMenuVisible(true)} aria-label={t('nav.settings')} />
+            <Button icon="pi pi-bars" text className="lg:hidden text-white p-0" onClick={() => setMobileMenuVisible(true)} aria-label={t('nav.open_navigation')} />
           )}
 
           {!authMode && !isLoggedIn && (

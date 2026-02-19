@@ -7,6 +7,12 @@
   --primary-text: #083344;
   --danger: #ef4444;
   --focus-ring: 0 0 0 3px rgba(6, 182, 212, 0.4);
+  --bg-dark: #0a0f1e;
+  --bg-surface: #111827;
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --glass-stroke: rgba(255, 255, 255, 0.15);
 }
 
 /* DARK THEME */
@@ -44,8 +50,18 @@ body {
 }
 
 .p-sidebar {
-  background: var(--bg-surface) !important;
+  background: #0f172a !important;
   border-right: 1px solid var(--border-subtle) !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+.p-sidebar .p-sidebar-content {
+  background: transparent !important;
+}
+
+.p-sidebar-mask {
+  background: rgba(2, 6, 23, 0.72) !important;
 }
 
 .p-button {

@@ -45,4 +45,18 @@ public class SecurityRBAC_IT {
         mockMvc.perform(get("/api/signals/flagged"))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @WithMockUser(username = "citizen", roles = {"CITIZEN"})
+    void citizenShouldNotAccessExportCsv() throws Exception {
+        mockMvc.perform(get("/api/signals/export/csv"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "superadmin", roles = {"SUPER_ADMIN"})
+    void superAdminShouldAccessExportCsv() throws Exception {
+        mockMvc.perform(get("/api/signals/export/csv"))
+                .andExpect(status().isOk());
+    }
 }

@@ -1,0 +1,41 @@
+- generic [ref=e3]:
+  - navigation:
+    - generic:
+      - link "SignalOS":
+        - /url: /
+        - generic: SignalOS
+  - main [ref=e4]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - img [ref=e11]
+        - heading "Portal de Acceso" [level=1] [ref=e14]
+        - paragraph [ref=e15]: Gestión de Open Civic Signal OS
+      - form "Login Form" [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: Usuario
+          - generic [ref=e19]:
+            - generic [ref=e20]: 
+            - textbox "Usuario" [ref=e21]:
+              - /placeholder: Ingrese su usuario
+        - generic [ref=e22]:
+          - generic [ref=e23]: Contraseña
+          - generic [ref=e25]:
+            - textbox "Contraseña" [ref=e26]:
+              - /placeholder: Ingrese su contraseña
+              - text: apiaudit175842
+            - switch "Show Password" [checked] [ref=e28] [cursor=pointer]
+        - button "Submit Login" [ref=e30] [cursor=pointer]:
+          - generic: 
+          - generic [ref=e31]: Entrar al OS
+        - generic [ref=e32]:
+          - text: ¿No tiene una cuenta?
+          - link "Cree una" [ref=e33] [cursor=pointer]:
+            - /url: /register
+  - contentinfo:
+    - generic:
+      - generic: 
+      - generic: Estándar Global de Gobernanza
+    - generic: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
+    - generic:
+      - generic: 
+      - generic: 
