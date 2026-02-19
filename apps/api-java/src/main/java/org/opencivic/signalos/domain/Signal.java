@@ -2,6 +2,7 @@ package org.opencivic.signalos.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,13 +24,14 @@ public class Signal {
     @Transient
     private ScoreBreakdown scoreBreakdown;
     
-    private String status; // NEW, IN_PROGRESS, RESOLVED, FLAGGED, REJECTED
+    private String status;
     
     @Column(columnDefinition = "TEXT")
     private String moderationReason;
     
+    // P1-8: Inicialización defensiva para evitar NullPointerException
     @ElementCollection
-    private List<UUID> mergedFrom;
+    private List<UUID> mergedFrom = new ArrayList<>();
     
     private LocalDateTime createdAt;
 
@@ -47,7 +49,7 @@ public class Signal {
         this.priorityScore = priorityScore;
         this.scoreBreakdown = scoreBreakdown;
         this.status = status;
-        this.mergedFrom = mergedFrom;
+        this.mergedFrom = mergedFrom != null ? mergedFrom : new ArrayList<>();
         this.createdAt = createdAt;
     }
 
@@ -63,6 +65,10 @@ public class Signal {
     public String getCategory() { return category; }
     public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
     public String getModerationReason() { return moderationReason; }
+    public List<UUID> getMergedFrom() { 
+        if (mergedFrom == null) mergedFrom = new ArrayList<>();
+        return mergedFrom; 
+    }
 
     // Setters
     public void setStatus(String status) { this.status = status; }

@@ -32,7 +32,8 @@ spring:
 application:
   security:
     jwt:
-      secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      # P0-4: Mandatory secret. Fail if not provided in environment.
+      secret-key: ${JWT_SECRET}
 
 management:
   endpoints:

@@ -7,6 +7,7 @@ interface AuthState {
   refreshToken: string | null;
   user: string | null;
   role: UserRole;
+  isLoggedIn: boolean; // P0-3: Consolidated login state
   setAuth: (data: { accessToken: string; refreshToken: string; user: string; role: string }) => void;
   logout: () => void;
   updateAccessToken: (token: string) => void;
@@ -21,18 +22,23 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       user: null,
       role: 'GUEST',
+      isLoggedIn: false,
       isHydrated: false,
       setAuth: (data) => set({
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         user: data.user,
         role: (data.role.replace('ROLE_', '') as UserRole),
+        isLoggedIn: true
       }),
       logout: () => {
-        set({ accessToken: null, refreshToken: null, user: null, role: 'GUEST' });
+        set({ accessToken: null, refreshToken: null, user: null, role: 'GUEST', isLoggedIn: false });
         localStorage.removeItem('auth-storage');
       },
-      updateAccessToken: (token) => set({ accessToken: token }),
+      updateAccessToken: (token) => set({ 
+        accessToken: token,
+        isLoggedIn: !!token 
+      }),
       setHydrated: () => set({ isHydrated: true })
     }),
     {

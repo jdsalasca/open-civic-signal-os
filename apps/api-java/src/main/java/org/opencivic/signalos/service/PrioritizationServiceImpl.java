@@ -10,6 +10,7 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.repository.VoteRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,12 +39,10 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public List<Signal> getTopUnresolved(int limit) {
-        // P2-15: Sorting in DB would be better, currently limiting in stream for logic clarity
-        return signalRepository.findAll().stream()
-                .filter(signal -> "NEW".equals(signal.getStatus()))
+        // P1-10: Scalable DB-level sorting using Pageable for limiting
+        return signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, limit))
+                .stream()
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)))
-                .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed())
-                .limit(limit)
                 .collect(Collectors.toList());
     }
 
@@ -71,6 +70,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Map<UUID, List<Signal>> findDuplicates() {
+        // Future P1-9 refinement: Use database-level fuzzy matching or batch processing
         List<Signal> signals = signalRepository.findAll();
         Map<UUID, List<Signal>> duplicateMap = new HashMap<>();
         Set<UUID> processed = new HashSet<>();
@@ -121,7 +121,6 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     @Transactional
     public Signal mergeSignals(UUID targetId, List<UUID> duplicateIds) {
-        // P1-10: Implementation of actual merge logic
         Signal target = signalRepository.findById(targetId).orElseThrow(() -> new RuntimeException("Target signal not found"));
         for (UUID dupId : duplicateIds) {
             Signal dup = signalRepository.findById(dupId).orElseThrow(() -> new RuntimeException("Duplicate signal " + dupId + " not found"));
@@ -165,7 +164,6 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus) {
-        // P1-9: Status validation through Enum
         return signalRepository.findById(id).map(signal -> {
             SignalStatus current = SignalStatus.valueOf(signal.getStatus());
             SignalStatus target = SignalStatus.valueOf(newStatus);
@@ -198,7 +196,6 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             signal.setPriorityScore(calculateScore(signal));
             return signalRepository.save(signal);
         } catch (DataIntegrityViolationException e) {
-            // P1-12: Handling race conditions
             throw new RuntimeException("Double voting detected and rejected.");
         }
     }

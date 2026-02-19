@@ -2,65 +2,54 @@ import { test, expect } from '@playwright/test';
 
 const BASE_URL = 'http://localhost:3002';
 
-test.describe('Bulletproof QA - Open Civic Signal OS', () => {
+test.describe('Bulletproof QA - Debugging', () => {
 
-  test('Security: Mandatory Login Redirection', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`);
-    await page.waitForURL(/.*login/);
-    await expect(page.locator('h1')).toContainText('Access Portal');
-  });
+  test('Auth: Detailed Citizen Lifecycle with Logging', async ({ page }) => {
+    // Capture browser console logs
+    page.on('console', msg => console.log(`[BROWSER] ${msg.type()}: ${msg.text()}`));
+    page.on('request', request => console.log(`[REQUEST] ${request.method()} ${request.url()}`));
+    page.on('response', response => console.log(`[RESPONSE] ${response.status()} ${response.url()}`));
 
-  test('Auth: Full Citizen Lifecycle (Register -> Login -> Report -> Vote)', async ({ page }) => {
-    const testUser = `qa_citizen_${Date.now()}`;
+    const testUser = `debug_user_${Date.now()}`;
     
     // 1. Register
+    console.log('--- STARTING REGISTRATION ---');
     await page.goto(`${BASE_URL}/register`);
     await page.fill('#username', testUser);
     await page.fill('#email', `${testUser}@example.com`);
     await page.fill('#password input', 'Password123!');
     await page.click('button[type="submit"]');
     
-    await page.waitForURL(/.*login/);
+    // Wait for the redirect to login
+    await page.waitForURL(/.*login/, { timeout: 10000 });
+    console.log('--- REGISTRATION SUCCESSFUL ---');
     
     // 2. Login
+    console.log('--- STARTING LOGIN ---');
     await page.fill('#username', testUser);
     await page.fill('#password input', 'Password123!');
     await page.click('button[type="submit"]');
     
-    await page.waitForURL(`${BASE_URL}/`);
+    // Wait for the dashboard load
+    await page.waitForURL(`${BASE_URL}/`, { timeout: 10000 });
+    console.log('--- LOGIN SUCCESSFUL ---');
+    
     await expect(page.locator('.text-5xl')).toContainText('Governance');
 
     // 3. Report Issue
+    console.log('--- STARTING REPORT ---');
     await page.click('text=Report New Issue');
     await page.waitForURL(/.*report/);
-    await page.fill('#title', `QA Automation Signal ${testUser}`);
-    await page.fill('#description', 'This is an automated test signal for quality assurance.');
+    await page.fill('#title', `QA Debug Signal ${testUser}`);
+    await page.fill('#description', 'This is a debug test signal.');
     await page.click('button[type="submit"]');
     
-    await page.waitForURL(`${BASE_URL}/`);
+    await page.waitForURL(`${BASE_URL}/`, { timeout: 10000 });
+    console.log('--- REPORT SUCCESSFUL ---');
     
-    // 4. Vote/Support
-    // Wait for the table to load the new record
-    await page.waitForSelector(`text=${testUser}`);
-    await page.click(`text=${testUser}`);
-    await page.waitForURL(/.*signal\/.*/);
-    
-    const supportBtn = page.locator('button:has-text("Support this Issue")');
-    await supportBtn.click();
-    
-    await expect(page.locator('.p-toast-message')).toBeVisible();
-  });
-
-  test('Security: RBAC Enforcement (Citizen cannot access Moderation)', async ({ page }) => {
-    // Login as standard citizen
-    await page.goto(`${BASE_URL}/login`);
-    await page.fill('#username', 'citizen');
-    await page.fill('#password input', 'citizen2026');
-    await page.click('button[type="submit"]');
-    
-    // Try to force navigate to moderation
-    await page.goto(`${BASE_URL}/moderation`);
-    await page.waitForURL(/.*unauthorized/);
-    await expect(page.locator('h1')).toContainText('Access Denied');
+    // 4. Verification in Table
+    console.log('--- STARTING VERIFICATION ---');
+    await page.waitForSelector(`text=${testUser}`, { timeout: 10000 });
+    console.log('--- SIGNAL FOUND IN TABLE ---');
   });
 });

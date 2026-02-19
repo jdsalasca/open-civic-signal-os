@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T17:00:00.000Z
+Last updated: 2026-02-19T18:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 30
+- DONE: 32
 
 ### TODO
 - _No issues_
@@ -25,6 +25,8 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #37 Data: Optimized Top-10 Ranking logic at DB-level (P1-10)
+- #36 Data: Persistent Notification History in PostgreSQL (P2-14)
 - #35 Security: Prevention of Privilege Escalation in public registration (P0-1)
 - #34 Security: Mandatory Environment-based JWT Secrets (P0-2)
 - #33 Security: Strict White-listed CORS Policy (P0-3)

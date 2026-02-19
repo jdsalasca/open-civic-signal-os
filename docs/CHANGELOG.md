@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **Persistent Notifications**: Notification history is now stored in PostgreSQL, replacing the previous in-memory list. (#36)
+- **Optimized Ranking**: Top-10 ranking logic has been moved to the database level for improved scalability and performance. (#37)
 - **Automated Abuse Detection**: Signals with suspicious patterns (e.g., high urgency with low impact) are now automatically flagged for review. (#30)
 - **Moderation Queue**: Dedicated view for Staff and SuperAdmins to approve or reject flagged signals with internal notes. (#30)
 - **Infrastructure Secrets Management**: Migrated sensitive credentials to a unified `.env` file, removing hardcoded values from Docker Compose. (#31)

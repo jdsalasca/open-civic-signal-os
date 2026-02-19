@@ -5,14 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record UserRegistrationRequest(
-    @NotBlank @Size(min = 4, max = 20)
-    String username,
-
-    @NotBlank @Email
-    String email,
-
-    @NotBlank @Size(min = 8)
-    String password,
-
-    String role // Defaults to CITIZEN if not specified
+    @NotBlank @Size(min = 4, max = 50) String username,
+    @NotBlank @Size(min = 8) String password,
+    @NotBlank @Email String email
 ) {}

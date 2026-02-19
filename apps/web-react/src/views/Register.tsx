@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
-import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { classNames } from "primereact/utils";
@@ -14,23 +13,16 @@ type RegisterForm = {
   username: string;
   email: string;
   password: string;
-  role: string;
 };
 
 export function Register() {
   const navigate = useNavigate();
   const { control, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
-    defaultValues: { username: '', email: '', password: '', role: 'CITIZEN' }
+    defaultValues: { username: '', email: '', password: '' }
   });
-
-  const roles = [
-    { label: 'Citizen (Report & Vote)', value: 'CITIZEN' },
-    { label: 'Public Servant (Staff)', value: 'PUBLIC_SERVANT' }
-  ];
 
   const onSubmit = async (data: RegisterForm) => {
     try {
-      // P1-11: Unified usage of apiClient
       const res = await apiClient.post("/api/auth/register", data);
 
       if (res.status === 200 || res.status === 201) {
@@ -46,7 +38,7 @@ export function Register() {
   return (
     <Layout>
       <div className="flex justify-content-center align-items-center mt-6">
-        <Card title="Join Signal OS" subTitle="Create your account to start impacting your community" style={{ width: '100%', maxWidth: '450px' }}>
+        <Card title="Join Signal OS" subTitle="Create your citizen account to start impacting your community" style={{ width: '100%', maxWidth: '450px' }}>
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid">
             <div className="field mt-2">
               <span className="p-float-label p-input-icon-left">
@@ -86,14 +78,9 @@ export function Register() {
               {errors.password && <small className="p-error">{errors.password.message}</small>}
             </div>
 
-            {/* Role selection is present but backend will force CITIZEN for P0 compliance */}
-            <div className="field mt-4">
-              <label htmlFor="role" className="text-xs font-semibold text-gray-500 uppercase ml-1">I am a...</label>
-              <Controller name="role" control={control} 
-                render={({ field }) => (
-                  <Dropdown id="role" {...field} options={roles} placeholder="Select a role" />
-                )} 
-              />
+            <div className="mt-4 p-3 bg-blue-900 border-round text-xs text-blue-100 flex align-items-center gap-2">
+              <i className="pi pi-shield"></i>
+              <span>Default Role: Citizen</span>
             </div>
 
             <Button type="submit" label="Create Account" className="mt-4 py-3 font-bold" />

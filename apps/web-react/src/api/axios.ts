@@ -14,24 +14,30 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // P0-2: Removed sensitive payload logs
   return config;
 });
 
 // Response Interceptor: Handle 401/403 and Refresh Token
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // P0-2: Removed sensitive payload logs
+    return response;
+  },
   async (error) => {
+    // P0-2: Safe redacted error log
+    console.error(`[API Error] ${error.response?.status || 'Network Error'} on ${error.config?.url}`);
+    
     const originalRequest = error.config;
 
-    // P1-11: Use instance for refresh to maintain baseURL and context
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = useAuthStore.getState().refreshToken;
 
       if (refreshToken) {
         try {
-          // P1-11: Dedicate specific call or use base instance with correct URL
-          const res = await axios.post(`${apiClient.defaults.baseURL}/api/auth/refresh`, { refreshToken });
+          const baseUrl = apiClient.defaults.baseURL || '';
+          const res = await axios.post(`${baseUrl}/api/auth/refresh`, { refreshToken });
           const { accessToken } = res.data;
           useAuthStore.getState().updateAccessToken(accessToken);
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -43,10 +49,6 @@ apiClient.interceptors.response.use(
       } else {
         useAuthStore.getState().logout();
       }
-    }
-
-    if (error.response?.status === 403) {
-      console.error('Forbidden action attempt.');
     }
 
     return Promise.reject(error);

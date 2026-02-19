@@ -1,4 +1,4 @@
-package org.opencivic.signalos.web.error;
+package org.opencivic.signalos.web.dto;
 
 import java.time.LocalDateTime;
 import java.util.Map;
