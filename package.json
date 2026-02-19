@@ -12,6 +12,8 @@
     "prioritize": "node src/prioritize.mjs examples/feedback.json examples/prioritized-backlog.json",
     "dev:web": "npm --workspace apps/web-react run dev",
     "build:web": "npm --workspace apps/web-react run build",
-    "preview:web": "npm --workspace apps/web-react run preview"
+    "preview:web": "npm --workspace apps/web-react run preview",
+    "agent:gate": "node scripts/agent-gate.mjs",
+    "quality:quick": "npm run prioritize && npm run build:web && npm run agent:gate"
   }
 }

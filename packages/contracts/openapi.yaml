@@ -19,3 +19,50 @@ paths:
       responses:
         '200':
           description: Prioritized list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrioritizedSignal'
+components:
+  schemas:
+    ScoreBreakdown:
+      type: object
+      required:
+        - urgency
+        - impact
+        - affectedPeople
+        - communityVotes
+      properties:
+        urgency:
+          type: number
+        impact:
+          type: number
+        affectedPeople:
+          type: number
+        communityVotes:
+          type: number
+    PrioritizedSignal:
+      type: object
+      required:
+        - id
+        - title
+        - category
+        - scoreBreakdown
+        - priorityScore
+        - status
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        scoreBreakdown:
+          $ref: '#/components/schemas/ScoreBreakdown'
+        priorityScore:
+          type: number
+        status:
+          type: string
+          enum: [NEW, IN_PROGRESS, RESOLVED]

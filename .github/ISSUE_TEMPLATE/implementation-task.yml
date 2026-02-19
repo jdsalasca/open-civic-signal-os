@@ -1,0 +1,40 @@
+name: Implementation Task
+description: Standardized task for agent execution with clear acceptance criteria.
+title: "task: "
+labels: ["agent-ready", "status:todo"]
+body:
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone
+      placeholder: "2026-Q2 Foundation"
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: ["P0", "P1", "P2"]
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What user/community outcome should improve?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Backend, frontend, contracts, docs.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Testable criteria for done.
+    validations:
+      required: true

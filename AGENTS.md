@@ -95,3 +95,15 @@ When closing an issue, agents must include:
 - Definition of Done: `docs/DEFINITION_OF_DONE.md`
 - PR checklist: `docs/PR_REVIEW_CHECKLIST.md`
 - System prompt: `docs/agent/SYSTEM_PROMPT.md`
+## Excellence Pack
+
+- Engineering standards: `docs/ENGINEERING_STANDARDS.md`
+- Backend standards: `docs/BACKEND_EXCELLENCE.md`
+- UX standards: `docs/UX_EXCELLENCE.md`
+- Test strategy: `docs/TEST_STRATEGY.md`
+- Security baseline: `docs/SECURITY_BASELINE.md`
+- Observability guide: `docs/OBSERVABILITY.md`
+- ADR template: `docs/architecture/ADR_TEMPLATE.md`
+- Agent gate script: `scripts/agent-gate.mjs`
+- Agent gate CI: `.github/workflows/agent-gate.yml`
+- Execution brief template: `docs/agent/EXECUTION_BRIEF_TEMPLATE.md`
