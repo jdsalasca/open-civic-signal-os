@@ -1,0 +1,103 @@
+name: Current Sprint Focus Issue
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 10 * * 1"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  publish-sprint-focus:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create or update sprint focus issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const path = "docs/community/current-backlog.md";
+            if (!fs.existsSync(path)) {
+              core.setFailed("Missing docs/community/current-backlog.md");
+              return;
+            }
+
+            const backlog = fs.readFileSync(path, "utf8").trim();
+
+            function isoWeek(date) {
+              const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+              const dayNr = (target.getUTCDay() + 6) % 7;
+              target.setUTCDate(target.getUTCDate() - dayNr + 3);
+              const firstThursday = new Date(Date.UTC(target.getUTCFullYear(), 0, 4));
+              const firstDayNr = (firstThursday.getUTCDay() + 6) % 7;
+              firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNr + 3);
+              const week = 1 + Math.round((target - firstThursday) / 604800000);
+              return `${target.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+            }
+
+            const week = isoWeek(new Date());
+            const title = `Current Sprint Focus ${week}`;
+
+            const body = [
+              "## Weekly Sprint Focus",
+              "",
+              `Week key: ${week}`,
+              "",
+              "Source of truth: `docs/community/current-backlog.md`",
+              "",
+              "---",
+              "",
+              backlog
+            ].join("\n");
+
+            const labels = [
+              { name: "sprint-focus", color: "0e8a16", description: "Current sprint execution focus" },
+              { name: "agent-backlog", color: "1d76db", description: "Agent-managed backlog execution" },
+              { name: "help wanted", color: "008672", description: "Maintainers welcome contributions" }
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ...label
+                });
+              } catch (error) {
+                if (error.status !== 422) throw error;
+              }
+            }
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100
+            });
+
+            const existing = openIssues.find((issue) => issue.title === title);
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+                labels: labels.map((l) => l.name)
+              });
+              core.info(`Updated existing issue #${existing.number}`);
+              return;
+            }
+
+            const created = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: labels.map((l) => l.name)
+            });
+            core.info(`Created issue #${created.data.number}`);
