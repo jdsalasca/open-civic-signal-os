@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,14 @@ public class SignalController {
             @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable) {
         return prioritizationService.getPrioritizedSignals(pageable)
                 .map(this::mapToResponse);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<SignalResponse> getSignalById(@PathVariable UUID id) {
+        return prioritizationService.getSignalById(id)
+                .map(this::mapToResponse)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/top-10")

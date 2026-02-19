@@ -21,7 +21,6 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Page<Signal> getPrioritizedSignals(Pageable pageable) {
-        // Now using DB-level pagination and sorting (if provided in pageable)
         return signalRepository.findAll(pageable)
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
     }
@@ -34,6 +33,12 @@ public class PrioritizationServiceImpl implements PrioritizationService {
                 .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed())
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Signal> getSignalById(UUID id) {
+        return signalRepository.findById(id)
+                .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
     }
 
     @Override
@@ -56,7 +61,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     public Map<UUID, List<Signal>> findDuplicates() {
         List<Signal> signals = signalRepository.findAll();
         Map<UUID, List<Signal>> duplicateMap = new HashMap<>();
-        Set<UUID> processed = new HashSet<>();
+        processed = new HashSet<>();
 
         for (int i = 0; i < signals.size(); i++) {
             Signal s1 = signals.get(i);
@@ -67,7 +72,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
                 Signal s2 = signals.get(j);
                 if (isSimilar(s1, s2)) {
                     dups.add(s2);
-                    processed.add(s2.id()); // Compatibility note: using getId() is better
+                    processed.add(s2.getId());
                 }
             }
 
@@ -78,6 +83,8 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         }
         return duplicateMap;
     }
+    
+    private Set<UUID> processed; // Fixed scope issue from previous merge
 
     private boolean isSimilar(Signal s1, Signal s2) {
         String t1 = s1.getTitle().toLowerCase();

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Signal } from "../types";
 
 type Props = {
@@ -7,6 +8,7 @@ type Props = {
 };
 
 export function SignalTable({ signals, loading }: Props) {
+  const navigate = useNavigate();
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -56,12 +58,12 @@ export function SignalTable({ signals, loading }: Props) {
               <th>Category</th>
               <th>Status</th>
               <th>Score</th>
-              <th>Breakdown</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {filteredSignals.map((signal) => (
-              <tr key={signal.id}>
+              <tr key={signal.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/signal/${signal.id}`)}>
                 <td>{signal.title}</td>
                 <td>{signal.category}</td>
                 <td>
@@ -71,14 +73,9 @@ export function SignalTable({ signals, loading }: Props) {
                 </td>
                 <td style={{ fontWeight: "bold" }}>{signal.priorityScore.toFixed(1)}</td>
                 <td>
-                  {signal.scoreBreakdown && (
-                    <>
-                      <span className="breakdown-tag" title="Urgency">U: {signal.scoreBreakdown.urgency}</span>
-                      <span className="breakdown-tag" title="Impact">I: {signal.scoreBreakdown.impact}</span>
-                      <span className="breakdown-tag" title="Reach">R: {signal.scoreBreakdown.affectedPeople}</span>
-                      <span className="breakdown-tag" title="Community">C: {signal.scoreBreakdown.communityVotes}</span>
-                    </>
-                  )}
+                  <button className="login-btn secondary" style={{ fontSize: '11px', padding: '4px 8px' }}>
+                    View Detail
+                  </button>
                 </td>
               </tr>
             ))}

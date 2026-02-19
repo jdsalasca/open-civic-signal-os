@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Signal Detail View**: New dedicated view showing complete problem descriptions and granular score breakdowns for transparency. (#19)
 - **Role-Based Access Control (RBAC)**: Implemented `PUBLIC_SERVANT` and `CITIZEN` roles in Spring Security and React. (#18)
   - Public Servants: Can view relays, send broadcasts, and manage signals.
   - Citizens: Can report signals and view the public dashboard.

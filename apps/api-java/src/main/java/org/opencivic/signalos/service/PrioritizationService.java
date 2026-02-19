@@ -7,11 +7,13 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PrioritizationService {
     Page<Signal> getPrioritizedSignals(Pageable pageable);
     List<Signal> getTopUnresolved(int limit);
+    Optional<Signal> getSignalById(UUID id);
     double calculateScore(Signal signal);
     ScoreBreakdown getBreakdown(Signal signal);
     
