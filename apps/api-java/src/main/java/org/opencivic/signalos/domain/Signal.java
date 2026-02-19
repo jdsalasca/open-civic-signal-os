@@ -60,6 +60,8 @@ public class Signal {
     public String getCategory() { return category; }
     public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
 
+    // Setters
+    public void setStatus(String status) { this.status = status; }
     public void setPriorityScore(double priorityScore) { this.priorityScore = priorityScore; }
     public void setScoreBreakdown(ScoreBreakdown scoreBreakdown) { this.scoreBreakdown = scoreBreakdown; }
 
