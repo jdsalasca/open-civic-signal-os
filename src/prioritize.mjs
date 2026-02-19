@@ -1,11 +1,20 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
-function score(signal) {
+function calculateBreakdown(signal) {
+  return {
+    urgency: signal.urgency * 30,
+    impact: signal.impact * 25,
+    affectedPeople: Math.min(signal.affectedPeople / 10, 30),
+    communityVotes: Math.min(signal.communityVotes / 5, 15)
+  };
+}
+
+function score(breakdown) {
   return (
-    signal.urgency * 30 +
-    signal.impact * 25 +
-    Math.min(signal.affectedPeople / 10, 30) +
-    Math.min(signal.communityVotes / 5, 15)
+    breakdown.urgency +
+    breakdown.impact +
+    breakdown.affectedPeople +
+    breakdown.communityVotes
   );
 }
 
@@ -20,7 +29,15 @@ function main() {
   }
 
   const prioritized = data
-    .map((item) => ({ ...item, priorityScore: Number(score(item).toFixed(2)) }))
+    .map((item) => {
+      const breakdown = calculateBreakdown(item);
+      return { 
+        ...item, 
+        priorityScore: Number(score(breakdown).toFixed(2)),
+        scoreBreakdown: breakdown,
+        status: item.status ?? "NEW"
+      };
+    })
     .sort((a, b) => b.priorityScore - a.priorityScore);
 
   writeFileSync(outputPath, JSON.stringify(prioritized, null, 2), "utf8");

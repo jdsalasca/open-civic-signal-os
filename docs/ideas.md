@@ -180,3 +180,32 @@ Build the most trusted open civic execution stack: from community signals to mea
 - Community leader mobile view with offline snapshots
 - SLA breach early-warning panel
 - Participatory budgeting simulator
+
+## Detailed Execution Assets
+
+- Story catalog: `docs/agent/user-stories.md`
+- Process diagrams: `docs/agent/process-flows.md`
+- System design: `docs/agent/system-design.md`
+- Delivery checklists: `docs/agent/execution-checklists.md`
+
+## Additional High-Impact Initiatives
+
+### P0 Additions
+
+- Incident triage board for trust-critical civic events.
+- Data freshness monitor per source channel.
+- Explainability snapshot export for community assemblies.
+- Moderation review queue with reason taxonomy.
+
+### P1 Additions
+
+- SLA breach predictor for institutional backlog owners.
+- Category-level trend anomaly detector.
+- Community trust pulse survey ingestion.
+- Operator playbooks for conflict resolution.
+
+### P2 Additions
+
+- Policy simulator for score-weight adjustments.
+- Federation bridge for inter-city backlog comparability.
+- Verifiable public archive of ranking history.
