@@ -64,6 +64,7 @@ public class Signal {
     public void setStatus(String status) { this.status = status; }
     public void setPriorityScore(double priorityScore) { this.priorityScore = priorityScore; }
     public void setScoreBreakdown(ScoreBreakdown scoreBreakdown) { this.scoreBreakdown = scoreBreakdown; }
+    public void setCommunityVotes(int communityVotes) { this.communityVotes = communityVotes; }
 
     public Signal withScore(double score, ScoreBreakdown breakdown) {
         this.priorityScore = score;

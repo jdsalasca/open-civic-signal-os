@@ -60,9 +60,7 @@ Do not do:
 
 Required:
 
-- `npm run quality:quick`
-- `npm run backlog:current:check`
-- `npm run agent:context:check`
+- `npm run agent:preflight`
 
 Conditional:
 

@@ -33,6 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+        
+        // Bypass for health checks and public auth endpoints
+        String path = request.getServletPath();
+        if (path.contains("/actuator") || path.contains("/api/auth") || path.contains("/api/health")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
@@ -58,7 +66,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Token expired or invalid
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

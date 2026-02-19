@@ -25,6 +25,7 @@
     "docker:ghcr:down": "docker compose -f infra/docker-compose.yml -f infra/docker-compose.ghcr.yml down",
     "agent:pr:hygiene": "node scripts/agent-pr-hygiene.mjs",
     "agent:evaluate:pr": "node scripts/agent-evaluate-pr.mjs",
+    "agent:preflight": "node scripts/agent-preflight.mjs",
     "agent:context:check": "node scripts/agent-context-check.mjs",
     "agent:adr:check": "node scripts/check-contract-adr.mjs",
     "backlog:current:check": "node scripts/check-current-backlog.mjs",

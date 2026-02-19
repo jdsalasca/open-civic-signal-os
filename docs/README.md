@@ -19,6 +19,10 @@
 - `docs/agent/playwright-visual-protocol.md`
 - `docs/agent/agent-capability-matrix.md`
 - `docs/agent/ux-quality-bar.md`
+- `docs/agent/must-should-rules.md`
+- `docs/agent/task-pack-frontend.md`
+- `docs/agent/task-pack-backend.md`
+- `docs/agent/task-pack-docs.md`
 
 ## Deployment
 

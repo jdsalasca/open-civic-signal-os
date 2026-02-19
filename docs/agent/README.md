@@ -36,5 +36,9 @@ No implementation starts without a Story ID and explicit acceptance criteria.
 - `docs/agent/playwright-visual-protocol.md`: mandatory Playwright UX audit protocol.
 - `docs/agent/agent-capability-matrix.md`: baseline capabilities by implementation lane.
 - `docs/agent/ux-quality-bar.md`: mandatory UX acceptance bar.
+- `docs/agent/must-should-rules.md`: low-cognitive-load policy (`MUST` vs `SHOULD`).
+- `docs/agent/task-pack-frontend.md`: minimal frontend execution pack.
+- `docs/agent/task-pack-backend.md`: minimal backend execution pack.
+- `docs/agent/task-pack-docs.md`: minimal docs/ops execution pack.
 
 - docs/agent/domain-decision-pack.md: ADR and contract decision governance pack.

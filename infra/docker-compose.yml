@@ -30,10 +30,10 @@ services:
       - "8081:8080"
     healthcheck:
       test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
-      interval: 30s
+      interval: 40s
       timeout: 10s
-      retries: 5
-      start_period: 40s
+      retries: 3
+      start_period: 60s
     depends_on:
       db:
         condition: service_healthy

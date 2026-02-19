@@ -130,6 +130,7 @@ Before implementing any issue, read:
 - `docs/agent/playwright-visual-protocol.md`
 - `docs/agent/agent-capability-matrix.md`
 - `docs/agent/ux-quality-bar.md`
+- `docs/agent/must-should-rules.md`
 - `docs/ideas.md`
 - `docs/community/issue-backlog.md`
 - `docs/community/current-backlog.md`
@@ -176,9 +177,7 @@ These rules were added from recurring AI-generated mistakes in this repository.
 
 Run these before push:
 
-- `npm run quality:quick`
-- `npm run backlog:current:check`
-- `npm run agent:context:check`
+- `npm run agent:preflight`
 
 If backend Java files changed, also run:
 

@@ -23,6 +23,7 @@ This file defines mandatory behavior for Codex-based implementation agents.
 
 ## Required Pre-Push Verification
 
+- `npm run agent:preflight`
 - `npm run quality:quick`
 - `npm run backlog:current:check`
 - `npm run agent:context:check`

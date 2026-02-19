@@ -55,6 +55,7 @@ Open Civic Signal OS converts community signals into transparent, auditable, and
 
 ## Quality gates before merge
 
+- `npm run agent:preflight`
 - Backend tests pass (`mvn -q test`)
 - Frontend builds (`npm run build:web`)
 - Main script still works (`npm run prioritize`)
