@@ -49,7 +49,15 @@
 - Every PR requires a structured summary covering Scope, API changes, Contract changes, and Verification.
 
 ## Quality Gates
-- Backend must compile: `mvn -q -DskipTests package`.
+- Backend tests must run (no test skipping): `mvn -q test`.
 - Frontend must build: `npm run build:web`.
 - MVP script must work: `npm run prioritize`.
 - Documentation must be updated for any behavior change.
+
+## Anti-Regression Rules for Gemini
+
+- Never commit generated artifacts (`dist`, `test-results`, screenshots, temp logs).
+- Never add dependencies for convenience; only add when issue scope requires and justify in PR.
+- Never change unrelated layers in same PR (for example, no large CSS redesign in backend issue).
+- Never ship malformed markdown or JSON (check for escaped newline fragments and JSON parse errors).
+- Never weaken checks (`skipTests`, bypass CI, incomplete verification evidence).

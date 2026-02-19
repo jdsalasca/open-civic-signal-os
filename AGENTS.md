@@ -90,7 +90,9 @@ When closing an issue, agents must include:
 - known limitations
 ## Agent Operations
 
+- Gemini project context: `GEMINI.md`
 - Gemini execution guide: `GEMINI_INSTRUCTIONS.md`
+- Codex execution contract: `CODEX.md`
 - Playbook: `docs/IMPLEMENTATION_PLAYBOOK.md`
 - Definition of Done: `docs/DEFINITION_OF_DONE.md`
 - PR checklist: `docs/PR_REVIEW_CHECKLIST.md`
@@ -119,6 +121,9 @@ When closing an issue, agents must include:
 Before implementing any issue, read:
 
 - `AGENTS.md`
+- `GEMINI.md`
+- `GEMINI_INSTRUCTIONS.md`
+- `CODEX.md`
 - `docs/ideas.md`
 - `docs/community/issue-backlog.md`
 - `docs/community/current-backlog.md`
@@ -135,6 +140,43 @@ Before implementing any issue, read:
 - Include explicit acceptance criteria and test evidence.
 - Never merge with failing CI.
 - Keep ranking logic backend-owned; frontend rendering only.
+
+## AI Failure Patterns and Guardrails (Mandatory)
+
+These rules were added from recurring AI-generated mistakes in this repository.
+
+- Do not commit generated artifacts:
+  - `apps/web-react/dist/*`
+  - `apps/web-react/test-results/*`
+  - `*.png` and `*.jpg` screenshots generated during tests/audits
+  - temporary logs and local cache files
+- Do not introduce hidden dependency churn:
+  - never add test or UI tooling dependencies unless the issue explicitly requires it
+  - if a dependency is added, justify it in PR summary
+- Do not mutate files outside scope:
+  - if the task is docs/backlog, do not modify runtime code
+  - if the task is backend-only, do not redesign frontend styles
+- Do not weaken quality gates:
+  - no `-DskipTests` for backend validation in CI
+  - no bypass of required checks
+- Do not ship malformed markdown/json:
+  - never commit escaped newline literals like `` `n `` as documentation bullets
+  - ensure `package.json` remains valid JSON with no trailing literal escape text
+- Do not mix unrelated work:
+  - avoid bundling UI redesign + backend + docs automation in one PR unless requested
+  - keep one objective and one rollback path
+
+## Hard Validation Before Push
+
+Run these before push:
+
+- `npm run quality:quick`
+- `npm run backlog:current:check`
+- `npm run agent:context:check`
+
+If backend Java files changed, also run:
+
+- `mvn -q test` in `apps/api-java`
 
 ## Execution Governance Rules (Expanded)
 

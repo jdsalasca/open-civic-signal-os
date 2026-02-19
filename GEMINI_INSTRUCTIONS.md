@@ -53,11 +53,20 @@ Open Civic Signal OS converts community signals into transparent, auditable, and
 
 ## Quality gates before merge
 
-- Backend compiles (`mvn -q -DskipTests package`)
+- Backend tests pass (`mvn -q test`)
 - Frontend builds (`npm run build:web`)
 - Main script still works (`npm run prioritize`)
 - Docs updated for behavior change
 - No dead code or placeholder TODOs in core paths
+
+## Critical anti-patterns (must avoid)
+
+- Do not commit generated files (`dist`, `test-results`, screenshots, local artifacts).
+- Do not add dependencies unless explicitly needed by the issue and justified in PR.
+- Do not mix unrelated objectives in one PR.
+- Do not modify docs with malformed escape sequences.
+- Do not break valid JSON in config files.
+- Do not skip tests or bypass required checks.
 
 ## Security and trust constraints
 
