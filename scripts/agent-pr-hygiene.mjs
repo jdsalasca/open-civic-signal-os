@@ -16,7 +16,7 @@ const requiredSections = [
 const missingSections = requiredSections.filter((section) => !body.includes(section));
 const hasIssueReference = /#\d+/.test(body);
 const hasStoryReference = /story:/i.test(body) || /\b[A-Z]{2,}-P\d-\d{3}\b/.test(body);
-const hasVerificationSignal = /Main script passes|Frontend build passes|Java build passes/i.test(body);
+const hasVerificationSignal = /Main script passes|Frontend build passes|Java tests pass|Java build passes/i.test(body);
 const hasUxEvidence = /Playwright|UX Evidence|N\/A/i.test(body);
 
 const failures = [];

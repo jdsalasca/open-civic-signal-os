@@ -33,5 +33,6 @@ No implementation starts without a Story ID and explicit acceptance criteria.
 - `docs/agent/technical-requirements.md`: technical invariants and constraints.
 - `docs/agent/integration-test-matrix.md`: integration test matrix by risk.
 - `docs/agent/security-abuse-checklist.md`: secure-by-default checklist.
+- `docs/agent/playwright-visual-protocol.md`: mandatory Playwright UX audit protocol.
 
 - docs/agent/domain-decision-pack.md: ADR and contract decision governance pack.
