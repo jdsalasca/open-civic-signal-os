@@ -1,0 +1,18 @@
+<svg width="640" height="180" viewBox="0 0 640 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="640" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D1B2A"/>
+      <stop offset="1" stop-color="#1B263B"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="64" y1="36" x2="230" y2="142" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00B4D8"/>
+      <stop offset="1" stop-color="#48CAE4"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="180" rx="24" fill="url(#g1)"/>
+  <circle cx="120" cy="90" r="52" fill="url(#g2)"/>
+  <circle cx="120" cy="90" r="26" fill="#0D1B2A"/>
+  <path d="M120 38V20M120 160V142M68 90H50M190 90H172M82 52L70 40M170 140L158 128M158 52L170 40M70 140L82 128" stroke="#90E0EF" stroke-width="6" stroke-linecap="round"/>
+  <text x="220" y="82" fill="#E0FBFC" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Open Civic Signal OS</text>
+  <text x="220" y="116" fill="#A8DADC" font-family="Segoe UI, Arial, sans-serif" font-size="20">Community voice to auditable public action</text>
+</svg>
