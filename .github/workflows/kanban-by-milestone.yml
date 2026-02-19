@@ -1,0 +1,110 @@
+name: Kanban by Milestone
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled, milestoned, demilestoned]
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  generate-kanban:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build kanban markdown
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "all",
+              per_page: 100
+            });
+
+            const filtered = issues.filter((item) => !item.pull_request);
+
+            const byMilestone = new Map();
+
+            function statusFor(issue) {
+              const labels = issue.labels.map((label) => typeof label === "string" ? label : label.name);
+              if (issue.state === "closed") return "DONE";
+              if (labels.includes("status:in-progress")) return "IN_PROGRESS";
+              if (labels.includes("status:blocked")) return "BLOCKED";
+              if (labels.includes("status:done")) return "DONE";
+              return "TODO";
+            }
+
+            for (const issue of filtered) {
+              const milestone = issue.milestone?.title ?? "No Milestone";
+              if (!byMilestone.has(milestone)) {
+                byMilestone.set(milestone, {
+                  TODO: [],
+                  IN_PROGRESS: [],
+                  BLOCKED: [],
+                  DONE: []
+                });
+              }
+              byMilestone.get(milestone)[statusFor(issue)].push(issue);
+            }
+
+            const milestoneOrder = Array.from(byMilestone.keys()).sort((a, b) => {
+              if (a === "No Milestone") return 1;
+              if (b === "No Milestone") return -1;
+              return a.localeCompare(b);
+            });
+
+            const lines = [];
+            lines.push("# Kanban by Milestone");
+            lines.push("");
+            lines.push(`Last updated: ${new Date().toISOString()}`);
+            lines.push("");
+            lines.push("Status labels used by this board:");
+            lines.push("- `status:todo`");
+            lines.push("- `status:in-progress`");
+            lines.push("- `status:blocked`");
+            lines.push("- `status:done`");
+            lines.push("");
+
+            for (const milestone of milestoneOrder) {
+              const group = byMilestone.get(milestone);
+              lines.push(`## ${milestone}`);
+              lines.push("");
+              lines.push(`- TODO: ${group.TODO.length}`);
+              lines.push(`- IN_PROGRESS: ${group.IN_PROGRESS.length}`);
+              lines.push(`- BLOCKED: ${group.BLOCKED.length}`);
+              lines.push(`- DONE: ${group.DONE.length}`);
+              lines.push("");
+
+              for (const column of ["TODO", "IN_PROGRESS", "BLOCKED", "DONE"]) {
+                lines.push(`### ${column}`);
+                if (group[column].length === 0) {
+                  lines.push("- _No issues_");
+                } else {
+                  for (const item of group[column]) {
+                    lines.push(`- #${item.number} ${item.title}`);
+                  }
+                }
+                lines.push("");
+              }
+            }
+
+            fs.writeFileSync("docs/kanban.md", lines.join("\n"), "utf8");
+
+      - name: Commit changes
+        run: |
+          if [[ -n "$(git status --porcelain docs/kanban.md)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/kanban.md
+            git commit -m "docs: refresh kanban by milestone"
+            git push
+          fi

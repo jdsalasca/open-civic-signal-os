@@ -12,6 +12,14 @@ body { margin: 0; }
   background: radial-gradient(circle at 20% 20%, #1c2541, #0b132b 60%);
 }
 
+.note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(144, 224, 239, 0.4);
+  background: rgba(36, 59, 83, 0.7);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -27,3 +35,31 @@ body { margin: 0; }
 }
 
 .card h2 { margin: 0 0 8px; color: #00b4d8; }
+
+.tableCard {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid rgba(0, 180, 216, 0.3);
+  border-radius: 12px;
+  background: rgba(10, 20, 34, 0.7);
+}
+
+.tableWrap { overflow: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+th, td {
+  border-bottom: 1px solid rgba(168, 218, 220, 0.2);
+  padding: 10px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  color: #90e0ef;
+  font-weight: 700;
+}
