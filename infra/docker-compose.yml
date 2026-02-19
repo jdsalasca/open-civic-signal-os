@@ -1,46 +1,28 @@
-version: "3.9"
 services:
-  db:
-    image: postgres:15-alpine
-    container_name: civic-db
-    environment:
-      POSTGRES_DB: signalos
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - civic-db-data:/var/lib/postgresql/data
-
   api:
-    image: maven:3.9.6-eclipse-temurin-21
-    container_name: civic-api-dev
-    working_dir: /app
+    build:
+      context: ../apps/api-java
+      dockerfile: Dockerfile
+    container_name: civic-api
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/signalos
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=password
-    volumes:
-      - ../apps/api-java:/app
-      - ~/.m2:/root/.m2
+      SERVER_PORT: 8080
     ports:
       - "8081:8080"
-    command: ["mvn", "spring-boot:run"]
-    depends_on:
-      - db
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
 
   web:
-    image: node:20-alpine
-    container_name: civic-web-dev
-    working_dir: /app
-    volumes:
-      - ../apps/web-react:/app
-      - /app/node_modules # avoid local node_modules override
+    build:
+      context: ../apps/web-react
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: civic-web
+    depends_on:
+      api:
+        condition: service_healthy
     ports:
-      - "3002:3002"
-    # Vite HMR uses host 0.0.0.0 and port must match container expose for websocket
-    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3002"]
-
-volumes:
-  civic-db-data:
+      - "3002:80"

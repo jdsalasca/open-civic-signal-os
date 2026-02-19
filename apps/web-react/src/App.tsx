@@ -25,7 +25,8 @@ const fallbackSignals: Signal[] = [
   }
 ];
 
-export function App() {`n  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
+export function App() {
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,4 +180,5 @@ export function App() {`n  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL 
     </main>
   );
 }
+
 
