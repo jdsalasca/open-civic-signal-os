@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T09:00:00.000Z
+Last updated: 2026-02-19T10:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 14
+- DONE: 16
 
 ### TODO
 - _No issues_
@@ -25,6 +25,8 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #21 UX: Modern Glassmorphism Redesign and UI Overhaul
+- #20 QA: Automated Visual Audit with Playwright
 - #19 UI: Dedicated Signal Detail View with full description and breakdown
 - #18 Security: RBAC with PUBLIC_SERVANT and CITIZEN roles
 - #17 DX: Fix production build 'React is not defined' error
