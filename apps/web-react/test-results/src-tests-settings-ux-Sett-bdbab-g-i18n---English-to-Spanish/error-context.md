@@ -1,0 +1,36 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation:
+    - generic:
+      - link "SignalOS":
+        - /url: /
+        - generic: SignalOS
+  - main [ref=e4]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - img [ref=e11]
+        - heading "Access Portal" [level=1] [ref=e14]
+        - paragraph [ref=e15]: Open Civic Signal OS Management
+      - form "Login Form" [ref=e16]:
+        - generic [ref=e17]:
+          - generic [ref=e18]: Username
+          - generic [ref=e19]:
+            - generic [ref=e20]: 
+            - textbox "Username" [ref=e21]:
+              - /placeholder: Enter your username
+              - text: admin
+        - generic [ref=e22]:
+          - generic [ref=e23]: Password
+          - generic [ref=e25]:
+            - textbox "Enter your password" [ref=e26]: admin12345
+            - switch "Show Password" [checked] [ref=e28] [cursor=pointer]
+        - button "Submit Login" [active] [ref=e30] [cursor=pointer]:
+          - generic: 
+          - generic [ref=e31]: Sign In to OS
+        - generic [ref=e32]:
+          - text: Don't have an account?
+          - link "Create one" [ref=e33] [cursor=pointer]:
+            - /url: /register
+```

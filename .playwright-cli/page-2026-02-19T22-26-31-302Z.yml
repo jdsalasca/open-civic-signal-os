@@ -1,0 +1,88 @@
+- generic [ref=e340]:
+  - navigation [ref=e341]:
+    - generic [ref=e342]:
+      - link "SignalOS" [ref=e343] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e345]: SignalOS
+      - generic [ref=e346]:
+        - link "Insights" [ref=e347] [cursor=pointer]:
+          - /url: /
+        - link "Public Report" [ref=e348] [cursor=pointer]:
+          - /url: /report
+        - link "My Contributions" [ref=e349] [cursor=pointer]:
+          - /url: /mine
+        - link "Moderation" [ref=e350] [cursor=pointer]:
+          - /url: /moderation
+    - generic [ref=e351]:
+      - text: 
+      - generic [ref=e352]:
+        - generic [ref=e353]:
+          - generic [ref=e354]: admin
+          - generic [ref=e355]: SUPER_ADMIN
+        - generic [ref=e357]: A
+        - button "Logout" [ref=e358] [cursor=pointer]:
+          - generic: 
+  - main [ref=e359]:
+    - generic [ref=e363]:
+      - generic [ref=e364]: Report Community Signal
+      - generic [ref=e365]:
+        - paragraph [ref=e366]: Your input will be processed by our priority algorithm to optimize civic response.
+        - generic [ref=e367]:
+          - generic [ref=e368]:
+            - generic [ref=e369]: Issue Title
+            - textbox "Issue Title" [ref=e370]:
+              - /placeholder: e.g. Broken water pipe in Main St.
+          - generic [ref=e371]:
+            - generic [ref=e372]: Category
+            - generic [ref=e373] [cursor=pointer]:
+              - generic:
+                - textbox
+              - generic:
+                - combobox:
+                  - option "Select Sector" [selected]
+              - generic [ref=e374]: Select Sector
+              - button "Select Sector" [ref=e375]:
+                - img [ref=e376]
+          - generic [ref=e378]:
+            - generic [ref=e379]: Scale (Estimated Citizens)
+            - generic [ref=e380]:
+              - slider [ref=e383]
+              - generic [ref=e384]: "10"
+          - generic [ref=e385]:
+            - generic [ref=e386]: Intelligence Context (Description)
+            - textbox "Intelligence Context (Description)" [ref=e387]:
+              - /placeholder: Describe the problem, location and observed impact...
+          - generic [ref=e388]:
+            - generic [ref=e389]:
+              - generic [ref=e390]: Urgency Factor
+              - generic [ref=e391]: "Score: 1-5"
+            - generic [ref=e392]:
+              - slider [ref=e395]
+              - generic [ref=e396]:
+                - generic [ref=e397]: LOW
+                - generic [ref=e398]: "3"
+                - generic [ref=e399]: CRITICAL
+          - generic [ref=e400]:
+            - generic [ref=e401]:
+              - generic [ref=e402]: Social Impact
+              - generic [ref=e403]: "Score: 1-5"
+            - generic [ref=e404]:
+              - slider [ref=e407]
+              - generic [ref=e408]:
+                - generic [ref=e409]: MINOR
+                - generic [ref=e410]: "3"
+                - generic [ref=e411]: SYSTEMIC
+          - generic [ref=e412]:
+            - button "Discard" [ref=e413] [cursor=pointer]:
+              - generic [ref=e414]: Discard
+            - button "Ingest Signal" [ref=e415] [cursor=pointer]:
+              - generic: 
+              - generic [ref=e416]: Ingest Signal
+  - contentinfo [ref=e417]:
+    - generic [ref=e418]:
+      - generic [ref=e419]: 
+      - generic [ref=e420]: Global Governance Standard
+    - generic [ref=e421]: © 2026 Open Civic Signal OS. Protocol v0.2.8-beta
+    - generic [ref=e422]:
+      - generic [ref=e423] [cursor=pointer]: 
+      - generic [ref=e424] [cursor=pointer]: 

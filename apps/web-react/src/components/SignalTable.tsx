@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { DataTable, DataTableFilterMeta } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Tag } from "primereact/tag";
@@ -14,6 +14,11 @@ type Props = {
   loading: boolean;
 };
 
+interface SkeletonRow {
+  _skeleton: boolean;
+  id?: string;
+}
+
 export function SignalTable({ signals, loading }: Props) {
   const navigate = useNavigate();
   const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -22,17 +27,23 @@ export function SignalTable({ signals, loading }: Props) {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
+  const tableData = useMemo<(Signal | SkeletonRow)[]>(() => {
+    if (loading) {
+      return new Array(6).fill(null).map((_, i) => ({ _skeleton: true, id: `sk-${i}` }));
+    }
+    return signals;
+  }, [signals, loading]);
+
   const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const _filters = { ...filters };
-    (_filters["global"] as any).value = value;
-
+    (_filters["global"] as { value: string | null; matchMode: FilterMatchMode }).value = value;
     setFilters(_filters);
     setGlobalFilterValue(value);
   };
 
-  const statusTemplate = (rowData: Signal) => {
-    if (loading) return <Skeleton width="4rem" height="1.5rem" />;
+  const statusTemplate = (rowData: Signal | SkeletonRow) => {
+    if ('_skeleton' in rowData) return <Skeleton width="4rem" height="1.5rem" />;
     const severity = rowData.status === "NEW" ? "info" : 
                     rowData.status === "IN_PROGRESS" ? "warning" : "success";
     return (
@@ -43,34 +54,34 @@ export function SignalTable({ signals, loading }: Props) {
     );
   };
 
-  const scoreTemplate = (rowData: Signal) => {
-    if (loading) return <Skeleton width="2rem" />;
+  const scoreTemplate = (rowData: Signal | SkeletonRow) => {
+    if ('_skeleton' in rowData) return <Skeleton width="2rem" />;
     return (
-      <div className="flex align-items-center gap-3">
-        <span className="font-black text-cyan-400 text-lg glow-cyan" style={{ minWidth: '35px' }}>{rowData.priorityScore.toFixed(0)}</span>
+      <div className="flex align-items-center gap-3" role="group" aria-label={`Priority Score: ${rowData.priorityScore?.toFixed(0)}`}>
+        <span className="font-black text-cyan-400 text-lg glow-cyan" style={{ minWidth: '35px' }}>{rowData.priorityScore?.toFixed(0)}</span>
         <div className="hidden xl:flex flex-column gap-1 flex-grow-1" style={{ maxWidth: '60px' }}>
            <div className="bg-gray-800 border-round overflow-hidden shadow-inner" style={{ height: '6px' }}>
-              <div className="bg-cyan-500 h-full shadow-2" style={{ width: `${Math.min((rowData.priorityScore / 350) * 100, 100)}%` }}></div>
+              <div className="bg-cyan-500 h-full shadow-2" style={{ width: `${Math.min(((rowData.priorityScore || 0) / 350) * 100, 100)}%` }}></div>
            </div>
         </div>
       </div>
     );
   };
 
-  const titleTemplate = (s: Signal) => {
-    if (loading) return (
+  const titleTemplate = (rowData: Signal | SkeletonRow) => {
+    if ('_skeleton' in rowData) return (
       <div className="flex flex-column gap-2">
         <Skeleton width="10rem" />
         <Skeleton width="6rem" height="0.5rem" />
       </div>
     );
     return (
-      <div className="flex flex-column py-1 overflow-hidden" data-testid={`signal-title-${s.id.substring(0,8)}`}>
+      <div className="flex flex-column py-1 overflow-hidden" data-testid={`signal-title-${rowData.id?.substring(0,8)}`}>
         <span className="font-bold text-white text-base mb-1 hover:text-cyan-400 transition-colors text-overflow-ellipsis overflow-hidden white-space-nowrap">
-          {s.title}
+          {rowData.title}
         </span>
         <div className="flex align-items-center gap-2">
-          <span className="text-xs text-gray-500 font-mono font-bold uppercase tracking-widest">REF: {s.id.substring(0,8)}</span>
+          <span className="text-xs text-gray-600 font-mono font-bold uppercase tracking-widest">REF: {rowData.id?.substring(0,8)}</span>
         </div>
       </div>
     );
@@ -111,6 +122,7 @@ export function SignalTable({ signals, loading }: Props) {
         className="p-button-primary border-none px-6 py-3 shadow-6" 
         onClick={() => navigate("/report")} 
         data-testid="empty-state-report-button"
+        aria-label="Report a new civic issue"
       />
     </div>
   );
@@ -118,30 +130,36 @@ export function SignalTable({ signals, loading }: Props) {
   return (
     <div className="animate-fade-in surface-section border-round-xl border-1 border-white-alpha-10 shadow-8 overflow-hidden">
       <DataTable 
-        value={loading ? (new Array(6).fill({})) : signals} 
+        value={tableData} 
         paginator 
         rows={10} 
         filters={filters}
         globalFilterFields={["title", "category", "status"]}
         header={header}
-        dataKey="id"
-        onRowClick={(e) => !loading && navigate(`/signal/${e.data.id}`)}
-        rowClassName={() => loading ? '' : 'cursor-pointer transition-colors'}
-        emptyMessage={emptyTemplate}
+        dataKey="id" // P1-C: Use stable 'id' (including skeleton IDs)
+        onRowClick={(e) => {
+          const row = e.data as Signal | SkeletonRow;
+          if (!loading && !('_skeleton' in row)) {
+            navigate(`/signal/${row.id}`);
+          }
+        }}
+        rowClassName={(d) => (loading || ('_skeleton' in (d as object))) ? '' : 'cursor-pointer transition-colors'}
+        emptyMessage={loading ? null : emptyTemplate}
         className="p-datatable-sm"
         sortField="priorityScore"
         sortOrder={-1}
         removableSort
         tableStyle={{ minWidth: '50rem' }}
         data-testid="signals-datatable"
+        aria-label="Civic Signals Data Table"
       >
         <Column header="Civic Need" body={titleTemplate} sortable sortField="title" />
-        <Column field="category" header="Category" sortable body={(s) => loading ? <Skeleton width="4rem" /> : (
-          <span className="text-xs font-black text-gray-400 uppercase tracking-widest bg-white-alpha-5 px-3 py-1 border-round-lg border-1 border-white-alpha-10">{s.category}</span>
+        <Column field="category" header="Category" sortable body={(s) => (loading || ('_skeleton' in (s as object))) ? <Skeleton width="4rem" /> : (
+          <span className="text-xs font-black text-gray-400 uppercase tracking-widest bg-white-alpha-5 px-3 py-1 border-round-lg border-1 border-white-alpha-10">{(s as Signal).category}</span>
         )} />
         <Column header="Status" sortable sortField="status" body={statusTemplate} style={{ width: '10rem' }} />
         <Column header="Intelligence Rank" sortable sortField="priorityScore" body={scoreTemplate} style={{ width: '12rem' }} />
-        <Column body={() => !loading && <i className="pi pi-arrow-up-right text-gray-600 hover:text-cyan-400 transition-colors" />} style={{ width: '3rem' }} />
+        <Column body={(d) => (!loading && !('_skeleton' in (d as object))) && <i className="pi pi-arrow-up-right text-gray-600 hover:text-cyan-400 transition-colors" />} style={{ width: '3rem' }} aria-label="View Details" />
       </DataTable>
     </div>
   );

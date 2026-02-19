@@ -1,0 +1,98 @@
+- generic [ref=e4]:
+  - status [ref=e825]: Lifecycle updated to IN_PROGRESS
+  - generic [ref=e723]:
+    - navigation [ref=e724]:
+      - generic [ref=e725]:
+        - link "SignalOS" [ref=e726] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e728]: SignalOS
+        - generic [ref=e729]:
+          - link "Insights" [ref=e730] [cursor=pointer]:
+            - /url: /
+          - link "Public Report" [ref=e731] [cursor=pointer]:
+            - /url: /report
+          - link "My Contributions" [ref=e732] [cursor=pointer]:
+            - /url: /mine
+          - link "Moderation" [ref=e733] [cursor=pointer]:
+            - /url: /moderation
+      - generic [ref=e734]:
+        - text: 
+        - generic [ref=e735]:
+          - generic [ref=e736]:
+            - generic [ref=e737]: admin
+            - generic [ref=e738]: SUPER_ADMIN
+          - generic [ref=e740]: A
+          - button "Logout" [ref=e741] [cursor=pointer]:
+            - generic: 
+    - main [ref=e742]:
+      - generic [ref=e744]:
+        - generic [ref=e826]:
+          - generic [ref=e827]:
+            - button "Back to dashboard" [ref=e828] [cursor=pointer]:
+              - generic: 
+            - generic [ref=e829]:
+              - generic [ref=e830]:
+                - generic [ref=e832]: IN_PROGRESS
+                - generic [ref=e833]: "SIGNAL REF: eba68591"
+              - heading "Unsafe crossing near school" [level=1] [ref=e834]
+          - button "Support this civic issue" [ref=e835] [cursor=pointer]:
+            - generic: 
+            - generic [ref=e836]: Support this Issue
+        - generic [ref=e837]:
+          - generic [ref=e838]:
+            - generic [ref=e841]:
+              - heading "Problem Definition" [level=3] [ref=e842]
+              - paragraph [ref=e843]: The zebra crossing is not visible
+              - separator
+              - generic [ref=e844]:
+                - generic [ref=e845]:
+                  - generic [ref=e847]: 
+                  - generic [ref=e848]:
+                    - generic [ref=e849]: Affected Estimation
+                    - generic [ref=e850]: 300 Citizens
+                - generic [ref=e851]:
+                  - generic [ref=e853]: 
+                  - generic [ref=e854]:
+                    - generic [ref=e855]: Civic Category
+                    - generic [ref=e856]: safety
+            - generic [ref=e858]:
+              - generic [ref=e859]: Lifecycle Administration
+              - generic [ref=e861]:
+                - button "Reset to NEW" [ref=e862] [cursor=pointer]:
+                  - generic [ref=e863]: Reset to NEW
+                - button "Mark IN PROGRESS" [disabled]:
+                  - generic: 
+                  - generic: Mark IN PROGRESS
+                - button "Mark RESOLVED" [ref=e864] [cursor=pointer]:
+                  - generic: 
+                  - generic [ref=e865]: Mark RESOLVED
+          - generic [ref=e867]:
+            - generic [ref=e869]: Intelligence Index
+            - generic [ref=e871]:
+              - generic [ref=e872]: "320"
+              - paragraph [ref=e873]: Priority Rank
+              - separator
+              - list "Score breakdown details" [ref=e874]:
+                - listitem [ref=e875]:
+                  - generic [ref=e876]:
+                    - generic [ref=e877]: Urgency Factor
+                    - generic [ref=e878]: 150 / 150
+                  - progressbar [ref=e879]
+                - listitem [ref=e881]:
+                  - generic [ref=e882]:
+                    - generic [ref=e883]: Social Impact
+                    - generic [ref=e884]: 125 / 125
+                  - progressbar [ref=e885]
+                - listitem [ref=e887]:
+                  - generic [ref=e888]:
+                    - generic [ref=e889]: Community Trust
+                    - generic [ref=e890]: 15 / 15
+                  - progressbar [ref=e891]
+    - contentinfo [ref=e812]:
+      - generic [ref=e813]:
+        - generic [ref=e814]: 
+        - generic [ref=e815]: Global Governance Standard
+      - generic [ref=e816]: © 2026 Open Civic Signal OS. Protocol v0.2.8-beta
+      - generic [ref=e817]:
+        - generic [ref=e818] [cursor=pointer]: 
+        - generic [ref=e819] [cursor=pointer]: 

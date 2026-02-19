@@ -4,10 +4,12 @@ import { UserRole } from '../types';
 
 interface AuthState {
   accessToken: string | null;
-  user: string | null;
-  role: UserRole;
-  isLoggedIn: boolean; // UX-P0-02: Consistent field for UI consumption
-  setAuth: (data: { accessToken: string; user: string; role: string }) => void;
+  userName: string | null;
+  activeRole: UserRole; // Current active role for UI and Permissions
+  rawRoles: string[];   // All authorized roles from BE
+  isLoggedIn: boolean;
+  setAuth: (data: { accessToken: string; username: string; roles: string }) => void;
+  switchRole: (role: string) => void;
   logout: () => void;
   updateAccessToken: (token: string) => void;
   isHydrated: boolean;
@@ -18,18 +20,24 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       accessToken: null,
-      user: null,
-      role: 'GUEST',
+      userName: null,
+      activeRole: 'GUEST',
+      rawRoles: [],
       isLoggedIn: false,
       isHydrated: false,
-      setAuth: (data) => set({
-        accessToken: data.accessToken,
-        user: data.user,
-        role: (data.role.replace('ROLE_', '') as UserRole),
-        isLoggedIn: true
-      }),
+      setAuth: (data) => {
+        const roles = data.roles.split(',').map(r => r.replace('ROLE_', '') as UserRole);
+        set({
+          accessToken: data.accessToken,
+          userName: data.username,
+          activeRole: roles[0], // Default to first role
+          rawRoles: roles,
+          isLoggedIn: true
+        });
+      },
+      switchRole: (role) => set({ activeRole: role as UserRole }),
       logout: () => {
-        set({ accessToken: null, user: null, role: 'GUEST', isLoggedIn: false });
+        set({ accessToken: null, userName: null, activeRole: 'GUEST', rawRoles: [], isLoggedIn: false });
         localStorage.removeItem('auth-storage');
       },
       updateAccessToken: (token) => set({ 

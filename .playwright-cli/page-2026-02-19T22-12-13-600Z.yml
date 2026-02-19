@@ -1,0 +1,38 @@
+- generic [ref=e3]:
+  - navigation:
+    - generic:
+      - link "SignalOS":
+        - /url: /
+        - generic: SignalOS
+  - main [ref=e4]:
+    - generic [ref=e8]:
+      - generic [ref=e10]: Join Signal OS
+      - generic [ref=e12]: Create your citizen account
+      - form "Registration Form" [ref=e14]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: 
+          - textbox "Username" [ref=e18]
+          - generic: Username
+        - generic [ref=e20]:
+          - generic [ref=e21]: 
+          - textbox "Email Address" [ref=e22]
+          - generic: Email Address
+        - generic [ref=e24]:
+          - generic [ref=e26]:
+            - textbox [ref=e27]
+            - switch "Show Password" [checked] [ref=e29] [cursor=pointer]
+          - generic: Password
+        - generic [ref=e31]:
+          - generic [ref=e32]: 
+          - generic [ref=e33]: "Default Security Clearance: Citizen"
+        - button "Submit Registration" [ref=e34] [cursor=pointer]:
+          - generic [ref=e35]: Create Account
+        - paragraph [ref=e36]: Already a member? Sign in here
+  - contentinfo:
+    - generic:
+      - generic: 
+      - generic: Global Governance Standard
+    - generic: © 2026 Open Civic Signal OS. Protocol v0.2.8-beta
+    - generic:
+      - generic: 
+      - generic: 

@@ -1,0 +1,240 @@
+- generic [ref=e425]:
+  - navigation [ref=e426]:
+    - generic [ref=e427]:
+      - link "SignalOS" [ref=e428] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e430]: SignalOS
+      - generic [ref=e431]:
+        - link "Insights" [ref=e432] [cursor=pointer]:
+          - /url: /
+        - link "Public Report" [ref=e433] [cursor=pointer]:
+          - /url: /report
+        - link "My Contributions" [ref=e434] [cursor=pointer]:
+          - /url: /mine
+        - link "Moderation" [ref=e435] [cursor=pointer]:
+          - /url: /moderation
+    - generic [ref=e436]:
+      - text: 
+      - generic [ref=e437]:
+        - generic [ref=e438]:
+          - generic [ref=e439]: admin
+          - generic [ref=e440]: SUPER_ADMIN
+        - generic [ref=e442]: A
+        - button "Logout" [ref=e443] [cursor=pointer]:
+          - generic: 
+  - main [ref=e444]:
+    - generic [ref=e445]:
+      - generic [ref=e446]:
+        - generic [ref=e447]:
+          - generic [ref=e448]:
+            - generic [ref=e449]: Live Intelligence
+            - generic [ref=e450]: •
+            - generic [ref=e451]: Welcome back, admin
+          - heading "Governance Insights" [level=1] [ref=e452]
+          - paragraph [ref=e453]: Real-time community signal prioritization and resolution lifecycle tracking.
+        - generic [ref=e454]:
+          - button "Send Top 10 Broadcast" [ref=e455] [cursor=pointer]:
+            - generic: 
+            - generic [ref=e456]: Weekly Broadcast
+          - button "Create New Civic Signal" [ref=e457] [cursor=pointer]:
+            - generic: 
+            - generic [ref=e458]: Report New Issue
+      - region "Civic Metrics Overview" [ref=e459]:
+        - 'article "Total Signals: 5" [ref=e461]':
+          - generic [ref=e464]:
+            - generic [ref=e465]:
+              - generic [ref=e466]: Total Signals
+              - generic [ref=e467]: "5"
+            - generic [ref=e469]: 
+        - 'article "Newly Reported: 4" [ref=e471]':
+          - generic [ref=e474]:
+            - generic [ref=e475]:
+              - generic [ref=e476]: Newly Reported
+              - generic [ref=e477]: "4"
+            - generic [ref=e479]: 
+        - 'article "Under Analysis: 0" [ref=e481]':
+          - generic [ref=e484]:
+            - generic [ref=e485]:
+              - generic [ref=e486]: Under Analysis
+              - generic [ref=e487]: "0"
+            - generic [ref=e489]: 
+        - 'article "Priority Avg: 241.4" [ref=e491]':
+          - generic [ref=e494]:
+            - generic [ref=e495]:
+              - generic [ref=e496]: Priority Avg
+              - generic [ref=e497]: "241.4"
+            - generic [ref=e499]: 
+      - generic [ref=e500]:
+        - generic "Civic Signals Data Table" [ref=e503]:
+          - generic [ref=e505]:
+            - generic [ref=e506]:
+              - generic [ref=e507]: 
+              - heading "Prioritized Feed" [level=2] [ref=e508]
+            - generic [ref=e509]:
+              - generic [ref=e510]: 
+              - textbox "Search signals in table" [ref=e511]:
+                - /placeholder: Search signals...
+          - table [ref=e513]:
+            - rowgroup [ref=e514]:
+              - row "Civic Need Category Status Intelligence Rank" [ref=e515]:
+                - columnheader "Civic Need" [ref=e516] [cursor=pointer]:
+                  - generic [ref=e517]:
+                    - generic [ref=e518]: Civic Need
+                    - img [ref=e520]
+                - columnheader "Category" [ref=e525] [cursor=pointer]:
+                  - generic [ref=e526]:
+                    - generic [ref=e527]: Category
+                    - img [ref=e529]
+                - columnheader "Status" [ref=e534] [cursor=pointer]:
+                  - generic [ref=e535]:
+                    - generic [ref=e536]: Status
+                    - img [ref=e538]
+                - columnheader "Intelligence Rank" [ref=e543] [cursor=pointer]:
+                  - generic [ref=e544]:
+                    - generic [ref=e545]: Intelligence Rank
+                    - img [ref=e547]
+                - columnheader [ref=e549]
+            - rowgroup [ref=e550]:
+              - 'row "Unsafe crossing near school REF: eba68591 safety NEW Priority Score: 320 " [ref=e551] [cursor=pointer]':
+                - 'cell "Unsafe crossing near school REF: eba68591" [ref=e552]':
+                  - generic [ref=e553]:
+                    - generic [ref=e554]: Unsafe crossing near school
+                    - generic [ref=e556]: "REF: eba68591"
+                - cell "safety" [ref=e557]
+                - cell "NEW" [ref=e558]:
+                  - generic [ref=e561]: NEW
+                - 'cell "Priority Score: 320" [ref=e562]':
+                  - 'group "Priority Score: 320" [ref=e563]':
+                    - generic [ref=e564]: "320"
+                - cell "" [ref=e568]:
+                  - generic [ref=e569]: 
+              - 'row "Broken Street Lamp REF: e35b96dd infrastructure NEW Priority Score: 295 " [ref=e570] [cursor=pointer]':
+                - 'cell "Broken Street Lamp REF: e35b96dd" [ref=e571]':
+                  - generic [ref=e572]:
+                    - generic [ref=e573]: Broken Street Lamp
+                    - generic [ref=e575]: "REF: e35b96dd"
+                - cell "infrastructure" [ref=e576]
+                - cell "NEW" [ref=e577]:
+                  - generic [ref=e580]: NEW
+                - 'cell "Priority Score: 295" [ref=e581]':
+                  - 'group "Priority Score: 295" [ref=e582]':
+                    - generic [ref=e583]: "295"
+                - cell "" [ref=e587]:
+                  - generic [ref=e588]: 
+              - 'row "Pothole in Main Ave REF: 94570b6f infrastructure RESOLVED Priority Score: 260 " [ref=e589] [cursor=pointer]':
+                - 'cell "Pothole in Main Ave REF: 94570b6f" [ref=e590]':
+                  - generic [ref=e591]:
+                    - generic [ref=e592]: Pothole in Main Ave
+                    - generic [ref=e594]: "REF: 94570b6f"
+                - cell "infrastructure" [ref=e595]
+                - cell "RESOLVED" [ref=e596]:
+                  - generic [ref=e599]: RESOLVED
+                - 'cell "Priority Score: 260" [ref=e600]':
+                  - 'group "Priority Score: 260" [ref=e601]':
+                    - generic [ref=e602]: "260"
+                - cell "" [ref=e606]:
+                  - generic [ref=e607]: 
+              - 'row "Test Signal REF: 624d311b infrastructure NEW Priority Score: 166 " [ref=e608] [cursor=pointer]':
+                - 'cell "Test Signal REF: 624d311b" [ref=e609]':
+                  - generic [ref=e610]:
+                    - generic [ref=e611]: Test Signal
+                    - generic [ref=e613]: "REF: 624d311b"
+                - cell "infrastructure" [ref=e614]
+                - cell "NEW" [ref=e615]:
+                  - generic [ref=e618]: NEW
+                - 'cell "Priority Score: 166" [ref=e619]':
+                  - 'group "Priority Score: 166" [ref=e620]':
+                    - generic [ref=e621]: "166"
+                - cell "" [ref=e625]:
+                  - generic [ref=e626]: 
+              - 'row "QA Debug Signal debug_user_1771537707382 REF: 2db04c01 infrastructure NEW Priority Score: 166 " [ref=e627] [cursor=pointer]':
+                - 'cell "QA Debug Signal debug_user_1771537707382 REF: 2db04c01" [ref=e628]':
+                  - generic [ref=e629]:
+                    - generic [ref=e630]: QA Debug Signal debug_user_1771537707382
+                    - generic [ref=e632]: "REF: 2db04c01"
+                - cell "infrastructure" [ref=e633]
+                - cell "NEW" [ref=e634]:
+                  - generic [ref=e637]: NEW
+                - 'cell "Priority Score: 166" [ref=e638]':
+                  - 'group "Priority Score: 166" [ref=e639]':
+                    - generic [ref=e640]: "166"
+                - cell "" [ref=e644]:
+                  - generic [ref=e645]: 
+          - generic [ref=e646]:
+            - button "First Page" [disabled]:
+              - img
+            - button "Previous Page" [disabled]:
+              - img
+            - button "Page 1" [ref=e648] [cursor=pointer]: "1"
+            - button "Next Page" [disabled]:
+              - img
+            - button "Last Page" [disabled]:
+              - img
+        - generic [ref=e650]:
+          - generic [ref=e652]:
+            - generic [ref=e653]: Signal Distribution
+            - img [ref=e656]
+          - generic [ref=e657]:
+            - generic [ref=e659]:
+              - heading " CRITICAL NEEDS" [level=2] [ref=e660]:
+                - generic [ref=e661]: 
+                - text: CRITICAL NEEDS
+              - paragraph [ref=e662]: Unresolved community top
+            - generic [ref=e665]:
+              - generic [ref=e666]:
+                - generic [ref=e667] [cursor=pointer]:
+                  - generic [ref=e668]: "01"
+                  - generic [ref=e669]:
+                    - generic [ref=e670]: Unsafe crossing near school
+                    - generic [ref=e671]: safety
+                - separator
+              - generic [ref=e672]:
+                - generic [ref=e673] [cursor=pointer]:
+                  - generic [ref=e674]: "02"
+                  - generic [ref=e675]:
+                    - generic [ref=e676]: Broken Street Lamp
+                    - generic [ref=e677]: infrastructure
+                - separator
+              - generic [ref=e678]:
+                - generic [ref=e679] [cursor=pointer]:
+                  - generic [ref=e680]: "03"
+                  - generic [ref=e681]:
+                    - generic [ref=e682]: Test Signal
+                    - generic [ref=e683]: infrastructure
+                - separator
+              - generic [ref=e685] [cursor=pointer]:
+                - generic [ref=e686]: "04"
+                - generic [ref=e687]:
+                  - generic [ref=e688]: QA Debug Signal debug_user_1771537707382
+                  - generic [ref=e689]: infrastructure
+          - generic [ref=e690]:
+            - generic [ref=e692]:
+              - heading " RECENT BROADCASTS" [level=2] [ref=e693]:
+                - generic [ref=e694]: 
+                - text: RECENT BROADCASTS
+              - paragraph [ref=e695]: Administrative alerts history
+            - generic [ref=e698]:
+              - generic [ref=e699]:
+                - generic [ref=e700]:
+                  - generic [ref=e701]: EMAIL
+                  - generic [ref=e702]: 21:48
+                - paragraph [ref=e703]: "\"Top unresolved community issues: [safety] Unsafe c...\""
+                - generic [ref=e704]:
+                  - generic [ref=e705]: 
+                  - generic [ref=e706]: ALL_STAFF
+              - generic [ref=e707]:
+                - generic [ref=e708]:
+                  - generic [ref=e709]: EMAIL
+                  - generic [ref=e710]: 21:47
+                - paragraph [ref=e711]: "\"Top unresolved community issues: [infrastructure] ...\""
+                - generic [ref=e712]:
+                  - generic [ref=e713]: 
+                  - generic [ref=e714]: ALL_STAFF
+  - contentinfo [ref=e715]:
+    - generic [ref=e716]:
+      - generic [ref=e717]: 
+      - generic [ref=e718]: Global Governance Standard
+    - generic [ref=e719]: © 2026 Open Civic Signal OS. Protocol v0.2.8-beta
+    - generic [ref=e720]:
+      - generic [ref=e721] [cursor=pointer]: 
+      - generic [ref=e722] [cursor=pointer]: 

@@ -16,17 +16,14 @@ public interface PrioritizationService {
     Optional<Signal> getSignalById(UUID id);
     double calculateScore(Signal signal);
     ScoreBreakdown getBreakdown(Signal signal);
-    
-    // Duplicate & Abuse detection
     Map<UUID, List<Signal>> findDuplicates();
     Signal mergeSignals(UUID targetId, List<UUID> duplicateIds);
-    List<Signal> getFlaggedSignals();
-    Signal moderateSignal(UUID id, String action, String reason);
     
-    // Persistence & Updates
+    // P1-B: Paginated access to moderation queue
+    Page<Signal> getFlaggedSignals(Pageable pageable);
+    
+    Signal moderateSignal(UUID id, String action, String reason);
     Signal saveSignal(Signal signal);
     Optional<Signal> updateStatus(UUID id, String newStatus);
-    
-    // Voting
     Signal voteForSignal(UUID signalId, String username);
 }

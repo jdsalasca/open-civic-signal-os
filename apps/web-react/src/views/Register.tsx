@@ -9,6 +9,10 @@ import { classNames } from "primereact/utils";
 import { Layout } from "../components/Layout";
 import apiClient from "../api/axios";
 
+interface ApiError extends Error {
+  friendlyMessage?: string;
+}
+
 type RegisterForm = {
   username: string;
   email: string;
@@ -29,8 +33,9 @@ export function Register() {
         toast.success("Account created! You can now log in.");
         navigate("/login");
       }
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Registration failed. Please check your data.");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Registration failed. Please check your data.");
     }
   };
 
@@ -52,6 +57,7 @@ export function Register() {
                     <InputText 
                       id="username" 
                       {...field} 
+                      autoComplete="username" // FE-4: Added autocomplete
                       className={classNames('py-3 pl-5', { 'p-invalid': fieldState.error })} 
                       data-testid="register-username-input"
                     />
@@ -70,6 +76,7 @@ export function Register() {
                     <InputText 
                       id="email" 
                       {...field} 
+                      autoComplete="email" // FE-4: Added autocomplete
                       className={classNames('py-3 pl-5', { 'p-invalid': fieldState.error })} 
                       data-testid="register-email-input"
                     />
@@ -89,6 +96,7 @@ export function Register() {
                       {...field} 
                       toggleMask 
                       inputId="password-input" 
+                      autoComplete="new-password" // FE-4: Added autocomplete
                       inputClassName="py-3" 
                       className={classNames('w-full', { 'p-invalid': fieldState.error })} 
                       data-testid="register-password-input"

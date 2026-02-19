@@ -10,6 +10,8 @@ import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.repository.VoteRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class PrioritizationServiceImpl implements PrioritizationService {
 
+    private static final Logger log = LoggerFactory.getLogger(PrioritizationServiceImpl.class);
     private final SignalRepository signalRepository;
     private final VoteRepository voteRepository;
     private final UserRepository userRepository;
@@ -71,9 +74,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Map<UUID, List<Signal>> findDuplicates() {
-        // BE-P1-07: Optimized deduplication. 
-        // In a production environment, this would be a background job using database fuzzy indexes.
-        // For now, we limit the search window to the most recent unresolved signals to avoid O(n2) on full table.
+        log.info("Starting optimized deduplication search window (last 100 signals)");
         List<Signal> signals = signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, 100));
         Map<UUID, List<Signal>> duplicateMap = new HashMap<>();
         Set<UUID> processed = new HashSet<>();
@@ -124,6 +125,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     @Transactional
     public Signal mergeSignals(UUID targetId, List<UUID> duplicateIds) {
+        log.info("Merging {} signals into target: {}", duplicateIds.size(), targetId);
         if (duplicateIds.contains(targetId)) {
             throw new ConflictException("Target signal cannot be part of its own duplicates list.");
         }
@@ -145,16 +147,16 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     }
 
     @Override
-    public List<Signal> getFlaggedSignals() {
-        return signalRepository.findAll().stream()
-                .filter(s -> "FLAGGED".equals(s.getStatus()))
-                .map(s -> s.withScore(calculateScore(s), getBreakdown(s)))
-                .collect(Collectors.toList());
+    public Page<Signal> getFlaggedSignals(Pageable pageable) {
+        // P1-B: Paginated DB-level query
+        return signalRepository.findByStatus("FLAGGED", pageable)
+                .map(s -> s.withScore(calculateScore(s), getBreakdown(s)));
     }
 
     @Override
     @Transactional
     public Signal moderateSignal(UUID id, String action, String reason) {
+        log.info("Moderating signal {}. Action: {}, Reason: {}", id, action, reason);
         Signal signal = signalRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Signal not found for moderation: " + id));
         
@@ -170,6 +172,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     public Signal saveSignal(Signal signal) {
         if (signal.getUrgency() == 5 && signal.getAffectedPeople() < 5) {
+            log.warn("Auto-flagging signal due to high urgency/low impact ratio: {}", signal.getTitle());
             signal.setStatus(SignalStatus.FLAGGED.name());
             signal.setModerationReason("Suspicious high urgency for very low population. Auto-flagged for review.");
         }
@@ -179,17 +182,20 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus) {
-        return signalRepository.findById(id).map(signal -> {
-            SignalStatus current = SignalStatus.valueOf(signal.getStatus());
-            SignalStatus target = SignalStatus.valueOf(newStatus);
-            
-            if (!current.canTransitionTo(target)) {
-                throw new ConflictException("Invalid status transition from " + current + " to " + target);
-            }
-            
-            signal.setStatus(target.name());
-            return signalRepository.save(signal);
-        });
+        log.info("Updating status for signal {}. Target: {}", id, newStatus);
+        Signal signal = signalRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Signal with ID " + id + " not found."));
+
+        SignalStatus current = SignalStatus.valueOf(signal.getStatus());
+        SignalStatus target = SignalStatus.valueOf(newStatus);
+        
+        if (!current.canTransitionTo(target)) {
+            log.error("Invalid status transition rejected: {} -> {}", current, target);
+            throw new ConflictException("Invalid status transition from " + current + " to " + target);
+        }
+        
+        signal.setStatus(target.name());
+        return Optional.of(signalRepository.save(signal));
     }
 
     @Override

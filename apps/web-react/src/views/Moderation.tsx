@@ -1,29 +1,31 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { Signal } from "../types";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { InputTextarea } from "primereact/inputtextarea";
+import { Card } from "primereact/card";
+import { Tag } from "primereact/tag";
 import { Layout } from "../components/Layout";
-import { Signal } from "../types";
 import apiClient from "../api/axios";
+
+interface ApiError extends Error {
+  friendlyMessage?: string;
+}
 
 export function Moderation() {
   const [flagged, setFlagged] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSignal, setSelectedSignal] = useState<Signal | null>(null);
-  const [moderationAction, setModerationAction] = useState<"APPROVE" | "REJECT" | null>(null);
-  const [reason, setReason] = useState("");
 
   const loadFlagged = async () => {
     try {
       setLoading(true);
-      // UX-001: Standardized path
       const res = await apiClient.get("signals/flagged");
-      setFlagged(res.data);
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Failed to load queue.");
+      // P1-B: Handle paginated response structure
+      setFlagged(res.data.content || []);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Failed to load moderation queue.");
     } finally {
       setLoading(false);
     }
@@ -33,83 +35,39 @@ export function Moderation() {
     loadFlagged();
   }, []);
 
-  const handleModerate = async () => {
-    if (!selectedSignal || !moderationAction) return;
+  const handleAction = async (id: string, action: 'APPROVE' | 'REJECT') => {
     try {
-      // UX-001: Standardized path
-      await apiClient.post(`signals/${selectedSignal.id}/moderate`, {
-        action: moderationAction,
-        reason
+      await apiClient.post(`signals/${id}/moderate`, {
+        action,
+        reason: action === 'APPROVE' ? 'Manually reviewed and approved.' : 'Rejected due to community guidelines violation.'
       });
-      toast.success(`Signal ${moderationAction === 'APPROVE' ? 'approved' : 'rejected'}`);
-      setSelectedSignal(null);
-      setReason("");
+      toast.success(`Signal ${action.toLowerCase()}d successfully.`);
       loadFlagged();
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Moderation failed.");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Moderation action failed.");
     }
-  };
-
-  const actionTemplate = (rowData: Signal) => {
-    return (
-      <div className="flex gap-2">
-        <Button 
-          icon="pi pi-check" 
-          severity="success" 
-          rounded 
-          className="bg-green-600 border-none hover:bg-green-500 shadow-2"
-          onClick={() => { setSelectedSignal(rowData); setModerationAction("APPROVE"); }} 
-        />
-        <Button 
-          icon="pi pi-times" 
-          severity="danger" 
-          rounded 
-          className="bg-red-600 border-none hover:bg-red-500 shadow-2"
-          onClick={() => { setSelectedSignal(rowData); setModerationAction("REJECT"); }} 
-        />
-      </div>
-    );
   };
 
   return (
     <Layout>
       <div className="animate-fade-in">
-        <h1 className="text-4xl font-black mb-2">Moderation <span className="text-orange-500">Queue</span></h1>
-        <p className="text-gray-400 mb-5 text-lg font-medium">Review community signals flagged by algorithmic integrity rules.</p>
+        <h1 className="text-4xl font-black mb-2 text-white">Moderation <span className="text-red-500">Queue</span></h1>
+        <p className="text-gray-500 mb-5">Review automatically flagged signals for potential abuse.</p>
 
-        <div className="surface-card border-round-xl border-1 border-white-alpha-10 shadow-8 overflow-hidden">
-          <DataTable value={flagged} loading={loading} emptyMessage={
-            <div className="p-6 text-center text-gray-500 font-bold uppercase tracking-widest">
-              No signals pending review
-            </div>
-          } className="p-datatable-lg">
-            <Column field="title" header="Flagged Signal" body={(s) => (
-              <div className="flex flex-column py-1">
-                <span className="font-bold text-gray-100">{s.title}</span>
-                <span className="text-xs text-gray-500 font-mono uppercase">REF: {s.id.substring(0,8)}</span>
+        <Card className="shadow-8 border-1 border-white-alpha-10 bg-gray-900 overflow-hidden">
+          <DataTable value={flagged} loading={loading} emptyMessage="No signals require attention." className="p-datatable-sm">
+            <Column field="title" header="Suspect Title" body={(s) => <span className="font-bold">{s.title}</span>} />
+            <Column field="category" header="Category" body={(s) => <Tag value={s.category} severity="secondary" />} />
+            <Column field="priorityScore" header="Score" body={(s) => <span className="font-mono text-cyan-400 font-bold">{s.priorityScore?.toFixed(0)}</span>} />
+            <Column header="Actions" body={(s) => (
+              <div className="flex gap-2">
+                <Button icon="pi pi-check" severity="success" size="small" label="Approve" onClick={() => handleAction(s.id, 'APPROVE')} />
+                <Button icon="pi pi-times" severity="danger" size="small" label="Reject" onClick={() => handleAction(s.id, 'REJECT')} />
               </div>
             )} />
-            <Column field="category" header="Category" body={(s) => <span className="text-gray-400 font-bold text-xs uppercase">{s.category}</span>} />
-            <Column header="Priority" body={(s) => <span className="font-bold text-orange-400 text-lg">{s.priorityScore.toFixed(0)}</span>} />
-            <Column header="Moderation Action" body={actionTemplate} style={{ width: '10rem' }} />
           </DataTable>
-        </div>
-
-        <Dialog header={`${moderationAction} Signal`} visible={!!selectedSignal} style={{ width: '100%', maxWidth: '450px' }} onHide={() => setSelectedSignal(null)} footer={
-          <div className="flex gap-2 justify-content-end p-3">
-            <Button label="Cancel" text className="text-gray-400 font-bold" onClick={() => setSelectedSignal(null)} />
-            <Button 
-              label="Execute Action" 
-              className={`p-button-primary font-bold ${moderationAction === 'APPROVE' ? 'bg-green-600' : 'bg-red-600'}`}
-              onClick={handleModerate} 
-            />
-          </div>
-        }>
-          <div className="flex flex-column gap-3 p-2">
-            <p className="m-0 text-gray-300 font-medium">Provide an internal justification for this moderation decision.</p>
-            <InputTextarea value={reason} onChange={(e) => setReason(e.target.value)} rows={5} placeholder="Moderation reasoning..." autoResize className="bg-gray-900 border-gray-800" />
-          </div>
-        </Dialog>
+        </Card>
       </div>
     </Layout>
   );

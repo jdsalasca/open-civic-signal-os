@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- **RBAC Hardening & Testing**: Reinforced Role-Based Access Control at the API level and implemented dedicated integration tests (`SecurityRBAC_IT`) to ensure unauthorized access is blocked. (#43)
+- **Database Schema Validation**: Enforced strict schema validation (`ddl-auto: validate`) using Flyway as the source of truth for database migrations. (#42)
+- **Standardized Logging**: Replaced legacy console outputs with professional SLF4J logging across all backend services for improved observability. (#41)
 - **Build-Time Type Safety**: Integrated `tsc --noEmit` into the frontend build process to ensure zero type errors in production. (#40)
 - **Batch Deduplication**: Refactored the duplicate signal detection to use a rolling window strategy, improving performance for large datasets. (#39)
 - **Typed Domain Exceptions**: Introduced `ResourceNotFoundException`, `ConflictException`, and others for semantic API error responses. (#3)

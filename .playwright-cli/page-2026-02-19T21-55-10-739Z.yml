@@ -1,0 +1,38 @@
+- generic [ref=e364]:
+  - navigation [ref=e365]:
+    - link "SignalOS" [ref=e367] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e369]: SignalOS
+  - main [ref=e370]:
+    - generic [ref=e375]:
+      - generic [ref=e376]:
+        - img [ref=e377]
+        - heading "Access Portal" [level=1] [ref=e380]
+        - paragraph [ref=e381]: Open Civic Signal OS Management
+      - form "Login Form" [ref=e382]:
+        - generic [ref=e383]:
+          - generic [ref=e384]: Username
+          - generic [ref=e385]:
+            - generic [ref=e386]: 
+            - textbox "Username" [active] [ref=e387]:
+              - /placeholder: Enter your username
+        - generic [ref=e388]:
+          - generic [ref=e389]: Password
+          - generic [ref=e391]:
+            - textbox "Enter your password" [ref=e392]
+            - switch "Show Password" [checked] [ref=e394] [cursor=pointer]
+        - button "Submit Login" [ref=e396] [cursor=pointer]:
+          - generic: 
+          - generic [ref=e397]: Sign In to OS
+        - generic [ref=e398]:
+          - text: Don't have an account?
+          - link "Create one" [ref=e399] [cursor=pointer]:
+            - /url: /register
+  - contentinfo [ref=e400]:
+    - generic [ref=e401]:
+      - generic [ref=e402]: 
+      - generic [ref=e403]: Global Governance Standard
+    - generic [ref=e404]: © 2026 Open Civic Signal OS. Protocol v0.2.7-hardened
+    - generic [ref=e405]:
+      - generic [ref=e406] [cursor=pointer]: 
+      - generic [ref=e407] [cursor=pointer]: 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Signal } from "../types";
@@ -11,32 +11,37 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Layout } from "../components/Layout";
 import apiClient from "../api/axios";
 
+interface ApiError extends Error {
+  friendlyMessage?: string;
+}
+
 export function SignalDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { role } = useAuthStore();
+  const { activeRole } = useAuthStore(); // Fixed: use activeRole
   const [signal, setSignal] = useState<Signal | null>(null);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
 
-  const fetchSignal = async () => {
+  const fetchSignal = useCallback(async () => {
     try {
       setLoading(true);
       const res = await apiClient.get(`signals/${id}`);
       if (res.status === 200) {
         setSignal(res.data);
       }
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Signal intelligence data unavailable.");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Signal intelligence data unavailable.");
       navigate("/");
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, navigate]);
 
   useEffect(() => {
     fetchSignal();
-  }, [id]);
+  }, [fetchSignal]);
 
   const updateStatus = async (newStatus: string) => {
     try {
@@ -45,8 +50,9 @@ export function SignalDetail() {
         toast.success(`Lifecycle updated to ${newStatus}`);
         fetchSignal();
       }
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Lifecycle transition failed.");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Lifecycle transition failed.");
     }
   };
 
@@ -58,8 +64,9 @@ export function SignalDetail() {
         toast.success("Community support registered!");
         fetchSignal();
       }
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Vote registration failed.");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Vote registration failed.");
     } finally {
       setVoting(false);
     }
@@ -68,7 +75,7 @@ export function SignalDetail() {
   if (loading) return <Layout><div className="p-6"><ProgressBar mode="indeterminate" style={{ height: '6px' }} /></div></Layout>;
   if (!signal) return null;
 
-  const isStaff = role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN";
+  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
   const getStatusSeverity = (s: string) => {
     if (s === 'NEW') return 'info';
     if (s === 'IN_PROGRESS') return 'warning';
@@ -117,7 +124,7 @@ export function SignalDetail() {
                   </div>
                   <div>
                     <div className="text-xs text-gray-500 uppercase font-black tracking-widest">Affected Estimation</div>
-                    <div className="text-xl font-black text-white" data-testid="affected-people-value">{signal.scoreBreakdown.affectedPeople * 10} Citizens</div>
+                    <div className="text-xl font-black text-white" data-testid="affected-people-value">{(signal.scoreBreakdown?.affectedPeople || 0) * 10} Citizens</div>
                   </div>
                 </div>
                 <div className="col-12 md:col-6 flex align-items-center gap-3 mb-3">
@@ -148,7 +155,7 @@ export function SignalDetail() {
               <div className="pt-4 px-4"><span className="text-xs font-black text-gray-600 uppercase tracking-widest">Intelligence Index</span></div>
             } data-testid="priority-score-card">
               <div className="text-7xl font-black text-cyan-400 mb-2 glow-cyan" data-testid="priority-score-value">
-                {signal.priorityScore.toFixed(0)}
+                {signal.priorityScore?.toFixed(0)}
               </div>
               <p className="text-gray-400 text-sm font-bold mb-4 uppercase tracking-tighter">Priority Rank</p>
               
@@ -158,25 +165,25 @@ export function SignalDetail() {
                 <div className="mb-4" role="listitem">
                   <div className="flex justify-content-between mb-2">
                     <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Urgency Factor</span>
-                    <span className="text-sm font-black text-gray-200">{signal.scoreBreakdown.urgency} / 150</span>
+                    <span className="text-sm font-black text-gray-200">{signal.scoreBreakdown?.urgency} / 150</span>
                   </div>
-                  <ProgressBar value={(signal.scoreBreakdown.urgency / 150) * 100} showValue={false} style={{ height: '6px' }} color="#06b6d4" />
+                  <ProgressBar value={((signal.scoreBreakdown?.urgency || 0) / 150) * 100} showValue={false} style={{ height: '6px' }} color="#06b6d4" />
                 </div>
                 
                 <div className="mb-4" role="listitem">
                   <div className="flex justify-content-between mb-2">
                     <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Social Impact</span>
-                    <span className="text-sm font-black text-gray-200">{signal.scoreBreakdown.impact} / 125</span>
+                    <span className="text-sm font-black text-gray-200">{signal.scoreBreakdown?.impact} / 125</span>
                   </div>
-                  <ProgressBar value={(signal.scoreBreakdown.impact / 125) * 100} showValue={false} style={{ height: '6px' }} color="#f59e0b" />
+                  <ProgressBar value={((signal.scoreBreakdown?.impact || 0) / 125) * 100} showValue={false} style={{ height: '6px' }} color="#f59e0b" />
                 </div>
 
                 <div className="mb-2" role="listitem">
                   <div className="flex justify-content-between mb-2">
                     <span className="text-xs font-black text-gray-500 uppercase tracking-widest">Community Trust</span>
-                    <span className="text-sm font-black text-gray-200">{signal.scoreBreakdown.communityVotes} / 15</span>
+                    <span className="text-sm font-black text-gray-200">{signal.scoreBreakdown?.communityVotes} / 15</span>
                   </div>
-                  <ProgressBar value={(signal.scoreBreakdown.communityVotes / 15) * 100} showValue={false} style={{ height: '6px' }} color="#10b981" />
+                  <ProgressBar value={((signal.scoreBreakdown?.communityVotes || 0) / 15) * 100} showValue={false} style={{ height: '6px' }} color="#10b981" />
                 </div>
               </div>
             </Card>

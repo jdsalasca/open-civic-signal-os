@@ -1,24 +1,28 @@
 package org.opencivic.signalos.web.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public record SignalCreateRequest(
-    @NotBlank(message = "Title is required")
-    @Size(max = 255)
+    @NotBlank 
+    @Size(min = 5, max = 150, message = "Title must be between 5 and 150 characters.")
     String title,
-
-    @Size(max = 2000)
+    
+    @NotBlank 
+    @Size(min = 10, max = 2000, message = "Description must be between 10 and 2000 characters.")
     String description,
-
-    @NotBlank(message = "Category is required")
+    
+    @NotBlank 
     String category,
-
-    @Min(1) @Max(5)
+    
+    @Min(1) @Max(5) 
     int urgency,
-
-    @Min(1) @Max(5)
+    
+    @Min(1) @Max(5) 
     int impact,
-
-    @Min(0)
+    
+    @Min(1) 
     int affectedPeople
 ) {}

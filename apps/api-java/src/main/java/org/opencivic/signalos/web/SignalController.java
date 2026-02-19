@@ -3,14 +3,24 @@ package org.opencivic.signalos.web;
 import jakarta.validation.Valid;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.SignalStatus;
+import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.repository.SignalRepository;
+import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.PrioritizationService;
+import org.opencivic.signalos.service.ExportService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.SignalResponse;
+import org.opencivic.signalos.exception.ResourceNotFoundException;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,9 +36,15 @@ import java.util.stream.Collectors;
 public class SignalController {
 
     private final PrioritizationService prioritizationService;
+    private final ExportService exportService;
+    private final UserRepository userRepository;
+    private final SignalRepository signalRepository;
 
-    public SignalController(PrioritizationService prioritizationService) {
+    public SignalController(PrioritizationService prioritizationService, ExportService exportService, UserRepository userRepository, SignalRepository signalRepository) {
         this.prioritizationService = prioritizationService;
+        this.exportService = exportService;
+        this.userRepository = userRepository;
+        this.signalRepository = signalRepository;
     }
 
     @GetMapping("/prioritized")
@@ -43,22 +59,19 @@ public class SignalController {
         return prioritizationService.getSignalById(id)
                 .map(this::mapToResponse)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Civic signal not found: " + id));
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<SignalResponse> updateStatus(@PathVariable UUID id, @RequestBody Map<String, String> body) {
         String newStatusStr = body.get("status");
-        try {
-            // P1-9: Input validation through Enum
-            SignalStatus.valueOf(newStatusStr);
-            return prioritizationService.updateStatus(id, newStatusStr)
-                    .map(this::mapToResponse)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid status provided: " + newStatusStr);
+        if (newStatusStr == null || newStatusStr.isBlank()) {
+            throw new IllegalArgumentException("Status field is mandatory.");
         }
+        return prioritizationService.updateStatus(id, newStatusStr)
+                .map(this::mapToResponse)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResourceNotFoundException("Signal not found for status update: " + id));
     }
 
     @PostMapping("/{id}/vote")
@@ -67,15 +80,28 @@ public class SignalController {
     }
 
     @GetMapping("/flagged")
-    public List<SignalResponse> getFlaggedSignals() {
-        return prioritizationService.getFlaggedSignals().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public Page<SignalResponse> getFlaggedSignals(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return prioritizationService.getFlaggedSignals(pageable)
+                .map(this::mapToResponse);
     }
 
     @PostMapping("/{id}/moderate")
     public SignalResponse moderate(@PathVariable UUID id, @RequestBody Map<String, String> body) {
         return mapToResponse(prioritizationService.moderateSignal(id, body.get("action"), body.get("reason")));
+    }
+
+    // OCS-P2-011: Data Export restricted to SUPER_ADMIN
+    @GetMapping("/export/csv")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<Resource> exportCsv() {
+        String filename = "signalos_intelligence_export_" + LocalDateTime.now() + ".csv";
+        InputStreamResource file = new InputStreamResource(exportService.exportSignalsToCsv());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(file);
     }
 
     @GetMapping("/top-10")
@@ -85,21 +111,25 @@ public class SignalController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/mine")
+    public List<SignalResponse> getMySignals(Authentication authentication) {
+        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
+        return signalRepository.findByAuthorIdOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     @PostMapping
-    public SignalResponse createSignal(@Valid @RequestBody SignalCreateRequest request) {
+    public SignalResponse createSignal(@Valid @RequestBody SignalCreateRequest request, Authentication authentication) {
+        User author = userRepository.findByUsername(authentication.getName()).orElseThrow();
         Signal s = new Signal(
-            UUID.randomUUID(),
-            request.title(),
-            request.description(),
-            request.category(),
-            request.urgency(),
-            request.impact(),
-            request.affectedPeople(),
-            0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), LocalDateTime.now()
+            UUID.randomUUID(), request.title(), request.description(), request.category(),
+            request.urgency(), request.impact(), request.affectedPeople(),
+            0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), LocalDateTime.now()
         );
         s.setPriorityScore(prioritizationService.calculateScore(s));
         s.setScoreBreakdown(prioritizationService.getBreakdown(s));
-        
         return mapToResponse(prioritizationService.saveSignal(s));
     }
 
@@ -114,24 +144,14 @@ public class SignalController {
 
     @PostMapping("/merge")
     public ResponseEntity<SignalResponse> mergeSignals(@RequestParam UUID targetId, @RequestBody List<UUID> duplicateIds) {
-        // P1-10: Implementation of transactional merge and correct response handling
-        try {
-            Signal merged = prioritizationService.mergeSignals(targetId, duplicateIds);
-            return ResponseEntity.ok(mapToResponse(merged));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        Signal merged = prioritizationService.mergeSignals(targetId, duplicateIds);
+        return ResponseEntity.ok(mapToResponse(merged));
     }
 
     private SignalResponse mapToResponse(Signal s) {
         return new SignalResponse(
-            s.getId(),
-            s.getTitle(),
-            s.getDescription(),
-            s.getCategory(),
-            s.getStatus(),
-            s.getPriorityScore(),
-            s.getScoreBreakdown()
+            s.getId(), s.getTitle(), s.getDescription(), s.getCategory(),
+            s.getStatus(), s.getPriorityScore(), s.getScoreBreakdown()
         );
     }
 }

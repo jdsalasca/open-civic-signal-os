@@ -8,24 +8,42 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
+@EnableAsync
 public class OpenCivicSignalOsApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(OpenCivicSignalOsApplication.class, args);
-    }
+	public static void main(String[] args) {
+		SpringApplication.run(OpenCivicSignalOsApplication.class, args);
+	}
 
-    @Bean
-    @Profile({"dev", "test"}) // BE-P1-05: Seed only in non-production profiles
-    CommandLineRunner seedUsers(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        return args -> {
-            if (userRepository.findByUsername("admin").isEmpty()) {
-                userRepository.save(new User("admin", passwordEncoder.encode("admin12345"), "admin@signalos.org", "ROLE_SUPER_ADMIN"));
-                userRepository.save(new User("servant", passwordEncoder.encode("servant2026"), "staff@signalos.org", "ROLE_PUBLIC_SERVANT"));
-                userRepository.save(new User("citizen", passwordEncoder.encode("citizen2026"), "citizen@signalos.org", "ROLE_CITIZEN"));
-                System.out.println("Dev Fixtures: Seed users created.");
-            }
-        };
-    }
+	@Bean
+	@Profile({"dev", "test"})
+	public CommandLineRunner seedUsers(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+		return args -> {
+			if (userRepository.findByUsername("admin").isEmpty()) {
+				// Admin has all roles
+				User admin = new User(
+					"admin", 
+					passwordEncoder.encode("admin12345"), 
+					"admin@signalos.org", 
+					"ROLE_SUPER_ADMIN,ROLE_PUBLIC_SERVANT,ROLE_CITIZEN"
+				);
+				admin.setEnabled(true);
+				userRepository.save(admin);
+			}
+			if (userRepository.findByUsername("servant").isEmpty()) {
+				// Servant has two roles
+				User servant = new User(
+					"servant", 
+					passwordEncoder.encode("servant123"), 
+					"servant@signalos.org", 
+					"ROLE_PUBLIC_SERVANT,ROLE_CITIZEN"
+				);
+				servant.setEnabled(true);
+				userRepository.save(servant);
+			}
+		};
+	}
 }

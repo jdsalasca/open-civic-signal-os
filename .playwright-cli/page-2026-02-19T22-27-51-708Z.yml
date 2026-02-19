@@ -1,0 +1,50 @@
+- generic [ref=e893]:
+  - navigation [ref=e894]:
+    - generic [ref=e895]:
+      - link "SignalOS" [ref=e896] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e898]: SignalOS
+      - generic [ref=e899]:
+        - link "Insights" [ref=e900] [cursor=pointer]:
+          - /url: /
+        - link "Public Report" [ref=e901] [cursor=pointer]:
+          - /url: /report
+        - link "My Contributions" [ref=e902] [cursor=pointer]:
+          - /url: /mine
+        - link "Moderation" [ref=e903] [cursor=pointer]:
+          - /url: /moderation
+    - generic [ref=e904]:
+      - text: 
+      - generic [ref=e905]:
+        - generic [ref=e906]:
+          - generic [ref=e907]: admin
+          - generic [ref=e908]: SUPER_ADMIN
+        - generic [ref=e910]: A
+        - button "Logout" [ref=e911] [cursor=pointer]:
+          - generic: 
+  - main [ref=e912]:
+    - generic [ref=e914]:
+      - heading "Moderation Queue" [level=1] [ref=e915]
+      - paragraph [ref=e916]: Review automatically flagged signals for potential abuse or incorrect classification.
+      - table [ref=e922]:
+        - rowgroup [ref=e923]:
+          - row "Suspect Title Category Score Actions" [ref=e924]:
+            - columnheader "Suspect Title" [ref=e925]:
+              - generic [ref=e927]: Suspect Title
+            - columnheader "Category" [ref=e928]:
+              - generic [ref=e930]: Category
+            - columnheader "Score" [ref=e931]:
+              - generic [ref=e933]: Score
+            - columnheader "Actions" [ref=e934]:
+              - generic [ref=e936]: Actions
+        - rowgroup [ref=e937]:
+          - row "No signals require attention." [ref=e938]:
+            - cell "No signals require attention." [ref=e939]
+  - contentinfo [ref=e940]:
+    - generic [ref=e941]:
+      - generic [ref=e942]: 
+      - generic [ref=e943]: Global Governance Standard
+    - generic [ref=e944]: © 2026 Open Civic Signal OS. Protocol v0.2.8-beta
+    - generic [ref=e945]:
+      - generic [ref=e946] [cursor=pointer]: 
+      - generic [ref=e947] [cursor=pointer]: 

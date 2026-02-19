@@ -11,6 +11,10 @@ import { ShieldCheck } from "lucide-react";
 import { Layout } from "../components/Layout";
 import apiClient from "../api/axios";
 
+interface ApiError extends Error {
+  friendlyMessage?: string;
+}
+
 type LoginForm = {
   username: string;
   password: string;
@@ -29,8 +33,9 @@ export function Login() {
       setAuth(res.data);
       toast.success(`Welcome back, ${res.data.username}!`);
       navigate("/");
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Invalid username or password.");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Invalid username or password.");
     }
   };
 
@@ -62,6 +67,7 @@ export function Login() {
                       id="username" 
                       {...field} 
                       autoFocus
+                      autoComplete="username" // FE-4: Added autocomplete
                       placeholder="Enter your username"
                       className={classNames('p-inputtext-lg py-3 pl-5', { 'p-invalid': fieldState.error })} 
                       data-testid="login-username-input"
@@ -84,6 +90,7 @@ export function Login() {
                     {...field} 
                     toggleMask 
                     feedback={false} 
+                    autoComplete="current-password" // FE-4: Added autocomplete
                     placeholder="Enter your password"
                     inputClassName="p-inputtext-lg py-3"
                     className={classNames('w-full', { 'p-invalid': fieldState.error })} 

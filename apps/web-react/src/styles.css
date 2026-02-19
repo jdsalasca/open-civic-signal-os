@@ -1,34 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --bg-dark: #0a0f1e;
-  --bg-surface: #111827;
-  
-  /* UX-002 & UX-007: WCAG AA Hardened Contrast Tokens */
   --primary: #06b6d4;      /* Cyan 500 */
   --primary-hover: #22d3ee;
   --primary-active: #0891b2;
-  --primary-text: #083344; /* Dark text on bright cyan for contrast */
-  
-  --secondary: #374151;    /* Gray 700 */
-  --secondary-hover: #4b5563;
-  --secondary-text: #f9fafb;
-  
-  --ghost-hover: rgba(255, 255, 255, 0.05);
-  --ghost-text: #9ca3af;   /* Gray 400 */
-  --ghost-text-hover: #f9fafb;
+  --primary-text: #083344;
+  --danger: #ef4444;
+  --focus-ring: 0 0 0 3px rgba(6, 182, 212, 0.4);
+}
 
-  --danger: #ef4444;       /* Red 500 */
-  --danger-hover: #f87171;
-  --danger-text: #ffffff;
-
+/* DARK THEME */
+.dark-theme {
+  --bg-dark: #0a0f1e;
+  --bg-surface: #111827;
   --text-main: #f9fafb;
-  --text-muted: #9ca3af;   /* Passes AA on #111827 */
-  --text-dim: #d1d5db;     /* Safe for meta info */
-  
+  --text-muted: #9ca3af;
   --border-subtle: rgba(255, 255, 255, 0.1);
   --glass-stroke: rgba(255, 255, 255, 0.15);
-  --focus-ring: 0 0 0 3px rgba(6, 182, 212, 0.4);
+}
+
+/* LIGHT THEME */
+.light-theme {
+  --bg-dark: #f3f4f6;      /* Gray 100 */
+  --bg-surface: #ffffff;   /* Pure white */
+  --text-main: #111827;    /* Gray 900 */
+  --text-muted: #4b5563;   /* Gray 600 */
+  --border-subtle: rgba(0, 0, 0, 0.1);
+  --glass-stroke: rgba(0, 0, 0, 0.05);
 }
 
 body {
@@ -36,79 +34,44 @@ body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-dark);
   color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
 }
 
-/* UX-004: Auth-focused hierarchy focus */
 .auth-page nav, .auth-page footer {
   filter: grayscale(1) opacity(0.3);
   pointer-events: none;
 }
 
-/* UX-003: Mobile Drawer & Overlap Fixes */
 .p-sidebar {
   background: var(--bg-surface) !important;
   border-right: 1px solid var(--border-subtle) !important;
 }
 
-.p-sidebar-mask {
-  background: rgba(0, 0, 0, 0.7) !important;
-  backdrop-filter: blur(4px);
-}
-
-/* Button Level System */
 .p-button {
   transition: all 0.2s ease !important;
   border-radius: 8px !important;
 }
 
-.p-button:focus-visible {
-  outline: none !important;
-  box-shadow: var(--focus-ring) !important;
-}
-
 .p-button.p-button-primary {
   background: var(--primary) !important;
   color: var(--primary-text) !important;
-  border: none !important;
-  font-weight: 800 !important;
-}
-.p-button.p-button-primary:hover { background: var(--primary-hover) !important; }
-.p-button.p-button-primary:active { background: var(--primary-active) !important; }
-
-.p-button.p-button-secondary {
-  background: var(--secondary) !important;
-  color: var(--secondary-text) !important;
-  border: 1px solid var(--border-subtle) !important;
 }
 
-.p-button.p-button-text {
-  color: var(--ghost-text) !important;
-}
-.p-button.p-button-text:hover { 
-  background: var(--ghost-hover) !important; 
-  color: var(--ghost-text-hover) !important; 
-}
-
-/* Global PrimeReact Overrides */
 .p-card {
   background: var(--bg-surface) !important;
   border: 1px solid var(--glass-stroke) !important;
   border-radius: 20px !important;
+  color: var(--text-main) !important;
 }
 
-.p-inputtext {
-  background: rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid var(--border-subtle) !important;
-  color: #fff !important;
-}
-.p-inputtext:focus {
-  border-color: var(--primary) !important;
-  box-shadow: var(--focus-ring) !important;
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--bg-surface) !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
 }
 
-/* UX-006: Exception Screens Consistency */
-.exception-card {
-  max-width: 500px;
-  text-align: center;
+.p-datatable .p-datatable-tbody > tr {
+  background: var(--bg-surface) !important;
+  color: var(--text-main) !important;
 }

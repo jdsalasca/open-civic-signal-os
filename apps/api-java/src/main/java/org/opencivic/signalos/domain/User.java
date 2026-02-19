@@ -2,6 +2,9 @@ package org.opencivic.signalos.domain;
 
 import jakarta.persistence.*;
 import java.util.UUID;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -20,17 +23,24 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String role; // ROLE_SUPER_ADMIN, ROLE_PUBLIC_SERVANT, ROLE_CITIZEN
+    private String roles; // Comma-separated: ROLE_CITIZEN,ROLE_PUBLIC_SERVANT
 
     private boolean enabled = false;
 
     public User() {}
 
-    public User(String username, String password, String email, String role) {
+    public User(String username, String password, String email, String roles) {
         this.username = username;
         this.password = password;
         this.email = email;
-        this.role = role;
+        this.roles = roles;
+    }
+
+    public List<String> getRoleList() {
+        if (roles == null) return List.of();
+        return Arrays.stream(roles.split(","))
+                .map(String::trim)
+                .collect(Collectors.toList());
     }
 
     // Getters and Setters
@@ -41,8 +51,11 @@ public class User {
     public void setPassword(String password) { this.password = password; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public String getRoles() { return roles; }
+    public void setRoles(String roles) { this.roles = roles; }
+    // Compatibility getter for Spring Security single-role logic if needed
+    public String getRole() { return roles; } 
+    public void setRole(String role) { this.roles = role; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }

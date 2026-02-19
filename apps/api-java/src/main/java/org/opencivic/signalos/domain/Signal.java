@@ -29,15 +29,17 @@ public class Signal {
     @Column(columnDefinition = "TEXT")
     private String moderationReason;
     
-    // P1-8: Inicialización defensiva para evitar NullPointerException
     @ElementCollection
     private List<UUID> mergedFrom = new ArrayList<>();
+    
+    @Column(name = "author_id")
+    private UUID authorId;
     
     private LocalDateTime createdAt;
 
     public Signal() {}
 
-    public Signal(UUID id, String title, String description, String category, int urgency, int impact, int affectedPeople, int communityVotes, double priorityScore, ScoreBreakdown scoreBreakdown, String status, List<UUID> mergedFrom, LocalDateTime createdAt) {
+    public Signal(UUID id, String title, String description, String category, int urgency, int impact, int affectedPeople, int communityVotes, double priorityScore, ScoreBreakdown scoreBreakdown, String status, List<UUID> mergedFrom, UUID authorId, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -50,6 +52,7 @@ public class Signal {
         this.scoreBreakdown = scoreBreakdown;
         this.status = status;
         this.mergedFrom = mergedFrom != null ? mergedFrom : new ArrayList<>();
+        this.authorId = authorId;
         this.createdAt = createdAt;
     }
 
@@ -65,17 +68,29 @@ public class Signal {
     public String getCategory() { return category; }
     public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
     public String getModerationReason() { return moderationReason; }
+    public UUID getAuthorId() { return authorId; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    
     public List<UUID> getMergedFrom() { 
         if (mergedFrom == null) mergedFrom = new ArrayList<>();
         return mergedFrom; 
     }
 
     // Setters
+    public void setId(UUID id) { this.id = id; }
+    public void setTitle(String title) { this.title = title; }
+    public void setDescription(String description) { this.description = description; }
+    public void setCategory(String category) { this.category = category; }
+    public void setUrgency(int urgency) { this.urgency = urgency; }
+    public void setImpact(int impact) { this.impact = impact; }
+    public void setAffectedPeople(int affectedPeople) { this.affectedPeople = affectedPeople; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setStatus(String status) { this.status = status; }
     public void setPriorityScore(double priorityScore) { this.priorityScore = priorityScore; }
     public void setScoreBreakdown(ScoreBreakdown scoreBreakdown) { this.scoreBreakdown = scoreBreakdown; }
     public void setCommunityVotes(int communityVotes) { this.communityVotes = communityVotes; }
     public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }
+    public void setAuthorId(UUID authorId) { this.authorId = authorId; }
 
     public Signal withScore(double score, ScoreBreakdown breakdown) {
         this.priorityScore = score;

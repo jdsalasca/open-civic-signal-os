@@ -1,0 +1,40 @@
+- generic [ref=e2]:
+  - status [ref=e59]: Account created! You can now log in.
+  - generic [ref=e60]:
+    - navigation [ref=e61]:
+      - link "SignalOS" [ref=e63] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e65]: SignalOS
+    - main [ref=e66]:
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - img [ref=e73]
+          - heading "Access Portal" [level=1] [ref=e76]
+          - paragraph [ref=e77]: Open Civic Signal OS Management
+        - form "Login Form" [ref=e78]:
+          - generic [ref=e79]:
+            - generic [ref=e80]: Username
+            - generic [ref=e81]:
+              - generic [ref=e82]: 
+              - textbox "Username" [active] [ref=e83]:
+                - /placeholder: Enter your username
+          - generic [ref=e84]:
+            - generic [ref=e85]: Password
+            - generic [ref=e87]:
+              - textbox "Enter your password" [ref=e88]
+              - switch "Show Password" [checked] [ref=e90] [cursor=pointer]
+          - button "Submit Login" [ref=e92] [cursor=pointer]:
+            - generic: 
+            - generic [ref=e93]: Sign In to OS
+          - generic [ref=e94]:
+            - text: Don't have an account?
+            - link "Create one" [ref=e95] [cursor=pointer]:
+              - /url: /register
+    - contentinfo [ref=e96]:
+      - generic [ref=e97]:
+        - generic [ref=e98]: 
+        - generic [ref=e99]: Global Governance Standard
+      - generic [ref=e100]: © 2026 Open Civic Signal OS. Protocol v0.2.7-hardened
+      - generic [ref=e101]:
+        - generic [ref=e102] [cursor=pointer]: 
+        - generic [ref=e103] [cursor=pointer]: 

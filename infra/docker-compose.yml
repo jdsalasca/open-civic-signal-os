@@ -1,59 +1,61 @@
 services:
-  db:
+  civic-db:
     image: postgres:15-alpine
     container_name: civic-db
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: signalos
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d signalos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - civic-db-data:/var/lib/postgresql/data
+
+  civic-api:
+    image: infra-api
+    container_name: civic-api
+    build:
+      context: ../apps/api-java
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://civic-db:5432/signalos
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password
+      JWT_SECRET: "strategic-civic-intelligence-key-secure-2026-v1"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3002"
+      SPRING_PROFILES_ACTIVE: dev
+    depends_on:
+      civic-db:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  api:
-    build:
-      context: ../apps/api-java
-      dockerfile: Dockerfile
-    container_name: civic-api
-    environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${POSTGRES_DB}
-      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
-      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - MAIL_HOST=${MAIL_HOST}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET}
-    ports:
-      - "8081:8080"
-    healthcheck:
-      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
-      interval: 40s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-    depends_on:
-      db:
-        condition: service_healthy
-
-  web:
+  civic-web:
+    image: infra-web
+    container_name: civic-web
     build:
       context: ../apps/web-react
       dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: /api
-    container_name: civic-web
-    depends_on:
-      - api
     ports:
       - "3002:80"
+    depends_on:
+      civic-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   civic-db-data:

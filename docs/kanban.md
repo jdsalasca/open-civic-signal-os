@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T19:00:00.000Z
+Last updated: 2026-02-19T20:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 35
+- DONE: 38
 
 ### TODO
 - _No issues_
@@ -25,6 +25,9 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #43 Security: Hardened RBAC enforcement with dedicated Integration Tests (SecurityRBAC_IT)
+- #42 Data: Enforced Database Schema Validation through Flyway baseline (BE-P2-09)
+- #41 Observability: Standardized SLF4J Logging across all services (BE-P2-10)
 - #40 QA: Integrated strict TypeScript type-checking in build pipeline (QE-P0-01)
 - #39 Data: Refactored Deduplication to batch-window processing (BE-P1-07)
 - #38 Security: Hardened Async Email Service with error handling (BE-P2-10)

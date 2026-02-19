@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { Signal, Notification } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
@@ -12,22 +12,28 @@ import { Card } from "primereact/card";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { Layout } from "../components/Layout";
+import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 
+interface ApiError extends Error {
+  friendlyMessage?: string;
+}
+
 export function Dashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const { role, user } = useAuthStore();
+  const { activeRole, userName } = useAuthStore();
   
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [signalsRes, notificationsRes] = await Promise.all([
         apiClient.get("signals/prioritized?size=50"),
-        (role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN")
+        (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
           ? apiClient.get("notifications/recent")
           : Promise.resolve(null)
       ]);
@@ -40,16 +46,17 @@ export function Dashboard() {
         setNotifications(notificationsRes.data);
       }
       
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Synchronization failed.");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Synchronization failed.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeRole]);
 
   useEffect(() => {
     loadData();
-  }, [role]);
+  }, [loadData]);
 
   const handleRelay = async () => {
     try {
@@ -58,48 +65,48 @@ export function Dashboard() {
         toast.success("Intelligence broadcast successful!");
         loadData();
       }
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Relay rejected.");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || "Relay rejected.");
     }
   };
 
-  const isStaff = role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN";
+  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
 
   return (
     <Layout>
       <section className="mb-6 flex flex-column lg:flex-row justify-content-between lg:align-items-center gap-4 animate-fade-in" data-testid="dashboard-hero">
         <div>
           <div className="flex align-items-center gap-2 mb-2">
-            <span className="bg-cyan-900 text-cyan-400 text-xs font-bold px-2 py-1 border-round uppercase tracking-tighter">Live Intelligence</span>
+            <span className="bg-cyan-900 text-cyan-400 text-xs font-bold px-2 py-1 border-round uppercase tracking-tighter">{t('dashboard.live_intel')}</span>
             <span className="text-gray-600 text-xs">•</span>
-            <span className="text-gray-500 text-xs font-medium" data-testid="welcome-message">Welcome back, {user}</span>
+            <span className="text-gray-500 text-xs font-medium" data-testid="welcome-message">{t('dashboard.welcome')}, {userName}</span>
           </div>
+          {/* P1-D: Cleaned title logic, allowing translation to define highlight via key or just direct text */}
           <h1 className="text-5xl font-black mb-2 tracking-tight line-height-1">
-            Governance <span className="text-cyan-500">Insights</span>
+            {t('dashboard.title')}
           </h1>
           <p className="text-gray-500 text-lg max-w-30rem m-0">
-            Real-time community signal prioritization and resolution lifecycle tracking.
+            {t('dashboard.subtitle')}
           </p>
         </div>
         <div className="flex gap-3">
           {isStaff && (
             <Button 
-              label="Weekly Broadcast" 
+              label={t('dashboard.broadcast')} 
               icon="pi pi-bolt" 
               severity="danger"
-              className="p-button-primary px-4 py-3 shadow-6"
+              className="p-button-primary px-4 py-3 shadow-6 font-bold"
               onClick={handleRelay} 
               data-testid="broadcast-button"
-              aria-label="Send Top 10 Broadcast"
             />
           )}
           <Button 
-            label="Report New Issue" 
+            label={t('dashboard.new_issue')} 
             icon="pi pi-plus" 
-            className="p-button-primary px-4 py-3 shadow-6" 
+            className="p-button-primary px-4 py-3 shadow-6 font-bold" 
             onClick={() => navigate("/report")} 
             data-testid="report-issue-button"
-            aria-label="Create New Civic Signal"
           />
         </div>
       </section>
@@ -119,7 +126,7 @@ export function Dashboard() {
             {isStaff && (
               <NotificationSidebar notifications={notifications} />
             )}
-            {role === "CITIZEN" && (
+            {activeRole === "CITIZEN" && (
               <Card title="Civic Support" className="bg-blue-900 border-none shadow-4" data-testid="citizen-support-card">
                 <p className="text-blue-100 line-height-3 mb-4 text-sm">
                   Your votes and reports directly impact the algorithmic priority of issues in your community. Keep up the good work!

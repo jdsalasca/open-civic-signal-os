@@ -1,25 +1,27 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../store/useAuthStore';
-import { UserRole } from '../types';
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore";
+import { ProgressBar } from "primereact/progressbar";
 
 type Props = {
-  allowedRoles?: UserRole[];
+  allowedRoles?: string[];
 };
 
 export function AuthGuard({ allowedRoles }: Props) {
-  const { accessToken, role, isHydrated } = useAuthStore();
-  const location = useLocation();
+  const { isLoggedIn, activeRole, isHydrated } = useAuthStore();
 
-  // Wait for store to load from localStorage
   if (!isHydrated) {
-    return null; // Or a loading spinner
+    return (
+      <div className="fixed top-0 left-0 w-full z-5">
+        <ProgressBar mode="indeterminate" style={{ height: '3px' }} />
+      </div>
+    );
   }
 
-  if (!accessToken) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!isLoggedIn) {
+    return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
+  if (allowedRoles && !allowedRoles.includes(activeRole)) {
     return <Navigate to="/unauthorized" replace />;
   }
 
