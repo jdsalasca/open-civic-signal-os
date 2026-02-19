@@ -173,3 +173,10 @@ Use these inputs before implementation:
 - Script: `scripts/agent-evaluate-pr.mjs`
 - Minimum score default: `8/12`
 - PRs below threshold must be revised before merge.
+
+## Agent Quality Review Workflow
+
+- Workflow: `.github/workflows/agent-quality-review.yml`
+- Trigger: weekly + manual
+- Source: `docs/metrics-history.md`
+- Output: one issue per week with trends and action checklist.

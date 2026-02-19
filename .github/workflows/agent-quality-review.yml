@@ -1,0 +1,147 @@
+name: Agent Quality Review
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 1"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate or update weekly quality issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const path = "docs/metrics-history.md";
+            if (!fs.existsSync(path)) {
+              core.setFailed("Missing docs/metrics-history.md");
+              return;
+            }
+
+            const lines = fs.readFileSync(path, "utf8").split("\n");
+            const rows = lines
+              .filter((line) => line.startsWith("| "))
+              .filter((line) => !line.includes("---"))
+              .filter((line) => !line.startsWith("| Week "));
+
+            const entries = rows
+              .map((line) => line.split("|").map((x) => x.trim()).filter(Boolean))
+              .filter((parts) => parts.length >= 5)
+              .map((parts) => ({
+                week: parts[0],
+                capturedAt: parts[1],
+                throughput: Number(parts[2]),
+                blockers: Number(parts[3]),
+                reopened: Number(parts[4])
+              }));
+
+            if (entries.length === 0) {
+              core.setFailed("No metrics entries found in docs/metrics-history.md");
+              return;
+            }
+
+            const latest = entries[entries.length - 1];
+            const previous = entries.length > 1 ? entries[entries.length - 2] : null;
+
+            const trend = (curr, prev, inverse = false) => {
+              if (prev === null || Number.isNaN(prev)) return "n/a";
+              if (curr === prev) return "stable";
+              if (!inverse) return curr > prev ? "up" : "down";
+              return curr > prev ? "worse" : "better";
+            };
+
+            const trendThroughput = trend(latest.throughput, previous?.throughput ?? null, false);
+            const trendBlockers = trend(latest.blockers, previous?.blockers ?? null, true);
+            const trendReopened = trend(latest.reopened, previous?.reopened ?? null, true);
+
+            const recent = entries.slice(-6);
+            const historyTable = [
+              "| Week | Throughput | Open Blockers | Reopened |",
+              "| --- | ---: | ---: | ---: |",
+              ...recent.map((e) => `| ${e.week} | ${e.throughput} | ${e.blockers} | ${e.reopened} |`)
+            ].join("\n");
+
+            const title = `Agent Quality Review ${latest.week}`;
+            const body = [
+              "## Weekly Agent Quality Review",
+              "",
+              `- Week: ${latest.week}`,
+              `- Captured at: ${latest.capturedAt}`,
+              "",
+              "## Current Signals",
+              "",
+              `- Throughput: ${latest.throughput} (${trendThroughput})`,
+              `- Open blockers: ${latest.blockers} (${trendBlockers})`,
+              `- Reopened issues: ${latest.reopened} (${trendReopened})`,
+              "",
+              "## Recent History",
+              "",
+              historyTable,
+              "",
+              "## Action Checklist",
+              "",
+              "- [ ] Confirm if throughput trend is acceptable for current sprint goals",
+              "- [ ] Review blocker root causes and assign owners",
+              "- [ ] Review reopened issues and define preventive changes",
+              "- [ ] Add at least one process improvement task to backlog",
+              "",
+              "## Notes",
+              "",
+              "Auto-generated from `docs/metrics-history.md`."
+            ].join("\n");
+
+            const labels = [
+              { name: "agent-quality", color: "1d76db", description: "Agent execution quality and delivery signals" },
+              { name: "process-improvement", color: "fbca04", description: "Operational improvements and workflow upgrades" },
+              { name: "help wanted", color: "008672", description: "Maintainers welcome contributions" }
+            ];
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ...label
+                });
+              } catch (error) {
+                if (error.status !== 422) throw error;
+              }
+            }
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100
+            });
+
+            const existing = openIssues.find((issue) => issue.title === title);
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+                labels: labels.map((l) => l.name)
+              });
+              core.info(`Updated existing issue #${existing.number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: labels.map((l) => l.name)
+              });
+              core.info(`Created issue #${created.data.number}`);
+            }

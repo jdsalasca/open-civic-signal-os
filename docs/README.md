@@ -33,3 +33,4 @@
 - `docs/CHANGELOG.md`
 - `.github/workflows/docker-images.yml`
 - `docs/metrics-history.md`
+- `.github/workflows/agent-quality-review.yml`

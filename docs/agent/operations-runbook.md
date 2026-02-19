@@ -53,3 +53,9 @@ Do not continue by guessing hidden product decisions.
 
 - Read trend history in `docs/metrics-history.md` before weekly planning decisions.
 
+## 8. Agent Quality Review Ritual
+
+- Run/verify `.github/workflows/agent-quality-review.yml` weekly.
+- Review generated issue and assign owners for process actions.
+- Convert at least one finding into backlog item each week.
+
