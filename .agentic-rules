@@ -1,0 +1,104 @@
+# .agentic-rules
+
+version: 1
+project: open-civic-signal-os
+mission: Transform community signals into transparent, auditable, executable civic backlog.
+
+## 1) Priority Order (Always)
+
+1. Correctness
+2. Security and privacy
+3. Determinism and auditability
+4. Testability and CI reliability
+5. UX clarity
+6. Delivery speed
+
+## 2) Scope Discipline
+
+- One objective per PR.
+- No unrelated refactors.
+- Backend issue: avoid broad frontend redesign.
+- Docs/backlog issue: avoid runtime behavior changes.
+- If scope changes, stop and update issue + acceptance criteria before coding.
+
+## 3) Source of Truth
+
+- Ranking logic lives in backend (Java), never frontend.
+- API contract changes require OpenAPI updates in same PR.
+- Scoring changes require formula/version traceability in docs.
+- `docs/community/current-backlog.md` is weekly execution source.
+
+## 4) Forbidden Commits
+
+Do not commit:
+
+- `apps/web-react/dist/*`
+- `apps/web-react/test-results/*`
+- screenshots or local audit artifacts (`*.png`, `*.jpg`) unless explicitly requested
+- editor temp files, caches, local logs
+- malformed config/docs (invalid JSON, broken markdown formatting)
+
+## 5) Dependency Policy
+
+- No dependency additions by default.
+- Add dependencies only if issue requires and maintainer impact is documented.
+- Any added dependency must include:
+  - why native/project-local solution is insufficient
+  - runtime vs dev-only classification
+  - rollback/removal plan
+
+## 6) Quality Gates Before Push
+
+Required:
+
+- `npm run quality:quick`
+- `npm run backlog:current:check`
+- `npm run agent:context:check`
+
+If Java backend changed:
+
+- `mvn -q test` in `apps/api-java`
+
+## 7) Security and Trust Rules
+
+- Minimize PII capture and exposure.
+- Never leak secrets in logs/docs/examples.
+- Keep audit metadata explicit: source, timestamp, transformation/version.
+- Moderation and trust-critical decisions must be explainable and reviewable.
+
+## 8) Testing Rules
+
+- Every bugfix must include a regression test.
+- Every behavior change must include test + docs update in same PR.
+- Never bypass CI checks or test execution (`skipTests` prohibited in validation).
+
+## 9) PR Evidence (Mandatory)
+
+PR description must include:
+
+- objective and story/issue ID
+- files touched by layer (backend/frontend/contracts/docs)
+- commands executed and outcomes
+- risk and rollback plan
+- migration impact (`none` if not applicable)
+
+## 10) Stop Conditions
+
+Pause and request clarification when:
+
+- acceptance criteria conflict with product principles
+- task requires breaking change not approved
+- security/privacy risk is uncertain
+- contract changes are ambiguous
+
+## 11) Definition of Excellent
+
+A change is excellent only if it is:
+
+- correct
+- deterministic
+- auditable
+- tested
+- documented
+- scoped
+- reversible

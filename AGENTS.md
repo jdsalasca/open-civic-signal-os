@@ -90,6 +90,7 @@ When closing an issue, agents must include:
 - known limitations
 ## Agent Operations
 
+- Agent hard rules: `.agentic-rules`
 - Gemini project context: `GEMINI.md`
 - Gemini execution guide: `GEMINI_INSTRUCTIONS.md`
 - Codex execution contract: `CODEX.md`
@@ -121,6 +122,7 @@ When closing an issue, agents must include:
 Before implementing any issue, read:
 
 - `AGENTS.md`
+- `.agentic-rules`
 - `GEMINI.md`
 - `GEMINI_INSTRUCTIONS.md`
 - `CODEX.md`
