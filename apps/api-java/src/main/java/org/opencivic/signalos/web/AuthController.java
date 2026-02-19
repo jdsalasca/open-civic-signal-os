@@ -3,6 +3,7 @@ package org.opencivic.signalos.web;
 import jakarta.validation.Valid;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.repository.UserRepository;
+import org.opencivic.signalos.service.EmailService;
 import org.opencivic.signalos.web.dto.UserRegistrationRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,10 +17,12 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @PostMapping("/register")
@@ -34,8 +37,11 @@ public class AuthController {
             request.email(),
             request.role() != null ? "ROLE_" + request.role() : "ROLE_CITIZEN"
         );
-        user.setEnabled(true); // For now, auto-enable. Later add email verification.
+        user.setEnabled(true);
         userRepository.save(user);
+
+        // Async email sending
+        new Thread(() -> emailService.sendWelcomeEmail(user.getEmail(), user.getUsername())).start();
 
         return Map.of("message", "User registered successfully. Welcome to Signal OS!");
     }
