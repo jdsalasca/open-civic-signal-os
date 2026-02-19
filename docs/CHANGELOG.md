@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **UI Componentization**: Refactored `App.tsx` into modular components (`SignalTable`, `DigestSidebar`, `NotificationSidebar`, `MetricsGrid`, `LoginModal`) for better maintainability. (#15)
+- **Standardized Error Handling**: Integrated `GlobalExceptionHandler` with a new `ApiError` format for consistent structured error responses. (#14)
 - **Spring Security Integration**: Added authentication layer for administrative actions (Broadcast/Relays). (#13)
 - **Operator Login (UI)**: New login modal and session management for authorized operators. (#13)
 - **PostgreSQL Persistence**: Replaced mock repositories with Spring Data JPA and real PostgreSQL connectivity. (#12)

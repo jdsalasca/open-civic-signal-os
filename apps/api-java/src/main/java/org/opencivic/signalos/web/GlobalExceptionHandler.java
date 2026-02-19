@@ -1,5 +1,7 @@
 package org.opencivic.signalos.web;
 
+import org.opencivic.signalos.web.error.ApiError;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,20 +15,21 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> details = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            details.put(fieldName, errorMessage);
         });
-        return ResponseEntity.badRequest().body(errors);
+        
+        ApiError error = new ApiError("Validation failed", HttpStatus.BAD_REQUEST.value(), details);
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGeneralExceptions(Exception ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("message", "An unexpected error occurred: " + ex.getMessage());
-        return ResponseEntity.internalServerError().body(error);
+    public ResponseEntity<ApiError> handleGeneralExceptions(Exception ex) {
+        ApiError error = new ApiError(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }
