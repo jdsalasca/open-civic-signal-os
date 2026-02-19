@@ -15,10 +15,15 @@ export function ReportSignal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const token = localStorage.getItem("civic_auth_token");
+    
     try {
       const res = await fetch("/api/signals", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": token ? `Basic ${token}` : ""
+        },
         body: JSON.stringify(form)
       });
 

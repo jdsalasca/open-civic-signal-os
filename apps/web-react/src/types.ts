@@ -22,3 +22,11 @@ export type Notification = {
   recipientGroup: string;
   sentAt: string;
 };
+
+export type UserRole = "PUBLIC_SERVANT" | "CITIZEN" | "GUEST";
+
+export type AuthInfo = {
+  user: string;
+  role: UserRole;
+  token: string;
+};

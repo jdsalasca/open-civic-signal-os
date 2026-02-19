@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- **Role-Based Access Control (RBAC)**: Implemented `PUBLIC_SERVANT` and `CITIZEN` roles in Spring Security and React. (#18)
+  - Public Servants: Can view relays, send broadcasts, and manage signals.
+  - Citizens: Can report signals and view the public dashboard.
+- **Role-Specific Dashboards**: Adjusted the UI layout and features based on the logged-in user's role. (#18)
 - **UX: Professional Notifications**: Integrated `react-hot-toast` to provide elegant, non-intrusive feedback for login, logout, and broadcast actions. (#16)
 - **UI Componentization**: Refactored `App.tsx` into modular components (`SignalTable`, `DigestSidebar`, `NotificationSidebar`, `MetricsGrid`, `LoginModal`) for better maintainability. (#15)
 - **Standardized Error Handling**: Integrated `GlobalExceptionHandler` with a new `ApiError` format for consistent structured error responses. (#14)
@@ -22,3 +26,6 @@
 - **Multi-channel Ingest Adapters**: New ingestion pipeline supporting JSON, CSV, and Chat-like exports into the civic backlog. (#3)
 - Added release quality gate workflow with semver, changelog, and coverage checks.
 - Added agent-first release policy documentation.
+
+### Fixed
+- **Production Build Error**: Resolved `ReferenceError: React is not defined` by correctly configuring `@vitejs/plugin-react` in the frontend build pipeline. (#17)

@@ -30,7 +30,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/health", "/api/signals/prioritized", "/api/signals/top-10", "/actuator/health").permitAll()
-                .requestMatchers("/api/notifications/recent", "/api/notifications/relay/**").hasRole("ADMIN")
+                .requestMatchers("/api/notifications/recent", "/api/notifications/relay/**").hasRole("PUBLIC_SERVANT")
+                .requestMatchers("/api/signals/**").hasAnyRole("CITIZEN", "PUBLIC_SERVANT")
                 .anyRequest().authenticated()
             )
             .httpBasic(withDefaults());
@@ -45,12 +46,19 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("civic2026"))
-                .roles("ADMIN")
+        UserDetails servant = User.builder()
+                .username("servant")
+                .password(passwordEncoder.encode("servant2026"))
+                .roles("PUBLIC_SERVANT")
                 .build();
-        return new InMemoryUserDetailsManager(admin);
+
+        UserDetails citizen = User.builder()
+                .username("citizen")
+                .password(passwordEncoder.encode("citizen2026"))
+                .roles("CITIZEN")
+                .build();
+
+        return new InMemoryUserDetailsManager(servant, citizen);
     }
 
     @Bean

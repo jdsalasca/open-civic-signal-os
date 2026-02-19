@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T07:00:00.000Z
+Last updated: 2026-02-19T08:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 11
+- DONE: 13
 
 ### TODO
 - _No issues_
@@ -25,6 +25,8 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #18 Security: RBAC with PUBLIC_SERVANT and CITIZEN roles
+- #17 DX: Fix production build 'React is not defined' error
 - #16 UX: Professional Toast Notifications with react-hot-toast
 - #15 DX: UI Componentization and React Refactoring
 - #14 DX: Global Error Handling and Standardized ApiError Response

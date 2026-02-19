@@ -16,7 +16,7 @@ export function LoginModal({ onLogin, onClose }: Props) {
   return (
     <div className="modal-overlay">
       <form className="login-modal" onSubmit={handleSubmit}>
-        <h2>Operator Login</h2>
+        <h2>Account Login</h2>
         <input
           type="text"
           placeholder="Username"
@@ -37,7 +37,10 @@ export function LoginModal({ onLogin, onClose }: Props) {
             Cancel
           </button>
         </div>
-        <p className="hint">Try admin / civic2026</p>
+        <div className="hint" style={{ lineHeight: '1.4' }}>
+          <strong>Staff:</strong> servant / servant2026<br/>
+          <strong>Citizen:</strong> citizen / citizen2026
+        </div>
       </form>
     </div>
   );
