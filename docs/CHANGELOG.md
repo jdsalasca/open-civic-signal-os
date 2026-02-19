@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- **Modern Visual Redesign**: Implemented a "Glassmorphism" aesthetic with a deep dark palette, blurred backgrounds, and interactive hover effects. (#21)
+- **Typography & Icons**: Switched to 'Inter' font and added refined SVG iconography for better readability and a professional feel. (#21)
+- **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 - **Signal Detail View**: New dedicated view showing complete problem descriptions and granular score breakdowns for transparency. (#19)
 - **Role-Based Access Control (RBAC)**: Implemented `PUBLIC_SERVANT` and `CITIZEN` roles in Spring Security and React. (#18)
   - Public Servants: Can view relays, send broadcasts, and manage signals.
