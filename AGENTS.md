@@ -88,3 +88,10 @@ When closing an issue, agents must include:
 - which contract file changed
 - sample input/output
 - known limitations
+## Agent Operations
+
+- Gemini execution guide: `GEMINI_INSTRUCTIONS.md`
+- Playbook: `docs/IMPLEMENTATION_PLAYBOOK.md`
+- Definition of Done: `docs/DEFINITION_OF_DONE.md`
+- PR checklist: `docs/PR_REVIEW_CHECKLIST.md`
+- System prompt: `docs/agent/SYSTEM_PROMPT.md`
