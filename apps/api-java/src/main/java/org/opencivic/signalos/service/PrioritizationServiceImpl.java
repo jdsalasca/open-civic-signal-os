@@ -21,16 +21,16 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     public List<Signal> getPrioritizedSignals() {
         return signalRepository.findAll().stream()
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)))
-                .sorted(Comparator.comparingDouble(Signal::priorityScore).reversed())
+                .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed())
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Signal> getTopUnresolved(int limit) {
         return signalRepository.findAll().stream()
-                .filter(signal -> "NEW".equals(signal.status()))
+                .filter(signal -> "NEW".equals(signal.getStatus()))
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)))
-                .sorted(Comparator.comparingDouble(Signal::priorityScore).reversed())
+                .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed())
                 .limit(limit)
                 .collect(Collectors.toList());
     }
@@ -44,10 +44,10 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     public ScoreBreakdown getBreakdown(Signal signal) {
         return new ScoreBreakdown(
-            signal.urgency() * 30.0,
-            signal.impact() * 25.0,
-            Math.min(signal.affectedPeople() / 10.0, 30.0),
-            Math.min(signal.communityVotes() / 5.0, 15.0)
+            signal.getUrgency() * 30.0,
+            signal.getImpact() * 25.0,
+            Math.min(signal.getAffectedPeople() / 10.0, 30.0),
+            Math.min(signal.getCommunityVotes() / 5.0, 15.0)
         );
     }
 
@@ -59,28 +59,28 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
         for (int i = 0; i < signals.size(); i++) {
             Signal s1 = signals.get(i);
-            if (processed.contains(s1.id())) continue;
+            if (processed.contains(s1.getId())) continue;
 
             List<Signal> dups = new ArrayList<>();
             for (int j = i + 1; j < signals.size(); j++) {
                 Signal s2 = signals.get(j);
                 if (isSimilar(s1, s2)) {
                     dups.add(s2);
-                    processed.add(s2.id());
+                    processed.add(s2.getId());
                 }
             }
 
             if (!dups.isEmpty()) {
-                duplicateMap.put(s1.id(), dups);
-                processed.add(s1.id());
+                duplicateMap.put(s1.getId(), dups);
+                processed.add(s1.getId());
             }
         }
         return duplicateMap;
     }
 
     private boolean isSimilar(Signal s1, Signal s2) {
-        String t1 = s1.title().toLowerCase();
-        String t2 = s2.title().toLowerCase();
+        String t1 = s1.getTitle().toLowerCase();
+        String t2 = s2.getTitle().toLowerCase();
         return t1.contains(t2) || t2.contains(t1) || levenshteinDistance(t1, t2) < 5;
     }
 

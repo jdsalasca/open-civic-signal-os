@@ -31,7 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendTop10Relay() {
         List<Signal> top10 = prioritizationService.getTopUnresolved(10);
         String summary = top10.stream()
-                .map(s -> s.title() + " (Score: " + Math.round(s.priorityScore()) + ")")
+                .map(s -> s.getTitle() + " (Score: " + Math.round(s.getPriorityScore()) + ")")
                 .collect(Collectors.joining("\n"));
 
         Notification n = new Notification(

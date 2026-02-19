@@ -50,3 +50,6 @@ Do not continue by guessing hidden product decisions.
   - open blockers,
   - reopened issues (rework signal).
 - If blockers or rework rise for 2 consecutive weeks, reduce WIP and split story scope.
+
+- Read trend history in docs/metrics-history.md before weekly planning decisions.
+

@@ -48,17 +48,17 @@ public class Signal {
         this.createdAt = createdAt;
     }
 
-    // Getters and Setters
-    public UUID id() { return id; }
-    public String title() { return title; }
-    public String status() { return status; }
-    public double priorityScore() { return priorityScore; }
-    public int urgency() { return urgency; }
-    public int impact() { return impact; }
-    public int affectedPeople() { return affectedPeople; }
-    public int communityVotes() { return communityVotes; }
-    public String category() { return category; }
-    public ScoreBreakdown scoreBreakdown() { return scoreBreakdown; }
+    // Getters and Setters (Standard naming)
+    public UUID getId() { return id; }
+    public String getTitle() { return title; }
+    public String getStatus() { return status; }
+    public double getPriorityScore() { return priorityScore; }
+    public int getUrgency() { return urgency; }
+    public int getImpact() { return impact; }
+    public int getAffectedPeople() { return affectedPeople; }
+    public int getCommunityVotes() { return communityVotes; }
+    public String getCategory() { return category; }
+    public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
 
     public void setPriorityScore(double priorityScore) { this.priorityScore = priorityScore; }
     public void setScoreBreakdown(ScoreBreakdown scoreBreakdown) { this.scoreBreakdown = scoreBreakdown; }

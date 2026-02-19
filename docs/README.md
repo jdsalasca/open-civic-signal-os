@@ -32,3 +32,4 @@
 - `docs/RELEASE_POLICY.md`
 - `docs/CHANGELOG.md`
 - `.github/workflows/docker-images.yml`
+- `docs/metrics-history.md`
