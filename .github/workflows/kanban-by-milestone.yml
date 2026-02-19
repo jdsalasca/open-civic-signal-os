@@ -151,8 +151,10 @@ jobs:
               for (const line of existing) {
                 if (!line.startsWith("| ")) continue;
                 if (line.includes("---")) continue;
+                if (line.startsWith("| Week ")) continue;
                 const parts = line.split("|").map((x) => x.trim()).filter(Boolean);
                 if (parts.length < 5) continue;
+                if (parts[0] === "Week") continue;
                 existingRows.push(line);
               }
             }
