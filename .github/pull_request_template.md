@@ -2,6 +2,10 @@
 
 - Closes #
 
+## Story ID
+
+- story:
+
 ## Scope
 
 - [ ] Backend
@@ -11,18 +15,22 @@
 
 ## Changes
 
-- 
+-
 
 ## Verification
 
-- [ ] Main script passes (`npm run prioritize` or `npm run balances`)
+- [ ] Main script passes
 - [ ] Frontend build passes (`npm run build:web`)
 - [ ] Java build passes (`mvn -q -DskipTests package`) or blocker documented
 
 ## Risks / Notes
 
-- 
+-
+
+## Rollback Plan
+
+-
 
 ## Screenshots / Output
 
-- 
+-

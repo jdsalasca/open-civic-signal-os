@@ -1,0 +1,53 @@
+name: Agent blocker report
+description: Report an implementation blocker that needs maintainer decision
+title: "blocker: <short summary>"
+labels: ["help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template when an agent is blocked and needs a decision to continue safely.
+
+  - type: input
+    id: story_id
+    attributes:
+      label: Story ID
+      placeholder: story:OCS-P0-001 or story:TBP-P0-001
+    validations:
+      required: true
+
+  - type: textarea
+    id: blocker
+    attributes:
+      label: Blocker Description
+      description: What is preventing progress?
+      placeholder: Explain exact blocker, error, or ambiguity.
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempts
+    attributes:
+      label: Attempted Alternatives
+      description: What options were already tried?
+      placeholder: List options and why they failed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: decision
+    attributes:
+      label: Minimal Decision Needed
+      description: What single decision would unblock execution?
+      placeholder: Define a concrete yes/no or option choice.
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk if deferred
+      description: What happens if this is not resolved now?
+      placeholder: Mention delivery, quality, or trust impact.
+    validations:
+      required: true

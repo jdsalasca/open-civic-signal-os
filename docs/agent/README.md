@@ -12,3 +12,7 @@ Execution assets for Gemini/Codex agents implementing Open Civic Signal OS.
 ## Operating Rule
 
 No implementation starts without a Story ID and explicit acceptance criteria.
+
+- docs/agent/operations-runbook.md: execution standard runbook.
+- docs/agent/sprint-execution-model.md: weekly multi-agent operating model.
+

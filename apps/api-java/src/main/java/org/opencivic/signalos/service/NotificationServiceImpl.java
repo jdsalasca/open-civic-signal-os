@@ -32,14 +32,12 @@ public class NotificationServiceImpl implements NotificationService {
         List<Signal> top10 = prioritizationService.getTopUnresolved(10);
         String summary = top10.stream()
                 .map(s -> s.title() + " (Score: " + Math.round(s.priorityScore()) + ")")
-                .collect(Collectors.joining("
-"));
+                .collect(Collectors.joining("\n"));
 
         Notification n = new Notification(
             UUID.randomUUID(),
             "TELEGRAM",
-            "URGENT TOP 10:
-" + summary,
+            "URGENT TOP 10:\n" + summary,
             "Public Works Taskforce",
             LocalDateTime.now()
         );

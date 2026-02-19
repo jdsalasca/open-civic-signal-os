@@ -149,3 +149,8 @@ Before implementing any issue, read:
 - Development overrides must be defined in `infra/docker-compose.dev.yml`.
 - Frontend API target must be configurable via `VITE_API_BASE_URL`.
 - Health checks are required before considering deployment successful.
+
+## Agent PR Hygiene Workflow
+
+- Workflow: .github/workflows/agent-pr-hygiene.yml`n- Script: scripts/agent-pr-hygiene.mjs`n- PRs must include Story ID, verification evidence, and rollback plan.
+
