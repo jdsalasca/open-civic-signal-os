@@ -1,22 +1,46 @@
-import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import { InputNumber } from "primereact/inputnumber";
+import { Dropdown } from "primereact/dropdown";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
+import { classNames } from "primereact/utils";
+import { Layout } from "../components/Layout";
+import { useState } from "react";
+import { UserRole } from "../types";
+
+type ReportForm = {
+  title: string;
+  description: string;
+  category: string;
+  urgency: number;
+  impact: number;
+  affectedPeople: number;
+};
 
 export function ReportSignal() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    category: "infrastructure",
-    urgency: 3,
-    impact: 3,
-    affectedPeople: 10
+  const [auth] = useState<{user: string, role: UserRole} | null>(() => {
+    const saved = localStorage.getItem("civic_auth_data");
+    return saved ? JSON.parse(saved) : null;
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const { control, handleSubmit, formState: { errors } } = useForm<ReportForm>({
+    defaultValues: { title: '', description: '', category: 'infrastructure', urgency: 3, impact: 3, affectedPeople: 10 }
+  });
+
+  const categories = [
+    { label: 'Infrastructure', value: 'infrastructure' },
+    { label: 'Safety', value: 'safety' },
+    { label: 'Education', value: 'education' },
+    { label: 'Environment', value: 'environment' }
+  ];
+
+  const onSubmit = async (data: ReportForm) => {
     const token = localStorage.getItem("civic_auth_token");
-    
     try {
       const res = await fetch("/api/signals", {
         method: "POST",
@@ -24,7 +48,7 @@ export function ReportSignal() {
           "Content-Type": "application/json",
           "Authorization": token ? `Basic ${token}` : ""
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(data)
       });
 
       if (res.ok) {
@@ -32,7 +56,7 @@ export function ReportSignal() {
         navigate("/");
       } else {
         const err = await res.json();
-        toast.error(`Error: ${Object.values(err).join(", ")}`);
+        toast.error(`Error: ${err.message || "Failed to submit"}`);
       }
     } catch (err) {
       toast.error("Network error reporting signal.");
@@ -40,60 +64,71 @@ export function ReportSignal() {
   };
 
   return (
-    <div className="form-container">
-      <header className="main-header">
-        <h1>Report Civic Signal</h1>
-        <button className="login-btn secondary" onClick={() => navigate("/")}>Back to Dashboard</button>
-      </header>
+    <Layout auth={auth} onLogout={() => { localStorage.clear(); window.location.href='/'; }} onLoginClick={() => navigate('/')}>
+      <div className="flex justify-content-center">
+        <Card title="Report Civic Signal" subTitle="Provide details about the issue in your community" style={{ width: '100%', maxWidth: '800px' }}>
+          <form onSubmit={handleSubmit(onSubmit)} className="p-fluid grid">
+            <div className="field col-12">
+              <label htmlFor="title" className="font-bold">Short Title</label>
+              <Controller name="title" control={control} rules={{ required: 'Title is required.' }} 
+                render={({ field, fieldState }) => (
+                  <InputText id={field.name} {...field} placeholder="e.g. Broken bench in Central Park" className={classNames({ 'p-invalid': fieldState.error })} />
+                )} 
+              />
+              {errors.title && <small className="p-error">{errors.title.message}</small>}
+            </div>
 
-      <form className="report-form card" onSubmit={handleSubmit}>
-        <div className="input-group">
-          <label>Short Title</label>
-          <input 
-            type="text" required placeholder="e.g. Broken bench in Central Park"
-            value={form.title} onChange={e => setForm({...form, title: e.target.value})}
-          />
-        </div>
+            <div className="field col-12">
+              <label htmlFor="description" className="font-bold">Detailed Description</label>
+              <Controller name="description" control={control} 
+                render={({ field }) => (
+                  <InputTextarea id={field.name} {...field} rows={4} placeholder="Describe the problem..." autoResize />
+                )} 
+              />
+            </div>
 
-        <div className="input-group">
-          <label>Detailed Description</label>
-          <textarea 
-            rows={4} placeholder="Describe the problem..."
-            value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-          />
-        </div>
+            <div className="field col-12 md:col-6">
+              <label htmlFor="category" className="font-bold">Category</label>
+              <Controller name="category" control={control} 
+                render={({ field }) => (
+                  <Dropdown id={field.name} {...field} options={categories} />
+                )} 
+              />
+            </div>
 
-        <div className="grid-form">
-          <div className="input-group">
-            <label>Category</label>
-            <select value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
-              <option value="infrastructure">Infrastructure</option>
-              <option value="safety">Safety</option>
-              <option value="education">Education</option>
-              <option value="environment">Environment</option>
-            </select>
-          </div>
+            <div className="field col-12 md:col-2">
+              <label htmlFor="urgency" className="font-bold">Urgency (1-5)</label>
+              <Controller name="urgency" control={control} 
+                render={({ field }) => (
+                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons />
+                )} 
+              />
+            </div>
 
-          <div className="input-group">
-            <label>Urgency (1-5)</label>
-            <input type="number" min="1" max="5" value={form.urgency} onChange={e => setForm({...form, urgency: parseInt(e.target.value)})} />
-          </div>
+            <div className="field col-12 md:col-2">
+              <label htmlFor="impact" className="font-bold">Impact (1-5)</label>
+              <Controller name="impact" control={control} 
+                render={({ field }) => (
+                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons />
+                )} 
+              />
+            </div>
 
-          <div className="input-group">
-            <label>Impact (1-5)</label>
-            <input type="number" min="1" max="5" value={form.impact} onChange={e => setForm({...form, impact: parseInt(e.target.value)})} />
-          </div>
+            <div className="field col-12 md:col-2">
+              <label htmlFor="affectedPeople" className="font-bold">Affected</label>
+              <Controller name="affectedPeople" control={control} 
+                render={({ field }) => (
+                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} />
+                )} 
+              />
+            </div>
 
-          <div className="input-group">
-            <label>Est. People Affected</label>
-            <input type="number" min="1" value={form.affectedPeople} onChange={e => setForm({...form, affectedPeople: parseInt(e.target.value)})} />
-          </div>
-        </div>
-
-        <button type="submit" className="relay-btn" style={{ width: '100%', marginTop: '20px' }}>
-          Submit Signal to Prioritization
-        </button>
-      </form>
-    </div>
+            <div className="col-12 mt-4">
+              <Button type="submit" label="Submit Signal to Prioritization" icon="pi pi-check" severity="success" size="large" />
+            </div>
+          </form>
+        </Card>
+      </div>
+    </Layout>
   );
 }

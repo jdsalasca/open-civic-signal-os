@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Signal, UserRole } from "../types";
+import { Layout } from "../components/Layout";
+import { Card } from "primereact/card";
+import { Button } from "primereact/button";
+import { Tag } from "primereact/tag";
+import { ProgressBar } from "primereact/progressbar";
+import { Divider } from "primereact/divider";
 
 export function SignalDetail() {
   const { id } = useParams();
@@ -9,7 +15,6 @@ export function SignalDetail() {
   const [signal, setSignal] = useState<Signal | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Get auth info
   const auth = (() => {
     const saved = localStorage.getItem("civic_auth_data");
     return saved ? JSON.parse(saved) : null;
@@ -51,84 +56,88 @@ export function SignalDetail() {
         toast.success(`Status updated to ${newStatus}`);
         fetchSignal();
       } else {
-        toast.error("Failed to update status. Check permissions.");
+        toast.error("Failed to update status.");
       }
     } catch (err) {
       toast.error("Error updating status.");
     }
   };
 
-  if (loading) return <div className="page">Loading details...</div>;
+  if (loading) return <ProgressBar mode="indeterminate" style={{ height: '6px' }} />;
   if (!signal) return null;
 
+  const isStaff = auth?.role === "PUBLIC_SERVANT" || auth?.role === "SUPER_ADMIN";
+
+  const getStatusSeverity = (s: string) => s === 'NEW' ? 'info' : s === 'IN_PROGRESS' ? 'warning' : 'success';
+
   return (
-    <div className="form-container">
-      <header className="main-header">
-        <div>
-          <span className={`status-pill status-${signal.status.toLowerCase().replace("_", "")}`} style={{ marginBottom: '10px', display: 'inline-block' }}>
-            {signal.status}
-          </span>
-          <h1>{signal.title}</h1>
-          <p className="small-note">Category: {signal.category} | ID: {signal.id}</p>
+    <Layout auth={auth} onLogout={() => { localStorage.clear(); window.location.href='/'; }} onLoginClick={() => navigate('/')}>
+      <div className="form-container" style={{ maxWidth: '900px' }}>
+        <div className="flex align-items-center gap-3 mb-4">
+          <Button icon="pi pi-arrow-left" rounded text onClick={() => navigate('/')} />
+          <h1 className="text-3xl m-0">{signal.title}</h1>
+          <Tag value={signal.status} severity={getStatusSeverity(signal.status)} />
         </div>
-        <button className="login-btn secondary" onClick={() => navigate("/")}>Back to Dashboard</button>
-      </header>
 
-      {/* Staff Actions */}
-      {auth?.role === "PUBLIC_SERVANT" && (
-        <section className="card" style={{ marginBottom: '24px', borderColor: 'var(--accent-primary)', borderStyle: 'dashed' }}>
-          <h3 style={{ fontSize: '1rem', marginBottom: '16px', color: 'var(--accent-primary)' }}>STAFF ACTIONS: Transition Status</h3>
-          <div className="header-actions">
-            <button className="login-btn" onClick={() => updateStatus('NEW')}>Set to NEW</button>
-            <button className="login-btn" style={{ background: 'var(--status-progress)', color: '#000' }} onClick={() => updateStatus('IN_PROGRESS')}>Start Work (IN PROGRESS)</button>
-            <button className="login-btn" style={{ background: 'var(--status-resolved)', color: '#000' }} onClick={() => updateStatus('RESOLVED')}>Resolve (FIXED)</button>
-          </div>
-        </section>
-      )}
+        <div className="grid">
+          <div className="col-12 lg:col-8">
+            <Card className="mb-4 shadow-3">
+              <h3 className="text-gray-500 mb-3 uppercase text-xs tracking-widest">Problem Description</h3>
+              <p className="text-lg line-height-3 m-0" style={{ whiteSpace: 'pre-wrap' }}>
+                {signal.description || "No detailed description provided."}
+              </p>
+              
+              <Divider />
+              
+              <h3 className="text-gray-500 mb-3 uppercase text-xs tracking-widest">Impact Details</h3>
+              <div className="flex flex-wrap gap-4 mt-2">
+                <div className="flex align-items-center gap-2">
+                  <i className="pi pi-users text-cyan-400"></i>
+                  <span><strong>{signal.scoreBreakdown.affectedPeople}</strong> people affected</span>
+                </div>
+                <div className="flex align-items-center gap-2">
+                  <i className="pi pi-tag text-purple-400"></i>
+                  <span>Category: <strong>{signal.category}</strong></span>
+                </div>
+              </div>
+            </Card>
 
-      <section className="grid" style={{ marginBottom: '24px' }}>
-        <article className="card">
-          <h2>{signal.priorityScore.toFixed(1)}</h2>
-          <p>Global Priority Score</p>
-        </article>
-        <article className="card">
-          <h2>{signal.scoreBreakdown.urgency}</h2>
-          <p>Urgency Points</p>
-        </article>
-        <article className="card">
-          <h2>{signal.scoreBreakdown.impact}</h2>
-          <p>Impact Points</p>
-        </article>
-      </section>
+            {isStaff && (
+              <Card title="Management Operations" className="border-1 border-dashed border-cyan-800 bg-gray-900 shadow-2">
+                <p className="text-sm text-gray-500 mb-4">Transition this issue through the resolution lifecycle.</p>
+                <div className="flex gap-2">
+                  <Button label="New" outlined size="small" onClick={() => updateStatus('NEW')} disabled={signal.status === 'NEW'} />
+                  <Button label="In Progress" severity="warning" size="small" icon="pi pi-bolt" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} />
+                  <Button label="Resolved" severity="success" size="small" icon="pi pi-check" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} />
+                </div>
+              </Card>
+            )}
+          </div>
 
-      <div className="card" style={{ padding: '30px' }}>
-        <h3>Problem Description</h3>
-        <p style={{ lineHeight: '1.6', fontSize: '1.1rem', whiteSpace: 'pre-wrap', color: 'var(--text-main)', opacity: 0.9 }}>
-          {signal.description || "No detailed description provided."}
-        </p>
-        
-        <hr style={{ margin: '30px 0', opacity: 0.1 }} />
-        
-        <h3>Full Score Breakdown</h3>
-        <div className="grid-form" style={{ marginTop: '10px' }}>
-          <div>
-            <div className="small-note">Urgency Factor</div>
-            <strong>{signal.scoreBreakdown.urgency}</strong>
-          </div>
-          <div>
-            <div className="small-note">Social Impact</div>
-            <strong>{signal.scoreBreakdown.impact}</strong>
-          </div>
-          <div>
-            <div className="small-note">Affected Population</div>
-            <strong>{signal.scoreBreakdown.affectedPeople}</strong>
-          </div>
-          <div>
-            <div className="small-note">Community Support</div>
-            <strong>{signal.scoreBreakdown.communityVotes}</strong>
+          <div className="col-12 lg:col-4">
+            <Card title="Priority Score" className="text-center shadow-3 mb-4">
+              <div className="text-6xl font-black text-cyan-400 mb-2">
+                {signal.priorityScore.toFixed(0)}
+              </div>
+              <p className="text-gray-500 text-xs uppercase tracking-wider">Algorithmic Rank</p>
+              <Divider />
+              <div className="text-left">
+                <div className="flex justify-content-between mb-2">
+                  <span className="text-sm">Urgency</span>
+                  <span className="font-bold">{signal.scoreBreakdown.urgency}</span>
+                </div>
+                <ProgressBar value={(signal.scoreBreakdown.urgency / 150) * 100} showValue={false} style={{ height: '4px' }} />
+                
+                <div className="flex justify-content-between mb-2 mt-3">
+                  <span className="text-sm">Social Impact</span>
+                  <span className="font-bold">{signal.scoreBreakdown.impact}</span>
+                </div>
+                <ProgressBar value={(signal.scoreBreakdown.impact / 125) * 100} showValue={false} severity="warning" style={{ height: '4px' }} />
+              </div>
+            </Card>
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
