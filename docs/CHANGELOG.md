@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **Dockerized Infrastructure**: Added multi-stage Dockerfiles and `docker-compose.yml` for production-ready deployment (Ports: 3002 for Web, 8081 for API).
+- **Weekly Top-10 Digest**: New sidebar visualization and API endpoint highlighting the top unresolved community needs. (#6)
 - **Dashboard Filters & Lifecycle**: Added real-time filtering by Category and Status to the public dashboard. (#5)
 - **UI Enhancements**: Integrated status-coded pills and visualized scoring breakdowns with tooltips in the signal table. (#5)
 - **Explainable Scoring Breakdown**: Prioritized signals now include a breakdown of their score (urgency, impact, reach, community votes) for full transparency. (#4)

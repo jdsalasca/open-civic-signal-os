@@ -1,20 +1,39 @@
 version: "3.9"
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: civic-db
+    environment:
+      POSTGRES_DB: signalos
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - civic-db-data:/var/lib/postgresql/data
+
   api:
-    image: eclipse-temurin:21
-    container_name: open-civic-api-dev
-    working_dir: /workspace/apps/api-java
-    volumes:
-      - ../:/workspace
-    command: ["bash", "-lc", "mvn spring-boot:run"]
+    build:
+      context: ../apps/api-java
+      dockerfile: Dockerfile
+    container_name: civic-api
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/signalos
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=password
     ports:
-      - "8080:8080"
+      - "8081:8080"
+    depends_on:
+      - db
+
   web:
-    image: node:20
-    container_name: open-civic-web-dev
-    working_dir: /workspace/apps/web-react
-    volumes:
-      - ../:/workspace
-    command: ["bash", "-lc", "npm install && npm run dev -- --host 0.0.0.0 --port 5173"]
+    build:
+      context: ../apps/web-react
+      dockerfile: Dockerfile
+    container_name: civic-web
     ports:
-      - "5173:5173"
+      - "3002:3002"
+
+volumes:
+  civic-db-data:

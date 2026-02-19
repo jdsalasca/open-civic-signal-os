@@ -37,7 +37,7 @@ export function App() {
   useEffect(() => {
     async function loadSignals() {
       try {
-        const response = await fetch("http://localhost:8080/api/signals/prioritized");
+        const response = await fetch("http://localhost:8081/api/signals/prioritized");
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
         }
@@ -68,6 +68,13 @@ export function App() {
       return matchCat && matchStatus;
     });
   }, [signals, filterCategory, filterStatus]);
+
+  const topUnresolved = useMemo(() => {
+    return signals
+      .filter(s => s.status === "NEW")
+      .sort((a, b) => b.priorityScore - a.priorityScore)
+      .slice(0, 10);
+  }, [signals]);
 
   const metrics = useMemo(() => {
     const total = signals.length;
@@ -104,62 +111,71 @@ export function App() {
         ))}
       </section>
 
-      <section className="tableCard">
-        <h2>Prioritized Signals</h2>
-        
-        <div className="controls">
-          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-            {categories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
-          </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-            {statuses.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
-          </select>
-        </div>
+      <div className="layout-split">
+        <section className="tableCard main-content">
+          <h2>Prioritized Signals</h2>
+          
+          <div className="controls">
+            <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+              {categories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
+            </select>
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+              {statuses.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
+            </select>
+          </div>
 
-        {loading ? <p>Loading...</p> : null}
-        <div className="tableWrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Score</th>
-                <th>Breakdown</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSignals.map((signal) => (
-                <tr key={signal.id}>
-                  <td>{signal.id}</td>
-                  <td>{signal.title}</td>
-                  <td>{signal.category}</td>
-                  <td>
-                    <span className={`status-pill status-${signal.status.toLowerCase().replace("_", "")}`}>
-                      {signal.status}
-                    </span>
-                  </td>
-                  <td style={{ fontWeight: 'bold' }}>{signal.priorityScore.toFixed(1)}</td>
-                  <td>
-                    <span className="breakdown-tag" title="Urgency">U: {signal.scoreBreakdown.urgency}</span>
-                    <span className="breakdown-tag" title="Impact">I: {signal.scoreBreakdown.impact}</span>
-                    <span className="breakdown-tag" title="Reach">R: {signal.scoreBreakdown.affectedPeople}</span>
-                    <span className="breakdown-tag" title="Community">C: {signal.scoreBreakdown.communityVotes}</span>
-                  </td>
-                </tr>
-              ))}
-              {filteredSignals.length === 0 && !loading && (
+          {loading ? <p>Loading...</p> : null}
+          <div className="tableWrap">
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>
-                    No signals found matching your filters.
-                  </td>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Status</th>
+                  <th>Score</th>
+                  <th>Breakdown</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+              </thead>
+              <tbody>
+                {filteredSignals.map((signal) => (
+                  <tr key={signal.id}>
+                    <td>{signal.title}</td>
+                    <td>{signal.category}</td>
+                    <td>
+                      <span className={`status-pill status-${signal.status.toLowerCase().replace("_", "")}`}>
+                        {signal.status}
+                      </span>
+                    </td>
+                    <td style={{ fontWeight: 'bold' }}>{signal.priorityScore.toFixed(1)}</td>
+                    <td>
+                      <span className="breakdown-tag" title="Urgency">U: {signal.scoreBreakdown.urgency}</span>
+                      <span className="breakdown-tag" title="Impact">I: {signal.scoreBreakdown.impact}</span>
+                      <span className="breakdown-tag" title="Reach">R: {signal.scoreBreakdown.affectedPeople}</span>
+                      <span className="breakdown-tag" title="Community">C: {signal.scoreBreakdown.communityVotes}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside className="digest-sidebar">
+          <h2>Top 10 Unresolved</h2>
+          <p className="small-note">Weekly high-priority community needs.</p>
+          <div className="digest-list">
+            {topUnresolved.map((signal, idx) => (
+              <div key={signal.id} className="digest-item">
+                <span className="digest-rank">#{idx + 1}</span>
+                <div className="digest-info">
+                  <span className="digest-title">{signal.title}</span>
+                  <span className="digest-meta">{signal.category} • Score: {signal.priorityScore.toFixed(0)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </aside>
+      </div>
     </main>
   );
 }
