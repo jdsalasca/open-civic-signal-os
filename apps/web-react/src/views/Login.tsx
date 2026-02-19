@@ -7,7 +7,7 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { classNames } from "primereact/utils";
 import { useAuthStore } from "../store/useAuthStore";
-import { Shield } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import apiClient from "../api/axios";
 
 type LoginForm = {
@@ -29,58 +29,88 @@ export function Login() {
       toast.success(`Welcome back, ${res.data.username}!`);
       navigate("/");
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Invalid credentials.");
+      const msg = err.response?.data?.message || "Invalid username or password.";
+      toast.error(msg);
     }
   };
 
   return (
-    <div className="flex justify-content-center align-items-center mt-6">
+    <div className="flex justify-content-center align-items-center" style={{ minHeight: '70vh' }}>
       <Card 
-        title={
-          <div className="flex align-items-center gap-2">
-            <Shield className="text-cyan-400" />
-            <span>Staff & Citizen Login</span>
-          </div>
-        } 
-        subTitle="Enter your credentials to access the OS" 
-        style={{ width: '100%', maxWidth: '400px' }}
+        className="shadow-8 border-round-2xl border-1 border-white-alpha-10 animate-fade-in"
+        style={{ width: '100%', maxWidth: '420px', background: 'var(--bg-surface)' }}
       >
+        <div className="text-center mb-5">
+          <ShieldCheck size={60} className="text-cyan-500 mb-3" />
+          <h1 className="text-3xl font-black text-white m-0 tracking-tight">Access Portal</h1>
+          <p className="text-gray-500 mt-2">Open Civic Signal OS Management</p>
+        </div>
+
         <form onSubmit={handleSubmit(onSubmit)} className="p-fluid">
-          <div className="field mt-2">
-            <label htmlFor="username">Username</label>
+          <div className="field mb-4">
+            <label htmlFor="username" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Username</label>
             <span className="p-input-icon-left">
-              <i className="pi pi-user" />
-              <Controller name="username" control={control} rules={{ required: 'Username is required.' }} 
+              <i className="pi pi-user text-cyan-500" />
+              <Controller 
+                name="username" 
+                control={control} 
+                rules={{ required: 'Username is required.' }} 
                 render={({ field, fieldState }) => (
-                  <InputText id={field.name} {...field} className={classNames({ 'p-invalid': fieldState.error })} />
+                  <InputText 
+                    id="username" 
+                    {...field} 
+                    autoFocus
+                    placeholder="Enter your username"
+                    className={classNames('p-inputtext-lg py-3 pl-5', { 'p-invalid': fieldState.error })} 
+                  />
                 )} 
               />
             </span>
-            {errors.username && <small className="p-error">{errors.username.message}</small>}
+            {errors.username && <small className="p-error block mt-1">{errors.username.message}</small>}
           </div>
 
-          <div className="field mt-4">
-            <label htmlFor="password">Password</label>
-            <Controller name="password" control={control} rules={{ required: 'Password is required.' }} 
+          <div className="field mb-5">
+            <label htmlFor="password" name="password-label" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Password</label>
+            <Controller 
+              name="password" 
+              control={control} 
+              rules={{ required: 'Password is required.' }} 
               render={({ field, fieldState }) => (
-                <Password id={field.name} {...field} toggleMask feedback={false} className={classNames({ 'p-invalid': fieldState.error })} />
+                <Password 
+                  id="password" 
+                  {...field} 
+                  toggleMask 
+                  feedback={false} 
+                  placeholder="Enter your password"
+                  inputClassName="p-inputtext-lg py-3"
+                  className={classNames('w-full', { 'p-invalid': fieldState.error })} 
+                />
               )} 
             />
-            {errors.password && <small className="p-error">{errors.password.message}</small>}
+            {errors.password && <small className="p-error block mt-1">{errors.password.message}</small>}
           </div>
 
-          <Button type="submit" label="Sign In" icon="pi pi-sign-in" className="mt-4" />
+          <Button 
+            type="submit" 
+            label="Sign In to OS" 
+            icon="pi pi-sign-in" 
+            className="py-3 font-bold text-lg shadow-4 border-none bg-cyan-600 hover:bg-cyan-500" 
+          />
           
-          <div className="text-center mt-4">
-            <p className="text-gray-500 text-sm">
-              Don't have an account? <Link to="/register" className="text-cyan-400 font-bold no-underline">Register here</Link>
-            </p>
+          <div className="text-center mt-5">
+            <span className="text-gray-600 mr-2">Don't have an account?</span>
+            <Link to="/register" className="text-cyan-400 font-bold no-underline hover:underline">Create one</Link>
           </div>
 
-          <div className="mt-4 p-3 bg-gray-800 border-round text-xs text-gray-400">
-            <div className="mb-1"><strong>SuperAdmin:</strong> admin / admin12345</div>
-            <div className="mb-1"><strong>Staff:</strong> servant / servant2026</div>
-            <div><strong>Citizen:</strong> citizen / citizen2026</div>
+          <div className="mt-5 p-3 bg-black-alpha-20 border-round-xl border-1 border-white-alpha-10">
+            <div className="flex justify-content-between mb-2 pb-2 border-bottom-1 border-white-alpha-10">
+              <span className="text-xs text-gray-500 font-medium">DEMO ACCESS</span>
+              <i className="pi pi-info-circle text-gray-600" />
+            </div>
+            <div className="flex flex-column gap-2">
+              <code className="text-min text-cyan-700">admin / admin12345</code>
+              <code className="text-min text-gray-700">citizen / citizen2026</code>
+            </div>
           </div>
         </form>
       </Card>

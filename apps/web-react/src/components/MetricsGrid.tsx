@@ -25,16 +25,16 @@ export function MetricsGrid({ signals }: Props) {
   }, [signals]);
 
   return (
-    <div className="grid">
+    <div className="grid grid-nogutter gap-3 mb-4">
       {metrics.map((m) => (
-        <div key={m.title} className="col-12 md:col-6 lg:col-3 animate-fade-in">
-          <Card className={`shadow-2 border-1 border-gray-800 bg-gray-900 metric-card-inner ${m.border}`}>
-            <div className="flex justify-content-between mb-2">
-              <div>
-                <span className="block text-gray-500 font-medium mb-2 uppercase text-xs tracking-wider">{m.title}</span>
-                <div className={`text-4xl font-bold ${m.color}`}>{m.value}</div>
+        <div key={m.title} className="col-12 sm:col-6 lg:col-3 flex">
+          <Card className={`shadow-4 border-1 border-gray-800 bg-gray-900 metric-card-inner w-full ${m.border}`}>
+            <div className="flex justify-content-between align-items-center">
+              <div className="flex flex-column gap-1">
+                <span className="text-gray-600 font-bold uppercase" style={{ fontSize: '10px', letterSpacing: '1.5px' }}>{m.title}</span>
+                <div className={`text-4xl font-black ${m.color}`}>{m.value}</div>
               </div>
-              <div className="flex align-items-center justify-content-center bg-gray-800 border-round shadow-1" style={{ width: '2.5rem', height: '2.5rem' }}>
+              <div className="flex align-items-center justify-content-center bg-gray-800 border-round-xl shadow-2" style={{ width: '3rem', height: '3rem' }}>
                 <i className={`pi ${m.icon} text-xl ${m.color}`}></i>
               </div>
             </div>
