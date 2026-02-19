@@ -180,3 +180,17 @@ Use these inputs before implementation:
 - Trigger: weekly + manual
 - Source: `docs/metrics-history.md`
 - Output: one issue per week with trends and action checklist.
+
+## Technical and Functional Input Pack
+
+Required references before implementation:
+
+- `docs/agent/functional-requirements.md`
+- `docs/agent/technical-requirements.md`
+- `docs/agent/integration-test-matrix.md`
+- `docs/agent/security-abuse-checklist.md`
+## Agent Context Check
+
+- Workflow: `.github/workflows/agent-context-check.yml`
+- Script: `scripts/agent-context-check.mjs`
+- Purpose: fail PRs missing mandatory technical/functional agent context.

@@ -1,0 +1,18 @@
+name: Agent Context Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate technical and functional context files
+        run: node scripts/agent-context-check.mjs

@@ -28,3 +28,8 @@ No implementation starts without a Story ID and explicit acceptance criteria.
 - `docs/agent/agent-evaluation-pack.md`: scoring model and evaluation gate.
 - `docs/agent/story-acceptance-checklist.md`: acceptance checklist by story.
 - `docs/agent/review-comment-catalog.md`: reusable high-signal review comments.
+
+- `docs/agent/functional-requirements.md`: functional baseline requirements.
+- `docs/agent/technical-requirements.md`: technical invariants and constraints.
+- `docs/agent/integration-test-matrix.md`: integration test matrix by risk.
+- `docs/agent/security-abuse-checklist.md`: secure-by-default checklist.
