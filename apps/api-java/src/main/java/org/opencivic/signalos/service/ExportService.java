@@ -38,7 +38,7 @@ public class ExportService {
                     String.valueOf(s.getImpact()),
                     String.valueOf(s.getAffectedPeople()),
                     String.valueOf(s.getCommunityVotes()),
-                    s.getCreatedAt().toString()
+                    s.getCreatedAt() != null ? s.getCreatedAt().toString() : ""
                 );
                 writer.println(String.join(",", data));
             }
@@ -49,11 +49,12 @@ public class ExportService {
 
     private String escapeCsv(String data) {
         if (data == null) return "";
-        String escapedData = data.replaceAll("\R", " ");
-        if (escapedData.contains(",") || escapedData.contains(""") || escapedData.contains("'")) {
-            escapedData = escapedData.replace(""", """");
-            escapedData = """ + escapedData + """;
+        // Clean line breaks
+        String cleaned = data.replace("\n", " ").replace("\r", " ");
+        // If contains comma or quotes, wrap in quotes and escape internal quotes
+        if (cleaned.contains(",") || cleaned.contains("\"")) {
+            cleaned = "\"" + cleaned.replace("\"", "\"\"") + "\"";
         }
-        return escapedData;
+        return cleaned;
     }
 }

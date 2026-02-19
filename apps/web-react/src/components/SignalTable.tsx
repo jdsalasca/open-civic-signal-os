@@ -7,6 +7,7 @@ import { FilterMatchMode } from "primereact/api";
 import { Skeleton } from "primereact/skeleton";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Signal } from "../types";
 
 type Props = {
@@ -20,6 +21,7 @@ interface SkeletonRow {
 }
 
 export function SignalTable({ signals, loading }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   
@@ -57,7 +59,7 @@ export function SignalTable({ signals, loading }: Props) {
   const scoreTemplate = (rowData: Signal | SkeletonRow) => {
     if ('_skeleton' in rowData) return <Skeleton width="2rem" />;
     return (
-      <div className="flex align-items-center gap-3" role="group" aria-label={`Priority Score: ${rowData.priorityScore?.toFixed(0)}`}>
+      <div className="flex align-items-center gap-3" role="group" aria-label={`${t('common.score')}: ${rowData.priorityScore?.toFixed(0)}`}>
         <span className="font-black text-cyan-400 text-lg glow-cyan" style={{ minWidth: '35px' }}>{rowData.priorityScore?.toFixed(0)}</span>
         <div className="hidden xl:flex flex-column gap-1 flex-grow-1" style={{ maxWidth: '60px' }}>
            <div className="bg-gray-800 border-round overflow-hidden shadow-inner" style={{ height: '6px' }}>
@@ -81,7 +83,7 @@ export function SignalTable({ signals, loading }: Props) {
           {rowData.title}
         </span>
         <div className="flex align-items-center gap-2">
-          <span className="text-xs text-gray-600 font-mono font-bold uppercase tracking-widest">REF: {rowData.id?.substring(0,8)}</span>
+          <span className="text-xs text-gray-500 font-mono font-bold uppercase tracking-widest">{t('signals.ref')}: {rowData.id?.substring(0,8)}</span>
         </div>
       </div>
     );
@@ -91,17 +93,17 @@ export function SignalTable({ signals, loading }: Props) {
     <div className="flex flex-column md:flex-row justify-content-between md:align-items-center gap-3 px-2 py-1">
       <div className="flex align-items-center gap-2">
         <i className="pi pi-bolt text-yellow-500 text-xl shadow-4"></i>
-        <h2 className="text-xl font-black m-0 text-white tracking-tight uppercase">Prioritized Feed</h2>
+        <h2 className="text-xl font-black m-0 text-white tracking-tight uppercase">{t('dashboard.feed_title')}</h2>
       </div>
       <span className="p-input-icon-left shadow-2 border-round-lg overflow-hidden">
         <i className="pi pi-search text-gray-400" />
         <InputText 
           value={globalFilterValue} 
           onChange={onGlobalFilterChange} 
-          placeholder="Search signals..." 
+          placeholder={t('dashboard.search_placeholder')} 
           className="p-inputtext-sm w-full md:w-20rem bg-gray-900 border-none font-medium text-white" 
           data-testid="signal-search-input"
-          aria-label="Search signals in table"
+          aria-label={t('dashboard.search_placeholder')}
         />
       </span>
     </div>
@@ -112,17 +114,17 @@ export function SignalTable({ signals, loading }: Props) {
       <div className="bg-gray-900 border-circle inline-flex align-items-center justify-content-center mb-4 shadow-4" style={{ width: '100px', height: '100px' }}>
         <i className="pi pi-search-plus text-4xl text-gray-600"></i>
       </div>
-      <h3 className="text-2xl font-black text-white m-0">No signals found</h3>
+      <h3 className="text-2xl font-black text-white m-0">{t('dashboard.empty_title')}</h3>
       <p className="text-gray-400 max-w-20rem mx-auto mt-2 mb-5 font-medium line-height-3">
-        Your community feed is currently clear. Be the first to report a local need.
+        {t('dashboard.empty_desc')}
       </p>
       <Button 
-        label="Report New Issue" 
+        label={t('dashboard.new_issue')} 
         icon="pi pi-plus" 
-        className="p-button-primary border-none px-6 py-3 shadow-6" 
+        className="p-button-primary border-none px-6 py-3 shadow-6 font-bold" 
         onClick={() => navigate("/report")} 
         data-testid="empty-state-report-button"
-        aria-label="Report a new civic issue"
+        aria-label={t('dashboard.new_issue')}
       />
     </div>
   );
@@ -136,7 +138,7 @@ export function SignalTable({ signals, loading }: Props) {
         filters={filters}
         globalFilterFields={["title", "category", "status"]}
         header={header}
-        dataKey="id" // P1-C: Use stable 'id' (including skeleton IDs)
+        dataKey="id" 
         onRowClick={(e) => {
           const row = e.data as Signal | SkeletonRow;
           if (!loading && !('_skeleton' in row)) {
@@ -151,15 +153,15 @@ export function SignalTable({ signals, loading }: Props) {
         removableSort
         tableStyle={{ minWidth: '50rem' }}
         data-testid="signals-datatable"
-        aria-label="Civic Signals Data Table"
+        aria-label={t('dashboard.feed_title')}
       >
-        <Column header="Civic Need" body={titleTemplate} sortable sortField="title" />
-        <Column field="category" header="Category" sortable body={(s) => (loading || ('_skeleton' in (s as object))) ? <Skeleton width="4rem" /> : (
-          <span className="text-xs font-black text-gray-400 uppercase tracking-widest bg-white-alpha-5 px-3 py-1 border-round-lg border-1 border-white-alpha-10">{(s as Signal).category}</span>
+        <Column header={t('common.title')} body={titleTemplate} sortable sortField="title" />
+        <Column field="category" header={t('common.category')} sortable body={(s) => (loading || ('_skeleton' in (s as object))) ? <Skeleton width="4rem" /> : (
+          <span className="text-xs font-black text-gray-400 uppercase tracking-widest bg-white-alpha-5 px-3 py-1 border-round-lg border-1 border-white-alpha-10">{t(`categories.${(s as Signal).category}`)}</span>
         )} />
-        <Column header="Status" sortable sortField="status" body={statusTemplate} style={{ width: '10rem' }} />
-        <Column header="Intelligence Rank" sortable sortField="priorityScore" body={scoreTemplate} style={{ width: '12rem' }} />
-        <Column body={(d) => (!loading && !('_skeleton' in (d as object))) && <i className="pi pi-arrow-up-right text-gray-600 hover:text-cyan-400 transition-colors" />} style={{ width: '3rem' }} aria-label="View Details" />
+        <Column header={t('common.status')} sortable sortField="status" body={statusTemplate} style={{ width: '10rem' }} />
+        <Column header={t('common.score')} sortable sortField="priorityScore" body={scoreTemplate} style={{ width: '12rem' }} />
+        <Column body={(d) => (!loading && !('_skeleton' in (d as object))) && <i className="pi pi-arrow-up-right text-gray-600 hover:text-cyan-400 transition-colors" />} style={{ width: '3rem' }} aria-label={t('signals.view_details')} />
       </DataTable>
     </div>
   );

@@ -29,7 +29,7 @@ export function Layout({ children, authMode = false }: Props) {
     try {
       await apiClient.post("auth/logout");
     } catch (err) {
-      console.warn("Server-side logout session could not be invalidated.");
+      console.warn(t('auth.logout_warn'));
     } finally {
       logout();
       setMobileMenuVisible(false);
@@ -56,7 +56,7 @@ export function Layout({ children, authMode = false }: Props) {
         onHide={() => setMobileMenuVisible(false)} 
         position="left" 
         className="bg-gray-900 border-right-1 border-white-alpha-10 w-20rem"
-        aria-label="Main Navigation"
+        aria-label={t('nav.settings')}
       >
         <div className="flex flex-column h-full p-3">
           <div className="flex align-items-center gap-2 mb-5">
@@ -120,7 +120,18 @@ export function Layout({ children, authMode = false }: Props) {
 
         <div className="flex align-items-center gap-3">
           {!authMode && isLoggedIn && (
-            <Button icon="pi pi-bars" text className="lg:hidden text-white p-0" onClick={() => setMobileMenuVisible(true)} />
+            <Button icon="pi pi-bars" text className="lg:hidden text-white p-0" onClick={() => setMobileMenuVisible(true)} aria-label={t('nav.settings')} />
+          )}
+
+          {!authMode && !isLoggedIn && (
+            <div className="flex gap-2">
+              <Link to="/login" className="no-underline">
+                <Button label={t('nav.sign_in')} size="small" text className="text-white hover:text-cyan-400 font-bold" />
+              </Link>
+              <Link to="/register" className="no-underline">
+                <Button label={t('nav.join_now')} size="small" className="p-button-primary px-3 font-bold" />
+              </Link>
+            </div>
           )}
 
           {isLoggedIn && (
@@ -130,7 +141,7 @@ export function Layout({ children, authMode = false }: Props) {
                 <span className="text-min font-bold text-cyan-500 uppercase tracking-tighter" style={{ fontSize: '9px' }}>{activeRole}</span>
               </div>
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-cyan-600 text-white font-bold" />
-              <Button icon="pi pi-power-off" rounded text className="text-gray-500 hover:text-red-400 ml-1" onClick={handleLogout} />
+              <Button icon="pi pi-power-off" rounded text className="text-gray-500 hover:text-red-400 ml-1" onClick={handleLogout} aria-label={t('nav.sign_out')} />
             </div>
           )}
         </div>
@@ -139,6 +150,20 @@ export function Layout({ children, authMode = false }: Props) {
       <main className="flex-grow-1 p-4 md:p-6 bg-gray-950">
         <div className="page-container h-full">{children}</div>
       </main>
+
+      <footer className="bg-gray-950 p-6 flex flex-column md:flex-row justify-content-between align-items-center border-top-1 border-white-alpha-10 gap-4">
+        <div className="flex align-items-center gap-2">
+          <i className="pi pi-globe text-gray-500"></i>
+          <span className="text-gray-400 text-sm font-bold uppercase tracking-widest text-xs">{t('nav.global_standard')}</span>
+        </div>
+        <div className="text-gray-400 text-xs text-center font-bold">
+          &copy; 2026 Open Civic Signal OS. {t('nav.protocol_version')}
+        </div>
+        <div className="flex gap-4">
+          <i className="pi pi-github text-gray-500 hover:text-white cursor-pointer transition-colors text-xl"></i>
+          <i className="pi pi-twitter text-gray-500 hover:text-white cursor-pointer transition-colors text-xl"></i>
+        </div>
+      </footer>
     </div>
   );
 }

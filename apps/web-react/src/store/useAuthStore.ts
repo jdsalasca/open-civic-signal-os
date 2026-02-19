@@ -5,10 +5,10 @@ import { UserRole } from '../types';
 interface AuthState {
   accessToken: string | null;
   userName: string | null;
-  activeRole: UserRole; // Current active role for UI and Permissions
-  rawRoles: string[];   // All authorized roles from BE
+  activeRole: UserRole;
+  rawRoles: string[];
   isLoggedIn: boolean;
-  setAuth: (data: { accessToken: string; username: string; roles: string }) => void;
+  setAuth: (data: { accessToken: string; username: string; role: string }) => void;
   switchRole: (role: string) => void;
   logout: () => void;
   updateAccessToken: (token: string) => void;
@@ -26,11 +26,15 @@ export const useAuthStore = create<AuthState>()(
       isLoggedIn: false,
       isHydrated: false,
       setAuth: (data) => {
-        const roles = data.roles.split(',').map(r => r.replace('ROLE_', '') as UserRole);
+        // Aligned with Backend AuthResponse record: accessToken, username, role
+        const roles = (data.role || 'ROLE_CITIZEN')
+          .split(',')
+          .map(r => r.trim().replace('ROLE_', '') as UserRole);
+        
         set({
           accessToken: data.accessToken,
-          userName: data.username,
-          activeRole: roles[0], // Default to first role
+          userName: data.username, // mapping lowercase 'username' from BE
+          activeRole: roles[0],
           rawRoles: roles,
           isLoggedIn: true
         });

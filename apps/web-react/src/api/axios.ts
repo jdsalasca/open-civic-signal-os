@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 
-// UX-001: Hardened baseURL. We avoid trailing slash to keep composition predictable.
+// UX-001: Centralized baseURL
 const apiClient = axios.create({
   baseURL: '/api',
   headers: {
@@ -17,7 +17,7 @@ apiClient.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   
-  // UX-001: Safety check - ensure no double /api in outgoing URL
+  // UX-001: Safety - Prevent double prefix if absolute path is passed
   if (config.url?.startsWith('/api')) {
     config.url = config.url.replace('/api', '');
   }
@@ -33,16 +33,16 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // UX-005: Root-cause analysis for error messaging
+    // UX-005: Map specific error messages by root cause
     if (!error.response) {
-      error.friendlyMessage = "Civic API Unreachable: Please verify your connection or check service status.";
+      error.friendlyMessage = "Civic API Unreachable: Check connection.";
     } else {
       switch (error.response.status) {
-        case 401: error.friendlyMessage = "Authentication Required: Your session is invalid or expired."; break;
-        case 403: error.friendlyMessage = "Forbidden: Your role lacks clearance for this coordinate."; break;
-        case 404: error.friendlyMessage = "Not Found: The requested civic resource does not exist."; break;
-        case 409: error.friendlyMessage = "Conflict: Action rejected to maintain data integrity."; break;
-        default: error.friendlyMessage = "Civic Error: An unexpected system rejection occurred.";
+        case 401: error.friendlyMessage = "Authentication Required."; break;
+        case 403: error.friendlyMessage = "Clearance Denied."; break;
+        case 404: error.friendlyMessage = "Resource not found."; break;
+        case 409: error.friendlyMessage = "State Conflict detected."; break;
+        case 500: error.friendlyMessage = "Internal System Synchronization Failure."; break;
       }
     }
 
@@ -50,7 +50,6 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // UX-001: Explicit relative path for refresh
         const res = await apiClient.post('auth/refresh', {});
         const { accessToken } = res.data;
         

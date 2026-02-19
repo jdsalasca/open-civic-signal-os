@@ -8,9 +8,11 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Layout } from "../components/Layout";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 
 export function MySignals() {
+  const { t } = useTranslation();
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -21,13 +23,13 @@ export function MySignals() {
         const res = await apiClient.get("signals/mine");
         setSignals(res.data);
       } catch (err) {
-        toast.error("Could not load your history.");
+        toast.error(t('common.error'));
       } finally {
         setLoading(false);
       }
     };
     fetchMySignals();
-  }, []);
+  }, [t]);
 
   const statusTemplate = (rowData: Signal) => {
     const severity = rowData.status === "NEW" ? "info" : 
@@ -41,10 +43,10 @@ export function MySignals() {
       <div className="animate-fade-in page-container">
         <div className="flex align-items-center justify-content-between mb-5">
           <div>
-            <h1 className="text-4xl font-black m-0 text-white tracking-tight">My Contributions</h1>
-            <p className="text-gray-400 mt-2">Track the impact of the issues you've reported.</p>
+            <h1 className="text-4xl font-black m-0 text-white tracking-tight">{t('my_contributions.title')}</h1>
+            <p className="text-gray-400 mt-2">{t('my_contributions.desc')}</p>
           </div>
-          <Button label="Report New Issue" icon="pi pi-plus" className="p-button-primary shadow-4" onClick={() => navigate("/report")} />
+          <Button label={t('dashboard.new_issue')} icon="pi pi-plus" className="p-button-primary shadow-4" onClick={() => navigate("/report")} />
         </div>
 
         <div className="grid">
@@ -53,7 +55,7 @@ export function MySignals() {
               <div className="flex align-items-center gap-3">
                 <i className="pi pi-file text-4xl text-cyan-400"></i>
                 <div>
-                  <span className="block text-cyan-200 font-bold uppercase text-xs tracking-widest">Total Reports</span>
+                  <span className="block text-cyan-200 font-bold uppercase text-xs tracking-widest">{t('my_contributions.total_reports')}</span>
                   <span className="text-4xl font-black text-white">{signals.length}</span>
                 </div>
               </div>
@@ -64,7 +66,7 @@ export function MySignals() {
               <div className="flex align-items-center gap-3">
                 <i className="pi pi-check-circle text-4xl text-purple-400"></i>
                 <div>
-                  <span className="block text-purple-200 font-bold uppercase text-xs tracking-widest">Resolved</span>
+                  <span className="block text-purple-200 font-bold uppercase text-xs tracking-widest">{t('my_contributions.resolved')}</span>
                   <span className="text-4xl font-black text-white">{signals.filter(s => s.status === 'RESOLVED').length}</span>
                 </div>
               </div>
@@ -75,7 +77,7 @@ export function MySignals() {
               <div className="flex align-items-center gap-3">
                 <i className="pi pi-heart text-4xl text-pink-500"></i>
                 <div>
-                  <span className="block text-gray-400 font-bold uppercase text-xs tracking-widest">Community Votes</span>
+                  <span className="block text-gray-400 font-bold uppercase text-xs tracking-widest">{t('my_contributions.community_votes')}</span>
                   <span className="text-4xl font-black text-white">
                     {signals.reduce((acc, s) => acc + (s.scoreBreakdown?.communityVotes || 0), 0)}
                   </span>
@@ -86,13 +88,13 @@ export function MySignals() {
         </div>
 
         <div className="surface-card border-round-xl border-1 border-white-alpha-10 shadow-8 overflow-hidden mt-4">
-          <DataTable value={signals} loading={loading} emptyMessage="You haven't reported any issues yet." className="p-datatable-lg">
-            <Column field="title" header="Signal Title" body={(s) => <span className="font-bold text-gray-100">{s.title}</span>} />
-            <Column field="category" header="Category" />
-            <Column header="Status" body={statusTemplate} />
-            <Column field="priorityScore" header="Score" body={(s) => s.priorityScore.toFixed(0)} />
+          <DataTable value={signals} loading={loading} emptyMessage={t('my_contributions.empty')} className="p-datatable-lg">
+            <Column field="title" header={t('common.title')} body={(s) => <span className="font-bold text-gray-100">{s.title}</span>} />
+            <Column field="category" header={t('common.category')} body={(s) => t(`categories.${s.category}`)} />
+            <Column header={t('common.status')} body={statusTemplate} />
+            <Column field="priorityScore" header={t('common.score')} body={(s) => s.priorityScore.toFixed(0)} />
             <Column body={(s) => (
-              <Button icon="pi pi-arrow-right" text rounded onClick={() => navigate(`/signal/${s.id}`)} aria-label="View Details" />
+              <Button icon="pi pi-arrow-right" text rounded onClick={() => navigate(`/signal/${s.id}`)} aria-label={t('signals.view_details')} />
             )} />
           </DataTable>
         </div>

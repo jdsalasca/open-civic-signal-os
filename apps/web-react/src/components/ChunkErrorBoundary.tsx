@@ -1,8 +1,9 @@
 import { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
+import { withTranslation, WithTranslation } from "react-i18next";
 
-interface Props {
+interface Props extends WithTranslation {
   children: ReactNode;
 }
 
@@ -10,13 +11,12 @@ interface State {
   hasError: boolean;
 }
 
-export class ChunkErrorBoundary extends Component<Props, State> {
+class ChunkErrorBoundaryBase extends Component<Props, State> {
   public state: State = {
     hasError: false
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    // FE-1: Detect dynamic import failures (MIME mismatch or network loss)
     const isChunkLoadError = error.message.includes("Failed to fetch dynamically imported module") || 
                              error.message.includes("Loading chunk");
     
@@ -37,19 +37,20 @@ export class ChunkErrorBoundary extends Component<Props, State> {
   };
 
   public render() {
+    const { t } = this.props;
+
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex align-items-center justify-content-center bg-gray-900 p-4">
           <Card className="exception-card shadow-8 border-cyan-900 border-1 w-full max-w-25rem">
             <div className="text-center">
               <i className="pi pi-refresh text-cyan-500 text-5xl mb-4"></i>
-              <h2 className="text-white font-black mb-2">Protocol Resynchronization</h2>
+              <h2 className="text-white font-black mb-2">{t('exceptions.chunk_title')}</h2>
               <p className="text-gray-400 mb-5 line-height-3">
-                A system module failed to load due to a stale cache or temporary signal loss. 
-                Synchronizing the application state is required.
+                {t('exceptions.chunk_desc')}
               </p>
               <Button 
-                label="Refresh Intelligence" 
+                label={t('exceptions.chunk_button')} 
                 icon="pi pi-sync" 
                 className="p-button-primary w-full py-3 font-bold" 
                 onClick={this.handleReload} 
@@ -60,6 +61,8 @@ export class ChunkErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return this.props.children; // Fixed: use this.props.children
+    return this.props.children;
   }
 }
+
+export const ChunkErrorBoundary = withTranslation()(ChunkErrorBoundaryBase);

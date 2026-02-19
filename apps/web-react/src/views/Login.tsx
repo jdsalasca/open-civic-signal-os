@@ -9,6 +9,7 @@ import { classNames } from "primereact/utils";
 import { useAuthStore } from "../store/useAuthStore";
 import { ShieldCheck } from "lucide-react";
 import { Layout } from "../components/Layout";
+import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 
 interface ApiError extends Error {
@@ -21,6 +22,7 @@ type LoginForm = {
 };
 
 export function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const { control, handleSubmit, formState: { errors } } = useForm<LoginForm>({
@@ -31,11 +33,11 @@ export function Login() {
     try {
       const res = await apiClient.post("auth/login", data);
       setAuth(res.data);
-      toast.success(`Welcome back, ${res.data.username}!`);
+      toast.success(t('auth.login_success', { name: res.data.username }));
       navigate("/");
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || "Invalid username or password.");
+      toast.error(apiErr.friendlyMessage || t('auth.invalid_credentials'));
     }
   };
 
@@ -49,61 +51,62 @@ export function Login() {
         >
           <div className="text-center mb-5">
             <ShieldCheck size={60} className="text-cyan-500 mb-3" />
-            <h1 className="text-3xl font-black text-white m-0 tracking-tight text-center">Access Portal</h1>
-            <p className="text-gray-500 mt-2">Open Civic Signal OS Management</p>
+            <h1 className="text-3xl font-black text-white m-0 tracking-tight text-center">{t('auth.login_title')}</h1>
+            <p className="text-gray-500 mt-2">{t('auth.login_subtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid" aria-label="Login Form">
             <div className="field mb-4">
-              <label htmlFor="username" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Username</label>
+              <label htmlFor="username-input" className="block text-gray-400 font-bold mb-2 text-xs uppercase">{t('auth.username')}</label>
               <span className="p-input-icon-left">
                 <i className="pi pi-user text-cyan-500" />
                 <Controller 
                   name="username" 
                   control={control} 
-                  rules={{ required: 'Username is required.' }} 
+                  rules={{ required: true }} 
                   render={({ field, fieldState }) => (
                     <InputText 
-                      id="username" 
+                      id="username-input" // Fixed ID
                       {...field} 
                       autoFocus
-                      autoComplete="username" // FE-4: Added autocomplete
-                      placeholder="Enter your username"
+                      autoComplete="username"
+                      placeholder={t('auth.username_placeholder')}
                       className={classNames('p-inputtext-lg py-3 pl-5', { 'p-invalid': fieldState.error })} 
                       data-testid="login-username-input"
                     />
                   )} 
                 />
               </span>
-              {errors.username && <small className="p-error block mt-1" data-testid="login-username-error">{errors.username.message}</small>}
+              {errors.username && <small className="p-error block mt-1">{t('common.required')}</small>}
             </div>
 
             <div className="field mb-5">
-              <label htmlFor="password" className="block text-gray-400 font-bold mb-2 text-xs uppercase">Password</label>
+              <label htmlFor="password-input" className="block text-gray-400 font-bold mb-2 text-xs uppercase">{t('auth.password')}</label>
               <Controller 
                 name="password" 
                 control={control} 
-                rules={{ required: 'Password is required.' }} 
+                rules={{ required: true }} 
                 render={({ field, fieldState }) => (
                   <Password 
-                    id="password" 
+                    id="login-password" 
                     {...field} 
                     toggleMask 
                     feedback={false} 
-                    autoComplete="current-password" // FE-4: Added autocomplete
-                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    inputId="password-input" // Fixed internal ID
+                    placeholder={t('auth.password_placeholder')}
                     inputClassName="p-inputtext-lg py-3"
                     className={classNames('w-full', { 'p-invalid': fieldState.error })} 
                     data-testid="login-password-input"
                   />
                 )} 
               />
-              {errors.password && <small className="p-error block mt-1" data-testid="login-password-error">{errors.password.message}</small>}
+              {errors.password && <small className="p-error block mt-1">{t('common.required')}</small>}
             </div>
 
             <Button 
               type="submit" 
-              label="Sign In to OS" 
+              label={t('auth.sign_in_button')} 
               icon="pi pi-sign-in" 
               className="p-button-primary py-3 font-bold text-lg shadow-4" 
               data-testid="login-submit-button"
@@ -111,8 +114,8 @@ export function Login() {
             />
             
             <div className="text-center mt-5">
-              <span className="text-gray-600 mr-2">Don't have an account?</span>
-              <Link to="/register" className="text-cyan-400 font-bold no-underline hover:underline" data-testid="go-to-register">Create one</Link>
+              <span className="text-gray-600 mr-2">{t('auth.no_account')}</span>
+              <Link to="/register" className="text-cyan-400 font-bold no-underline hover:underline" data-testid="go-to-register">{t('auth.create_one')}</Link>
             </div>
           </form>
         </Card>
