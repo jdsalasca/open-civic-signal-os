@@ -14,6 +14,14 @@ type Signal = {
   };
 };
 
+type Notification = {
+  id: string;
+  channel: string;
+  message: string;
+  recipientGroup: string;
+  sentAt: string;
+};
+
 const fallbackSignals: Signal[] = [
   {
     id: "sig-003",
@@ -28,6 +36,7 @@ const fallbackSignals: Signal[] = [
 export function App() {
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
   const [signals, setSignals] = useState<Signal[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -35,25 +44,39 @@ export function App() {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  useEffect(() => {
-    async function loadSignals() {
-      try {
-        const response = await fetch(`${apiBaseUrl}/api/signals/prioritized`);
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-        const data = (await response.json()) as Signal[];
-        setSignals(data);
-      } catch (err) {
-        setSignals(fallbackSignals);
-        setError(err instanceof Error ? err.message : "Unknown API error");
-      } finally {
-        setLoading(false);
-      }
+  const loadData = async () => {
+    try {
+      const [signalsRes, notificationsRes] = await Promise.all([
+        fetch(`${apiBaseUrl}/api/signals/prioritized`),
+        fetch(`${apiBaseUrl}/api/notifications/recent`)
+      ]);
+      
+      if (signalsRes.ok) setSignals(await signalsRes.json());
+      if (notificationsRes.ok) setNotifications(await notificationsRes.json());
+      
+    } catch (err) {
+      setSignals(fallbackSignals);
+      setError(err instanceof Error ? err.message : "Unknown API error");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    loadSignals();
+  useEffect(() => {
+    loadData();
   }, [apiBaseUrl]);
+
+  const handleRelay = async () => {
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/notifications/relay/top-10`, { method: 'POST' });
+      if (res.ok) {
+        alert("Broadcast relay sent successfully!");
+        loadData();
+      }
+    } catch (err) {
+      alert("Error sending relay.");
+    }
+  };
 
   const categories = useMemo(() => {
     const cats = new Set(signals.map(s => s.category));
@@ -96,9 +119,14 @@ export function App() {
 
   return (
     <main className="page">
-      <header>
-        <h1>Open Civic Signal OS</h1>
-        <p>Transparent civic prioritization dashboard (React + API integration).</p>
+      <header className="main-header">
+        <div>
+          <h1>Open Civic Signal OS</h1>
+          <p>Transparent civic prioritization dashboard (React + API integration).</p>
+        </div>
+        <button className="relay-btn" onClick={handleRelay}>
+          📢 Broadcast Top 10 Relay
+        </button>
       </header>
 
       {error ? <p className="note">API unavailable, showing fallback sample. Reason: {error}</p> : null}
@@ -114,15 +142,16 @@ export function App() {
 
       <div className="layout-split">
         <section className="tableCard main-content">
-          <h2>Prioritized Signals</h2>
-          
-          <div className="controls">
-            <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-              {categories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
-            </select>
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-              {statuses.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
-            </select>
+          <div className="title-row">
+            <h2>Prioritized Signals</h2>
+            <div className="controls">
+              <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+                {categories.map(c => <option key={c} value={c}>{c === "all" ? "All Categories" : c}</option>)}
+              </select>
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+                {statuses.map(s => <option key={s} value={s}>{s === "all" ? "All Statuses" : s}</option>)}
+              </select>
+            </div>
           </div>
 
           {loading ? <p>Loading...</p> : null}
@@ -161,24 +190,40 @@ export function App() {
           </div>
         </section>
 
-        <aside className="digest-sidebar">
-          <h2>Top 10 Unresolved</h2>
-          <p className="small-note">Weekly high-priority community needs.</p>
-          <div className="digest-list">
-            {topUnresolved.map((signal, idx) => (
-              <div key={signal.id} className="digest-item">
-                <span className="digest-rank">#{idx + 1}</span>
-                <div className="digest-info">
-                  <span className="digest-title">{signal.title}</span>
-                  <span className="digest-meta">{signal.category} • Score: {signal.priorityScore.toFixed(0)}</span>
+        <aside className="sidebar-group">
+          <section className="digest-sidebar">
+            <h2>Top 10 Unresolved</h2>
+            <p className="small-note">Weekly high-priority community needs.</p>
+            <div className="digest-list">
+              {topUnresolved.map((signal, idx) => (
+                <div key={signal.id} className="digest-item">
+                  <span className="digest-rank">#{idx + 1}</span>
+                  <div className="digest-info">
+                    <span className="digest-title">{signal.title}</span>
+                    <span className="digest-meta">{signal.category} • Score: {signal.priorityScore.toFixed(0)}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="notifications-sidebar">
+            <h3>Recent Relays</h3>
+            <div className="notif-list">
+              {notifications.map(n => (
+                <div key={n.id} className="notif-item">
+                  <div className="notif-header">
+                    <span className="channel-badge">{n.channel}</span>
+                    <span className="notif-date">{new Date(n.sentAt).toLocaleTimeString()}</span>
+                  </div>
+                  <p className="notif-msg">{n.message.substring(0, 60)}...</p>
+                  <span className="notif-group">To: {n.recipientGroup}</span>
+                </div>
+              ))}
+            </div>
+          </section>
         </aside>
       </div>
     </main>
   );
 }
-
-

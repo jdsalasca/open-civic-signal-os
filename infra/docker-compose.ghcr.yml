@@ -1,0 +1,22 @@
+services:
+  api:
+    image: ${API_IMAGE:-ghcr.io/jdsalasca/open-civic-signal-os-api:latest}
+    container_name: civic-api
+    environment:
+      SERVER_PORT: 8080
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/jdsalasca/open-civic-signal-os-web:latest}
+    container_name: civic-web
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3002:80"

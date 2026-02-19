@@ -12,6 +12,30 @@ body { margin: 0; }
   background: radial-gradient(circle at 20% 20%, #1c2541, #0b132b 60%);
 }
 
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.relay-btn {
+  padding: 12px 20px;
+  background: #e63946;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.relay-btn:hover {
+  background: #ff4d6d;
+  transform: translateY(-2px);
+}
+
 .note {
   margin-top: 12px;
   padding: 10px 12px;
@@ -49,6 +73,14 @@ body { margin: 0; }
   min-width: 600px;
 }
 
+.sidebar-group {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 .tableCard {
   padding: 16px;
   border: 1px solid rgba(0, 180, 216, 0.3);
@@ -56,16 +88,21 @@ body { margin: 0; }
   background: rgba(10, 20, 34, 0.7);
 }
 
-.digest-sidebar {
-  flex: 1;
-  min-width: 280px;
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.digest-sidebar, .notifications-sidebar {
   padding: 20px;
   background: rgba(29, 53, 87, 0.4);
   border: 1px dashed rgba(168, 218, 220, 0.3);
   border-radius: 12px;
 }
 
-.digest-sidebar h2 {
+.digest-sidebar h2, .notifications-sidebar h3 {
   margin: 0;
   font-size: 1.2rem;
   color: #a8dadc;
@@ -77,17 +114,17 @@ body { margin: 0; }
   margin: 4px 0 16px;
 }
 
-.digest-list {
+.digest-list, .notif-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.digest-item {
+.digest-item, .notif-item {
   display: flex;
   gap: 12px;
   align-items: center;
-  padding: 8px;
+  padding: 10px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
 }
@@ -108,16 +145,40 @@ body { margin: 0; }
   font-weight: 500;
 }
 
-.digest-meta {
+.digest-meta, .notif-date, .notif-group {
   font-size: 0.75rem;
   color: #457b9d;
 }
 
+.notif-item {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.notif-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.channel-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: #1d3557;
+  color: #a8dadc;
+  border-radius: 4px;
+}
+
+.notif-msg {
+  margin: 6px 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #f1faee;
+}
+
 .controls {
-  margin-bottom: 20px;
   display: flex;
   gap: 12px;
-  flex-wrap: wrap;
 }
 
 select {

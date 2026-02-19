@@ -35,3 +35,19 @@ docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml down
 - Do not move ranking logic to frontend.
 - Do not deploy with failing health checks.
 - Keep compose files as single source of runtime truth.
+
+## GHCR Deployment
+
+Use published images from GitHub Container Registry:
+
+```bash
+API_IMAGE=ghcr.io/jdsalasca/open-civic-signal-os-api:latest \
+WEB_IMAGE=ghcr.io/jdsalasca/open-civic-signal-os-web:latest \
+docker compose -f infra/docker-compose.yml -f infra/docker-compose.ghcr.yml up -d
+```
+
+Or via npm script:
+
+```bash
+npm run docker:ghcr:up
+```

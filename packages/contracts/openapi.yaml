@@ -25,8 +25,47 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PrioritizedSignal'
+  /api/signals/top-10:
+    get:
+      summary: Get top 10 unresolved civic problems
+      responses:
+        '200':
+          description: List of top signals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrioritizedSignal'
+  /api/notifications/recent:
+    get:
+      summary: Get recent outgoing notification relays
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
 components:
   schemas:
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+        channel:
+          type: string
+          enum: [WHATSAPP, TELEGRAM, EMAIL]
+        message:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        recipientGroup:
+          type: string
     ScoreBreakdown:
       type: object
       required:

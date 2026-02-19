@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- **Messaging Relay Service**: Added `NotificationService` to simulate and track outgoing relays to WhatsApp and Telegram for weekly Top-10 digests. (#7)
+- **Broadcast UI**: Integrated a "Broadcast Relay" button and notification history sidebar in the dashboard. (#7)
 - **Duplicate Signal Detection**: Added heuristics (Levenshtein distance and partial title matching) to identify potential duplicate community signals. (#8)
 - **Backend Hot-Reloading**: Integrated `spring-boot-devtools` and updated Docker configuration to support real-time development updates.
 - **Dockerized Infrastructure**: Added multi-stage Dockerfiles and `docker-compose.yml` for production-ready deployment (Ports: 3002 for Web, 8081 for API).
