@@ -15,12 +15,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+
+    // P1-7: Definición explícita de rutas públicas para evitar bypass
+    private static final List<String> PUBLIC_URLS = List.of(
+        "/api/auth/login",
+        "/api/auth/register",
+        "/api/auth/refresh",
+        "/api/health",
+        "/actuator/health"
+    );
 
     public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
@@ -34,9 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         
-        // Bypass for health checks and public auth endpoints
         String path = request.getServletPath();
-        if (path.contains("/actuator") || path.contains("/api/auth") || path.contains("/api/health")) {
+        
+        // P1-7: Uso de coincidencia exacta o prefijo controlado
+        if (PUBLIC_URLS.stream().anyMatch(path::equals)) {
             filterChain.doFilter(request, response);
             return;
         }

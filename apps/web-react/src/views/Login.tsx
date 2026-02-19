@@ -104,16 +104,7 @@ export function Login() {
               <Link to="/register" className="text-cyan-400 font-bold no-underline hover:underline">Create one</Link>
             </div>
 
-            <div className="mt-5 p-3 bg-black-alpha-20 border-round-xl border-1 border-white-alpha-10">
-              <div className="flex justify-content-between mb-2 pb-2 border-bottom-1 border-white-alpha-10">
-                <span className="text-xs text-gray-500 font-medium">DEMO ACCESS</span>
-                <i className="pi pi-info-circle text-gray-600" />
-              </div>
-              <div className="flex flex-column gap-2">
-                <code className="text-min text-cyan-700">admin / admin12345</code>
-                <code className="text-min text-gray-700">citizen / citizen2026</code>
-              </div>
-            </div>
+            {/* P0-6: Removed Demo Credentials box from UI */}
           </form>
         </Card>
       </div>

@@ -2,6 +2,7 @@ package org.opencivic.signalos.web;
 
 import jakarta.validation.Valid;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.service.PrioritizationService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.SignalResponse;
@@ -10,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,11 +48,17 @@ public class SignalController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<SignalResponse> updateStatus(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-        String newStatus = body.get("status");
-        return prioritizationService.updateStatus(id, newStatus)
-                .map(this::mapToResponse)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        String newStatusStr = body.get("status");
+        try {
+            // P1-9: Input validation through Enum
+            SignalStatus.valueOf(newStatusStr);
+            return prioritizationService.updateStatus(id, newStatusStr)
+                    .map(this::mapToResponse)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid status provided: " + newStatusStr);
+        }
     }
 
     @PostMapping("/{id}/vote")
@@ -89,7 +95,7 @@ public class SignalController {
             request.urgency(),
             request.impact(),
             request.affectedPeople(),
-            0, 0.0, null, "NEW", new ArrayList<>(), LocalDateTime.now()
+            0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), LocalDateTime.now()
         );
         s.setPriorityScore(prioritizationService.calculateScore(s));
         s.setScoreBreakdown(prioritizationService.getBreakdown(s));
@@ -107,9 +113,14 @@ public class SignalController {
     }
 
     @PostMapping("/merge")
-    public SignalResponse mergeSignals(@RequestParam UUID targetId, @RequestBody List<UUID> duplicateIds) {
-        Signal merged = prioritizationService.mergeSignals(targetId, duplicateIds);
-        return merged != null ? mapToResponse(merged) : null;
+    public ResponseEntity<SignalResponse> mergeSignals(@RequestParam UUID targetId, @RequestBody List<UUID> duplicateIds) {
+        // P1-10: Implementation of transactional merge and correct response handling
+        try {
+            Signal merged = prioritizationService.mergeSignals(targetId, duplicateIds);
+            return ResponseEntity.ok(mapToResponse(merged));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     private SignalResponse mapToResponse(Signal s) {

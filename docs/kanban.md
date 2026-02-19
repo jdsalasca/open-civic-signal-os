@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T16:00:00.000Z
+Last updated: 2026-02-19T17:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 25
+- DONE: 30
 
 ### TODO
 - _No issues_
@@ -25,6 +25,10 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #35 Security: Prevention of Privilege Escalation in public registration (P0-1)
+- #34 Security: Mandatory Environment-based JWT Secrets (P0-2)
+- #33 Security: Strict White-listed CORS Policy (P0-3)
+- #32 Security: RBAC-hardened API Endpoints (P0-4)
 - #31 Security: Infrastructure-wide Secrets Management (.env)
 - #30 Admin: Automated Abuse Detection and Moderation Queue
 - #29 Auth: Mandatory 'Login-first' routing policy

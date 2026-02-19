@@ -7,10 +7,11 @@ interface AuthState {
   refreshToken: string | null;
   user: string | null;
   role: UserRole;
-  isLoggedIn: boolean;
   setAuth: (data: { accessToken: string; refreshToken: string; user: string; role: string }) => void;
   logout: () => void;
   updateAccessToken: (token: string) => void;
+  isHydrated: boolean;
+  setHydrated: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -20,22 +21,25 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       user: null,
       role: 'GUEST',
-      isLoggedIn: false,
+      isHydrated: false,
       setAuth: (data) => set({
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
         user: data.user,
         role: (data.role.replace('ROLE_', '') as UserRole),
-        isLoggedIn: true
       }),
       logout: () => {
+        set({ accessToken: null, refreshToken: null, user: null, role: 'GUEST' });
         localStorage.removeItem('auth-storage');
-        set({ accessToken: null, refreshToken: null, user: null, role: 'GUEST', isLoggedIn: false });
       },
-      updateAccessToken: (token) => set({ accessToken: token })
+      updateAccessToken: (token) => set({ accessToken: token }),
+      setHydrated: () => set({ isHydrated: true })
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated();
+      }
     }
   )
 );

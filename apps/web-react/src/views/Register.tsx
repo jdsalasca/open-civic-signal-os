@@ -8,6 +8,7 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { classNames } from "primereact/utils";
 import { Layout } from "../components/Layout";
+import apiClient from "../api/axios";
 
 type RegisterForm = {
   username: string;
@@ -29,21 +30,16 @@ export function Register() {
 
   const onSubmit = async (data: RegisterForm) => {
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
+      // P1-11: Unified usage of apiClient
+      const res = await apiClient.post("/api/auth/register", data);
 
-      if (res.ok) {
+      if (res.status === 200 || res.status === 201) {
         toast.success("Account created! You can now log in.");
         navigate("/login");
-      } else {
-        const err = await res.json();
-        toast.error(err.message || "Registration failed.");
       }
-    } catch (err) {
-      toast.error("Network error during registration.");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Registration failed. Check your details.";
+      toast.error(msg);
     }
   };
 
@@ -57,7 +53,7 @@ export function Register() {
                 <i className="pi pi-user" />
                 <Controller name="username" control={control} rules={{ required: 'Username is required.', minLength: { value: 4, message: 'Min 4 characters' } }} 
                   render={({ field, fieldState }) => (
-                    <InputText id={field.name} {...field} className={classNames({ 'p-invalid': fieldState.error })} />
+                    <InputText id="username" {...field} className={classNames({ 'p-invalid': fieldState.error })} />
                   )} 
                 />
                 <label htmlFor="username">Username</label>
@@ -70,7 +66,7 @@ export function Register() {
                 <i className="pi pi-envelope" />
                 <Controller name="email" control={control} rules={{ required: 'Email is required.', pattern: { value: /^\S+@\S+$/i, message: 'Invalid email' } }} 
                   render={({ field, fieldState }) => (
-                    <InputText id={field.name} {...field} className={classNames({ 'p-invalid': fieldState.error })} />
+                    <InputText id="email" {...field} className={classNames({ 'p-invalid': fieldState.error })} />
                   )} 
                 />
                 <label htmlFor="email">Email Address</label>
@@ -82,7 +78,7 @@ export function Register() {
               <span className="p-float-label">
                 <Controller name="password" control={control} rules={{ required: 'Password is required.', minLength: { value: 8, message: 'Min 8 characters' } }} 
                   render={({ field, fieldState }) => (
-                    <Password id={field.name} {...field} toggleMask className={classNames({ 'p-invalid': fieldState.error })} />
+                    <Password id="password" {...field} toggleMask inputId="password-input" className={classNames('w-full', { 'p-invalid': fieldState.error })} />
                   )} 
                 />
                 <label htmlFor="password">Password</label>
@@ -90,16 +86,17 @@ export function Register() {
               {errors.password && <small className="p-error">{errors.password.message}</small>}
             </div>
 
+            {/* Role selection is present but backend will force CITIZEN for P0 compliance */}
             <div className="field mt-4">
               <label htmlFor="role" className="text-xs font-semibold text-gray-500 uppercase ml-1">I am a...</label>
               <Controller name="role" control={control} 
                 render={({ field }) => (
-                  <Dropdown id={field.name} {...field} options={roles} placeholder="Select a role" />
+                  <Dropdown id="role" {...field} options={roles} placeholder="Select a role" />
                 )} 
               />
             </div>
 
-            <Button type="submit" label="Create Account" className="mt-4" />
+            <Button type="submit" label="Create Account" className="mt-4 py-3 font-bold" />
             
             <p className="text-center mt-4 text-gray-500 text-sm">
               Already have an account? <span className="text-cyan-400 cursor-pointer font-bold" onClick={() => navigate("/login")}>Login here</span>

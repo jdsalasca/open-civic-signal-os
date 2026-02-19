@@ -2,11 +2,13 @@ package org.opencivic.signalos.service;
 
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.ScoreBreakdown;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.domain.Vote;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.repository.VoteRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,13 +32,13 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Page<Signal> getPrioritizedSignals(Pageable pageable) {
-        // Only return non-flagged and non-rejected signals to the public dashboard
         return signalRepository.findByStatusNotIn(List.of("FLAGGED", "REJECTED"), pageable)
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
     }
 
     @Override
     public List<Signal> getTopUnresolved(int limit) {
+        // P2-15: Sorting in DB would be better, currently limiting in stream for logic clarity
         return signalRepository.findAll().stream()
                 .filter(signal -> "NEW".equals(signal.getStatus()))
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)))
@@ -117,8 +119,18 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     }
 
     @Override
+    @Transactional
     public Signal mergeSignals(UUID targetId, List<UUID> duplicateIds) {
-        return signalRepository.findById(targetId).orElse(null);
+        // P1-10: Implementation of actual merge logic
+        Signal target = signalRepository.findById(targetId).orElseThrow(() -> new RuntimeException("Target signal not found"));
+        for (UUID dupId : duplicateIds) {
+            Signal dup = signalRepository.findById(dupId).orElseThrow(() -> new RuntimeException("Duplicate signal " + dupId + " not found"));
+            target.setCommunityVotes(target.getCommunityVotes() + dup.getCommunityVotes());
+            target.getMergedFrom().add(dupId);
+            signalRepository.delete(dup);
+        }
+        target.setPriorityScore(calculateScore(target));
+        return signalRepository.save(target);
     }
 
     @Override
@@ -133,9 +145,9 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     public Signal moderateSignal(UUID id, String action, String reason) {
         Signal signal = signalRepository.findById(id).orElseThrow();
         if ("APPROVE".equalsIgnoreCase(action)) {
-            signal.setStatus("NEW");
+            signal.setStatus(SignalStatus.NEW.name());
         } else {
-            signal.setStatus("REJECTED");
+            signal.setStatus(SignalStatus.REJECTED.name());
         }
         signal.setModerationReason(reason);
         return signalRepository.save(signal);
@@ -143,18 +155,26 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Signal saveSignal(Signal signal) {
-        // Basic abuse detection logic
         if (signal.getUrgency() == 5 && signal.getAffectedPeople() < 5) {
-            signal.setStatus("FLAGGED");
+            signal.setStatus(SignalStatus.FLAGGED.name());
             signal.setModerationReason("Suspicious high urgency for very low population. Auto-flagged for review.");
         }
         return signalRepository.save(signal);
     }
 
     @Override
+    @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus) {
+        // P1-9: Status validation through Enum
         return signalRepository.findById(id).map(signal -> {
-            signal.setStatus(newStatus);
+            SignalStatus current = SignalStatus.valueOf(signal.getStatus());
+            SignalStatus target = SignalStatus.valueOf(newStatus);
+            
+            if (!current.canTransitionTo(target)) {
+                throw new RuntimeException("Invalid status transition from " + current + " to " + target);
+            }
+            
+            signal.setStatus(target.name());
             return signalRepository.save(signal);
         });
     }
@@ -172,11 +192,14 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             throw new RuntimeException("User already voted for this signal");
         }
 
-        voteRepository.save(new Vote(user.getId(), signalId));
-        
-        signal.setCommunityVotes(signal.getCommunityVotes() + 1);
-        signal.setPriorityScore(calculateScore(signal));
-        
-        return signalRepository.save(signal);
+        try {
+            voteRepository.save(new Vote(user.getId(), signalId));
+            signal.setCommunityVotes(signal.getCommunityVotes() + 1);
+            signal.setPriorityScore(calculateScore(signal));
+            return signalRepository.save(signal);
+        } catch (DataIntegrityViolationException e) {
+            // P1-12: Handling race conditions
+            throw new RuntimeException("Double voting detected and rejected.");
+        }
     }
 }

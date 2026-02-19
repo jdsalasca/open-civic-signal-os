@@ -43,7 +43,8 @@ export function Dashboard() {
     } catch (err) {
       toast.error("Network synchronization failed.");
     } finally {
-      setTimeout(() => setLoading(false), 600);
+      // P2-17: Removed artificial delay. Feedback is now immediate.
+      setLoading(false);
     }
   };
 

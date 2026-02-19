@@ -45,16 +45,18 @@ public class AuthController {
             throw new RuntimeException("Username already exists");
         }
 
+        // P0-1: Prevention of privilege escalation. Public registration ALWAYS defaults to ROLE_CITIZEN.
         User user = new User(
             request.username(),
             passwordEncoder.encode(request.password()),
             request.email(),
-            request.role() != null ? "ROLE_" + request.role() : "ROLE_CITIZEN"
+            "ROLE_CITIZEN"
         );
         user.setEnabled(true);
         userRepository.save(user);
 
-        new Thread(() -> emailService.sendWelcomeEmail(user.getEmail(), user.getUsername())).start();
+        // P2-13: Async email trigger without manual thread spawning.
+        emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
 
         return Map.of("message", "User registered successfully. Welcome to Signal OS!");
     }

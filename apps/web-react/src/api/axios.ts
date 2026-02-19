@@ -23,33 +23,30 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 401 Unauthorized (Token expired or invalid)
+    // P1-11: Use instance for refresh to maintain baseURL and context
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = useAuthStore.getState().refreshToken;
 
       if (refreshToken) {
         try {
-          const res = await axios.post('/api/auth/refresh', { refreshToken });
+          // P1-11: Dedicate specific call or use base instance with correct URL
+          const res = await axios.post(`${apiClient.defaults.baseURL}/api/auth/refresh`, { refreshToken });
           const { accessToken } = res.data;
           useAuthStore.getState().updateAccessToken(accessToken);
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return apiClient(originalRequest);
         } catch (refreshError) {
           useAuthStore.getState().logout();
-          window.location.href = '/login';
           return Promise.reject(refreshError);
         }
       } else {
         useAuthStore.getState().logout();
-        window.location.href = '/login';
       }
     }
 
-    // Handle 403 Forbidden (Insufficient permissions)
     if (error.response?.status === 403) {
-      console.error('Permission denied: Access forbidden.');
-      // Optionally show a toast here via an external event or global state
+      console.error('Forbidden action attempt.');
     }
 
     return Promise.reject(error);

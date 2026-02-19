@@ -1,8 +1,8 @@
 package org.opencivic.signalos.config;
 
-import org.opencivic.signalos.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,8 +20,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -41,11 +39,16 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/health", "/actuator/health", "/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
-                .requestMatchers("/api/signals/prioritized", "/api/signals/top-10").permitAll()
-                .requestMatchers("/api/notifications/recent", "/api/notifications/relay/**").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers("/api/auth/**", "/api/health", "/actuator/health").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10").permitAll()
+                
+                .requestMatchers(HttpMethod.POST, "/api/signals/*/vote").hasRole("CITIZEN")
+                .requestMatchers(HttpMethod.POST, "/api/signals").hasAnyRole("CITIZEN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/signals/*/status").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/signals/merge").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers("/api/signals/flagged", "/api/signals/*/moderate").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
-                .requestMatchers("/api/signals/**").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers("/api/notifications/recent", "/api/notifications/relay/**").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
+                
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -76,9 +79,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
+        // P0-3: Permitting both local variants for QA stability
+        configuration.setAllowedOrigins(List.of("http://localhost:3002", "http://127.0.0.1:3002"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
