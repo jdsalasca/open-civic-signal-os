@@ -8,6 +8,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { classNames } from "primereact/utils";
+import { Layout } from "../components/Layout";
 import apiClient from "../api/axios";
 
 type ReportForm = {
@@ -46,70 +47,72 @@ export function ReportSignal() {
   };
 
   return (
-    <div className="flex justify-content-center">
-      <Card title="Report Civic Signal" subTitle="Provide details about the issue in your community" style={{ width: '100%', maxWidth: '800px' }}>
-        <form onSubmit={handleSubmit(onSubmit)} className="p-fluid grid">
-          <div className="field col-12">
-            <label htmlFor="title" className="font-bold">Short Title</label>
-            <Controller name="title" control={control} rules={{ required: 'Title is required.' }} 
-              render={({ field, fieldState }) => (
-                <InputText id={field.name} {...field} placeholder="e.g. Broken bench in Central Park" className={classNames({ 'p-invalid': fieldState.error })} />
-              )} 
-            />
-            {errors.title && <small className="p-error">{errors.title.message}</small>}
-          </div>
+    <Layout>
+      <div className="flex justify-content-center">
+        <Card title="Report Civic Signal" subTitle="Provide details about the issue in your community" style={{ width: '100%', maxWidth: '800px' }}>
+          <form onSubmit={handleSubmit(onSubmit)} className="p-fluid grid">
+            <div className="field col-12">
+              <label htmlFor="title" className="font-bold">Short Title</label>
+              <Controller name="title" control={control} rules={{ required: 'Title is required.' }} 
+                render={({ field, fieldState }) => (
+                  <InputText id={field.name} {...field} placeholder="e.g. Broken bench in Central Park" className={classNames({ 'p-invalid': fieldState.error })} />
+                )} 
+              />
+              {errors.title && <small className="p-error">{errors.title.message}</small>}
+            </div>
 
-          <div className="field col-12">
-            <label htmlFor="description" className="font-bold">Detailed Description</label>
-            <Controller name="description" control={control} 
-              render={({ field }) => (
-                <InputTextarea id={field.name} {...field} rows={4} placeholder="Describe the problem..." autoResize />
-              )} 
-            />
-          </div>
+            <div className="field col-12">
+              <label htmlFor="description" className="font-bold">Detailed Description</label>
+              <Controller name="description" control={control} 
+                render={({ field }) => (
+                  <InputTextarea id={field.name} {...field} rows={4} placeholder="Describe the problem..." autoResize />
+                )} 
+              />
+            </div>
 
-          <div className="field col-12 md:col-6">
-            <label htmlFor="category" className="font-bold">Category</label>
-            <Controller name="category" control={control} 
-              render={({ field }) => (
-                <Dropdown id={field.name} {...field} options={categories} />
-              )} 
-            />
-          </div>
+            <div className="field col-12 md:col-6">
+              <label htmlFor="category" className="font-bold">Category</label>
+              <Controller name="category" control={control} 
+                render={({ field }) => (
+                  <Dropdown id={field.name} {...field} options={categories} />
+                )} 
+              />
+            </div>
 
-          <div className="field col-12 md:col-2">
-            <label htmlFor="urgency" className="font-bold">Urgency (1-5)</label>
-            <Controller name="urgency" control={control} 
-              render={({ field }) => (
-                <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons />
-              )} 
-            />
-          </div>
+            <div className="field col-12 md:col-2">
+              <label htmlFor="urgency" className="font-bold">Urgency (1-5)</label>
+              <Controller name="urgency" control={control} 
+                render={({ field }) => (
+                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons />
+                )} 
+              />
+            </div>
 
-          <div className="field col-12 md:col-2">
-            <label htmlFor="impact" className="font-bold">Impact (1-5)</label>
-            <Controller name="impact" control={control} 
-              render={({ field }) => (
-                <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons />
-              )} 
-            />
-          </div>
+            <div className="field col-12 md:col-2">
+              <label htmlFor="impact" className="font-bold">Impact (1-5)</label>
+              <Controller name="impact" control={control} 
+                render={({ field }) => (
+                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} max={5} showButtons />
+                )} 
+              />
+            </div>
 
-          <div className="field col-12 md:col-2">
-            <label htmlFor="affectedPeople" className="font-bold">Affected</label>
-            <Controller name="affectedPeople" control={control} 
-              render={({ field }) => (
-                <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} />
-              )} 
-            />
-          </div>
+            <div className="field col-12 md:col-2">
+              <label htmlFor="affectedPeople" className="font-bold">Affected</label>
+              <Controller name="affectedPeople" control={control} 
+                render={({ field }) => (
+                  <InputNumber id={field.name} value={field.value} onValueChange={(e) => field.onChange(e.value)} min={1} />
+                )} 
+              />
+            </div>
 
-          <div className="col-12 mt-4 flex gap-2">
-            <Button type="button" label="Cancel" outlined className="w-auto" onClick={() => navigate('/')} />
-            <Button type="submit" label="Submit Signal" icon="pi pi-check" severity="success" className="w-auto" />
-          </div>
-        </form>
-      </Card>
-    </div>
+            <div className="col-12 mt-4 flex gap-2">
+              <Button type="button" label="Cancel" outlined className="w-auto" onClick={() => navigate('/')} />
+              <Button type="submit" label="Submit Signal" icon="pi pi-check" severity="success" className="w-auto" />
+            </div>
+          </form>
+        </Card>
+      </div>
+    </Layout>
   );
 }

@@ -11,6 +11,7 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
+import { Layout } from "../components/Layout";
 import apiClient from "../api/axios";
 
 export function Dashboard() {
@@ -65,7 +66,7 @@ export function Dashboard() {
   const isStaff = role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN";
 
   return (
-    <div className="page-container">
+    <Layout>
       <section className="mb-6 flex flex-column lg:flex-row justify-content-between lg:align-items-center gap-4 animate-fade-in">
         <div>
           <div className="flex align-items-center gap-2 mb-2">
@@ -128,6 +129,6 @@ export function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
