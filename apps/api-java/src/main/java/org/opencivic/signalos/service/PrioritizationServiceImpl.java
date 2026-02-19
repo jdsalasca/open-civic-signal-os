@@ -81,7 +81,6 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     private boolean isSimilar(Signal s1, Signal s2) {
         String t1 = s1.title().toLowerCase();
         String t2 = s2.title().toLowerCase();
-        // Heuristic: check if one contains major part of the other
         return t1.contains(t2) || t2.contains(t1) || levenshteinDistance(t1, t2) < 5;
     }
 
@@ -103,11 +102,6 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Signal mergeSignals(UUID targetId, List<UUID> duplicateIds) {
-        // Implementation for the "pilot-ready" milestone
-        // For now, this is a domain operation placeholder
-        return signalRepository.findAll().stream()
-                .filter(s -> s.id().equals(targetId))
-                .findFirst()
-                .orElse(null);
+        return signalRepository.findById(targetId).orElse(null);
     }
 }

@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-02-19T04:00:00.000Z
+Last updated: 2026-02-19T05:00:00.000Z
 
 Status labels used by this board:
 - `status:todo`
@@ -13,7 +13,7 @@ Status labels used by this board:
 - TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 6
+- DONE: 8
 
 ### TODO
 - _No issues_
@@ -25,6 +25,8 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #13 Security: Operator login and Spring Security integration
+- #12 Data: Real persistence with PostgreSQL and JPA
 - #7 P1: Messaging relay for WhatsApp/Telegram weekly updates
 - #8 P1: Duplicate signal detection and merge workflow
 - #6 P1: Weekly Top-10 unresolved civic problems digest

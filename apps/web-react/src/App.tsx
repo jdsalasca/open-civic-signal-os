@@ -40,19 +40,31 @@ export function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("civic_auth"));
+  const [showLogin, setShowLogin] = useState(false);
+  const [credentials, setCredentials] = useState({ user: "", pass: "" });
+
   // Filters
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
+  const getAuthHeader = () => {
+    const auth = localStorage.getItem("civic_auth");
+    return auth ? { 'Authorization': `Basic ${auth}` } : {};
+  };
+
   const loadData = async () => {
     try {
-      const [signalsRes, notificationsRes] = await Promise.all([
-        fetch(`${apiBaseUrl}/api/signals/prioritized`),
-        fetch(`${apiBaseUrl}/api/notifications/recent`)
-      ]);
-      
+      const signalsRes = await fetch(`${apiBaseUrl}/api/signals/prioritized`);
       if (signalsRes.ok) setSignals(await signalsRes.json());
-      if (notificationsRes.ok) setNotifications(await notificationsRes.json());
+      
+      if (isLoggedIn) {
+        const notificationsRes = await fetch(`${apiBaseUrl}/api/notifications/recent`, {
+          headers: getAuthHeader()
+        });
+        if (notificationsRes.ok) setNotifications(await notificationsRes.json());
+      }
       
     } catch (err) {
       setSignals(fallbackSignals);
@@ -64,14 +76,33 @@ export function App() {
 
   useEffect(() => {
     loadData();
-  }, [apiBaseUrl]);
+  }, [apiBaseUrl, isLoggedIn]);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const encoded = btoa(`${credentials.user}:${credentials.pass}`);
+    localStorage.setItem("civic_auth", encoded);
+    setIsLoggedIn(true);
+    setShowLogin(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("civic_auth");
+    setIsLoggedIn(false);
+    setNotifications([]);
+  };
 
   const handleRelay = async () => {
     try {
-      const res = await fetch(`${apiBaseUrl}/api/notifications/relay/top-10`, { method: 'POST' });
+      const res = await fetch(`${apiBaseUrl}/api/notifications/relay/top-10`, { 
+        method: 'POST',
+        headers: getAuthHeader()
+      });
       if (res.ok) {
         alert("Broadcast relay sent successfully!");
         loadData();
+      } else {
+        alert("Unauthorized or error sending relay.");
       }
     } catch (err) {
       alert("Error sending relay.");
@@ -124,12 +155,42 @@ export function App() {
           <h1>Open Civic Signal OS</h1>
           <p>Transparent civic prioritization dashboard (React + API integration).</p>
         </div>
-        <button className="relay-btn" onClick={handleRelay}>
-          📢 Broadcast Top 10 Relay
-        </button>
+        <div className="header-actions">
+          {isLoggedIn ? (
+            <>
+              <button className="relay-btn" onClick={handleRelay}>
+                📢 Broadcast Top 10 Relay
+              </button>
+              <button className="login-btn secondary" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <button className="login-btn" onClick={() => setShowLogin(true)}>Operator Login</button>
+          )}
+        </div>
       </header>
 
-      {error ? <p className="note">API unavailable, showing fallback sample. Reason: {error}</p> : null}
+      {showLogin && (
+        <div className="modal-overlay">
+          <form className="login-modal" onSubmit={handleLogin}>
+            <h2>Operator Login</h2>
+            <input 
+              type="text" placeholder="Username" required
+              value={credentials.user} onChange={e => setCredentials({...credentials, user: e.target.value})}
+            />
+            <input 
+              type="password" placeholder="Password" required
+              value={credentials.pass} onChange={e => setCredentials({...credentials, pass: e.target.value})}
+            />
+            <div className="modal-actions">
+              <button type="submit">Login</button>
+              <button type="button" onClick={() => setShowLogin(false)}>Cancel</button>
+            </div>
+            <p className="hint">Try admin / civic2026</p>
+          </form>
+        </div>
+      )}
+
+      {error ? <p className="note">API connection status: {error}</p> : null}
 
       <section className="grid">
         {metrics.map((card) => (
@@ -207,21 +268,24 @@ export function App() {
             </div>
           </section>
 
-          <section className="notifications-sidebar">
-            <h3>Recent Relays</h3>
-            <div className="notif-list">
-              {notifications.map(n => (
-                <div key={n.id} className="notif-item">
-                  <div className="notif-header">
-                    <span className="channel-badge">{n.channel}</span>
-                    <span className="notif-date">{new Date(n.sentAt).toLocaleTimeString()}</span>
+          {isLoggedIn && (
+            <section className="notifications-sidebar">
+              <h3>Recent Relays (Admin Only)</h3>
+              <div className="notif-list">
+                {notifications.length === 0 && <p className="small-note">No recent relays.</p>}
+                {notifications.map(n => (
+                  <div key={n.id} className="notif-item">
+                    <div className="notif-header">
+                      <span className="channel-badge">{n.channel}</span>
+                      <span className="notif-date">{new Date(n.sentAt).toLocaleTimeString()}</span>
+                    </div>
+                    <p className="notif-msg">{n.message.substring(0, 60)}...</p>
+                    <span className="notif-group">To: {n.recipientGroup}</span>
                   </div>
-                  <p className="notif-msg">{n.message.substring(0, 60)}...</p>
-                  <span className="notif-group">To: {n.recipientGroup}</span>
-                </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
+          )}
         </aside>
       </div>
     </main>

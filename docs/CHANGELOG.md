@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- **Spring Security Integration**: Added authentication layer for administrative actions (Broadcast/Relays). (#13)
+- **Operator Login (UI)**: New login modal and session management for authorized operators. (#13)
+- **PostgreSQL Persistence**: Replaced mock repositories with Spring Data JPA and real PostgreSQL connectivity. (#12)
+- **Database Seeding**: Automated initial data population for new environment setups.
 - **Messaging Relay Service**: Added `NotificationService` to simulate and track outgoing relays to WhatsApp and Telegram for weekly Top-10 digests. (#7)
 - **Broadcast UI**: Integrated a "Broadcast Relay" button and notification history sidebar in the dashboard. (#7)
 - **Duplicate Signal Detection**: Added heuristics (Levenshtein distance and partial title matching) to identify potential duplicate community signals. (#8)

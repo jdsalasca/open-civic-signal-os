@@ -31,6 +31,8 @@ jobs:
             });
 
             const filtered = issues.filter((item) => !item.pull_request);
+            const now = new Date();
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
             const byMilestone = new Map();
 
@@ -56,6 +58,30 @@ jobs:
               byMilestone.get(milestone)[statusFor(issue)].push(issue);
             }
 
+            const weeklyThroughput = filtered.filter((issue) => {
+              if (!issue.closed_at) return false;
+              return new Date(issue.closed_at) >= sevenDaysAgo;
+            }).length;
+
+            const openBlockedCount = filtered.filter((issue) => {
+              if (issue.state !== "open") return false;
+              const labels = issue.labels.map((label) => typeof label === "string" ? label : label.name);
+              return labels.includes("status:blocked") || labels.includes("blocked");
+            }).length;
+
+            const issueEvents = await github.paginate(github.rest.issues.listEventsForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            const weeklyReopened = issueEvents.filter((event) => {
+              if (event.event !== "reopened") return false;
+              if (event.issue?.pull_request) return false;
+              if (!event.created_at) return false;
+              return new Date(event.created_at) >= sevenDaysAgo;
+            }).length;
+
             const milestoneOrder = Array.from(byMilestone.keys()).sort((a, b) => {
               if (a === "No Milestone") return 1;
               if (b === "No Milestone") return -1;
@@ -72,6 +98,13 @@ jobs:
             lines.push("- `status:in-progress`");
             lines.push("- `status:blocked`");
             lines.push("- `status:done`");
+            lines.push("");
+            lines.push("## Weekly Delivery Metrics");
+            lines.push("");
+            lines.push(`- Window: last 7 days (since ${sevenDaysAgo.toISOString()})`);
+            lines.push(`- Throughput (issues closed): ${weeklyThroughput}`);
+            lines.push(`- Blockers currently open: ${openBlockedCount}`);
+            lines.push(`- Rework signal (issues reopened): ${weeklyReopened}`);
             lines.push("");
 
             for (const milestone of milestoneOrder) {

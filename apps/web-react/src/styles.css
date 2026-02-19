@@ -18,10 +18,32 @@ body { margin: 0; }
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
+  border-bottom: 1px solid rgba(168, 218, 220, 0.1);
+  padding-bottom: 16px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.login-btn {
+  padding: 8px 16px;
+  background: #457b9d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.login-btn.secondary {
+  background: transparent;
+  border: 1px solid #457b9d;
 }
 
 .relay-btn {
-  padding: 12px 20px;
+  padding: 8px 20px;
   background: #e63946;
   color: white;
   border: none;
@@ -35,6 +57,53 @@ body { margin: 0; }
   background: #ff4d6d;
   transform: translateY(-2px);
 }
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.login-modal {
+  background: #1c2541;
+  padding: 32px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid #457b9d;
+}
+
+.login-modal input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #344e41;
+  background: #0b132b;
+  color: white;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-actions button[type="submit"] { background: #a8dadc; color: #1d3557; font-weight: bold; }
+
+.hint { font-size: 11px; color: #457b9d; text-align: center; }
 
 .note {
   margin-top: 12px;
