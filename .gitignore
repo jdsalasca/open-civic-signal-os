@@ -1,5 +1,6 @@
 node_modules/
 apps/web-react/dist/
+output/playwright/
 !coverage/coverage-summary.json
 !coverage/
 !coverage/coverage-summary.json

@@ -20,6 +20,8 @@ Open Civic Signal OS converts community signals into transparent, auditable, and
 1. Pick one issue labeled `agent-ready`.
 2. Read the issue and linked docs before coding:
    - `AGENTS.md`
+   - `docs/agent/agent-capability-matrix.md`
+   - `docs/agent/ux-quality-bar.md`
    - `docs/STACK.md`
    - `docs/MONOREPO.md`
    - `docs/ideas.md`

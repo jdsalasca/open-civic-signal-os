@@ -39,7 +39,7 @@ export function Dashboard() {
       }
       
     } catch (err) {
-      toast.error("Error connecting to services.");
+      toast.error("Network synchronization error.");
     } finally {
       setLoading(false);
     }
@@ -53,42 +53,57 @@ export function Dashboard() {
     try {
       const res = await apiClient.post("/api/notifications/relay/top-10");
       if (res.status === 200) {
-        toast.success("Relay sent!");
+        toast.success("Broadcast successful!");
         loadData();
       }
     } catch (err) {
-      toast.error("Failed to send relay.");
+      toast.error("Unauthorized: Operation rejected.");
     }
   };
 
   const isStaff = role === "PUBLIC_SERVANT" || role === "SUPER_ADMIN";
 
   return (
-    <>
-      <div className="flex justify-content-between align-items-center mb-4">
+    <div className="page-container">
+      <section className="mb-6 flex flex-column md:flex-row justify-content-between align-items-end gap-4 animate-fade-in">
         <div>
-          <h1 className="text-4xl m-0">Community Backlog</h1>
-          <p className="text-gray-500 m-0">Live signals prioritized by impact and urgency.</p>
+          <h1 className="text-5xl font-black mb-2 tracking-tight">
+            Signal <span className="text-cyan-500">Intelligence</span>
+          </h1>
+          <p className="text-gray-500 text-lg max-w-30rem line-height-3">
+            Real-time algorithmic prioritization of community reported needs and infrastructure signals.
+          </p>
         </div>
-        {isStaff && (
-          <Button 
-            label="Broadcast Top 10" 
-            icon="pi pi-megaphone" 
-            severity="danger" 
-            onClick={handleRelay} 
-          />
-        )}
-      </div>
+        <div className="flex gap-3">
+          {isStaff && (
+            <Button 
+              label="Run Weekly Relay" 
+              icon="pi pi-bolt" 
+              severity="danger"
+              className="px-4 py-3 shadow-4 hover:shadow-6"
+              onClick={handleRelay} 
+            />
+          )}
+          {role === "CITIZEN" && (
+            <Button 
+              label="Report Civic Issue" 
+              icon="pi pi-plus" 
+              className="px-4 py-3 bg-cyan-600 border-none shadow-4" 
+              onClick={() => navigate("/report")} 
+            />
+          )}
+        </div>
+      </section>
 
-      {loading && <ProgressBar mode="indeterminate" style={{ height: '4px', marginBottom: '20px' }} />}
+      {loading && <ProgressBar mode="indeterminate" style={{ height: '2px', marginBottom: '24px' }} className="border-round" />}
 
       <MetricsGrid signals={signals} />
 
-      <div className="grid mt-4">
-        <div className="col-12 lg:col-8">
+      <div className="grid mt-2">
+        <div className="col-12 xl:col-8">
           <SignalTable signals={signals} loading={loading} />
         </div>
-        <div className="col-12 lg:col-4">
+        <div className="col-12 xl:col-4">
           <div className="flex flex-column gap-4">
             <DigestSidebar signals={signals} />
             
@@ -96,19 +111,17 @@ export function Dashboard() {
               <NotificationSidebar notifications={notifications} />
             )}
 
-            {role === "CITIZEN" && (
-              <Card title="Citizen Action" subTitle="Report new issues in your sector">
-                <Button 
-                  label="Report New Issue" 
-                  icon="pi pi-plus" 
-                  className="w-full" 
-                  onClick={() => navigate("/report")} 
-                />
+            {!isLoggedIn && (
+              <Card title="Civic Participation" className="bg-cyan-900 border-none shadow-4">
+                <p className="text-cyan-100 line-height-3 mb-4">
+                  Join the platform to report issues, support community initiatives and track resolution status in real-time.
+                </p>
+                <Button label="Get Started" severity="info" className="w-full bg-cyan-500 border-none text-gray-900 font-bold" onClick={() => navigate('/register')} />
               </Card>
             )}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

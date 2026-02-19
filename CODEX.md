@@ -9,6 +9,7 @@ This file defines mandatory behavior for Codex-based implementation agents.
 - Keep civic prioritization transparent, deterministic, and auditable.
 - Preserve backend ownership of ranking logic.
 - Prefer small, reviewable changes with explicit rollback.
+- Follow `docs/agent/agent-capability-matrix.md` and `docs/agent/ux-quality-bar.md`.
 
 ## Non-Negotiable Rules
 

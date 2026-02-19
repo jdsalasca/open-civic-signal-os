@@ -17,6 +17,8 @@
 - `docs/agent/execution-checklists.md`
 - `docs/agent/advanced-diagrams.md`
 - `docs/agent/playwright-visual-protocol.md`
+- `docs/agent/agent-capability-matrix.md`
+- `docs/agent/ux-quality-bar.md`
 
 ## Deployment
 

@@ -128,6 +128,8 @@ Before implementing any issue, read:
 - `GEMINI_INSTRUCTIONS.md`
 - `CODEX.md`
 - `docs/agent/playwright-visual-protocol.md`
+- `docs/agent/agent-capability-matrix.md`
+- `docs/agent/ux-quality-bar.md`
 - `docs/ideas.md`
 - `docs/community/issue-backlog.md`
 - `docs/community/current-backlog.md`
