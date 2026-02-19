@@ -14,6 +14,7 @@
 - `docs/agent/process-flows.md`
 - `docs/agent/system-design.md`
 - `docs/agent/execution-checklists.md`
+- `docs/agent/advanced-diagrams.md`
 
 ## Excellence and Governance
 

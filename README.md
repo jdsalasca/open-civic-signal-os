@@ -60,3 +60,12 @@ cd apps/api-java
 ## Vision
 
 Community voice should become visible, measurable, and actionable.
+
+## Visual Assets
+
+- Brand kit: `assets/brand-kit.md`
+- Mark: `assets/logo-mark.svg`
+- Wordmark: `assets/logo-wordmark.svg`
+- Banner SVG: `assets/banner.svg`
+- Social card PNG: `assets/social-card.png`
+- Logo PNG: `assets/logo-512.png`

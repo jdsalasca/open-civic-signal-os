@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-label="Open Civic Signal wordmark">
+  <rect width="1200" height="320" rx="36" fill="#0F233A"/>
+  <circle cx="150" cy="160" r="68" fill="#2EC4B6"/>
+  <path d="M238 196 L300 122 L362 196" stroke="#F7FFF7" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="420" y="150" font-size="72" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#F7FFF7">Open Civic Signal OS</text>
+  <text x="420" y="210" font-size="30" font-family="Segoe UI, Arial, sans-serif" fill="#BDE7E2">Explainable civic prioritization</text>
+</svg>

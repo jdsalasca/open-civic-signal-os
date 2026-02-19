@@ -134,3 +134,11 @@ Before implementing any issue, read:
 - Include explicit acceptance criteria and test evidence.
 - Never merge with failing CI.
 - Keep ranking logic backend-owned; frontend rendering only.
+
+## Execution Governance Rules (Expanded)
+
+- Every issue must define measurable civic outcome.
+- Every scoring change must include formula diff and reproducibility evidence.
+- Every dashboard feature must expose data freshness timestamp.
+- Every moderation rule must include false-positive review strategy.
+- Every release must publish "what changed for communities" summary.

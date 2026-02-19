@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 560" role="img" aria-label="Open Civic Signal hero banner">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0F233A"/>
+      <stop offset="100%" stop-color="#1A535C"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="560" fill="url(#bg)"/>
+  <circle cx="200" cy="280" r="110" fill="#2EC4B6" opacity="0.95"/>
+  <text x="360" y="250" font-size="82" font-family="Segoe UI, Arial, sans-serif" font-weight="700" fill="#F7FFF7">Open Civic Signal OS</text>
+  <text x="360" y="320" font-size="34" font-family="Segoe UI, Arial, sans-serif" fill="#D7F6F2">Turn community signals into transparent action backlogs</text>
+  <text x="360" y="380" font-size="24" font-family="Segoe UI, Arial, sans-serif" fill="#BDE7E2">Java Backend • React Frontend • Auditable Scoring</text>
+</svg>

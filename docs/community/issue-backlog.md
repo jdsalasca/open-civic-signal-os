@@ -77,3 +77,11 @@ Priority legend:
 16. `story:OCS-P2-003 design federation-ready contracts for multi-city use`
 
 Use `.github/workflows/seed-community-issues.yml` to persist these as GitHub issues.
+
+## Additional Deep Stories
+
+17. `story:OCS-P1-006 add data freshness monitoring and stale-source alerts`
+18. `story:OCS-P1-007 add explainability export snapshots for assemblies`
+19. `story:OCS-P1-008 ingest community trust pulse inputs and aggregates`
+20. `story:OCS-P2-004 build policy simulation sandbox for scoring weights`
+21. `story:OCS-P2-005 deliver low-bandwidth field dashboard mode`

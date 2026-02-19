@@ -94,3 +94,25 @@
 ### OCS-P2-001 Assembly Mode
 ### OCS-P2-002 Trust-Proof Snapshot
 ### OCS-P2-003 Federation Contract Starter
+
+## New Detailed Stories (Execution Pack Expansion)
+
+### OCS-P1-006 Data Freshness Monitor
+- Goal: alert stale channels before ranking quality drops.
+- Acceptance: stale-source warning appears in operator dashboard and digest.
+
+### OCS-P1-007 Explainability Export Snapshot
+- Goal: export per-item score breakdown for assemblies.
+- Acceptance: downloadable JSON/CSV with formula metadata and evidence links.
+
+### OCS-P1-008 Community Trust Pulse Ingestion
+- Goal: include periodic trust signals in roadmap decisions.
+- Acceptance: pulse survey schema and aggregation endpoint available.
+
+### OCS-P2-004 Policy Simulation Sandbox
+- Goal: simulate weight changes without affecting production ranking.
+- Acceptance: simulation endpoint returns diff view vs current policy.
+
+### OCS-P2-005 Low-Bandwidth Field Mode
+- Goal: keep dashboard usable in constrained network contexts.
+- Acceptance: lightweight view under size/perf budget with cached summaries.

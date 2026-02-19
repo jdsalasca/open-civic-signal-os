@@ -80,8 +80,13 @@ jobs:
               "story:OCS-P1-002 implement municipal execution bridge and ownership",
               "story:OCS-P1-003 version and expose formula metadata",
               "story:OCS-P1-004 build transparency monthly report pipeline",
+              "story:OCS-P1-006 add data freshness monitoring and stale-source alerts",
+              "story:OCS-P1-007 add explainability export snapshots for assemblies",
+              "story:OCS-P1-008 ingest community trust pulse inputs and aggregates",
               "story:OCS-P2-001 prototype assembly mode for townhall facilitation",
-              "story:OCS-P2-002 implement trust-proof snapshot for backlog publish"
+              "story:OCS-P2-002 implement trust-proof snapshot for backlog publish",
+              "story:OCS-P2-004 build policy simulation sandbox for scoring weights",
+              "story:OCS-P2-005 deliver low-bandwidth field dashboard mode"
             ].map((title) => {
               const priority = title.includes("OCS-P0-") ? "priority:P0" : title.includes("OCS-P1-") ? "priority:P1" : "priority:P2";
               return { title, labels: [priority, "help wanted", "good first issue", "type:story"] };
