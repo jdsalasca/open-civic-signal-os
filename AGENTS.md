@@ -154,3 +154,15 @@ Before implementing any issue, read:
 
 - Workflow: .github/workflows/agent-pr-hygiene.yml`n- Script: scripts/agent-pr-hygiene.mjs`n- PRs must include Story ID, verification evidence, and rollback plan.
 
+
+## Agent Input Pack
+
+Use these inputs before implementation:
+
+- `docs/agent/prompt-library.md`
+- `docs/agent/quality-rubric.md`
+- `docs/agent/test-scenario-pack.md`
+- `docs/agent/failure-playbook.md`
+- `docs/agent/change-risk-matrix.md`
+- `docs/agent/agent-handshake-protocol.md`
+- `docs/agent/backlog-expansion-seeds.md`

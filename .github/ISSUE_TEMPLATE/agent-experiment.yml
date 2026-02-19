@@ -1,0 +1,36 @@
+name: Agent experiment
+about: Propose and track controlled experiments to improve delivery quality
+title: "experiment: <hypothesis>"
+labels: ["help wanted"]
+body:
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: Hypothesis
+      description: What result do we expect and why?
+    validations:
+      required: true
+
+  - type: textarea
+    id: experiment_design
+    attributes:
+      label: Experiment Design
+      description: Steps, controls, and success criteria.
+    validations:
+      required: true
+
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Metrics
+      description: Which numbers prove success/failure?
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk and rollback
+      description: What could go wrong and how to revert?
+    validations:
+      required: true
