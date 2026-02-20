@@ -67,13 +67,8 @@ public class AuthController {
             "ROLE_CITIZEN"
         );
         
-        // V3: Support for automated testing in dev/test profiles
-        String verificationCode;
-        if ("dev".equalsIgnoreCase(activeProfile) || "test".equalsIgnoreCase(activeProfile)) {
-            verificationCode = "123456";
-        } else {
-            verificationCode = String.format("%06d", new Random().nextInt(999999));
-        }
+        // Generate a real random 6-digit code for all profiles to test mail delivery flow
+        String verificationCode = String.format("%06d", new Random().nextInt(999999));
         
         user.setVerificationCode(verificationCode);
         user.setVerified(false);
@@ -84,7 +79,7 @@ public class AuthController {
         emailService.sendVerificationCode(user.getEmail(), user.getUsername(), verificationCode);
 
         return ResponseEntity.ok(Map.of(
-            "message", "Registration successful. Please check your email for the activation code.",
+            "message", "Registration successful. A verification protocol has been initiated via email.",
             "username", user.getUsername()
         ));
     }
@@ -99,17 +94,14 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", "Account is already verified."));
         }
 
-        // Reuse existing or generate new (using the same logic as register)
-        String code = user.getVerificationCode();
-        if (code == null || code.isBlank()) {
-            code = "123456"; // Default for dev/test as per register logic
-            user.setVerificationCode(code);
-            userRepository.save(user);
-        }
+        // Generate a NEW code for security on every resend
+        String code = String.format("%06d", new Random().nextInt(999999));
+        user.setVerificationCode(code);
+        userRepository.save(user);
 
         emailService.sendVerificationCode(user.getEmail(), user.getUsername(), code);
 
-        return ResponseEntity.ok(Map.of("message", "Verification code resent successfully."));
+        return ResponseEntity.ok(Map.of("message", "A new verification code has been dispatched."));
     }
 
     @PostMapping("/verify")
@@ -129,7 +121,11 @@ public class AuthController {
             user.setEnabled(true);
             user.setVerificationCode(null);
             userRepository.save(user);
-            return ResponseEntity.ok(Map.of("message", "Account activated successfully. You can now log in."));
+            
+            // New: Send welcome email after verification
+            emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
+            
+            return ResponseEntity.ok(Map.of("message", "Protocol activation complete. Account is now active."));
         } else {
             throw new UnauthorizedActionException("Invalid activation code.");
         }

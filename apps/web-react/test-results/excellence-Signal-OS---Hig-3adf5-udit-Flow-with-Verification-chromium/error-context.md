@@ -13,10 +13,10 @@
       - generic [ref=e12]: Create your citizen account
       - form "Registration Form" [ref=e14]:
         - generic [ref=e16]:
-          - textbox "Username" [ref=e17]: qa_expert_1771558136739
+          - textbox "Username" [ref=e17]: qa_expert_1771558121827
           - generic: Username
         - generic [ref=e19]:
-          - textbox "Email Address" [ref=e20]: qa_expert_1771558136739@yopmail.com
+          - textbox "Email Address" [ref=e20]: qa_expert_1771558121827@yopmail.com
           - generic: Email Address
         - generic [ref=e22]:
           - generic [ref=e24]:
