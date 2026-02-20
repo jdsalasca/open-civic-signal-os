@@ -66,7 +66,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
       <div className="flex align-items-center gap-3" role="group" aria-label={`${t('common.score')}: ${rowData.priorityScore?.toFixed(0)}`}>
         <span className="font-black text-cyan-400 text-lg glow-cyan" style={{ minWidth: '35px' }}>{rowData.priorityScore?.toFixed(0)}</span>
         <div className="hidden xl:flex flex-column gap-1 flex-grow-1" style={{ maxWidth: '60px' }}>
-           <div className="bg-gray-800 border-round overflow-hidden shadow-inner" style={{ height: '6px' }}>
+           <div className="bg-card border-round overflow-hidden shadow-inner" style={{ height: '6px' }}>
               <div className="bg-cyan-500 h-full shadow-2" style={{ width: `${Math.min(((rowData.priorityScore || 0) / 350) * 100, 100)}%` }}></div>
            </div>
         </div>
@@ -165,11 +165,11 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
       >
         <Column header={t('common.title')} body={titleTemplate} sortable sortField="title" />
         <Column field="category" header={t('common.category')} sortable body={(s) => (loading || ('_skeleton' in (s as object))) ? <Skeleton width="4rem" /> : (
-          <span className="text-xs font-black text-gray-400 uppercase tracking-widest bg-white-alpha-5 px-3 py-1 border-round-lg border-1 border-white-alpha-10">{t(`categories.${(s as Signal).category}`)}</span>
+          <span className="text-xs font-black text-muted uppercase tracking-widest bg-white-alpha-5 px-3 py-1 border-round-lg border-1 border-white-alpha-10">{t(`categories.${(s as Signal).category}`)}</span>
         )} />
         <Column header={t('common.status')} sortable sortField="status" body={statusTemplate} style={{ width: '10rem' }} />
         <Column header={t('common.score')} sortable sortField="priorityScore" body={scoreTemplate} style={{ width: '12rem' }} />
-        <Column body={(d) => (!loading && !('_skeleton' in (d as object))) && <i className="pi pi-arrow-up-right text-gray-600 hover:text-cyan-400 transition-colors" />} style={{ width: '3rem' }} aria-label={t('signals.view_details')} />
+        <Column body={(d) => (!loading && !('_skeleton' in (d as object))) && <i className="pi pi-arrow-up-right text-muted hover:text-cyan-400 transition-colors" />} style={{ width: '3rem' }} aria-label={t('signals.view_details')} />
       </DataTable>
     </div>
   );

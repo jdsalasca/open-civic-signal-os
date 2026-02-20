@@ -68,15 +68,15 @@ export function Settings() {
           <Layout>
             <div className="animate-fade-in max-w-30rem mx-auto mt-4">
               <div className="mb-5 text-center">
-                <h1 className="text-4xl font-black text-white m-0 tracking-tight">{t('settings.title')}</h1>
-                <p className="text-gray-500 mt-2">{t('settings.desc')}</p>
+                <h1 className="text-4xl font-black text-main m-0 tracking-tight">{t('settings.title')}</h1>
+                <p className="text-muted mt-2">{t('settings.desc')}</p>
               </div>
       
-              <Card className="shadow-8 border-1 border-white-alpha-10 mb-4 bg-gray-900">
+              <Card className="shadow-8 border-1 border-white-alpha-10 mb-4 bg-surface">
                 <div className="flex flex-column gap-4">
       
                   <div className="flex flex-column gap-2">
-                    <label className="font-bold text-sm uppercase tracking-widest text-gray-400">
+                    <label className="font-bold text-sm uppercase tracking-widest text-muted">
                       <i className="pi pi-globe mr-2"></i>{t('settings.language')}
                     </label>
                     <SelectButton
@@ -90,7 +90,7 @@ export function Settings() {
                   <Divider className="my-2 opacity-10" />
       
                   <div className="flex flex-column gap-2">
-                    <label className="font-bold text-sm uppercase tracking-widest text-gray-400">
+                    <label className="font-bold text-sm uppercase tracking-widest text-muted">
                       <i className="pi pi-palette mr-2"></i>{t('settings.theme')}
                     </label>
                     <SelectButton
@@ -113,12 +113,12 @@ export function Settings() {
                         <label className="font-bold text-sm uppercase tracking-widest text-cyan-500">
                           <i className="pi pi-shield mr-2"></i>{t('settings.role')}
                         </label>
-                        <p className="text-xs text-gray-500 m-0 mb-2">{t('settings.role_desc')}</p>
+                        <p className="text-xs text-muted m-0 mb-2">{t('settings.role_desc')}</p>
                         <Dropdown
                           value={activeRole}
                           options={rawRoles}
                           onChange={handleRoleChange}
-                          className="w-full bg-gray-950"
+                          className="w-full bg-card"
                         />
                       </div>
                     </>
@@ -132,7 +132,7 @@ export function Settings() {
                         <label className="font-bold text-sm uppercase tracking-widest text-red-400">
                           <i className="pi pi-database mr-2"></i>{t('settings.admin_tools')}
                         </label>
-                        <p className="text-xs text-gray-500 m-0 mb-3">{t('settings.admin_desc')}</p> 
+                        <p className="text-xs text-muted m-0 mb-3">{t('settings.admin_desc')}</p> 
                         <Button
                           label={t('settings.export_button')}
                           icon="pi pi-download" 
@@ -147,7 +147,7 @@ export function Settings() {
               </Card>
       
               <div className="text-center p-4 bg-white-alpha-5 border-round-xl border-1 border-white-alpha-10">
-                <span className="text-xs text-gray-600 font-mono">{t('nav.protocol_version')} | Session: Persistent</span>
+                <span className="text-xs text-muted font-mono">{t('nav.protocol_version')} | Session: Persistent</span>
               </div>
             </div>
           </Layout>

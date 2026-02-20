@@ -56,7 +56,7 @@ export function ReportSignal() {
     <Layout>
       <div className="flex justify-content-center mt-4 pb-6">
         <Card title={t('report.title')} style={{ width: '100%', maxWidth: '700px' }} className="shadow-8 border-round-2xl">
-          <p className="text-gray-500 mb-5">{t('report.desc')}</p>
+          <p className="text-muted mb-5">{t('report.desc')}</p>
           
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid grid">
             <div className="field col-12">
