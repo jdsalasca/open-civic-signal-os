@@ -56,6 +56,11 @@
 - Use `.github/workflows/seed-community-issues.yml` when backlog items need persistence as GitHub issues.
 - Do not start implementation from ad-hoc ideas without mapping to a backlog item/story ID first.
 
+### 4. UI/UX Integrity Rules
+- **No Invisible Controls:** Ensure Sliders and Dropdowns have `w-full` class and are not squashed by flex containers.
+- **Direct Event Mapping:** In React Hook Form Controllers, map PrimeReact events manually: `onChange={(e) => field.onChange(e.value)}`.
+- **Contrast Guarantee:** Critical form labels must be explicit and use `text-main` or `text-muted` tokens to ensure visibility in both themes.
+
 ## Quality Gates
 - Backend tests must run (no test skipping): `mvn -q test`.
 - Frontend must build: `npm run build:web`.

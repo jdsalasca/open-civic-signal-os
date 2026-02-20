@@ -102,6 +102,18 @@ When closing an issue, agents must include:
 - which contract file changed
 - sample input/output
 - known limitations
+## Frontend Component Integrity Standards (Mandatory)
+
+To prevent "dead pickers" or squashed inputs, all React components using PrimeReact must follow:
+
+1. **Event Mapping:** Always use explicit event mapping in `Controller` or state handlers. 
+   - `onChange={(e) => field.onChange(e.value)}` for Sliders, Dropdowns, SelectButtons.
+   - `onChange={(e) => field.onChange(e.target.value)}` for InputText, InputTextarea.
+2. **Layout Consistency:** Use `className="w-full"` for all form inputs to ensure they occupy the intended container space.
+3. **Explicit Labels:** Prefer explicit `<label>` elements over `p-float-label` for critical forms (Login, Register, Report) to guarantee visibility across dark/light themes.
+4. **Validation Feedback:** Always provide a `<small className="p-error">` block below inputs using `fieldState.error`.
+5. **Score Persistence:** Prioritization scores must be calculated backend-side and stored in the DB (Auditability).
+
 ## Agent Operations
 
 - Agent hard rules: `.agentic-rules`

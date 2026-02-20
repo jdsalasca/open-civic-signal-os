@@ -57,86 +57,82 @@ export function Register() {
         >
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid flex flex-column gap-4" aria-label="Registration Form">
             <div className="field">
-              <span className="p-float-label">
-                <Controller name="username" control={control} rules={{ required: true, minLength: 4 }} 
-                  render={({ field, fieldState }) => (
-                    <InputText 
-                      id="username-input" 
-                      {...field} 
-                      autoComplete="username"
-                      className={classNames('py-3', { 'p-invalid': fieldState.error })} 
-                      data-testid="register-username-input"
-                    />
-                  )} 
-                />
-                <label htmlFor="username-input">{t('auth.username')}</label>
-              </span>
-              {errors.username && <small className="p-error">{t('common.required')}</small>}
+              <label htmlFor="username-input" className="auth-field-label">{t('auth.username')}</label>
+              <Controller name="username" control={control} rules={{ required: t('common.required'), minLength: { value: 4, message: t('auth.username_too_short') } }} 
+                render={({ field, fieldState }) => (
+                  <InputText 
+                    id="username-input" 
+                    {...field} 
+                    autoComplete="username"
+                    className={classNames('p-inputtext-lg py-3', { 'p-invalid': fieldState.error })} 
+                    data-testid="register-username-input"
+                    placeholder={t('auth.username_placeholder')}
+                  />
+                )} 
+              />
+              {errors.username && <small className="p-error block mt-1">{errors.username.message || t('common.required')}</small>}
             </div>
 
             <div className="field">
-              <span className="p-float-label">
-                <Controller name="email" control={control} rules={{ required: true, pattern: /^\S+@\S+$/i }} 
-                  render={({ field, fieldState }) => (
-                    <InputText 
-                      id="email-input" 
-                      {...field} 
-                      autoComplete="email"
-                      className={classNames('py-3', { 'p-invalid': fieldState.error })} 
-                      data-testid="register-email-input"
-                    />
-                  )} 
-                />
-                <label htmlFor="email-input">{t('auth.email')}</label>
-              </span>
-              {errors.email && <small className="p-error">{t('common.invalid_email')}</small>}
+              <label htmlFor="email-input" className="auth-field-label">{t('auth.email')}</label>
+              <Controller name="email" control={control} rules={{ required: t('common.required'), pattern: { value: /^\S+@\S+$/i, message: t('common.invalid_email') } }} 
+                render={({ field, fieldState }) => (
+                  <InputText 
+                    id="email-input" 
+                    {...field} 
+                    autoComplete="email"
+                    className={classNames('p-inputtext-lg py-3', { 'p-invalid': fieldState.error })} 
+                    data-testid="register-email-input"
+                    placeholder="email@example.com"
+                  />
+                )} 
+              />
+              {errors.email && <small className="p-error block mt-1">{errors.email.message || t('common.invalid_email')}</small>}
             </div>
 
             <div className="field">
-              <span className="p-float-label">
-                <Controller name="password" control={control} rules={{ required: true, minLength: 8 }} 
-                  render={({ field, fieldState }) => (
-                    <Password 
-                      id="password-input-container" 
-                      {...field} 
-                      toggleMask 
-                      inputId="password-input" 
-                      autoComplete="new-password"
-                      inputClassName="py-3" 
-                      className={classNames('w-full', { 'p-invalid': fieldState.error })} 
-                      data-testid="register-password-input"
-                    />
-                  )} 
-                />
-                <label htmlFor="password-input">{t('auth.password')}</label>
-              </span>
-              {errors.password && <small className="p-error">{t('common.required')}</small>}
+              <label htmlFor="password-input" className="auth-field-label">{t('auth.password')}</label>
+              <Controller name="password" control={control} rules={{ required: t('common.required'), minLength: { value: 8, message: t('auth.password_too_short') } }} 
+                render={({ field, fieldState }) => (
+                  <Password 
+                    id="password-input-container" 
+                    {...field} 
+                    toggleMask 
+                    inputId="password-input" 
+                    autoComplete="new-password"
+                    placeholder="Min. 8 characters"
+                    inputClassName="p-inputtext-lg py-3" 
+                    className={classNames('w-full', { 'p-invalid': fieldState.error })} 
+                    data-testid="register-password-input"
+                  />
+                )} 
+              />
+              {errors.password && <small className="p-error block mt-1">{errors.password.message || t('common.required')}</small>}
             </div>
 
             <div className="field">
-              <span className="p-float-label">
-                <Controller name="confirmPassword" control={control} 
-                  rules={{ 
-                    required: true, 
-                    validate: value => value === password || "Passwords must match"
-                  }} 
-                  render={({ field, fieldState }) => (
-                    <Password 
-                      id="confirm-password-input-container" 
-                      {...field} 
-                      toggleMask 
-                      feedback={false}
-                      inputId="confirm-password-input" 
-                      autoComplete="new-password"
-                      inputClassName="py-3" 
-                      className={classNames('w-full', { 'p-invalid': fieldState.error })} 
-                      data-testid="register-confirm-password-input"
-                    />
-                  )} 
-                />
-                <label htmlFor="confirm-password-input">{t('auth.confirm_password') || "Confirm Password"}</label>
-              </span>
-              {errors.confirmPassword && <small className="p-error">{errors.confirmPassword.message || t('common.required')}</small>}
+              <label htmlFor="confirm-password-input" className="auth-field-label">{t('auth.confirm_password') || "Confirm Password"}</label>
+              <Controller name="confirmPassword" control={control} 
+                rules={{ 
+                  required: t('common.required'), 
+                  validate: value => value === password || t('auth.passwords_mismatch') || "Passwords must match"
+                }} 
+                render={({ field, fieldState }) => (
+                  <Password 
+                    id="confirm-password-input-container" 
+                    {...field} 
+                    toggleMask 
+                    feedback={false}
+                    inputId="confirm-password-input" 
+                    autoComplete="new-password"
+                    placeholder="Repeat password"
+                    inputClassName="p-inputtext-lg py-3" 
+                    className={classNames('w-full', { 'p-invalid': fieldState.error })} 
+                    data-testid="register-confirm-password-input"
+                  />
+                )} 
+              />
+              {errors.confirmPassword && <small className="p-error block mt-1">{errors.confirmPassword.message || t('common.required')}</small>}
             </div>
 
             <div className="p-3 bg-blue-900-alpha-20 border-round text-xs text-blue-300 flex align-items-center gap-2 border-1 border-blue-800">

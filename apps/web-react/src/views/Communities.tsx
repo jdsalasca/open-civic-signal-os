@@ -176,21 +176,43 @@ export function Communities() {
         </div>
       </div>
 
-      <Dialog header="Create Community" visible={creating} onHide={() => setCreating(false)} className="w-30rem">
-        <div className="flex flex-column gap-3">
-          <InputText value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Name" />
-          <InputText value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder="Slug" />
-          <InputText
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            placeholder="Description"
-          />
-          <Button
-            label="Create"
-            onClick={handleCreate}
-            disabled={!newName.trim() || !newSlug.trim()}
-            data-testid="create-community-submit-button"
-          />
+      <Dialog 
+        header={<div className="text-xl font-black uppercase tracking-tight text-main">Create New Community</div>} 
+        visible={creating} 
+        onHide={() => setCreating(false)} 
+        className="w-full max-w-30rem mx-3"
+        breakpoints={{ '960px': '75vw', '641px': '90vw' }}
+      >
+        <div className="flex flex-column gap-4 pt-2">
+          <div className="flex flex-column gap-2">
+            <label htmlFor="comm-name" className="text-xs font-bold uppercase text-muted tracking-widest">Community Name</label>
+            <InputText id="comm-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Springfield Heights" className="w-full p-inputtext-lg" />
+          </div>
+          <div className="flex flex-column gap-2">
+            <label htmlFor="comm-slug" className="text-xs font-bold uppercase text-muted tracking-widest">URL Slug</label>
+            <InputText id="comm-slug" value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder="e.g. springfield-heights" className="w-full font-mono" />
+          </div>
+          <div className="flex flex-column gap-2">
+            <label htmlFor="comm-desc" className="text-xs font-bold uppercase text-muted tracking-widest">Description</label>
+            <InputText
+              id="comm-desc"
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              placeholder="Provide a brief context for this community"
+              className="w-full"
+            />
+          </div>
+          <div className="flex gap-2 justify-content-end mt-2">
+            <Button label="Cancel" text onClick={() => setCreating(false)} className="text-muted" />
+            <Button
+              label="Create Community"
+              icon="pi pi-check"
+              onClick={handleCreate}
+              disabled={!newName.trim() || !newSlug.trim()}
+              className="p-button-primary px-4 shadow-4"
+              data-testid="create-community-submit-button"
+            />
+          </div>
         </div>
       </Dialog>
     </Layout>

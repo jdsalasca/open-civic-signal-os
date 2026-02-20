@@ -98,7 +98,7 @@ export function Settings() {
       
                   <div className="flex flex-column gap-2">
                     <label className="font-bold text-sm uppercase tracking-widest text-muted">
-                      <i className="pi pi-globe mr-2"></i>{t('settings.language')}
+                      <i className="pi pi-globe mr-2 text-cyan-500"></i>{t('settings.language')}
                     </label>
                     <SelectButton
                       value={language}
@@ -112,14 +112,15 @@ export function Settings() {
       
                   <div className="flex flex-column gap-2">
                     <label className="font-bold text-sm uppercase tracking-widest text-muted">
-                      <i className="pi pi-palette mr-2"></i>{t('settings.theme')}
+                      <i className="pi pi-palette mr-2 text-purple-500"></i>{t('settings.theme')}
                     </label>
                     <SelectButton
                       value={theme}
                       options={themeOptions}
                       onChange={handleThemeChange}
+                      className="w-full"
                       itemTemplate={(option: ThemeOption) => (
-                        <div className="flex align-items-center gap-2">
+                        <div className="flex align-items-center justify-content-center gap-2 w-full">
                           <i className={option.icon}></i>
                           <span>{option.label}</span>
                         </div>
@@ -142,12 +143,12 @@ export function Settings() {
                             optionLabel="label"
                             optionValue="value"
                             onChange={handleRoleChange}
-                            className="w-full bg-card"
+                            className="w-full bg-card p-inputtext-lg"
                             placeholder={t('settings.role')}
                             itemTemplate={(option: RoleOption) => (
-                              <div className="flex flex-column">
-                                <span className="font-semibold">{option.label}</span>
-                                <small className="text-color-secondary">{option.code}</small>
+                              <div className="flex flex-column py-1">
+                                <span className="font-bold text-main">{option.label}</span>
+                                <small className="text-muted font-mono">{option.code}</small>
                               </div>
                             )}
                           />
