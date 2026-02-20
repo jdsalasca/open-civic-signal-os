@@ -10,7 +10,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     // 1. Registration Flow
     await page.goto(`${BASE_URL}/register`);
     await page.locator('#username-input').fill(uniqueUser);
-    await page.locator('#email-input').fill(`${uniqueUser}@signalos.org`);
+    await page.locator('#email-input').fill(`${uniqueUser}@yopmail.com`);
     await page.locator('#password-input').fill('SecurePass123!');
     await page.getByTestId('register-submit-button').click();
 

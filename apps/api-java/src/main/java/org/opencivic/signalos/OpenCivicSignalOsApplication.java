@@ -27,7 +27,7 @@ public class OpenCivicSignalOsApplication {
 				User admin = new User(
 					"admin", 
 					passwordEncoder.encode("admin12345"), 
-					"admin@signalos.org", 
+					"admin-signalos@yopmail.com", 
 					"ROLE_SUPER_ADMIN,ROLE_PUBLIC_SERVANT,ROLE_CITIZEN"
 				);
 				admin.setEnabled(true);
@@ -38,7 +38,7 @@ public class OpenCivicSignalOsApplication {
 				User servant = new User(
 					"servant", 
 					passwordEncoder.encode("servant123"), 
-					"servant@signalos.org", 
+					"servant-signalos@yopmail.com", 
 					"ROLE_PUBLIC_SERVANT,ROLE_CITIZEN"
 				);
 				servant.setEnabled(true);
