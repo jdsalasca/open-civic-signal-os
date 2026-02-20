@@ -33,7 +33,8 @@ export function Register() {
 
       if (res.status === 200 || res.status === 201) {
         toast.success(t('auth.register_success'));
-        navigate("/login");
+        // Redirect to verify passing the username
+        navigate("/verify", { state: { username: data.username } });
       }
     } catch (err) {
       const apiErr = err as ApiError;

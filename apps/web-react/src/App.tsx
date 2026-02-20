@@ -7,13 +7,14 @@ import { useSettingsStore } from "./store/useSettingsStore";
 import { AuthGuard } from "./components/AuthGuard";
 import { ChunkErrorBoundary } from "./components/ChunkErrorBoundary";
 
-// P2-16: Code-splitting for optimized bundle size
+// P2-16: Code-splitting
 const Dashboard = lazy(() => import("./views/Dashboard").then(m => ({ default: m.Dashboard })));
 const ReportSignal = lazy(() => import("./views/ReportSignal").then(m => ({ default: m.ReportSignal })));
 const SignalDetail = lazy(() => import("./views/SignalDetail").then(m => ({ default: m.SignalDetail })));
 const MySignals = lazy(() => import("./views/MySignals").then(m => ({ default: m.MySignals })));
 const Settings = lazy(() => import("./views/Settings").then(m => ({ default: m.Settings })));
 const Register = lazy(() => import("./views/Register").then(m => ({ default: m.Register })));
+const Verify = lazy(() => import("./views/Verify").then(m => ({ default: m.Verify })));
 const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
 const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
 const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
@@ -29,7 +30,6 @@ export function App() {
   const { isLoggedIn } = useAuthStore();
   const { theme } = useSettingsStore();
 
-  // Reactive Theme Application
   useEffect(() => {
     const html = document.documentElement;
     if (theme === 'dark') {
@@ -60,6 +60,7 @@ export function App() {
           <Routes>
             <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
+            <Route path="/verify" element={<Verify />} />
             
             <Route element={<AuthGuard />}>
               <Route path="/" element={<Dashboard />} />

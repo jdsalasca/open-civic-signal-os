@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Random;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -55,37 +56,79 @@ public class AuthController {
             throw new ConflictException("Username already exists in the registry.");
         }
 
-        // V2: Support for roles (plural)
         User user = new User(
             request.username(),
             passwordEncoder.encode(request.password()),
             request.email(),
             "ROLE_CITIZEN"
         );
-        user.setEnabled(true);
+        
+        // V3: Support for automated testing in dev/test profiles
+        String verificationCode;
+        if ("dev".equalsIgnoreCase(activeProfile) || "test".equalsIgnoreCase(activeProfile)) {
+            verificationCode = "123456";
+        } else {
+            verificationCode = String.format("%06d", new Random().nextInt(999999));
+        }
+        
+        user.setVerificationCode(verificationCode);
+        user.setVerified(false);
+        user.setEnabled(false);
+        
         userRepository.save(user);
 
-        emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
+        emailService.sendVerificationCode(user.getEmail(), user.getUsername(), verificationCode);
 
-        return ResponseEntity.ok(Map.of("message", "User registered successfully. Welcome to Signal OS!"));
+        return ResponseEntity.ok(Map.of(
+            "message", "Registration successful. Please check your email for the activation code.",
+            "username", user.getUsername()
+        ));
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<Map<String, String>> verify(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String code = body.get("code");
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedActionException("Identity not found."));
+
+        if (user.isVerified()) {
+            return ResponseEntity.ok(Map.of("message", "Account already verified."));
+        }
+
+        if (code != null && code.equals(user.getVerificationCode())) {
+            user.setVerified(true);
+            user.setEnabled(true);
+            user.setVerificationCode(null);
+            userRepository.save(user);
+            return ResponseEntity.ok(Map.of("message", "Account activated successfully. You can now log in."));
+        } else {
+            throw new UnauthorizedActionException("Invalid activation code.");
+        }
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        User user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new UnauthorizedActionException("Invalid credentials."));
+
+        if (!user.isVerified()) {
+            throw new UnauthorizedActionException("Account not verified. Please check your email.");
+        }
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
         } catch (BadCredentialsException e) {
-            throw new UnauthorizedActionException("Invalid credentials provided for " + request.username());
+            throw new UnauthorizedActionException("Invalid credentials provided.");
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.username());
         String accessToken = jwtService.generateToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
         
-        User user = userRepository.findByUsername(request.username()).orElseThrow();
-
         ResponseCookie cookie = createRefreshCookie(refreshToken, 7 * 24 * 60 * 60);
 
         return ResponseEntity.ok()
@@ -96,7 +139,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
         if (refreshToken == null) {
-            throw new UnauthorizedActionException("Security Error: Refresh token missing from secure storage.");
+            throw new UnauthorizedActionException("Security Error: Refresh token missing.");
         }
 
         try {
@@ -109,7 +152,7 @@ public class AuthController {
                 return ResponseEntity.ok(new AuthResponse(accessToken, null, user.getRoles(), user.getUsername()));
             }
         } catch (Exception e) {
-            throw new UnauthorizedActionException("Authentication Expired: Secure rotation failed. Please log in again.");
+            throw new UnauthorizedActionException("Authentication Expired.");
         }
         
         throw new UnauthorizedActionException("Token integrity check failed.");
@@ -118,10 +161,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
         ResponseCookie cookie = createRefreshCookie("", 0);
-        
-        return ResponseEntity.noContent()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .build();
+        return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
 
     private ResponseCookie createRefreshCookie(String value, long maxAge) {
@@ -139,6 +179,6 @@ public class AuthController {
     public Map<String, Object> getCurrentUser(Authentication authentication) {
         if (authentication == null) return Map.of("role", "GUEST");
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        return Map.of("username", user.getUsername(), "roles", user.getRoles(), "email", user.getEmail());
+        return Map.of("username", user.getUsername(), "roles", user.getRoles(), "email", user.getEmail(), "verified", user.isVerified());
     }
 }
