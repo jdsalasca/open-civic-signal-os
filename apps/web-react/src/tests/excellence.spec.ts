@@ -10,6 +10,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     await page.getByTestId('register-username-input').fill(uniqueUser);
     await page.getByTestId('register-email-input').fill(`${uniqueUser}@yopmail.com`);
     await page.getByTestId('register-password-input').fill('SecurePass123!');
+    await page.getByTestId('register-confirm-password-input').fill('SecurePass123!');
     await page.getByTestId('register-submit-button').click();
 
     // 2. Identity Verification (Activation Step)

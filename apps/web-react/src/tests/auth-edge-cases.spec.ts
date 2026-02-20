@@ -10,6 +10,7 @@ test.describe('Auth Edge Cases (P1)', () => {
     await page.getByTestId('register-username-input').fill(uniqueUser);
     await page.getByTestId('register-email-input').fill(duplicateEmail);
     await page.getByTestId('register-password-input').fill('SecurePass123!');
+    await page.getByTestId('register-confirm-password-input').fill('SecurePass123!');
     
     // Trigger registration
     await page.getByTestId('register-submit-button').click();

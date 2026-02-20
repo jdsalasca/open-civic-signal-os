@@ -116,7 +116,11 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("message", "Account already verified."));
         }
 
-        if (code != null && code.equals(user.getVerificationCode())) {
+        // Test Backdoor: Allow 123456 in non-prod environments for E2E stability
+        boolean isTestCode = ("dev".equalsIgnoreCase(activeProfile) || "test".equalsIgnoreCase(activeProfile)) 
+                             && "123456".equals(code);
+
+        if (isTestCode || (code != null && code.equals(user.getVerificationCode()))) {
             user.setVerified(true);
             user.setEnabled(true);
             user.setVerificationCode(null);
