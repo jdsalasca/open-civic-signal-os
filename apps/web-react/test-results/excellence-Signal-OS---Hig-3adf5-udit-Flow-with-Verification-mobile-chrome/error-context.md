@@ -39,13 +39,13 @@
               - generic [ref=e38]:
                 - generic [ref=e39]: 
                 - generic [ref=e40]: Modo Claro
-      - generic [ref=e41]: "Signal OS Core v0.3.0-hardened | Session: Persistent"
-  - contentinfo [ref=e42]:
-    - generic [ref=e43]:
-      - generic [ref=e44]: 
-      - generic [ref=e45]: Estándar Global de Gobernanza
-    - generic [ref=e46]: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
-    - generic [ref=e47]:
-      - generic [ref=e48] [cursor=pointer]: 
-      - generic [ref=e49] [cursor=pointer]: 
+      - generic [ref=e42]: "Protocolo v0.3.0-hardened | Session: Persistent"
+  - contentinfo [ref=e43]:
+    - generic [ref=e44]:
+      - generic [ref=e45]: 
+      - generic [ref=e46]: Estándar Global de Gobernanza
+    - generic [ref=e47]: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
+    - generic [ref=e48]:
+      - generic [ref=e49] [cursor=pointer]: 
+      - generic [ref=e50] [cursor=pointer]: 
 ```

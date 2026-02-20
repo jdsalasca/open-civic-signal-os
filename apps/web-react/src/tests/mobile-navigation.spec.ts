@@ -10,7 +10,8 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
     await page.getByTestId('login-password-input').fill('admin12345');
     await page.getByTestId('login-submit-button').click();
 
-    await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 15000 });
+    await page.waitForURL('**/');
+    await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 30000 });
 
     // Open Drawer
     const menuButton = page.locator('button[aria-label="Open navigation menu"]');

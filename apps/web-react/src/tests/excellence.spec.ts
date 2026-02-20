@@ -35,7 +35,14 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     await expect(page.getByText('Configuración del Sistema')).toBeVisible();
 
     // 5. Contribution Flow (Spanish)
-    await page.click('a[href="/report"]');
+    const mobileMenuButton = page.locator('button[aria-label="Abrir menú de navegación"]');
+    if (await mobileMenuButton.isVisible()) {
+      await mobileMenuButton.click();
+      await page.locator('.p-sidebar a[href="/report"]').click();
+    } else {
+      await page.click('a[href="/report"]');
+    }
+    
     await page.locator('#title').fill('Mejora de Alumbrado Público');
     await page.locator('#description').fill('Validación de flujo bilingüe y estabilidad de datos.');
     
