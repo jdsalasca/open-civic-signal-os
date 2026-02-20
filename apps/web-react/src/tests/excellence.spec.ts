@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Signal OS - High Quality E2E Suite', () => {
 
   test('Complete Quality Audit Flow with Verification', async ({ page }) => {
-    const uniqueUser = `qa_expert_${Date.now()}`;
+    const uniqueUser = `qa_expert_${Date.now()}_${Math.floor(Math.random() * 1_000_000)}`;
     
     // 1. Registration Flow
     await page.goto('/register');
@@ -72,7 +72,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
       if (await mobileMenuButton.isVisible()) {
         await mobileMenuButton.click();
       }
-      await mobileLogout.click();
+      await mobileLogout.evaluate((el) => (el as HTMLElement).click());
     }
     await expect(page).toHaveURL(/.*login/);
   });

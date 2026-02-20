@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -125,9 +126,59 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     }
 
     private boolean isSimilar(Signal s1, Signal s2) {
-        String t1 = s1.getTitle().toLowerCase();
-        String t2 = s2.getTitle().toLowerCase();
-        return t1.contains(t2) || t2.contains(t1) || levenshteinDistance(t1, t2) < 5;
+        if (s1.getCategory() == null || s2.getCategory() == null || !s1.getCategory().equalsIgnoreCase(s2.getCategory())) {
+            return false;
+        }
+
+        String t1 = normalizeTitle(s1.getTitle());
+        String t2 = normalizeTitle(s2.getTitle());
+        if (t1.isBlank() || t2.isBlank()) {
+            return false;
+        }
+        if (t1.equals(t2)) {
+            return true;
+        }
+
+        int minLen = Math.min(t1.length(), t2.length());
+        if (minLen >= 12 && (t1.contains(t2) || t2.contains(t1))) {
+            return true;
+        }
+
+        double overlap = tokenOverlap(t1, t2);
+        int distance = levenshteinDistance(t1, t2);
+        int adaptiveThreshold = Math.max(3, minLen / 5);
+
+        return overlap >= 0.75 || (overlap >= 0.55 && distance <= adaptiveThreshold);
+    }
+
+    private String normalizeTitle(String title) {
+        if (title == null) {
+            return "";
+        }
+        String ascii = Normalizer.normalize(title, Normalizer.Form.NFD)
+            .replaceAll("\\p{M}", "");
+        return ascii
+            .toLowerCase(Locale.ROOT)
+            .replaceAll("[^a-z0-9\\s]", " ")
+            .replaceAll("\\s+", " ")
+            .trim();
+    }
+
+    private double tokenOverlap(String t1, String t2) {
+        Set<String> a = Arrays.stream(t1.split(" "))
+            .filter(token -> token.length() >= 3)
+            .collect(Collectors.toSet());
+        Set<String> b = Arrays.stream(t2.split(" "))
+            .filter(token -> token.length() >= 3)
+            .collect(Collectors.toSet());
+
+        if (a.isEmpty() || b.isEmpty()) {
+            return 0.0;
+        }
+
+        Set<String> intersection = new HashSet<>(a);
+        intersection.retainAll(b);
+        return (double) intersection.size() / (double) Math.min(a.size(), b.size());
     }
 
     private int levenshteinDistance(String x, String y) {

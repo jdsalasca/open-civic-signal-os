@@ -28,6 +28,7 @@ export function Dashboard() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<SignalMeta | null>(null);
+  const [duplicateClusters, setDuplicateClusters] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
   const [lazyState, setLazyState] = useState({
     first: 0,
@@ -38,11 +39,14 @@ export function Dashboard() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [signalsRes, metaRes, notificationsRes] = await Promise.all([
+      const [signalsRes, metaRes, notificationsRes, duplicatesRes] = await Promise.all([
         apiClient.get(`signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`),
         apiClient.get("signals/meta"),
         (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
           ? apiClient.get("notifications/recent")
+          : Promise.resolve(null),
+        (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
+          ? apiClient.get("signals/duplicates")
           : Promise.resolve(null)
       ]);
       
@@ -57,6 +61,11 @@ export function Dashboard() {
       
       if (notificationsRes && notificationsRes.status === 200) {
         setNotifications(notificationsRes.data);
+      }
+
+      if (duplicatesRes && duplicatesRes.status === 200) {
+        const clusterCount = Object.keys(duplicatesRes.data || {}).length;
+        setDuplicateClusters(clusterCount);
       }
       
     } catch (err) {
@@ -190,6 +199,28 @@ export function Dashboard() {
             <DigestSidebar signals={signals} />
             {isStaff && (
               <NotificationSidebar notifications={notifications} />
+            )}
+            {isStaff && (
+              <Card className="bg-surface border-1 border-white-alpha-10 shadow-4" data-testid="duplicates-insight-card">
+                <div className="flex align-items-start justify-content-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-black text-main uppercase tracking-widest mt-0 mb-2">
+                      {t('dashboard.duplicates_title')}
+                    </h3>
+                    <p className="text-sm text-muted m-0">
+                      {t('dashboard.duplicates_desc', { count: duplicateClusters })}
+                    </p>
+                  </div>
+                  <Button
+                    label={t('dashboard.review_queue')}
+                    icon="pi pi-eye"
+                    outlined
+                    severity="info"
+                    onClick={() => navigate('/moderation')}
+                    data-testid="duplicates-review-button"
+                  />
+                </div>
+              </Card>
             )}
             {activeRole === "CITIZEN" && (
               <Card title={t('dashboard.citizen_support_title')} className="bg-surface border-1 border-white-alpha-10 shadow-4" data-testid="citizen-support-card">

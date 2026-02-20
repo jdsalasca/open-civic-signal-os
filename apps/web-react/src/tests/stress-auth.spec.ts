@@ -3,13 +3,13 @@ import { test, expect } from '@playwright/test';
 test.describe('Signal OS - Infrastructure Stress Test (P0)', () => {
   
   test('Concurrent Registration Stress', async ({ page }) => {
-    const timestamp = Date.now();
+    const runId = `${Date.now()}_${Math.floor(Math.random() * 1_000_000)}`;
     
     // Simulate multiple registration attempts rapidly
     for (let i = 0; i < 5; i++) {
       await page.goto('/register');
-      await page.getByTestId('register-username-input').fill(`stressuser_${timestamp}_${i}`);
-      await page.getByTestId('register-email-input').fill(`stress_${timestamp}_${i}@example.com`);
+      await page.getByTestId('register-username-input').fill(`stressuser_${runId}_${i}`);
+      await page.getByTestId('register-email-input').fill(`stress_${runId}_${i}@example.com`);
       await page.getByTestId('register-password-input').fill('Password123!');
       await page.getByTestId('register-confirm-password-input').fill('Password123!');
       
@@ -23,7 +23,7 @@ test.describe('Signal OS - Infrastructure Stress Test (P0)', () => {
 
   test('Auth Code Brute Force Mitigation (Visual)', async ({ page }) => {
     await page.goto('/register');
-    const user = `brute_${Date.now()}`;
+    const user = `brute_${Date.now()}_${Math.floor(Math.random() * 1_000_000)}`;
     await page.getByTestId('register-username-input').fill(user);
     await page.getByTestId('register-email-input').fill(`${user}@example.com`);
     await page.getByTestId('register-password-input').fill('Password123!');
