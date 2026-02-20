@@ -36,6 +36,15 @@ This file defines mandatory behavior for Codex-based implementation agents.
 - Docs/backlog issue: avoid runtime behavior changes.
 - CI issue: avoid product logic changes unless needed for fix.
 
+## Backlog Routing (Mandatory)
+
+- Actionable backlog source of truth:
+  - `docs/community/issue-backlog.md`
+  - `docs/community/current-backlog.md`
+  - `docs/community/community-features-issue-pack.md`
+- If an item is not in backlog, add it first (with priority and acceptance criteria) before implementation.
+- For GitHub persistence, use `.github/workflows/seed-community-issues.yml`.
+
 ## PR Evidence Template
 
 - Objective:

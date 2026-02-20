@@ -20,7 +20,7 @@ services:
     image: infra-api
     container_name: civic-api
     build:
-      context: ../apps/api-java
+      context: ./apps/api-java
       dockerfile: Dockerfile
     ports:
       - "8081:8080"
@@ -47,7 +47,7 @@ services:
     image: infra-web
     container_name: civic-web
     build:
-      context: ../apps/web-react
+      context: ./apps/web-react
       dockerfile: Dockerfile
     ports:
       - "3002:80"

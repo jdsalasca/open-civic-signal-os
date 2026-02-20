@@ -51,11 +51,13 @@ public class EmailService {
         try {
             MimeMessage mimeMessage = createEmail(to, "noreply@signalos.org", subject, body);
             Message message = createMessageWithEmail(mimeMessage);
-            // Service accounts must impersonate a user to send mail as "me", or specify the user
+            
+            // Note: If using a Service Account, 'me' refers to the service account itself.
+            // If it fails with 400, you need Domain-wide Delegation or use OAuth2 Client ID.
             gmailService.users().messages().send("me", message).execute();
             log.info("Secure civic email sent successfully to: {}", to);
         } catch (Exception e) {
-            log.error("CRITICAL: Strategic communication failure. Reason: {}", e.getMessage());
+            log.error("CRITICAL: Strategic communication failure. Reason: {}. Suggestion: Check if Service Account has Gmail API enabled and proper scopes.", e.getMessage());
         }
     }
 

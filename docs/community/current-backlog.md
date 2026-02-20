@@ -36,6 +36,21 @@ Operational backlog snapshot for immediate execution in Open Civic Signal OS.
    - Weekly top issues digest generation.
    - "You asked, we shipped" operational digest template.
 
+## Community Features Track (New)
+
+1. Multi-community memberships.
+   - Users can belong to one or more communities with explicit membership records.
+   - Dashboard and reporting filters are scoped by selected community context.
+2. Inter-community communication.
+   - Community spaces can open structured cross-community conversations on shared issues.
+   - Add moderation and audit logs for community-to-community threads.
+3. Community internal roles.
+   - Define community-scoped roles (member, moderator, coordinator, public-servant liaison).
+   - Enforce role-based permissions for posting, moderation, and official announcements.
+4. Community progress blog for public servants.
+   - Public servants can publish progress updates per community.
+   - Citizens can follow updates and see timeline visibility of what is being worked on.
+
 ## P0 Execution Queue (Agent Order)
 
 1. `story:OCS-P0-003` expose prioritized backlog API with explainability fields.

@@ -48,6 +48,14 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
 - Concrete execution -> GitHub issues + milestone labels
 - Keep PRs small and linked to one objective
 
+## Actionable Backlog Source (Mandatory)
+
+- Primary executable backlog: `docs/community/issue-backlog.md`
+- Operational sequencing source: `docs/community/current-backlog.md`
+- Community features expansion source: `docs/community/community-features-issue-pack.md`
+- GitHub issue seeding workflow: `.github/workflows/seed-community-issues.yml`
+- Agents must start from these backlog sources before proposing new scope.
+
 ## Labels Convention
 
 - `impact-high`: measurable community value in < 30 days.

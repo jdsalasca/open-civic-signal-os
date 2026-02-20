@@ -48,6 +48,14 @@
 - Use the branch naming convention: `feat/<issue-number>-<short-slug>`.
 - Every PR requires a structured summary covering Scope, API changes, Contract changes, and Verification.
 
+### 5. Actionable Backlog Routing (Mandatory)
+- Create implementation tasks only from:
+  - `docs/community/issue-backlog.md`
+  - `docs/community/current-backlog.md`
+  - `docs/community/community-features-issue-pack.md`
+- Use `.github/workflows/seed-community-issues.yml` when backlog items need persistence as GitHub issues.
+- Do not start implementation from ad-hoc ideas without mapping to a backlog item/story ID first.
+
 ## Quality Gates
 - Backend tests must run (no test skipping): `mvn -q test`.
 - Frontend must build: `npm run build:web`.
