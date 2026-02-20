@@ -4,35 +4,32 @@
   --primary: #06b6d4;      /* Cyan 500 */
   --primary-hover: #22d3ee;
   --primary-active: #0891b2;
-  --primary-text: #083344;
+  --primary-text: #ffffff;
   --danger: #ef4444;
   --focus-ring: 0 0 0 3px rgba(6, 182, 212, 0.4);
-  --bg-dark: #0a0f1e;
-  --bg-surface: #111827;
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --glass-stroke: rgba(255, 255, 255, 0.15);
+  
+  /* DEFAULT DARK THEME (Refined) */
+  --bg-dark: #020617;      /* Slate 950 */
+  --bg-surface: #0f172a;   /* Slate 900 */
+  --bg-card: #1e293b;      /* Slate 800 */
+  --text-main: #f8fafc;    /* Slate 50 */
+  --text-muted: #94a3b8;   /* Slate 400 - Better contrast than before */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --glass-stroke: rgba(255, 255, 255, 0.12);
+  --nav-bg: rgba(15, 23, 42, 0.8);
 }
 
-/* DARK THEME */
-.dark-theme {
-  --bg-dark: #0a0f1e;
-  --bg-surface: #111827;
-  --text-main: #f9fafb;
-  --text-muted: #9ca3af;
-  --border-subtle: rgba(255, 255, 255, 0.1);
-  --glass-stroke: rgba(255, 255, 255, 0.15);
-}
-
-/* LIGHT THEME */
+/* LIGHT THEME (Optimized for Contrast) */
 .light-theme {
-  --bg-dark: #f3f4f6;      /* Gray 100 */
+  --bg-dark: #f8fafc;      /* Slate 50 */
   --bg-surface: #ffffff;   /* Pure white */
-  --text-main: #111827;    /* Gray 900 */
-  --text-muted: #4b5563;   /* Gray 600 */
-  --border-subtle: rgba(0, 0, 0, 0.1);
-  --glass-stroke: rgba(0, 0, 0, 0.05);
+  --bg-card: #f1f5f9;      /* Slate 100 */
+  --text-main: #0f172a;    /* Slate 900 - High contrast */
+  --text-muted: #475569;   /* Slate 600 - Compliant contrast */
+  --border-subtle: rgba(0, 0, 0, 0.12);
+  --glass-stroke: rgba(0, 0, 0, 0.08);
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --primary-text: #083344;
 }
 
 body {
@@ -49,23 +46,63 @@ body {
   pointer-events: none;
 }
 
+/* PRIMEREACT OVERRIDES FOR THEME CONSISTENCY */
 .p-sidebar {
   z-index: 9999 !important;
-  background: #0f172a !important;
+  background: var(--bg-surface) !important;
+  color: var(--text-main) !important;
   border-right: 1px solid var(--border-subtle) !important;
   opacity: 1 !important;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.45) !important;
-}
-
-.p-sidebar .p-sidebar-content {
-  background: transparent !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
 }
 
 .p-sidebar-mask {
   z-index: 9998 !important;
-  background: rgba(2, 6, 23, 0.85) !important;
+  background: rgba(2, 6, 23, 0.6) !important;
   backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+}
+
+.p-card {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--glass-stroke) !important;
+  border-radius: 16px !important;
+  color: var(--text-main) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  background: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  background: var(--bg-surface) !important;
+  color: var(--text-main) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: var(--bg-card) !important;
+}
+
+.p-inputtext {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--text-main) !important;
+}
+
+.p-inputtext:focus {
+  border-color: var(--primary) !important;
+  box-shadow: var(--focus-ring) !important;
+}
+
+.p-button.p-button-text {
+  color: var(--text-main) !important;
 }
 
 .p-button {
@@ -78,20 +115,8 @@ body {
   color: var(--primary-text) !important;
 }
 
-.p-card {
-  background: var(--bg-surface) !important;
-  border: 1px solid var(--glass-stroke) !important;
-  border-radius: 20px !important;
-  color: var(--text-main) !important;
-}
-
-.p-datatable .p-datatable-thead > tr > th {
-  background: var(--bg-surface) !important;
-  color: var(--text-main) !important;
-  border-bottom: 1px solid var(--border-subtle) !important;
-}
-
-.p-datatable .p-datatable-tbody > tr {
-  background: var(--bg-surface) !important;
-  color: var(--text-main) !important;
-}
+/* CUSTOM UTILITIES */
+.text-main { color: var(--text-main); }
+.text-muted { color: var(--text-muted); }
+.bg-surface { background-color: var(--bg-surface); }
+.border-subtle { border-color: var(--border-subtle); }

@@ -48,14 +48,14 @@ export function Layout({ children, authMode = false }: Props) {
   ];
 
   return (
-    <div className={`min-h-screen flex flex-column bg-gray-900 ${authMode ? 'auth-page' : ''}`}>
+    <div className={`min-h-screen flex flex-column ${authMode ? 'auth-page' : ''}`}>
       <Toast ref={toastRef} />
       
       <Sidebar 
         visible={mobileMenuVisible} 
         onHide={() => setMobileMenuVisible(false)} 
         position="left" 
-        className="bg-gray-900 border-right-1 border-white-alpha-10 w-20rem"
+        className="w-20rem"
         aria-label={t('nav.main_navigation')}
       >
         <div className="flex flex-column h-full p-3">
@@ -63,7 +63,7 @@ export function Layout({ children, authMode = false }: Props) {
             <div className="bg-cyan-500 border-round flex align-items-center justify-content-center shadow-4" style={{ width: '32px', height: '32px' }}>
               <i className="pi pi-signal text-gray-900 font-bold"></i>
             </div>
-            <span className="text-xl font-black text-white tracking-tighter uppercase">Signal<span className="text-cyan-500">OS</span></span>
+            <span className="text-xl font-black tracking-tighter uppercase">Signal<span className="text-cyan-500">OS</span></span>
           </div>
 
           <nav className="flex flex-column gap-2 flex-grow-1">
@@ -71,7 +71,7 @@ export function Layout({ children, authMode = false }: Props) {
               <Link 
                 key={link.to} 
                 to={link.to} 
-                className={`flex align-items-center gap-3 p-3 border-round-lg no-underline transition-colors font-bold ${location.pathname === link.to ? 'bg-cyan-900 text-cyan-400' : 'text-gray-400 hover:text-white hover:bg-white-alpha-5'}`}
+                className={`flex align-items-center gap-3 p-3 border-round-lg no-underline transition-colors font-bold ${location.pathname === link.to ? 'bg-cyan-900 text-cyan-400' : 'text-muted hover:text-main hover:bg-white-alpha-5'}`}
               >
                 <i className={link.icon}></i>
                 <span>{link.label}</span>
@@ -84,7 +84,7 @@ export function Layout({ children, authMode = false }: Props) {
               <div className="flex align-items-center gap-3 mb-4 px-2">
                 <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-cyan-600 text-white font-bold" />
                 <div className="flex flex-column">
-                  <span className="text-sm font-bold text-white line-height-1 mb-1">{userName}</span>
+                  <span className="text-sm font-bold line-height-1 mb-1">{userName}</span>
                   <span className="text-xs text-cyan-500 font-bold uppercase tracking-widest" style={{fontSize: '9px'}}>{activeRole}</span>
                 </div>
               </div>
@@ -94,13 +94,13 @@ export function Layout({ children, authMode = false }: Props) {
         </div>
       </Sidebar>
       
-      <nav className="surface-section px-4 md:px-6 py-3 shadow-4 flex justify-content-between align-items-center border-bottom-1 border-white-alpha-10 z-5 sticky top-0">
+      <nav className="surface-section px-4 md:px-6 py-3 shadow-4 flex justify-content-between align-items-center border-bottom-1 border-white-alpha-10 z-5 sticky top-0" style={{ backgroundColor: 'var(--nav-bg)', backdropFilter: 'blur(12px)' }}>
         <div className="flex align-items-center gap-5">
           <Link to="/" className="flex align-items-center gap-2 no-underline">
             <div className="bg-cyan-500 border-round-md flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
               <i className="pi pi-signal text-gray-900 font-bold"></i>
             </div>
-            <span className="text-xl font-black text-white tracking-tighter uppercase">Signal<span className="text-cyan-500">OS</span></span>
+            <span className="text-xl font-black tracking-tighter uppercase text-main">Signal<span className="text-cyan-500">OS</span></span>
           </Link>
           
           {!authMode && isLoggedIn && (
@@ -109,7 +109,7 @@ export function Layout({ children, authMode = false }: Props) {
                 <Link 
                   key={link.to} 
                   to={link.to} 
-                  className={`no-underline font-bold text-sm transition-colors transition-duration-200 ${location.pathname === link.to ? 'text-cyan-400' : 'text-gray-400 hover:text-white'}`}
+                  className={`no-underline font-bold text-sm transition-colors transition-duration-200 ${location.pathname === link.to ? 'text-cyan-400' : 'text-muted hover:text-main'}`}
                 >
                   {link.label}
                 </Link>
@@ -120,13 +120,13 @@ export function Layout({ children, authMode = false }: Props) {
 
         <div className="flex align-items-center gap-3">
           {!authMode && isLoggedIn && (
-            <Button icon="pi pi-bars" text className="lg:hidden text-white p-0" onClick={() => setMobileMenuVisible(true)} aria-label={t('nav.open_navigation')} />
+            <Button icon="pi pi-bars" text className="lg:hidden text-main p-0" onClick={() => setMobileMenuVisible(true)} aria-label={t('nav.open_navigation')} />
           )}
 
           {!authMode && !isLoggedIn && (
             <div className="flex gap-2">
               <Link to="/login" className="no-underline">
-                <Button label={t('nav.sign_in')} size="small" text className="text-white hover:text-cyan-400 font-bold" />
+                <Button label={t('nav.sign_in')} size="small" text className="text-main hover:text-cyan-400 font-bold" />
               </Link>
               <Link to="/register" className="no-underline">
                 <Button label={t('nav.join_now')} size="small" className="p-button-primary px-3 font-bold" />
@@ -135,9 +135,9 @@ export function Layout({ children, authMode = false }: Props) {
           )}
 
           {isLoggedIn && (
-            <div className="hidden lg:flex align-items-center gap-3 bg-gray-800 py-1 pl-3 pr-1 border-round-right-3xl border-round-left-xl border-1 border-white-alpha-10">
+            <div className="hidden lg:flex align-items-center gap-3 bg-white-alpha-5 py-1 pl-3 pr-1 border-round-right-3xl border-round-left-xl border-1 border-white-alpha-10">
               <div className="flex flex-column align-items-end mr-1">
-                <span className="text-xs font-bold text-white line-height-1 mb-1">{userName}</span>
+                <span className="text-xs font-bold line-height-1 mb-1">{userName}</span>
                 <span className="text-min font-bold text-cyan-500 uppercase tracking-tighter" style={{ fontSize: '9px' }}>{activeRole}</span>
               </div>
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-cyan-600 text-white font-bold" />
@@ -147,11 +147,11 @@ export function Layout({ children, authMode = false }: Props) {
         </div>
       </nav>
 
-      <main className="flex-grow-1 p-4 md:p-6 bg-gray-950">
+      <main className="flex-grow-1 p-4 md:p-6">
         <div className="page-container h-full">{children}</div>
       </main>
 
-      <footer className="bg-gray-950 p-6 flex flex-column md:flex-row justify-content-between align-items-center border-top-1 border-white-alpha-10 gap-4">
+      <footer className="p-6 flex flex-column md:flex-row justify-content-between align-items-center border-top-1 border-white-alpha-10 gap-4">
         <div className="flex align-items-center gap-2">
           <i className="pi pi-globe text-gray-500"></i>
           <span className="text-gray-400 text-sm font-bold uppercase tracking-widest text-xs">{t('nav.global_standard')}</span>

@@ -1,0 +1,47 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - status [ref=e8]: Internal System Synchronization Failure.
+  - generic [ref=e9]:
+    - navigation:
+      - generic:
+        - link "SignalOS":
+          - /url: /
+          - generic: SignalOS
+    - main [ref=e10]:
+      - generic [ref=e14]:
+        - generic [ref=e16]: Join Signal OS
+        - generic [ref=e18]: Create your citizen account
+        - form "Registration Form" [ref=e20]:
+          - generic [ref=e22]:
+            - generic [ref=e23]: 
+            - textbox "Username" [ref=e24]: user_1771551572257
+            - generic: Username
+          - generic [ref=e26]:
+            - generic [ref=e27]: 
+            - textbox "Email Address" [ref=e28]: admin-signalos@yopmail.com
+            - generic: Email Address
+          - generic [ref=e30]:
+            - generic [ref=e32]:
+              - textbox "Password" [ref=e33]: SecurePass123!
+              - switch "Show Password" [checked] [ref=e35] [cursor=pointer]
+            - generic: Password
+          - generic [ref=e37]:
+            - generic [ref=e38]: 
+            - generic [ref=e39]: "Default Security Clearance: Citizen"
+          - button "Submit Registration" [active] [ref=e40] [cursor=pointer]:
+            - generic [ref=e41]: Create Account
+          - paragraph [ref=e42]:
+            - text: Already a member?
+            - link "Sign in here" [ref=e43] [cursor=pointer]:
+              - /url: /login
+    - contentinfo:
+      - generic:
+        - generic: 
+        - generic: Global Governance Standard
+      - generic: © 2026 Open Civic Signal OS. Protocol v0.3.0-hardened
+      - generic:
+        - generic: 
+        - generic: 
+```

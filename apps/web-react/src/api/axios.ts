@@ -37,12 +37,19 @@ apiClient.interceptors.response.use(
     if (!error.response) {
       error.friendlyMessage = "Civic API Unreachable: Check connection.";
     } else {
-      switch (error.response.status) {
-        case 401: error.friendlyMessage = "Authentication Required."; break;
-        case 403: error.friendlyMessage = "Clearance Denied."; break;
-        case 404: error.friendlyMessage = "Resource not found."; break;
-        case 409: error.friendlyMessage = "State Conflict detected."; break;
-        case 500: error.friendlyMessage = "Internal System Synchronization Failure."; break;
+      // Prioritize backend message if available
+      const backendMessage = error.response.data?.message;
+      
+      if (backendMessage) {
+        error.friendlyMessage = backendMessage;
+      } else {
+        switch (error.response.status) {
+          case 401: error.friendlyMessage = "Authentication Required."; break;
+          case 403: error.friendlyMessage = "Clearance Denied."; break;
+          case 404: error.friendlyMessage = "Resource not found."; break;
+          case 409: error.friendlyMessage = "State Conflict detected."; break;
+          case 500: error.friendlyMessage = "Internal System Synchronization Failure."; break;
+        }
       }
     }
 

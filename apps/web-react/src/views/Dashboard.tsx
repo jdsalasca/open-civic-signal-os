@@ -90,14 +90,14 @@ export function Dashboard() {
         <div>
           <div className="flex align-items-center gap-2 mb-2">
             <span className="bg-cyan-900 text-cyan-400 text-xs font-bold px-2 py-1 border-round uppercase tracking-tighter">{t('dashboard.live_intel')}</span>
-            <span className="text-gray-600 text-xs">•</span>
-            <span className="text-gray-500 text-xs font-medium" data-testid="welcome-message">{t('dashboard.welcome')}, {userName}</span>
+            <span className="text-muted text-xs">•</span>
+            <span className="text-muted text-xs font-medium" data-testid="welcome-message">{t('dashboard.welcome')}, {userName}</span>
           </div>
           {/* P1-D: Cleaned title logic, allowing translation to define highlight via key or just direct text */}
-          <h1 className="text-5xl font-black mb-2 tracking-tight line-height-1">
+          <h1 className="text-5xl font-black mb-2 tracking-tight line-height-1 text-main">
             {t('dashboard.title')}
           </h1>
-          <p className="text-gray-500 text-lg max-w-30rem m-0">
+          <p className="text-muted text-lg max-w-30rem m-0">
             {t('dashboard.subtitle')}
           </p>
         </div>

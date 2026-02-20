@@ -82,7 +82,7 @@ export function ReportSignal() {
               <label htmlFor="affectedPeople" className="font-bold block mb-2">{t('report.scale')}</label>
               <Controller name="affectedPeople" control={control} 
                 render={({ field }) => (
-                  <div className="flex align-items-center gap-3 bg-gray-900 p-2 border-round border-1 border-white-alpha-10">
+                  <div className="flex align-items-center gap-3 bg-white-alpha-5 p-2 border-round border-1 border-white-alpha-10">
                     <Slider {...field} min={1} max={1000} className="flex-grow-1" />
                     <span className="font-black text-cyan-400" style={{ minWidth: '40px' }}>{field.value}</span>
                   </div>
@@ -102,12 +102,12 @@ export function ReportSignal() {
             <div className="field col-12 md:col-6">
               <div className="flex justify-content-between mb-2">
                 <label className="font-bold">{t('report.urgency')}</label>
-                <span className="text-xs text-gray-500 uppercase font-black">{t('common.score')}: 1-5</span>
+                <span className="text-xs text-muted uppercase font-black">{t('common.score')}: 1-5</span>
               </div>
               <Controller name="urgency" control={control} render={({ field }) => (
-                <div className="p-3 bg-black-alpha-20 border-round">
+                <div className="p-3 bg-white-alpha-5 border-round border-1 border-white-alpha-10">
                   <Slider {...field} min={1} max={5} step={1} />
-                  <div className="flex justify-content-between mt-2 text-xs font-bold text-gray-600">
+                  <div className="flex justify-content-between mt-2 text-xs font-bold text-muted">
                     <span>{t('report.urgency_low')}</span>
                     <span className="text-cyan-500">{field.value}</span>
                     <span>{t('report.urgency_critical')}</span>
@@ -119,12 +119,12 @@ export function ReportSignal() {
             <div className="field col-12 md:col-6">
               <div className="flex justify-content-between mb-2">
                 <label className="font-bold">{t('report.impact')}</label>
-                <span className="text-xs text-gray-500 uppercase font-black">{t('common.score')}: 1-5</span>
+                <span className="text-xs text-muted uppercase font-black">{t('common.score')}: 1-5</span>
               </div>
               <Controller name="impact" control={control} render={({ field }) => (
-                <div className="p-3 bg-black-alpha-20 border-round">
+                <div className="p-3 bg-white-alpha-5 border-round border-1 border-white-alpha-10">
                   <Slider {...field} min={1} max={5} step={1} />
-                  <div className="flex justify-content-between mt-2 text-xs font-bold text-gray-600">
+                  <div className="flex justify-content-between mt-2 text-xs font-bold text-muted">
                     <span>{t('report.impact_minor')}</span>
                     <span className="text-purple-500">{field.value}</span>
                     <span>{t('report.impact_systemic')}</span>
@@ -134,8 +134,8 @@ export function ReportSignal() {
             </div>
 
             <div className="col-12 mt-4 flex gap-3">
-              <Button type="button" label={t('common.discard')} outlined className="p-button-secondary border-gray-700" onClick={() => navigate("/")} />
-              <Button type="submit" label={t('report.submit')} icon="pi pi-bolt" loading={isSubmitting} className="p-button-primary" />
+              <Button type="button" label={t('common.discard')} outlined severity="secondary" onClick={() => navigate("/")} />
+              <Button type="submit" label={t('report.submit')} icon="pi pi-bolt" loading={isSubmitting} className="p-button-primary shadow-4" />
             </div>
           </form>
         </Card>

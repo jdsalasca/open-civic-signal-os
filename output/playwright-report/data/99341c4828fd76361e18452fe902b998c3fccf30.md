@@ -1,0 +1,148 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "SignalOS" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e8]: SignalOS
+      - generic [ref=e9]:
+        - link "Perspectivas" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - link "Reporte Público" [ref=e11] [cursor=pointer]:
+          - /url: /report
+        - link "Mis Contribuciones" [ref=e12] [cursor=pointer]:
+          - /url: /mine
+        - link "Configuración" [ref=e13] [cursor=pointer]:
+          - /url: /settings
+    - generic [ref=e14]:
+      - text: 
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: qa_expert_1771551572215
+          - generic [ref=e18]: CITIZEN
+        - generic [ref=e20]: Q
+        - button "Cerrar Sesión" [ref=e21] [cursor=pointer]:
+          - generic: 
+  - main [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]: Inteligencia en Vivo
+            - generic [ref=e28]: •
+            - generic [ref=e29]: Bienvenido de nuevo, qa_expert_1771551572215
+          - heading "Perspectivas de Gobierno" [level=1] [ref=e30]
+          - paragraph [ref=e31]: Seguimiento en tiempo real de la priorización y resolución de señales comunitarias.
+        - button "Reportar Incidencia" [ref=e33] [cursor=pointer]:
+          - generic: 
+          - generic [ref=e34]: Reportar Incidencia
+      - region "Civic Metrics Overview" [ref=e35]:
+        - 'article "Total de Señales: 1" [ref=e37]':
+          - generic [ref=e40]:
+            - generic [ref=e41]:
+              - generic [ref=e42]: Total de Señales
+              - generic [ref=e43]: "1"
+            - generic [ref=e45]: 
+        - 'article "Nuevos Reportes: 1" [ref=e47]':
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - generic [ref=e52]: Nuevos Reportes
+              - generic [ref=e53]: "1"
+            - generic [ref=e55]: 
+        - 'article "Bajo Análisis: 0" [ref=e57]':
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]: Bajo Análisis
+              - generic [ref=e63]: "0"
+            - generic [ref=e65]: 
+        - 'article "Promedio Prioridad: 166.0" [ref=e67]':
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - generic [ref=e72]: Promedio Prioridad
+              - generic [ref=e73]: "166.0"
+            - generic [ref=e75]: 
+      - generic [ref=e76]:
+        - generic "Feed Priorizado" [ref=e79]:
+          - generic [ref=e81]:
+            - generic [ref=e82]:
+              - generic [ref=e83]: 
+              - heading "Feed Priorizado" [level=2] [ref=e84]
+            - generic [ref=e85]:
+              - generic [ref=e86]: 
+              - textbox "Buscar señales..." [ref=e87]
+          - table [ref=e89]:
+            - rowgroup [ref=e90]:
+              - row "Título Categoría Estado Puntaje" [ref=e91]:
+                - columnheader "Título" [ref=e92] [cursor=pointer]:
+                  - generic [ref=e93]:
+                    - generic [ref=e94]: Título
+                    - img [ref=e96]
+                - columnheader "Categoría" [ref=e101] [cursor=pointer]:
+                  - generic [ref=e102]:
+                    - generic [ref=e103]: Categoría
+                    - img [ref=e105]
+                - columnheader "Estado" [ref=e110] [cursor=pointer]:
+                  - generic [ref=e111]:
+                    - generic [ref=e112]: Estado
+                    - img [ref=e114]
+                - columnheader "Puntaje" [ref=e119] [cursor=pointer]:
+                  - generic [ref=e120]:
+                    - generic [ref=e121]: Puntaje
+                    - img [ref=e123]
+                - columnheader [ref=e125]
+            - rowgroup [ref=e126]:
+              - 'row "Mejora de Alumbrado Público REF: a038aacc Infraestructura NEW Puntaje: 166 " [ref=e127] [cursor=pointer]':
+                - 'cell "Mejora de Alumbrado Público REF: a038aacc" [ref=e128]':
+                  - generic [ref=e129]:
+                    - generic [ref=e130]: Mejora de Alumbrado Público
+                    - generic [ref=e132]: "REF: a038aacc"
+                - cell "Infraestructura" [ref=e133]
+                - cell "NEW" [ref=e134]:
+                  - generic [ref=e137]: NEW
+                - 'cell "Puntaje: 166" [ref=e138]':
+                  - 'group "Puntaje: 166" [ref=e139]':
+                    - generic [ref=e140]: "166"
+                - cell "" [ref=e144]:
+                  - generic [ref=e145]: 
+          - generic [ref=e146]:
+            - button "First Page" [disabled]:
+              - img
+            - button "Previous Page" [disabled]:
+              - img
+            - button "Page 1" [ref=e148] [cursor=pointer]: "1"
+            - button "Next Page" [disabled]:
+              - img
+            - button "Last Page" [disabled]:
+              - img
+        - generic [ref=e150]:
+          - generic [ref=e152]:
+            - generic [ref=e153]: Distribución de Señales
+            - img [ref=e156]
+          - generic [ref=e158]:
+            - generic [ref=e159]: Transmisión Semanal
+            - generic [ref=e162]:
+              - generic [ref=e163]: "01"
+              - generic [ref=e164]:
+                - heading "Mejora de Alumbrado Público" [level=4] [ref=e165]
+                - generic [ref=e166]:
+                  - generic [ref=e167]: "166"
+                  - generic [ref=e168]: •
+                  - generic [ref=e169]: Infraestructura
+          - generic [ref=e171]:
+            - generic [ref=e172]: Apoyo Ciudadano
+            - generic [ref=e173]:
+              - paragraph [ref=e174]: Sus votos y reportes impactan directamente en la prioridad algorítmica de su comunidad.
+              - generic [ref=e175]:
+                - generic [ref=e176]: 
+                - generic [ref=e177]: "Verificación Ciudadana: Activa"
+  - contentinfo [ref=e178]:
+    - generic [ref=e179]:
+      - generic [ref=e180]: 
+      - generic [ref=e181]: Estándar Global de Gobernanza
+    - generic [ref=e182]: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
+    - generic [ref=e183]:
+      - generic [ref=e184] [cursor=pointer]: 
+      - generic [ref=e185] [cursor=pointer]: 
+```

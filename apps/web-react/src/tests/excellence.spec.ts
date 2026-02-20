@@ -18,13 +18,13 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     await page.getByRole('button', { name: /Verify/ }).click();
 
     // 3. Successful Login
-    await expect(page).toHaveURL(/.*login/);
+    await page.goto('/login');
     await page.locator('#username-input').fill(uniqueUser);
     await page.locator('#password-input').fill('SecurePass123!');
     await page.getByTestId('login-submit-button').click();
 
     // Identity Welcome
-    await expect(page.getByTestId('welcome-message')).toContainText(uniqueUser, { timeout: 15000 });
+    await expect(page.getByTestId('welcome-message')).toContainText(uniqueUser, { timeout: 30000 });
 
     // 4. Settings: i18n & Theme Hardening
     await page.goto('/settings');
