@@ -31,6 +31,9 @@ services:
       JWT_SECRET: "strategic-civic-intelligence-key-secure-2026-v1"
       CORS_ALLOWED_ORIGINS: "http://localhost:3002"
       SPRING_PROFILES_ACTIVE: dev
+      GOOGLE_APPLICATION_CREDENTIALS: /app/secrets/google-credentials.json
+    volumes:
+      - ${LOCAL_GOOGLE_CREDENTIALS_PATH}:/app/secrets/google-credentials.json:ro
     depends_on:
       civic-db:
         condition: service_healthy
