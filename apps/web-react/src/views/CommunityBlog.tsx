@@ -25,6 +25,7 @@ export function CommunityBlog() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [statusTag, setStatusTag] = useState("IN_PROGRESS");
+  const canPublish = Boolean(activeCommunityId && title.trim() && content.trim());
 
   const loadPosts = useCallback(async () => {
     if (!activeCommunityId) return;
@@ -70,6 +71,7 @@ export function CommunityBlog() {
               onChange={(e) => setTitle(e.target.value)}
               className="w-full mb-2"
               placeholder="Title"
+              disabled={!activeCommunityId}
             />
             <InputTextarea
               value={content}
@@ -77,14 +79,26 @@ export function CommunityBlog() {
               rows={6}
               className="w-full mb-2"
               placeholder="What changed for this community?"
+              disabled={!activeCommunityId}
             />
             <Dropdown
               value={statusTag}
               options={statusTagOptions}
               onChange={(e) => setStatusTag(e.value)}
               className="w-full mb-2"
+              disabled={!activeCommunityId}
             />
-            <Button label="Publish" onClick={createPost} />
+            <Button
+              label="Publish"
+              onClick={createPost}
+              disabled={!canPublish}
+              data-testid="publish-blog-button"
+            />
+            {!activeCommunityId && (
+              <small className="block mt-2 text-color-secondary">
+                Select a community context to publish updates.
+              </small>
+            )}
           </Card>
         </div>
         <div className="col-12 lg:col-8">

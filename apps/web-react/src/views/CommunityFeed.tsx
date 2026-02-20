@@ -46,12 +46,18 @@ export function CommunityFeed() {
   return (
     <Layout>
       <Card title="Cross-Community Feed">
+        {!activeCommunityId && (
+          <div className="text-color-secondary mb-3">
+            Select a community from the top navigation to load the feed.
+          </div>
+        )}
         <div className="flex gap-2 mb-4">
           <Dropdown
             value={typeFilter}
             options={typeOptions}
             onChange={(e) => setTypeFilter(e.value)}
             className="w-14rem"
+            disabled={!activeCommunityId}
           />
           <Dropdown
             value={days}
@@ -62,6 +68,7 @@ export function CommunityFeed() {
             ]}
             onChange={(e) => setDays(e.value)}
             className="w-10rem"
+            disabled={!activeCommunityId}
           />
         </div>
         {filteredItems.length === 0 ? (

@@ -55,6 +55,7 @@ export function App() {
           left: 'auto',
           bottom: '1rem',
           zIndex: 11000,
+          pointerEvents: 'none',
         }}
         gutter={10}
         toastOptions={{

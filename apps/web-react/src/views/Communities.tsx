@@ -103,22 +103,39 @@ export function Communities() {
       <div className="grid">
         <div className="col-12 lg:col-6">
           <Card title="Community Memberships" className="shadow-4">
-            <div className="flex gap-2 mb-3">
-              <Dropdown
-                value={selectedCommunityId}
-                options={communityOptions}
-                onChange={(e) => setSelectedCommunityId(e.value)}
-                placeholder="Select community"
-                className="flex-1"
-              />
-              <Dropdown
-                value={joinRole}
-                options={roleOptions}
-                onChange={(e) => setJoinRole(e.value)}
-                className="w-15rem"
-              />
-              <Button label="Join" onClick={handleJoin} disabled={!selectedCommunityId} />
+            <div className="grid mb-3">
+              <div className="col-12 lg:col-6">
+                <Dropdown
+                  value={selectedCommunityId}
+                  options={communityOptions}
+                  onChange={(e) => setSelectedCommunityId(e.value)}
+                  placeholder="Select community"
+                  className="w-full"
+                />
+              </div>
+              <div className="col-12 md:col-6 lg:col-3">
+                <Dropdown
+                  value={joinRole}
+                  options={roleOptions}
+                  onChange={(e) => setJoinRole(e.value)}
+                  className="w-full"
+                />
+              </div>
+              <div className="col-12 md:col-6 lg:col-3">
+                <Button
+                  label="Join"
+                  onClick={handleJoin}
+                  disabled={!selectedCommunityId}
+                  className="w-full"
+                  data-testid="community-join-button"
+                />
+              </div>
             </div>
+            {!selectedCommunityId && (
+              <small className="block mb-3 text-color-secondary">
+                Select a community first to enable joining.
+              </small>
+            )}
             <div className="flex flex-column gap-2">
               {memberships.map((membership) => (
                 <div
@@ -142,7 +159,12 @@ export function Communities() {
         </div>
         <div className="col-12 lg:col-6">
           <Card title="Community Registry" className="shadow-4">
-            <Button label="Create Community" icon="pi pi-plus" onClick={() => setCreating(true)} />
+            <Button
+              label="Create Community"
+              icon="pi pi-plus"
+              onClick={() => setCreating(true)}
+              data-testid="open-create-community-button"
+            />
             <ul className="mt-4">
               {communities.map((community) => (
                 <li key={community.id}>
@@ -167,6 +189,7 @@ export function Communities() {
             label="Create"
             onClick={handleCreate}
             disabled={!newName.trim() || !newSlug.trim()}
+            data-testid="create-community-submit-button"
           />
         </div>
       </Dialog>

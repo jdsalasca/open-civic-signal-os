@@ -90,6 +90,8 @@ export function CommunityThreads() {
   const targetOptions = memberships
     .filter((m: CommunityMembership) => m.communityId !== activeCommunityId)
     .map((m: CommunityMembership) => ({ label: m.communityName, value: m.communityId }));
+  const canCreateThread = Boolean(activeCommunityId && targetCommunityId && newThreadTitle.trim());
+  const canSendMessage = Boolean(selectedThreadId && activeCommunityId && newMessage.trim());
 
   return (
     <Layout>
@@ -108,8 +110,24 @@ export function CommunityThreads() {
               onChange={(e) => setTargetCommunityId(e.value)}
               placeholder="Target community"
               className="w-full mb-2"
+              disabled={!activeCommunityId || targetOptions.length === 0}
             />
-            <Button label="Create Thread" onClick={createThread} />
+            <Button
+              label="Create Thread"
+              onClick={createThread}
+              disabled={!canCreateThread}
+              data-testid="create-thread-button"
+            />
+            {!activeCommunityId && (
+              <small className="block mt-2 text-color-secondary">
+                Select a community context to enable thread actions.
+              </small>
+            )}
+            {activeCommunityId && targetOptions.length === 0 && (
+              <small className="block mt-2 text-color-secondary">
+                Join at least one additional community to open cross-community threads.
+              </small>
+            )}
           </Card>
           <Card title="Post Message">
             <Dropdown
@@ -118,6 +136,7 @@ export function CommunityThreads() {
               onChange={(e) => setSelectedThreadId(e.value)}
               placeholder="Select thread"
               className="w-full mb-2"
+              disabled={!activeCommunityId || threads.length === 0}
             />
             <InputTextarea
               value={newMessage}
@@ -125,8 +144,19 @@ export function CommunityThreads() {
               rows={4}
               className="w-full mb-2"
               placeholder="Message"
+              disabled={!activeCommunityId || threads.length === 0}
             />
-            <Button label="Send" onClick={sendMessage} />
+            <Button
+              label="Send"
+              onClick={sendMessage}
+              disabled={!canSendMessage}
+              data-testid="send-thread-message-button"
+            />
+            {threads.length === 0 && (
+              <small className="block mt-2 text-color-secondary">
+                Create a thread first before posting a message.
+              </small>
+            )}
           </Card>
         </div>
         <div className="col-12 lg:col-8">
