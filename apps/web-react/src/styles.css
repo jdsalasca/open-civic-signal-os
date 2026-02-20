@@ -58,8 +58,9 @@ body {
 
 .p-sidebar-mask {
   z-index: 9998 !important;
-  background: rgba(2, 6, 23, 0.6) !important;
-  backdrop-filter: blur(8px);
+  background: rgba(2, 6, 23, 0.92) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .p-card {

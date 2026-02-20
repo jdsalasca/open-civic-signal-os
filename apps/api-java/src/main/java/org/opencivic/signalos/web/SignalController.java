@@ -1,6 +1,6 @@
 package org.opencivic.signalos.web;
 
-import import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.PageRequest;
 import jakarta.validation.Valid;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.SignalStatus;

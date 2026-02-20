@@ -75,6 +75,7 @@ export function App() {
             </Route>
             
             <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/forbidden" element={<Unauthorized />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

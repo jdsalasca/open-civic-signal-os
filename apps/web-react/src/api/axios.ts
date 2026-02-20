@@ -26,6 +26,20 @@ apiClient.interceptors.request.use((config) => {
 });
 
 // Response Interceptor: Handle 401/403 and Refresh Token
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 apiClient.interceptors.response.use(
   (response) => {
     return response;
@@ -37,9 +51,7 @@ apiClient.interceptors.response.use(
     if (!error.response) {
       error.friendlyMessage = "Civic API Unreachable: Check connection.";
     } else {
-      // Prioritize backend message if available
       const backendMessage = error.response.data?.message;
-      
       if (backendMessage) {
         error.friendlyMessage = backendMessage;
       } else {
@@ -53,18 +65,44 @@ apiClient.interceptors.response.use(
       }
     }
 
+    // P0: Refresh-loop breaker logic
+    // 1. Guard against recursive refresh on /auth/refresh or /auth/login
+    if (originalRequest.url?.includes('auth/refresh') || originalRequest.url?.includes('auth/login')) {
+      if (error.response?.status === 401) {
+        useAuthStore.getState().logout();
+      }
+      return Promise.reject(error);
+    }
+
+    // 2. Trigger refresh if 401 and not retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return apiClient(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const res = await apiClient.post('auth/refresh', {});
         const { accessToken } = res.data;
         
         useAuthStore.getState().updateAccessToken(accessToken);
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        processQueue(null, accessToken);
+        isRefreshing = false;
         
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
+        processQueue(refreshError, null);
+        isRefreshing = false;
         useAuthStore.getState().logout();
         return Promise.reject(refreshError);
       }

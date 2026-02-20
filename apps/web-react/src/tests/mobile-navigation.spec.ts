@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:3002';
-
 test.describe('Mobile Navigation Integrity (P0)', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 

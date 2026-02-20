@@ -16,6 +16,7 @@ const resources = {
         "actions": "Actions",
         "status": "Status",
         "category": "Category",
+        "select_category": "Select a category",
         "score": "Score",
         "description": "Description",
         "title": "Title"
@@ -198,6 +199,7 @@ const resources = {
         "actions": "Acciones",
         "status": "Estado",
         "category": "Categoría",
+        "select_category": "Seleccione una categoría",
         "score": "Puntaje",
         "description": "Descripción",
         "title": "Título"
