@@ -55,7 +55,12 @@ const resources = {
         "welcome_back": "Welcome back",
         "login_success": "Welcome back, {{name}}!",
         "register_success": "Account created! You can now log in.",
-        "logout_warn": "Server-side logout session could not be invalidated."
+        "logout_warn": "Server-side logout session could not be invalidated.",
+        "activate_title": "Activate Identity",
+        "activate_subtitle": "Enter the 6-digit code sent to your email",
+        "verify_button": "Verify and Activate",
+        "verify_protocol": "Identity verification is a mandatory protocol for Signal OS access.",
+        "verified_success": "Account activated! You can now log in."
       },
       "dashboard": {
         "welcome": "Welcome back",
@@ -232,7 +237,12 @@ const resources = {
         "welcome_back": "Bienvenido de nuevo",
         "login_success": "¡Bienvenido de nuevo, {{name}}!",
         "register_success": "¡Cuenta creada! Ya puede iniciar sesión.",
-        "logout_warn": "La sesión del servidor no pudo ser invalidada."
+        "logout_warn": "La sesión del servidor no pudo ser invalidada.",
+        "activate_title": "Activar Identidad",
+        "activate_subtitle": "Ingrese el código de 6 dígitos enviado a su correo",
+        "verify_button": "Verificar y Activar",
+        "verify_protocol": "La verificación de identidad es un protocolo obligatorio para acceder a Signal OS.",
+        "verified_success": "¡Cuenta activada! Ya puede iniciar sesión."
       },
       "dashboard": {
         "welcome": "Bienvenido de nuevo",

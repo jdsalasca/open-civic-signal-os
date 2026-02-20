@@ -28,10 +28,11 @@ export function Verify() {
   const onSubmit = async (data: VerifyForm) => {
     try {
       await apiClient.post("auth/verify", { username, code: data.code });
-      toast.success(t('auth.verified_success') || "Account activated! You can now log in.");
+      toast.success(t('auth.verified_success'));
       navigate("/login");
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Invalid verification code.");
+    } catch (err: unknown) {
+      const apiErr = err as { friendlyMessage?: string };
+      toast.error(apiErr.friendlyMessage || "Invalid verification code.");
     }
   };
 
@@ -39,8 +40,8 @@ export function Verify() {
     <Layout authMode>
       <div className="flex justify-content-center align-items-center mt-8">
         <Card 
-          title={<div className="text-center w-full">Activate Identity</div>} 
-          subTitle={<div className="text-center w-full">Enter the 6-digit code sent to your email</div>} 
+          title={<div className="text-center w-full">{t('auth.activate_title')}</div>} 
+          subTitle={<div className="text-center w-full">{t('auth.activate_subtitle')}</div>} 
           style={{ width: '100%', maxWidth: '400px' }}
           className="shadow-8"
         >
@@ -60,12 +61,12 @@ export function Verify() {
             </div>
             <Button 
               type="submit" 
-              label="Verify and Activate" 
+              label={t('auth.verify_button')} 
               className="p-button-primary mt-4 py-3 font-bold" 
               loading={isSubmitting} 
             />
             <p className="text-center mt-4 text-xs text-gray-500">
-              Identity verification is a mandatory protocol for Signal OS access.
+              {t('auth.verify_protocol')}
             </p>
           </form>
         </Card>

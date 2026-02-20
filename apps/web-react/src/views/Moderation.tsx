@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { Signal } from "../types";
 import { DataTable } from "primereact/datatable";
@@ -19,24 +19,23 @@ export function Moderation() {
   const [flagged, setFlagged] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadFlagged = async () => {
+  const loadFlagged = useCallback(async () => {
     try {
       setLoading(true);
       const res = await apiClient.get("signals/flagged");
       // P1-B: Handle paginated response structure
-            setFlagged(res.data.content || []);
-          } catch (err) {
-            const apiErr = err as ApiError;
-            toast.error(apiErr.friendlyMessage || t('moderation.load_error'));
-          } finally {
-            setLoading(false);
-          }
-        };
-      
-        useEffect(() => {
-          loadFlagged();
-        }, [t]);
-      
+      setFlagged(res.data.content || []);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('moderation.load_error'));
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    loadFlagged();
+  }, [loadFlagged]);      
         const handleAction = async (id: string, action: 'APPROVE' | 'REJECT') => {
           try {
             await apiClient.post(`signals/${id}/moderate`, {
