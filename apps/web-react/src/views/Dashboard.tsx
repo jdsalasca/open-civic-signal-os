@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
-import { Signal, Notification } from "../types";
+import { Signal, Notification, SignalMeta } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
 import { SignalTable } from "../components/SignalTable";
 import { DigestSidebar } from "../components/DigestSidebar";
@@ -27,6 +27,7 @@ export function Dashboard() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<SignalMeta | null>(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [lazyState, setLazyState] = useState({
     first: 0,
@@ -37,8 +38,9 @@ export function Dashboard() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const [signalsRes, notificationsRes] = await Promise.all([
+      const [signalsRes, metaRes, notificationsRes] = await Promise.all([
         apiClient.get(`signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`),
+        apiClient.get("signals/meta"),
         (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
           ? apiClient.get("notifications/recent")
           : Promise.resolve(null)
@@ -47,6 +49,10 @@ export function Dashboard() {
       if (signalsRes.status === 200) {
         setSignals(signalsRes.data.content || []);
         setTotalRecords(signalsRes.data.totalElements || 0);
+      }
+
+      if (metaRes.status === 200) {
+        setMeta(metaRes.data);
       }
       
       if (notificationsRes && notificationsRes.status === 200) {
@@ -84,6 +90,29 @@ export function Dashboard() {
 
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
 
+  const formatLastUpdated = (isoDate: string | null) => {
+    if (!isoDate) {
+      return t('dashboard.freshness_pending');
+    }
+    const date = new Date(isoDate);
+    if (Number.isNaN(date.getTime())) {
+      return t('dashboard.freshness_pending');
+    }
+    const diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+    if (diffMinutes < 1) {
+      return t('dashboard.freshness_now');
+    }
+    if (diffMinutes < 60) {
+      return t('dashboard.freshness_minutes', { count: diffMinutes });
+    }
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) {
+      return t('dashboard.freshness_hours', { count: diffHours });
+    }
+    const diffDays = Math.floor(diffHours / 24);
+    return t('dashboard.freshness_days', { count: diffDays });
+  };
+
   return (
     <Layout>
       <section className="mb-6 flex flex-column lg:flex-row justify-content-between lg:align-items-center gap-4 animate-fade-in" data-testid="dashboard-hero">
@@ -92,6 +121,14 @@ export function Dashboard() {
             <span className="bg-cyan-900 text-cyan-400 text-xs font-bold px-2 py-1 border-round uppercase tracking-tighter">{t('dashboard.live_intel')}</span>
             <span className="text-muted text-xs">•</span>
             <span className="text-muted text-xs font-medium" data-testid="welcome-message">{t('dashboard.welcome')}, {userName}</span>
+            {meta && (
+              <>
+                <span className="text-muted text-xs">•</span>
+                <span className="text-muted text-xs font-medium" data-testid="dashboard-freshness-badge">
+                  {t('dashboard.freshness_label')}: {formatLastUpdated(meta.lastUpdatedAt)}
+                </span>
+              </>
+            )}
           </div>
           {/* P1-D: Cleaned title logic, allowing translation to define highlight via key or just direct text */}
           <h1 className="text-5xl font-black mb-2 tracking-tight line-height-1 text-main">
@@ -100,6 +137,16 @@ export function Dashboard() {
           <p className="text-muted text-lg max-w-30rem m-0">
             {t('dashboard.subtitle')}
           </p>
+          {meta && (
+            <div className="mt-3 flex flex-wrap gap-2" data-testid="dashboard-meta-summary">
+              <span className="bg-white-alpha-5 text-main text-xs font-semibold px-2 py-1 border-round border-1 border-white-alpha-10">
+                {t('metrics.total')}: {meta.totalSignals}
+              </span>
+              <span className="bg-white-alpha-5 text-main text-xs font-semibold px-2 py-1 border-round border-1 border-white-alpha-10">
+                {t('dashboard.open_signals')}: {meta.unresolvedSignals}
+              </span>
+            </div>
+          )}
         </div>
         <div className="flex gap-3">
           {isStaff && (

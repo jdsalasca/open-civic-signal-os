@@ -23,6 +23,12 @@ export type Notification = {
   sentAt: string;
 };
 
+export type SignalMeta = {
+  totalSignals: number;
+  unresolvedSignals: number;
+  lastUpdatedAt: string | null;
+};
+
 export type UserRole = "SUPER_ADMIN" | "PUBLIC_SERVANT" | "CITIZEN" | "GUEST";
 
 export type AuthInfo = {

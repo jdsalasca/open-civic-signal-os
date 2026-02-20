@@ -2,6 +2,7 @@ package org.opencivic.signalos.web;
 
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import org.opencivic.signalos.service.CommunityAccessService;
 import org.opencivic.signalos.service.ExportService;
 import org.opencivic.signalos.service.PrioritizationService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
+import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -43,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SignalController {
 
     private static final int MAX_PAGE_SIZE = 100;
+    private static final Collection<String> RESOLVED_STATUSES = List.of("RESOLVED", "REJECTED");
     private final PrioritizationService prioritizationService;
     private final ExportService exportService;
     private final UserRepository userRepository;
@@ -161,6 +164,29 @@ public class SignalController {
         return prioritizationService.getTopUnresolved(10, communityId).stream()
             .map(this::mapToResponse)
             .collect(Collectors.toList());
+    }
+
+    @GetMapping("/meta")
+    public SignalMetaResponse getSignalsMeta(
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        long totalSignals = communityId == null
+            ? signalRepository.count()
+            : signalRepository.countByCommunityId(communityId);
+
+        long unresolvedSignals = communityId == null
+            ? signalRepository.countByStatusNotIn(RESOLVED_STATUSES)
+            : signalRepository.countByStatusNotInAndCommunityId(RESOLVED_STATUSES, communityId);
+
+        LocalDateTime lastUpdatedAt = (communityId == null
+            ? signalRepository.findTopByOrderByCreatedAtDesc()
+            : signalRepository.findTopByCommunityIdOrderByCreatedAtDesc(communityId))
+                .map(Signal::getCreatedAt)
+                .orElse(null);
+
+        return new SignalMetaResponse(totalSignals, unresolvedSignals, lastUpdatedAt);
     }
 
     @GetMapping("/mine")

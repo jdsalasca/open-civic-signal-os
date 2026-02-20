@@ -46,7 +46,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health", "/api/test/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/export/**").hasRole("SUPER_ADMIN")
                 
                 .requestMatchers(HttpMethod.POST, "/api/signals/*/vote").hasRole("CITIZEN")

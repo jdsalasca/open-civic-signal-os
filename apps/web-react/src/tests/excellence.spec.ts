@@ -28,6 +28,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     // Identity Welcome - Wait for hydration and dashboard load
     await page.waitForSelector('[data-testid="auth-loading"]', { state: 'detached' });
     await expect(page.getByTestId('welcome-message')).toContainText(uniqueUser, { timeout: 30000 });
+    await expect(page.getByTestId('dashboard-freshness-badge')).toBeVisible();
 
     // 4. Settings: i18n & Theme Hardening
     await page.goto('/settings');
