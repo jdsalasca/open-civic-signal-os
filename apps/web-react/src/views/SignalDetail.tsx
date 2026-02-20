@@ -89,7 +89,15 @@ export function SignalDetail() {
       <div className="animate-fade-in pb-6" data-testid="signal-detail-view">
         <div className="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-5 gap-3">
           <div className="flex align-items-center gap-3">
-            <Button icon="pi pi-arrow-left" rounded text className="text-muted hover:text-main" onClick={() => navigate('/')} aria-label={t('common.back')} />
+            <Button
+              icon="pi pi-arrow-left"
+              rounded
+              text
+              className="text-muted hover:text-main"
+              onClick={() => navigate('/')}
+              aria-label={t('common.back')}
+              data-testid="signal-detail-back-button"
+            />
             <div>
               <div className="flex align-items-center gap-2 mb-1">
                 <Tag value={signal.status} severity={getStatusSeverity(signal.status)} className="px-2" data-testid="signal-status-tag" />
