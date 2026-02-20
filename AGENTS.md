@@ -40,6 +40,10 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
 - Expose "why this item is ranked here" in every UI list.
 - Support mobile-first layouts for community leaders in the field.
 - Make dashboards readable in low-bandwidth scenarios.
+- Keep notifications and logs from covering interactive fields:
+  - no toast/overlay in viewport center during form workflows
+  - reserve safe top/bottom offsets for sticky nav + mobile keyboards
+  - validate registration/login/verify screens with Playwright in desktop + mobile
 
 ## Collaboration Workflow
 
@@ -180,6 +184,9 @@ These rules were added from recurring AI-generated mistakes in this repository.
 - Do not mix unrelated work:
   - avoid bundling UI redesign + backend + docs automation in one PR unless requested
   - keep one objective and one rollback path
+- Do not stack notification systems without intent:
+  - avoid rendering multiple global toast layers (`react-hot-toast` + PrimeReact `Toast`) in the same layout path
+  - if both are required, document ownership/scope and test z-index/position conflicts
 
 ## Hard Validation Before Push
 

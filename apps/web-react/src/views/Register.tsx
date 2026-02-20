@@ -47,12 +47,12 @@ export function Register() {
 
   return (
     <Layout authMode>
-      <div className="flex justify-content-center align-items-center mt-6">
+      <div className="auth-shell flex justify-content-center align-items-center">
         <Card 
           title={<div className="text-center w-full">{t('auth.join_title')}</div>} 
           subTitle={<div className="text-center w-full">{t('auth.join_subtitle')}</div>} 
           style={{ width: '100%', maxWidth: '450px' }}
-          className="shadow-8 border-cyan-900-alpha-20"
+          className="auth-card shadow-8 border-cyan-900-alpha-20"
           data-testid="register-card"
         >
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid flex flex-column gap-4" aria-label="Registration Form">

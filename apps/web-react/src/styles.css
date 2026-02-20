@@ -116,9 +116,46 @@ body {
   color: var(--primary-text) !important;
 }
 
+.auth-shell {
+  min-height: calc(100vh - 8.5rem);
+  padding: 1.5rem 0 1rem;
+}
+
+.auth-card {
+  border-radius: 1.1rem !important;
+  border: 1px solid var(--glass-stroke) !important;
+  box-shadow: 0 22px 52px rgba(2, 6, 23, 0.35) !important;
+}
+
+.auth-card .p-card-title {
+  color: var(--text-main) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.01em;
+}
+
+.auth-card .p-card-subtitle {
+  color: var(--text-muted) !important;
+  font-weight: 500 !important;
+}
+
+.auth-field-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 @media (max-width: 768px) {
   .react-hot-toast {
     width: min(92vw, 360px) !important;
+  }
+
+  .auth-shell {
+    min-height: calc(100vh - 7.5rem);
+    padding-top: 1rem;
   }
 }
 

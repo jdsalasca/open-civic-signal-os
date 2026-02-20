@@ -48,12 +48,12 @@ export function Verify() {
 
   return (
     <Layout authMode>
-      <div className="flex justify-content-center align-items-center mt-8">
+      <div className="auth-shell flex justify-content-center align-items-center">
         <Card 
           title={<div className="text-center w-full">{t('auth.activate_title')}</div>} 
           subTitle={<div className="text-center w-full">{t('auth.activate_subtitle')}</div>} 
           style={{ width: '100%', maxWidth: '400px' }}
-          className="shadow-8"
+          className="auth-card shadow-8"
         >
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid">
             <div className="field">

@@ -71,3 +71,8 @@
 - Never ship malformed markdown or JSON (check for escaped newline fragments and JSON parse errors).
 - Never weaken checks (`skipTests`, bypass CI, incomplete verification evidence).
 - Never ship frontend changes without Playwright CLI flow audit evidence.
+- Never place notifications where they block form interaction:
+  - do not use center-screen toast placement for auth/report forms
+  - enforce safe offsets from sticky nav and mobile viewport controls
+  - validate login/register/verify with Playwright on desktop and mobile after UI changes
+- Never run duplicate global notification containers on the same page unless explicitly required and tested for z-index conflicts.

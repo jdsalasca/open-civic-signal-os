@@ -43,21 +43,21 @@ export function Login() {
 
   return (
     <Layout authMode>
-      <div className="flex justify-content-center align-items-center mt-6">
+      <div className="auth-shell flex justify-content-center align-items-center">
         <Card 
-          className="shadow-8 border-round-2xl border-1 border-white-alpha-10 animate-fade-in"
+          className="auth-card shadow-8 border-round-2xl border-1 border-white-alpha-10 animate-fade-in"
           style={{ width: '100%', maxWidth: '420px', background: 'var(--bg-surface)' }}
           data-testid="login-card"
         >
           <div className="text-center mb-5">
             <ShieldCheck size={60} className="text-cyan-500 mb-3" />
-            <h1 className="text-3xl font-black text-white m-0 tracking-tight text-center">{t('auth.login_title')}</h1>
-            <p className="text-gray-500 mt-2">{t('auth.login_subtitle')}</p>
+            <h1 className="text-3xl font-black text-main m-0 tracking-tight text-center">{t('auth.login_title')}</h1>
+            <p className="text-muted mt-2">{t('auth.login_subtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid" aria-label="Login Form">
             <div className="field mb-4">
-              <label htmlFor="username-input" className="block text-gray-400 font-bold mb-2 text-xs uppercase">{t('auth.username')}</label>
+              <label htmlFor="username-input" className="auth-field-label">{t('auth.username')}</label>
               <span className="p-input-icon-left">
                 <i className="pi pi-user text-cyan-500" />
                 <Controller 
@@ -81,7 +81,7 @@ export function Login() {
             </div>
 
             <div className="field mb-5">
-              <label htmlFor="password-input" className="block text-gray-400 font-bold mb-2 text-xs uppercase">{t('auth.password')}</label>
+              <label htmlFor="password-input" className="auth-field-label">{t('auth.password')}</label>
               <Controller 
                 name="password" 
                 control={control} 
@@ -114,7 +114,7 @@ export function Login() {
             />
             
             <div className="text-center mt-5">
-              <span className="text-gray-600 mr-2">{t('auth.no_account')}</span>
+              <span className="text-muted mr-2">{t('auth.no_account')}</span>
               <Link to="/register" className="text-cyan-400 font-bold no-underline hover:underline" data-testid="go-to-register">{t('auth.create_one')}</Link>
             </div>
           </form>
