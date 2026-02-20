@@ -187,6 +187,10 @@ These rules were added from recurring AI-generated mistakes in this repository.
 - Do not stack notification systems without intent:
   - avoid rendering multiple global toast layers (`react-hot-toast` + PrimeReact `Toast`) in the same layout path
   - if both are required, document ownership/scope and test z-index/position conflicts
+- Protect global client state integrity:
+  - buttons and navigation actions must not reset persisted global state (`auth`, `settings`, `community`) unless explicitly a logout/reset action
+  - when reloading memberships/preferences, preserve existing selected context if still valid; fallback only when invalid
+  - add Playwright coverage for state persistence across route/button flows when touching shared layout or stores
 
 ## Hard Validation Before Push
 

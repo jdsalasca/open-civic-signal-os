@@ -18,7 +18,10 @@ export const useCommunityStore = create<CommunityState>()(
       setMemberships: (memberships) =>
         set((state) => ({
           memberships,
-          activeCommunityId: state.activeCommunityId ?? memberships[0]?.communityId ?? null,
+          activeCommunityId:
+            memberships.find((m) => m.communityId === state.activeCommunityId)?.communityId ??
+            memberships[0]?.communityId ??
+            null,
         })),
       setActiveCommunityId: (communityId) => set({ activeCommunityId: communityId }),
       clear: () => set({ activeCommunityId: null, memberships: [] }),

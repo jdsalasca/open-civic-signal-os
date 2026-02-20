@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UserRole } from '../types';
+import { useCommunityStore } from './useCommunityStore';
 
 interface AuthState {
   accessToken: string | null;
@@ -41,9 +42,9 @@ export const useAuthStore = create<AuthState>()(
       },
       switchRole: (role) => set({ activeRole: role as UserRole }),
       logout: () => {
+        useCommunityStore.getState().clear();
         set({ accessToken: null, userName: null, activeRole: 'GUEST', rawRoles: [], isLoggedIn: false });
         localStorage.removeItem('auth-storage');
-        localStorage.removeItem('community-storage');
       },
       updateAccessToken: (token) => set({ 
         accessToken: token,

@@ -76,3 +76,7 @@
   - enforce safe offsets from sticky nav and mobile viewport controls
   - validate login/register/verify with Playwright on desktop and mobile after UI changes
 - Never run duplicate global notification containers on the same page unless explicitly required and tested for z-index conflicts.
+- Never allow non-logout buttons/navigation to reset persisted global state (`auth-storage`, `settings-storage`, `community-storage`):
+  - preserve active community, language, theme, and active role across route transitions
+  - if context data is refreshed from API, keep prior selection when still valid and only fallback when invalid
+  - include Playwright state-persistence checks whenever layout/store wiring changes
