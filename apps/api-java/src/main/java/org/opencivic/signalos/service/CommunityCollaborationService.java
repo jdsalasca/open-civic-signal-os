@@ -5,8 +5,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.opencivic.signalos.domain.CommunityBlogPost;
 import org.opencivic.signalos.domain.CommunityRole;
 import org.opencivic.signalos.domain.CommunityThread;
@@ -23,6 +26,7 @@ import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,9 +158,14 @@ public class CommunityCollaborationService {
     public List<CommunityBlogPostResponse> getBlogTimeline(UUID communityId, String username) {
         User user = accessService.getCurrentUser(username);
         accessService.requireMembership(user.getId(), communityId);
-        return blogPostRepository.findByCommunityIdOrderByPublishedAtDesc(communityId)
-            .stream()
-            .map(this::toBlogResponse)
+        List<CommunityBlogPost> posts = blogPostRepository.findByCommunityIdOrderByPublishedAtDesc(communityId);
+        
+        Set<UUID> authorIds = posts.stream().map(CommunityBlogPost::getAuthorId).collect(Collectors.toSet());
+        Map<UUID, User> authors = userRepository.findAllById(authorIds).stream()
+            .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        return posts.stream()
+            .map(post -> toBlogResponse(post, authors.get(post.getAuthorId())))
             .toList();
     }
 
@@ -214,8 +223,9 @@ public class CommunityCollaborationService {
         LocalDateTime since = LocalDateTime.now().minusDays(Math.max(1, days));
 
         List<CommunityFeedItemResponse> items = new ArrayList<>();
+        PageRequest limited = PageRequest.of(0, 50);
 
-        signalRepository.findByCommunityId(communityId).stream()
+        signalRepository.findByCommunityIdOrderByCreatedAtDesc(communityId, limited).stream()
             .filter(signal -> signal.getCreatedAt() != null && signal.getCreatedAt().isAfter(since))
             .forEach(signal -> items.add(
                 new CommunityFeedItemResponse(
@@ -229,7 +239,7 @@ public class CommunityCollaborationService {
                 )
             ));
 
-        blogPostRepository.findByCommunityIdOrderByPublishedAtDesc(communityId).stream()
+        blogPostRepository.findByCommunityIdOrderByPublishedAtDesc(communityId, limited).stream()
             .filter(post -> post.getPublishedAt() != null && post.getPublishedAt().isAfter(since))
             .forEach(post -> items.add(
                 new CommunityFeedItemResponse(
@@ -243,7 +253,7 @@ public class CommunityCollaborationService {
                 )
             ));
 
-        threadRepository.findBySourceCommunityIdOrTargetCommunityIdOrderByUpdatedAtDesc(communityId, communityId).stream()
+        threadRepository.findBySourceCommunityIdOrTargetCommunityIdOrderByUpdatedAtDesc(communityId, communityId, limited).stream()
             .filter(thread -> thread.getUpdatedAt() != null && thread.getUpdatedAt().isAfter(since))
             .forEach(thread -> items.add(
                 new CommunityFeedItemResponse(
@@ -259,6 +269,7 @@ public class CommunityCollaborationService {
 
         return items.stream()
             .sorted(Comparator.comparing(CommunityFeedItemResponse::happenedAt).reversed())
+            .limit(100)
             .toList();
     }
 
@@ -309,21 +320,26 @@ public class CommunityCollaborationService {
         );
     }
 
-    private CommunityBlogPostResponse toBlogResponse(CommunityBlogPost post) {
-        User author = userRepository.findById(post.getAuthorId())
-            .orElseThrow(() -> new ResourceNotFoundException("Blog author not found: " + post.getAuthorId()));
+    private CommunityBlogPostResponse toBlogResponse(CommunityBlogPost post, User author) {
+        String username = author != null ? author.getUsername() : "deleted_user";
+        String roles = author != null ? author.getRoles() : "";
         return new CommunityBlogPostResponse(
             post.getId(),
             post.getCommunityId(),
             post.getAuthorId(),
-            author.getUsername(),
-            author.getRoles(),
+            username,
+            roles,
             post.getTitle(),
             post.getContent(),
             post.getStatusTag(),
             post.getPublishedAt(),
             post.getUpdatedAt()
         );
+    }
+
+    private CommunityBlogPostResponse toBlogResponse(CommunityBlogPost post) {
+        User author = userRepository.findById(post.getAuthorId()).orElse(null);
+        return toBlogResponse(post, author);
     }
 
     private String freshness(LocalDateTime timestamp) {

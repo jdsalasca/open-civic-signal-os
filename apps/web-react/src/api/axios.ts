@@ -2,9 +2,10 @@ import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCommunityStore } from '../store/useCommunityStore';
 
-// UX-001: Centralized baseURL
+// UX-001: Environment-driven baseURL with sensible fallback
+const envBaseURL = import.meta.env.VITE_API_BASE_URL;
 const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL: envBaseURL ? (envBaseURL.endsWith('/') ? envBaseURL.slice(0, -1) : envBaseURL) : '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,9 +24,10 @@ apiClient.interceptors.request.use((config) => {
     config.headers['X-Community-Id'] = activeCommunityId;
   }
   
-  // UX-001: Safety - Prevent double prefix if absolute path is passed
-  if (config.url?.startsWith('/api')) {
-    config.url = config.url.replace('/api', '');
+  // UX-001: Safety - Prevent double prefix if absolute path or manual /api is passed when baseURL is already set
+  const currentBase = config.baseURL || '';
+  if (currentBase && config.url?.startsWith(currentBase)) {
+    config.url = config.url.replace(currentBase, '');
   }
   
   return config;

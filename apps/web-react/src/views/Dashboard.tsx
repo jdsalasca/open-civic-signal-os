@@ -36,17 +36,17 @@ export function Dashboard() {
     page: 0
   });
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
       const [signalsRes, metaRes, notificationsRes, duplicatesRes] = await Promise.all([
-        apiClient.get(`signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`),
-        apiClient.get("signals/meta"),
+        apiClient.get(`signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`, { signal }),
+        apiClient.get("signals/meta", { signal }),
         (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
-          ? apiClient.get("notifications/recent")
+          ? apiClient.get("notifications/recent", { signal })
           : Promise.resolve(null),
         (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
-          ? apiClient.get("signals/duplicates")
+          ? apiClient.get("signals/duplicates", { signal })
           : Promise.resolve(null)
       ]);
       
@@ -68,7 +68,8 @@ export function Dashboard() {
         setDuplicateClusters(clusterCount);
       }
       
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'CanceledError' || err.name === 'AbortError') return;
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('dashboard.sync_error'));
     } finally {
@@ -77,7 +78,9 @@ export function Dashboard() {
   }, [activeRole, t, lazyState]);
 
   useEffect(() => {
-    loadData();
+    const controller = new AbortController();
+    loadData(controller.signal);
+    return () => controller.abort();
   }, [loadData]);
 
   const onPage = (event: any) => {

@@ -33,7 +33,7 @@ export function ReportSignal() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = useForm<ReportForm>({
     mode: "onChange",
     defaultValues: { title: '', description: '', category: '', urgency: 3, impact: 3, affectedPeople: 10 }

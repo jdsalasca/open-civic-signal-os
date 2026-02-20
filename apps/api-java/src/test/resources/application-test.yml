@@ -8,3 +8,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
+application:
+  security:
+    jwt:
+      secret-key: "test-secret-key-at-least-32-characters-long-for-hmac-sha"

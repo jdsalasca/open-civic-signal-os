@@ -21,8 +21,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.SecureRandom;
 import java.util.Map;
-import java.util.Random;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,6 +34,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final SecureRandom secureRandom = new SecureRandom();
 
     @Value("${spring.profiles.active:prod}")
     private String activeProfile;
@@ -68,7 +69,7 @@ public class AuthController {
         );
         
         // Generate a real random 6-digit code for all profiles to test mail delivery flow
-        String verificationCode = String.format("%06d", new Random().nextInt(999999));
+        String verificationCode = String.format("%06d", secureRandom.nextInt(999999));
         
         user.setVerificationCode(verificationCode);
         user.setVerified(false);
@@ -95,7 +96,7 @@ public class AuthController {
         }
 
         // Generate a NEW code for security on every resend
-        String code = String.format("%06d", new Random().nextInt(999999));
+        String code = String.format("%06d", secureRandom.nextInt(999999));
         user.setVerificationCode(code);
         userRepository.save(user);
 

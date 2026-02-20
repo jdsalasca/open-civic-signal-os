@@ -156,13 +156,18 @@ export function Layout({ children, authMode = false }: Props) {
           )}
 
           {!authMode && isLoggedIn && communityOptions.length > 0 && (
-            <Dropdown
-              value={activeCommunityId || communityOptions[0].value}
-              options={communityOptions}
-              onChange={(e) => handleCommunitySwitch(e.value)}
-              placeholder="Select Community"
-              className="w-14rem hidden md:block"
-            />
+            <div className="hidden md:block">
+              <Dropdown
+                value={activeCommunityId || communityOptions[0].value}
+                options={communityOptions}
+                onChange={(e) => handleCommunitySwitch(e.value)}
+                placeholder="Select Community"
+                className="w-full md:w-16rem lg:w-20rem"
+                style={{ maxWidth: '25vw' }}
+                tooltip={memberships.find(m => m.communityId === activeCommunityId)?.communityName}
+                tooltipOptions={{ position: 'bottom' }}
+              />
+            </div>
           )}
 
           {!authMode && !isLoggedIn && (
