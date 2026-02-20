@@ -72,90 +72,99 @@ export function ReportSignal() {
           
           <form onSubmit={handleSubmit(onSubmit)} className="p-fluid grid">
             <div className="field col-12">
-              <label htmlFor="title" className="font-bold block mb-2">{t('report.issue_title')}</label>
-              <Controller name="title" control={control} rules={{ required: t('common.required') }} 
+              <label htmlFor="title" className="font-bold block mb-2 text-main text-sm uppercase tracking-wider">{t('report.issue_title')}</label>
+              <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: 5, message: t('report.title_too_short') } }} 
                 render={({ field, fieldState }) => (
-                  <InputText
-                    id="title"
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    className={classNames({ 'p-invalid': fieldState.error })}
-                    placeholder={t('report.issue_title_placeholder')}
-                  />
+                  <>
+                    <InputText
+                      id="title"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                      placeholder={t('report.issue_title_placeholder')}
+                    />
+                    {fieldState.error && <small className="p-error block mt-1">{fieldState.error.message}</small>}
+                  </>
                 )} 
               />
-              {errors.title && <small className="p-error">{errors.title.message || t('common.required')}</small>}
             </div>
 
             <div className="field col-12 md:col-6">
-              <label htmlFor="category" className="font-bold block mb-2">{t('common.category')}</label>
+              <label htmlFor="category" className="font-bold block mb-2 text-main text-sm uppercase tracking-wider">{t('common.category')}</label>
               <Controller name="category" control={control} rules={{ required: t('common.required') }} 
                 render={({ field, fieldState }) => (
-                  <Dropdown
-                    id="category"
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.value)}
-                    options={categories}
-                    className={classNames({ 'p-invalid': fieldState.error })}
-                    placeholder={t('common.select_category')}
-                  />
+                  <>
+                    <Dropdown
+                      id="category"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.value)}
+                      options={categories}
+                      className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                      placeholder={t('common.select_category')}
+                    />
+                    {fieldState.error && <small className="p-error block mt-1">{fieldState.error.message}</small>}
+                  </>
                 )} 
               />
-              {errors.category && <small className="p-error">{errors.category.message || t('common.required')}</small>}
             </div>
 
             <div className="field col-12 md:col-6">
-              <label htmlFor="affectedPeople" className="font-bold block mb-2">{t('report.scale')}</label>
+              <label htmlFor="affectedPeople" className="font-bold block mb-2 text-main text-sm uppercase tracking-wider">{t('report.scale')}</label>
               <Controller name="affectedPeople" control={control} 
                 render={({ field }) => (
-                  <div className="flex align-items-center gap-3 bg-white-alpha-5 p-2 border-round border-1 border-white-alpha-10">
+                  <div className="flex flex-column gap-2 p-3 border-round border-1 border-subtle bg-black-alpha-10">
+                    <div className="flex justify-content-between align-items-center mb-2">
+                       <span className="text-sm text-muted">Estimated Citizens</span>
+                       <span className="text-xl font-bold text-cyan-400">{field.value}</span>
+                    </div>
                     <Slider
                       value={field.value}
-                      onChange={(e) => field.onChange((e.value as number) ?? 1)}
+                      onChange={(e) => field.onChange(e.value)}
                       min={1}
                       max={1000}
-                      className="flex-grow-1"
+                      className="w-full"
                     />
-                    <span className="font-black text-cyan-400" style={{ minWidth: '40px' }}>{field.value}</span>
                   </div>
                 )} 
               />
             </div>
 
             <div className="field col-12">
-              <label htmlFor="description" className="font-bold block mb-2">{t('report.context')}</label>
-              <Controller name="description" control={control} rules={{ required: t('common.required') }} 
+              <label htmlFor="description" className="font-bold block mb-2 text-main text-sm uppercase tracking-wider">{t('report.context')}</label>
+              <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: 20, message: t('report.desc_too_short') } }} 
                 render={({ field, fieldState }) => (
-                  <InputTextarea
-                    id="description"
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.target.value)}
-                    rows={4}
-                    className={classNames({ 'p-invalid': fieldState.error })}
-                    placeholder={t('report.context_placeholder')}
-                  />
+                  <>
+                    <InputTextarea
+                      id="description"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      rows={4}
+                      className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                      placeholder={t('report.context_placeholder')}
+                    />
+                    {fieldState.error && <small className="p-error block mt-1">{fieldState.error.message}</small>}
+                  </>
                 )} 
               />
-              {errors.description && <small className="p-error">{errors.description.message || t('common.required')}</small>}
             </div>
 
             <div className="field col-12 md:col-6">
               <div className="flex justify-content-between mb-2">
-                <label className="font-bold">{t('report.urgency')}</label>
-                <span className="text-xs text-muted uppercase font-black">{t('common.score')}: 1-5</span>
+                <label className="font-bold text-main text-sm uppercase tracking-wider">{t('report.urgency')}</label>
+                <span className="text-xs text-muted uppercase font-bold">{t('common.score')}: {control._formValues.urgency}/5</span>
               </div>
               <Controller name="urgency" control={control} render={({ field }) => (
-                <div className="p-3 bg-white-alpha-5 border-round border-1 border-white-alpha-10">
+                <div className="p-4 border-round border-1 border-subtle bg-black-alpha-10">
                   <Slider
                     value={field.value}
-                    onChange={(e) => field.onChange((e.value as number) ?? 1)}
+                    onChange={(e) => field.onChange(e.value)}
                     min={1}
                     max={5}
                     step={1}
+                    className="w-full mb-3"
                   />
-                  <div className="flex justify-content-between mt-2 text-xs font-bold text-muted">
+                  <div className="flex justify-content-between text-xs font-bold text-muted">
                     <span>{t('report.urgency_low')}</span>
-                    <span className="text-cyan-500">{field.value}</span>
                     <span>{t('report.urgency_critical')}</span>
                   </div>
                 </div>
@@ -164,21 +173,21 @@ export function ReportSignal() {
 
             <div className="field col-12 md:col-6">
               <div className="flex justify-content-between mb-2">
-                <label className="font-bold">{t('report.impact')}</label>
-                <span className="text-xs text-muted uppercase font-black">{t('common.score')}: 1-5</span>
+                <label className="font-bold text-main text-sm uppercase tracking-wider">{t('report.impact')}</label>
+                <span className="text-xs text-muted uppercase font-bold">{t('common.score')}: {control._formValues.impact}/5</span>
               </div>
               <Controller name="impact" control={control} render={({ field }) => (
-                <div className="p-3 bg-white-alpha-5 border-round border-1 border-white-alpha-10">
+                <div className="p-4 border-round border-1 border-subtle bg-black-alpha-10">
                   <Slider
                     value={field.value}
-                    onChange={(e) => field.onChange((e.value as number) ?? 1)}
+                    onChange={(e) => field.onChange(e.value)}
                     min={1}
                     max={5}
                     step={1}
+                    className="w-full mb-3"
                   />
-                  <div className="flex justify-content-between mt-2 text-xs font-bold text-muted">
+                  <div className="flex justify-content-between text-xs font-bold text-muted">
                     <span>{t('report.impact_minor')}</span>
-                    <span className="text-purple-500">{field.value}</span>
                     <span>{t('report.impact_systemic')}</span>
                   </div>
                 </div>

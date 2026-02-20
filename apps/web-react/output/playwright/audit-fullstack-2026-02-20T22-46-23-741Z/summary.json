@@ -1,0 +1,40 @@
+{
+  "baseUrl": "http://localhost:3002",
+  "outDir": "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z",
+  "runs": [
+    {
+      "viewport": "desktop",
+      "screenshots": [
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\desktop-login.png",
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\desktop-dashboard.png",
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\desktop-report.png",
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\desktop-forbidden.png",
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\desktop-notfound.png"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [
+        {
+          "url": "http://localhost:3002/api/signals/duplicates",
+          "method": "GET",
+          "failure": "net::ERR_ABORTED"
+        }
+      ],
+      "badResponses": []
+    },
+    {
+      "viewport": "mobile",
+      "screenshots": [
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\mobile-login.png",
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\mobile-dashboard.png",
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\mobile-report.png",
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\mobile-forbidden.png",
+        "C:\\Users\\jdsal\\Documents\\Programming-personal\\open-civic-signal-os\\apps\\web-react\\output\\playwright\\audit-fullstack-2026-02-20T22-46-23-741Z\\mobile-notfound.png"
+      ],
+      "consoleErrors": [],
+      "pageErrors": [],
+      "requestFailures": [],
+      "badResponses": []
+    }
+  ]
+}

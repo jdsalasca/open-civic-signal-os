@@ -58,6 +58,7 @@ C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\LoginRequest.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\ModerateThreadMessageRequest.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\SignalCreateRequest.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\SignalMetaResponse.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\SignalResponse.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\TokenRefreshRequest.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\UpdateCommunityBlogPostRequest.java

@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.opencivic.signalos.service.ScoringRegressionTest
 -------------------------------------------------------------------------------
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.534 s -- in org.opencivic.signalos.service.ScoringRegressionTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.544 s -- in org.opencivic.signalos.service.ScoringRegressionTest

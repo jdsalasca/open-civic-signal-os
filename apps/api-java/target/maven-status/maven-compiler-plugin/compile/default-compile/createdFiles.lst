@@ -8,6 +8,7 @@ org\opencivic\signalos\web\CommunityCollaborationController.class
 org\opencivic\signalos\web\dto\CreateCommunityThreadRequest.class
 org\opencivic\signalos\repository\SignalRepository.class
 org\opencivic\signalos\web\dto\JoinCommunityRequest.class
+org\opencivic\signalos\web\dto\SignalMetaResponse.class
 org\opencivic\signalos\web\dto\UpdateCommunityRoleRequest.class
 org\opencivic\signalos\web\dto\CommunityMembershipResponse.class
 org\opencivic\signalos\service\JwtService.class
