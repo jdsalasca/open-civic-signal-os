@@ -16,15 +16,24 @@ paths:
   /api/signals/prioritized:
     get:
       summary: Get prioritized civic backlog
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
       responses:
         '200':
-          description: Prioritized list
+          description: Paginated prioritized list
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PrioritizedSignal'
+                $ref: '#/components/schemas/PagedPrioritizedSignals'
   /api/signals/top-10:
     get:
       summary: Get top 10 unresolved civic problems
@@ -105,3 +114,19 @@ components:
         status:
           type: string
           enum: [NEW, IN_PROGRESS, RESOLVED]
+    PagedPrioritizedSignals:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrioritizedSignal'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+

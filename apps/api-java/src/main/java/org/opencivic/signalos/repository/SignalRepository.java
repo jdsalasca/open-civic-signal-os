@@ -19,5 +19,5 @@ public interface SignalRepository extends JpaRepository<Signal, UUID> {
     @Query("SELECT s FROM Signal s WHERE s.status = :status ORDER BY s.priorityScore DESC")
     List<Signal> findTopSignalsByStatus(@Param("status") String status, Pageable pageable);
 
-    List<Signal> findByAuthorIdOrderByCreatedAtDesc(UUID authorId);
+    Page<Signal> findByAuthorId(UUID authorId, Pageable pageable);
 }

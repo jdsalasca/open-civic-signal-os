@@ -1,5 +1,6 @@
 package org.opencivic.signalos.web;
 
+import import org.springframework.data.domain.PageRequest;
 import jakarta.validation.Valid;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.SignalStatus;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/signals")
 public class SignalController {
 
+    private static final int MAX_PAGE_SIZE = 100;
     private final PrioritizationService prioritizationService;
     private final ExportService exportService;
     private final UserRepository userRepository;
@@ -50,7 +52,12 @@ public class SignalController {
     @GetMapping("/prioritized")
     public Page<SignalResponse> getPrioritizedSignals(
             @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable) {
-        return prioritizationService.getPrioritizedSignals(pageable)
+        Pageable sanitized = PageRequest.of(
+            pageable.getPageNumber(),
+            Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
+            pageable.getSort()
+        );
+        return prioritizationService.getPrioritizedSignals(sanitized)
                 .map(this::mapToResponse);
     }
 
@@ -82,7 +89,12 @@ public class SignalController {
     @GetMapping("/flagged")
     public Page<SignalResponse> getFlaggedSignals(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return prioritizationService.getFlaggedSignals(pageable)
+        Pageable sanitized = PageRequest.of(
+            pageable.getPageNumber(),
+            Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
+            pageable.getSort()
+        );
+        return prioritizationService.getFlaggedSignals(sanitized)
                 .map(this::mapToResponse);
     }
 
@@ -112,12 +124,17 @@ public class SignalController {
     }
 
     @GetMapping("/mine")
-    public List<SignalResponse> getMySignals(Authentication authentication) {
+    public Page<SignalResponse> getMySignals(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            Authentication authentication) {
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        return signalRepository.findByAuthorIdOrderByCreatedAtDesc(user.getId())
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        Pageable sanitized = PageRequest.of(
+            pageable.getPageNumber(),
+            Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
+            pageable.getSort()
+        );
+        return signalRepository.findByAuthorId(user.getId(), sanitized)
+                .map(this::mapToResponse);
     }
 
     @PostMapping

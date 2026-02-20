@@ -56,6 +56,10 @@ public class AuthController {
             throw new ConflictException("Username already exists in the registry.");
         }
 
+        if (userRepository.findByEmail(request.email()).isPresent()) {
+            throw new ConflictException("Identity already registered with this email address.");
+        }
+
         User user = new User(
             request.username(),
             passwordEncoder.encode(request.password()),

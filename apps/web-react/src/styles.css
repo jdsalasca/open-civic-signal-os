@@ -63,7 +63,9 @@ body {
 
 .p-sidebar-mask {
   z-index: 9998 !important;
-  background: rgba(2, 6, 23, 0.72) !important;
+  background: rgba(2, 6, 23, 0.85) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .p-button {
