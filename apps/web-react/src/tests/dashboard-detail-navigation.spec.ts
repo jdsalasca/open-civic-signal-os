@@ -30,6 +30,8 @@ test.describe('Dashboard Detail Navigation (P0)', () => {
     await expect(page.getByTestId('signal-detail-view')).toBeVisible();
     await expect(page.getByTestId('signal-title')).toBeVisible();
     await expect(page.getByTestId('priority-score-card')).toBeVisible();
+    await expect(page.getByTestId('why-ranked-panel')).toBeVisible();
+    await expect(page.getByTestId('why-ranked-panel')).toContainText(/Why Ranked Here|Por que esta aqui/);
 
     await page.getByTestId('signal-detail-back-button').click();
     await expect(page).toHaveURL(/\/$/);

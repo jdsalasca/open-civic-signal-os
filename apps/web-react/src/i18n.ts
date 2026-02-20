@@ -133,9 +133,15 @@ const resources = {
         "lifecycle_success": "Lifecycle updated to {{status}}",
         "intel_index": "Intelligence Index",
         "priority_rank": "Priority Rank",
+        "why_ranked_title": "Why Ranked Here",
+        "why_ranked_desc": "The score is deterministic and calculated on backend-owned factors.",
         "urgency_factor": "Urgency Factor",
+        "urgency_formula": "Urgency score = urgency level x 30 (max 150).",
         "social_impact": "Social Impact",
-        "community_trust": "Community Trust"
+        "impact_formula": "Impact score = impact level x 25 (max 125).",
+        "community_trust": "Community Trust",
+        "affected_formula": "Affected score = estimated people / 10 (capped at 30).",
+        "votes_formula": "Trust score = community votes / 5 (capped at 15)."
       },
       "my_contributions": {
         "title": "My Contributions",
@@ -326,9 +332,15 @@ const resources = {
         "lifecycle_success": "Ciclo de vida actualizado a {{status}}",
         "intel_index": "Índice de Inteligencia",
         "priority_rank": "Rango de Prioridad",
+        "why_ranked_title": "Por que esta aqui",
+        "why_ranked_desc": "El puntaje es determinista y se calcula con factores controlados por backend.",
         "urgency_factor": "Factor de Urgencia",
+        "urgency_formula": "Puntaje de urgencia = nivel de urgencia x 30 (max 150).",
         "social_impact": "Impacto Social",
-        "community_trust": "Confianza Comunitaria"
+        "impact_formula": "Puntaje de impacto = nivel de impacto x 25 (max 125).",
+        "community_trust": "Confianza Comunitaria",
+        "affected_formula": "Puntaje de afectados = personas estimadas / 10 (tope 30).",
+        "votes_formula": "Puntaje de confianza = votos comunitarios / 5 (tope 15)."
       },
       "my_contributions": {
         "title": "Mis Contribuciones",

@@ -197,6 +197,49 @@ export function SignalDetail() {
                 </div>
               </div>
             </Card>
+
+            <Card className="shadow-4 border-1 border-white-alpha-10 bg-surface" data-testid="why-ranked-panel">
+              <h3 className="text-xs font-black text-cyan-500 uppercase tracking-widest mt-0 mb-3">
+                {t('signals.why_ranked_title')}
+              </h3>
+              <p className="text-sm text-muted mt-0 mb-3 line-height-3">
+                {t('signals.why_ranked_desc')}
+              </p>
+              <div className="flex flex-column gap-3">
+                <div className="p-3 border-round bg-card border-1 border-white-alpha-10">
+                  <div className="text-xs font-black text-main uppercase tracking-widest">
+                    {t('signals.urgency_factor')}
+                  </div>
+                  <div className="text-xs text-muted mt-1">
+                    {t('signals.urgency_formula')}
+                  </div>
+                </div>
+                <div className="p-3 border-round bg-card border-1 border-white-alpha-10">
+                  <div className="text-xs font-black text-main uppercase tracking-widest">
+                    {t('signals.social_impact')}
+                  </div>
+                  <div className="text-xs text-muted mt-1">
+                    {t('signals.impact_formula')}
+                  </div>
+                </div>
+                <div className="p-3 border-round bg-card border-1 border-white-alpha-10">
+                  <div className="text-xs font-black text-main uppercase tracking-widest">
+                    {t('signals.affected_estimation')}
+                  </div>
+                  <div className="text-xs text-muted mt-1">
+                    {t('signals.affected_formula')}
+                  </div>
+                </div>
+                <div className="p-3 border-round bg-card border-1 border-white-alpha-10">
+                  <div className="text-xs font-black text-main uppercase tracking-widest">
+                    {t('signals.community_trust')}
+                  </div>
+                  <div className="text-xs text-muted mt-1">
+                    {t('signals.votes_formula')}
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </div>
