@@ -43,6 +43,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.opencivic.signalos.web.dto.TrustPacket;
+
 @RestController
 @RequestMapping("/api/signals")
 public class SignalController {
@@ -70,6 +72,11 @@ public class SignalController {
         this.signalRepository = signalRepository;
         this.communityAccessService = communityAccessService;
         this.meterRegistry = meterRegistry;
+    }
+
+    @GetMapping("/{id}/trust-packet")
+    public ResponseEntity<TrustPacket> getTrustPacket(@PathVariable UUID id) {
+        return ResponseEntity.ok(prioritizationService.getTrustPacket(id));
     }
 
     @GetMapping("/prioritized")

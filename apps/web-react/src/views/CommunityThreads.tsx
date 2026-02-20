@@ -97,67 +97,90 @@ export function CommunityThreads() {
     <Layout>
       <div className="grid">
         <div className="col-12 lg:col-4">
-          <Card title="Open Thread" className="mb-4">
-            <InputText
-              value={newThreadTitle}
-              onChange={(e) => setNewThreadTitle(e.target.value)}
-              placeholder="Thread title"
-              className="w-full mb-2"
-            />
-            <Dropdown
-              value={targetCommunityId}
-              options={targetOptions}
-              onChange={(e) => setTargetCommunityId(e.value)}
-              placeholder="Target community"
-              className="w-full mb-2"
-              disabled={!activeCommunityId || targetOptions.length === 0}
-            />
-            <Button
-              label="Create Thread"
-              onClick={createThread}
-              disabled={!canCreateThread}
-              data-testid="create-thread-button"
-            />
-            {!activeCommunityId && (
-              <small className="block mt-2 text-color-secondary">
-                Select a community context to enable thread actions.
-              </small>
-            )}
-            {activeCommunityId && targetOptions.length === 0 && (
-              <small className="block mt-2 text-color-secondary">
-                Join at least one additional community to open cross-community threads.
-              </small>
-            )}
-          </Card>
-          <Card title="Post Message">
-            <Dropdown
-              value={selectedThreadId}
-              options={threads.map((thread) => ({ label: thread.title, value: thread.id }))}
-              onChange={(e) => setSelectedThreadId(e.value)}
-              placeholder="Select thread"
-              className="w-full mb-2"
-              disabled={!activeCommunityId || threads.length === 0}
-            />
-            <InputTextarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              rows={4}
-              className="w-full mb-2"
-              placeholder="Message"
-              disabled={!activeCommunityId || threads.length === 0}
-            />
-            <Button
-              label="Send"
-              onClick={sendMessage}
-              disabled={!canSendMessage}
-              data-testid="send-thread-message-button"
-            />
-            {threads.length === 0 && (
-              <small className="block mt-2 text-color-secondary">
-                Create a thread first before posting a message.
-              </small>
-            )}
-          </Card>
+                    <Card title={<span className="uppercase text-sm font-bold tracking-widest text-cyan-500">Open Thread</span>} className="mb-4 shadow-4 border-1 border-white-alpha-10 bg-surface">
+                      <div className="flex flex-column gap-3">
+                        <div>
+                          <label className="text-xs font-bold uppercase text-muted mb-1 block">Thread Topic</label>
+                          <InputText
+                            value={newThreadTitle}
+                            onChange={(e) => setNewThreadTitle(e.target.value)}
+                            placeholder="e.g. Infrastructure Coordination"
+                            className="w-full"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold uppercase text-muted mb-1 block">Target Community</label>
+                          <Dropdown
+                            value={targetCommunityId}
+                            options={targetOptions}
+                            onChange={(e) => setTargetCommunityId(e.value)}
+                            placeholder="Select partner community"
+                            className="w-full"
+                            disabled={!activeCommunityId || targetOptions.length === 0}
+                            emptyMessage="No other communities joined"
+                          />
+                        </div>
+                        <Button
+                          label="Create Thread"
+                          icon="pi pi-comments"
+                          onClick={createThread}
+                          disabled={!canCreateThread}
+                          className="w-full p-button-primary"
+                          data-testid="create-thread-button"
+                        />
+                      </div>
+                      {!activeCommunityId && (
+                        <div className="mt-3 p-2 border-round bg-yellow-900-alpha-20 text-yellow-200 text-xs">
+                          Select a community context to enable thread actions.
+                        </div>
+                      )}
+                      {activeCommunityId && targetOptions.length === 0 && (
+                        <div className="mt-3 p-2 border-round bg-blue-900-alpha-20 text-blue-200 text-xs">
+                          Join at least one additional community to open cross-community threads.
+                        </div>
+                      )}
+                    </Card>
+                    
+                    <Card title={<span className="uppercase text-sm font-bold tracking-widest text-cyan-500">Post Message</span>} className="shadow-4 border-1 border-white-alpha-10 bg-surface">
+                      <div className="flex flex-column gap-3">
+                        <div>
+                          <label className="text-xs font-bold uppercase text-muted mb-1 block">Select Context</label>
+                          <Dropdown
+                            value={selectedThreadId}
+                            options={threads.map((thread) => ({ label: thread.title, value: thread.id }))}
+                            onChange={(e) => setSelectedThreadId(e.value)}
+                            placeholder="Choose active thread"
+                            className="w-full"
+                            disabled={!activeCommunityId || threads.length === 0}
+                            emptyMessage="No threads active"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold uppercase text-muted mb-1 block">Message Content</label>
+                          <InputTextarea
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            rows={4}
+                            className="w-full"
+                            placeholder="Type your message here..."
+                            disabled={!activeCommunityId || threads.length === 0}
+                          />
+                        </div>
+                        <Button
+                          label="Send Message"
+                          icon="pi pi-send"
+                          onClick={sendMessage}
+                          disabled={!canSendMessage}
+                          className="w-full"
+                          data-testid="send-thread-message-button"
+                        />
+                      </div>
+                      {threads.length === 0 && activeCommunityId && (
+                        <div className="mt-3 p-2 border-round bg-gray-800 text-gray-400 text-xs">
+                          Create a thread first to start the conversation.
+                        </div>
+                      )}
+                    </Card>
         </div>
         <div className="col-12 lg:col-8">
           <Card title={`Thread Timeline (${activeMembership?.communityName ?? "No community"})`}>

@@ -23,6 +23,11 @@ import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.opencivic.signalos.web.dto.TrustPacket;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Base64;
+
 @Service
 public class PrioritizationServiceImpl implements PrioritizationService {
 
@@ -35,6 +40,41 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         this.signalRepository = signalRepository;
         this.voteRepository = voteRepository;
         this.userRepository = userRepository;
+    }
+
+    @Override
+    public TrustPacket getTrustPacket(UUID signalId) {
+        Signal signal = signalRepository.findById(signalId)
+                .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + signalId));
+        
+        // Ensure score is current
+        ScoreBreakdown breakdown = getBreakdown(signal);
+        double score = calculateScore(signal);
+        
+        // Generate a simple verification hash (Proof of Integrity)
+        String rawData = signal.getId() + ":" + signal.getCreatedAt() + ":" + score;
+        String hash = generateHash(rawData);
+
+        return new TrustPacket(
+            signal.getId(),
+            signal.getTitle(),
+            signal.getStatus(),
+            signal.getCreatedAt(),
+            score,
+            breakdown,
+            TrustPacket.CURRENT_FORMULA,
+            hash
+        );
+    }
+
+    private String generateHash(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedhash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(encodedhash);
+        } catch (Exception e) {
+            return "HASH_ERROR";
+        }
     }
 
     @Override

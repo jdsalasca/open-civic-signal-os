@@ -40,6 +40,7 @@ C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\service\NotificationServiceImpl.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\service\PrioritizationService.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\service\PrioritizationServiceImpl.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\service\RateLimitService.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\AuthController.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\CommunityCollaborationController.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\CommunityController.java
@@ -61,6 +62,7 @@ C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\SignalMetaResponse.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\SignalResponse.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\TokenRefreshRequest.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\TrustPacket.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\UpdateCommunityBlogPostRequest.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\UpdateCommunityRoleRequest.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\UserRegistrationRequest.java

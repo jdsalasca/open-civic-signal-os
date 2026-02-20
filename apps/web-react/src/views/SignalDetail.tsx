@@ -120,7 +120,17 @@ export function SignalDetail() {
         <div className="grid">
           <div className="col-12 lg:col-8">
             <Card className="mb-4 shadow-6" data-testid="signal-description-card">
-              <h3 className="text-muted mb-4 uppercase text-xs font-black tracking-widest">{t('signals.problem_definition')}</h3>
+              <div className="flex justify-content-between align-items-center mb-4">
+                <h3 className="text-muted uppercase text-xs font-black tracking-widest m-0">{t('signals.problem_definition')}</h3>
+                <Button 
+                  icon="pi pi-download" 
+                  label="Trust Packet" 
+                  className="p-button-text p-button-sm text-cyan-400 font-bold"
+                  onClick={() => window.open(`/api/signals/${id}/trust-packet`, '_blank')}
+                  tooltip="Download cryptographic proof of prioritization"
+                  tooltipOptions={{ position: 'left' }}
+                />
+              </div>
               <p className="text-xl line-height-4 m-0 text-main font-medium" style={{ whiteSpace: 'pre-wrap' }}>
                 {signal.description || "No descriptive context provided for this signal."}
               </p>

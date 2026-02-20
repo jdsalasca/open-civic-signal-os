@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.opencivic.signalos.web.dto.TrustPacket;
+
 public interface PrioritizationService {
     Page<Signal> getPrioritizedSignals(Pageable pageable);
     Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId);
@@ -19,6 +21,7 @@ public interface PrioritizationService {
     Optional<Signal> getSignalById(UUID id, UUID communityId);
     double calculateScore(Signal signal);
     ScoreBreakdown getBreakdown(Signal signal);
+    TrustPacket getTrustPacket(UUID signalId);
     Map<UUID, List<Signal>> findDuplicates();
     Signal mergeSignals(UUID targetId, List<UUID> duplicateIds);
     

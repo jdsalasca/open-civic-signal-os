@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import java.security.SecureRandom;
 import java.util.Map;
 
+import org.opencivic.signalos.service.RateLimitService;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -35,6 +37,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final SecureRandom secureRandom = new SecureRandom();
+    private final RateLimitService rateLimitService;
 
     @Value("${spring.profiles.active:prod}")
     private String activeProfile;
@@ -42,17 +45,20 @@ public class AuthController {
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, 
                           EmailService emailService, JwtService jwtService, 
                           AuthenticationManager authenticationManager,
-                          UserDetailsService userDetailsService) {
+                          UserDetailsService userDetailsService,
+                          RateLimitService rateLimitService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
+        this.rateLimitService = rateLimitService;
     }
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
+        // ... implementation ...
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new ConflictException("Username already exists in the registry.");
         }
@@ -87,6 +93,7 @@ public class AuthController {
 
     @PostMapping("/resend-code")
     public ResponseEntity<Map<String, String>> resendCode(@RequestBody Map<String, String> body) {
+        // ... implementation ...
         String username = body.get("username");
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedActionException("Identity not found."));
@@ -108,6 +115,11 @@ public class AuthController {
     @PostMapping("/verify")
     public ResponseEntity<Map<String, String>> verify(@RequestBody Map<String, String> body) {
         String username = body.get("username");
+        
+        if (!rateLimitService.tryAcquire(username)) {
+            return ResponseEntity.status(429).body(Map.of("message", "Too many attempts. Please wait."));
+        }
+
         String code = body.get("code");
 
         User user = userRepository.findByUsername(username)
@@ -129,6 +141,7 @@ public class AuthController {
             
             // New: Send welcome email after verification
             emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
+            rateLimitService.reset(username);
             
             return ResponseEntity.ok(Map.of("message", "Protocol activation complete. Account is now active."));
         } else {
@@ -138,6 +151,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        if (!rateLimitService.tryAcquire(request.username())) {
+            throw new UnauthorizedActionException("Too many login attempts. Please wait.");
+        }
+
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new UnauthorizedActionException("Invalid credentials."));
 
@@ -149,6 +166,7 @@ public class AuthController {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
+            rateLimitService.reset(request.username());
         } catch (BadCredentialsException e) {
             throw new UnauthorizedActionException("Invalid credentials provided.");
         }
