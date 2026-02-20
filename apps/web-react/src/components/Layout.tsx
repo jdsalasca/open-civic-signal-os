@@ -1,8 +1,7 @@
-import { ReactNode, useRef, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
-import { Toast } from "primereact/toast";
 import { Sidebar } from "primereact/sidebar";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCommunityStore } from "../store/useCommunityStore";
@@ -21,7 +20,6 @@ export function Layout({ children, authMode = false }: Props) {
   const location = useLocation();
   const { isLoggedIn, activeRole, userName, logout } = useAuthStore();
   const { memberships, activeCommunityId, setMemberships, setActiveCommunityId } = useCommunityStore();
-  const toastRef = useRef<Toast>(null);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
   useEffect(() => {
@@ -85,8 +83,6 @@ export function Layout({ children, authMode = false }: Props) {
 
   return (
     <div className={`min-h-screen flex flex-column ${authMode ? 'auth-page' : ''}`}>
-      <Toast ref={toastRef} />
-      
       <Sidebar 
         visible={mobileMenuVisible} 
         onHide={() => setMobileMenuVisible(false)} 

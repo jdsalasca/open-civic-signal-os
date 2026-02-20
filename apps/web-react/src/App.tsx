@@ -48,14 +48,26 @@ export function App() {
   return (
     <BrowserRouter>
       <Toaster 
-        position="top-center"
+        position="top-right"
+        containerStyle={{
+          top: '5.75rem',
+          right: '1rem',
+          left: 'auto',
+          bottom: 'auto',
+          zIndex: 11000,
+        }}
+        gutter={10}
         toastOptions={{
+          duration: 4000,
           style: {
             background: theme === 'dark' ? '#111827' : '#fff',
             color: theme === 'dark' ? '#fff' : '#111827',
             border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: '12px',
-            fontSize: '14px'
+            fontSize: '14px',
+            maxWidth: '360px',
+            boxShadow: '0 14px 32px rgba(2, 6, 23, 0.28)',
+            pointerEvents: 'auto',
           },
         }}
       />

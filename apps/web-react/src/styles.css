@@ -116,6 +116,12 @@ body {
   color: var(--primary-text) !important;
 }
 
+@media (max-width: 768px) {
+  .react-hot-toast {
+    width: min(92vw, 360px) !important;
+  }
+}
+
 /* CUSTOM UTILITIES */
 .text-main { color: var(--text-main); }
 .text-muted { color: var(--text-muted); }
