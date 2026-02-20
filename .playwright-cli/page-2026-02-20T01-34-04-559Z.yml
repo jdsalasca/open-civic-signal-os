@@ -1,0 +1,131 @@
+- generic [ref=e4]:
+  - status [ref=e41]: ¡Bienvenido de nuevo, qa1657396877!
+  - generic [ref=e42]:
+    - navigation [ref=e43]:
+      - generic [ref=e44]:
+        - link "SignalOS" [ref=e45] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e47]: SignalOS
+        - generic [ref=e48]:
+          - link "Perspectivas" [ref=e49] [cursor=pointer]:
+            - /url: /
+          - link "Reporte Público" [ref=e50] [cursor=pointer]:
+            - /url: /report
+          - link "Mis Contribuciones" [ref=e51] [cursor=pointer]:
+            - /url: /mine
+          - link "Configuración" [ref=e52] [cursor=pointer]:
+            - /url: /settings
+      - generic [ref=e53]:
+        - text: 
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - generic [ref=e56]: qa1657396877
+            - generic [ref=e57]: CITIZEN
+          - generic [ref=e59]: Q
+          - button "Cerrar Sesión" [ref=e60] [cursor=pointer]:
+            - generic: 
+    - main [ref=e61]:
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64]:
+            - generic [ref=e65]:
+              - generic [ref=e66]: Inteligencia en Vivo
+              - generic [ref=e67]: •
+              - generic [ref=e68]: Bienvenido de nuevo, qa1657396877
+            - heading "Perspectivas de Gobierno" [level=1] [ref=e69]
+            - paragraph [ref=e70]: Seguimiento en tiempo real de la priorización y resolución de señales comunitarias.
+          - button "Reportar Incidencia" [ref=e72] [cursor=pointer]:
+            - generic: 
+            - generic [ref=e73]: Reportar Incidencia
+        - region "Civic Metrics Overview" [ref=e74]:
+          - 'article "Total de Señales: 0" [ref=e76]':
+            - generic [ref=e79]:
+              - generic [ref=e80]:
+                - generic [ref=e81]: Total de Señales
+                - generic [ref=e82]: "0"
+              - generic [ref=e84]: 
+          - 'article "Nuevos Reportes: 0" [ref=e86]':
+            - generic [ref=e89]:
+              - generic [ref=e90]:
+                - generic [ref=e91]: Nuevos Reportes
+                - generic [ref=e92]: "0"
+              - generic [ref=e94]: 
+          - 'article "Bajo Análisis: 0" [ref=e96]':
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - generic [ref=e101]: Bajo Análisis
+                - generic [ref=e102]: "0"
+              - generic [ref=e104]: 
+          - 'article "Promedio Prioridad: 0" [ref=e106]':
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - generic [ref=e111]: Promedio Prioridad
+                - generic [ref=e112]: "0"
+              - generic [ref=e114]: 
+        - generic [ref=e115]:
+          - generic "Feed Priorizado" [ref=e118]:
+            - generic [ref=e120]:
+              - generic [ref=e121]:
+                - generic [ref=e122]: 
+                - heading "Feed Priorizado" [level=2] [ref=e123]
+              - generic [ref=e124]:
+                - generic [ref=e125]: 
+                - textbox "Buscar señales..." [ref=e126]
+            - table [ref=e128]:
+              - rowgroup [ref=e129]:
+                - row "Título Categoría Estado Puntaje" [ref=e130]:
+                  - columnheader "Título" [ref=e131] [cursor=pointer]:
+                    - generic [ref=e132]:
+                      - generic [ref=e133]: Título
+                      - img [ref=e135]
+                  - columnheader "Categoría" [ref=e140] [cursor=pointer]:
+                    - generic [ref=e141]:
+                      - generic [ref=e142]: Categoría
+                      - img [ref=e144]
+                  - columnheader "Estado" [ref=e149] [cursor=pointer]:
+                    - generic [ref=e150]:
+                      - generic [ref=e151]: Estado
+                      - img [ref=e153]
+                  - columnheader "Puntaje" [ref=e158] [cursor=pointer]:
+                    - generic [ref=e159]:
+                      - generic [ref=e160]: Puntaje
+                      - img [ref=e162]
+                  - columnheader [ref=e164]
+              - rowgroup [ref=e165]:
+                - row " No se encontraron señales El feed de su comunidad está despejado. Sea el primero en reportar una necesidad local. Reportar Incidencia" [ref=e166]:
+                  - cell " No se encontraron señales El feed de su comunidad está despejado. Sea el primero en reportar una necesidad local. Reportar Incidencia" [ref=e167]:
+                    - generic [ref=e168]:
+                      - generic [ref=e170]: 
+                      - heading "No se encontraron señales" [level=3] [ref=e171]
+                      - paragraph [ref=e172]: El feed de su comunidad está despejado. Sea el primero en reportar una necesidad local.
+                      - button "Reportar Incidencia" [ref=e173] [cursor=pointer]:
+                        - generic: 
+                        - generic [ref=e174]: Reportar Incidencia
+            - generic [ref=e175]:
+              - button "First Page" [disabled]:
+                - img
+              - button "Previous Page" [disabled]:
+                - img
+              - button "Next Page" [disabled]:
+                - img
+              - button "Last Page" [disabled]:
+                - img
+          - generic [ref=e177]:
+            - generic [ref=e179]:
+              - generic [ref=e180]: Transmisión Semanal
+              - paragraph [ref=e183]: No se encontraron señales
+            - generic [ref=e185]:
+              - generic [ref=e186]: Apoyo Ciudadano
+              - generic [ref=e187]:
+                - paragraph [ref=e188]: Sus votos y reportes impactan directamente en la prioridad algorítmica de su comunidad.
+                - generic [ref=e189]:
+                  - generic [ref=e190]: 
+                  - generic [ref=e191]: "Verificación Ciudadana: Activa"
+    - contentinfo [ref=e192]:
+      - generic [ref=e193]:
+        - generic [ref=e194]: 
+        - generic [ref=e195]: Estándar Global de Gobernanza
+      - generic [ref=e196]: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
+      - generic [ref=e197]:
+        - generic [ref=e198] [cursor=pointer]: 
+        - generic [ref=e199] [cursor=pointer]: 

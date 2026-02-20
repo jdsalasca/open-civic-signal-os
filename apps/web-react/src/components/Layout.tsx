@@ -88,7 +88,7 @@ export function Layout({ children, authMode = false }: Props) {
                   <span className="text-xs text-cyan-500 font-bold uppercase tracking-widest" style={{fontSize: '9px'}}>{activeRole}</span>
                 </div>
               </div>
-              <Button label={t('nav.sign_out')} icon="pi pi-power-off" severity="danger" text className="w-full justify-content-start font-bold py-3" onClick={handleLogout} />
+              <Button label={t('nav.sign_out')} icon="pi pi-power-off" severity="danger" text className="w-full justify-content-start font-bold py-3" onClick={handleLogout} data-testid="logout-button-mobile" />
             </div>
           )}
         </div>
@@ -141,7 +141,7 @@ export function Layout({ children, authMode = false }: Props) {
                 <span className="text-min font-bold text-cyan-500 uppercase tracking-tighter" style={{ fontSize: '9px' }}>{activeRole}</span>
               </div>
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-cyan-600 text-white font-bold" />
-              <Button icon="pi pi-power-off" rounded text className="text-gray-500 hover:text-red-400 ml-1" onClick={handleLogout} aria-label={t('nav.sign_out')} />
+              <Button icon="pi pi-power-off" rounded text className="text-gray-500 hover:text-red-400 ml-1" onClick={handleLogout} aria-label={t('nav.sign_out')} data-testid="logout-button-desktop" />
             </div>
           )}
         </div>

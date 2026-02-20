@@ -1,0 +1,88 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5]:
+      - link "SignalOS" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e8]: SignalOS
+      - generic [ref=e9]:
+        - link "Perspectivas" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - link "Reporte Público" [ref=e11] [cursor=pointer]:
+          - /url: /report
+        - link "Mis Contribuciones" [ref=e12] [cursor=pointer]:
+          - /url: /mine
+        - link "Configuración" [ref=e13] [cursor=pointer]:
+          - /url: /settings
+    - generic [ref=e14]:
+      - text: 
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: qa1657396877
+          - generic [ref=e18]: CITIZEN
+        - generic [ref=e20]: Q
+        - button "Cerrar Sesión" [ref=e21] [cursor=pointer]:
+          - generic: 
+  - main [ref=e22]:
+    - generic [ref=e26]:
+      - generic [ref=e27]: Reportar Señal Comunitaria
+      - generic [ref=e28]:
+        - paragraph [ref=e29]: Su entrada será procesada por nuestro algoritmo para optimizar la respuesta cívica.
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: Título del Problema
+            - textbox "Título del Problema" [ref=e33]:
+              - /placeholder: ej. Tubería rota en Calle Principal
+          - generic [ref=e34]:
+            - generic [ref=e35]: Categoría
+            - generic [ref=e36] [cursor=pointer]:
+              - generic:
+                - textbox
+              - generic:
+                - combobox:
+                  - option "common.select_category" [selected]
+              - generic [ref=e37]: common.select_category
+              - button "common.select_category" [ref=e38]:
+                - img [ref=e39]
+          - generic [ref=e41]:
+            - generic [ref=e42]: Escala (Ciudadanos Estimados)
+            - generic [ref=e43]:
+              - slider [ref=e46]
+              - generic [ref=e47]: "10"
+          - generic [ref=e48]:
+            - generic [ref=e49]: Contexto de Inteligencia (Descripción)
+            - textbox "Contexto de Inteligencia (Descripción)" [ref=e50]:
+              - /placeholder: Describa el problema, ubicación e impacto observado...
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - generic [ref=e53]: Factor de Urgencia
+              - generic [ref=e54]: "Puntaje: 1-5"
+            - generic [ref=e55]:
+              - slider [ref=e58]
+              - generic [ref=e59]:
+                - generic [ref=e60]: BAJA
+                - generic [ref=e61]: "3"
+                - generic [ref=e62]: CRÍTICA
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - generic [ref=e65]: Impacto Social
+              - generic [ref=e66]: "Puntaje: 1-5"
+            - generic [ref=e67]:
+              - slider [ref=e70]
+              - generic [ref=e71]:
+                - generic [ref=e72]: MENOR
+                - generic [ref=e73]: "3"
+                - generic [ref=e74]: SISTÉMICO
+          - generic [ref=e75]:
+            - button "Descartar" [ref=e76] [cursor=pointer]:
+              - generic [ref=e77]: Descartar
+            - button "Ingresar Señal" [ref=e78] [cursor=pointer]:
+              - generic: 
+              - generic [ref=e79]: Ingresar Señal
+  - contentinfo [ref=e80]:
+    - generic [ref=e81]:
+      - generic [ref=e82]: 
+      - generic [ref=e83]: Estándar Global de Gobernanza
+    - generic [ref=e84]: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
+    - generic [ref=e85]:
+      - generic [ref=e86] [cursor=pointer]: 
+      - generic [ref=e87] [cursor=pointer]: 

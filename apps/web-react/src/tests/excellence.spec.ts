@@ -1,14 +1,12 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:3002';
-
 test.describe('Signal OS - High Quality E2E Suite', () => {
 
   test('Complete Quality Audit Flow with Verification', async ({ page }) => {
     const uniqueUser = `qa_expert_${Date.now()}`;
     
     // 1. Registration Flow
-    await page.goto(`${BASE_URL}/register`);
+    await page.goto('/register');
     await page.locator('#username-input').fill(uniqueUser);
     await page.locator('#email-input').fill(`${uniqueUser}@yopmail.com`);
     await page.locator('#password-input').fill('SecurePass123!');
@@ -17,7 +15,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     // 2. Identity Verification (Activation Step)
     await expect(page).toHaveURL(/.*verify/);
     await page.locator('#verify-code').fill('123456');
-    await page.getByRole('button', { name: 'Verify and Activate' }).click();
+    await page.getByRole('button', { name: /Verify/ }).click();
 
     // 3. Successful Login
     await expect(page).toHaveURL(/.*login/);
@@ -29,7 +27,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     await expect(page.getByTestId('welcome-message')).toContainText(uniqueUser, { timeout: 15000 });
 
     // 4. Settings: i18n & Theme Hardening
-    await page.goto(`${BASE_URL}/settings`);
+    await page.goto('/settings');
     await page.locator('.p-selectbutton >> text=Español').click();
     await expect(page.getByText('Configuración del Sistema')).toBeVisible();
 
@@ -41,7 +39,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     await page.locator('.p-dropdown').click();
     await page.locator('.p-dropdown-item >> text=Infraestructura').click();
     
-    await page.getByRole('button', { name: 'Ingresar Señal' }).click();
+    await page.getByRole('button', { name: /Ingresar/ }).click();
 
     // 6. Dashboard Integrity
     await expect(page.locator('[data-testid="dashboard-hero"]')).toBeVisible();
@@ -51,7 +49,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     await expect(table).toContainText('Mejora de Alumbrado Público');
 
     // 7. Security Logout
-    await page.locator('button[aria-label="Cerrar Sesión"]').click();
+    await page.getByTestId('logout-button-desktop').click();
     await expect(page).toHaveURL(/.*login/);
   });
 });
