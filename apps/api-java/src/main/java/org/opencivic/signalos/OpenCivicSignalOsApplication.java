@@ -22,28 +22,50 @@ public class OpenCivicSignalOsApplication {
 	@Profile({"dev", "test"})
 	public CommandLineRunner seedUsers(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
-			if (userRepository.findByUsername("admin").isEmpty()) {
-				// Admin has all roles
-				User admin = new User(
-					"admin", 
-					passwordEncoder.encode("admin12345"), 
-					"admin-signalos@yopmail.com", 
-					"ROLE_SUPER_ADMIN,ROLE_PUBLIC_SERVANT,ROLE_CITIZEN"
-				);
-				admin.setEnabled(true);
-				userRepository.save(admin);
-			}
-			if (userRepository.findByUsername("servant").isEmpty()) {
-				// Servant has two roles
-				User servant = new User(
-					"servant", 
-					passwordEncoder.encode("servant123"), 
-					"servant-signalos@yopmail.com", 
-					"ROLE_PUBLIC_SERVANT,ROLE_CITIZEN"
-				);
-				servant.setEnabled(true);
-				userRepository.save(servant);
-			}
+			upsertSeedUser(
+				userRepository,
+				passwordEncoder,
+				"admin",
+				"admin12345",
+				"opencivicadmin@yopmail.com",
+				"ROLE_SUPER_ADMIN,ROLE_PUBLIC_SERVANT,ROLE_CITIZEN"
+			);
+			upsertSeedUser(
+				userRepository,
+				passwordEncoder,
+				"servant",
+				"servant123",
+				"servant@yopmail.com",
+				"ROLE_PUBLIC_SERVANT,ROLE_CITIZEN"
+			);
+			upsertSeedUser(
+				userRepository,
+				passwordEncoder,
+				"citizen",
+				"citizen123",
+				"citizen@yopmail.com",
+				"ROLE_CITIZEN"
+			);
 		};
+	}
+
+	private void upsertSeedUser(
+		UserRepository userRepository,
+		PasswordEncoder passwordEncoder,
+		String username,
+		String rawPassword,
+		String email,
+		String roles
+	) {
+		User user = userRepository.findByUsername(username).orElseGet(() ->
+			new User(username, passwordEncoder.encode(rawPassword), email, roles)
+		);
+		user.setPassword(passwordEncoder.encode(rawPassword));
+		user.setEmail(email);
+		user.setRoles(roles);
+		user.setVerificationCode(null);
+		user.setVerified(true);
+		user.setEnabled(true);
+		userRepository.save(user);
 	}
 }

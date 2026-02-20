@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Auth Edge Cases (P1)', () => {
   
   test('Should return 409 Conflict when registering duplicate email', async ({ page }) => {
-    const duplicateEmail = 'admin-signalos@yopmail.com'; // Already exists from seeding
+    const duplicateEmail = 'opencivicadmin@yopmail.com'; // Already exists from seeding
     const uniqueUser = `user_${Date.now()}`;
 
     await page.goto('/register');

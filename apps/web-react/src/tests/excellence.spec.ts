@@ -60,7 +60,19 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     await expect(table).toContainText('Mejora de Alumbrado Público');
 
     // 7. Security Logout
-    await page.getByTestId('logout-button-desktop').click();
+    const desktopLogout = page.getByTestId('logout-button-desktop');
+    const mobileLogout = page.getByTestId('logout-button-mobile');
+    if (await desktopLogout.isVisible()) {
+      await desktopLogout.click();
+    } else {
+      const mobileMenuButton = page
+        .locator('button[aria-label="Abrir menú de navegación"], button[aria-label="Open navigation menu"]')
+        .first();
+      if (await mobileMenuButton.isVisible()) {
+        await mobileMenuButton.click();
+      }
+      await mobileLogout.click();
+    }
     await expect(page).toHaveURL(/.*login/);
   });
 });

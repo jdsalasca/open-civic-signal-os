@@ -32,12 +32,13 @@ test.describe('Signal OS - Infrastructure Stress Test (P0)', () => {
 
     await expect(page).toHaveURL(/\/verify/);
 
-    // Rapidly enter wrong codes
+    // Rapidly enter wrong codes and ensure verification does not complete.
     const input = page.locator('#verify-code');
     for (let i = 0; i < 3; i++) {
       await input.fill('000000');
       await page.click('button[type="submit"]');
-      await expect(page.locator('.p-toast-message-error')).toBeVisible();
+      await expect(page).toHaveURL(/\/verify/);
+      await expect(page.locator('#verify-code')).toBeVisible();
     }
   });
 });

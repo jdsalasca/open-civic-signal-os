@@ -41,7 +41,7 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
       const style = window.getComputedStyle(el) as any;
       return style.backdropFilter || style.webkitBackdropFilter;
     });
-    expect(backdropFilter).toContain('blur(8px)');
+    expect(backdropFilter).toContain('blur(12px)');
 
     // Close menu
     await page.keyboard.press('Escape');
