@@ -40,6 +40,8 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
 - Expose "why this item is ranked here" in every UI list.
 - Support mobile-first layouts for community leaders in the field.
 - Make dashboards readable in low-bandwidth scenarios.
+- Never expose raw enum identifiers directly in role/lifecycle selectors when user-friendly labels are available.
+- Any role-switch UI must preserve selected role across route transitions and provide immediate feedback about what changed.
 - Keep notifications and logs from covering interactive fields:
   - no toast/overlay in viewport center during form workflows
   - reserve safe top/bottom offsets for sticky nav + mobile keyboards

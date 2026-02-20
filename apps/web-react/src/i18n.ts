@@ -172,13 +172,19 @@ const resources = {
         "theme": "Interface Theme",
         "role": "Active Identity Role",
         "role_desc": "Switch between your authorized security clearances.",
+        "role_switched": "Active role switched to {{role}}.",
         "dark": "Dark Mode",
         "light": "Light Mode",
         "admin_tools": "Administrative Tools",
         "admin_desc": "Download complete intelligence datasets for external auditing.",
         "export_button": "Export Signal Registry (CSV)",
         "export_success": "Intelligence data exported successfully.",
-        "export_error": "Export failed. Insufficient clearance or network error."
+        "export_error": "Export failed. Insufficient clearance or network error.",
+        "roles": {
+          "SUPER_ADMIN": "Super Admin",
+          "PUBLIC_SERVANT": "Public Servant",
+          "CITIZEN": "Citizen"
+        }
       },
       "exceptions": {
         "404_title": "404",
@@ -374,13 +380,19 @@ const resources = {
         "theme": "Tema de Interfaz",
         "role": "Rol de Identidad Activo",
         "role_desc": "Cambie entre sus niveles de seguridad autorizados.",
+        "role_switched": "Rol activo actualizado a {{role}}.",
         "dark": "Modo Oscuro",
         "light": "Modo Claro",
         "admin_tools": "Herramientas Administrativas",
         "admin_desc": "Descargue conjuntos de datos completos para auditoría externa.",
         "export_button": "Exportar Registro (CSV)",
         "export_success": "Datos de inteligencia exportados con éxito.",
-        "export_error": "Error al exportar. Permisos insuficientes o error de red."
+        "export_error": "Error al exportar. Permisos insuficientes o error de red.",
+        "roles": {
+          "SUPER_ADMIN": "Super Admin",
+          "PUBLIC_SERVANT": "Servidor Público",
+          "CITIZEN": "Ciudadano"
+        }
       },
       "exceptions": {
         "404_title": "404",

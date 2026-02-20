@@ -16,6 +16,12 @@ interface ThemeOption {
   icon: string;
 }
 
+interface RoleOption {
+  label: string;
+  value: string;
+  code: string;
+}
+
 export function Settings() {
   const { t, i18n } = useTranslation();
   const { language, setLanguage, theme, setTheme } = useSettingsStore();
@@ -45,8 +51,23 @@ export function Settings() {
   };
 
   const handleRoleChange = (e: DropdownChangeEvent) => {
-    switchRole(e.value);
+    const nextRole = e.value as string | undefined;
+    if (!nextRole || nextRole === activeRole) {
+      return;
+    }
+    switchRole(nextRole);
+    toast.success(
+      t('settings.role_switched', {
+        role: t(`settings.roles.${nextRole}`, { defaultValue: nextRole.replace(/_/g, ' ') }),
+      })
+    );
   };
+
+  const roleOptions: RoleOption[] = rawRoles.map((role) => ({
+    label: t(`settings.roles.${role}`, { defaultValue: role.replace(/_/g, ' ') }),
+    value: role,
+    code: role,
+  }));
 
   const handleExportCsv = async () => {
     try {
@@ -114,12 +135,23 @@ export function Settings() {
                           <i className="pi pi-shield mr-2"></i>{t('settings.role')}
                         </label>
                         <p className="text-xs text-muted m-0 mb-2">{t('settings.role_desc')}</p>
-                        <Dropdown
-                          value={activeRole}
-                          options={rawRoles}
-                          onChange={handleRoleChange}
-                          className="w-full bg-card"
-                        />
+                        <div data-testid="role-switch-dropdown">
+                          <Dropdown
+                            value={activeRole}
+                            options={roleOptions}
+                            optionLabel="label"
+                            optionValue="value"
+                            onChange={handleRoleChange}
+                            className="w-full bg-card"
+                            placeholder={t('settings.role')}
+                            itemTemplate={(option: RoleOption) => (
+                              <div className="flex flex-column">
+                                <span className="font-semibold">{option.label}</span>
+                                <small className="text-color-secondary">{option.code}</small>
+                              </div>
+                            )}
+                          />
+                        </div>
                       </div>
                     </>
                   )}

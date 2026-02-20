@@ -31,16 +31,23 @@ export const useAuthStore = create<AuthState>()(
         const roles = (data.role || 'ROLE_CITIZEN')
           .split(',')
           .map(r => r.trim().replace('ROLE_', '') as UserRole);
-        
-        set({
+
+        set((state) => ({
           accessToken: data.accessToken,
           userName: data.username, // mapping lowercase 'username' from BE
-          activeRole: roles[0],
+          activeRole: roles.includes(state.activeRole) ? state.activeRole : (roles[0] ?? 'CITIZEN'),
           rawRoles: roles,
           isLoggedIn: true
-        });
+        }));
       },
-      switchRole: (role) => set({ activeRole: role as UserRole }),
+      switchRole: (role) =>
+        set((state) => {
+          const nextRole = role as UserRole;
+          if (!state.rawRoles.includes(nextRole)) {
+            return state;
+          }
+          return { ...state, activeRole: nextRole };
+        }),
       logout: () => {
         useCommunityStore.getState().clear();
         set({ accessToken: null, userName: null, activeRole: 'GUEST', rawRoles: [], isLoggedIn: false });
