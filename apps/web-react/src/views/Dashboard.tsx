@@ -192,13 +192,13 @@ export function Dashboard() {
               <NotificationSidebar notifications={notifications} />
             )}
             {activeRole === "CITIZEN" && (
-              <Card title={t('dashboard.citizen_support_title')} className="bg-blue-900 border-none shadow-4" data-testid="citizen-support-card">
-                <p className="text-blue-100 line-height-3 mb-4 text-sm">
+              <Card title={t('dashboard.citizen_support_title')} className="bg-surface border-1 border-white-alpha-10 shadow-4" data-testid="citizen-support-card">
+                <p className="text-muted line-height-3 mb-4 text-sm">
                   {t('dashboard.citizen_support_desc')}
                 </p>
-                <div className="flex align-items-center gap-2 text-blue-200">
+                <div className="flex align-items-center gap-2 text-cyan-500">
                   <i className="pi pi-shield"></i>
-                  <span className="text-xs font-bold uppercase tracking-wider">{t('dashboard.citizen_verification')}</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-500">{t('dashboard.citizen_verification')}</span>
                 </div>
               </Card>
             )}

@@ -13,6 +13,10 @@ type Props = {
 
 export function CategoryChart({ signals }: Props) {
   const { t } = useTranslation();
+  const textMuted =
+    typeof window !== "undefined"
+      ? getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#94a3b8"
+      : "#94a3b8";
   const chartData = useMemo(() => {
     const categories = signals.reduce((acc: Record<string, number>, s) => {
       acc[s.category] = (acc[s.category] || 0) + 1;
@@ -43,7 +47,7 @@ export function CategoryChart({ signals }: Props) {
       legend: {
         position: "bottom" as const,
         labels: {
-          color: "#9ca3af",
+          color: textMuted,
           usePointStyle: true,
           padding: 20,
           font: { size: 11, weight: "bold" as const },
@@ -54,7 +58,7 @@ export function CategoryChart({ signals }: Props) {
   };
 
   return (
-    <Card title={t('dashboard.distribution_title')} className="shadow-4 border-1 border-white-alpha-10 bg-gray-900 overflow-hidden">
+    <Card title={t('dashboard.distribution_title')} className="shadow-4 border-1 border-white-alpha-10 bg-surface overflow-hidden">
       <div style={{ height: "250px" }} className="flex justify-content-center">
         <Pie data={chartData} options={options} />
       </div>
