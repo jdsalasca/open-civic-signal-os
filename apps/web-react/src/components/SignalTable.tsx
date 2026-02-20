@@ -13,6 +13,10 @@ import { Signal } from "../types";
 type Props = {
   signals: Signal[];
   loading: boolean;
+  totalRecords?: number;
+  rows?: number;
+  first?: number;
+  onPage?: (event: any) => void;
 };
 
 interface SkeletonRow {
@@ -20,7 +24,7 @@ interface SkeletonRow {
   id?: string;
 }
 
-export function SignalTable({ signals, loading }: Props) {
+export function SignalTable({ signals, loading, totalRecords, rows, first, onPage }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [globalFilterValue, setGlobalFilterValue] = useState("");
@@ -31,10 +35,10 @@ export function SignalTable({ signals, loading }: Props) {
 
   const tableData = useMemo<(Signal | SkeletonRow)[]>(() => {
     if (loading) {
-      return new Array(6).fill(null).map((_, i) => ({ _skeleton: true, id: `sk-${i}` }));
+      return new Array(rows || 6).fill(null).map((_, i) => ({ _skeleton: true, id: `sk-${i}` }));
     }
     return signals;
-  }, [signals, loading]);
+  }, [signals, loading, rows]);
 
   const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -133,8 +137,12 @@ export function SignalTable({ signals, loading }: Props) {
     <div className="animate-fade-in surface-section border-round-xl border-1 border-white-alpha-10 shadow-8 overflow-hidden">
       <DataTable 
         value={tableData} 
+        lazy
         paginator 
-        rows={10} 
+        first={first}
+        rows={rows || 10} 
+        totalRecords={totalRecords}
+        onPage={onPage}
         filters={filters}
         globalFilterFields={["title", "category", "status"]}
         header={header}

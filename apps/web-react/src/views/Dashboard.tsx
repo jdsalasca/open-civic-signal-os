@@ -27,12 +27,18 @@ export function Dashboard() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [lazyState, setLazyState] = useState({
+    first: 0,
+    rows: 10,
+    page: 0
+  });
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [signalsRes, notificationsRes] = await Promise.all([
-        apiClient.get("signals/prioritized?size=50"),
+        apiClient.get(`signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`),
         (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
           ? apiClient.get("notifications/recent")
           : Promise.resolve(null)
@@ -40,6 +46,7 @@ export function Dashboard() {
       
       if (signalsRes.status === 200) {
         setSignals(signalsRes.data.content || []);
+        setTotalRecords(signalsRes.data.totalElements || 0);
       }
       
       if (notificationsRes && notificationsRes.status === 200) {
@@ -52,11 +59,15 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [activeRole, t]);
+  }, [activeRole, t, lazyState]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const onPage = (event: any) => {
+    setLazyState(event);
+  };
 
   const handleRelay = async () => {
     try {
@@ -117,7 +128,14 @@ export function Dashboard() {
 
       <div className="grid mt-2">
         <div className="col-12 xl:col-8" data-testid="main-signal-table">
-          <SignalTable signals={signals} loading={loading} />
+          <SignalTable 
+            signals={signals} 
+            loading={loading} 
+            totalRecords={totalRecords}
+            rows={lazyState.rows}
+            first={lazyState.first}
+            onPage={onPage}
+          />
         </div>
         <div className="col-12 xl:col-4">
           <div className="flex flex-column gap-4">
