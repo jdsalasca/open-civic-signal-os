@@ -33,7 +33,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       GOOGLE_APPLICATION_CREDENTIALS: /app/secrets/google-credentials.json
     volumes:
-      - ${LOCAL_GOOGLE_CREDENTIALS_PATH}:/app/secrets/google-credentials.json:ro
+      - "${LOCAL_GOOGLE_CREDENTIALS_PATH}:/app/secrets/google-credentials.json:ro"
     depends_on:
       civic-db:
         condition: service_healthy

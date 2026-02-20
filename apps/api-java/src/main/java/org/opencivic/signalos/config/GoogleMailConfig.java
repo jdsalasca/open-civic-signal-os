@@ -23,12 +23,19 @@ public class GoogleMailConfig {
 
     @Bean
     public Gmail gmailService() throws IOException, GeneralSecurityException {
+        String envVar = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        log.info("Attempting to load Google Credentials from path: {}", envVar);
+        
+        if (envVar == null || envVar.isBlank()) {
+            log.error("GOOGLE_APPLICATION_CREDENTIALS environment variable is NOT SET.");
+            return null;
+        }
+
         try {
-            // This will look for the file defined in GOOGLE_APPLICATION_CREDENTIALS environment variable
             GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
                     .createScoped(Collections.singleton(GmailScopes.GMAIL_SEND));
             
-            log.info("Google Credentials loaded successfully via standard environment flow.");
+            log.info("Google Credentials loaded successfully. Type: {}", credentials.getClass().getName());
 
             return new Gmail.Builder(
                     GoogleNetHttpTransport.newTrustedTransport(),
