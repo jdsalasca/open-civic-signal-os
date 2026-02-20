@@ -55,101 +55,101 @@ export function Settings() {
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `signalos_export_${new Date().getTime()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      toast.success("Intelligence data exported successfully.");
-    } catch (err) {
-      toast.error("Export failed. Insufficient clearance or network error.");
-    }
-  };
-
-  return (
-    <Layout>
-      <div className="animate-fade-in max-w-30rem mx-auto mt-4">
-        <div className="mb-5 text-center">
-          <h1 className="text-4xl font-black text-white m-0 tracking-tight">{t('settings.title')}</h1>
-          <p className="text-gray-500 mt-2">{t('settings.desc')}</p>
-        </div>
-
-        <Card className="shadow-8 border-1 border-white-alpha-10 mb-4">
-          <div className="flex flex-column gap-4">
-            
-            <div className="flex flex-column gap-2">
-              <label className="font-bold text-sm uppercase tracking-widest text-gray-400">
-                <i className="pi pi-globe mr-2"></i>{t('settings.language')}
-              </label>
-              <SelectButton 
-                value={language} 
-                options={languageOptions} 
-                onChange={handleLanguageChange} 
-                className="w-full"
-              />
-            </div>
-
-            <Divider className="my-2 opacity-10" />
-
-            <div className="flex flex-column gap-2">
-              <label className="font-bold text-sm uppercase tracking-widest text-gray-400">
-                <i className="pi pi-palette mr-2"></i>{t('settings.theme')}
-              </label>
-              <SelectButton 
-                value={theme} 
-                options={themeOptions} 
-                onChange={handleThemeChange}
-                itemTemplate={(option: ThemeOption) => (
-                  <div className="flex align-items-center gap-2">
-                    <i className={option.icon}></i>
-                    <span>{option.label}</span>
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            toast.success(t('settings.export_success'));
+          } catch (err) {
+            toast.error(t('settings.export_error'));
+          }
+        };
+      
+        return (
+          <Layout>
+            <div className="animate-fade-in max-w-30rem mx-auto mt-4">
+              <div className="mb-5 text-center">
+                <h1 className="text-4xl font-black text-white m-0 tracking-tight">{t('settings.title')}</h1>
+                <p className="text-gray-500 mt-2">{t('settings.desc')}</p>
+              </div>
+      
+              <Card className="shadow-8 border-1 border-white-alpha-10 mb-4 bg-gray-900">
+                <div className="flex flex-column gap-4">
+      
+                  <div className="flex flex-column gap-2">
+                    <label className="font-bold text-sm uppercase tracking-widest text-gray-400">
+                      <i className="pi pi-globe mr-2"></i>{t('settings.language')}
+                    </label>
+                    <SelectButton
+                      value={language}
+                      options={languageOptions}
+                      onChange={handleLanguageChange}
+                      className="w-full"
+                    />
                   </div>
-                )}
-              />
+      
+                  <Divider className="my-2 opacity-10" />
+      
+                  <div className="flex flex-column gap-2">
+                    <label className="font-bold text-sm uppercase tracking-widest text-gray-400">
+                      <i className="pi pi-palette mr-2"></i>{t('settings.theme')}
+                    </label>
+                    <SelectButton
+                      value={theme}
+                      options={themeOptions}
+                      onChange={handleThemeChange}
+                      itemTemplate={(option: ThemeOption) => (
+                        <div className="flex align-items-center gap-2">
+                          <i className={option.icon}></i>
+                          <span>{option.label}</span>
+                        </div>
+                      )}
+                    />
+                  </div>
+      
+                  {rawRoles.length > 1 && (
+                    <>
+                      <Divider className="my-2 opacity-10" />
+                      <div className="flex flex-column gap-2">
+                        <label className="font-bold text-sm uppercase tracking-widest text-cyan-500">
+                          <i className="pi pi-shield mr-2"></i>{t('settings.role')}
+                        </label>
+                        <p className="text-xs text-gray-500 m-0 mb-2">{t('settings.role_desc')}</p>
+                        <Dropdown
+                          value={activeRole}
+                          options={rawRoles}
+                          onChange={handleRoleChange}
+                          className="w-full bg-gray-950"
+                        />
+                      </div>
+                    </>
+                  )}
+      
+                  {/* OCS-P2-011: Admin Audit Tools */}
+                  {activeRole === 'SUPER_ADMIN' && (
+                    <>
+                      <Divider className="my-2 opacity-10" />
+                      <div className="flex flex-column gap-2">
+                        <label className="font-bold text-sm uppercase tracking-widest text-red-400">
+                          <i className="pi pi-database mr-2"></i>{t('settings.admin_tools')}
+                        </label>
+                        <p className="text-xs text-gray-500 m-0 mb-3">{t('settings.admin_desc')}</p> 
+                        <Button
+                          label={t('settings.export_button')}
+                          icon="pi pi-download" 
+                          className="p-button-danger outlined w-full"
+                          onClick={handleExportCsv}
+                        />
+                      </div>
+                    </>
+                  )}
+      
+                </div>
+              </Card>
+      
+              <div className="text-center p-4 bg-white-alpha-5 border-round-xl border-1 border-white-alpha-10">
+                <span className="text-xs text-gray-600 font-mono">{t('nav.protocol_version')} | Session: Persistent</span>
+              </div>
             </div>
-
-            {rawRoles.length > 1 && (
-              <>
-                <Divider className="my-2 opacity-10" />
-                <div className="flex flex-column gap-2">
-                  <label className="font-bold text-sm uppercase tracking-widest text-cyan-500">
-                    <i className="pi pi-shield mr-2"></i>{t('settings.role')}
-                  </label>
-                  <p className="text-xs text-gray-500 m-0 mb-2">{t('settings.role_desc')}</p>
-                  <Dropdown 
-                    value={activeRole} 
-                    options={rawRoles} 
-                    onChange={handleRoleChange} 
-                    className="w-full bg-gray-900"
-                  />
-                </div>
-              </>
-            )}
-
-            {/* OCS-P2-011: Admin Audit Tools */}
-            {activeRole === 'SUPER_ADMIN' && (
-              <>
-                <Divider className="my-2 opacity-10" />
-                <div className="flex flex-column gap-2">
-                  <label className="font-bold text-sm uppercase tracking-widest text-red-400">
-                    <i className="pi pi-database mr-2"></i>Administrative Tools
-                  </label>
-                  <p className="text-xs text-gray-500 m-0 mb-3">Download complete intelligence datasets for external auditing.</p>
-                  <Button 
-                    label="Export Signal Registry (CSV)" 
-                    icon="pi pi-download" 
-                    className="p-button-danger outlined w-full"
-                    onClick={handleExportCsv}
-                  />
-                </div>
-              </>
-            )}
-
-          </div>
-        </Card>
-
-        <div className="text-center p-4 bg-white-alpha-5 border-round-xl border-1 border-white-alpha-10">
-          <span className="text-xs text-gray-600 font-mono">Signal OS Core v0.3.0-hardened | Session: Persistent</span>
-        </div>
-      </div>
-    </Layout>
-  );
-}
+          </Layout>
+        );
+      }

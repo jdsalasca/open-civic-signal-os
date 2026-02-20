@@ -48,11 +48,11 @@ export function Dashboard() {
       
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || "Synchronization failed.");
+      toast.error(apiErr.friendlyMessage || t('dashboard.sync_error'));
     } finally {
       setLoading(false);
     }
-  }, [activeRole]);
+  }, [activeRole, t]);
 
   useEffect(() => {
     loadData();
@@ -62,12 +62,12 @@ export function Dashboard() {
     try {
       const res = await apiClient.post("notifications/relay/top-10");
       if (res.status === 200) {
-        toast.success("Intelligence broadcast successful!");
+        toast.success(t('dashboard.broadcast_success'));
         loadData();
       }
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || "Relay rejected.");
+      toast.error(apiErr.friendlyMessage || t('dashboard.relay_rejected'));
     }
   };
 

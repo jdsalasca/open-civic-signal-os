@@ -64,6 +64,8 @@ const resources = {
         "subtitle": "Real-time community signal prioritization and resolution lifecycle tracking.",
         "broadcast": "Weekly Broadcast",
         "broadcast_success": "Intelligence broadcast successful!",
+        "sync_error": "Synchronization failed.",
+        "relay_rejected": "Relay rejected.",
         "new_issue": "Report New Issue",
         "feed_title": "Prioritized Feed",
         "distribution_title": "Signal Distribution",
@@ -134,7 +136,9 @@ const resources = {
         "approve": "Approve",
         "reject": "Reject",
         "empty": "No signals require attention.",
-        "success": "Signal {{action}} successfully."
+        "success": "Signal {{action}} successfully.",
+        "load_error": "Failed to load moderation queue.",
+        "action_error": "Moderation action failed."
       },
       "settings": {
         "title": "System Settings",
@@ -237,6 +241,8 @@ const resources = {
         "subtitle": "Seguimiento en tiempo real de la priorización y resolución de señales comunitarias.",
         "broadcast": "Transmisión Semanal",
         "broadcast_success": "¡Transmisión de inteligencia exitosa!",
+        "sync_error": "Sincronización fallida.",
+        "relay_rejected": "Retransmisión rechazada.",
         "new_issue": "Reportar Incidencia",
         "feed_title": "Feed Priorizado",
         "distribution_title": "Distribución de Señales",
@@ -307,7 +313,9 @@ const resources = {
         "approve": "Aprobar",
         "reject": "Rechazar",
         "empty": "No hay señales que requieran atención.",
-        "success": "Señal {{action}} con éxito."
+        "success": "Señal {{action}} con éxito.",
+        "load_error": "Error al cargar la cola de moderación.",
+        "action_error": "Acción de moderación fallida."
       },
       "settings": {
         "title": "Configuración del Sistema",

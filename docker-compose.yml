@@ -1,0 +1,61 @@
+services:
+  civic-db:
+    image: postgres:15-alpine
+    container_name: civic-db
+    environment:
+      POSTGRES_DB: signalos
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d signalos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - civic-db-data:/var/lib/postgresql/data
+
+  civic-api:
+    image: infra-api
+    container_name: civic-api
+    build:
+      context: ../apps/api-java
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://civic-db:5432/signalos
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password
+      JWT_SECRET: "strategic-civic-intelligence-key-secure-2026-v1"
+      CORS_ALLOWED_ORIGINS: "http://localhost:3002"
+      SPRING_PROFILES_ACTIVE: dev
+    depends_on:
+      civic-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  civic-web:
+    image: infra-web
+    container_name: civic-web
+    build:
+      context: ../apps/web-react
+      dockerfile: Dockerfile
+    ports:
+      - "3002:80"
+    depends_on:
+      civic-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  civic-db-data:
