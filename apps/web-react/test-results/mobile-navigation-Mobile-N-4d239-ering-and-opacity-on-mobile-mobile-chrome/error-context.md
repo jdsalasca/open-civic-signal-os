@@ -18,15 +18,17 @@
           - generic [ref=e18]: Username
           - generic [ref=e19]:
             - generic [ref=e20]: 
-            - textbox "Username" [active] [ref=e21]:
+            - textbox "Username" [ref=e21]:
               - /placeholder: Enter your username
+              - text: admin
         - generic [ref=e22]:
           - generic [ref=e23]: Password
           - generic [ref=e25]:
             - textbox "Password" [ref=e26]:
               - /placeholder: Enter your password
+              - text: admin12345
             - switch "Show Password" [checked] [ref=e28] [cursor=pointer]
-        - button "Submit Login" [ref=e30] [cursor=pointer]:
+        - button "Submit Login" [active] [ref=e30] [cursor=pointer]:
           - generic: 
           - generic [ref=e31]: Sign In to OS
         - generic [ref=e32]:

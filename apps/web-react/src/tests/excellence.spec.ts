@@ -7,9 +7,9 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     
     // 1. Registration Flow
     await page.goto('/register');
-    await page.locator('#username-input').fill(uniqueUser);
-    await page.locator('#email-input').fill(`${uniqueUser}@yopmail.com`);
-    await page.locator('#password-input').fill('SecurePass123!');
+    await page.getByTestId('register-username-input').fill(uniqueUser);
+    await page.getByTestId('register-email-input').fill(`${uniqueUser}@yopmail.com`);
+    await page.getByTestId('register-password-input').fill('SecurePass123!');
     await page.getByTestId('register-submit-button').click();
 
     // 2. Identity Verification (Activation Step)
@@ -19,15 +19,18 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
 
     // 3. Successful Login
     await page.goto('/login');
-    await page.locator('#username-input').fill(uniqueUser);
-    await page.locator('#password-input').fill('SecurePass123!');
+    await page.waitForSelector('[data-testid="login-card"]');
+    await page.getByTestId('login-username-input').fill(uniqueUser);
+    await page.getByTestId('login-password-input').fill('SecurePass123!');
     await page.getByTestId('login-submit-button').click();
 
-    // Identity Welcome
+    // Identity Welcome - Wait for hydration and dashboard load
+    await page.waitForSelector('[data-testid="auth-loading"]', { state: 'detached' });
     await expect(page.getByTestId('welcome-message')).toContainText(uniqueUser, { timeout: 30000 });
 
     // 4. Settings: i18n & Theme Hardening
     await page.goto('/settings');
+    await page.waitForLoadState('networkidle');
     await page.locator('.p-selectbutton >> text=Español').click();
     await expect(page.getByText('Configuración del Sistema')).toBeVisible();
 

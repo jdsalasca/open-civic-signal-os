@@ -16,7 +16,7 @@
         - form "Registration Form" [ref=e20]:
           - generic [ref=e22]:
             - generic [ref=e23]: 
-            - textbox "Username" [ref=e24]: user_1771551572257
+            - textbox "Username" [ref=e24]: user_1771552164945
             - generic: Username
           - generic [ref=e26]:
             - generic [ref=e27]: 

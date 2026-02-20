@@ -31,17 +31,17 @@ export function MetricsGrid({ signals }: Props) {
       {metrics.map((m) => (
         <div key={m.title} className="col-12 sm:col-6 lg:col-3 flex">
           <Card 
-            className={`shadow-8 border-1 border-gray-800 bg-gray-900 metric-card-inner w-full transition-transform transition-duration-200 hover:scale-105 ${m.border}`}
+            className={`shadow-8 border-1 border-white-alpha-10 bg-surface metric-card-inner w-full transition-transform transition-duration-200 hover:scale-105 ${m.border}`}
             data-testid={`metric-card-${m.id}`}
             role="article"
             aria-label={`${m.title}: ${m.value}`}
           >
             <div className="flex justify-content-between align-items-center">
               <div className="flex flex-column gap-1">
-                <span className="text-gray-400 font-black uppercase tracking-widest" style={{ fontSize: '10px' }} aria-hidden="true">{m.title}</span>
+                <span className="text-muted font-black uppercase tracking-widest" style={{ fontSize: '10px' }} aria-hidden="true">{m.title}</span>
                 <div className={`text-4xl font-black ${m.color} tracking-tight`} data-testid={`metric-value-${m.id}`}>{m.value}</div>
               </div>
-              <div className="flex align-items-center justify-content-center bg-gray-800 border-round-xl shadow-4 border-1 border-white-alpha-10" style={{ width: '3.5rem', height: '3rem' }} aria-hidden="true">
+              <div className="flex align-items-center justify-content-center bg-white-alpha-5 border-round-xl shadow-4 border-1 border-white-alpha-10" style={{ width: '3.5rem', height: '3rem' }} aria-hidden="true">
                 <i className={`pi ${m.icon} text-xl ${m.color} font-bold`}></i>
               </div>
             </div>

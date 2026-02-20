@@ -83,11 +83,11 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
     );
     return (
       <div className="flex flex-column py-1 overflow-hidden" data-testid={`signal-title-${rowData.id?.substring(0,8)}`}>
-        <span className="font-bold text-white text-base mb-1 hover:text-cyan-400 transition-colors text-overflow-ellipsis overflow-hidden white-space-nowrap">
+        <span className="font-bold text-main text-base mb-1 hover:text-cyan-400 transition-colors text-overflow-ellipsis overflow-hidden white-space-nowrap">
           {rowData.title}
         </span>
         <div className="flex align-items-center gap-2">
-          <span className="text-xs text-gray-500 font-mono font-bold uppercase tracking-widest">{t('signals.ref')}: {rowData.id?.substring(0,8)}</span>
+          <span className="text-xs text-muted font-mono font-bold uppercase tracking-widest">{t('signals.ref')}: {rowData.id?.substring(0,8)}</span>
         </div>
       </div>
     );
@@ -97,15 +97,15 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
     <div className="flex flex-column md:flex-row justify-content-between md:align-items-center gap-3 px-2 py-1">
       <div className="flex align-items-center gap-2">
         <i className="pi pi-bolt text-yellow-500 text-xl shadow-4"></i>
-        <h2 className="text-xl font-black m-0 text-white tracking-tight uppercase">{t('dashboard.feed_title')}</h2>
+        <h2 className="text-xl font-black m-0 text-main tracking-tight uppercase">{t('dashboard.feed_title')}</h2>
       </div>
       <span className="p-input-icon-left shadow-2 border-round-lg overflow-hidden">
-        <i className="pi pi-search text-gray-400" />
+        <i className="pi pi-search text-muted" />
         <InputText 
           value={globalFilterValue} 
           onChange={onGlobalFilterChange} 
           placeholder={t('dashboard.search_placeholder')} 
-          className="p-inputtext-sm w-full md:w-20rem bg-gray-900 border-none font-medium text-white" 
+          className="p-inputtext-sm w-full md:w-20rem bg-card border-none font-medium text-main" 
           data-testid="signal-search-input"
           aria-label={t('dashboard.search_placeholder')}
         />
@@ -115,11 +115,11 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
 
   const emptyTemplate = () => (
     <div className="empty-state-container my-6" data-testid="empty-signals-state">
-      <div className="bg-gray-900 border-circle inline-flex align-items-center justify-content-center mb-4 shadow-4" style={{ width: '100px', height: '100px' }}>
-        <i className="pi pi-search-plus text-4xl text-gray-600"></i>
+      <div className="bg-card border-circle inline-flex align-items-center justify-content-center mb-4 shadow-4" style={{ width: '100px', height: '100px' }}>
+        <i className="pi pi-search-plus text-4xl text-muted"></i>
       </div>
-      <h3 className="text-2xl font-black text-white m-0">{t('dashboard.empty_title')}</h3>
-      <p className="text-gray-400 max-w-20rem mx-auto mt-2 mb-5 font-medium line-height-3">
+      <h3 className="text-2xl font-black text-main m-0">{t('dashboard.empty_title')}</h3>
+      <p className="text-muted max-w-20rem mx-auto mt-2 mb-5 font-medium line-height-3">
         {t('dashboard.empty_desc')}
       </p>
       <Button 

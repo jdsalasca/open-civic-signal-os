@@ -7,9 +7,9 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
 
   test('Drawer menu layering and opacity on mobile', async ({ page }) => {
     // Login as admin to see all nav links
-    await page.goto(`${BASE_URL}/login`);
-    await page.locator('#username-input').fill('admin');
-    await page.locator('#password-input').fill('admin12345');
+    await page.goto('/login');
+    await page.getByTestId('login-username-input').fill('admin');
+    await page.getByTestId('login-password-input').fill('admin12345');
     await page.getByTestId('login-submit-button').click();
 
     await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 15000 });

@@ -7,9 +7,9 @@ test.describe('Auth Edge Cases (P1)', () => {
     const uniqueUser = `user_${Date.now()}`;
 
     await page.goto('/register');
-    await page.locator('#username-input').fill(uniqueUser);
-    await page.locator('#email-input').fill(duplicateEmail);
-    await page.locator('#password-input').fill('SecurePass123!');
+    await page.getByTestId('register-username-input').fill(uniqueUser);
+    await page.getByTestId('register-email-input').fill(duplicateEmail);
+    await page.getByTestId('register-password-input').fill('SecurePass123!');
     
     // Trigger registration
     await page.getByTestId('register-submit-button').click();

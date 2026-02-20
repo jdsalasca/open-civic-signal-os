@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation:
+    - generic:
+      - link "SignalOS":
+        - /url: /
+        - generic: SignalOS
+  - main [ref=e4]:
+    - generic [ref=e8]:
+      - generic [ref=e10]: Join Signal OS
+      - generic [ref=e12]: Create your citizen account
+      - form "Registration Form" [ref=e14]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: 
+          - textbox "Username" [ref=e18]: user_1771552165063
+          - generic: Username
+        - generic [ref=e20]:
+          - generic [ref=e21]: 
+          - textbox "Email Address" [ref=e22]: admin-signalos@yopmail.com
+          - generic: Email Address
+        - generic [ref=e24]:
+          - generic [ref=e26]:
+            - textbox "Password" [ref=e27]: SecurePass123!
+            - switch "Show Password" [checked] [ref=e29] [cursor=pointer]
+          - generic: Password
+        - generic [ref=e31]:
+          - generic [ref=e32]: 
+          - generic [ref=e33]: "Default Security Clearance: Citizen"
+        - button "Submit Registration" [active] [ref=e34] [cursor=pointer]:
+          - generic [ref=e35]: Create Account
+        - paragraph [ref=e36]:
+          - text: Already a member?
+          - link "Sign in here" [ref=e37] [cursor=pointer]:
+            - /url: /login
+  - contentinfo:
+    - generic:
+      - generic: 
+      - generic: Global Governance Standard
+    - generic: © 2026 Open Civic Signal OS. Protocol v0.3.0-hardened
+    - generic:
+      - generic: 
+      - generic: 
+```

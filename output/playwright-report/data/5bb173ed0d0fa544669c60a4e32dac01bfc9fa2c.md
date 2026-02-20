@@ -20,7 +20,7 @@
       - text: 
       - generic [ref=e15]:
         - generic [ref=e16]:
-          - generic [ref=e17]: qa_expert_1771551572215
+          - generic [ref=e17]: qa_expert_1771552165005
           - generic [ref=e18]: CITIZEN
         - generic [ref=e20]: Q
         - button "Cerrar Sesión" [ref=e21] [cursor=pointer]:
@@ -32,24 +32,24 @@
           - generic [ref=e26]:
             - generic [ref=e27]: Inteligencia en Vivo
             - generic [ref=e28]: •
-            - generic [ref=e29]: Bienvenido de nuevo, qa_expert_1771551572215
+            - generic [ref=e29]: Bienvenido de nuevo, qa_expert_1771552165005
           - heading "Perspectivas de Gobierno" [level=1] [ref=e30]
           - paragraph [ref=e31]: Seguimiento en tiempo real de la priorización y resolución de señales comunitarias.
         - button "Reportar Incidencia" [ref=e33] [cursor=pointer]:
           - generic: 
           - generic [ref=e34]: Reportar Incidencia
       - region "Civic Metrics Overview" [ref=e35]:
-        - 'article "Total de Señales: 1" [ref=e37]':
+        - 'article "Total de Señales: 2" [ref=e37]':
           - generic [ref=e40]:
             - generic [ref=e41]:
               - generic [ref=e42]: Total de Señales
-              - generic [ref=e43]: "1"
+              - generic [ref=e43]: "2"
             - generic [ref=e45]: 
-        - 'article "Nuevos Reportes: 1" [ref=e47]':
+        - 'article "Nuevos Reportes: 2" [ref=e47]':
           - generic [ref=e50]:
             - generic [ref=e51]:
               - generic [ref=e52]: Nuevos Reportes
-              - generic [ref=e53]: "1"
+              - generic [ref=e53]: "2"
             - generic [ref=e55]: 
         - 'article "Bajo Análisis: 0" [ref=e57]':
           - generic [ref=e60]:
@@ -106,43 +106,65 @@
                     - generic [ref=e140]: "166"
                 - cell "" [ref=e144]:
                   - generic [ref=e145]: 
-          - generic [ref=e146]:
+              - 'row "Mejora de Alumbrado Público REF: eaa143ac Infraestructura NEW Puntaje: 166 " [ref=e146] [cursor=pointer]':
+                - 'cell "Mejora de Alumbrado Público REF: eaa143ac" [ref=e147]':
+                  - generic [ref=e148]:
+                    - generic [ref=e149]: Mejora de Alumbrado Público
+                    - generic [ref=e151]: "REF: eaa143ac"
+                - cell "Infraestructura" [ref=e152]
+                - cell "NEW" [ref=e153]:
+                  - generic [ref=e156]: NEW
+                - 'cell "Puntaje: 166" [ref=e157]':
+                  - 'group "Puntaje: 166" [ref=e158]':
+                    - generic [ref=e159]: "166"
+                - cell "" [ref=e163]:
+                  - generic [ref=e164]: 
+          - generic [ref=e165]:
             - button "First Page" [disabled]:
               - img
             - button "Previous Page" [disabled]:
               - img
-            - button "Page 1" [ref=e148] [cursor=pointer]: "1"
+            - button "Page 1" [ref=e167] [cursor=pointer]: "1"
             - button "Next Page" [disabled]:
               - img
             - button "Last Page" [disabled]:
               - img
-        - generic [ref=e150]:
-          - generic [ref=e152]:
-            - generic [ref=e153]: Distribución de Señales
-            - img [ref=e156]
-          - generic [ref=e158]:
-            - generic [ref=e159]: Transmisión Semanal
-            - generic [ref=e162]:
-              - generic [ref=e163]: "01"
-              - generic [ref=e164]:
-                - heading "Mejora de Alumbrado Público" [level=4] [ref=e165]
-                - generic [ref=e166]:
-                  - generic [ref=e167]: "166"
-                  - generic [ref=e168]: •
-                  - generic [ref=e169]: Infraestructura
+        - generic [ref=e169]:
           - generic [ref=e171]:
-            - generic [ref=e172]: Apoyo Ciudadano
-            - generic [ref=e173]:
-              - paragraph [ref=e174]: Sus votos y reportes impactan directamente en la prioridad algorítmica de su comunidad.
-              - generic [ref=e175]:
-                - generic [ref=e176]: 
-                - generic [ref=e177]: "Verificación Ciudadana: Activa"
-  - contentinfo [ref=e178]:
-    - generic [ref=e179]:
-      - generic [ref=e180]: 
-      - generic [ref=e181]: Estándar Global de Gobernanza
-    - generic [ref=e182]: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
-    - generic [ref=e183]:
-      - generic [ref=e184] [cursor=pointer]: 
-      - generic [ref=e185] [cursor=pointer]: 
+            - generic [ref=e172]: Distribución de Señales
+            - img [ref=e175]
+          - generic [ref=e177]:
+            - generic [ref=e178]: Transmisión Semanal
+            - generic [ref=e180]:
+              - generic [ref=e181]:
+                - generic [ref=e182]: "01"
+                - generic [ref=e183]:
+                  - heading "Mejora de Alumbrado Público" [level=4] [ref=e184]
+                  - generic [ref=e185]:
+                    - generic [ref=e186]: "166"
+                    - generic [ref=e187]: •
+                    - generic [ref=e188]: Infraestructura
+              - generic [ref=e189]:
+                - generic [ref=e190]: "02"
+                - generic [ref=e191]:
+                  - heading "Mejora de Alumbrado Público" [level=4] [ref=e192]
+                  - generic [ref=e193]:
+                    - generic [ref=e194]: "166"
+                    - generic [ref=e195]: •
+                    - generic [ref=e196]: Infraestructura
+          - generic [ref=e198]:
+            - generic [ref=e199]: Apoyo Ciudadano
+            - generic [ref=e200]:
+              - paragraph [ref=e201]: Sus votos y reportes impactan directamente en la prioridad algorítmica de su comunidad.
+              - generic [ref=e202]:
+                - generic [ref=e203]: 
+                - generic [ref=e204]: "Verificación Ciudadana: Activa"
+  - contentinfo [ref=e205]:
+    - generic [ref=e206]:
+      - generic [ref=e207]: 
+      - generic [ref=e208]: Estándar Global de Gobernanza
+    - generic [ref=e209]: © 2026 Open Civic Signal OS. Protocolo v0.3.0-hardened
+    - generic [ref=e210]:
+      - generic [ref=e211] [cursor=pointer]: 
+      - generic [ref=e212] [cursor=pointer]: 
 ```
