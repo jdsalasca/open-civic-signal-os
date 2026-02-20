@@ -1,6 +1,9 @@
 package org.opencivic.signalos.web;
 
 import jakarta.validation.Valid;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -51,19 +54,22 @@ public class SignalController {
     private final UserRepository userRepository;
     private final SignalRepository signalRepository;
     private final CommunityAccessService communityAccessService;
+    private final MeterRegistry meterRegistry;
 
     public SignalController(
         PrioritizationService prioritizationService,
         ExportService exportService,
         UserRepository userRepository,
         SignalRepository signalRepository,
-        CommunityAccessService communityAccessService
+        CommunityAccessService communityAccessService,
+        MeterRegistry meterRegistry
     ) {
         this.prioritizationService = prioritizationService;
         this.exportService = exportService;
         this.userRepository = userRepository;
         this.signalRepository = signalRepository;
         this.communityAccessService = communityAccessService;
+        this.meterRegistry = meterRegistry;
     }
 
     @GetMapping("/prioritized")
@@ -72,14 +78,40 @@ public class SignalController {
         Authentication authentication,
         @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable
     ) {
+        String scope = communityId == null ? "global" : "community";
+        Timer.Sample latencySample = Timer.start(meterRegistry);
+        String status = "success";
         validateCommunityScope(authentication, communityId);
         Pageable sanitized = PageRequest.of(
             pageable.getPageNumber(),
             Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
             pageable.getSort()
         );
-        return prioritizationService.getPrioritizedSignals(sanitized, communityId)
-            .map(this::mapToResponse);
+        try {
+            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId)
+                .map(this::mapToResponse);
+
+            meterRegistry.counter("signalos.prioritized.requests.total", "scope", scope).increment();
+            DistributionSummary.builder("signalos.prioritized.result.size")
+                .baseUnit("signals")
+                .tag("scope", scope)
+                .register(meterRegistry)
+                .record(response.getNumberOfElements());
+
+            return response;
+        } catch (RuntimeException ex) {
+            status = "error";
+            meterRegistry.counter("signalos.prioritized.requests.errors.total", "scope", scope).increment();
+            throw ex;
+        } finally {
+            latencySample.stop(
+                Timer.builder("signalos.prioritized.latency")
+                    .description("Latency for prioritized feed retrieval")
+                    .tag("scope", scope)
+                    .tag("status", status)
+                    .register(meterRegistry)
+            );
+        }
     }
 
     @GetMapping("/{id}")
