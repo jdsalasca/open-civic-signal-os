@@ -9,6 +9,7 @@ const resources = {
         "loading": "Loading...",
         "error": "Error",
         "success": "Success",
+        "required": "This field is required.",
         "save": "Save",
         "cancel": "Cancel",
         "discard": "Discard",
@@ -105,6 +106,7 @@ const resources = {
       "report": {
         "title": "Report Community Signal",
         "desc": "Your input will be processed by our priority algorithm to optimize civic response.",
+        "community_required": "Select a community in the top navigation before reporting a signal.",
         "issue_title": "Issue Title",
         "issue_title_placeholder": "e.g. Broken water pipe in Main St.",
         "scale": "Scale (Estimated Citizens)",
@@ -217,6 +219,7 @@ const resources = {
         "loading": "Cargando...",
         "error": "Error",
         "success": "Éxito",
+        "required": "Este campo es obligatorio.",
         "save": "Guardar",
         "cancel": "Cancelar",
         "discard": "Descartar",
@@ -313,6 +316,7 @@ const resources = {
       "report": {
         "title": "Reportar Señal Comunitaria",
         "desc": "Su entrada será procesada por nuestro algoritmo para optimizar la respuesta cívica.",
+        "community_required": "Seleccione una comunidad en la navegación superior antes de reportar una señal.",
         "issue_title": "Título del Problema",
         "issue_title_placeholder": "ej. Tubería rota en Calle Principal",
         "scale": "Escala (Ciudadanos Estimados)",
