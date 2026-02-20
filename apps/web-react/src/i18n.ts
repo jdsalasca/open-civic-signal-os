@@ -60,6 +60,8 @@ const resources = {
         "activate_title": "Activate Identity",
         "activate_subtitle": "Enter the 6-digit code sent to your email",
         "verify_button": "Verify and Activate",
+        "resend_button": "Resend Verification Code",
+        "code_resent": "Verification code resent to your email.",
         "verify_protocol": "Identity verification is a mandatory protocol for Signal OS access.",
         "verified_success": "Account activated! You can now log in."
       },
@@ -243,6 +245,8 @@ const resources = {
         "activate_title": "Activar Identidad",
         "activate_subtitle": "Ingrese el código de 6 dígitos enviado a su correo",
         "verify_button": "Verificar y Activar",
+        "resend_button": "Reenviar Código de Verificación",
+        "code_resent": "Código de verificación reenviado a su correo.",
         "verify_protocol": "La verificación de identidad es un protocolo obligatorio para acceder a Signal OS.",
         "verified_success": "¡Cuenta activada! Ya puede iniciar sesión."
       },

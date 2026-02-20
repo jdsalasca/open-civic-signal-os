@@ -36,6 +36,16 @@ export function Verify() {
     }
   };
 
+  const handleResend = async () => {
+    try {
+      await apiClient.post("auth/resend-code", { username });
+      toast.success(t('auth.code_resent') || "Verification code resent to your email.");
+    } catch (err: unknown) {
+      const apiErr = err as { friendlyMessage?: string };
+      toast.error(apiErr.friendlyMessage || "Failed to resend code.");
+    }
+  };
+
   return (
     <Layout authMode>
       <div className="flex justify-content-center align-items-center mt-8">
@@ -65,6 +75,17 @@ export function Verify() {
               className="p-button-primary mt-4 py-3 font-bold" 
               loading={isSubmitting} 
             />
+            
+            <div className="text-center mt-4">
+              <Button 
+                type="button" 
+                label={t('auth.resend_button') || "Resend Verification Code"} 
+                link 
+                className="text-cyan-500 font-bold p-0" 
+                onClick={handleResend}
+              />
+            </div>
+
             <p className="text-center mt-4 text-xs text-gray-500">
               {t('auth.verify_protocol')}
             </p>

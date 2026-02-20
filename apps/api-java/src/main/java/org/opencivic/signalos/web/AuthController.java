@@ -89,6 +89,29 @@ public class AuthController {
         ));
     }
 
+    @PostMapping("/resend-code")
+    public ResponseEntity<Map<String, String>> resendCode(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UnauthorizedActionException("Identity not found."));
+
+        if (user.isVerified()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Account is already verified."));
+        }
+
+        // Reuse existing or generate new (using the same logic as register)
+        String code = user.getVerificationCode();
+        if (code == null || code.isBlank()) {
+            code = "123456"; // Default for dev/test as per register logic
+            user.setVerificationCode(code);
+            userRepository.save(user);
+        }
+
+        emailService.sendVerificationCode(user.getEmail(), user.getUsername(), code);
+
+        return ResponseEntity.ok(Map.of("message", "Verification code resent successfully."));
+    }
+
     @PostMapping("/verify")
     public ResponseEntity<Map<String, String>> verify(@RequestBody Map<String, String> body) {
         String username = body.get("username");

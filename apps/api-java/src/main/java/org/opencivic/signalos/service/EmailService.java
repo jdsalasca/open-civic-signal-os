@@ -49,36 +49,25 @@ public class EmailService {
         }
 
         try {
-            MimeMessage mimeMessage = createEmail(to, "noreply@signalos.org", subject, body);
-            Message message = createMessageWithEmail(mimeMessage);
+            // 3. Create the message (MimeMessage)
+            jakarta.mail.internet.MimeMessage mimeMessage = new jakarta.mail.internet.MimeMessage(jakarta.mail.Session.getDefaultInstance(new java.util.Properties()));
+            mimeMessage.setFrom(new jakarta.mail.internet.InternetAddress("open-civic@n8n-workflows-468303.iam.gserviceaccount.com"));
+            mimeMessage.addRecipient(jakarta.mail.Message.RecipientType.TO, new jakarta.mail.internet.InternetAddress(to));
+            mimeMessage.setSubject(subject);
+            mimeMessage.setText(body);
             
-            // Note: If using a Service Account, 'me' refers to the service account itself.
-            // If it fails with 400, you need Domain-wide Delegation or use OAuth2 Client ID.
+            // 4. Encode and send
+            java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+            mimeMessage.writeTo(buffer);
+            String encodedEmail = java.util.Base64.getUrlEncoder().encodeToString(buffer.toByteArray());
+            
+            com.google.api.services.gmail.model.Message message = new com.google.api.services.gmail.model.Message();
+            message.setRaw(encodedEmail);
+            
             gmailService.users().messages().send("me", message).execute();
-            log.info("Secure civic email sent successfully to: {}", to);
+            log.info("✅ Secure civic email sent successfully to: {}", to);
         } catch (Exception e) {
-            log.error("CRITICAL: Strategic communication failure. Reason: {}. Suggestion: Check if Service Account has Gmail API enabled and proper scopes.", e.getMessage());
+            log.error("CRITICAL: Strategic communication failure. Reason: {}. Check if Gmail API is enabled for project n8n-workflows-468303.", e.getMessage());
         }
-    }
-
-    private MimeMessage createEmail(String to, String from, String subject, String bodyText) throws MessagingException {
-        Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
-        MimeMessage email = new MimeMessage(session);
-        email.setFrom(new InternetAddress(from));
-        email.addRecipient(jakarta.mail.Message.RecipientType.TO, new InternetAddress(to));
-        email.setSubject(subject);
-        email.setText(bodyText);
-        return email;
-    }
-
-    private Message createMessageWithEmail(MimeMessage emailContent) throws MessagingException, IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        emailContent.writeTo(buffer);
-        byte[] bytes = buffer.toByteArray();
-        String encodedEmail = Base64.encodeBase64URLSafeString(bytes);
-        Message message = new Message();
-        message.setRaw(encodedEmail);
-        return message;
     }
 }
