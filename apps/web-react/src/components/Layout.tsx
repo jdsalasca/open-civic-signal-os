@@ -5,8 +5,10 @@ import { Avatar } from "primereact/avatar";
 import { Toast } from "primereact/toast";
 import { Sidebar } from "primereact/sidebar";
 import { useAuthStore } from "../store/useAuthStore";
+import { useCommunityStore } from "../store/useCommunityStore";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { Dropdown } from "primereact/dropdown";
 
 type Props = {
   children: ReactNode;
@@ -18,12 +20,28 @@ export function Layout({ children, authMode = false }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, activeRole, userName, logout } = useAuthStore();
+  const { memberships, activeCommunityId, setMemberships, setActiveCommunityId } = useCommunityStore();
   const toastRef = useRef<Toast>(null);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
   useEffect(() => {
     setMobileMenuVisible(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const loadMemberships = async () => {
+      if (!isLoggedIn) return;
+      try {
+        const res = await apiClient.get("communities/my");
+        if (res.status === 200) {
+          setMemberships(res.data || []);
+        }
+      } catch (err) {
+        console.warn("Failed to load community memberships", err);
+      }
+    };
+    loadMemberships();
+  }, [isLoggedIn, setMemberships]);
 
   const handleLogout = async () => {
     try {
@@ -45,7 +63,25 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.my_contributions'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
     { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && isStaff },
     { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
+    { label: 'Communities', to: '/communities', icon: 'pi pi-users', visible: isLoggedIn },
+    { label: 'Threads', to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
+    { label: 'Blog', to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
+    { label: 'Feed', to: '/communities/feed', icon: 'pi pi-list', visible: isLoggedIn },
   ];
+
+  const communityOptions = memberships.map((m) => ({
+    label: `${m.communityName} (${m.role})`,
+    value: m.communityId,
+  }));
+
+  const handleCommunitySwitch = async (communityId: string) => {
+    try {
+      await apiClient.post(`communities/${communityId}/switch`);
+      setActiveCommunityId(communityId);
+    } catch (err) {
+      console.warn("Community switch failed", err);
+    }
+  };
 
   return (
     <div className={`min-h-screen flex flex-column ${authMode ? 'auth-page' : ''}`}>
@@ -121,6 +157,16 @@ export function Layout({ children, authMode = false }: Props) {
         <div className="flex align-items-center gap-3">
           {!authMode && isLoggedIn && (
             <Button icon="pi pi-bars" text className="lg:hidden text-main p-0" onClick={() => setMobileMenuVisible(true)} aria-label={t('nav.open_navigation')} />
+          )}
+
+          {!authMode && isLoggedIn && communityOptions.length > 0 && (
+            <Dropdown
+              value={activeCommunityId || communityOptions[0].value}
+              options={communityOptions}
+              onChange={(e) => handleCommunitySwitch(e.value)}
+              placeholder="Select Community"
+              className="w-14rem hidden md:block"
+            />
           )}
 
           {!authMode && !isLoggedIn && (

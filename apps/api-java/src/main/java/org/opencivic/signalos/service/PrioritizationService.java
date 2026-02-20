@@ -12,8 +12,11 @@ import java.util.UUID;
 
 public interface PrioritizationService {
     Page<Signal> getPrioritizedSignals(Pageable pageable);
+    Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId);
     List<Signal> getTopUnresolved(int limit);
+    List<Signal> getTopUnresolved(int limit, UUID communityId);
     Optional<Signal> getSignalById(UUID id);
+    Optional<Signal> getSignalById(UUID id, UUID communityId);
     double calculateScore(Signal signal);
     ScoreBreakdown getBreakdown(Signal signal);
     Map<UUID, List<Signal>> findDuplicates();
@@ -23,7 +26,11 @@ public interface PrioritizationService {
     Page<Signal> getFlaggedSignals(Pageable pageable);
     
     Signal moderateSignal(UUID id, String action, String reason);
+    Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String username);
+    Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String username, UUID communityId);
     Signal saveSignal(Signal signal);
     Optional<Signal> updateStatus(UUID id, String newStatus);
+    Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId);
     Signal voteForSignal(UUID signalId, String username);
+    Signal voteForSignal(UUID signalId, String username, UUID communityId);
 }

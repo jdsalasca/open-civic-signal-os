@@ -38,13 +38,29 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Page<Signal> getPrioritizedSignals(Pageable pageable) {
-        return signalRepository.findByStatusNotIn(List.of("FLAGGED", "REJECTED"), pageable)
+        return getPrioritizedSignals(pageable, null);
+    }
+
+    @Override
+    public Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId) {
+        Page<Signal> basePage = communityId == null
+            ? signalRepository.findByStatusNotIn(List.of("FLAGGED", "REJECTED"), pageable)
+            : signalRepository.findByStatusNotInAndCommunityId(List.of("FLAGGED", "REJECTED"), communityId, pageable);
+        return basePage
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
     }
 
     @Override
     public List<Signal> getTopUnresolved(int limit) {
-        return signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, limit))
+        return getTopUnresolved(limit, null);
+    }
+
+    @Override
+    public List<Signal> getTopUnresolved(int limit, UUID communityId) {
+        List<Signal> baseSignals = communityId == null
+            ? signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, limit))
+            : signalRepository.findTopSignalsByStatusAndCommunityId("NEW", communityId, PageRequest.of(0, limit));
+        return baseSignals
                 .stream()
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)))
                 .collect(Collectors.toList());
@@ -52,7 +68,15 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Optional<Signal> getSignalById(UUID id) {
-        return signalRepository.findById(id)
+        return getSignalById(id, null);
+    }
+
+    @Override
+    public Optional<Signal> getSignalById(UUID id, UUID communityId) {
+        Optional<Signal> baseSignal = communityId == null
+            ? signalRepository.findById(id)
+            : signalRepository.findByIdAndCommunityId(id, communityId);
+        return baseSignal
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
     }
 
@@ -170,6 +194,43 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     }
 
     @Override
+    @Transactional
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String username) {
+        return createSignal(title, description, category, urgency, impact, affectedPeople, username, null);
+    }
+
+    @Override
+    @Transactional
+    public Signal createSignal(
+        String title,
+        String description,
+        String category,
+        int urgency,
+        int impact,
+        int affectedPeople,
+        String username,
+        UUID communityId
+    ) {
+        User author = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Author user not found: " + username));
+
+        Signal signal = new Signal(
+            UUID.randomUUID(), title, description, category,
+            urgency, impact, affectedPeople,
+            0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), java.time.LocalDateTime.now(), communityId
+        );
+        
+        // Ensure breakdown is calculated and persisted
+        ScoreBreakdown breakdown = getBreakdown(signal);
+        double score = breakdown.urgency() + breakdown.impact() + breakdown.affectedPeople() + breakdown.communityVotes();
+        
+        signal.setScoreBreakdown(breakdown);
+        signal.setPriorityScore(score);
+        
+        return saveSignal(signal);
+    }
+
+    @Override
     public Signal saveSignal(Signal signal) {
         if (signal.getUrgency() == 5 && signal.getAffectedPeople() < 5) {
             log.warn("Auto-flagging signal due to high urgency/low impact ratio: {}", signal.getTitle());
@@ -182,8 +243,16 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus) {
+        return updateStatus(id, newStatus, null);
+    }
+
+    @Override
+    @Transactional
+    public Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId) {
         log.info("Updating status for signal {}. Target: {}", id, newStatus);
-        Signal signal = signalRepository.findById(id)
+        Signal signal = (communityId == null
+            ? signalRepository.findById(id)
+            : signalRepository.findByIdAndCommunityId(id, communityId))
                 .orElseThrow(() -> new ResourceNotFoundException("Signal with ID " + id + " not found."));
 
         SignalStatus current = SignalStatus.valueOf(signal.getStatus());
@@ -201,10 +270,18 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     @Transactional
     public Signal voteForSignal(UUID signalId, String username) {
+        return voteForSignal(signalId, username, null);
+    }
+
+    @Override
+    @Transactional
+    public Signal voteForSignal(UUID signalId, String username, UUID communityId) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
-        
-        Signal signal = signalRepository.findById(signalId)
+
+        Signal signal = (communityId == null
+            ? signalRepository.findById(signalId)
+            : signalRepository.findByIdAndCommunityId(signalId, communityId))
                 .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + signalId));
 
         if (voteRepository.findByUserIdAndSignalId(user.getId(), signalId).isPresent()) {

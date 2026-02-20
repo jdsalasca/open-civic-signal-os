@@ -17,6 +17,10 @@ const Register = lazy(() => import("./views/Register").then(m => ({ default: m.R
 const Verify = lazy(() => import("./views/Verify").then(m => ({ default: m.Verify })));
 const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
 const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
+const Communities = lazy(() => import("./views/Communities").then(m => ({ default: m.Communities })));
+const CommunityThreads = lazy(() => import("./views/CommunityThreads").then(m => ({ default: m.CommunityThreads })));
+const CommunityBlog = lazy(() => import("./views/CommunityBlog").then(m => ({ default: m.CommunityBlog })));
+const CommunityFeed = lazy(() => import("./views/CommunityFeed").then(m => ({ default: m.CommunityFeed })));
 const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
 const Unauthorized = lazy(() => import("./views/Unauthorized").then(m => ({ default: m.Unauthorized })));
 
@@ -68,6 +72,10 @@ export function App() {
               <Route path="/signal/:id" element={<SignalDetail />} />
               <Route path="/mine" element={<MySignals />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/communities" element={<Communities />} />
+              <Route path="/communities/threads" element={<CommunityThreads />} />
+              <Route path="/communities/blog" element={<CommunityBlog />} />
+              <Route path="/communities/feed" element={<CommunityFeed />} />
             </Route>
 
             <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>

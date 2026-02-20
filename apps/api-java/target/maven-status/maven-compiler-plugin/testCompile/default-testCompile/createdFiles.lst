@@ -1,0 +1,6 @@
+org\opencivic\signalos\service\ScoringRegressionTest.class
+org\opencivic\signalos\service\PrioritizationServiceIT.class
+org\opencivic\signalos\security\CommunityRBAC_IT.class
+org\opencivic\signalos\security\SecurityRBAC_IT.class
+org\opencivic\signalos\service\SignalLifecycleIT.class
+org\opencivic\signalos\HealthCheckTest.class

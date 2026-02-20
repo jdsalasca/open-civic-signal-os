@@ -25,7 +25,7 @@ public class EmailService {
     @Autowired
     private SpringTemplateEngine templateEngine;
 
-    @Value("${spring.mail.username}")
+    @Value("${spring.mail.username:no-reply@localhost}")
     private String fromEmail;
 
     @Async

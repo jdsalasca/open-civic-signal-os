@@ -43,6 +43,7 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         set({ accessToken: null, userName: null, activeRole: 'GUEST', rawRoles: [], isLoggedIn: false });
         localStorage.removeItem('auth-storage');
+        localStorage.removeItem('community-storage');
       },
       updateAccessToken: (token) => set({ 
         accessToken: token,

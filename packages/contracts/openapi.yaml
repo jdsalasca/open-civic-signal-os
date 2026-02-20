@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Open Civic Signal OS API
-  version: 0.1.0
+  version: 0.2.0
 paths:
   /api/health:
     get:
@@ -27,6 +27,12 @@ paths:
           schema:
             type: integer
             default: 20
+        - name: X-Community-Id
+          in: header
+          schema:
+            type: string
+            format: uuid
+          required: false
       responses:
         '200':
           description: Paginated prioritized list
@@ -37,6 +43,13 @@ paths:
   /api/signals/top-10:
     get:
       summary: Get top 10 unresolved civic problems
+      parameters:
+        - name: X-Community-Id
+          in: header
+          schema:
+            type: string
+            format: uuid
+          required: false
       responses:
         '200':
           description: List of top signals
@@ -58,6 +71,286 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Notification'
+  /api/communities:
+    get:
+      summary: List available communities
+      responses:
+        '200':
+          description: Community catalog
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Community'
+    post:
+      summary: Create community and auto-assign creator as coordinator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityRequest'
+      responses:
+        '200':
+          description: Created community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Community'
+  /api/communities/my:
+    get:
+      summary: Get memberships for current user
+      responses:
+        '200':
+          description: Membership list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityMembership'
+  /api/communities/{communityId}/join:
+    post:
+      summary: Join a community with selected role
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinCommunityRequest'
+      responses:
+        '200':
+          description: Membership created/returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityMembership'
+  /api/communities/{communityId}/memberships/{userId}/role:
+    patch:
+      summary: Update community role for a member (coordinator only)
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommunityRoleRequest'
+      responses:
+        '200':
+          description: Updated membership
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityMembership'
+        '403':
+          description: Forbidden
+  /api/communities/{communityId}/switch:
+    post:
+      summary: Validate and activate community context
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Context activated
+        '403':
+          description: User not member of community
+  /api/community/threads:
+    get:
+      summary: List inter-community threads
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Thread list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityThread'
+    post:
+      summary: Create a cross-community thread linked to an optional signal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityThreadRequest'
+      responses:
+        '200':
+          description: Thread created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityThread'
+  /api/community/threads/{threadId}/messages:
+    post:
+      summary: Add message to thread
+      parameters:
+        - in: path
+          name: threadId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityThreadMessageRequest'
+      responses:
+        '200':
+          description: Message created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityThreadMessage'
+  /api/community/threads/{threadId}/messages/{messageId}/moderate:
+    patch:
+      summary: Hide or unhide thread message
+      parameters:
+        - in: path
+          name: threadId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerateThreadMessageRequest'
+      responses:
+        '200':
+          description: Message moderated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityThreadMessage'
+        '403':
+          description: Forbidden
+  /api/community/blog:
+    get:
+      summary: List community public-servant updates
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Blog timeline
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityBlogPost'
+    post:
+      summary: Create community blog update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityBlogPostRequest'
+      responses:
+        '200':
+          description: Blog post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityBlogPost'
+        '403':
+          description: Forbidden
+  /api/community/blog/{postId}:
+    put:
+      summary: Update community blog post
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommunityBlogPostRequest'
+      responses:
+        '200':
+          description: Blog post updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityBlogPost'
+  /api/community/feed:
+    get:
+      summary: Unified cross-community feed
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: days
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        '200':
+          description: Typed feed list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityFeedItem'
 components:
   schemas:
     Notification:
@@ -129,4 +422,230 @@ components:
           type: integer
         number:
           type: integer
-
+    Community:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CommunityMembership:
+      type: object
+      required: [userId, communityId, communityName, role]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        communitySlug:
+          type: string
+        role:
+          type: string
+          enum: [MEMBER, MODERATOR, COORDINATOR, PUBLIC_SERVANT_LIAISON]
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+    CommunityThreadMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        threadId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        sourceCommunityId:
+          type: string
+          format: uuid
+        content:
+          type: string
+        hidden:
+          type: boolean
+        moderationReason:
+          type: string
+        hiddenBy:
+          type: string
+          format: uuid
+        hiddenAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    CommunityThread:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sourceCommunityId:
+          type: string
+          format: uuid
+        targetCommunityId:
+          type: string
+          format: uuid
+        relatedSignalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityThreadMessage'
+    CommunityBlogPost:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorUsername:
+          type: string
+        authorRole:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        statusTag:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CommunityFeedItem:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [signal, blog, thread-update]
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        summary:
+          type: string
+        happenedAt:
+          type: string
+          format: date-time
+        freshness:
+          type: string
+    CreateCommunityRequest:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+    JoinCommunityRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [MEMBER, MODERATOR, COORDINATOR, PUBLIC_SERVANT_LIAISON]
+    UpdateCommunityRoleRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [MEMBER, MODERATOR, COORDINATOR, PUBLIC_SERVANT_LIAISON]
+    CreateCommunityThreadRequest:
+      type: object
+      required: [sourceCommunityId, targetCommunityId, title]
+      properties:
+        sourceCommunityId:
+          type: string
+          format: uuid
+        targetCommunityId:
+          type: string
+          format: uuid
+        relatedSignalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+    CreateCommunityThreadMessageRequest:
+      type: object
+      required: [sourceCommunityId, content]
+      properties:
+        sourceCommunityId:
+          type: string
+          format: uuid
+        content:
+          type: string
+    ModerateThreadMessageRequest:
+      type: object
+      required: [reason]
+      properties:
+        hidden:
+          type: boolean
+        reason:
+          type: string
+    CreateCommunityBlogPostRequest:
+      type: object
+      required: [communityId, title, content, statusTag]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        statusTag:
+          type: string
+    UpdateCommunityBlogPostRequest:
+      type: object
+      required: [title, content, statusTag]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        statusTag:
+          type: string

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/useAuthStore';
+import { useCommunityStore } from '../store/useCommunityStore';
 
 // UX-001: Centralized baseURL
 const apiClient = axios.create({
@@ -15,6 +16,11 @@ apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  const activeCommunityId = useCommunityStore.getState().activeCommunityId;
+  if (activeCommunityId) {
+    config.headers['X-Community-Id'] = activeCommunityId;
   }
   
   // UX-001: Safety - Prevent double prefix if absolute path is passed

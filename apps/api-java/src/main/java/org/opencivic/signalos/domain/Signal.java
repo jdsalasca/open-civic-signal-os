@@ -21,7 +21,13 @@ public class Signal {
     private int communityVotes;
     private double priorityScore;
     
-    @Transient
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "urgency", column = @Column(name = "score_urgency")),
+        @AttributeOverride(name = "impact", column = @Column(name = "score_impact")),
+        @AttributeOverride(name = "affectedPeople", column = @Column(name = "score_affected_people")),
+        @AttributeOverride(name = "communityVotes", column = @Column(name = "score_community_votes"))
+    })
     private ScoreBreakdown scoreBreakdown;
     
     private String status;
@@ -34,12 +40,19 @@ public class Signal {
     
     @Column(name = "author_id")
     private UUID authorId;
+
+    @Column(name = "community_id")
+    private UUID communityId;
     
     private LocalDateTime createdAt;
 
     public Signal() {}
 
     public Signal(UUID id, String title, String description, String category, int urgency, int impact, int affectedPeople, int communityVotes, double priorityScore, ScoreBreakdown scoreBreakdown, String status, List<UUID> mergedFrom, UUID authorId, LocalDateTime createdAt) {
+        this(id, title, description, category, urgency, impact, affectedPeople, communityVotes, priorityScore, scoreBreakdown, status, mergedFrom, authorId, createdAt, null);
+    }
+
+    public Signal(UUID id, String title, String description, String category, int urgency, int impact, int affectedPeople, int communityVotes, double priorityScore, ScoreBreakdown scoreBreakdown, String status, List<UUID> mergedFrom, UUID authorId, LocalDateTime createdAt, UUID communityId) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -54,6 +67,7 @@ public class Signal {
         this.mergedFrom = mergedFrom != null ? mergedFrom : new ArrayList<>();
         this.authorId = authorId;
         this.createdAt = createdAt;
+        this.communityId = communityId;
     }
 
     public UUID getId() { return id; }
@@ -69,6 +83,7 @@ public class Signal {
     public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
     public String getModerationReason() { return moderationReason; }
     public UUID getAuthorId() { return authorId; }
+    public UUID getCommunityId() { return communityId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     
     public List<UUID> getMergedFrom() { 
@@ -91,6 +106,7 @@ public class Signal {
     public void setCommunityVotes(int communityVotes) { this.communityVotes = communityVotes; }
     public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }
     public void setAuthorId(UUID authorId) { this.authorId = authorId; }
+    public void setCommunityId(UUID communityId) { this.communityId = communityId; }
 
     public Signal withScore(double score, ScoreBreakdown breakdown) {
         this.priorityScore = score;
