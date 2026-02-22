@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Avatar } from "primereact/avatar";
@@ -14,6 +13,7 @@ import { CivicButton } from "../components/ui/CivicButton";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicField } from "../components/ui/CivicField";
 import { CivicEngagement } from "../components/CivicEngagement";
+import { CivicSelect } from "../components/ui/CivicSelect";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -118,12 +118,11 @@ export function CommunityBlog() {
                   </CivicField>
 
                   <CivicField label="Operation Status">
-                    <Dropdown
+                    <CivicSelect
                       value={statusTag}
                       options={statusTagOptions}
                       onChange={(e) => setStatusTag(e.value)}
-                      className="w-full bg-black-alpha-20"
-                      appendTo={document.body}
+                      className="w-full"
                     />
                   </CivicField>
 

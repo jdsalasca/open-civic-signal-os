@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Dropdown } from "primereact/dropdown";
 import { Slider } from "primereact/slider";
 import { classNames } from "primereact/utils";
 import { Layout } from "../components/Layout";
@@ -13,6 +12,8 @@ import { useCommunityStore } from "../store/useCommunityStore";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicField } from "../components/ui/CivicField";
+import { CivicSelect } from "../components/ui/CivicSelect";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -77,10 +78,7 @@ export function ReportSignal() {
   return (
     <Layout>
       <div className="animate-fade-up max-w-60rem mx-auto pb-8">
-        <div className="mb-8">
-          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">{t('report.title')}</h1>
-          <p className="text-secondary text-lg font-medium">{t('report.desc')}</p>
-        </div>
+        <CivicPageHeader title={t('report.title')} description={t('report.desc')} />
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid">
@@ -105,15 +103,14 @@ export function ReportSignal() {
                     <CivicField label={t('common.category')}>
                       <Controller name="category" control={control} rules={{ required: t('common.required') }} 
                         render={({ field }) => (
-                          <Dropdown
+                          <CivicSelect
                             value={field.value}
                             onChange={(e) => field.onChange(e.value)}
                             options={categories}
                             placeholder={t('common.select_category')}
                             inputId="report-category"
-                            className="w-full bg-black-alpha-20"
+                            className="w-full"
                             data-testid="report-category-dropdown"
-                            appendTo={document.body}
                             itemTemplate={(option) => (
                               <div className="flex align-items-center gap-2">
                                 <i className={`pi ${option.icon} text-brand-primary`}></i>

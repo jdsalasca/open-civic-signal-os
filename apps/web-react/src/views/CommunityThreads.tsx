@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
-import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputText } from "primereact/inputtext";
 import { Avatar } from "primereact/avatar";
@@ -12,6 +11,7 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicField } from "../components/ui/CivicField";
+import { CivicSelect } from "../components/ui/CivicSelect";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -131,7 +131,7 @@ export function CommunityThreads() {
                   />
                 </CivicField>
                 <CivicField label="Target Sector">
-                  <Dropdown
+                  <CivicSelect
                     value={targetCommunityId}
                     options={targetOptions}
                     onChange={(e) => setTargetCommunityId(e.value)}
@@ -140,7 +140,6 @@ export function CommunityThreads() {
                     disabled={!activeCommunityId || targetOptions.length === 0}
                     emptyMessage="Join other communities to sync"
                     data-testid="thread-target-dropdown"
-                    appendTo={document.body}
                   />
                 </CivicField>
                 <CivicButton
@@ -158,7 +157,7 @@ export function CommunityThreads() {
             <CivicCard title="Transmission Unit">
               <div className="flex flex-column gap-2">
                 <CivicField label="Active Thread">
-                  <Dropdown
+                  <CivicSelect
                     value={selectedThreadId}
                     options={threads.map((thread) => ({ label: thread.title, value: thread.id }))}
                     onChange={(e) => setSelectedThreadId(e.value)}
@@ -166,7 +165,6 @@ export function CommunityThreads() {
                     className="w-full bg-black-alpha-20"
                     disabled={!activeCommunityId || threads.length === 0}
                     data-testid="thread-select-dropdown"
-                    appendTo={document.body}
                   />
                 </CivicField>
                 <CivicField label="Message Data">

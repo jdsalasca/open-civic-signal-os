@@ -8,7 +8,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
-import { Dropdown } from "primereact/dropdown";
+import { CivicSelect } from "./ui/CivicSelect";
 
 type Props = {
   children: ReactNode;
@@ -177,14 +177,13 @@ export function Layout({ children, authMode = false }: Props) {
             {communityOptions.length > 0 && (
               <div className="hidden sm:flex align-items-center gap-3 bg-white-alpha-5 border-round-xl px-4 py-2 border-1 border-white-alpha-10 hover:border-white-alpha-20 transition-colors cursor-pointer">
                 <i className="pi pi-map-marker text-brand-primary text-sm"></i>
-                <Dropdown
+                <CivicSelect
                   value={activeCommunityId || communityOptions[0].value}
                   options={communityOptions}
                   onChange={(e) => handleCommunitySwitch(e.value)}
                   placeholder="Sector"
                   className="w-10rem border-none bg-transparent font-bold text-sm"
                   data-testid="community-switch-dropdown"
-                  appendTo={document.body}
                   itemTemplate={(option) => (
                     <div className="flex flex-column py-1">
                       <span className="font-black text-xs uppercase tracking-widest">{option.label}</span>

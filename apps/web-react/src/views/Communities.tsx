@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Community, CommunityMembership } from "../types";
 import { Layout } from "../components/Layout";
@@ -10,6 +9,8 @@ import { useCommunityStore } from "../store/useCommunityStore";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicBadge } from "../components/ui/CivicBadge";
+import { CivicSelect } from "../components/ui/CivicSelect";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -102,10 +103,7 @@ export function Communities() {
   return (
     <Layout>
       <div className="animate-fade-up">
-        <div className="mb-8">
-          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">Community Hub</h1>
-          <p className="text-secondary text-lg font-medium">Manage your civic ecosystem and regional memberships.</p>
-        </div>
+        <CivicPageHeader title="Community Hub" description="Manage your civic ecosystem and regional memberships." />
 
         <div className="grid">
           <div className="col-12 lg:col-7">
@@ -113,23 +111,21 @@ export function Communities() {
               <div className="flex flex-column gap-4">
                 <div className="grid grid-nogutter gap-3 mb-4 p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10">
                   <div className="col-12 lg:col-5">
-                    <Dropdown
+                    <CivicSelect
                       value={selectedCommunityId}
                       options={communityOptions}
                       onChange={(e) => setSelectedCommunityId(e.value)}
                       placeholder="Select a community"
-                      className="w-full bg-black-alpha-20"
-                      appendTo={document.body}
+                      className="w-full"
                       data-testid="join-community-dropdown"
                     />
                   </div>
                   <div className="col-12 md:col-6 lg:col-4">
-                    <Dropdown
+                    <CivicSelect
                       value={joinRole}
                       options={roleOptions}
                       onChange={(e) => setJoinRole(e.value)}
-                      className="w-full bg-black-alpha-20"
-                      appendTo={document.body}
+                      className="w-full"
                       data-testid="join-role-dropdown"
                     />
                   </div>
@@ -156,12 +152,11 @@ export function Communities() {
                         <div className="font-black text-main uppercase tracking-tight">{membership.communityName}</div>
                         <div className="text-xs font-mono text-muted mt-1">/{membership.communitySlug}</div>
                       </div>
-                      <Dropdown
+                      <CivicSelect
                         value={membership.role}
                         options={roleOptions}
                         onChange={(e) => roleUpdate(membership, e.value)}
                         className="w-14rem bg-black-alpha-30"
-                        appendTo={document.body}
                         data-testid={`membership-role-dropdown-${membership.communityId}`}
                       />
                     </div>

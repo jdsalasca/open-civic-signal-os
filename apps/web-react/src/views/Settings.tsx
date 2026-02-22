@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
-import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
+import { DropdownChangeEvent } from "primereact/dropdown";
 import { Divider } from "primereact/divider";
 import { Layout } from "../components/Layout";
 import { toast } from "react-hot-toast";
@@ -12,6 +12,8 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicField } from "../components/ui/CivicField";
 import { CivicBadge } from "../components/ui/CivicBadge";
+import { CivicSelect } from "../components/ui/CivicSelect";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 
 interface ThemeOption {
   label: string;
@@ -90,10 +92,7 @@ export function Settings() {
   return (
     <Layout>
       <div className="animate-fade-up max-w-50rem mx-auto">
-        <div className="mb-8">
-          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">{t('settings.title')}</h1>
-          <p className="text-secondary text-lg font-medium">{t('settings.desc')}</p>
-        </div>
+        <CivicPageHeader title={t('settings.title')} description={t('settings.desc')} />
 
         <div className="grid">
           <div className="col-12 lg:col-5">
@@ -160,7 +159,7 @@ export function Settings() {
 
                 <CivicField label={t('settings.role')} helpText={t('settings.role_desc')}>
                   <div data-testid="role-switch-dropdown">
-                    <Dropdown
+                    <CivicSelect
                       value={activeRole}
                       options={roleOptions}
                       optionLabel="label"
@@ -168,7 +167,6 @@ export function Settings() {
                       onChange={handleRoleChange}
                       className="w-full bg-black-alpha-20 p-inputtext-lg"
                       disabled={rawRoles.length <= 1}
-                      appendTo={document.body}
                       itemTemplate={(option: RoleOption) => (
                         <div className="flex flex-column py-1">
                           <span className="font-bold text-main">{option.label}</span>

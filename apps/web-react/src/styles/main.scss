@@ -86,30 +86,30 @@ body {
 }
 
 .p-inputtext, .p-inputtextarea {
-  background: rgba(0, 0, 0, 0.3) !important;
-  border: 1px solid var(--border-subtle) !important;
-  color: var(--text-main) !important;
+  background: var(--field-bg) !important;
+  border: 1px solid var(--field-border) !important;
+  color: var(--field-text) !important;
   border-radius: $radius-md !important;
   padding: 1rem !important;
   font-weight: 500 !important;
   transition: all 0.2s ease !important;
   &:focus { 
-    border-color: var(--brand-primary) !important; 
-    box-shadow: 0 0 0 1px var(--brand-primary) !important;
-    background: rgba(0, 0, 0, 0.5) !important;
+    border-color: var(--field-border-focus) !important; 
+    box-shadow: 0 0 0 1px var(--field-border-focus) !important;
+    background: var(--field-bg-focus) !important;
   }
 }
 
 .p-dropdown {
-  background: var(--bg-card) !important;
-  border: 1px solid var(--border-subtle) !important;
+  background: var(--field-bg) !important;
+  border: 1px solid var(--field-border) !important;
   border-radius: $radius-md !important;
-  .p-dropdown-label { color: var(--text-main) !important; font-weight: 700; font-size: 0.85rem; }
-  &:not(.p-disabled).p-focus { border-color: var(--brand-primary) !important; box-shadow: 0 0 0 1px var(--brand-primary) !important; }
+  .p-dropdown-label { color: var(--field-text) !important; font-weight: 700; font-size: 0.85rem; }
+  &:not(.p-disabled).p-focus { border-color: var(--field-border-focus) !important; box-shadow: 0 0 0 1px var(--field-border-focus) !important; }
 }
 
 .p-dropdown-panel {
-  background: var(--bg-card) !important;
+  background: var(--bg-surface) !important;
   border: 1px solid var(--border-subtle) !important;
   border-radius: $radius-md !important;
   box-shadow: var(--shadow-premium) !important;
@@ -164,8 +164,9 @@ body {
 }
 
 .p-sidebar {
-  background: #0f172a !important;
+  background: var(--bg-sidebar) !important;
   opacity: 1 !important;
+  border-right: 1px solid var(--border-subtle) !important;
 }
 
 .p-sidebar-mask {
@@ -174,8 +175,8 @@ body {
 }
 
 .p-tooltip .p-tooltip-text {
-  background: #000 !important;
-  color: #fff !important;
+  background: var(--tooltip-bg) !important;
+  color: var(--tooltip-text) !important;
   font-size: 0.7rem !important;
   font-weight: 800 !important;
   text-transform: uppercase;

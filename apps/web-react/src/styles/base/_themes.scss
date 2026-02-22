@@ -32,6 +32,13 @@
     
     --scrollbar-thumb: #27272a;
     --tooltip-bg: #000000;
+    --tooltip-text: #ffffff;
+    --field-bg: rgba(0, 0, 0, 0.35);
+    --field-bg-focus: rgba(0, 0, 0, 0.5);
+    --field-text: #ffffff;
+    --field-border: #27272a;
+    --field-border-focus: #818cf8;
+    --bg-sidebar: #0f172a;
   }
 
   // --- PRISTINE LIGHT THEME ---
@@ -55,5 +62,12 @@
 
     --scrollbar-thumb: #d4d4d8;
     --tooltip-bg: #09090b;
+    --tooltip-text: #ffffff;
+    --field-bg: #ffffff;
+    --field-bg-focus: #ffffff;
+    --field-text: #09090b;
+    --field-border: #d4d4d8;
+    --field-border-focus: #818cf8;
+    --bg-sidebar: #ffffff;
   }
 }

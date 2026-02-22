@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { Dropdown } from "primereact/dropdown";
 import { CommunityFeedItem } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
@@ -10,6 +9,7 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
+import { CivicSelect } from "../components/ui/CivicSelect";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -75,15 +75,14 @@ export function CommunityFeed() {
           </div>
           
           <div className="flex gap-3 bg-black-alpha-20 p-2 border-round-2xl border-1 border-white-alpha-10">
-            <Dropdown
+            <CivicSelect
               value={typeFilter}
               options={typeOptions}
               onChange={(e) => setTypeFilter(e.value)}
               className="w-14rem bg-transparent border-none font-bold"
               disabled={!activeCommunityId}
-              appendTo={document.body}
             />
-            <Dropdown
+            <CivicSelect
               value={days}
               options={[
                 { label: "Past 7 days", value: 7 },
@@ -93,7 +92,6 @@ export function CommunityFeed() {
               onChange={(e) => setDays(e.value)}
               className="w-12rem bg-transparent border-none font-bold"
               disabled={!activeCommunityId}
-              appendTo={document.body}
             />
           </div>
         </div>
