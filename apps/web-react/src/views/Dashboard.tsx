@@ -115,11 +115,11 @@ export function Dashboard() {
   };
 
   const quickFilters = [
-    { label: "All Signals", value: "ALL", icon: "pi-list" },
-    { label: "Critical", value: "URGENT", icon: "pi-exclamation-triangle" },
-    { label: "Pending", value: "NEW", icon: "pi-clock" },
-    { label: "In Progress", value: "IN_PROGRESS", icon: "pi-sync" },
-    { label: "Resolved", value: "RESOLVED", icon: "pi-check-circle" },
+    { label: t('signals.filter_all'), value: "ALL", icon: "pi-list" },
+    { label: t('signals.filter_critical'), value: "URGENT", icon: "pi-exclamation-triangle" },
+    { label: t('signals.filter_pending'), value: "NEW", icon: "pi-clock" },
+    { label: t('signals.filter_in_progress'), value: "IN_PROGRESS", icon: "pi-sync" },
+    { label: t('signals.filter_resolved'), value: "RESOLVED", icon: "pi-check-circle" },
   ];
 
   return (
@@ -149,7 +149,7 @@ export function Dashboard() {
           <div className="flex gap-3">
             {isStaff && (
               <CivicButton 
-                label="Relay Intelligence" 
+                label={t('dashboard.broadcast')}
                 icon="pi pi-bolt" 
                 variant="danger"
                 className="py-4 px-6 shadow-xl"
@@ -157,7 +157,7 @@ export function Dashboard() {
               />
             )}
             <CivicButton 
-              label="Report New Signal" 
+              label={t('dashboard.new_issue')}
               icon="pi pi-plus" 
               glow
               className="py-4 px-6 shadow-xl"
@@ -181,6 +181,7 @@ export function Dashboard() {
                 {quickFilters.map(f => (
                   <button
                     key={f.value}
+                    type="button"
                     onClick={() => setActiveFilter(f.value)}
                     className={`flex align-items-center gap-2 px-4 py-2 border-round-xl border-1 transition-all cursor-pointer whitespace-nowrap font-bold text-xs uppercase tracking-widest
                       ${activeFilter === f.value 
@@ -219,6 +220,21 @@ export function Dashboard() {
                 <>
                   {signals.length > 0 && (
                     <CategoryChart signals={signals} />
+                  )}
+                  {!isStaff && (
+                    <CivicCard title={t('dashboard.quickstart_title')} variant="brand">
+                      <p className="text-secondary text-sm m-0 mb-4">{t('dashboard.quickstart_desc')}</p>
+                      <ul className="m-0 p-0 list-none flex flex-column gap-2 text-sm text-secondary">
+                        <li className="line-height-3">1. {t('dashboard.quickstart_step_1')}</li>
+                        <li className="line-height-3">2. {t('dashboard.quickstart_step_2')}</li>
+                        <li className="line-height-3">3. {t('dashboard.quickstart_step_3')}</li>
+                      </ul>
+                      <div className="mt-4 flex flex-column gap-2">
+                        <CivicButton label={t('dashboard.quickstart_report')} onClick={() => navigate('/report')} />
+                        <CivicButton label={t('dashboard.quickstart_forums')} variant="secondary" onClick={() => navigate('/communities/threads')} />
+                        <CivicButton label={t('dashboard.quickstart_contributions')} variant="ghost" onClick={() => navigate('/mine')} />
+                      </div>
+                    </CivicCard>
                   )}
                   <DigestSidebar signals={signals} />
                   {isStaff && (

@@ -96,6 +96,9 @@ export function Layout({ children, authMode = false }: Props) {
             to={link.to} 
             className={`flex align-items-center justify-content-between px-4 py-3 border-round-xl no-underline transition-all font-bold ${location.pathname === link.to ? 'bg-white-alpha-10 text-main shadow-sm' : 'text-secondary hover:text-main hover:bg-white-alpha-5'}`}
             data-testid={link.testId}
+            aria-label={link.label}
+            aria-current={location.pathname === link.to ? "page" : undefined}
+            onClick={() => setMobileMenuVisible(false)}
           >
             <div className="flex align-items-center gap-3">
               <i className={`${link.icon} text-base ${location.pathname === link.to ? 'text-brand-primary' : 'opacity-70'}`}></i>
@@ -110,6 +113,7 @@ export function Layout({ children, authMode = false }: Props) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-app">
+      <a href="#main-content" className="skip-link">{t('nav.skip_to_content')}</a>
       {/* SIDEBAR */}
       <aside className="hidden lg:flex flex-column w-18rem border-right-1 border-white-alpha-5 bg-card z-2">
         <div className="p-6 flex align-items-center gap-3">
@@ -119,10 +123,10 @@ export function Layout({ children, authMode = false }: Props) {
           <span className="text-xl font-black tracking-tighter uppercase text-main">Signal<span className="text-brand-primary">OS</span></span>
         </div>
 
-        <nav className="flex-grow-1 px-3 py-4 overflow-y-auto">
-          <NavGroup title="Intelligence" items={mainNav} />
-          <NavGroup title="Collaboration" items={socialNav} />
-          <NavGroup title="Personal" items={personalNav} />
+        <nav className="flex-grow-1 px-3 py-4 overflow-y-auto" aria-label={t('nav.main_navigation')}>
+          <NavGroup title={t('nav.group_intelligence')} items={mainNav} />
+          <NavGroup title={t('nav.group_collaboration')} items={socialNav} />
+          <NavGroup title={t('nav.group_personal')} items={personalNav} />
         </nav>
 
         <div className="mt-auto p-4 border-top-1 border-white-alpha-5 bg-black-alpha-20">
@@ -131,7 +135,7 @@ export function Layout({ children, authMode = false }: Props) {
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
               <div className="flex flex-column overflow-hidden">
                 <span className="text-xs font-black text-main truncate uppercase tracking-wider">{userName}</span>
-                <span className="text-min font-bold text-muted uppercase" style={{ fontSize: '8px' }}>Clearance: {activeRole}</span>
+                <span className="text-min font-bold text-muted uppercase" style={{ fontSize: '8px' }}>{t('nav.clearance')}: {activeRole}</span>
               </div>
             </div>
             <Button 
@@ -196,26 +200,28 @@ export function Layout({ children, authMode = false }: Props) {
 
             <div className="hidden xl:flex align-items-center gap-3 bg-white-alpha-5 px-4 py-2 border-round-xl border-1 border-white-alpha-10">
               <div className="w-8px h-8px border-circle bg-status-resolved animate-pulse"></div>
-              <span className="text-xs font-black text-main uppercase tracking-widest">Core Active</span>
+              <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
             </div>
             
             <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
           </div>
         </header>
 
-        <main className="flex-grow-1 overflow-y-auto p-6 lg:p-10 bg-app">
+        <main id="main-content" className="flex-grow-1 overflow-y-auto p-6 lg:p-10 bg-app">
           <div className="page-container mx-auto" style={{ maxWidth: '1300px' }}>
             {children}
           </div>
         </main>
 
-        <nav className="lg:hidden flex justify-content-around align-items-center bg-card border-top-1 border-white-alpha-5 h-5rem px-2 sticky bottom-0 z-5">
+        <nav className="lg:hidden flex justify-content-around align-items-center bg-card border-top-1 border-white-alpha-5 h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
           {mainNav.concat(socialNav).slice(0, 5).map(link => (
             <Link 
               key={link.to} 
               to={link.to} 
               className={`flex flex-column align-items-center gap-1 no-underline ${location.pathname === link.to ? 'text-brand-primary' : 'text-muted'}`}
               data-testid={link.testId}
+              aria-label={link.label}
+              aria-current={location.pathname === link.to ? "page" : undefined}
             >
               <i className={`${link.icon} text-xl`}></i>
               <span style={{ fontSize: '9px' }} className="font-bold uppercase tracking-widest">{link.label.split(' ')[0]}</span>
@@ -230,10 +236,10 @@ export function Layout({ children, authMode = false }: Props) {
             <div className="bg-white border-round-xl p-2 shadow-lg"><i className="pi pi-signal text-black"></i></div>
             <span className="text-xl font-black text-main">SignalOS</span>
           </div>
-          <nav className="flex flex-column gap-4">
-            <NavGroup title="Main" items={mainNav} />
-            <NavGroup title="Social" items={socialNav} />
-            <NavGroup title="System" items={personalNav} />
+          <nav className="flex flex-column gap-4" aria-label={t('nav.main_navigation')}>
+            <NavGroup title={t('nav.group_main')} items={mainNav} />
+            <NavGroup title={t('nav.group_social')} items={socialNav} />
+            <NavGroup title={t('nav.group_system')} items={personalNav} />
           </nav>
           <Button
             label={t('nav.sign_out')}

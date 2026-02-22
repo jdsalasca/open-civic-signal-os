@@ -95,3 +95,7 @@
   - report/blog/thread creation must include min/max guidance and live character counters
   - keep copy localized (EN/ES) in the same PR whenever labels/placeholders/feedback change
   - prefer shared UI primitives for repeated patterns (`CivicSelect`, page headers, counters, fields)
+- Never regress accessibility fundamentals:
+  - keep keyboard navigation discoverable (skip-to-content + visible focus rings)
+  - use semantic landmarks and active-link state (`aria-current`) in shared navigation
+  - keep contrast token-driven for light/dark parity (no ad-hoc hardcoded low-contrast text colors)

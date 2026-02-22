@@ -50,6 +50,10 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
   - all user-generated text flows (report, blog, threads) must expose min/max guidance and live character counters
   - use plain-language labels/placeholders and avoid technical jargon unless role-specific
   - provide equivalent EN/ES copy updates in the same change set
+- Accessibility baseline is mandatory:
+  - include keyboard-first navigation paths (skip link + focus-visible states on interactive controls)
+  - provide semantic landmarks (`main`, `nav`) and `aria-current` on active navigation links
+  - preserve readability in both themes by using tokenized contrast values, not hardcoded text shades
 - Centralize UI primitives:
   - prefer shared components (`CivicSelect`, page headers, counters, fields) over repeated local markup
   - avoid ad-hoc style divergence across views for the same control type
