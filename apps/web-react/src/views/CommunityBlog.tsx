@@ -102,6 +102,7 @@ export function CommunityBlog() {
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. Phase 1 Verification Complete"
                       className="w-full"
+                      data-testid="blog-title-input"
                     />
                   </CivicField>
                   
@@ -112,6 +113,7 @@ export function CommunityBlog() {
                       rows={6}
                       className="w-full"
                       placeholder="Provide thorough details for the community..."
+                      data-testid="blog-content-input"
                     />
                   </CivicField>
 
@@ -132,6 +134,7 @@ export function CommunityBlog() {
                     loading={publishing}
                     className="w-full py-4 mt-2"
                     glow
+                    data-testid="publish-blog-button"
                   />
                 </div>
               </CivicCard>

@@ -63,7 +63,7 @@ export function Layout({ children, authMode = false }: Props) {
   const mainNav = [
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
     { label: 'Live Feed', to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
-    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn },
+    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
   ];
 
   const socialNav = [
@@ -95,6 +95,7 @@ export function Layout({ children, authMode = false }: Props) {
             key={link.to} 
             to={link.to} 
             className={`flex align-items-center justify-content-between px-4 py-3 border-round-xl no-underline transition-all font-bold ${location.pathname === link.to ? 'bg-white-alpha-10 text-main shadow-sm' : 'text-secondary hover:text-main hover:bg-white-alpha-5'}`}
+            data-testid={link.testId}
           >
             <div className="flex align-items-center gap-3">
               <i className={`${link.icon} text-base ${location.pathname === link.to ? 'text-brand-primary' : 'opacity-70'}`}></i>
@@ -205,6 +206,7 @@ export function Layout({ children, authMode = false }: Props) {
               key={link.to} 
               to={link.to} 
               className={`flex flex-column align-items-center gap-1 no-underline ${location.pathname === link.to ? 'text-brand-primary' : 'text-muted'}`}
+              data-testid={link.testId}
             >
               <i className={`${link.icon} text-xl`}></i>
               <span style={{ fontSize: '9px' }} className="font-bold uppercase tracking-widest">{link.label.split(' ')[0]}</span>

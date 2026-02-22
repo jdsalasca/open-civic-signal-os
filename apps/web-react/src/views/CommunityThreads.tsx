@@ -127,6 +127,7 @@ export function CommunityThreads() {
                     onChange={(e) => setNewThreadTitle(e.target.value)}
                     placeholder="e.g. Joint Security Patrol"
                     className="w-full"
+                    data-testid="thread-title-input"
                   />
                 </CivicField>
                 <CivicField label="Target Sector">
@@ -138,6 +139,7 @@ export function CommunityThreads() {
                     className="w-full bg-black-alpha-20"
                     disabled={!activeCommunityId || targetOptions.length === 0}
                     emptyMessage="Join other communities to sync"
+                    data-testid="thread-target-dropdown"
                   />
                 </CivicField>
                 <CivicButton
@@ -147,6 +149,7 @@ export function CommunityThreads() {
                   disabled={!canCreateThread}
                   className="w-full py-4 mt-2"
                   glow
+                  data-testid="create-thread-button"
                 />
               </div>
             </CivicCard>
@@ -161,6 +164,7 @@ export function CommunityThreads() {
                     placeholder="Select dialogue"
                     className="w-full bg-black-alpha-20"
                     disabled={!activeCommunityId || threads.length === 0}
+                    data-testid="thread-select-dropdown"
                   />
                 </CivicField>
                 <CivicField label="Message Data">
@@ -171,6 +175,7 @@ export function CommunityThreads() {
                     className="w-full"
                     placeholder="Compose intelligence dispatch..."
                     disabled={!activeCommunityId || threads.length === 0}
+                    data-testid="thread-message-input"
                   />
                 </CivicField>
                 <CivicButton
@@ -179,6 +184,7 @@ export function CommunityThreads() {
                   onClick={sendMessage}
                   disabled={!canSendMessage}
                   className="w-full py-4 mt-2"
+                  data-testid="send-thread-message-button"
                 />
               </div>
             </CivicCard>

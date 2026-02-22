@@ -195,6 +195,10 @@ These rules were added from recurring AI-generated mistakes in this repository.
 - Do not ship malformed markdown/json:
   - never commit escaped newline literals like `` `n `` as documentation bullets
   - ensure `package.json` remains valid JSON with no trailing literal escape text
+- Do not write fragile E2E selectors:
+  - avoid placeholder/text-only selectors for critical actions
+  - prefer stable `data-testid` hooks for navigation, form submit, and modal actions
+  - when UI copy changes, update tests and selectors in the same PR
 - Do not mix unrelated work:
   - avoid bundling UI redesign + backend + docs automation in one PR unless requested
   - keep one objective and one rollback path

@@ -87,8 +87,10 @@ export function ReportSignal() {
                     render={({ field, fieldState }) => (
                       <InputText
                         {...field}
+                        id="report-title"
                         className={classNames('w-full', { 'p-invalid': fieldState.error })}
                         placeholder="What is the problem?"
+                        data-testid="report-title-input"
                       />
                     )} 
                   />
@@ -104,7 +106,9 @@ export function ReportSignal() {
                             onChange={(e) => field.onChange(e.value)}
                             options={categories}
                             placeholder="Select Type"
+                            inputId="report-category"
                             className="w-full bg-black-alpha-20"
+                            data-testid="report-category-dropdown"
                             itemTemplate={(option) => (
                               <div className="flex align-items-center gap-2">
                                 <i className={`pi ${option.icon} text-brand-primary`}></i>
@@ -136,13 +140,15 @@ export function ReportSignal() {
                 <CivicField label="Deep Context" error={errors.description?.message}>
                   <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: 20, message: t('report.desc_too_short') } }} 
                     render={({ field }) => (
-                      <InputTextarea
-                        {...field}
-                        rows={6}
-                        className="w-full"
-                        placeholder="Describe the situation, location, and potential consequences..."
-                      />
-                    )} 
+                        <InputTextarea
+                          {...field}
+                          id="report-description"
+                          rows={6}
+                          className="w-full"
+                          placeholder="Describe the situation, location, and potential consequences..."
+                          data-testid="report-description-textarea"
+                        />
+                      )} 
                   />
                 </CivicField>
               </CivicCard>
@@ -161,9 +167,11 @@ export function ReportSignal() {
                       <span className="text-3xl font-black" style={{ color: getScaleColor(currentUrgency) }}>{currentUrgency}</span>
                     </div>
                     <div className="p-4 border-round-2xl transition-colors duration-500 shadow-inner" style={{ background: `linear-gradient(135deg, ${getScaleColor(currentUrgency)}15 0%, transparent 100%)`, border: `1px solid ${getScaleColor(currentUrgency)}30` }}>
+                      <div data-testid="report-urgency-slider">
                       <Controller name="urgency" control={control} render={({ field }) => (
                         <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
                       )} />
+                      </div>
                       <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
                         <span>Low Priority</span>
                         <span>Immediate Action</span>
@@ -181,9 +189,11 @@ export function ReportSignal() {
                       <span className="text-3xl font-black" style={{ color: getScaleColor(currentImpact) }}>{currentImpact}</span>
                     </div>
                     <div className="p-4 border-round-2xl transition-colors duration-500 shadow-inner" style={{ background: `linear-gradient(135deg, ${getScaleColor(currentImpact)}15 0%, transparent 100%)`, border: `1px solid ${getScaleColor(currentImpact)}30` }}>
+                      <div data-testid="report-impact-slider">
                       <Controller name="impact" control={control} render={({ field }) => (
                         <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
                       )} />
+                      </div>
                       <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
                         <span>Minor Nuisance</span>
                         <span>Systemic Failure</span>
@@ -215,6 +225,7 @@ export function ReportSignal() {
                       loading={isSubmitting}
                       className="w-full py-4 text-lg"
                       glow
+                      data-testid="report-submit-button"
                     />
                   </div>
                 )}
