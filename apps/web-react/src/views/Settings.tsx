@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
@@ -67,11 +68,17 @@ export function Settings() {
     toast.success(t('settings.role_switched', { role: roleLabel }));
   };
 
-  const roleOptions: RoleOption[] = rawRoles.map((role) => ({
-    label: t(`settings.roles.${role}`, { defaultValue: role.replace(/_/g, ' ') }),
-    value: role,
-    code: role,
-  }));
+  const roleOptions: RoleOption[] = useMemo(
+    () =>
+      rawRoles
+        .map((role) => ({
+          label: t(`settings.roles.${role}`, { defaultValue: role.replace(/_/g, ' ') }),
+          value: role,
+          code: role,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [rawRoles, t]
+  );
 
   const handleExportCsv = async () => {
     try {
@@ -167,6 +174,7 @@ export function Settings() {
                       onChange={handleRoleChange}
                       className="w-full bg-black-alpha-20 p-inputtext-lg"
                       disabled={rawRoles.length <= 1}
+                      placeholder={roleOptions[0]?.label ?? activeRole}
                       itemTemplate={(option: RoleOption) => (
                         <div className="flex flex-column py-1">
                           <span className="font-bold text-main">{option.label}</span>

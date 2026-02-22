@@ -99,3 +99,7 @@
   - keep keyboard navigation discoverable (skip-to-content + visible focus rings)
   - use semantic landmarks and active-link state (`aria-current`) in shared navigation
   - keep contrast token-driven for light/dark parity (no ad-hoc hardcoded low-contrast text colors)
+- Never ship visual-only filters or dead search boxes:
+  - if a filter is shown as active in UI, it must deterministically affect returned/visible records
+  - status/scope filters must be API-contract backed when domain-owned by backend
+  - add Playwright checks that filter actions emit expected query parameters and update visible data

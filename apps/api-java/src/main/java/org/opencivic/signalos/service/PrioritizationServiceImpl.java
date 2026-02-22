@@ -87,14 +87,26 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Page<Signal> getPrioritizedSignals(Pageable pageable) {
-        return getPrioritizedSignals(pageable, null);
+        return getPrioritizedSignals(pageable, null, null);
     }
 
     @Override
     public Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId) {
-        Page<Signal> basePage = communityId == null
-            ? signalRepository.findByStatusNotIn(List.of("FLAGGED", "REJECTED"), pageable)
-            : signalRepository.findByStatusNotInAndCommunityId(List.of("FLAGGED", "REJECTED"), communityId, pageable);
+        return getPrioritizedSignals(pageable, communityId, null);
+    }
+
+    @Override
+    public Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId, Collection<String> statuses) {
+        Page<Signal> basePage;
+        if (statuses != null && !statuses.isEmpty()) {
+            basePage = communityId == null
+                ? signalRepository.findByStatusIn(statuses, pageable)
+                : signalRepository.findByStatusInAndCommunityId(statuses, communityId, pageable);
+        } else {
+            basePage = communityId == null
+                ? signalRepository.findByStatusNotIn(List.of("FLAGGED", "REJECTED"), pageable)
+                : signalRepository.findByStatusNotInAndCommunityId(List.of("FLAGGED", "REJECTED"), communityId, pageable);
+        }
         return basePage
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
     }

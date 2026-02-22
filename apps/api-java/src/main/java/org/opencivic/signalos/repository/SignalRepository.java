@@ -13,6 +13,7 @@ import java.util.UUID;
 
 public interface SignalRepository extends JpaRepository<Signal, UUID> {
     Page<Signal> findByStatusNotIn(Collection<String> statuses, Pageable pageable);
+    Page<Signal> findByStatusIn(Collection<String> statuses, Pageable pageable);
     
     // P1-B: Efficient paginated query for moderation
     Page<Signal> findByStatus(String status, Pageable pageable);
@@ -23,6 +24,7 @@ public interface SignalRepository extends JpaRepository<Signal, UUID> {
     Page<Signal> findByAuthorId(UUID authorId, Pageable pageable);
     Page<Signal> findByAuthorIdAndCommunityId(UUID authorId, UUID communityId, Pageable pageable);
     Page<Signal> findByStatusNotInAndCommunityId(Collection<String> statuses, UUID communityId, Pageable pageable);
+    Page<Signal> findByStatusInAndCommunityId(Collection<String> statuses, UUID communityId, Pageable pageable);
     @Query("SELECT s FROM Signal s WHERE s.status = :status AND s.communityId = :communityId ORDER BY s.priorityScore DESC")
     List<Signal> findTopSignalsByStatusAndCommunityId(
         @Param("status") String status,

@@ -5,6 +5,7 @@ import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import org.opencivic.signalos.web.dto.TrustPacket;
 public interface PrioritizationService {
     Page<Signal> getPrioritizedSignals(Pageable pageable);
     Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId);
+    Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId, Collection<String> statuses);
     List<Signal> getTopUnresolved(int limit);
     List<Signal> getTopUnresolved(int limit, UUID communityId);
     Optional<Signal> getSignalById(UUID id);

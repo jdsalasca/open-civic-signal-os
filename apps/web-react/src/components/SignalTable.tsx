@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
-import { DataTable, DataTableFilterMeta } from "primereact/datatable";
+import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { FilterMatchMode } from "primereact/api";
 import { Skeleton } from "primereact/skeleton";
 import { useNavigate } from "react-router-dom";
 import { Signal } from "../types";
@@ -25,25 +24,35 @@ interface SkeletonRow {
 export function SignalTable({ signals, loading, totalRecords, rows, first, onPage }: Props) {
   const navigate = useNavigate();
   const [globalFilterValue, setGlobalFilterValue] = useState("");
-  
-  const [filters, setFilters] = useState<DataTableFilterMeta>({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  });
+
+  const filteredSignals = useMemo(() => {
+    if (!globalFilterValue.trim()) {
+      return signals;
+    }
+    const query = globalFilterValue.trim().toLowerCase();
+    return signals.filter((signal) => {
+      const idPart = signal.id?.slice(0, 8).toLowerCase() ?? "";
+      return (
+        signal.title.toLowerCase().includes(query) ||
+        signal.category.toLowerCase().includes(query) ||
+        signal.status.toLowerCase().includes(query) ||
+        idPart.includes(query)
+      );
+    });
+  }, [signals, globalFilterValue]);
 
   const tableData = useMemo<(Signal | SkeletonRow)[]>(() => {
     if (loading) {
       return new Array(rows || 6).fill(null).map((_, i) => ({ _skeleton: true, id: `sk-${i}` }));
     }
-    return signals;
-  }, [signals, loading, rows]);
+    return filteredSignals;
+  }, [filteredSignals, loading, rows]);
 
   const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const _filters = { ...filters };
-    (_filters["global"] as { value: string | null; matchMode: FilterMatchMode }).value = value;
-    setFilters(_filters);
-    setGlobalFilterValue(value);
+    setGlobalFilterValue(e.target.value);
   };
+
+  const tableTotalRecords = globalFilterValue.trim() ? filteredSignals.length : totalRecords;
 
   const statusTemplate = (rowData: Signal | SkeletonRow) => {
     if ('_skeleton' in rowData) return <Skeleton width="4rem" height="1.5rem" />;
@@ -117,9 +126,8 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
         paginator 
         first={first}
         rows={rows || 10} 
-        totalRecords={totalRecords}
+        totalRecords={tableTotalRecords}
         onPage={onPage}
-        filters={filters}
         header={header}
         dataKey="id" 
         onRowClick={(e) => {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
 import { Signal, Notification, SignalMeta } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
@@ -19,6 +19,9 @@ import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 interface ApiError extends Error {
   friendlyMessage?: string;
 }
+
+const CRITICAL_SCORE_THRESHOLD = 220;
+const STATUS_FILTERS = new Set(["NEW", "IN_PROGRESS", "RESOLVED"]);
 
 export function Dashboard() {
   const { t } = useTranslation();
@@ -42,8 +45,11 @@ export function Dashboard() {
   const loadData = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true);
+      const prioritizedQuery = STATUS_FILTERS.has(activeFilter)
+        ? `signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}&status=${activeFilter}`
+        : `signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`;
       const [signalsRes, metaRes, notificationsRes, duplicatesRes] = await Promise.all([
-        apiClient.get(`signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`, { signal }),
+        apiClient.get(prioritizedQuery, { signal }),
         apiClient.get("signals/meta", { signal }),
         (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
           ? apiClient.get("notifications/recent", { signal })
@@ -78,7 +84,7 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [activeRole, t, lazyState]);
+  }, [activeRole, t, lazyState, activeFilter]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -89,6 +95,20 @@ export function Dashboard() {
   const onPage = (event: any) => {
     setLazyState(event);
   };
+
+  const handleFilterChange = (value: string) => {
+    setActiveFilter(value);
+    setLazyState((prev) => ({ ...prev, first: 0, page: 0 }));
+  };
+
+  const displayedSignals = useMemo(() => {
+    if (activeFilter === "CRITICAL") {
+      return signals.filter((s) => (s.priorityScore ?? 0) >= CRITICAL_SCORE_THRESHOLD);
+    }
+    return signals;
+  }, [signals, activeFilter]);
+
+  const visibleRecords = activeFilter === "CRITICAL" ? displayedSignals.length : totalRecords;
 
   const handleRelay = async () => {
     try {
@@ -116,7 +136,7 @@ export function Dashboard() {
 
   const quickFilters = [
     { label: t('signals.filter_all'), value: "ALL", icon: "pi-list" },
-    { label: t('signals.filter_critical'), value: "URGENT", icon: "pi-exclamation-triangle" },
+    { label: t('signals.filter_critical'), value: "CRITICAL", icon: "pi-exclamation-triangle" },
     { label: t('signals.filter_pending'), value: "NEW", icon: "pi-clock" },
     { label: t('signals.filter_in_progress'), value: "IN_PROGRESS", icon: "pi-sync" },
     { label: t('signals.filter_resolved'), value: "RESOLVED", icon: "pi-check-circle" },
@@ -170,7 +190,7 @@ export function Dashboard() {
           {loading ? (
             <CivicSkeleton type="metric" count={4} />
           ) : (
-            <MetricsGrid signals={signals} />
+            <MetricsGrid signals={displayedSignals} />
           )}
         </div>
 
@@ -182,7 +202,8 @@ export function Dashboard() {
                   <button
                     key={f.value}
                     type="button"
-                    onClick={() => setActiveFilter(f.value)}
+                    onClick={() => handleFilterChange(f.value)}
+                    data-testid={`dashboard-filter-${f.value.toLowerCase()}`}
                     className={`flex align-items-center gap-2 px-4 py-2 border-round-xl border-1 transition-all cursor-pointer whitespace-nowrap font-bold text-xs uppercase tracking-widest
                       ${activeFilter === f.value 
                         ? 'bg-brand-primary border-brand-primary text-white shadow-lg' 
@@ -201,9 +222,9 @@ export function Dashboard() {
             ) : (
               <CivicCard padding="none" className="border-round-3xl">
                 <SignalTable 
-                  signals={signals} 
+                  signals={displayedSignals} 
                   loading={loading} 
-                  totalRecords={totalRecords}
+                  totalRecords={visibleRecords}
                   rows={lazyState.rows}
                   first={lazyState.first}
                   onPage={onPage}
@@ -218,8 +239,8 @@ export function Dashboard() {
                 <CivicSkeleton type="text" count={3} />
               ) : (
                 <>
-                  {signals.length > 0 && (
-                    <CategoryChart signals={signals} />
+                  {displayedSignals.length > 0 && (
+                    <CategoryChart signals={displayedSignals} />
                   )}
                   {!isStaff && (
                     <CivicCard title={t('dashboard.quickstart_title')} variant="brand">
@@ -236,7 +257,7 @@ export function Dashboard() {
                       </div>
                     </CivicCard>
                   )}
-                  <DigestSidebar signals={signals} />
+                  <DigestSidebar signals={displayedSignals} />
                   {isStaff && (
                     <NotificationSidebar notifications={notifications} />
                   )}

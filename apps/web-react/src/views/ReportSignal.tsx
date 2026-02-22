@@ -219,9 +219,19 @@ export function ReportSignal() {
 
               <CivicCard title={t('auth.verify_protocol')}>
                 {!activeCommunityId ? (
-                  <div className="p-4 border-round-xl bg-status-rejected-alpha-10 border-1 border-status-rejected-alpha-20 text-status-rejected text-sm font-bold flex align-items-center gap-3">
-                    <i className="pi pi-lock text-xl"></i>
-                    {t('report.community_required')}
+                  <div className="flex flex-column gap-3">
+                    <div className="p-4 border-round-xl bg-status-rejected-alpha-10 border-1 border-status-rejected-alpha-20 text-status-rejected text-sm font-bold flex align-items-center gap-3">
+                      <i className="pi pi-lock text-xl"></i>
+                      {t('report.community_required')}
+                    </div>
+                    <CivicButton
+                      label={t('nav.communities')}
+                      icon="pi pi-users"
+                      variant="secondary"
+                      className="w-full py-3"
+                      onClick={() => navigate("/communities")}
+                      data-testid="report-go-communities-button"
+                    />
                   </div>
                 ) : (
                   <div className="flex flex-column gap-4">

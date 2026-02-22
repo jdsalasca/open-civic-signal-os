@@ -27,6 +27,13 @@ paths:
           schema:
             type: integer
             default: 20
+        - name: status
+          in: query
+          required: false
+          description: Optional comma-separated lifecycle status filter (for example `NEW` or `NEW,IN_PROGRESS`).
+          schema:
+            type: string
+            example: NEW
         - name: X-Community-Id
           in: header
           schema:

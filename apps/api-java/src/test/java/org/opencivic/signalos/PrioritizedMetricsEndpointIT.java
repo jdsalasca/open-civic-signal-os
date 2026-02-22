@@ -3,6 +3,7 @@ package org.opencivic.signalos;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.everyItem;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,5 +34,13 @@ class PrioritizedMetricsEndpointIT {
         mockMvc.perform(get("/actuator/metrics/signalos.prioritized.requests.total"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("signalos.prioritized.requests.total"));
+    }
+
+    @Test
+    @WithMockUser(username = "superadmin", roles = {"SUPER_ADMIN"})
+    void shouldSupportOptionalStatusFilterInPrioritizedEndpoint() throws Exception {
+        mockMvc.perform(get("/api/signals/prioritized?page=0&size=10&status=NEW"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[*].status", everyItem(org.hamcrest.Matchers.is("NEW"))));
     }
 }

@@ -226,6 +226,10 @@ These rules were added from recurring AI-generated mistakes in this repository.
   - buttons and navigation actions must not reset persisted global state (`auth`, `settings`, `community`) unless explicitly a logout/reset action
   - when reloading memberships/preferences, preserve existing selected context if still valid; fallback only when invalid
   - add Playwright coverage for state persistence across route/button flows when touching shared layout or stores
+- Protect interactive control integrity:
+  - no visual-only filters: any dashboard filter chip/button must change the underlying query or deterministic dataset, not just local highlight state
+  - if filter semantics require backend ownership (status, scope, moderation state), expose explicit API query params and test them
+  - add Playwright assertions that each critical filter triggers the expected API contract (`status`, `community`, paging)
 
 ## Hard Validation Before Push
 

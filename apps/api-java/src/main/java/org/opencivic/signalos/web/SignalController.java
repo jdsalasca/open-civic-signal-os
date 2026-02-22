@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,7 @@ public class SignalController {
     @GetMapping("/prioritized")
     public Page<SignalResponse> getPrioritizedSignals(
         @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        @RequestParam(value = "status", required = false) String statusFilter,
         Authentication authentication,
         @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -114,13 +116,14 @@ public class SignalController {
         Timer.Sample latencySample = Timer.start(meterRegistry);
         String status = "success";
         validateCommunityScope(authentication, communityId);
+        List<String> statuses = normalizeStatusFilter(statusFilter);
         Pageable sanitized = PageRequest.of(
             pageable.getPageNumber(),
             Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
             pageable.getSort()
         );
         try {
-            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId)
+            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses)
                 .map(this::mapToResponse);
 
             meterRegistry.counter("signalos.prioritized.requests.total", "scope", scope).increment();
@@ -330,5 +333,17 @@ public class SignalController {
         }
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
         communityAccessService.requireMembership(user.getId(), communityId);
+    }
+
+    private List<String> normalizeStatusFilter(String statusFilter) {
+        if (statusFilter == null || statusFilter.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(statusFilter.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isBlank())
+            .map(String::toUpperCase)
+            .distinct()
+            .toList();
     }
 }
