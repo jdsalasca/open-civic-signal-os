@@ -45,7 +45,7 @@ export function Login() {
   return (
     <Layout authMode>
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
-        <CivicCard className="w-full max-w-28rem animate-fade-up" padding="lg">
+        <CivicCard className="w-full max-w-28rem animate-fade-up" padding="lg" data-testid="login-card">
           <div className="text-center mb-8">
             <div className="inline-flex align-items-center justify-content-center p-3 bg-brand-primary-alpha-10 border-round-2xl mb-4 border-1 border-brand-primary-alpha-20">
               <ShieldCheck size={48} className="text-brand-primary" />

@@ -85,3 +85,9 @@
   - preserve active community, language, theme, and active role across route transitions
   - if context data is refreshed from API, keep prior selection when still valid and only fallback when invalid
   - include Playwright state-persistence checks whenever layout/store wiring changes
+- Never rely on implicit button types in forms:
+  - set `type="button"` for all non-submit actions (cancel/discard/open-panel/secondary actions)
+  - reserve `type="submit"` for the intended primary form action only
+- Never ship dropdown overlays without portal hardening:
+  - for PrimeReact `Dropdown` in header cards, sidebars, dialogs, and dense forms, use `appendTo={document.body}`
+  - validate no overlap/clipping with Playwright in desktop and mobile viewports

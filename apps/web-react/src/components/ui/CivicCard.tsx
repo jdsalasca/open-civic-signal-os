@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
+import { HTMLAttributes, ReactNode } from 'react';
 import { classNames } from 'primereact/utils';
 
-interface CivicCardProps {
+interface CivicCardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   children: ReactNode;
   title?: ReactNode;
   className?: string;
@@ -9,7 +9,7 @@ interface CivicCardProps {
   variant?: 'neutral' | 'brand' | 'success' | 'warning' | 'danger';
 }
 
-export function CivicCard({ children, title, className, padding = 'md', variant = 'neutral' }: CivicCardProps) {
+export function CivicCard({ children, title, className, padding = 'md', variant = 'neutral', ...rest }: CivicCardProps) {
   const paddingClasses = {
     'none': 'p-0',
     'sm': 'p-3',
@@ -30,7 +30,7 @@ export function CivicCard({ children, title, className, padding = 'md', variant 
       'glass-panel rounded-2xl overflow-hidden transition-all duration-300 hover:border-white-alpha-20',
       variantClasses[variant],
       className
-    )}>
+    )} {...rest}>
       {title && (
         <div className="px-5 py-4 border-bottom-1 border-white-alpha-10 bg-white-alpha-5">
           <h3 className="m-0 text-xs font-black uppercase tracking-widest text-brand-primary">

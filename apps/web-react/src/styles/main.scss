@@ -163,6 +163,16 @@ body {
   .p-dialog-content { background: transparent !important; padding: 2rem !important; }
 }
 
+.p-sidebar {
+  background: #0f172a !important;
+  opacity: 1 !important;
+}
+
+.p-sidebar-mask {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
 .p-tooltip .p-tooltip-text {
   background: #000 !important;
   color: #fff !important;

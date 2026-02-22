@@ -64,6 +64,10 @@ export function ReportSignal() {
     }
   };
 
+  const handleDiscard = () => {
+    navigate("/");
+  };
+
   const getScaleColor = (val: number) => {
     if (val <= 2) return 'var(--status-resolved)';
     if (val <= 3) return 'var(--status-progress)';
@@ -74,22 +78,22 @@ export function ReportSignal() {
     <Layout>
       <div className="animate-fade-up max-w-60rem mx-auto pb-8">
         <div className="mb-8">
-          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">Submit Intelligence</h1>
-          <p className="text-secondary text-lg font-medium">Record a new civic signal for community prioritization.</p>
+          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">{t('report.title')}</h1>
+          <p className="text-secondary text-lg font-medium">{t('report.desc')}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid">
             <div className="col-12 lg:col-7">
-              <CivicCard title="Signal Metadata" className="mb-6">
-                <CivicField label="Signal Headline" error={errors.title?.message}>
+              <CivicCard title={t('report.title')} className="mb-6">
+                <CivicField label={t('report.issue_title')} error={errors.title?.message}>
                   <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: 5, message: t('report.title_too_short') } }} 
                     render={({ field, fieldState }) => (
                       <InputText
                         {...field}
                         id="report-title"
                         className={classNames('w-full', { 'p-invalid': fieldState.error })}
-                        placeholder="What is the problem?"
+                        placeholder={t('report.issue_title_placeholder')}
                         data-testid="report-title-input"
                       />
                     )} 
@@ -98,17 +102,18 @@ export function ReportSignal() {
 
                 <div className="grid">
                   <div className="col-12 md:col-6">
-                    <CivicField label="Civic Category">
+                    <CivicField label={t('common.category')}>
                       <Controller name="category" control={control} rules={{ required: t('common.required') }} 
                         render={({ field }) => (
                           <Dropdown
                             value={field.value}
                             onChange={(e) => field.onChange(e.value)}
                             options={categories}
-                            placeholder="Select Type"
+                            placeholder={t('common.select_category')}
                             inputId="report-category"
                             className="w-full bg-black-alpha-20"
                             data-testid="report-category-dropdown"
+                            appendTo={document.body}
                             itemTemplate={(option) => (
                               <div className="flex align-items-center gap-2">
                                 <i className={`pi ${option.icon} text-brand-primary`}></i>
@@ -121,7 +126,7 @@ export function ReportSignal() {
                     </CivicField>
                   </div>
                   <div className="col-12 md:col-6">
-                    <CivicField label="Estimated Scope">
+                    <CivicField label={t('report.scale')}>
                       <Controller name="affectedPeople" control={control} 
                         render={({ field }) => (
                           <div className="flex flex-column gap-3 p-3 border-round-xl bg-black-alpha-20 border-1 border-white-alpha-10">
@@ -137,7 +142,7 @@ export function ReportSignal() {
                   </div>
                 </div>
 
-                <CivicField label="Deep Context" error={errors.description?.message}>
+                <CivicField label={t('report.context')} error={errors.description?.message}>
                   <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: 20, message: t('report.desc_too_short') } }} 
                     render={({ field }) => (
                         <InputTextarea
@@ -145,7 +150,7 @@ export function ReportSignal() {
                           id="report-description"
                           rows={6}
                           className="w-full"
-                          placeholder="Describe the situation, location, and potential consequences..."
+                          placeholder={t('report.context_placeholder')}
                           data-testid="report-description-textarea"
                         />
                       )} 
@@ -155,14 +160,14 @@ export function ReportSignal() {
             </div>
 
             <div className="col-12 lg:col-5">
-              <CivicCard title="Prioritization Factors" variant="brand" className="mb-6">
+              <CivicCard title={t('signals.why_ranked_title')} variant="brand" className="mb-6">
                 <div className="flex flex-column gap-8 py-4">
                   {/* Urgency Picker */}
                   <div className="flex flex-column gap-4">
                     <div className="flex justify-content-between align-items-end">
                       <div>
-                        <label className="text-xs font-black uppercase tracking-widest text-main block mb-1">Urgency Level</label>
-                        <span className="text-xs text-muted font-bold">How fast does this need a response?</span>
+                        <label className="text-xs font-black uppercase tracking-widest text-main block mb-1">{t('report.urgency')}</label>
+                        <span className="text-xs text-muted font-bold">{t('signals.urgency_formula')}</span>
                       </div>
                       <span className="text-3xl font-black" style={{ color: getScaleColor(currentUrgency) }}>{currentUrgency}</span>
                     </div>
@@ -173,8 +178,8 @@ export function ReportSignal() {
                       )} />
                       </div>
                       <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
-                        <span>Low Priority</span>
-                        <span>Immediate Action</span>
+                        <span>{t('report.urgency_low')}</span>
+                        <span>{t('report.urgency_critical')}</span>
                       </div>
                     </div>
                   </div>
@@ -183,8 +188,8 @@ export function ReportSignal() {
                   <div className="flex flex-column gap-4">
                     <div className="flex justify-content-between align-items-end">
                       <div>
-                        <label className="text-xs font-black uppercase tracking-widest text-main block mb-1">Social Impact</label>
-                        <span className="text-xs text-muted font-bold">Severity of the problem's effects.</span>
+                        <label className="text-xs font-black uppercase tracking-widest text-main block mb-1">{t('report.impact')}</label>
+                        <span className="text-xs text-muted font-bold">{t('signals.impact_formula')}</span>
                       </div>
                       <span className="text-3xl font-black" style={{ color: getScaleColor(currentImpact) }}>{currentImpact}</span>
                     </div>
@@ -195,32 +200,39 @@ export function ReportSignal() {
                       )} />
                       </div>
                       <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
-                        <span>Minor Nuisance</span>
-                        <span>Systemic Failure</span>
+                        <span>{t('report.impact_minor')}</span>
+                        <span>{t('report.impact_systemic')}</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </CivicCard>
 
-              <CivicCard title="Protocol Validation">
+              <CivicCard title={t('auth.verify_protocol')}>
                 {!activeCommunityId ? (
                   <div className="p-4 border-round-xl bg-status-rejected-alpha-10 border-1 border-status-rejected-alpha-20 text-status-rejected text-sm font-bold flex align-items-center gap-3">
                     <i className="pi pi-lock text-xl"></i>
-                    No Community Active. Access Denied.
+                    {t('report.community_required')}
                   </div>
                 ) : (
                   <div className="flex flex-column gap-4">
                     <div className="flex align-items-center gap-3 p-3 bg-white-alpha-5 border-round-xl border-1 border-white-alpha-10">
                       <i className="pi pi-shield text-brand-primary text-xl"></i>
                       <div className="flex flex-column">
-                        <span className="text-xs font-bold text-main uppercase">Encryption Verified</span>
-                        <span className="text-min text-muted">Ready for secure transmission</span>
+                        <span className="text-xs font-bold text-main uppercase">{t('settings.encryption')}</span>
+                        <span className="text-min text-muted">{t('settings.encryption_value')}</span>
                       </div>
                     </div>
                     <CivicButton
+                      label={t('common.discard')}
+                      variant="secondary"
+                      className="w-full py-4 text-lg"
+                      onClick={handleDiscard}
+                      data-testid="report-discard-button"
+                    />
+                    <CivicButton
                       type="submit"
-                      label="Dispatch Signal"
+                      label={t('report.submit')}
                       icon="pi pi-bolt"
                       loading={isSubmitting}
                       className="w-full py-4 text-lg"

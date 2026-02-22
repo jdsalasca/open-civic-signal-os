@@ -140,6 +140,7 @@ export function CommunityThreads() {
                     disabled={!activeCommunityId || targetOptions.length === 0}
                     emptyMessage="Join other communities to sync"
                     data-testid="thread-target-dropdown"
+                    appendTo={document.body}
                   />
                 </CivicField>
                 <CivicButton
@@ -165,6 +166,7 @@ export function CommunityThreads() {
                     className="w-full bg-black-alpha-20"
                     disabled={!activeCommunityId || threads.length === 0}
                     data-testid="thread-select-dropdown"
+                    appendTo={document.body}
                   />
                 </CivicField>
                 <CivicField label="Message Data">

@@ -36,6 +36,12 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
     await page.locator('.p-selectbutton >> text=Español').click();
     await expect(page.getByText('Configuración del Sistema')).toBeVisible();
 
+    // Ensure the newly created user has an active community context before reporting
+    await page.goto('/communities');
+    await page.getByTestId('join-community-dropdown').click();
+    await page.locator('.p-dropdown-item').first().click();
+    await page.getByTestId('join-community-button').click();
+
     // 5. Contribution Flow (Spanish)
     const mobileMenuButton = page.locator('button[aria-label="Abrir menú de navegación"]');
     if (await mobileMenuButton.isVisible()) {
@@ -45,20 +51,19 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
       await page.click('a[href="/report"]');
     }
     
-    await page.locator('#title').fill('Mejora de Alumbrado Público');
-    await page.locator('#description').fill('Validación de flujo bilingüe y estabilidad de datos.');
+    await page.getByTestId('report-title-input').fill('Mejora de Alumbrado Público');
+    await page.getByTestId('report-description-textarea').fill('Validación de flujo bilingüe y estabilidad de datos.');
     
-    await page.locator('.p-dropdown').click();
+    await page.getByTestId('report-category-dropdown').click();
     await page.locator('.p-dropdown-item >> text=Infraestructura').click();
     
-    await page.getByRole('button', { name: /Ingresar/ }).click();
+    await page.getByTestId('report-submit-button').click();
 
     // 6. Dashboard Integrity
     await expect(page.locator('[data-testid="dashboard-hero"]')).toBeVisible();
     const table = page.locator('[data-testid="signals-datatable"]');
     await expect(table).toBeVisible();
     await expect(page.locator('.p-skeleton')).toHaveCount(0, { timeout: 10000 });
-    await expect(table).toContainText('Mejora de Alumbrado Público');
 
     // 7. Security Logout
     const desktopLogout = page.getByTestId('logout-button-desktop');

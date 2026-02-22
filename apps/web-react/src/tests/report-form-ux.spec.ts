@@ -10,7 +10,7 @@ test('Report form UX validation - Sliders and Dropdowns', async ({ page }) => {
   
   // Navigate to report
   await page.goto('/report');
-  await expect(page).toHaveURL('http://localhost:3002/report');
+  await expect(page).toHaveURL(/\/report$/);
 
   // Fill text fields
   await page.getByTestId('report-title-input').fill('Dangerous Pothole on Main St');

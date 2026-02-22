@@ -17,6 +17,7 @@ export function CivicButton({ variant = 'primary', glow, className, ...props }: 
   return (
     <Button
       {...props}
+      type={props.type ?? 'button'}
       className={classNames(
         'transition-all active:scale-95 px-4 py-2 font-bold uppercase tracking-wider text-xs',
         variantClasses[variant],

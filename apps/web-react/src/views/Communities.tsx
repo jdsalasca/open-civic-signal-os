@@ -119,6 +119,8 @@ export function Communities() {
                       onChange={(e) => setSelectedCommunityId(e.value)}
                       placeholder="Select a community"
                       className="w-full bg-black-alpha-20"
+                      appendTo={document.body}
+                      data-testid="join-community-dropdown"
                     />
                   </div>
                   <div className="col-12 md:col-6 lg:col-4">
@@ -127,6 +129,8 @@ export function Communities() {
                       options={roleOptions}
                       onChange={(e) => setJoinRole(e.value)}
                       className="w-full bg-black-alpha-20"
+                      appendTo={document.body}
+                      data-testid="join-role-dropdown"
                     />
                   </div>
                   <div className="col-12 md:col-6 lg:col-2 flex-grow-1">
@@ -137,6 +141,7 @@ export function Communities() {
                       disabled={!selectedCommunityId}
                       className="w-full"
                       glow
+                      data-testid="join-community-button"
                     />
                   </div>
                 </div>
@@ -156,6 +161,8 @@ export function Communities() {
                         options={roleOptions}
                         onChange={(e) => roleUpdate(membership, e.value)}
                         className="w-14rem bg-black-alpha-30"
+                        appendTo={document.body}
+                        data-testid={`membership-role-dropdown-${membership.communityId}`}
                       />
                     </div>
                   ))}

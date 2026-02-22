@@ -81,6 +81,7 @@ export function CommunityFeed() {
               onChange={(e) => setTypeFilter(e.value)}
               className="w-14rem bg-transparent border-none font-bold"
               disabled={!activeCommunityId}
+              appendTo={document.body}
             />
             <Dropdown
               value={days}
@@ -92,6 +93,7 @@ export function CommunityFeed() {
               onChange={(e) => setDays(e.value)}
               className="w-12rem bg-transparent border-none font-bold"
               disabled={!activeCommunityId}
+              appendTo={document.body}
             />
           </div>
         </div>

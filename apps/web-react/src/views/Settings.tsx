@@ -31,13 +31,13 @@ export function Settings() {
   const { activeRole, rawRoles, switchRole, userName } = useAuthStore();
 
   const languageOptions = [
-    { label: 'English', value: 'en' },
-    { label: 'Español', value: 'es' }
+    { label: t('settings.languages.en'), value: 'en' },
+    { label: t('settings.languages.es'), value: 'es' }
   ];
 
   const themeOptions: ThemeOption[] = [
-    { label: 'Dark Mode', value: 'dark', icon: 'pi pi-moon' },
-    { label: 'Light Mode', value: 'light', icon: 'pi pi-sun' }
+    { label: t('settings.dark'), value: 'dark', icon: 'pi pi-moon' },
+    { label: t('settings.light'), value: 'light', icon: 'pi pi-sun' }
   ];
 
   const handleLanguageChange = (e: SelectButtonChangeEvent) => {
@@ -60,8 +60,9 @@ export function Settings() {
   const handleRoleChange = (e: DropdownChangeEvent) => {
     const nextRole = e.value as string | undefined;
     if (!nextRole || nextRole === activeRole) return;
+    const roleLabel = roleOptions.find((option) => option.value === nextRole)?.label ?? nextRole;
     switchRole(nextRole);
-    toast.success(`Active authorization level updated to ${nextRole}`);
+    toast.success(t('settings.role_switched', { role: roleLabel }));
   };
 
   const roleOptions: RoleOption[] = rawRoles.map((role) => ({
@@ -80,9 +81,9 @@ export function Settings() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success("Intelligence dataset exported successfully");
+      toast.success(t('settings.export_success'));
     } catch (err) {
-      toast.error("Data export failed: Insufficient clearance");
+      toast.error(t('settings.export_error'));
     }
   };
 
@@ -90,13 +91,13 @@ export function Settings() {
     <Layout>
       <div className="animate-fade-up max-w-50rem mx-auto">
         <div className="mb-8">
-          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">System Configuration</h1>
-          <p className="text-secondary text-lg font-medium">Manage your digital identity and operational preferences.</p>
+          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">{t('settings.title')}</h1>
+          <p className="text-secondary text-lg font-medium">{t('settings.desc')}</p>
         </div>
 
         <div className="grid">
           <div className="col-12 lg:col-5">
-            <CivicCard title="Identity Profile" variant="brand" className="h-full">
+            <CivicCard title={t('settings.identity_profile')} variant="brand" className="h-full">
               <div className="flex flex-column align-items-center text-center py-4">
                 <div className="relative mb-4">
                   <Avatar label={userName?.[0].toUpperCase()} shape="circle" size="xlarge" className="bg-brand-primary text-white font-black shadow-xl" style={{ width: '80px', height: '80px', fontSize: '2rem' }} />
@@ -105,23 +106,23 @@ export function Settings() {
                 <h2 className="text-2xl font-black text-main m-0 tracking-tight">{userName}</h2>
                 <div className="mt-2 flex gap-2 justify-content-center">
                   <CivicBadge label={activeRole} severity="progress" />
-                  <CivicBadge label="Verified User" severity="resolved" />
+                  <CivicBadge label={t('settings.verified_user')} severity="resolved" />
                 </div>
                 
                 <Divider className="my-6 opacity-10" />
                 
                 <div className="w-full text-left">
                   <div className="flex justify-content-between mb-3">
-                    <span className="text-xs font-bold text-muted uppercase">Clearance Level</span>
-                    <span className="text-xs font-mono text-main">L-04 ADMIN</span>
+                    <span className="text-xs font-bold text-muted uppercase">{t('settings.clearance_level')}</span>
+                    <span className="text-xs font-mono text-main">{t('settings.clearance_level_value')}</span>
                   </div>
                   <div className="flex justify-content-between mb-3">
-                    <span className="text-xs font-bold text-muted uppercase">Encryption</span>
-                    <span className="text-xs font-mono text-main">AES-256 Enabled</span>
+                    <span className="text-xs font-bold text-muted uppercase">{t('settings.encryption')}</span>
+                    <span className="text-xs font-mono text-main">{t('settings.encryption_value')}</span>
                   </div>
                   <div className="flex justify-content-between">
-                    <span className="text-xs font-bold text-muted uppercase">Protocol</span>
-                    <span className="text-xs font-mono text-main">SignalOS v2.4</span>
+                    <span className="text-xs font-bold text-muted uppercase">{t('settings.protocol')}</span>
+                    <span className="text-xs font-mono text-main">{t('settings.protocol_value')}</span>
                   </div>
                 </div>
               </div>
@@ -129,23 +130,25 @@ export function Settings() {
           </div>
 
           <div className="col-12 lg:col-7">
-            <CivicCard title="Interface & Protocol" className="mb-6">
+            <CivicCard title={t('settings.interface_protocol')} className="mb-6">
               <div className="flex flex-column gap-6">
-                <CivicField label="Global Language" helpText="Localization for all system notifications and UI elements.">
+                <CivicField label={t('settings.language')} helpText={t('settings.language_help')}>
                   <SelectButton
                     value={language}
                     options={languageOptions}
                     onChange={handleLanguageChange}
                     className="w-full"
+                    data-testid="language-select"
                   />
                 </CivicField>
 
-                <CivicField label="Visual Environment" helpText="Adjust the interface contrast for your current workspace.">
+                <CivicField label={t('settings.theme')} helpText={t('settings.theme_help')}>
                   <SelectButton
                     value={theme}
                     options={themeOptions}
                     onChange={handleThemeChange}
                     className="w-full"
+                    data-testid="theme-select"
                     itemTemplate={(option: ThemeOption) => (
                       <div className="flex align-items-center justify-content-center gap-3 w-full py-1">
                         <i className={option.icon}></i>
@@ -155,8 +158,8 @@ export function Settings() {
                   />
                 </CivicField>
 
-                {rawRoles.length > 1 && (
-                  <CivicField label="Active Authority" helpText="Switch between your authorized roles for this session.">
+                <CivicField label={t('settings.role')} helpText={t('settings.role_desc')}>
+                  <div data-testid="role-switch-dropdown">
                     <Dropdown
                       value={activeRole}
                       options={roleOptions}
@@ -164,6 +167,8 @@ export function Settings() {
                       optionValue="value"
                       onChange={handleRoleChange}
                       className="w-full bg-black-alpha-20 p-inputtext-lg"
+                      disabled={rawRoles.length <= 1}
+                      appendTo={document.body}
                       itemTemplate={(option: RoleOption) => (
                         <div className="flex flex-column py-1">
                           <span className="font-bold text-main">{option.label}</span>
@@ -171,19 +176,19 @@ export function Settings() {
                         </div>
                       )}
                     />
-                  </CivicField>
-                )}
+                  </div>
+                </CivicField>
               </div>
             </CivicCard>
 
             {activeRole === 'SUPER_ADMIN' && (
-              <CivicCard title="Administrative Arsenal" variant="danger">
+              <CivicCard title={t('settings.admin_tools')} variant="danger">
                 <div className="flex flex-column gap-4">
                   <p className="text-secondary text-sm m-0 leading-relaxed">
-                    Access high-level data exports and system-wide integrity tools.
+                    {t('settings.admin_desc')}
                   </p>
                   <CivicButton
-                    label="Download Intelligence Dataset"
+                    label={t('settings.export_button')}
                     icon="pi pi-download" 
                     variant="danger"
                     className="w-full py-4 text-sm"
@@ -197,7 +202,7 @@ export function Settings() {
 
         <div className="text-center mt-8 p-6 bg-white-alpha-5 border-round-3xl border-1 border-white-alpha-10 mb-8">
           <p className="text-muted text-xs font-bold uppercase tracking-widest m-0">
-            Open Civic Signal OS — Professional Governance Protocol
+            {t('settings.footer')}
           </p>
         </div>
       </div>

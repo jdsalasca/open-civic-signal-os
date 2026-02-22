@@ -125,20 +125,18 @@ export function Dashboard() {
   return (
     <Layout>
       <div className="animate-fade-up">
-        <section className="mb-8 flex flex-column lg:flex-row justify-content-between align-items-end gap-6">
+        <section className="mb-8 flex flex-column lg:flex-row justify-content-between align-items-end gap-6" data-testid="dashboard-hero">
           <div>
             <div className="flex align-items-center gap-3 mb-4">
               <CivicBadge label="Operations Live" severity="new" />
-              <div className="flex align-items-center gap-2 px-3 py-1 bg-white-alpha-5 border-round-lg border-1 border-white-alpha-10 text-xs font-bold text-secondary">
+              <div className="flex align-items-center gap-2 px-3 py-1 bg-white-alpha-5 border-round-lg border-1 border-white-alpha-10 text-xs font-bold text-secondary" data-testid="welcome-message">
                 <i className="pi pi-user text-brand-primary"></i>
                 {userName}
               </div>
-              {meta && (
-                <div className="flex align-items-center gap-2 px-3 py-1 bg-white-alpha-5 border-round-lg border-1 border-white-alpha-10 text-xs font-bold text-secondary">
-                  <i className="pi pi-clock text-brand-primary"></i>
-                  {formatLastUpdated(meta.lastUpdatedAt)}
-                </div>
-              )}
+              <div className="flex align-items-center gap-2 px-3 py-1 bg-white-alpha-5 border-round-lg border-1 border-white-alpha-10 text-xs font-bold text-secondary" data-testid="dashboard-freshness-badge">
+                <i className="pi pi-clock text-brand-primary"></i>
+                {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
+              </div>
             </div>
             <h1 className="text-6xl font-black m-0 tracking-tighter text-main line-height-1">
               {t('dashboard.title')}

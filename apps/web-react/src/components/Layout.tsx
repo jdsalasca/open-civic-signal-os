@@ -62,20 +62,20 @@ export function Layout({ children, authMode = false }: Props) {
 
   const mainNav = [
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
-    { label: 'Live Feed', to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
+    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
   ];
 
   const socialNav = [
-    { label: 'Public Blog', to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
-    { label: 'Dialogues', to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
+    { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
+    { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
   ];
 
   const personalNav = [
-    { label: 'Contributions', to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
+    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
     { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && isStaff },
-    { label: 'Registry', to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
-    { label: 'Settings', to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
+    { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
+    { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
   ];
 
   const communityOptions = memberships.map((m) => ({
@@ -135,11 +135,12 @@ export function Layout({ children, authMode = false }: Props) {
               </div>
             </div>
             <Button 
-              label="Sign Out" 
+              label={t('nav.sign_out')}
               icon="pi pi-power-off" 
               text 
               className="w-full justify-content-start text-xs font-black text-muted hover:text-danger py-3" 
-              onClick={handleLogout} 
+              onClick={handleLogout}
+              data-testid="logout-button-desktop"
             />
           </div>
         </div>
@@ -149,7 +150,14 @@ export function Layout({ children, authMode = false }: Props) {
       <div className="flex flex-column flex-grow-1 overflow-hidden relative">
         <header className="h-5rem flex align-items-center justify-content-between px-6 border-bottom-1 border-white-alpha-5 bg-black-alpha-40 backdrop-blur-xl z-1">
           <div className="flex align-items-center gap-6 flex-grow-1">
-            <Button icon="pi pi-bars" text className="lg:hidden text-main" onClick={() => setMobileMenuVisible(true)} />
+            <Button
+              icon="pi pi-bars"
+              text
+              className="lg:hidden text-main"
+              onClick={() => setMobileMenuVisible(true)}
+              aria-label={t('nav.open_navigation')}
+              data-testid="mobile-menu-toggle"
+            />
             
             <div className="hidden md:flex align-items-center flex-grow-1 max-w-30rem">
               <span className="p-input-icon-left w-full relative group">
@@ -175,6 +183,8 @@ export function Layout({ children, authMode = false }: Props) {
                   onChange={(e) => handleCommunitySwitch(e.value)}
                   placeholder="Sector"
                   className="w-10rem border-none bg-transparent font-bold text-sm"
+                  data-testid="community-switch-dropdown"
+                  appendTo={document.body}
                   itemTemplate={(option) => (
                     <div className="flex flex-column py-1">
                       <span className="font-black text-xs uppercase tracking-widest">{option.label}</span>
@@ -226,6 +236,14 @@ export function Layout({ children, authMode = false }: Props) {
             <NavGroup title="Social" items={socialNav} />
             <NavGroup title="System" items={personalNav} />
           </nav>
+          <Button
+            label={t('nav.sign_out')}
+            icon="pi pi-power-off"
+            text
+            className="w-full justify-content-start text-xs font-black text-muted hover:text-danger py-3"
+            onClick={handleLogout}
+            data-testid="logout-button-mobile"
+          />
         </div>
       </Sidebar>
     </div>

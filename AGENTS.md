@@ -199,6 +199,12 @@ These rules were added from recurring AI-generated mistakes in this repository.
   - avoid placeholder/text-only selectors for critical actions
   - prefer stable `data-testid` hooks for navigation, form submit, and modal actions
   - when UI copy changes, update tests and selectors in the same PR
+- Do not ship ambiguous form-button behavior:
+  - all non-submit UI buttons inside/near forms must be explicit `type="button"`
+  - keep `type="submit"` only on the primary submit action
+- Do not ship unstable dropdown overlays:
+  - PrimeReact `Dropdown` used in constrained containers/header cards must use body portal mounting (`appendTo={document.body}`)
+  - verify menu layering with Playwright on mobile + desktop whenever dropdown placement changes
 - Do not mix unrelated work:
   - avoid bundling UI redesign + backend + docs automation in one PR unless requested
   - keep one objective and one rollback path

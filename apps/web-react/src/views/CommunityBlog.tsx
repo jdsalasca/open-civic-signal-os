@@ -123,6 +123,7 @@ export function CommunityBlog() {
                       options={statusTagOptions}
                       onChange={(e) => setStatusTag(e.value)}
                       className="w-full bg-black-alpha-20"
+                      appendTo={document.body}
                     />
                   </CivicField>
 

@@ -110,7 +110,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
   );
 
   return (
-    <div className="animate-fade-up overflow-hidden border-round-3xl border-1 border-white-alpha-10 shadow-premium">
+    <div className="animate-fade-up overflow-hidden border-round-3xl border-1 border-white-alpha-10 shadow-premium" data-testid="signals-datatable">
       <DataTable 
         value={tableData} 
         lazy

@@ -48,10 +48,9 @@ export function App() {
   return (
     <BrowserRouter>
       <Toaster 
-        position="bottom-right"
+        position="top-center"
         containerStyle={{
-          bottom: '2rem',
-          right: '2rem',
+          top: '1rem',
           zIndex: 99999,
         }}
         gutter={12}
