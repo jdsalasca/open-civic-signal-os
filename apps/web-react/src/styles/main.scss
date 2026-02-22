@@ -229,6 +229,27 @@ select:focus-visible,
   width: 100%;
 }
 
+.civic-toolbar {
+  background: var(--bg-elevated);
+}
+
+.civic-select-panel {
+  z-index: 10020 !important;
+  max-width: min(92vw, 30rem);
+}
+
+@media (max-width: 640px) {
+  .civic-toolbar {
+    width: 100%;
+  }
+}
+
+@media (hover: none) {
+  .hover-actions {
+    opacity: 1 !important;
+  }
+}
+
 // --- ANIMATIONS ---
 @keyframes shimmer {
   0% { background-position: -200% 0; }

@@ -15,6 +15,7 @@ import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicSkeleton } from "../components/ui/CivicSkeleton";
+import { CivicToolbar } from "../components/ui/CivicToolbar";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -197,7 +198,7 @@ export function Dashboard() {
         <div className="grid">
           <div className="col-12 xl:col-9">
             <div className="flex align-items-center justify-content-between mb-4 px-2">
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hidden">
+              <CivicToolbar className="overflow-x-auto pb-2 scrollbar-hidden">
                 {quickFilters.map(f => (
                   <button
                     key={f.value}
@@ -214,7 +215,7 @@ export function Dashboard() {
                     {f.label}
                   </button>
                 ))}
-              </div>
+              </CivicToolbar>
             </div>
 
             {loading ? (

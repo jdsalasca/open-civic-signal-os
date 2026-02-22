@@ -11,6 +11,8 @@ import { CivicButton } from "../components/ui/CivicButton";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicEmptyState } from "../components/ui/CivicEmptyState";
+import { CivicToolbar } from "../components/ui/CivicToolbar";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -109,8 +111,8 @@ export function Communities() {
           <div className="col-12 lg:col-7">
             <CivicCard title="My Memberships" className="h-full">
               <div className="flex flex-column gap-4">
-                <div className="grid grid-nogutter gap-3 mb-4 p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10">
-                  <div className="col-12 lg:col-5">
+                <CivicToolbar className="mb-4 p-4">
+                  <div className="flex-1" style={{ minWidth: "14rem" }}>
                     <CivicSelect
                       value={selectedCommunityId}
                       options={communityOptions}
@@ -120,7 +122,7 @@ export function Communities() {
                       data-testid="join-community-dropdown"
                     />
                   </div>
-                  <div className="col-12 md:col-6 lg:col-4">
+                  <div className="flex-1" style={{ minWidth: "12rem" }}>
                     <CivicSelect
                       value={joinRole}
                       options={roleOptions}
@@ -129,7 +131,7 @@ export function Communities() {
                       data-testid="join-role-dropdown"
                     />
                   </div>
-                  <div className="col-12 md:col-6 lg:col-2 flex-grow-1">
+                  <div className="flex-1" style={{ minWidth: "10rem" }}>
                     <CivicButton
                       label="Join"
                       icon="pi pi-user-plus"
@@ -140,7 +142,7 @@ export function Communities() {
                       data-testid="join-community-button"
                     />
                   </div>
-                </div>
+                </CivicToolbar>
 
                 <div className="flex flex-column gap-3">
                   {memberships.map((membership) => (
@@ -156,16 +158,17 @@ export function Communities() {
                         value={membership.role}
                         options={roleOptions}
                         onChange={(e) => roleUpdate(membership, e.value)}
-                        className="w-14rem bg-black-alpha-30"
+                        className="w-full md:w-14rem bg-black-alpha-30"
                         data-testid={`membership-role-dropdown-${membership.communityId}`}
                       />
                     </div>
                   ))}
                   {memberships.length === 0 && (
-                    <div className="text-center p-8 text-muted border-2 border-dashed border-white-alpha-10 border-round-2xl">
-                      <i className="pi pi-users text-4xl mb-3 block"></i>
-                      You are not a member of any community yet.
-                    </div>
+                    <CivicEmptyState
+                      icon="pi-users"
+                      title="No memberships yet"
+                      description="Join a community from the selector above to start participating."
+                    />
                   )}
                 </div>
               </div>
@@ -185,14 +188,22 @@ export function Communities() {
                   data-testid="open-create-community-button"
                 />
               </div>
-              <div className="flex flex-column gap-3">
-                {communities.map((community) => (
-                  <div key={community.id} className="p-4 border-round-xl border-1 border-white-alpha-10 bg-black-alpha-20 flex justify-content-between align-items-center">
-                    <div className="font-bold text-main">{community.name}</div>
-                    <CivicBadge label={community.slug} type="category" />
-                  </div>
-                ))}
-              </div>
+              {communities.length === 0 ? (
+                <CivicEmptyState
+                  icon="pi-globe"
+                  title="Registry is empty"
+                  description="Create the first community to initialize the public registry."
+                />
+              ) : (
+                <div className="flex flex-column gap-3">
+                  {communities.map((community) => (
+                    <div key={community.id} className="p-4 border-round-xl border-1 border-white-alpha-10 bg-black-alpha-20 flex justify-content-between align-items-center">
+                      <div className="font-bold text-main">{community.name}</div>
+                      <CivicBadge label={community.slug} type="category" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </CivicCard>
           </div>
         </div>

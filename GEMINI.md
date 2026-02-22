@@ -94,7 +94,7 @@
 - Never ship inconsistent form quality across participation workflows:
   - report/blog/thread creation must include min/max guidance and live character counters
   - keep copy localized (EN/ES) in the same PR whenever labels/placeholders/feedback change
-  - prefer shared UI primitives for repeated patterns (`CivicSelect`, page headers, counters, fields)
+  - prefer shared UI primitives for repeated patterns (`CivicSelect`, page headers, counters, fields, toolbars, empty states)
 - Never regress accessibility fundamentals:
   - keep keyboard navigation discoverable (skip-to-content + visible focus rings)
   - use semantic landmarks and active-link state (`aria-current`) in shared navigation

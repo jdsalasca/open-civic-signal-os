@@ -7,9 +7,10 @@ import { useCommunityStore } from "../store/useCommunityStore";
 import apiClient from "../api/axios";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
-import { CivicButton } from "../components/ui/CivicButton";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicSelect } from "../components/ui/CivicSelect";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicToolbar } from "../components/ui/CivicToolbar";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -69,17 +70,18 @@ export function CommunityFeed() {
     <Layout>
       <div className="animate-fade-up">
         <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">Live Ecosystem</h1>
-            <p className="text-secondary text-lg font-medium">Real-time pulses from {activeCommunityName || 'your community'}.</p>
-          </div>
+          <CivicPageHeader
+            title="Live Ecosystem"
+            description={`Real-time pulses from ${activeCommunityName || 'your community'}.`}
+            className="mb-0"
+          />
           
-          <div className="flex gap-3 bg-black-alpha-20 p-2 border-round-2xl border-1 border-white-alpha-10">
+          <CivicToolbar>
             <CivicSelect
               value={typeFilter}
               options={typeOptions}
               onChange={(e) => setTypeFilter(e.value)}
-              className="w-14rem bg-transparent border-none font-bold"
+              className="w-full md:w-14rem bg-transparent border-none font-bold"
               disabled={!activeCommunityId}
             />
             <CivicSelect
@@ -90,18 +92,21 @@ export function CommunityFeed() {
                 { label: "Past 30 days", value: 30 },
               ]}
               onChange={(e) => setDays(e.value)}
-              className="w-12rem bg-transparent border-none font-bold"
+              className="w-full md:w-12rem bg-transparent border-none font-bold"
               disabled={!activeCommunityId}
             />
-          </div>
+          </CivicToolbar>
         </div>
 
         {!activeCommunityId ? (
-          <CivicCard className="text-center p-8">
-            <i className="pi pi-map-marker text-4xl text-muted mb-4 block"></i>
-            <h3 className="text-main text-2xl font-black m-0">No Community Selected</h3>
-            <p className="text-secondary mt-2 mb-6">Select a community context from the navigation bar to see live activity.</p>
-            <CivicButton label="Explore Communities" variant="secondary" onClick={() => navigate('/communities')} />
+          <CivicCard>
+            <CivicEmptyState
+              icon="pi-map-marker"
+              title="No Community Selected"
+              description="Select a community context from the navigation bar to see live activity."
+              actionLabel="Explore Communities"
+              onAction={() => navigate('/communities')}
+            />
           </CivicCard>
         ) : (
           <div className="grid">

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -18,10 +19,12 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
+import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 
 type ApiError = Error & { friendlyMessage?: string };
 
 export function CommunityBlog() {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeCommunityId, memberships } = useCommunityStore();
   const { activeRole } = useAuthStore();
@@ -160,11 +163,23 @@ export function CommunityBlog() {
           )}
 
           <div className={isStaff ? "col-12 lg:col-8" : "col-12 lg:col-8 lg:col-offset-2"}>
-            {posts.length === 0 ? (
-              <CivicCard className="text-center p-8">
-                <i className="pi pi-history text-4xl text-muted mb-4 block"></i>
-                <h3 className="text-main text-2xl font-black m-0">{t('community_blog.empty_title')}</h3>
-                <p className="text-secondary mt-2">{t('community_blog.empty_desc')}</p>
+            {!activeCommunityId ? (
+              <CivicCard>
+                <CivicEmptyState
+                  icon="pi-map-marker"
+                  title={t('community_blog.empty_title')}
+                  description={t('report.community_required')}
+                  actionLabel={t('nav.communities')}
+                  onAction={() => navigate('/communities')}
+                />
+              </CivicCard>
+            ) : posts.length === 0 ? (
+              <CivicCard>
+                <CivicEmptyState
+                  icon="pi-history"
+                  title={t('community_blog.empty_title')}
+                  description={t('community_blog.empty_desc')}
+                />
               </CivicCard>
             ) : (
               <div className="flex flex-column gap-8">

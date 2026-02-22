@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputText } from "primereact/inputtext";
@@ -16,12 +17,14 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
+import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 
 type ApiError = Error & { friendlyMessage?: string };
 
 const REACTION_TYPES = ["👍", "🔥", "🙌", "📍", "👏", "🆘"];
 
 export function CommunityThreads() {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { memberships, activeCommunityId } = useCommunityStore();
   const [threads, setThreads] = useState<CommunityThread[]>([]);
@@ -121,6 +124,18 @@ export function CommunityThreads() {
       <div className="animate-fade-up">
         <CivicPageHeader title={t('community_threads.title')} description={t('community_threads.desc')} />
 
+        {!activeCommunityId && (
+          <CivicCard className="mb-6">
+            <CivicEmptyState
+              icon="pi-map-marker"
+              title={t('community_threads.none')}
+              description={t('report.community_required')}
+              actionLabel={t('nav.communities')}
+              onAction={() => navigate('/communities')}
+            />
+          </CivicCard>
+        )}
+
         <div className="grid">
           <div className="col-12 lg:col-4">
             <CivicCard title={t('community_threads.channel_title')} className="mb-6" variant="brand">
@@ -205,10 +220,11 @@ export function CommunityThreads() {
           <div className="col-12 lg:col-8">
             <CivicCard title={t('community_threads.feed_title', { community: activeMembership?.communityName || t('community_threads.none') })} padding="none">
               {threads.length === 0 ? (
-                <div className="text-center p-8 text-muted">
-                  <i className="pi pi-comments text-4xl mb-3 block"></i>
-                  {t('community_threads.empty')}
-                </div>
+                <CivicEmptyState
+                  icon="pi-comments"
+                  title={t('community_threads.empty')}
+                  description={t('community_threads.join_other')}
+                />
               ) : (
                 <div className="flex flex-column gap-px bg-white-alpha-10">
                   {threads.map((thread) => (
@@ -237,7 +253,7 @@ export function CommunityThreads() {
                                 </div>
                               </div>
                               
-                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="hover-actions flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 {REACTION_TYPES.map(emoji => (
                                   <button 
                                     key={emoji}
@@ -277,7 +293,7 @@ export function CommunityThreads() {
                                 size="small"
                                 icon={message.hidden ? "pi pi-eye" : "pi pi-eye-slash"}
                                 label={message.hidden ? t('community_threads.restore') : t('community_threads.hide')}
-                                className="text-min font-black opacity-20 hover:opacity-100"
+                                className="text-min font-black opacity-80"
                                 onClick={() => moderateMessage(thread.id, message.id, !message.hidden)}
                               />
                             </div>

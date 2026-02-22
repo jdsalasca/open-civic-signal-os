@@ -56,6 +56,7 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
   - preserve readability in both themes by using tokenized contrast values, not hardcoded text shades
 - Centralize UI primitives:
   - prefer shared components (`CivicSelect`, page headers, counters, fields) over repeated local markup
+  - prefer shared containers (`CivicToolbar`, `CivicEmptyState`) for filter bars and empty states
   - avoid ad-hoc style divergence across views for the same control type
 
 ## Collaboration Workflow
