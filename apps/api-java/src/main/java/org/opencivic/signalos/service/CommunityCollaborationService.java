@@ -305,6 +305,25 @@ public class CommunityCollaborationService {
         );
     }
 
+    @Transactional
+    public CommunityThreadMessageResponse reactToMessage(
+        UUID threadId,
+        UUID messageId,
+        String reactionType,
+        String username
+    ) {
+        User user = accessService.getCurrentUser(username);
+        CommunityThreadMessage message = messageRepository.findById(messageId)
+            .orElseThrow(() -> new ResourceNotFoundException("Thread message not found: " + messageId));
+        
+        Map<String, Integer> reactions = message.getReactions();
+        reactions.put(reactionType, reactions.getOrDefault(reactionType, 0) + 1);
+        message.setReactions(reactions);
+        
+        CommunityThreadMessage saved = messageRepository.save(message);
+        return toMessageResponse(saved);
+    }
+
     private CommunityThreadMessageResponse toMessageResponse(CommunityThreadMessage message) {
         return new CommunityThreadMessageResponse(
             message.getId(),
@@ -316,7 +335,8 @@ public class CommunityCollaborationService {
             message.getModerationReason(),
             message.getHiddenBy(),
             message.getHiddenAt(),
-            message.getCreatedAt()
+            message.getCreatedAt(),
+            message.getReactions()
         );
     }
 

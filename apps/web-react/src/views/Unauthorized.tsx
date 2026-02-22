@@ -1,53 +1,42 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
-import { useAuthStore } from "../store/useAuthStore";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicCard } from "../components/ui/CivicCard";
 import { Layout } from "../components/Layout";
-import { useTranslation } from "react-i18next";
 
 export function Unauthorized() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
-  const logout = useAuthStore((state) => state.logout);
-
-  const handleSwitchAccount = () => {
-    logout();
-    navigate("/login");
-  };
 
   return (
     <Layout authMode>
-      <div className="flex align-items-center justify-content-center mt-8">
-        <Card className="exception-card shadow-8 border-1 border-white-alpha-10 animate-fade-in border-red-900" style={{ maxWidth: '450px' }}>
-          <div className="text-center">
-            <div className="inline-flex align-items-center justify-content-center bg-red-900-alpha-20 border-circle mb-4 shadow-4" style={{ width: '100px', height: '100px' }}>
-              <i className="pi pi-lock text-5xl text-red-500"></i>
+      <div className="min-h-screen flex justify-content-center align-items-center p-4">
+        <CivicCard className="w-full max-w-30rem text-center animate-fade-up" padding="lg">
+          <div className="mb-8">
+            <div className="inline-flex align-items-center justify-content-center p-4 bg-status-progress-alpha-10 border-round-3xl mb-6 border-1 border-status-progress-alpha-20">
+              <i className="pi pi-lock text-5xl text-status-progress"></i>
             </div>
-            <h1 className="text-6xl font-black text-white m-0 tracking-tighter">{t('exceptions.403_title')}</h1>
-            <h2 className="text-2xl font-bold text-gray-200 mt-2 mb-4">{t('exceptions.403_subtitle')}</h2>
-            <p className="text-gray-400 mb-6 line-height-3">
-              {t('exceptions.403_desc')}
+            <h1 className="text-4xl font-black text-main m-0 tracking-tighter">Clearance Denied</h1>
+            <p className="text-secondary mt-4 mb-0 font-medium leading-relaxed">
+              Your current identity level does not have the required authorization to access this operational sector.
             </p>
-            
-            <div className="flex flex-column gap-3">
-              <Button 
-                label={t('exceptions.403_home')} 
-                icon="pi pi-arrow-left" 
-                className="p-button-primary py-3 font-bold text-lg" 
-                onClick={() => navigate("/")} 
-                data-testid="unauthorized-back-button"
-              />
-              <Button 
-                label={t('exceptions.403_switch')} 
-                icon="pi pi-user-edit" 
-                text 
-                className="text-gray-100 hover:bg-white-alpha-10 font-bold py-3 border-1 border-white-alpha-20" 
-                onClick={handleSwitchAccount} 
-                data-testid="unauthorized-switch-button"
-              />
-            </div>
           </div>
-        </Card>
+
+          <div className="flex flex-column gap-3">
+            <CivicButton 
+              label="Request Elevation" 
+              icon="pi pi-shield" 
+              className="py-4 text-base" 
+              onClick={() => navigate("/settings")}
+              glow
+            />
+            <CivicButton 
+              label="Back to Safety" 
+              variant="secondary"
+              icon="pi pi-arrow-left" 
+              className="py-4 text-base"
+              onClick={() => navigate("/")}
+            />
+          </div>
+        </CivicCard>
       </div>
     </Layout>
   );

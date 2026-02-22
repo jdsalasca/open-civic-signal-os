@@ -5,11 +5,14 @@ import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.domain.Vote;
+import org.opencivic.signalos.domain.SignalStatusEntry;
 import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.repository.VoteRepository;
+import org.opencivic.signalos.repository.SignalStatusEntryRepository;
+import org.opencivic.signalos.web.dto.TrustPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,14 +22,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import org.opencivic.signalos.web.dto.TrustPacket;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.Base64;
 
 @Service
 public class PrioritizationServiceImpl implements PrioritizationService {
@@ -35,11 +35,16 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     private final SignalRepository signalRepository;
     private final VoteRepository voteRepository;
     private final UserRepository userRepository;
+    private final SignalStatusEntryRepository statusHistoryRepository;
 
-    public PrioritizationServiceImpl(SignalRepository signalRepository, VoteRepository voteRepository, UserRepository userRepository) {
+    public PrioritizationServiceImpl(SignalRepository signalRepository, 
+                                  VoteRepository voteRepository, 
+                                  UserRepository userRepository,
+                                  SignalStatusEntryRepository statusHistoryRepository) {
         this.signalRepository = signalRepository;
         this.voteRepository = voteRepository;
         this.userRepository = userRepository;
+        this.statusHistoryRepository = statusHistoryRepository;
     }
 
     @Override
@@ -47,11 +52,9 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         Signal signal = signalRepository.findById(signalId)
                 .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + signalId));
         
-        // Ensure score is current
         ScoreBreakdown breakdown = getBreakdown(signal);
         double score = calculateScore(signal);
         
-        // Generate a simple verification hash (Proof of Integrity)
         String rawData = signal.getId() + ":" + signal.getCreatedAt() + ":" + score;
         String hash = generateHash(rawData);
 
@@ -65,6 +68,11 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             TrustPacket.CURRENT_FORMULA,
             hash
         );
+    }
+
+    @Override
+    public List<SignalStatusEntry> getStatusHistory(UUID signalId) {
+        return statusHistoryRepository.findBySignalIdOrderByCreatedAtDesc(signalId);
     }
 
     private String generateHash(String input) {
@@ -139,8 +147,16 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Map<UUID, List<Signal>> findDuplicates() {
-        log.info("Starting optimized deduplication search window (last 100 signals)");
-        List<Signal> signals = signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, 100));
+        return findDuplicates(null);
+    }
+
+    @Override
+    public Map<UUID, List<Signal>> findDuplicates(UUID communityId) {
+        log.info("Starting scoped deduplication search for community: {}", communityId);
+        List<Signal> signals = communityId == null 
+            ? signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, 100))
+            : signalRepository.findTopSignalsByStatusAndCommunityId("NEW", communityId, PageRequest.of(0, 100));
+        
         Map<UUID, List<Signal>> duplicateMap = new HashMap<>();
         Set<UUID> processed = new HashSet<>();
 
@@ -263,7 +279,6 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Page<Signal> getFlaggedSignals(Pageable pageable) {
-        // P1-B: Paginated DB-level query
         return signalRepository.findByStatus("FLAGGED", pageable)
                 .map(s -> s.withScore(calculateScore(s), getBreakdown(s)));
     }
@@ -275,13 +290,20 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         Signal signal = signalRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Signal not found for moderation: " + id));
         
+        String oldStatus = signal.getStatus();
         if ("APPROVE".equalsIgnoreCase(action)) {
             signal.setStatus(SignalStatus.NEW.name());
         } else {
             signal.setStatus(SignalStatus.REJECTED.name());
         }
         signal.setModerationReason(reason);
-        return signalRepository.save(signal);
+        Signal saved = signalRepository.save(signal);
+
+        statusHistoryRepository.save(new SignalStatusEntry(
+            id, oldStatus, signal.getStatus(), "moderator", reason
+        ));
+
+        return saved;
     }
 
     @Override
@@ -311,14 +333,19 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), java.time.LocalDateTime.now(), communityId
         );
         
-        // Ensure breakdown is calculated and persisted
         ScoreBreakdown breakdown = getBreakdown(signal);
         double score = breakdown.urgency() + breakdown.impact() + breakdown.affectedPeople() + breakdown.communityVotes();
         
         signal.setScoreBreakdown(breakdown);
         signal.setPriorityScore(score);
         
-        return saveSignal(signal);
+        Signal saved = saveSignal(signal);
+        
+        statusHistoryRepository.save(new SignalStatusEntry(
+            saved.getId(), "NONE", "NEW", username, "Initial report submission"
+        ));
+
+        return saved;
     }
 
     @Override
@@ -344,18 +371,24 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         Signal signal = (communityId == null
             ? signalRepository.findById(id)
             : signalRepository.findByIdAndCommunityId(id, communityId))
-                .orElseThrow(() -> new ResourceNotFoundException("Signal with ID " + id + " not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("Signal not found."));
 
-        SignalStatus current = SignalStatus.valueOf(signal.getStatus());
+        String oldStatus = signal.getStatus();
+        SignalStatus current = SignalStatus.valueOf(oldStatus);
         SignalStatus target = SignalStatus.valueOf(newStatus);
         
         if (!current.canTransitionTo(target)) {
-            log.error("Invalid status transition rejected: {} -> {}", current, target);
-            throw new ConflictException("Invalid status transition from " + current + " to " + target);
+            throw new ConflictException("Invalid transition from " + current + " to " + target);
         }
         
         signal.setStatus(target.name());
-        return Optional.of(signalRepository.save(signal));
+        Signal saved = signalRepository.save(signal);
+        
+        statusHistoryRepository.save(new SignalStatusEntry(
+            id, oldStatus, newStatus, "system_operator", "Standard lifecycle transition"
+        ));
+        
+        return Optional.of(saved);
     }
 
     @Override

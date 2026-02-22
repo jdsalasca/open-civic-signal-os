@@ -46,6 +46,21 @@ public class Signal {
     
     private LocalDateTime createdAt;
 
+    @ElementCollection
+    @CollectionTable(name = "signal_reactions", joinColumns = @JoinColumn(name = "signal_id"))
+    @MapKeyColumn(name = "reaction_type")
+    @Column(name = "count")
+    private java.util.Map<String, Integer> reactions = new java.util.HashMap<>();
+
+    public java.util.Map<String, Integer> getReactions() {
+        if (reactions == null) reactions = new java.util.HashMap<>();
+        return reactions;
+    }
+
+    public void setReactions(java.util.Map<String, Integer> reactions) {
+        this.reactions = reactions;
+    }
+
     public Signal() {}
 
     public Signal(UUID id, String title, String description, String category, int urgency, int impact, int affectedPeople, int communityVotes, double priorityScore, ScoreBreakdown scoreBreakdown, String status, List<UUID> mergedFrom, UUID authorId, LocalDateTime createdAt) {

@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './App.tsx'
-import './styles.css'
+import './styles/main.scss'
 import i18n from './i18n'
 import { useSettingsStore } from './store/useSettingsStore'
 

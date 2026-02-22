@@ -1,6 +1,7 @@
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\config\AsyncConfig.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\config\JwtAuthenticationFilter.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\config\SecurityConfig.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\CivicComment.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\Community.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\CommunityBlogPost.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\CommunityMembership.java
@@ -12,6 +13,7 @@ C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\ScoreBreakdown.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\Signal.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\SignalStatus.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\SignalStatusEntry.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\User.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\domain\Vote.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\exception\ConflictException.java
@@ -19,6 +21,7 @@ C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\exception\ResourceNotFoundException.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\exception\UnauthorizedActionException.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\OpenCivicSignalOsApplication.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\CivicCommentRepository.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\CommunityBlogPostRepository.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\CommunityMembershipAuditRepository.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\CommunityMembershipRepository.java
@@ -27,9 +30,11 @@ C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\CommunityThreadRepository.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\NotificationRepository.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\SignalRepository.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\SignalStatusEntryRepository.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\UserRepository.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\repository\VoteRepository.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\security\UserDetailsServiceImpl.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\service\CivicEngagementService.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\service\CommunityAccessService.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\service\CommunityCollaborationService.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\service\CommunityService.java
@@ -46,6 +51,7 @@ C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\CommunityController.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\ApiError.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\AuthResponse.java
+C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\CivicCommentResponse.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\CommunityBlogPostResponse.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\CommunityFeedItemResponse.java
 C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\api-java\src\main\java\org\opencivic\signalos\web\dto\CommunityMembershipResponse.java

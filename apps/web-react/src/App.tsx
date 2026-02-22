@@ -50,25 +50,43 @@ export function App() {
       <Toaster 
         position="bottom-right"
         containerStyle={{
-          top: 'auto',
-          right: '1rem',
-          left: 'auto',
-          bottom: '1rem',
-          zIndex: 11000,
-          pointerEvents: 'none',
+          bottom: '2rem',
+          right: '2rem',
+          zIndex: 99999,
         }}
-        gutter={10}
+        gutter={12}
         toastOptions={{
-          duration: 4000,
+          duration: 5000,
+          className: 'glass-panel',
           style: {
-            background: theme === 'dark' ? '#111827' : '#fff',
-            color: theme === 'dark' ? '#fff' : '#111827',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '12px',
+            background: 'var(--bg-nav)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid var(--glass-stroke)',
+            color: 'var(--text-main)',
+            borderRadius: '16px',
+            padding: '16px 24px',
             fontSize: '14px',
-            maxWidth: '360px',
-            boxShadow: '0 14px 32px rgba(2, 6, 23, 0.28)',
-            pointerEvents: 'auto',
+            fontWeight: '600',
+            boxShadow: 'var(--shadow-premium)',
+            maxWidth: '400px',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--status-resolved)',
+              secondary: '#fff',
+            },
+            style: {
+              borderLeft: '4px solid var(--status-resolved)',
+            }
+          },
+          error: {
+            iconTheme: {
+              primary: 'var(--status-rejected)',
+              secondary: '#fff',
+            },
+            style: {
+              borderLeft: '4px solid var(--status-rejected)',
+            }
           },
         }}
       />

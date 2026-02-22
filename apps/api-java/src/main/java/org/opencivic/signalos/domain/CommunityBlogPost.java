@@ -34,6 +34,21 @@ public class CommunityBlogPost {
     private LocalDateTime publishedAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    @jakarta.persistence.ElementCollection
+    @jakarta.persistence.CollectionTable(name = "blog_reactions", joinColumns = @jakarta.persistence.JoinColumn(name = "blog_id"))
+    @jakarta.persistence.MapKeyColumn(name = "reaction_type")
+    @jakarta.persistence.Column(name = "count")
+    private java.util.Map<String, Integer> reactions = new java.util.HashMap<>();
+
+    public java.util.Map<String, Integer> getReactions() {
+        if (reactions == null) reactions = new java.util.HashMap<>();
+        return reactions;
+    }
+
+    public void setReactions(java.util.Map<String, Integer> reactions) {
+        this.reactions = reactions;
+    }
+
     public UUID getId() {
         return id;
     }

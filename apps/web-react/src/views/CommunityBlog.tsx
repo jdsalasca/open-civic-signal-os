@@ -1,31 +1,41 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { Avatar } from "primereact/avatar";
 import { CommunityBlogPost } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
+import { useAuthStore } from "../store/useAuthStore";
 import apiClient from "../api/axios";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicBadge } from "../components/ui/CivicBadge";
+import { CivicField } from "../components/ui/CivicField";
+import { CivicEngagement } from "../components/CivicEngagement";
 
 type ApiError = Error & { friendlyMessage?: string };
 
 const statusTagOptions = [
   { label: "PLANNED", value: "PLANNED" },
-  { label: "IN_PROGRESS", value: "IN_PROGRESS" },
+  { label: "IN PROGRESS", value: "IN_PROGRESS" },
   { label: "COMPLETED", value: "COMPLETED" },
   { label: "BLOCKED", value: "BLOCKED" },
 ];
 
 export function CommunityBlog() {
-  const { activeCommunityId } = useCommunityStore();
+  const { activeCommunityId, memberships } = useCommunityStore();
+  const { activeRole } = useAuthStore();
   const [posts, setPosts] = useState<CommunityBlogPost[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [statusTag, setStatusTag] = useState("IN_PROGRESS");
+  const [publishing, setPublishing] = useState(false);
+
+  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
   const canPublish = Boolean(activeCommunityId && title.trim() && content.trim());
+  const activeCommunityName = memberships.find(m => m.communityId === activeCommunityId)?.communityName;
 
   const loadPosts = useCallback(async () => {
     if (!activeCommunityId) return;
@@ -43,7 +53,8 @@ export function CommunityBlog() {
   }, [loadPosts]);
 
   const createPost = async () => {
-    if (!activeCommunityId || !title.trim() || !content.trim()) return;
+    if (!canPublish) return;
+    setPublishing(true);
     try {
       await apiClient.post("community/blog", {
         communityId: activeCommunityId,
@@ -53,98 +64,128 @@ export function CommunityBlog() {
       });
       setTitle("");
       setContent("");
-      toast.success("Update published");
+      toast.success("Intelligence update published");
       loadPosts();
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || "Failed to publish update");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const getStatusSeverity = (tag: string) => {
+    switch (tag) {
+      case 'COMPLETED': return 'resolved';
+      case 'BLOCKED': return 'rejected';
+      case 'IN_PROGRESS': return 'progress';
+      default: return 'new';
     }
   };
 
   return (
     <Layout>
-      <div className="grid">
-        <div className="col-12 lg:col-4">
-          <Card title={<span className="uppercase text-sm font-bold tracking-widest text-purple-500">Publish Update</span>} className="shadow-4 border-1 border-white-alpha-10 bg-surface">
-            <div className="flex flex-column gap-3">
-              <div>
-                <label className="text-xs font-bold uppercase text-muted mb-1 block">Headline</label>
-                <InputText
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full"
-                  placeholder="e.g. Park Renovation Started"
-                  disabled={!activeCommunityId}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted mb-1 block">Details</label>
-                <InputTextarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={6}
-                  className="w-full"
-                  placeholder="Share progress details with the community..."
-                  disabled={!activeCommunityId}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-bold uppercase text-muted mb-1 block">Status</label>
-                <Dropdown
-                  value={statusTag}
-                  options={statusTagOptions}
-                  onChange={(e) => setStatusTag(e.value)}
-                  className="w-full"
-                  disabled={!activeCommunityId}
-                />
-              </div>
-              <Button
-                label="Publish Update"
-                icon="pi pi-megaphone"
-                onClick={createPost}
-                disabled={!canPublish}
-                className="w-full p-button-help"
-                data-testid="publish-blog-button"
-              />
-            </div>
-            {!activeCommunityId && (
-              <div className="mt-3 p-2 border-round bg-gray-800 text-gray-400 text-xs">
-                Select a community context to publish updates.
-              </div>
-            )}
-          </Card>
+      <div className="animate-fade-up">
+        <div className="mb-8">
+          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">Public Record</h1>
+          <p className="text-secondary text-lg font-medium">Official updates and progress reports from {activeCommunityName || 'community staff'}.</p>
         </div>
-        <div className="col-12 lg:col-8">
-          <Card title={<span className="uppercase text-sm font-bold tracking-widest text-main">Public-Servant Timeline</span>} className="shadow-4 border-1 border-white-alpha-10 bg-surface">
+
+        <div className="grid">
+          {isStaff && (
+            <div className="col-12 lg:col-4">
+              <CivicCard title="Dispatch Intelligence" variant="brand">
+                <div className="flex flex-column gap-2">
+                  <CivicField label="Headline">
+                    <InputText
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="e.g. Phase 1 Verification Complete"
+                      className="w-full"
+                    />
+                  </CivicField>
+                  
+                  <CivicField label="Detailed Context">
+                    <InputTextarea
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      rows={6}
+                      className="w-full"
+                      placeholder="Provide thorough details for the community..."
+                    />
+                  </CivicField>
+
+                  <CivicField label="Operation Status">
+                    <Dropdown
+                      value={statusTag}
+                      options={statusTagOptions}
+                      onChange={(e) => setStatusTag(e.value)}
+                      className="w-full bg-black-alpha-20"
+                    />
+                  </CivicField>
+
+                  <CivicButton
+                    label="Publish Dispatch"
+                    icon="pi pi-send"
+                    onClick={createPost}
+                    disabled={!canPublish}
+                    loading={publishing}
+                    className="w-full py-4 mt-2"
+                    glow
+                  />
+                </div>
+              </CivicCard>
+            </div>
+          )}
+
+          <div className={isStaff ? "col-12 lg:col-8" : "col-12 lg:col-8 lg:col-offset-2"}>
             {posts.length === 0 ? (
-              <div className="text-center p-5 text-muted">
-                <i className="pi pi-inbox text-2xl mb-3 block"></i>
-                No updates published yet.
-              </div>
+              <CivicCard className="text-center p-8">
+                <i className="pi pi-history text-4xl text-muted mb-4 block"></i>
+                <h3 className="text-main text-2xl font-black m-0">No Archives Found</h3>
+                <p className="text-secondary mt-2">Historical timeline is currently empty for this sector.</p>
+              </CivicCard>
             ) : (
-              <div className="flex flex-column gap-3">
+              <div className="flex flex-column gap-8">
                 {posts.map((post) => (
-                  <div key={post.id} className="surface-0 border-1 border-round p-4 border-300 dark:bg-black-alpha-20 dark:border-white-alpha-10">
-                    <div className="flex justify-content-between align-items-center mb-2">
-                      <strong className="text-xl text-main">{post.title}</strong>
-                      <span className={`text-xs font-bold px-2 py-1 border-round ${
-                        post.statusTag === 'COMPLETED' ? 'bg-green-900 text-green-400' :
-                        post.statusTag === 'BLOCKED' ? 'bg-red-900 text-red-400' :
-                        'bg-blue-900 text-blue-400'
-                      }`}>{post.statusTag}</span>
+                  <div key={post.id} className="flex flex-column gap-4">
+                    <div className="glass-panel border-round-3xl p-6 hover:border-white-alpha-30 transition-all duration-300">
+                      <div className="flex justify-content-between align-items-start mb-6">
+                        <div className="flex align-items-center gap-3">
+                          <Avatar label={post.authorUsername?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold shadow-4" />
+                          <div className="flex flex-column">
+                            <span className="text-sm font-bold text-main">{post.authorUsername}</span>
+                            <span className="text-xs text-muted font-bold uppercase tracking-tighter">{post.authorRole}</span>
+                          </div>
+                        </div>
+                        <CivicBadge label={post.statusTag.replace('_', ' ')} severity={getStatusSeverity(post.statusTag)} />
+                      </div>
+
+                      <h2 className="text-3xl font-black text-main m-0 mb-4 tracking-tight leading-tight">{post.title}</h2>
+                      <p className="text-secondary text-lg line-height-4 font-medium opacity-90 m-0 mb-6" style={{whiteSpace: 'pre-wrap'}}>{post.content}</p>
+                      
+                      <div className="flex justify-content-between align-items-center pt-6 border-top-1 border-white-alpha-10">
+                        <div className="flex align-items-center gap-2 text-xs text-muted font-bold uppercase tracking-widest">
+                          <i className="pi pi-calendar"></i>
+                          <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+                          <span className="mx-1">•</span>
+                          <span>{new Date(post.publishedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="my-3 line-height-3 text-lg text-color-secondary" style={{whiteSpace: 'pre-wrap'}}>{post.content}</p>
-                    <div className="flex align-items-center gap-2 text-xs text-muted">
-                      <i className="pi pi-user"></i>
-                      <span>{post.authorUsername} ({post.authorRole})</span>
-                      <span>•</span>
-                      <span>{new Date(post.publishedAt).toLocaleString()}</span>
+                    
+                    <div className="px-4">
+                      <CivicEngagement 
+                        parentId={post.id} 
+                        parentType="BLOG" 
+                        initialReactions={post.reactions} 
+                      />
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </div>
     </Layout>

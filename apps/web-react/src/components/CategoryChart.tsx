@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import { Pie } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Card } from "primereact/card";
 import { useTranslation } from "react-i18next";
 import { Signal } from "../types";
+import { CivicCard } from "./ui/CivicCard";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -13,10 +13,16 @@ type Props = {
 
 export function CategoryChart({ signals }: Props) {
   const { t } = useTranslation();
-  const textMuted =
-    typeof window !== "undefined"
-      ? getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#94a3b8"
-      : "#94a3b8";
+  
+  const colors = [
+    "#6366f1", // Indigo 500
+    "#10b981", // Emerald 500
+    "#f59e0b", // Amber 500
+    "#f43f5e", // Rose 500
+    "#0ea5e9", // Sky 500
+    "#8b5cf6", // Violet 500
+  ];
+
   const chartData = useMemo(() => {
     const categories = signals.reduce((acc: Record<string, number>, s) => {
       acc[s.category] = (acc[s.category] || 0) + 1;
@@ -24,44 +30,49 @@ export function CategoryChart({ signals }: Props) {
     }, {});
 
     return {
-      labels: Object.keys(categories),
+      labels: Object.keys(categories).map(c => t(`categories.${c}`)),
       datasets: [
         {
           data: Object.values(categories),
-          backgroundColor: [
-            "#06b6d4",
-            "#8b5cf6",
-            "#ec4899",
-            "#f59e0b",
-            "#10b981",
-            "#3b82f6",
-          ],
+          backgroundColor: colors,
+          hoverOffset: 15,
           borderWidth: 0,
+          borderRadius: 4,
+          cutout: '75%'
         },
       ],
     };
-  }, [signals]);
+  }, [signals, t]);
 
   const options = {
     plugins: {
       legend: {
         position: "bottom" as const,
         labels: {
-          color: textMuted,
+          color: "#94a3b8",
           usePointStyle: true,
-          padding: 20,
-          font: { size: 11, weight: "bold" as const },
+          pointStyle: 'circle',
+          padding: 25,
+          font: { size: 10, weight: 700, family: 'Plus Jakarta Sans' },
         },
       },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        titleFont: { size: 13, weight: 800 },
+        bodyFont: { size: 12 },
+        padding: 12,
+        cornerRadius: 8,
+        displayColors: true
+      }
     },
     maintainAspectRatio: false,
   };
 
   return (
-    <Card title={t('dashboard.distribution_title')} className="shadow-4 border-1 border-white-alpha-10 bg-surface overflow-hidden">
-      <div style={{ height: "250px" }} className="flex justify-content-center">
-        <Pie data={chartData} options={options} />
+    <CivicCard title="Sector Distribution">
+      <div style={{ height: "280px" }} className="flex justify-content-center py-2">
+        <Doughnut data={chartData} options={options} />
       </div>
-    </Card>
+    </CivicCard>
   );
 }

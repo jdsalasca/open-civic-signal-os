@@ -5,13 +5,14 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 import { Slider } from "primereact/slider";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { classNames } from "primereact/utils";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 import { useCommunityStore } from "../store/useCommunityStore";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicField } from "../components/ui/CivicField";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -33,19 +34,23 @@ export function ReportSignal() {
   const {
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    watch,
+    formState: { isSubmitting, errors },
   } = useForm<ReportForm>({
     mode: "onChange",
     defaultValues: { title: '', description: '', category: '', urgency: 3, impact: 3, affectedPeople: 10 }
   });
 
+  const currentUrgency = watch('urgency');
+  const currentImpact = watch('impact');
+
   const categories = [
-    { label: t('categories.safety'), value: 'safety' },
-    { label: t('categories.infrastructure'), value: 'infrastructure' },
-    { label: t('categories.environment'), value: 'environment' },
-    { label: t('categories.social'), value: 'social' },
-    { label: t('categories.mobility'), value: 'mobility' },
-    { label: t('categories.education'), value: 'education' },
+    { label: t('categories.safety'), value: 'safety', icon: 'pi-shield' },
+    { label: t('categories.infrastructure'), value: 'infrastructure', icon: 'pi-building' },
+    { label: t('categories.environment'), value: 'environment', icon: 'pi-sun' },
+    { label: t('categories.social'), value: 'social', icon: 'pi-users' },
+    { label: t('categories.mobility'), value: 'mobility', icon: 'pi-car' },
+    { label: t('categories.education'), value: 'education', icon: 'pi-book' },
   ];
 
   const onSubmit = async (data: ReportForm) => {
@@ -59,155 +64,164 @@ export function ReportSignal() {
     }
   };
 
+  const getScaleColor = (val: number) => {
+    if (val <= 2) return 'var(--status-resolved)';
+    if (val <= 3) return 'var(--status-progress)';
+    return 'var(--status-rejected)';
+  };
+
   return (
     <Layout>
-      <div className="flex justify-content-center mt-4 pb-6">
-        <Card title={t('report.title')} style={{ width: '100%', maxWidth: '700px' }} className="shadow-8 border-round-2xl">
-          <p className="text-muted mb-5">{t('report.desc')}</p>
-          {!activeCommunityId && (
-            <div className="mb-4 p-3 border-round border-1 border-yellow-500 text-yellow-200 bg-yellow-900-alpha-20">
-              {t('report.community_required')}
-            </div>
-          )}
-          
-          <form onSubmit={handleSubmit(onSubmit)} className="p-fluid grid">
-            <div className="field col-12">
-              <label htmlFor="title" className="font-bold block mb-2 text-main text-sm uppercase tracking-wider">{t('report.issue_title')}</label>
-              <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: 5, message: t('report.title_too_short') } }} 
-                render={({ field, fieldState }) => (
-                  <>
-                    <InputText
-                      id="title"
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      className={classNames('w-full', { 'p-invalid': fieldState.error })}
-                      placeholder={t('report.issue_title_placeholder')}
-                    />
-                    {fieldState.error && <small className="p-error block mt-1">{fieldState.error.message}</small>}
-                  </>
-                )} 
-              />
+      <div className="animate-fade-up max-w-60rem mx-auto pb-8">
+        <div className="mb-8">
+          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">Submit Intelligence</h1>
+          <p className="text-secondary text-lg font-medium">Record a new civic signal for community prioritization.</p>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid">
+            <div className="col-12 lg:col-7">
+              <CivicCard title="Signal Metadata" className="mb-6">
+                <CivicField label="Signal Headline" error={errors.title?.message}>
+                  <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: 5, message: t('report.title_too_short') } }} 
+                    render={({ field, fieldState }) => (
+                      <InputText
+                        {...field}
+                        className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                        placeholder="What is the problem?"
+                      />
+                    )} 
+                  />
+                </CivicField>
+
+                <div className="grid">
+                  <div className="col-12 md:col-6">
+                    <CivicField label="Civic Category">
+                      <Controller name="category" control={control} rules={{ required: t('common.required') }} 
+                        render={({ field }) => (
+                          <Dropdown
+                            value={field.value}
+                            onChange={(e) => field.onChange(e.value)}
+                            options={categories}
+                            placeholder="Select Type"
+                            className="w-full bg-black-alpha-20"
+                            itemTemplate={(option) => (
+                              <div className="flex align-items-center gap-2">
+                                <i className={`pi ${option.icon} text-brand-primary`}></i>
+                                <span>{option.label}</span>
+                              </div>
+                            )}
+                          />
+                        )} 
+                      />
+                    </CivicField>
+                  </div>
+                  <div className="col-12 md:col-6">
+                    <CivicField label="Estimated Scope">
+                      <Controller name="affectedPeople" control={control} 
+                        render={({ field }) => (
+                          <div className="flex flex-column gap-3 p-3 border-round-xl bg-black-alpha-20 border-1 border-white-alpha-10">
+                            <div className="flex justify-content-between font-black text-main">
+                              <span className="text-xs uppercase opacity-50">Citizens</span>
+                              <span className="text-brand-primary">{field.value}</span>
+                            </div>
+                            <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={1000} className="w-full" />
+                          </div>
+                        )} 
+                      />
+                    </CivicField>
+                  </div>
+                </div>
+
+                <CivicField label="Deep Context" error={errors.description?.message}>
+                  <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: 20, message: t('report.desc_too_short') } }} 
+                    render={({ field }) => (
+                      <InputTextarea
+                        {...field}
+                        rows={6}
+                        className="w-full"
+                        placeholder="Describe the situation, location, and potential consequences..."
+                      />
+                    )} 
+                  />
+                </CivicField>
+              </CivicCard>
             </div>
 
-            <div className="field col-12 md:col-6">
-              <label htmlFor="category" className="font-bold block mb-2 text-main text-sm uppercase tracking-wider">{t('common.category')}</label>
-              <Controller name="category" control={control} rules={{ required: t('common.required') }} 
-                render={({ field, fieldState }) => (
-                  <>
-                    <Dropdown
-                      id="category"
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.value)}
-                      options={categories}
-                      className={classNames('w-full', { 'p-invalid': fieldState.error })}
-                      placeholder={t('common.select_category')}
-                    />
-                    {fieldState.error && <small className="p-error block mt-1">{fieldState.error.message}</small>}
-                  </>
-                )} 
-              />
-            </div>
-
-            <div className="field col-12 md:col-6">
-              <label htmlFor="affectedPeople" className="font-bold block mb-2 text-main text-sm uppercase tracking-wider">{t('report.scale')}</label>
-              <Controller name="affectedPeople" control={control} 
-                render={({ field }) => (
-                  <div className="flex flex-column gap-2 p-3 border-round border-1 border-subtle bg-black-alpha-10">
-                    <div className="flex justify-content-between align-items-center mb-2">
-                       <span className="text-sm text-muted">Estimated Citizens</span>
-                       <span className="text-xl font-bold text-cyan-400">{field.value}</span>
+            <div className="col-12 lg:col-5">
+              <CivicCard title="Prioritization Factors" variant="brand" className="mb-6">
+                <div className="flex flex-column gap-8 py-4">
+                  {/* Urgency Picker */}
+                  <div className="flex flex-column gap-4">
+                    <div className="flex justify-content-between align-items-end">
+                      <div>
+                        <label className="text-xs font-black uppercase tracking-widest text-main block mb-1">Urgency Level</label>
+                        <span className="text-xs text-muted font-bold">How fast does this need a response?</span>
+                      </div>
+                      <span className="text-3xl font-black" style={{ color: getScaleColor(currentUrgency) }}>{currentUrgency}</span>
                     </div>
-                    <Slider
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.value)}
-                      min={1}
-                      max={1000}
-                      className="w-full"
-                    />
+                    <div className="p-4 border-round-2xl transition-colors duration-500 shadow-inner" style={{ background: `linear-gradient(135deg, ${getScaleColor(currentUrgency)}15 0%, transparent 100%)`, border: `1px solid ${getScaleColor(currentUrgency)}30` }}>
+                      <Controller name="urgency" control={control} render={({ field }) => (
+                        <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
+                      )} />
+                      <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
+                        <span>Low Priority</span>
+                        <span>Immediate Action</span>
+                      </div>
+                    </div>
                   </div>
-                )} 
-              />
-            </div>
 
-            <div className="field col-12">
-              <label htmlFor="description" className="font-bold block mb-2 text-main text-sm uppercase tracking-wider">{t('report.context')}</label>
-              <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: 20, message: t('report.desc_too_short') } }} 
-                render={({ field, fieldState }) => (
-                  <>
-                    <InputTextarea
-                      id="description"
-                      value={field.value}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      rows={4}
-                      className={classNames('w-full', { 'p-invalid': fieldState.error })}
-                      placeholder={t('report.context_placeholder')}
-                    />
-                    {fieldState.error && <small className="p-error block mt-1">{fieldState.error.message}</small>}
-                  </>
-                )} 
-              />
-            </div>
-
-            <div className="field col-12 md:col-6">
-              <div className="flex justify-content-between mb-2">
-                <label className="font-bold text-main text-sm uppercase tracking-wider">{t('report.urgency')}</label>
-                <span className="text-xs text-muted uppercase font-bold">{t('common.score')}: {control._formValues.urgency}/5</span>
-              </div>
-              <Controller name="urgency" control={control} render={({ field }) => (
-                <div className="p-4 border-round border-1 border-subtle bg-black-alpha-10">
-                  <Slider
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.value)}
-                    min={1}
-                    max={5}
-                    step={1}
-                    className="w-full mb-3"
-                  />
-                  <div className="flex justify-content-between text-xs font-bold text-muted">
-                    <span>{t('report.urgency_low')}</span>
-                    <span>{t('report.urgency_critical')}</span>
+                  {/* Impact Picker */}
+                  <div className="flex flex-column gap-4">
+                    <div className="flex justify-content-between align-items-end">
+                      <div>
+                        <label className="text-xs font-black uppercase tracking-widest text-main block mb-1">Social Impact</label>
+                        <span className="text-xs text-muted font-bold">Severity of the problem's effects.</span>
+                      </div>
+                      <span className="text-3xl font-black" style={{ color: getScaleColor(currentImpact) }}>{currentImpact}</span>
+                    </div>
+                    <div className="p-4 border-round-2xl transition-colors duration-500 shadow-inner" style={{ background: `linear-gradient(135deg, ${getScaleColor(currentImpact)}15 0%, transparent 100%)`, border: `1px solid ${getScaleColor(currentImpact)}30` }}>
+                      <Controller name="impact" control={control} render={({ field }) => (
+                        <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
+                      )} />
+                      <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
+                        <span>Minor Nuisance</span>
+                        <span>Systemic Failure</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              )} />
-            </div>
+              </CivicCard>
 
-            <div className="field col-12 md:col-6">
-              <div className="flex justify-content-between mb-2">
-                <label className="font-bold text-main text-sm uppercase tracking-wider">{t('report.impact')}</label>
-                <span className="text-xs text-muted uppercase font-bold">{t('common.score')}: {control._formValues.impact}/5</span>
-              </div>
-              <Controller name="impact" control={control} render={({ field }) => (
-                <div className="p-4 border-round border-1 border-subtle bg-black-alpha-10">
-                  <Slider
-                    value={field.value}
-                    onChange={(e) => field.onChange(e.value)}
-                    min={1}
-                    max={5}
-                    step={1}
-                    className="w-full mb-3"
-                  />
-                  <div className="flex justify-content-between text-xs font-bold text-muted">
-                    <span>{t('report.impact_minor')}</span>
-                    <span>{t('report.impact_systemic')}</span>
+              <CivicCard title="Protocol Validation">
+                {!activeCommunityId ? (
+                  <div className="p-4 border-round-xl bg-status-rejected-alpha-10 border-1 border-status-rejected-alpha-20 text-status-rejected text-sm font-bold flex align-items-center gap-3">
+                    <i className="pi pi-lock text-xl"></i>
+                    No Community Active. Access Denied.
                   </div>
-                </div>
-              )} />
+                ) : (
+                  <div className="flex flex-column gap-4">
+                    <div className="flex align-items-center gap-3 p-3 bg-white-alpha-5 border-round-xl border-1 border-white-alpha-10">
+                      <i className="pi pi-shield text-brand-primary text-xl"></i>
+                      <div className="flex flex-column">
+                        <span className="text-xs font-bold text-main uppercase">Encryption Verified</span>
+                        <span className="text-min text-muted">Ready for secure transmission</span>
+                      </div>
+                    </div>
+                    <CivicButton
+                      type="submit"
+                      label="Dispatch Signal"
+                      icon="pi pi-bolt"
+                      loading={isSubmitting}
+                      className="w-full py-4 text-lg"
+                      glow
+                    />
+                  </div>
+                )}
+              </CivicCard>
             </div>
-
-            <div className="col-12 mt-4 flex gap-3">
-              <Button type="button" label={t('common.discard')} outlined severity="secondary" onClick={() => navigate("/")} />
-              <Button
-                type="submit"
-                label={t('report.submit')}
-                icon="pi pi-bolt"
-                loading={isSubmitting}
-                disabled={isSubmitting}
-                className="p-button-primary shadow-4"
-                data-testid="report-submit-button"
-              />
-            </div>
-          </form>
-        </Card>
+          </div>
+        </form>
       </div>
     </Layout>
   );

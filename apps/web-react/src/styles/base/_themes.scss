@@ -1,0 +1,59 @@
+@import "variables";
+
+:root {
+  // --- CORE BRAND TOKENS (VIBRANT NEONS) ---
+  --brand-primary: #818cf8;      // Indigo 400
+  --brand-primary-hover: #a5b4fc;
+  --brand-primary-glow: rgba(129, 140, 248, 0.4);
+  
+  --status-new: #38bdf8;         // Sky 400
+  --status-progress: #fbbf24;    // Amber 400
+  --status-resolved: #34d399;    // Emerald 400
+  --status-rejected: #fb7185;    // Rose 400
+
+  // --- ULTRA DARK THEME (LINEAR STYLE) ---
+  &.dark-theme, &:not(.light-theme) {
+    --bg-app: #000000;           // Pure Black for depth
+    --bg-nav: rgba(0, 0, 0, 0.8);
+    --bg-surface: #0a0a0a;       // Deepest Slate
+    --bg-card: #111111;
+    --bg-elevated: #1a1a1a;
+    
+    --text-main: #ffffff;
+    --text-secondary: #a1a1aa;   // Zinc 400
+    --text-muted: #52525b;       // Zinc 600
+    
+    --border-subtle: #27272a;    // Zinc 800
+    --glass-stroke: rgba(255, 255, 255, 0.1);
+    --shadow-premium: 0 0 0 1px rgba(255,255,255,0.05), 0 20px 50px rgba(0,0,0,1);
+    
+    --mesh-gradient-1: rgba(99, 102, 241, 0.12);
+    --mesh-gradient-2: rgba(16, 185, 129, 0.08);
+    
+    --scrollbar-thumb: #27272a;
+    --tooltip-bg: #000000;
+  }
+
+  // --- PRISTINE LIGHT THEME ---
+  &.light-theme {
+    --bg-app: #ffffff;
+    --bg-nav: rgba(255, 255, 255, 0.8);
+    --bg-surface: #fafafa;
+    --bg-card: #ffffff;
+    --bg-elevated: #f4f4f5;
+    
+    --text-main: #09090b;        // Zinc 950
+    --text-secondary: #3f3f46;   // Zinc 700
+    --text-muted: #a1a1aa;       // Zinc 400
+    
+    --border-subtle: #e4e4e7;    // Zinc 200
+    --glass-stroke: rgba(0, 0, 0, 0.05);
+    --shadow-premium: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+    
+    --mesh-gradient-1: rgba(99, 102, 241, 0.04);
+    --mesh-gradient-2: rgba(16, 185, 129, 0.03);
+
+    --scrollbar-thumb: #d4d4d8;
+    --tooltip-bg: #09090b;
+  }
+}

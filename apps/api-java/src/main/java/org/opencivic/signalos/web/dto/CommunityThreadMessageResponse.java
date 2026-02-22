@@ -1,6 +1,7 @@
 package org.opencivic.signalos.web.dto;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 public record CommunityThreadMessageResponse(
@@ -13,5 +14,6 @@ public record CommunityThreadMessageResponse(
     String moderationReason,
     UUID hiddenBy,
     LocalDateTime hiddenAt,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    Map<String, Integer> reactions
 ) {}

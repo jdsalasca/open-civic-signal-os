@@ -1,6 +1,7 @@
 import { Signal } from "../types";
-import { Card } from "primereact/card";
 import { useTranslation } from "react-i18next";
+import { CivicCard } from "./ui/CivicCard";
+import { CivicBadge } from "./ui/CivicBadge";
 
 type Props = {
   signals: Signal[];
@@ -13,26 +14,30 @@ export function DigestSidebar({ signals }: Props) {
     .slice(0, 3);
 
   return (
-    <Card title={t('dashboard.broadcast')} className="shadow-4 border-1 border-white-alpha-10 bg-surface">
-      <div className="flex flex-column gap-3">
+    <CivicCard title="High Priority Digest" variant="brand">
+      <div className="flex flex-column gap-5">
         {top3.length === 0 ? (
-          <p className="text-muted text-sm italic">{t('dashboard.empty_title')}</p>
+          <div className="text-center py-4 text-muted italic text-sm">
+            No priority data available for digest.
+          </div>
         ) : (
           top3.map((s, i) => (
-            <div key={s.id} className="flex gap-3 align-items-start">
-              <span className="text-2xl font-black text-main opacity-20">0{i + 1}</span>
-              <div>
-                <h4 className="text-sm font-bold text-main m-0 line-height-2 mb-1">{s.title}</h4>
+            <div key={s.id} className="flex gap-4 align-items-start group cursor-pointer">
+              <span className="text-3xl font-black text-brand-primary opacity-20 group-hover:opacity-100 transition-opacity">0{i + 1}</span>
+              <div className="flex flex-column gap-1 overflow-hidden">
+                <h4 className="text-sm font-black text-main m-0 leading-tight truncate group-hover:text-brand-primary transition-colors">
+                  {s.title}
+                </h4>
                 <div className="flex align-items-center gap-2">
-                  <span className="text-xs text-cyan-500 font-black uppercase">{s.priorityScore.toFixed(0)}</span>
-                  <span className="text-muted">•</span>
-                  <span className="text-xs text-muted font-bold uppercase">{t(`categories.${s.category}`)}</span>
+                  <span className="text-xs text-brand-primary font-black">{s.priorityScore.toFixed(0)} Pts</span>
+                  <span className="text-white-alpha-10 font-bold">|</span>
+                  <CivicBadge label={t(`categories.${s.category}`)} type="category" />
                 </div>
               </div>
             </div>
           ))
         )}
       </div>
-    </Card>
+    </CivicCard>
   );
 }

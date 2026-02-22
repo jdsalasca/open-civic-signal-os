@@ -24,13 +24,34 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.opencivic.signalos.service.CivicEngagementService;
+import org.opencivic.signalos.web.dto.CivicCommentResponse;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/community")
 public class CommunityCollaborationController {
     private final CommunityCollaborationService collaborationService;
+    private final CivicEngagementService engagementService;
 
-    public CommunityCollaborationController(CommunityCollaborationService collaborationService) {
+    public CommunityCollaborationController(CommunityCollaborationService collaborationService, CivicEngagementService engagementService) {
         this.collaborationService = collaborationService;
+        this.engagementService = engagementService;
+    }
+
+    @GetMapping("/blog/{id}/comments")
+    public List<CivicCommentResponse> getBlogComments(@PathVariable UUID id) {
+        return engagementService.getComments(id, "BLOG");
+    }
+
+    @PostMapping("/blog/{id}/comments")
+    public CivicCommentResponse addBlogComment(@PathVariable UUID id, @RequestBody Map<String, String> body, Principal principal) {
+        return engagementService.addComment(id, "BLOG", body.get("content"), principal.getName());
+    }
+
+    @PostMapping("/blog/{id}/react")
+    public Map<String, Integer> reactToBlog(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+        return engagementService.react(id, "BLOG", body.get("type"));
     }
 
     @GetMapping("/threads")
@@ -65,6 +86,21 @@ public class CommunityCollaborationController {
             threadId,
             request.sourceCommunityId(),
             request.content(),
+            principal.getName()
+        );
+    }
+
+    @PostMapping("/threads/{threadId}/messages/{messageId}/react")
+    public CommunityThreadMessageResponse reactToMessage(
+        @PathVariable UUID threadId,
+        @PathVariable UUID messageId,
+        @RequestBody java.util.Map<String, String> body,
+        Principal principal
+    ) {
+        return collaborationService.reactToMessage(
+            threadId,
+            messageId,
+            body.get("type"),
             principal.getName()
         );
     }

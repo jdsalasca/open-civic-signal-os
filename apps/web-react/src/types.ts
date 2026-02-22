@@ -5,6 +5,17 @@ export type ScoreBreakdown = {
   communityVotes: number;
 };
 
+export type CivicComment = {
+  id: string;
+  parentId: string;
+  parentType: 'SIGNAL' | 'BLOG';
+  authorId: string;
+  authorUsername: string;
+  authorRole: string;
+  content: string;
+  createdAt: string;
+};
+
 export type Signal = {
   id: string;
   title: string;
@@ -13,6 +24,8 @@ export type Signal = {
   status: string;
   priorityScore: number;
   scoreBreakdown: ScoreBreakdown;
+  communityVotes: number;
+  reactions: Record<string, number>;
 };
 
 export type Notification = {
@@ -64,6 +77,7 @@ export type CommunityThreadMessage = {
   hidden: boolean;
   moderationReason?: string;
   createdAt: string;
+  reactions: Record<string, number>;
 };
 
 export type CommunityThread = {
@@ -89,6 +103,17 @@ export type CommunityBlogPost = {
   statusTag: string;
   publishedAt: string;
   updatedAt: string;
+  reactions: Record<string, number>;
+};
+
+export type SignalStatusEntry = {
+  id: string;
+  signalId: string;
+  statusFrom: string;
+  statusTo: string;
+  changedBy: string;
+  reason: string;
+  createdAt: string;
 };
 
 export type CommunityFeedItem = {

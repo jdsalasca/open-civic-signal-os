@@ -21,6 +21,8 @@ import org.opencivic.signalos.service.PrioritizationService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
+import org.opencivic.signalos.service.CivicEngagementService;
+import org.opencivic.signalos.web.dto.CivicCommentResponse;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -57,6 +59,7 @@ public class SignalController {
     private final SignalRepository signalRepository;
     private final CommunityAccessService communityAccessService;
     private final MeterRegistry meterRegistry;
+    private final CivicEngagementService engagementService;
 
     public SignalController(
         PrioritizationService prioritizationService,
@@ -64,7 +67,8 @@ public class SignalController {
         UserRepository userRepository,
         SignalRepository signalRepository,
         CommunityAccessService communityAccessService,
-        MeterRegistry meterRegistry
+        MeterRegistry meterRegistry,
+        CivicEngagementService engagementService
     ) {
         this.prioritizationService = prioritizationService;
         this.exportService = exportService;
@@ -72,11 +76,32 @@ public class SignalController {
         this.signalRepository = signalRepository;
         this.communityAccessService = communityAccessService;
         this.meterRegistry = meterRegistry;
+        this.engagementService = engagementService;
+    }
+
+    @GetMapping("/{id}/comments")
+    public List<CivicCommentResponse> getComments(@PathVariable UUID id) {
+        return engagementService.getComments(id, "SIGNAL");
+    }
+
+    @PostMapping("/{id}/comments")
+    public CivicCommentResponse addComment(@PathVariable UUID id, @RequestBody Map<String, String> body, Authentication auth) {
+        return engagementService.addComment(id, "SIGNAL", body.get("content"), auth.getName());
+    }
+
+    @PostMapping("/{id}/react")
+    public Map<String, Integer> react(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+        return engagementService.react(id, "SIGNAL", body.get("type"));
     }
 
     @GetMapping("/{id}/trust-packet")
     public ResponseEntity<TrustPacket> getTrustPacket(@PathVariable UUID id) {
         return ResponseEntity.ok(prioritizationService.getTrustPacket(id));
+    }
+
+    @GetMapping("/{id}/history")
+    public List<org.opencivic.signalos.domain.SignalStatusEntry> getStatusHistory(@PathVariable UUID id) {
+        return prioritizationService.getStatusHistory(id);
     }
 
     @GetMapping("/prioritized")
@@ -268,8 +293,10 @@ public class SignalController {
     }
 
     @GetMapping("/duplicates")
-    public Map<UUID, List<SignalResponse>> getDuplicates() {
-        return prioritizationService.findDuplicates().entrySet().stream()
+    public Map<UUID, List<SignalResponse>> getDuplicates(
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId
+    ) {
+        return prioritizationService.findDuplicates(communityId).entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> e.getValue().stream().map(this::mapToResponse).collect(Collectors.toList())

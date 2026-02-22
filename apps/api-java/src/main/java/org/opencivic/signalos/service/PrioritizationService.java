@@ -22,8 +22,10 @@ public interface PrioritizationService {
     double calculateScore(Signal signal);
     ScoreBreakdown getBreakdown(Signal signal);
     TrustPacket getTrustPacket(UUID signalId);
-    Map<UUID, List<Signal>> findDuplicates();
-    Signal mergeSignals(UUID targetId, List<UUID> duplicateIds);
+    java.util.List<org.opencivic.signalos.domain.SignalStatusEntry> getStatusHistory(UUID signalId);
+    java.util.Map<UUID, java.util.List<Signal>> findDuplicates();
+    java.util.Map<UUID, java.util.List<Signal>> findDuplicates(UUID communityId);
+    Signal mergeSignals(UUID targetId, java.util.List<UUID> duplicateIds);
     
     // P1-B: Paginated access to moderation queue
     Page<Signal> getFlaggedSignals(Pageable pageable);

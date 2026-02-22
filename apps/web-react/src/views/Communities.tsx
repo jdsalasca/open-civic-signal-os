@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -9,6 +7,9 @@ import { Community, CommunityMembership } from "../types";
 import { Layout } from "../components/Layout";
 import apiClient from "../api/axios";
 import { useCommunityStore } from "../store/useCommunityStore";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicBadge } from "../components/ui/CivicBadge";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -100,79 +101,98 @@ export function Communities() {
 
   return (
     <Layout>
-      <div className="grid">
-        <div className="col-12 lg:col-6">
-          <Card title="Community Memberships" className="shadow-4">
-            <div className="grid mb-3">
-              <div className="col-12 lg:col-6">
-                <Dropdown
-                  value={selectedCommunityId}
-                  options={communityOptions}
-                  onChange={(e) => setSelectedCommunityId(e.value)}
-                  placeholder="Select community"
-                  className="w-full"
-                />
-              </div>
-              <div className="col-12 md:col-6 lg:col-3">
-                <Dropdown
-                  value={joinRole}
-                  options={roleOptions}
-                  onChange={(e) => setJoinRole(e.value)}
-                  className="w-full"
-                />
-              </div>
-              <div className="col-12 md:col-6 lg:col-3">
-                <Button
-                  label="Join"
-                  onClick={handleJoin}
-                  disabled={!selectedCommunityId}
-                  className="w-full"
-                  data-testid="community-join-button"
-                />
-              </div>
-            </div>
-            {!selectedCommunityId && (
-              <small className="block mb-3 text-color-secondary">
-                Select a community first to enable joining.
-              </small>
-            )}
-            <div className="flex flex-column gap-2">
-              {memberships.map((membership) => (
-                <div
-                  key={`${membership.communityId}-${membership.userId}`}
-                  className="surface-100 dark:surface-900 border-round p-3 flex justify-content-between align-items-center"
-                >
-                  <div>
-                    <div className="font-bold">{membership.communityName}</div>
-                    <small>{membership.communitySlug}</small>
-                  </div>
-                  <Dropdown
-                    value={membership.role}
-                    options={roleOptions}
-                    onChange={(e) => roleUpdate(membership, e.value)}
-                    className="w-16rem"
-                  />
-                </div>
-              ))}
-            </div>
-          </Card>
+      <div className="animate-fade-up">
+        <div className="mb-8">
+          <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">Community Hub</h1>
+          <p className="text-secondary text-lg font-medium">Manage your civic ecosystem and regional memberships.</p>
         </div>
-        <div className="col-12 lg:col-6">
-          <Card title="Community Registry" className="shadow-4">
-            <Button
-              label="Create Community"
-              icon="pi pi-plus"
-              onClick={() => setCreating(true)}
-              data-testid="open-create-community-button"
-            />
-            <ul className="mt-4">
-              {communities.map((community) => (
-                <li key={community.id}>
-                  <strong>{community.name}</strong> - {community.slug}
-                </li>
-              ))}
-            </ul>
-          </Card>
+
+        <div className="grid">
+          <div className="col-12 lg:col-7">
+            <CivicCard title="My Memberships" className="h-full">
+              <div className="flex flex-column gap-4">
+                <div className="grid grid-nogutter gap-3 mb-4 p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10">
+                  <div className="col-12 lg:col-5">
+                    <Dropdown
+                      value={selectedCommunityId}
+                      options={communityOptions}
+                      onChange={(e) => setSelectedCommunityId(e.value)}
+                      placeholder="Select a community"
+                      className="w-full bg-black-alpha-20"
+                    />
+                  </div>
+                  <div className="col-12 md:col-6 lg:col-4">
+                    <Dropdown
+                      value={joinRole}
+                      options={roleOptions}
+                      onChange={(e) => setJoinRole(e.value)}
+                      className="w-full bg-black-alpha-20"
+                    />
+                  </div>
+                  <div className="col-12 md:col-6 lg:col-2 flex-grow-1">
+                    <CivicButton
+                      label="Join"
+                      icon="pi pi-user-plus"
+                      onClick={handleJoin}
+                      disabled={!selectedCommunityId}
+                      className="w-full"
+                      glow
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-column gap-3">
+                  {memberships.map((membership) => (
+                    <div
+                      key={`${membership.communityId}-${membership.userId}`}
+                      className="flex justify-content-between align-items-center p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10 hover:border-white-alpha-20 transition-colors"
+                    >
+                      <div>
+                        <div className="font-black text-main uppercase tracking-tight">{membership.communityName}</div>
+                        <div className="text-xs font-mono text-muted mt-1">/{membership.communitySlug}</div>
+                      </div>
+                      <Dropdown
+                        value={membership.role}
+                        options={roleOptions}
+                        onChange={(e) => roleUpdate(membership, e.value)}
+                        className="w-14rem bg-black-alpha-30"
+                      />
+                    </div>
+                  ))}
+                  {memberships.length === 0 && (
+                    <div className="text-center p-8 text-muted border-2 border-dashed border-white-alpha-10 border-round-2xl">
+                      <i className="pi pi-users text-4xl mb-3 block"></i>
+                      You are not a member of any community yet.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CivicCard>
+          </div>
+
+          <div className="col-12 lg:col-5">
+            <CivicCard title="Registry Explorer" variant="brand">
+              <div className="flex justify-content-between align-items-center mb-6">
+                <p className="text-secondary text-sm font-medium m-0">Public directory of verified communities.</p>
+                <CivicButton
+                  label="Create"
+                  icon="pi pi-plus"
+                  onClick={() => setCreating(true)}
+                  variant="secondary"
+                  size="small"
+                  data-testid="open-create-community-button"
+                />
+              </div>
+              <div className="flex flex-column gap-3">
+                {communities.map((community) => (
+                  <div key={community.id} className="p-4 border-round-xl border-1 border-white-alpha-10 bg-black-alpha-20 flex justify-content-between align-items-center">
+                    <div className="font-bold text-main">{community.name}</div>
+                    <CivicBadge label={community.slug} type="category" />
+                  </div>
+                ))}
+              </div>
+            </CivicCard>
+          </div>
         </div>
       </div>
 
@@ -203,14 +223,14 @@ export function Communities() {
             />
           </div>
           <div className="flex gap-2 justify-content-end mt-2">
-            <Button label="Cancel" text onClick={() => setCreating(false)} className="text-muted" />
-            <Button
+            <CivicButton label="Cancel" variant="ghost" onClick={() => setCreating(false)} />
+            <CivicButton
               label="Create Community"
               icon="pi pi-check"
               onClick={handleCreate}
               disabled={!newName.trim() || !newSlug.trim()}
-              className="p-button-primary px-4 shadow-4"
               data-testid="create-community-submit-button"
+              glow
             />
           </div>
         </div>

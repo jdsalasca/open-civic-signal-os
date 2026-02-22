@@ -6,14 +6,15 @@ import { SignalTable } from "../components/SignalTable";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
 import { CategoryChart } from "../components/CategoryChart";
-import { ProgressBar } from "primereact/progressbar";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicBadge } from "../components/ui/CivicBadge";
+import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -30,6 +31,8 @@ export function Dashboard() {
   const [meta, setMeta] = useState<SignalMeta | null>(null);
   const [duplicateClusters, setDuplicateClusters] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
+  
+  const [activeFilter, setActiveFilter] = useState<string>("ALL");
   const [lazyState, setLazyState] = useState({
     first: 0,
     rows: 10,
@@ -103,139 +106,145 @@ export function Dashboard() {
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
 
   const formatLastUpdated = (isoDate: string | null) => {
-    if (!isoDate) {
-      return t('dashboard.freshness_pending');
-    }
+    if (!isoDate) return t('dashboard.freshness_pending');
     const date = new Date(isoDate);
-    if (Number.isNaN(date.getTime())) {
-      return t('dashboard.freshness_pending');
-    }
     const diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
-    if (diffMinutes < 1) {
-      return t('dashboard.freshness_now');
-    }
-    if (diffMinutes < 60) {
-      return t('dashboard.freshness_minutes', { count: diffMinutes });
-    }
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) {
-      return t('dashboard.freshness_hours', { count: diffHours });
-    }
-    const diffDays = Math.floor(diffHours / 24);
-    return t('dashboard.freshness_days', { count: diffDays });
+    if (diffMinutes < 1) return t('dashboard.freshness_now');
+    if (diffMinutes < 60) return t('dashboard.freshness_minutes', { count: diffMinutes });
+    return t('dashboard.freshness_hours', { count: Math.floor(diffMinutes / 60) });
   };
+
+  const quickFilters = [
+    { label: "All Signals", value: "ALL", icon: "pi-list" },
+    { label: "Critical", value: "URGENT", icon: "pi-exclamation-triangle" },
+    { label: "Pending", value: "NEW", icon: "pi-clock" },
+    { label: "In Progress", value: "IN_PROGRESS", icon: "pi-sync" },
+    { label: "Resolved", value: "RESOLVED", icon: "pi-check-circle" },
+  ];
 
   return (
     <Layout>
-      <section className="mb-6 flex flex-column lg:flex-row justify-content-between lg:align-items-center gap-4 animate-fade-in" data-testid="dashboard-hero">
-        <div>
-          <div className="flex align-items-center gap-2 mb-2">
-            <span className="bg-cyan-900 text-cyan-400 text-xs font-bold px-2 py-1 border-round uppercase tracking-tighter">{t('dashboard.live_intel')}</span>
-            <span className="text-muted text-xs">•</span>
-            <span className="text-muted text-xs font-medium" data-testid="welcome-message">{t('dashboard.welcome')}, {userName}</span>
-            {meta && (
-              <>
-                <span className="text-muted text-xs">•</span>
-                <span className="text-muted text-xs font-medium" data-testid="dashboard-freshness-badge">
-                  {t('dashboard.freshness_label')}: {formatLastUpdated(meta.lastUpdatedAt)}
-                </span>
-              </>
+      <div className="animate-fade-up">
+        <section className="mb-8 flex flex-column lg:flex-row justify-content-between align-items-end gap-6">
+          <div>
+            <div className="flex align-items-center gap-3 mb-4">
+              <CivicBadge label="Operations Live" severity="new" />
+              <div className="flex align-items-center gap-2 px-3 py-1 bg-white-alpha-5 border-round-lg border-1 border-white-alpha-10 text-xs font-bold text-secondary">
+                <i className="pi pi-user text-brand-primary"></i>
+                {userName}
+              </div>
+              {meta && (
+                <div className="flex align-items-center gap-2 px-3 py-1 bg-white-alpha-5 border-round-lg border-1 border-white-alpha-10 text-xs font-bold text-secondary">
+                  <i className="pi pi-clock text-brand-primary"></i>
+                  {formatLastUpdated(meta.lastUpdatedAt)}
+                </div>
+              )}
+            </div>
+            <h1 className="text-6xl font-black m-0 tracking-tighter text-main line-height-1">
+              {t('dashboard.title')}
+            </h1>
+            <p className="text-secondary text-xl mt-3 mb-0 font-medium max-w-30rem opacity-80">
+              {t('dashboard.subtitle')}
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            {isStaff && (
+              <CivicButton 
+                label="Relay Intelligence" 
+                icon="pi pi-bolt" 
+                variant="danger"
+                className="py-4 px-6 shadow-xl"
+                onClick={handleRelay}
+              />
+            )}
+            <CivicButton 
+              label="Report New Signal" 
+              icon="pi pi-plus" 
+              glow
+              className="py-4 px-6 shadow-xl"
+              onClick={() => navigate("/report")}
+            />
+          </div>
+        </section>
+
+        <div className="mb-8">
+          {loading ? (
+            <CivicSkeleton type="metric" count={4} />
+          ) : (
+            <MetricsGrid signals={signals} />
+          )}
+        </div>
+
+        <div className="grid">
+          <div className="col-12 xl:col-9">
+            <div className="flex align-items-center justify-content-between mb-4 px-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hidden">
+                {quickFilters.map(f => (
+                  <button
+                    key={f.value}
+                    onClick={() => setActiveFilter(f.value)}
+                    className={`flex align-items-center gap-2 px-4 py-2 border-round-xl border-1 transition-all cursor-pointer whitespace-nowrap font-bold text-xs uppercase tracking-widest
+                      ${activeFilter === f.value 
+                        ? 'bg-brand-primary border-brand-primary text-white shadow-lg' 
+                        : 'bg-white-alpha-5 border-white-alpha-10 text-secondary hover:border-white-alpha-30'
+                      }`}
+                  >
+                    <i className={`pi ${f.icon}`}></i>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {loading ? (
+              <CivicSkeleton type="table-row" count={8} />
+            ) : (
+              <CivicCard padding="none" className="border-round-3xl">
+                <SignalTable 
+                  signals={signals} 
+                  loading={loading} 
+                  totalRecords={totalRecords}
+                  rows={lazyState.rows}
+                  first={lazyState.first}
+                  onPage={onPage}
+                />
+              </CivicCard>
             )}
           </div>
-          {/* P1-D: Cleaned title logic, allowing translation to define highlight via key or just direct text */}
-          <h1 className="text-5xl font-black mb-2 tracking-tight line-height-1 text-main">
-            {t('dashboard.title')}
-          </h1>
-          <p className="text-muted text-lg max-w-30rem m-0">
-            {t('dashboard.subtitle')}
-          </p>
-          {meta && (
-            <div className="mt-3 flex flex-wrap gap-2" data-testid="dashboard-meta-summary">
-              <span className="bg-white-alpha-5 text-main text-xs font-semibold px-2 py-1 border-round border-1 border-white-alpha-10">
-                {t('metrics.total')}: {meta.totalSignals}
-              </span>
-              <span className="bg-white-alpha-5 text-main text-xs font-semibold px-2 py-1 border-round border-1 border-white-alpha-10">
-                {t('dashboard.open_signals')}: {meta.unresolvedSignals}
-              </span>
+
+          <div className="col-12 xl:col-3">
+            <div className="flex flex-column gap-6">
+              {loading ? (
+                <CivicSkeleton type="text" count={3} />
+              ) : (
+                <>
+                  {signals.length > 0 && (
+                    <CategoryChart signals={signals} />
+                  )}
+                  <DigestSidebar signals={signals} />
+                  {isStaff && (
+                    <NotificationSidebar notifications={notifications} />
+                  )}
+                  {isStaff && (
+                    <CivicCard title="Integrity Alerts" variant="danger">
+                      <div className="flex flex-column gap-4">
+                        <div className="flex align-items-center justify-content-between bg-status-rejected-alpha-10 p-3 border-round-xl">
+                          <span className="text-sm font-bold text-main">Duplicates</span>
+                          <span className="bg-status-rejected text-white px-2 py-1 border-round font-black text-xs">{duplicateClusters}</span>
+                        </div>
+                        <CivicButton 
+                          label="Review Queue" 
+                          variant="ghost" 
+                          className="w-full text-xs" 
+                          onClick={() => navigate('/moderation')}
+                        />
+                      </div>
+                    </CivicCard>
+                  )}
+                </>
+              )}
             </div>
-          )}
-        </div>
-        <div className="flex gap-3">
-          {isStaff && (
-            <Button 
-              label={t('dashboard.broadcast')} 
-              icon="pi pi-bolt" 
-              severity="danger"
-              className="p-button-primary px-4 py-3 shadow-6 font-bold"
-              onClick={handleRelay} 
-              data-testid="broadcast-button"
-            />
-          )}
-          <Button 
-            label={t('dashboard.new_issue')} 
-            icon="pi pi-plus" 
-            className="p-button-primary px-4 py-3 shadow-6 font-bold" 
-            onClick={() => navigate("/report")} 
-            data-testid="report-issue-button"
-          />
-        </div>
-      </section>
-
-      {loading && <ProgressBar mode="indeterminate" style={{ height: '2px', marginBottom: '24px' }} className="border-round" />}
-
-      <MetricsGrid signals={loading ? [] : signals} />
-
-      <div className="grid mt-2">
-        <div className="col-12 xl:col-8" data-testid="main-signal-table">
-          <SignalTable 
-            signals={signals} 
-            loading={loading} 
-            totalRecords={totalRecords}
-            rows={lazyState.rows}
-            first={lazyState.first}
-            onPage={onPage}
-          />
-        </div>
-        <div className="col-12 xl:col-4">
-          <div className="flex flex-column gap-4">
-            {!loading && signals.length > 0 && <CategoryChart signals={signals} />}
-            <DigestSidebar signals={signals} />
-            {isStaff && (
-              <NotificationSidebar notifications={notifications} />
-            )}
-            {isStaff && (
-              <Card className="bg-surface border-1 border-white-alpha-10 shadow-4" data-testid="duplicates-insight-card">
-                <div className="flex align-items-start justify-content-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-black text-main uppercase tracking-widest mt-0 mb-2">
-                      {t('dashboard.duplicates_title')}
-                    </h3>
-                    <p className="text-sm text-muted m-0">
-                      {t('dashboard.duplicates_desc', { count: duplicateClusters })}
-                    </p>
-                  </div>
-                  <Button
-                    label={t('dashboard.review_queue')}
-                    icon="pi pi-eye"
-                    outlined
-                    severity="info"
-                    onClick={() => navigate('/moderation')}
-                    data-testid="duplicates-review-button"
-                  />
-                </div>
-              </Card>
-            )}
-            {activeRole === "CITIZEN" && (
-              <Card title={t('dashboard.citizen_support_title')} className="bg-surface border-1 border-white-alpha-10 shadow-4" data-testid="citizen-support-card">
-                <p className="text-muted line-height-3 mb-4 text-sm">
-                  {t('dashboard.citizen_support_desc')}
-                </p>
-                <div className="flex align-items-center gap-2 text-cyan-500">
-                  <i className="pi pi-shield"></i>
-                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-500">{t('dashboard.citizen_verification')}</span>
-                </div>
-              </Card>
-            )}
           </div>
         </div>
       </div>

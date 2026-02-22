@@ -2,11 +2,12 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicField } from "../components/ui/CivicField";
 
 type VerifyForm = {
   code: string;
@@ -18,7 +19,7 @@ export function Verify() {
   const location = useLocation();
   const username = location.state?.username;
   
-  const { control, handleSubmit, formState: { isSubmitting } } = useForm<VerifyForm>();
+  const { control, handleSubmit, formState: { isSubmitting, errors } } = useForm<VerifyForm>();
 
   if (!username) {
     navigate("/login");
@@ -30,9 +31,8 @@ export function Verify() {
       await apiClient.post("auth/verify", { username, code: data.code });
       toast.success(t('auth.verified_success'));
       navigate("/login");
-    } catch (err: unknown) {
-      const apiErr = err as { friendlyMessage?: string };
-      toast.error(apiErr.friendlyMessage || "Invalid verification code.");
+    } catch (err: any) {
+      toast.error(err.friendlyMessage || "Invalid verification code.");
     }
   };
 
@@ -40,57 +40,64 @@ export function Verify() {
     try {
       await apiClient.post("auth/resend-code", { username });
       toast.success(t('auth.code_resent') || "Verification code resent to your email.");
-    } catch (err: unknown) {
-      const apiErr = err as { friendlyMessage?: string };
-      toast.error(apiErr.friendlyMessage || "Failed to resend code.");
+    } catch (err: any) {
+      toast.error(err.friendlyMessage || "Failed to resend code.");
     }
   };
 
   return (
     <Layout authMode>
-      <div className="auth-shell flex justify-content-center align-items-center">
-        <Card 
-          title={<div className="text-center w-full">{t('auth.activate_title')}</div>} 
-          subTitle={<div className="text-center w-full">{t('auth.activate_subtitle')}</div>} 
-          style={{ width: '100%', maxWidth: '400px' }}
-          className="auth-card shadow-8"
-        >
-          <form onSubmit={handleSubmit(onSubmit)} className="p-fluid">
-            <div className="field">
+      <div className="min-h-screen flex justify-content-center align-items-center p-4">
+        <CivicCard className="w-full max-w-28rem animate-fade-up text-center" padding="lg">
+          <div className="mb-8">
+            <div className="inline-flex align-items-center justify-content-center p-3 bg-brand-primary-alpha-10 border-round-2xl mb-4 border-1 border-brand-primary-alpha-20">
+              <i className="pi pi-shield text-4xl text-brand-primary"></i>
+            </div>
+            <h1 className="text-4xl font-black text-main m-0 tracking-tighter">{t('auth.activate_title')}</h1>
+            <p className="text-secondary mt-2 font-medium">{t('auth.activate_subtitle')}</p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-column gap-2 text-left" aria-label="Verification Form">
+            <CivicField 
+              label="Verification Code" 
+              error={errors.code ? t('common.required') : undefined}
+              helpText={t('auth.verify_protocol')}
+            >
               <Controller name="code" control={control} rules={{ required: true, minLength: 6, maxLength: 6 }} 
                 render={({ field }) => (
                   <InputText 
                     {...field} 
                     id="verify-code" 
                     placeholder="000000" 
-                    className="text-center text-4xl font-black tracking-widest py-3"
+                    className="text-center text-4xl font-black tracking-widest py-3 w-full"
                     autoFocus
+                    maxLength={6}
                   />
                 )} 
               />
-            </div>
-            <Button 
+            </CivicField>
+
+            <CivicButton 
               type="submit" 
               label={t('auth.verify_button')} 
-              className="p-button-primary mt-4 py-3 font-bold" 
+              icon="pi pi-check-shield" 
+              className="py-4 text-base mt-2" 
               loading={isSubmitting} 
+              glow
             />
             
-            <div className="text-center mt-4">
-              <Button 
+            <div className="mt-8 pt-6 border-top-1 border-white-alpha-10 flex flex-column gap-3 text-center">
+              <p className="text-muted text-sm m-0">Didn't receive the code?</p>
+              <CivicButton 
                 type="button" 
-                label={t('auth.resend_button') || "Resend Verification Code"} 
-                link 
-                className="text-cyan-500 font-bold p-0" 
+                label={t('auth.resend_button') || "Dispatch New Code"} 
+                variant="ghost"
                 onClick={handleResend}
+                className="text-xs"
               />
             </div>
-
-            <p className="text-center mt-4 text-xs text-gray-500">
-              {t('auth.verify_protocol')}
-            </p>
           </form>
-        </Card>
+        </CivicCard>
       </div>
     </Layout>
   );

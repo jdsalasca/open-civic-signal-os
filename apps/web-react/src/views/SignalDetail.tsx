@@ -1,16 +1,18 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { Signal } from "../types";
-import { Card } from "primereact/card";
-import { Button } from "primereact/button";
-import { Tag } from "primereact/tag";
+import { Signal, SignalStatusEntry } from "../types";
 import { ProgressBar } from "primereact/progressbar";
 import { Divider } from "primereact/divider";
 import { useAuthStore } from "../store/useAuthStore";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicBadge } from "../components/ui/CivicBadge";
+import { CivicEngagement } from "../components/CivicEngagement";
+import { PriorityRadar } from "../components/PriorityRadar";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -22,15 +24,23 @@ export function SignalDetail() {
   const navigate = useNavigate();
   const { activeRole } = useAuthStore();
   const [signal, setSignal] = useState<Signal | null>(null);
+  const [history, setHistory] = useState<SignalStatusEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
 
-  const fetchSignal = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await apiClient.get(`signals/${id}`);
-      if (res.status === 200) {
-        setSignal(res.data);
+      const [signalRes, historyRes] = await Promise.all([
+        apiClient.get(`signals/${id}`),
+        apiClient.get(`signals/${id}/history`)
+      ]);
+      
+      if (signalRes.status === 200) {
+        setSignal(signalRes.data);
+      }
+      if (historyRes.status === 200) {
+        setHistory(historyRes.data || []);
       }
     } catch (err) {
       const apiErr = err as ApiError;
@@ -42,15 +52,15 @@ export function SignalDetail() {
   }, [id, navigate, t]);
 
   useEffect(() => {
-    fetchSignal();
-  }, [fetchSignal]);
+    fetchData();
+  }, [fetchData]);
 
   const updateStatus = async (newStatus: string) => {
     try {
       const res = await apiClient.patch(`signals/${id}/status`, { status: newStatus });
       if (res.status === 200) {
         toast.success(t('signals.lifecycle_success', { status: newStatus }));
-        fetchSignal();
+        fetchData();
       }
     } catch (err) {
       const apiErr = err as ApiError;
@@ -64,7 +74,7 @@ export function SignalDetail() {
       const res = await apiClient.post(`signals/${id}/vote`);
       if (res.status === 200) {
         toast.success(t('signals.support_success'));
-        fetchSignal();
+        fetchData();
       }
     } catch (err) {
       const apiErr = err as ApiError;
@@ -78,178 +88,167 @@ export function SignalDetail() {
   if (!signal) return null;
 
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
-  const getStatusSeverity = (s: string) => {
-    if (s === 'NEW') return 'info';
-    if (s === 'IN_PROGRESS') return 'warning';
-    return 'success';
-  };
+  
+  let severity: 'new' | 'progress' | 'resolved' | 'rejected' = 'new';
+  if (signal.status === "IN_PROGRESS") severity = 'progress';
+  if (signal.status === "RESOLVED") severity = 'resolved';
+  if (signal.status === "REJECTED") severity = 'rejected';
 
   return (
     <Layout>
-      <div className="animate-fade-in pb-6" data-testid="signal-detail-view">
-        <div className="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-5 gap-3">
-          <div className="flex align-items-center gap-3">
-            <Button
+      <div className="animate-fade-up pb-8">
+        <div className="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-8 gap-4">
+          <div className="flex align-items-center gap-4">
+            <CivicButton
               icon="pi pi-arrow-left"
-              rounded
-              text
-              className="text-muted hover:text-main"
+              variant="ghost"
               onClick={() => navigate('/')}
-              aria-label={t('common.back')}
-              data-testid="signal-detail-back-button"
+              className="p-3 border-round-circle"
             />
             <div>
-              <div className="flex align-items-center gap-2 mb-1">
-                <Tag value={signal.status} severity={getStatusSeverity(signal.status)} className="px-2" data-testid="signal-status-tag" />
-                <span className="text-xs text-muted font-mono font-bold uppercase tracking-widest">{t('signals.ref')}: {signal.id.substring(0,8)}</span>
+              <div className="flex align-items-center gap-3 mb-2">
+                <CivicBadge label={signal.status} severity={severity} />
+                <span className="text-xs text-muted font-mono font-bold uppercase tracking-widest">Protocol ID: {signal.id.substring(0,8)}</span>
               </div>
-              <h1 className="text-4xl font-black text-main m-0 tracking-tight line-height-1" data-testid="signal-title">{signal.title}</h1>
+              <h1 className="text-5xl font-black text-main m-0 tracking-tighter leading-tight">{signal.title}</h1>
             </div>
           </div>
-          <Button 
-            label={voting ? t('signals.support_loading') : t('signals.support_button')} 
+          <CivicButton 
+            label={voting ? "Processing..." : "Support Signal"} 
             icon="pi pi-heart-fill" 
-            className="p-button-primary px-5 py-3 shadow-4 font-bold text-lg bg-red-600 border-none hover:bg-red-500" 
+            variant="danger"
+            className="py-4 px-6 text-lg shadow-xl"
             loading={voting}
             onClick={handleVote} 
-            data-testid="support-signal-button"
-            aria-label={t('signals.support_button')}
+            glow
           />
         </div>
 
         <div className="grid">
           <div className="col-12 lg:col-8">
-            <Card className="mb-4 shadow-6" data-testid="signal-description-card">
-              <div className="flex justify-content-between align-items-center mb-4">
-                <h3 className="text-muted uppercase text-xs font-black tracking-widest m-0">{t('signals.problem_definition')}</h3>
-                <Button 
+            <CivicCard className="mb-8">
+              <div className="flex justify-content-between align-items-center mb-8">
+                <h3 className="text-brand-primary uppercase text-xs font-black tracking-widest m-0">Intelligence Context</h3>
+                <CivicButton 
                   icon="pi pi-download" 
                   label="Trust Packet" 
-                  className="p-button-text p-button-sm text-cyan-400 font-bold"
-                  onClick={() => window.open(`/api/signals/${id}/trust-packet`, '_blank')}
-                  tooltip="Download cryptographic proof of prioritization"
-                  tooltipOptions={{ position: 'left' }}
+                  variant="ghost"
+                  className="text-xs"
+                  onClick={() => window.open(`/api/signals/${signal.id}/trust-packet`, '_blank')}
                 />
               </div>
-              <p className="text-xl line-height-4 m-0 text-main font-medium" style={{ whiteSpace: 'pre-wrap' }}>
-                {signal.description || "No descriptive context provided for this signal."}
+              <p className="text-xl line-height-4 m-0 text-primary font-medium leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
+                {signal.description}
               </p>
               
-              <Divider className="my-5 opacity-10" />
+              <Divider className="my-8 opacity-10" />
               
               <div className="grid grid-nogutter">
-                <div className="col-12 md:col-6 flex align-items-center gap-3 mb-3">
-                  <div className="bg-cyan-900 border-round p-3 flex align-items-center justify-content-center" style={{ width: '3rem', height: '3rem' }}>
-                    <i className="pi pi-users text-cyan-400 text-xl"></i>
+                <div className="col-12 md:col-6 flex align-items-center gap-4 mb-4">
+                  <div className="bg-brand-primary-alpha-10 border-round-xl p-4 flex align-items-center justify-content-center shadow-lg" style={{ width: '4.5rem', height: '4rem' }}>
+                    <i className="pi pi-users text-brand-primary text-2xl"></i>
                   </div>
                   <div>
-                    <div className="text-xs text-muted uppercase font-black tracking-widest">{t('signals.affected_estimation')}</div>
-                    <div className="text-xl font-black text-main" data-testid="affected-people-value">{(signal.scoreBreakdown?.affectedPeople || 0) * 10} {t('signals.citizens')}</div>
+                    <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">Affected Citizens</div>
+                    <div className="text-2xl font-black text-main">{signal.scoreBreakdown?.affectedPeople * 10} Estimated</div>
                   </div>
                 </div>
-                <div className="col-12 md:col-6 flex align-items-center gap-3 mb-3">
-                  <div className="bg-purple-900 border-round p-3 flex align-items-center justify-content-center" style={{ width: '3rem', height: '3rem' }}>
-                    <i className="pi pi-tag text-purple-400 text-xl"></i>
+                <div className="col-12 md:col-6 flex align-items-center gap-4 mb-4">
+                  <div className="bg-status-progress-alpha-10 border-round-xl p-4 flex align-items-center justify-content-center shadow-lg" style={{ width: '4.5rem', height: '4rem' }}>
+                    <i className="pi pi-tag text-status-progress text-2xl"></i>
                   </div>
                   <div>
-                    <div className="text-xs text-muted uppercase font-black tracking-widest">{t('signals.civic_category')}</div>
-                    <div className="text-xl font-black text-main uppercase tracking-tighter" data-testid="signal-category-value">{t(`categories.${signal.category}`)}</div>
+                    <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">Classification</div>
+                    <div className="text-2xl font-black text-main uppercase tracking-tighter">{t(`categories.${signal.category}`)}</div>
                   </div>
                 </div>
               </div>
-            </Card>
+            </CivicCard>
 
-            {isStaff && (
-              <Card title={<span className="text-sm font-black uppercase tracking-widest text-cyan-500">{t('signals.lifecycle_admin')}</span>} className="border-1 border-dashed border-cyan-800 bg-black-alpha-30 shadow-2" data-testid="staff-operations-card">
-                <div className="flex flex-wrap gap-3 mt-2">
-                  <Button label={t('signals.reset_new')} outlined severity="info" size="small" className="font-bold border-gray-700" onClick={() => updateStatus('NEW')} disabled={signal.status === 'NEW'} data-testid="status-new-button" />
-                  <Button label={t('signals.mark_inprogress')} severity="warning" size="small" icon="pi pi-bolt" className="font-bold shadow-2" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} data-testid="status-inprogress-button" />
-                  <Button label={t('signals.mark_resolved')} severity="success" size="small" icon="pi pi-check" className="font-bold shadow-2" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} data-testid="status-resolved-button" />
-                </div>
-              </Card>
-            )}
+            <CivicCard title="Operational Audit Trail" padding="none" className="mb-8">
+              <div className="flex flex-column gap-px bg-white-alpha-10">
+                {history.map((entry, idx) => (
+                  <div key={entry.id} className="bg-surface p-5 hover:bg-white-alpha-5 transition-colors flex gap-4">
+                    <div className="flex flex-column align-items-center gap-2">
+                      <div className="bg-brand-primary-alpha-20 border-circle p-2 flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
+                        <i className={`pi ${idx === 0 ? 'pi-star-fill' : 'pi-history'} text-brand-primary text-xs`}></i>
+                      </div>
+                      {idx !== history.length - 1 && <div className="flex-grow-1 w-2px bg-white-alpha-10"></div>}
+                    </div>
+                    <div className="flex-grow-1">
+                      <div className="flex justify-content-between align-items-start mb-2">
+                        <div className="flex align-items-center gap-2">
+                          <CivicBadge label={entry.statusTo} severity={entry.statusTo === 'RESOLVED' ? 'resolved' : 'progress'} />
+                          <span className="text-xs font-bold text-muted">from {entry.statusFrom}</span>
+                        </div>
+                        <span className="text-xs font-mono text-muted">{new Date(entry.createdAt).toLocaleString()}</span>
+                      </div>
+                      <p className="m-0 text-secondary text-sm font-medium">{entry.reason}</p>
+                      <div className="mt-3 text-xs font-black uppercase tracking-widest text-muted">
+                        Authored by: <span className="text-brand-primary">{entry.changedBy}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CivicCard>
+
+            <CivicEngagement 
+              parentId={signal.id} 
+              parentType="SIGNAL" 
+              initialReactions={signal.reactions} 
+            />
           </div>
 
           <div className="col-12 lg:col-4">
-            <Card className="text-center shadow-8 mb-4 border-cyan-900" header={
-              <div className="pt-4 px-4"><span className="text-xs font-black text-muted uppercase tracking-widest">{t('signals.intel_index')}</span></div>
-            } data-testid="priority-score-card">
-              <div className="text-7xl font-black text-cyan-400 mb-2 glow-cyan" data-testid="priority-score-value">
+            <CivicCard className="text-center mb-8" variant="brand" title="Intelligence Index">
+              <div className="text-8xl font-black text-main mb-2 tracking-tighter">
                 {signal.priorityScore?.toFixed(0)}
               </div>
-              <p className="text-muted text-sm font-bold mb-4 uppercase tracking-tighter">{t('signals.priority_rank')}</p>
-              
-              <Divider className="opacity-10" />
-              
-              <div className="text-left px-2" role="list" aria-label="Score breakdown details">
-                <div className="mb-4" role="listitem">
-                  <div className="flex justify-content-between mb-2">
-                    <span className="text-xs font-black text-muted uppercase tracking-widest">{t('signals.urgency_factor')}</span>
-                    <span className="text-sm font-black text-main">{(signal.scoreBreakdown?.urgency || 0).toFixed(0)} / 150</span>
-                  </div>
-                  <ProgressBar value={((signal.scoreBreakdown?.urgency || 0) / 150) * 100} showValue={false} style={{ height: '6px' }} color="#06b6d4" />
-                </div>
-                
-                <div className="mb-4" role="listitem">
-                  <div className="flex justify-content-between mb-2">
-                    <span className="text-xs font-black text-muted uppercase tracking-widest">{t('signals.social_impact')}</span>
-                    <span className="text-sm font-black text-main">{(signal.scoreBreakdown?.impact || 0).toFixed(0)} / 125</span>
-                  </div>
-                  <ProgressBar value={((signal.scoreBreakdown?.impact || 0) / 125) * 100} showValue={false} style={{ height: '6px' }} color="#f59e0b" />
-                </div>
+              <p className="text-muted text-sm font-bold mb-8 uppercase tracking-widest">Public Priority Rank</p>
+            </CivicCard>
 
-                <div className="mb-2" role="listitem">
-                  <div className="flex justify-content-between mb-2">
-                    <span className="text-xs font-black text-muted uppercase tracking-widest">{t('signals.community_trust')}</span>
-                    <span className="text-sm font-black text-main">{(signal.scoreBreakdown?.communityVotes || 0).toFixed(0)} / 15</span>
-                  </div>
-                  <ProgressBar value={((signal.scoreBreakdown?.communityVotes || 0) / 15) * 100} showValue={false} style={{ height: '6px' }} color="#10b981" />
-                </div>
-              </div>
-            </Card>
+            <PriorityRadar 
+              urgency={signal.scoreBreakdown?.urgency || 0}
+              impact={signal.scoreBreakdown?.impact || 0}
+              votes={signal.scoreBreakdown?.communityVotes || 0}
+              people={signal.scoreBreakdown?.affectedPeople || 0}
+            />
 
-            <Card className="shadow-4 border-1 border-white-alpha-10 bg-surface" data-testid="why-ranked-panel">
-              <h3 className="text-xs font-black text-cyan-500 uppercase tracking-widest mt-0 mb-3">
-                {t('signals.why_ranked_title')}
-              </h3>
-              <p className="text-sm text-muted mt-0 mb-3 line-height-3">
+            <div className="mb-8"></div>
+
+            <CivicCard title={t('signals.why_ranked_title')} className="mb-8">
+              <p className="text-sm text-secondary mt-0 mb-5 leading-relaxed">
                 {t('signals.why_ranked_desc')}
               </p>
-              <div className="flex flex-column gap-3">
-                <div className="p-3 border-round bg-card border-1 border-white-alpha-10">
-                  <div className="text-xs font-black text-main uppercase tracking-widest">
-                    {t('signals.urgency_factor')}
+              <div className="flex flex-column gap-4">
+                {[
+                  { label: "Urgency", formula: "Urgency Factor * 30" },
+                  { label: "Social Impact", formula: "Impact Score * 25" },
+                  { label: "Affected Citizens", formula: "min(People/10, 30)" },
+                  { label: "Community Support", formula: "min(Votes/5, 15)" }
+                ].map((item, idx) => (
+                  <div key={idx} className="p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10 shadow-sm">
+                    <div className="text-xs font-black text-main uppercase tracking-widest mb-1">
+                      {item.label}
+                    </div>
+                    <div className="text-xs text-muted font-mono leading-tight">
+                      {item.formula}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted mt-1">
-                    {t('signals.urgency_formula')}
-                  </div>
-                </div>
-                <div className="p-3 border-round bg-card border-1 border-white-alpha-10">
-                  <div className="text-xs font-black text-main uppercase tracking-widest">
-                    {t('signals.social_impact')}
-                  </div>
-                  <div className="text-xs text-muted mt-1">
-                    {t('signals.impact_formula')}
-                  </div>
-                </div>
-                <div className="p-3 border-round bg-card border-1 border-white-alpha-10">
-                  <div className="text-xs font-black text-main uppercase tracking-widest">
-                    {t('signals.affected_estimation')}
-                  </div>
-                  <div className="text-xs text-muted mt-1">
-                    {t('signals.affected_formula')}
-                  </div>
-                </div>
-                <div className="p-3 border-round bg-card border-1 border-white-alpha-10">
-                  <div className="text-xs font-black text-main uppercase tracking-widest">
-                    {t('signals.community_trust')}
-                  </div>
-                  <div className="text-xs text-muted mt-1">
-                    {t('signals.votes_formula')}
-                  </div>
-                </div>
+                ))}
               </div>
-            </Card>
+            </CivicCard>
+
+            {isStaff && (
+              <CivicCard title="Protocol Management" variant="brand" className="mb-8">
+                <div className="flex flex-column gap-3">
+                  <CivicButton label="Restore to Pending" variant="secondary" className="text-xs w-full" onClick={() => updateStatus('NEW')} disabled={signal.status === 'NEW'} />
+                  <CivicButton label="Authorize Progress" icon="pi pi-bolt" className="bg-status-progress text-black text-xs w-full" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} />
+                  <CivicButton label="Finalize Resolution" icon="pi pi-check" className="bg-status-resolved text-black text-xs w-full" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} />
+                </div>
+              </CivicCard>
+            )}
           </div>
         </div>
       </div>
