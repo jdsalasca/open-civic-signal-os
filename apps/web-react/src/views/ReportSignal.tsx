@@ -14,6 +14,8 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicField } from "../components/ui/CivicField";
 import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
+import { FORM_LIMITS } from "../constants/formLimits";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -44,6 +46,8 @@ export function ReportSignal() {
 
   const currentUrgency = watch('urgency');
   const currentImpact = watch('impact');
+  const currentTitleLength = watch('title')?.length ?? 0;
+  const currentDescriptionLength = watch('description')?.length ?? 0;
 
   const categories = [
     { label: t('categories.safety'), value: 'safety', icon: 'pi-shield' },
@@ -85,31 +89,35 @@ export function ReportSignal() {
             <div className="col-12 lg:col-7">
               <CivicCard title={t('report.title')} className="mb-6">
                 <CivicField label={t('report.issue_title')} error={errors.title?.message}>
-                  <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: 5, message: t('report.title_too_short') } }} 
+                  <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.titleMin, message: t('report.title_too_short') }, maxLength: { value: FORM_LIMITS.report.titleMax, message: t('report.title_too_long') } }} 
                     render={({ field, fieldState }) => (
-                      <InputText
-                        {...field}
-                        id="report-title"
-                        className={classNames('w-full', { 'p-invalid': fieldState.error })}
-                        placeholder={t('report.issue_title_placeholder')}
-                        data-testid="report-title-input"
-                      />
+                      <div className="flex flex-column gap-2">
+                        <InputText
+                          {...field}
+                          id="report-title"
+                          className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                          placeholder={t('report.issue_title_placeholder')}
+                          data-testid="report-title-input"
+                          maxLength={FORM_LIMITS.report.titleMax}
+                        />
+                        <CivicCharacterCount current={currentTitleLength} max={FORM_LIMITS.report.titleMax} min={FORM_LIMITS.report.titleMin} />
+                      </div>
                     )} 
                   />
                 </CivicField>
 
                 <div className="grid">
                   <div className="col-12 md:col-6">
-                    <CivicField label={t('common.category')}>
+                    <CivicField label={t('common.category')} error={errors.category?.message}>
                       <Controller name="category" control={control} rules={{ required: t('common.required') }} 
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <CivicSelect
                             value={field.value}
                             onChange={(e) => field.onChange(e.value)}
                             options={categories}
                             placeholder={t('common.select_category')}
                             inputId="report-category"
-                            className="w-full"
+                            className={classNames('w-full', { 'p-invalid': fieldState.error })}
                             data-testid="report-category-dropdown"
                             itemTemplate={(option) => (
                               <div className="flex align-items-center gap-2">
@@ -140,8 +148,9 @@ export function ReportSignal() {
                 </div>
 
                 <CivicField label={t('report.context')} error={errors.description?.message}>
-                  <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: 20, message: t('report.desc_too_short') } }} 
+                  <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.descriptionMin, message: t('report.desc_too_short') }, maxLength: { value: FORM_LIMITS.report.descriptionMax, message: t('report.desc_too_long') } }} 
                     render={({ field }) => (
+                      <div className="flex flex-column gap-2">
                         <InputTextarea
                           {...field}
                           id="report-description"
@@ -149,7 +158,10 @@ export function ReportSignal() {
                           className="w-full"
                           placeholder={t('report.context_placeholder')}
                           data-testid="report-description-textarea"
+                          maxLength={FORM_LIMITS.report.descriptionMax}
                         />
+                        <CivicCharacterCount current={currentDescriptionLength} max={FORM_LIMITS.report.descriptionMax} min={FORM_LIMITS.report.descriptionMin} />
+                      </div>
                       )} 
                   />
                 </CivicField>

@@ -46,6 +46,13 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
   - no toast/overlay in viewport center during form workflows
   - reserve safe top/bottom offsets for sticky nav + mobile keyboards
   - validate registration/login/verify screens with Playwright in desktop + mobile
+- Standardize inclusive form UX across app:
+  - all user-generated text flows (report, blog, threads) must expose min/max guidance and live character counters
+  - use plain-language labels/placeholders and avoid technical jargon unless role-specific
+  - provide equivalent EN/ES copy updates in the same change set
+- Centralize UI primitives:
+  - prefer shared components (`CivicSelect`, page headers, counters, fields) over repeated local markup
+  - avoid ad-hoc style divergence across views for the same control type
 
 ## Collaboration Workflow
 

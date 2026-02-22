@@ -91,3 +91,7 @@
 - Never ship dropdown overlays without portal hardening:
   - for PrimeReact `Dropdown` in header cards, sidebars, dialogs, and dense forms, use `appendTo={document.body}`
   - validate no overlap/clipping with Playwright in desktop and mobile viewports
+- Never ship inconsistent form quality across participation workflows:
+  - report/blog/thread creation must include min/max guidance and live character counters
+  - keep copy localized (EN/ES) in the same PR whenever labels/placeholders/feedback change
+  - prefer shared UI primitives for repeated patterns (`CivicSelect`, page headers, counters, fields)
