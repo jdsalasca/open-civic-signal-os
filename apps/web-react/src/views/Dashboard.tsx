@@ -16,6 +16,7 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 import { CivicToolbar } from "../components/ui/CivicToolbar";
+import { useCommunityStore } from "../store/useCommunityStore";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -23,11 +24,23 @@ interface ApiError extends Error {
 
 const CRITICAL_SCORE_THRESHOLD = 220;
 const STATUS_FILTERS = new Set(["NEW", "IN_PROGRESS", "RESOLVED"]);
+const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
+
+type DashboardCachePayload = {
+  signals: Signal[];
+  totalRecords: number;
+  meta: SignalMeta | null;
+  notifications: Notification[];
+  duplicateClusters: number;
+};
+
+const dashboardCache = new Map<string, { timestamp: number; data: DashboardCachePayload }>();
 
 export function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeRole, userName } = useAuthStore();
+  const { activeCommunityId } = useCommunityStore();
   
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -43,7 +56,29 @@ export function Dashboard() {
     page: 0
   });
 
-  const loadData = useCallback(async (signal?: AbortSignal) => {
+  const loadData = useCallback(async (signal?: AbortSignal, force = false) => {
+    const cacheKey = [
+      activeCommunityId || "global",
+      activeRole,
+      activeFilter,
+      lazyState.page,
+      lazyState.rows,
+    ].join(":");
+
+    if (!force) {
+      const cached = dashboardCache.get(cacheKey);
+      const isFresh = cached && Date.now() - cached.timestamp < DASHBOARD_CACHE_TTL_MS;
+      if (isFresh && cached) {
+        setSignals(cached.data.signals);
+        setTotalRecords(cached.data.totalRecords);
+        setMeta(cached.data.meta);
+        setNotifications(cached.data.notifications);
+        setDuplicateClusters(cached.data.duplicateClusters);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       const prioritizedQuery = STATUS_FILTERS.has(activeFilter)
@@ -77,6 +112,20 @@ export function Dashboard() {
         const clusterCount = Object.keys(duplicatesRes.data || {}).length;
         setDuplicateClusters(clusterCount);
       }
+
+      dashboardCache.set(cacheKey, {
+        timestamp: Date.now(),
+        data: {
+          signals: signalsRes.data.content || [],
+          totalRecords: signalsRes.data.totalElements || 0,
+          meta: metaRes.status === 200 ? metaRes.data : null,
+          notifications: notificationsRes && notificationsRes.status === 200 ? notificationsRes.data : [],
+          duplicateClusters:
+            duplicatesRes && duplicatesRes.status === 200
+              ? Object.keys(duplicatesRes.data || {}).length
+              : 0,
+        },
+      });
       
     } catch (err: any) {
       if (err.name === 'CanceledError' || err.name === 'AbortError') return;
@@ -85,7 +134,7 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [activeRole, t, lazyState, activeFilter]);
+  }, [activeRole, t, lazyState, activeFilter, activeCommunityId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -116,7 +165,7 @@ export function Dashboard() {
       const res = await apiClient.post("notifications/relay/top-10");
       if (res.status === 200) {
         toast.success(t('dashboard.broadcast_success'));
-        loadData();
+        loadData(undefined, true);
       }
     } catch (err) {
       const apiErr = err as ApiError;
