@@ -66,6 +66,114 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PrioritizedSignal'
+  /api/signals/{id}:
+    get:
+      summary: Get one civic signal detail by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Signal detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalResponse'
+        '400':
+          description: Invalid signal ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Signal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/signals/meta:
+    get:
+      summary: Get aggregate metadata for current signal scope
+      parameters:
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aggregated signal metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalMeta'
+  /api/signals/mine:
+    get:
+      summary: Get signals created by the authenticated user
+      parameters:
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated self-reported signals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedPrioritizedSignals'
+  /api/signals/{id}/vote:
+    post:
+      summary: Cast support vote for a signal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Updated signal after vote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalResponse'
+        '404':
+          description: Signal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/notifications/recent:
     get:
       summary: Get recent outgoing notification relays
@@ -360,6 +468,18 @@ paths:
                   $ref: '#/components/schemas/CommunityFeedItem'
 components:
   schemas:
+    ApiError:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
     Notification:
       type: object
       properties:
@@ -429,6 +549,47 @@ components:
           type: integer
         number:
           type: integer
+    SignalResponse:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - category
+        - status
+        - priorityScore
+        - scoreBreakdown
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        priorityScore:
+          type: number
+        scoreBreakdown:
+          $ref: '#/components/schemas/ScoreBreakdown'
+    SignalMeta:
+      type: object
+      required:
+        - totalSignals
+        - unresolvedSignals
+      properties:
+        totalSignals:
+          type: integer
+          format: int64
+        unresolvedSignals:
+          type: integer
+          format: int64
+        lastUpdatedAt:
+          type: string
+          format: date-time
     Community:
       type: object
       required: [id, name, slug]

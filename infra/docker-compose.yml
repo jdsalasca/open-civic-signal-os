@@ -28,9 +28,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://civic-db:5432/signalos
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: password
-      JWT_SECRET: "strategic-civic-intelligence-key-secure-2026-v1"
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       CORS_ALLOWED_ORIGINS: "http://localhost:3002"
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: prod
     depends_on:
       civic-db:
         condition: service_healthy

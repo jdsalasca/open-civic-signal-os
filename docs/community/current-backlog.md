@@ -65,3 +65,32 @@ Operational backlog snapshot for immediate execution in Open Civic Signal OS.
 - Acceptance criteria and validation commands are explicit.
 - Contract and rollback notes are included.
 - Owner lane assigned (backend, frontend, docs, ops).
+
+## Critical Fix Backlog (Audit 2026-02-23)
+
+1. `P0 security: remove dev profile from production compose runtime`
+   - Replace `SPRING_PROFILES_ACTIVE: dev` in `infra/docker-compose.yml` with a hardened runtime profile.
+   - Acceptance criteria:
+     - verification code backdoor (`123456`) is not accepted in compose runtime
+     - SQL debug logging is disabled in compose runtime
+     - auth and signal flows still pass smoke tests
+2. `P0 security: externalize JWT secret and forbid hardcoded fallback in compose`
+   - Remove inline secret from `infra/docker-compose.yml` and load via environment/secret manager.
+   - Acceptance criteria:
+     - compose starts only when explicit secret is provided
+     - no static secret literal remains in repo runtime files
+3. `P1 trust-critical: align OpenAPI with active signal endpoints`
+   - Add contract entries for currently used endpoints (`/api/signals/{id}`, `/api/signals/meta`, `/api/signals/mine`, `/api/signals/{id}/vote`).
+   - Acceptance criteria:
+     - OpenAPI includes request/response + error schemas for these routes
+     - API integration tests validate at least detail + meta contract examples
+4. `P1 performance: remove N+1 engagement calls in community blog timeline`
+   - Replace per-post `GET /api/community/blog/{id}/comments` fetch pattern with batched comment summary/list endpoint.
+   - Acceptance criteria:
+     - blog timeline load requires O(1) or O(log n) API calls for engagement data
+     - Playwright trace shows at least 70% fewer blog comment requests on initial load
+5. `P1 performance: cache and de-duplicate membership loading in layout`
+   - Avoid repeated `GET /api/communities/my` calls across route transitions.
+   - Acceptance criteria:
+     - a single navigation session does not re-fetch memberships on every page unless explicit refresh
+     - global state persistence tests remain green
