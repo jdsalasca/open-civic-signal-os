@@ -33,6 +33,7 @@ export function CommunityBlog() {
   const [content, setContent] = useState("");
   const [statusTag, setStatusTag] = useState("IN_PROGRESS");
   const [publishing, setPublishing] = useState(false);
+  const [commentCountsByPost, setCommentCountsByPost] = useState<Record<string, number>>({});
 
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
   const titleLength = title.trim().length;
@@ -54,7 +55,17 @@ export function CommunityBlog() {
     if (!activeCommunityId) return;
     try {
       const res = await apiClient.get(`community/blog?communityId=${activeCommunityId}`);
-      setPosts(res.data || []);
+      const timeline = res.data || [];
+      setPosts(timeline);
+
+      if (timeline.length === 0) {
+        setCommentCountsByPost({});
+        return;
+      }
+
+      const postIds = timeline.map((post: CommunityBlogPost) => post.id).join(",");
+      const countRes = await apiClient.get(`community/blog/comments/count?postIds=${postIds}`);
+      setCommentCountsByPost(countRes.data || {});
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('community_blog.load_error'));
@@ -215,6 +226,8 @@ export function CommunityBlog() {
                         parentId={post.id} 
                         parentType="BLOG" 
                         initialReactions={post.reactions} 
+                        initialCommentCount={commentCountsByPost[post.id] ?? 0}
+                        autoloadComments={false}
                       />
                     </div>
                   </div>

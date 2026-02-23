@@ -441,6 +441,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityBlogPost'
+  /api/community/blog/comments/count:
+    get:
+      summary: Get comment counts for a set of blog post IDs
+      parameters:
+        - in: query
+          name: postIds
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+            style: form
+            explode: false
+      responses:
+        '200':
+          description: Map of post ID to comment count
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int64
   /api/community/feed:
     get:
       summary: Unified cross-community feed

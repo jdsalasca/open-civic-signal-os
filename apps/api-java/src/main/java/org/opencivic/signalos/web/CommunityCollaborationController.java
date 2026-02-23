@@ -44,6 +44,11 @@ public class CommunityCollaborationController {
         return engagementService.getComments(id, "BLOG");
     }
 
+    @GetMapping("/blog/comments/count")
+    public Map<UUID, Long> getBlogCommentCounts(@RequestParam List<UUID> postIds) {
+        return engagementService.getCommentCounts(postIds, "BLOG");
+    }
+
     @PostMapping("/blog/{id}/comments")
     public CivicCommentResponse addBlogComment(@PathVariable UUID id, @RequestBody Map<String, String> body, Principal principal) {
         return engagementService.addComment(id, "BLOG", body.get("content"), principal.getName());

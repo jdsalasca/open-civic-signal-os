@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,6 +45,22 @@ public class CivicEngagementService {
                 .stream()
                 .map(this::toCommentResponse)
                 .collect(Collectors.toList());
+    }
+
+    public Map<UUID, Long> getCommentCounts(List<UUID> parentIds, String parentType) {
+        if (parentIds == null || parentIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<UUID, Long> counts = new LinkedHashMap<>();
+        for (UUID parentId : parentIds) {
+            counts.put(parentId, 0L);
+        }
+
+        commentRepository.countByParentIdsAndParentType(parentIds, parentType)
+            .forEach(entry -> counts.put(entry.getParentId(), entry.getCommentCount()));
+
+        return counts;
     }
 
     @Transactional

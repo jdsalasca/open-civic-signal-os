@@ -11,15 +11,26 @@ interface Props {
   parentId: string;
   parentType: 'SIGNAL' | 'BLOG';
   initialReactions?: Record<string, number>;
+  initialCommentCount?: number;
+  autoloadComments?: boolean;
 }
 
 const REACTION_TYPES = ["👍", "🔥", "🙌", "📍", "👏", "🆘"];
 
-export function CivicEngagement({ parentId, parentType, initialReactions = {} }: Props) {
+export function CivicEngagement({
+  parentId,
+  parentType,
+  initialReactions = {},
+  initialCommentCount = 0,
+  autoloadComments = true,
+}: Props) {
   const [comments, setComments] = useState<CivicComment[]>([]);
   const [reactions, setReactions] = useState<Record<string, number>>(initialReactions);
   const [newComment, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [commentsVisible, setCommentsVisible] = useState(autoloadComments);
+  const [commentsLoaded, setCommentsLoaded] = useState(false);
+  const [commentCount, setCommentCount] = useState(initialCommentCount);
 
   const loadData = useCallback(async () => {
     try {
@@ -27,15 +38,26 @@ export function CivicEngagement({ parentId, parentType, initialReactions = {} }:
         ? `signals/${parentId}/comments` 
         : `community/blog/${parentId}/comments`;
       const res = await apiClient.get(endpoint);
-      setComments(res.data || []);
+      const nextComments = res.data || [];
+      setComments(nextComments);
+      setCommentCount(nextComments.length);
+      setCommentsLoaded(true);
     } catch (err) {
       console.error("Failed to load engagement data", err);
     }
   }, [parentId, parentType]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (autoloadComments) {
+      loadData();
+    }
+  }, [autoloadComments, loadData]);
+
+  useEffect(() => {
+    if (!autoloadComments && commentsVisible && !commentsLoaded) {
+      loadData();
+    }
+  }, [autoloadComments, commentsVisible, commentsLoaded, loadData]);
 
   const handleReact = async (type: string) => {
     try {
@@ -51,6 +73,9 @@ export function CivicEngagement({ parentId, parentType, initialReactions = {} }:
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
+    if (!commentsVisible) {
+      setCommentsVisible(true);
+    }
     setLoading(true);
     try {
       const endpoint = parentType === 'SIGNAL' 
@@ -87,6 +112,20 @@ export function CivicEngagement({ parentId, parentType, initialReactions = {} }:
       {/* COMMENTS SECTION */}
       <CivicCard title="Public Discussion" padding="none">
         <div className="flex flex-column">
+          <div className="flex align-items-center justify-content-between p-4 bg-black-alpha-20 border-bottom-1 border-white-alpha-10">
+            <span className="text-xs font-black uppercase tracking-widest text-muted">
+              Comments: {commentCount}
+            </span>
+            <CivicButton
+              label={commentsVisible ? "Hide discussion" : "View discussion"}
+              variant="ghost"
+              icon={commentsVisible ? "pi pi-chevron-up" : "pi pi-chevron-down"}
+              onClick={() => setCommentsVisible((prev) => !prev)}
+            />
+          </div>
+
+          {commentsVisible && (
+            <>
           {/* COMMENT LIST */}
           <div className="flex flex-column gap-px bg-white-alpha-10">
             {comments.length === 0 ? (
@@ -129,6 +168,8 @@ export function CivicEngagement({ parentId, parentType, initialReactions = {} }:
               </div>
             </div>
           </div>
+            </>
+          )}
         </div>
       </CivicCard>
     </div>
