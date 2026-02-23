@@ -16,16 +16,24 @@ type Props = {
 };
 
 export function Layout({ children, authMode = false }: Props) {
+  const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, activeRole, userName, logout } = useAuthStore();
-  const { memberships, activeCommunityId, setMemberships, setActiveCommunityId } = useCommunityStore();
+  const {
+    memberships,
+    activeCommunityId,
+    setMemberships,
+    setActiveCommunityId,
+    shouldRefreshMemberships,
+  } = useCommunityStore();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
   useEffect(() => {
     const loadMemberships = async () => {
       if (!isLoggedIn) return;
+      if (!shouldRefreshMemberships(MEMBERSHIP_CACHE_TTL_MS)) return;
       try {
         const res = await apiClient.get("communities/my");
         if (res.status === 200) {
@@ -36,7 +44,7 @@ export function Layout({ children, authMode = false }: Props) {
       }
     };
     loadMemberships();
-  }, [isLoggedIn, setMemberships]);
+  }, [isLoggedIn, setMemberships, shouldRefreshMemberships]);
 
   const handleLogout = async () => {
     try {
