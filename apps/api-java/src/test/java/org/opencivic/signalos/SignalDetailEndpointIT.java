@@ -74,7 +74,10 @@ class SignalDetailEndpointIT {
     @WithMockUser(username = "citizen", roles = {"CITIZEN"})
     void shouldReturnBadRequestWhenIdIsMalformed() throws Exception {
         mockMvc.perform(get("/api/signals/not-a-uuid"))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.error").value("Bad Request"))
+            .andExpect(jsonPath("$.message").value("Invalid parameter 'id'. Expected UUID."));
     }
 
     @Test
