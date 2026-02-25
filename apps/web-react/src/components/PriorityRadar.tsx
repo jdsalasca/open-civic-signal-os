@@ -9,6 +9,8 @@ import {
   Legend,
 } from "chart.js";
 import { CivicCard } from "./ui/CivicCard";
+import { useMemo } from "react";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 ChartJS.register(
   RadialLinearScale,
@@ -27,6 +29,22 @@ interface PriorityRadarProps {
 }
 
 export function PriorityRadar({ urgency, impact, votes, people }: PriorityRadarProps) {
+  const theme = useSettingsStore((state) => state.theme);
+  const palette = useMemo(() => {
+    const styles = getComputedStyle(document.documentElement);
+    const token = (name: string, fallback: string) => styles.getPropertyValue(name).trim() || fallback;
+    const primary = token("--brand-primary", "#1d4ed8");
+    return {
+      primary,
+      primaryGlow: token("--brand-primary-glow", "rgba(29, 78, 216, 0.35)"),
+      textMuted: token("--text-muted", "#64748b"),
+      grid: token("--border-subtle", "rgba(148, 163, 184, 0.35)"),
+      tooltipBg: token("--tooltip-bg", "#0f172a"),
+      tooltipText: token("--tooltip-text", "#ffffff"),
+      onBrand: token("--on-brand", "#f8fafc")
+    };
+  }, [theme]);
+
   const data = {
     labels: ["Urgency", "Impact", "Community Support", "Population Scale"],
     datasets: [
@@ -38,13 +56,13 @@ export function PriorityRadar({ urgency, impact, votes, people }: PriorityRadarP
           (votes / 15) * 100,
           (people / 30) * 100,
         ],
-        backgroundColor: "rgba(99, 102, 241, 0.2)",
-        borderColor: "#6366f1",
+        backgroundColor: palette.primaryGlow,
+        borderColor: palette.primary,
         borderWidth: 2,
-        pointBackgroundColor: "#6366f1",
-        pointBorderColor: "#fff",
-        pointHoverBackgroundColor: "#fff",
-        pointHoverBorderColor: "#6366f1",
+        pointBackgroundColor: palette.primary,
+        pointBorderColor: palette.onBrand,
+        pointHoverBackgroundColor: palette.onBrand,
+        pointHoverBorderColor: palette.primary,
       },
     ],
   };
@@ -52,10 +70,10 @@ export function PriorityRadar({ urgency, impact, votes, people }: PriorityRadarP
   const options = {
     scales: {
       r: {
-        angleLines: { color: "rgba(255, 255, 255, 0.1)" },
-        grid: { color: "rgba(255, 255, 255, 0.1)" },
+        angleLines: { color: palette.grid },
+        grid: { color: palette.grid },
         pointLabels: {
-          color: "#94a3b8",
+          color: palette.textMuted,
           font: { size: 10, weight: 700, family: "Plus Jakarta Sans" },
         },
         ticks: { display: false, stepSize: 20 },
@@ -66,7 +84,9 @@ export function PriorityRadar({ urgency, impact, votes, people }: PriorityRadarP
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#1e293b",
+        backgroundColor: palette.tooltipBg,
+        titleColor: palette.tooltipText,
+        bodyColor: palette.tooltipText,
         cornerRadius: 8,
         padding: 12,
       },

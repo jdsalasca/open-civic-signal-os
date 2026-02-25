@@ -59,7 +59,7 @@ body {
   top: -4rem;
   z-index: 100000;
   background: var(--brand-primary);
-  color: #fff;
+  color: var(--on-brand);
   padding: 0.6rem 0.9rem;
   border-radius: 0.6rem;
   text-decoration: none;
@@ -95,7 +95,7 @@ select:focus-visible,
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: var(--shadow-lift) !important;
   }
 
   &::before {
@@ -122,14 +122,14 @@ select:focus-visible,
 
   &.p-button-primary {
     background: var(--brand-primary) !important;
-    color: #ffffff !important;
+    color: var(--on-brand) !important;
     border: none !important;
     box-shadow: 0 4px 14px 0 var(--brand-primary-glow) !important;
 
     &:hover {
       background: var(--brand-primary-hover) !important;
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6) !important;
+      box-shadow: 0 8px 22px var(--brand-primary-glow-strong) !important;
     }
 
     &:active {
@@ -144,20 +144,20 @@ select:focus-visible,
 
     &:hover {
       border-color: var(--text-secondary) !important;
-      background: var(--border-subtle) !important;
+      background: var(--surface-hover) !important;
     }
   }
 
   &.p-button-danger {
     background: var(--status-rejected) !important;
-    color: #ffffff !important;
+    color: var(--on-brand) !important;
     border: none !important;
-    box-shadow: 0 4px 14px 0 rgba(244, 63, 94, 0.4) !important;
+    box-shadow: 0 4px 14px 0 var(--status-rejected-glow) !important;
 
     &:hover {
       filter: brightness(1.1);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(244, 63, 94, 0.6) !important;
+      box-shadow: 0 8px 22px var(--status-rejected-glow) !important;
     }
   }
 }
@@ -175,7 +175,7 @@ select:focus-visible,
 
   &:focus {
     border-color: var(--field-border-focus) !important;
-    box-shadow: 0 0 0 2px var(--brand-primary-glow), inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 0 0 2px var(--focus-ring), inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
     background: var(--field-bg-focus) !important;
   }
 }
@@ -214,7 +214,7 @@ select:focus-visible,
 
     &.p-highlight {
       background: var(--brand-primary);
-      color: #000;
+      color: var(--on-brand);
     }
   }
 }
@@ -236,7 +236,7 @@ select:focus-visible,
     border-bottom: 1px solid var(--border-subtle) !important;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.02) !important;
+      background: var(--table-row-hover) !important;
     }
   }
 }
@@ -263,7 +263,7 @@ select:focus-visible,
 
     &.p-highlight {
       background: var(--brand-primary) !important;
-      color: #000 !important;
+      color: var(--on-brand) !important;
     }
   }
 }
@@ -308,6 +308,7 @@ select:focus-visible,
   padding: 0.5rem 0.8rem !important;
   border-radius: 6px !important;
   border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--tooltip-shadow);
 }
 
 // --- LAYOUT ---
@@ -358,7 +359,7 @@ select:focus-visible,
 .shimmer-effect {
   background: linear-gradient(90deg,
       rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
+      var(--shimmer-highlight) 50%,
       rgba(255, 255, 255, 0) 100%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite linear;

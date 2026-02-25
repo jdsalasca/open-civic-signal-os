@@ -4,6 +4,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { useTranslation } from "react-i18next";
 import { Signal } from "../types";
 import { CivicCard } from "./ui/CivicCard";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -13,15 +14,25 @@ type Props = {
 
 export function CategoryChart({ signals }: Props) {
   const { t } = useTranslation();
-  
-  const colors = [
-    "#6366f1", // Indigo 500
-    "#10b981", // Emerald 500
-    "#f59e0b", // Amber 500
-    "#f43f5e", // Rose 500
-    "#0ea5e9", // Sky 500
-    "#8b5cf6", // Violet 500
-  ];
+  const theme = useSettingsStore((state) => state.theme);
+
+  const palette = useMemo(() => {
+    const styles = getComputedStyle(document.documentElement);
+    const token = (name: string, fallback: string) => styles.getPropertyValue(name).trim() || fallback;
+    return {
+      colors: [
+        token("--chart-1", "#1d4ed8"),
+        token("--chart-2", "#0d9488"),
+        token("--chart-3", "#f59e0b"),
+        token("--chart-4", "#e11d48"),
+        token("--chart-5", "#0284c7"),
+        token("--chart-6", "#7c3aed")
+      ],
+      textMuted: token("--text-muted", "#64748b"),
+      tooltipBg: token("--tooltip-bg", "#0f172a"),
+      tooltipText: token("--tooltip-text", "#ffffff")
+    };
+  }, [theme]);
 
   const chartData = useMemo(() => {
     const categories = signals.reduce((acc: Record<string, number>, s) => {
@@ -34,7 +45,7 @@ export function CategoryChart({ signals }: Props) {
       datasets: [
         {
           data: Object.values(categories),
-          backgroundColor: colors,
+          backgroundColor: palette.colors,
           hoverOffset: 15,
           borderWidth: 0,
           borderRadius: 4,
@@ -42,14 +53,14 @@ export function CategoryChart({ signals }: Props) {
         },
       ],
     };
-  }, [signals, t]);
+  }, [palette.colors, signals, t]);
 
   const options = {
     plugins: {
       legend: {
         position: "bottom" as const,
         labels: {
-          color: "#94a3b8",
+          color: palette.textMuted,
           usePointStyle: true,
           pointStyle: 'circle',
           padding: 25,
@@ -57,7 +68,9 @@ export function CategoryChart({ signals }: Props) {
         },
       },
       tooltip: {
-        backgroundColor: '#1e293b',
+        backgroundColor: palette.tooltipBg,
+        titleColor: palette.tooltipText,
+        bodyColor: palette.tooltipText,
         titleFont: { size: 13, weight: 800 },
         bodyFont: { size: 12 },
         padding: 12,

@@ -45,11 +45,11 @@ export function LoginModal({ onLogin, onClose }: Props) {
           </button>
         </div>
         
-        <p className="hint" style={{ marginTop: '10px' }}>
-          New to Signal OS? <span style={{ color: 'var(--accent-primary)', cursor: 'pointer' }} onClick={handleRegisterRedirect}>Register here</span>
+        <p className="hint" style={{ marginTop: "10px", color: "var(--text-secondary)" }}>
+          New to Signal OS? <span style={{ color: "var(--brand-primary)", cursor: "pointer", fontWeight: 700 }} onClick={handleRegisterRedirect}>Register here</span>
         </p>
 
-        <div className="hint" style={{ lineHeight: '1.4', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
+        <div className="hint" style={{ lineHeight: "1.4", borderTop: "1px solid var(--border-subtle)", paddingTop: "10px", color: "var(--text-muted)" }}>
           <strong>Admin:</strong> admin / admin12345<br/>
           <strong>Staff:</strong> servant / servant2026<br/>
           <strong>Citizen:</strong> citizen / citizen2026
