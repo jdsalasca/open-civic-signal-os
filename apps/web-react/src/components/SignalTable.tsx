@@ -99,7 +99,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
   };
 
   const header = (
-    <div className="flex flex-column md:flex-row justify-content-between md:align-items-center gap-4 px-6 py-4 border-bottom-1 border-subtle bg-surface">
+    <div className="flex flex-column md:flex-row justify-content-between md:align-items-center gap-4 px-6 py-4 bg-surface">
       <div className="flex align-items-center gap-3">
         <div className="w-2rem h-2rem bg-brand-primary border-round-sm flex align-items-center justify-content-center shadow-lg">
           <i className="pi pi-database text-on-brand font-bold text-xs"></i>
@@ -122,7 +122,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
   );
 
   return (
-    <div className="animate-fade-up overflow-hidden border-round-3xl border-1 border-white-alpha-10 shadow-premium" data-testid="signals-datatable">
+    <div className="animate-fade-up overflow-hidden border-round-3xl border-1 border-subtle shadow-premium bg-card" data-testid="signals-datatable">
       <DataTable 
         value={tableData} 
         lazy
