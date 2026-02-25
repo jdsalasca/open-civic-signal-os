@@ -5,6 +5,7 @@
   --brand-primary-glow-strong: rgba(29, 78, 216, 0.55);
   --brand-accent: #0d9488;
   --on-brand: #f8fafc;
+  --on-surface-strong: #f8fafc;
 
   --status-new: #0ea5e9;
   --status-progress: #f59e0b;
@@ -66,6 +67,8 @@
     --pill-border: rgba(148, 163, 184, 0.22);
     --pill-hover: rgba(148, 163, 184, 0.2);
     --panel-soft-bg: rgba(148, 163, 184, 0.08);
+    --logo-surface: #e2e8f0;
+    --logo-icon: #0f172a;
     --alpha-surface-05: rgba(148, 163, 184, 0.08);
     --alpha-surface-10: rgba(148, 163, 184, 0.13);
     --alpha-border-05: rgba(148, 163, 184, 0.12);
@@ -115,6 +118,8 @@
     --pill-border: rgba(29, 78, 216, 0.22);
     --pill-hover: rgba(29, 78, 216, 0.14);
     --panel-soft-bg: rgba(29, 78, 216, 0.05);
+    --logo-surface: #0f172a;
+    --logo-icon: #f8fafc;
     --alpha-surface-05: rgba(29, 78, 216, 0.05);
     --alpha-surface-10: rgba(29, 78, 216, 0.1);
     --alpha-border-05: rgba(29, 78, 216, 0.1);
@@ -144,6 +149,8 @@
 .text-main { color: var(--text-main) !important; }
 .text-secondary { color: var(--text-secondary) !important; }
 .text-muted { color: var(--text-muted) !important; }
+.text-on-brand { color: var(--on-brand) !important; }
+.text-on-surface-strong { color: var(--on-surface-strong) !important; }
 .text-brand-primary { color: var(--brand-primary) !important; }
 .text-status-new { color: var(--status-new) !important; }
 .text-status-progress { color: var(--status-progress) !important; }
@@ -181,6 +188,37 @@
 .border-brand-primary-alpha-30 { border-color: var(--brand-primary-alpha-30) !important; }
 .border-status-rejected-alpha-20 { border-color: var(--status-rejected-alpha-20) !important; }
 .border-status-progress-alpha-20 { border-color: var(--status-progress-alpha-20) !important; }
+
+.u-logo-badge {
+  background: var(--logo-surface) !important;
+  border: 1px solid var(--border-subtle);
+}
+
+.u-logo-icon {
+  color: var(--logo-icon) !important;
+}
+
+.u-card-surface {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+.u-section-title {
+  color: var(--brand-primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.u-page-title {
+  color: var(--text-main);
+  letter-spacing: -0.04em;
+}
+
+.u-page-subtitle {
+  color: var(--text-secondary);
+  max-width: 42rem;
+}
 
 .app-search-shell {
   display: flex;
@@ -231,4 +269,65 @@
   padding: 0.12rem 0.42rem;
   font-size: 0.62rem;
   font-weight: 700;
+}
+
+@keyframes motion-enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes motion-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-soft-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.motion-page {
+  animation: motion-enter-fade 0.28s ease-out both;
+}
+
+.motion-card {
+  animation: motion-enter-up 0.34s ease-out both;
+}
+
+.motion-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.motion-card-hover:hover {
+  transform: translateY(-2px);
+}
+
+.motion-pulse-soft {
+  animation: motion-soft-pulse 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-page,
+  .motion-card,
+  .motion-pulse-soft {
+    animation: none !important;
+  }
+  .motion-card-hover {
+    transition: none !important;
+  }
 }

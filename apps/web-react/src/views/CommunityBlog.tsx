@@ -139,7 +139,7 @@ export function CommunityBlog() {
 
   return (
     <Layout>
-      <div className="animate-fade-up">
+      <div className="animate-fade-up motion-page">
         <CivicPageHeader
           title={t("community_blog.title")}
           description={t("community_blog.desc", { community: activeCommunityName || t("community_blog.default_community") })}

@@ -193,7 +193,7 @@ export function Dashboard() {
 
   return (
     <Layout>
-      <div className="animate-fade-up">
+      <div className="animate-fade-up motion-page">
         <section className="mb-8 flex flex-column lg:flex-row justify-content-between align-items-end gap-6" data-testid="dashboard-hero">
           <div>
             <div className="flex align-items-center flex-wrap gap-3 mb-4">
@@ -310,7 +310,7 @@ export function Dashboard() {
                       <div className="flex flex-column gap-4">
                         <div className="flex align-items-center justify-content-between bg-status-rejected-alpha-10 p-3 border-round-xl">
                           <span className="text-sm font-bold text-main">Duplicates</span>
-                          <span className="bg-status-rejected text-white px-2 py-1 border-round font-black text-xs">{duplicateClusters}</span>
+                          <span className="bg-status-rejected text-on-brand px-2 py-1 border-round font-black text-xs">{duplicateClusters}</span>
                         </div>
                         <CivicButton 
                           label="Review Queue" 

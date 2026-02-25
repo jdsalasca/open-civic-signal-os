@@ -7,8 +7,8 @@ interface CivicPageHeaderProps {
 export function CivicPageHeader({ title, description, className }: CivicPageHeaderProps) {
   return (
     <div className={className ?? "mb-8"}>
-      <h1 className="text-5xl font-black mb-2 text-main tracking-tighter">{title}</h1>
-      <p className="text-secondary text-lg font-medium">{description}</p>
+      <h1 className="u-page-title text-4xl md:text-5xl font-black mb-2">{title}</h1>
+      <p className="u-page-subtitle text-lg font-medium">{description}</p>
     </div>
   );
 }

@@ -102,7 +102,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
     <div className="flex flex-column md:flex-row justify-content-between md:align-items-center gap-4 px-6 py-4 border-bottom-1 border-white-alpha-5 bg-black-alpha-20">
       <div className="flex align-items-center gap-3">
         <div className="w-2rem h-2rem bg-brand-primary border-round-sm flex align-items-center justify-content-center shadow-lg">
-          <i className="pi pi-database text-black font-bold text-xs"></i>
+          <i className="pi pi-database text-on-brand font-bold text-xs"></i>
         </div>
         <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">Priority issues</h2>
       </div>

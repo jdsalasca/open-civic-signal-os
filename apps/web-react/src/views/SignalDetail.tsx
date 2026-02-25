@@ -96,7 +96,7 @@ export function SignalDetail() {
 
   return (
     <Layout>
-      <div className="animate-fade-up pb-8">
+      <div className="animate-fade-up motion-page pb-8">
         <div className="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-8 gap-4">
           <div className="flex align-items-center gap-4">
             <CivicButton
@@ -137,7 +137,7 @@ export function SignalDetail() {
                   onClick={() => window.open(`/api/signals/${signal.id}/trust-packet`, '_blank')}
                 />
               </div>
-              <p className="text-xl line-height-4 m-0 text-primary font-medium leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
+              <p className="text-xl line-height-4 m-0 text-secondary font-medium leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
                 {signal.description}
               </p>
               

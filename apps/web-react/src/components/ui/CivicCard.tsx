@@ -27,13 +27,13 @@ export function CivicCard({ children, title, className, padding = 'md', variant 
 
   return (
     <div className={classNames(
-      'glass-panel rounded-2xl overflow-hidden',
+      'glass-panel u-card-surface motion-card motion-card-hover rounded-2xl overflow-hidden',
       variantClasses[variant],
       className
     )} {...rest}>
       {title && (
         <div className="px-5 py-4 border-bottom-1 border-subtle bg-surface opacity-90">
-          <h3 className="m-0 text-xs font-black uppercase tracking-widest text-brand-primary">
+          <h3 className="m-0 text-xs u-section-title">
             {title}
           </h3>
         </div>

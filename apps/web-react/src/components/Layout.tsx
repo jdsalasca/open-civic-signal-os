@@ -140,8 +140,8 @@ export function Layout({ children, authMode = false }: Props) {
       {/* SIDEBAR */}
       <aside className="hidden lg:flex flex-column w-18rem border-right-1 border-white-alpha-5 bg-card z-2">
         <div className="p-6 flex align-items-center gap-3">
-          <div className="bg-white border-round-xl flex align-items-center justify-content-center shadow-premium" style={{ width: '36px', height: '36px' }}>
-            <i className="pi pi-signal text-black text-lg"></i>
+          <div className="u-logo-badge border-round-xl flex align-items-center justify-content-center shadow-premium" style={{ width: '36px', height: '36px' }}>
+            <i className="pi pi-signal u-logo-icon text-lg"></i>
           </div>
           <span className="text-xl font-black tracking-tighter uppercase text-main">Signal<span className="text-brand-primary">OS</span></span>
         </div>
@@ -269,7 +269,7 @@ export function Layout({ children, authMode = false }: Props) {
       <Sidebar visible={mobileMenuVisible} onHide={() => setMobileMenuVisible(false)} className="w-20rem bg-app">
         <div className="p-4 flex flex-column gap-6">
           <div className="flex align-items-center gap-3">
-            <div className="bg-white border-round-xl p-2 shadow-lg"><i className="pi pi-signal text-black"></i></div>
+            <div className="u-logo-badge border-round-xl p-2 shadow-lg"><i className="pi pi-signal u-logo-icon"></i></div>
             <span className="text-xl font-black text-main">SignalOS</span>
           </div>
           <nav className="flex flex-column gap-4" aria-label={t('nav.main_navigation')}>

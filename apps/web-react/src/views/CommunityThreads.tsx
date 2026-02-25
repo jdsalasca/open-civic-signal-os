@@ -232,7 +232,7 @@ export function CommunityThreads() {
 
   return (
     <Layout>
-      <div className="animate-fade-up">
+      <div className="animate-fade-up motion-page">
         <CivicPageHeader title={t("community_threads.title")} description={t("community_threads.desc")} />
 
         {!activeCommunityId && (
