@@ -22,6 +22,7 @@ import org.opencivic.signalos.service.PrioritizationService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
+import org.opencivic.signalos.web.dto.ApiPageResponse;
 import org.opencivic.signalos.service.CivicEngagementService;
 import org.opencivic.signalos.web.dto.CivicCommentResponse;
 import org.springframework.core.io.InputStreamResource;
@@ -106,7 +107,7 @@ public class SignalController {
     }
 
     @GetMapping("/prioritized")
-    public Page<SignalResponse> getPrioritizedSignals(
+    public ApiPageResponse<SignalResponse> getPrioritizedSignals(
         @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
         @RequestParam(value = "status", required = false) String statusFilter,
         Authentication authentication,
@@ -133,7 +134,7 @@ public class SignalController {
                 .register(meterRegistry)
                 .record(response.getNumberOfElements());
 
-            return response;
+            return ApiPageResponse.from(response);
         } catch (RuntimeException ex) {
             status = "error";
             meterRegistry.counter("signalos.prioritized.requests.errors.total", "scope", scope).increment();
@@ -193,7 +194,7 @@ public class SignalController {
     }
 
     @GetMapping("/flagged")
-    public Page<SignalResponse> getFlaggedSignals(
+    public ApiPageResponse<SignalResponse> getFlaggedSignals(
         @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Pageable sanitized = PageRequest.of(
@@ -201,8 +202,10 @@ public class SignalController {
             Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
             pageable.getSort()
         );
-        return prioritizationService.getFlaggedSignals(sanitized)
-            .map(this::mapToResponse);
+        return ApiPageResponse.from(
+            prioritizationService.getFlaggedSignals(sanitized)
+                .map(this::mapToResponse)
+        );
     }
 
     @PostMapping("/{id}/moderate")
@@ -257,7 +260,7 @@ public class SignalController {
     }
 
     @GetMapping("/mine")
-    public Page<SignalResponse> getMySignals(
+    public ApiPageResponse<SignalResponse> getMySignals(
         @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
         @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
         Authentication authentication
@@ -269,10 +272,12 @@ public class SignalController {
             Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
             pageable.getSort()
         );
-        return (communityId == null
-            ? signalRepository.findByAuthorId(user.getId(), sanitized)
-            : signalRepository.findByAuthorIdAndCommunityId(user.getId(), communityId, sanitized))
-            .map(this::mapToResponse);
+        return ApiPageResponse.from(
+            (communityId == null
+                ? signalRepository.findByAuthorId(user.getId(), sanitized)
+                : signalRepository.findByAuthorIdAndCommunityId(user.getId(), communityId, sanitized))
+                .map(this::mapToResponse)
+        );
     }
 
     @PostMapping

@@ -14,6 +14,7 @@ import org.opencivic.signalos.web.dto.CreateCommunityThreadMessageRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadRequest;
 import org.opencivic.signalos.web.dto.ModerateThreadMessageRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityBlogPostRequest;
+import org.opencivic.signalos.web.dto.ApiPageResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -64,13 +64,15 @@ public class CommunityCollaborationController {
     }
 
     @GetMapping("/threads")
-    public Page<CommunityThreadResponse> getThreads(
+    public ApiPageResponse<CommunityThreadResponse> getThreads(
         @RequestParam UUID communityId,
         @RequestParam(required = false) String status,
         @PageableDefault(size = 20, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
         Principal principal
     ) {
-        return collaborationService.getThreads(communityId, status, pageable, principal.getName());
+        return ApiPageResponse.from(
+            collaborationService.getThreads(communityId, status, pageable, principal.getName())
+        );
     }
 
     @PostMapping("/threads")
