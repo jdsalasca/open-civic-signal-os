@@ -13,7 +13,6 @@ import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
-import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 import { CivicToolbar } from "../components/ui/CivicToolbar";
 import { useCommunityStore } from "../store/useCommunityStore";
@@ -197,8 +196,7 @@ export function Dashboard() {
       <div className="animate-fade-up">
         <section className="mb-8 flex flex-column lg:flex-row justify-content-between align-items-end gap-6" data-testid="dashboard-hero">
           <div>
-            <div className="flex align-items-center gap-3 mb-4">
-              <CivicBadge label="Operations Live" severity="new" />
+            <div className="flex align-items-center flex-wrap gap-3 mb-4">
               <div className="u-pill" data-testid="welcome-message">
                 <i className="pi pi-user text-brand-primary"></i>
                 {userName}
@@ -208,11 +206,11 @@ export function Dashboard() {
                 {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
               </div>
             </div>
-            <h1 className="text-6xl font-black m-0 tracking-tighter text-main line-height-1">
-              {t('dashboard.title')}
+            <h1 className="text-4xl md:text-5xl font-black m-0 tracking-tight text-main line-height-2">
+              {t('dashboard.focus_today')}
             </h1>
-            <p className="text-secondary text-xl mt-3 mb-0 font-medium max-w-30rem opacity-80">
-              {t('dashboard.subtitle')}
+            <p className="text-secondary text-lg mt-3 mb-0 font-medium max-w-30rem">
+              {t('dashboard.focus_subtitle')}
             </p>
           </div>
 

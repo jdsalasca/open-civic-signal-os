@@ -91,6 +91,7 @@ public class CommunityCollaborationController {
             threadId,
             request.sourceCommunityId(),
             request.content(),
+            request.parentMessageId(),
             principal.getName()
         );
     }

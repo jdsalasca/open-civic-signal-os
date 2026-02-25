@@ -152,6 +152,20 @@ class CommunityRBAC_IT {
             .andExpect(status().isOk());
     }
 
+    @Test
+    @WithMockUser(username = "member_user", roles = {"CITIZEN"})
+    void memberCanReplyToThreadMessageUsingParentMessageId() throws Exception {
+        String path = "/api/community/threads/" + threadId + "/messages";
+        mockMvc.perform(
+                post(path)
+                    .contentType("application/json")
+                    .content(
+                        "{\"sourceCommunityId\":\"" + communityId + "\",\"content\":\"Reply to parent\",\"parentMessageId\":\"" + messageId + "\"}"
+                    )
+            )
+            .andExpect(status().isOk());
+    }
+
     private User createUser(String username) {
         User user = new User(username, "{noop}pw", username + "@test.dev", "ROLE_CITIZEN");
         user.setEnabled(true);

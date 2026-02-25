@@ -104,14 +104,14 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
         <div className="w-2rem h-2rem bg-brand-primary border-round-sm flex align-items-center justify-content-center shadow-lg">
           <i className="pi pi-database text-black font-bold text-xs"></i>
         </div>
-        <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">Live Intelligence Feed</h2>
+        <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">Priority issues</h2>
       </div>
       <div className="app-search-shell w-full md:w-auto md:ml-auto" style={{ maxWidth: "20rem" }}>
         <i className="pi pi-search app-search-icon" />
         <InputText
           value={globalFilterValue}
           onChange={onGlobalFilterChange}
-          placeholder="Filter protocols..."
+          placeholder="Search by title, status, category or ID..."
           className="app-search-input"
         />
       </div>
@@ -137,7 +137,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
           }
         }}
         rowClassName={(d) => (loading || ('_skeleton' in (d as object))) ? '' : 'cursor-pointer group hover:bg-white-alpha-5 transition-colors'}
-        emptyMessage={loading ? null : <div className="p-8 text-center text-muted font-bold uppercase tracking-widest text-xs">No intelligence data matches current filters</div>}
+        emptyMessage={loading ? null : <div className="p-8 text-center text-muted font-bold uppercase tracking-widest text-xs">No results match your filters</div>}
         className="p-datatable-sm"
         sortField="priorityScore"
         sortOrder={-1}

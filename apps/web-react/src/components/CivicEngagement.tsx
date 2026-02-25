@@ -96,10 +96,11 @@ export function CivicEngagement({
     <div className="flex flex-column gap-6 mt-8">
       {/* REACTION BAR */}
       <div className="flex flex-wrap align-items-center gap-2 p-3 bg-white-alpha-5 border-round-2xl border-1 border-white-alpha-10">
-        <span className="text-xs font-black uppercase text-muted px-2 mr-2">Community Sentiment</span>
+        <span className="text-xs font-black uppercase text-muted px-2 mr-2">Reactions</span>
         {REACTION_TYPES.map(emoji => (
           <button 
             key={emoji}
+            type="button"
             onClick={() => handleReact(emoji)}
             className="flex align-items-center gap-2 px-3 py-2 border-round-xl bg-black-alpha-40 border-1 border-transparent hover:border-brand-primary-alpha-30 transition-all cursor-pointer group"
           >
@@ -114,10 +115,10 @@ export function CivicEngagement({
         <div className="flex flex-column">
           <div className="flex align-items-center justify-content-between p-4 bg-black-alpha-20 border-bottom-1 border-white-alpha-10">
             <span className="text-xs font-black uppercase tracking-widest text-muted">
-              Comments: {commentCount}
+              Comments ({commentCount})
             </span>
             <CivicButton
-              label={commentsVisible ? "Hide discussion" : "View discussion"}
+              label={commentsVisible ? "Hide comments" : "View comments"}
               variant="ghost"
               icon={commentsVisible ? "pi pi-chevron-up" : "pi pi-chevron-down"}
               onClick={() => setCommentsVisible((prev) => !prev)}
@@ -129,7 +130,7 @@ export function CivicEngagement({
           {/* COMMENT LIST */}
           <div className="flex flex-column gap-px bg-white-alpha-10">
             {comments.length === 0 ? (
-              <div className="p-8 text-center text-muted italic">No comments yet. Start the conversation.</div>
+              <div className="p-8 text-center text-muted italic">No comments yet. Be the first to comment.</div>
             ) : (
               comments.map((comment) => (
                 <div key={comment.id} className="bg-surface p-5 hover:bg-white-alpha-5 transition-colors">

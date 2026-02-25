@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
@@ -23,34 +23,24 @@ import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 
 type ApiError = Error & { friendlyMessage?: string };
 
+const imageRegex = /!\[[^\]]*\]\(([^)]+)\)/;
+
+const extractFirstImageUrl = (content: string): string | null => {
+  const match = content.match(imageRegex);
+  return match?.[1] || null;
+};
+
+const stripMarkdownImages = (content: string): string => {
+  return content.replace(/!\[[^\]]*\]\(([^)]+)\)/g, "").trim();
+};
+
 const renderContent = (content: string) => {
-  const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-  const parts = [];
-  let lastIndex = 0;
-  let match;
-
-  while ((match = imgRegex.exec(content)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex, match.index)}</span>);
-    }
-    parts.push(
-      <img
-        key={`img-${match.index}`}
-        src={match[2]}
-        alt={match[1]}
-        loading="lazy"
-        className="max-w-full h-auto border-round-xl shadow-2 my-4 block"
-        style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }}
-      />
-    );
-    lastIndex = imgRegex.lastIndex;
-  }
-
-  if (lastIndex < content.length) {
-    parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex)}</span>);
-  }
-
-  return <div className="text-secondary text-base line-height-4 font-medium opacity-90 m-0 mb-4" style={{ whiteSpace: 'pre-wrap' }}>{parts.length > 0 ? parts : content}</div>;
+  const cleaned = stripMarkdownImages(content);
+  return (
+    <p className="text-secondary text-base line-height-4 font-medium m-0" style={{ whiteSpace: "pre-wrap" }}>
+      {cleaned}
+    </p>
+  );
 };
 
 export function CommunityBlog() {
@@ -68,18 +58,24 @@ export function CommunityBlog() {
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
   const titleLength = title.trim().length;
   const contentLength = content.trim().length;
-  const statusTagOptions = [
-    { label: t('community_blog.status_planned'), value: "PLANNED" },
-    { label: t('community_blog.status_in_progress'), value: "IN_PROGRESS" },
-    { label: t('community_blog.status_completed'), value: "COMPLETED" },
-    { label: t('community_blog.status_blocked'), value: "BLOCKED" },
-  ];
+
+  const statusTagOptions = useMemo(
+    () => [
+      { label: t("community_blog.status_planned"), value: "PLANNED" },
+      { label: t("community_blog.status_in_progress"), value: "IN_PROGRESS" },
+      { label: t("community_blog.status_completed"), value: "COMPLETED" },
+      { label: t("community_blog.status_blocked"), value: "BLOCKED" },
+    ],
+    [t]
+  );
+
   const canPublish = Boolean(
     activeCommunityId &&
-    titleLength >= FORM_LIMITS.blog.titleMin &&
-    contentLength >= FORM_LIMITS.blog.contentMin
+      titleLength >= FORM_LIMITS.blog.titleMin &&
+      contentLength >= FORM_LIMITS.blog.contentMin
   );
-  const activeCommunityName = memberships.find(m => m.communityId === activeCommunityId)?.communityName;
+
+  const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
 
   const loadPosts = useCallback(async () => {
     if (!activeCommunityId) return;
@@ -98,7 +94,7 @@ export function CommunityBlog() {
       setCommentCountsByPost(countRes.data || {});
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t('community_blog.load_error'));
+      toast.error(apiErr.friendlyMessage || t("community_blog.load_error"));
     }
   }, [activeCommunityId, t]);
 
@@ -118,11 +114,11 @@ export function CommunityBlog() {
       });
       setTitle("");
       setContent("");
-      toast.success(t('community_blog.publish_success'));
+      toast.success(t("community_blog.publish_success"));
       loadPosts();
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t('community_blog.publish_error'));
+      toast.error(apiErr.friendlyMessage || t("community_blog.publish_error"));
     } finally {
       setPublishing(false);
     }
@@ -130,10 +126,14 @@ export function CommunityBlog() {
 
   const getStatusSeverity = (tag: string) => {
     switch (tag) {
-      case 'COMPLETED': return 'resolved';
-      case 'BLOCKED': return 'rejected';
-      case 'IN_PROGRESS': return 'progress';
-      default: return 'new';
+      case "COMPLETED":
+        return "resolved";
+      case "BLOCKED":
+        return "rejected";
+      case "IN_PROGRESS":
+        return "progress";
+      default:
+        return "new";
     }
   };
 
@@ -141,21 +141,21 @@ export function CommunityBlog() {
     <Layout>
       <div className="animate-fade-up">
         <CivicPageHeader
-          title={t('community_blog.title')}
-          description={t('community_blog.desc', { community: activeCommunityName || t('community_blog.default_community') })}
+          title={t("community_blog.title")}
+          description={t("community_blog.desc", { community: activeCommunityName || t("community_blog.default_community") })}
         />
 
         <div className="grid">
           {isStaff && (
             <div className="col-12 lg:col-4">
-              <CivicCard title={t('community_blog.dispatch_title')} variant="brand">
-                <div className="flex flex-column gap-2">
-                  <CivicField label={t('community_blog.headline')}>
+              <CivicCard title={t("community_blog.dispatch_title")} variant="brand">
+                <div className="flex flex-column gap-3">
+                  <CivicField label={t("community_blog.headline")}>
                     <div className="flex flex-column gap-2">
                       <InputText
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder={t('community_blog.headline_placeholder')}
+                        placeholder={t("community_blog.headline_placeholder")}
                         className="w-full"
                         data-testid="blog-title-input"
                         maxLength={FORM_LIMITS.blog.titleMax}
@@ -164,22 +164,23 @@ export function CommunityBlog() {
                     </div>
                   </CivicField>
 
-                  <CivicField label={t('community_blog.context')}>
+                  <CivicField label={t("community_blog.context")}>
                     <div className="flex flex-column gap-2">
                       <InputTextarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        rows={6}
+                        rows={8}
                         className="w-full"
-                        placeholder={t('community_blog.context_placeholder')}
+                        placeholder={t("community_blog.context_placeholder")}
                         data-testid="blog-content-input"
                         maxLength={FORM_LIMITS.blog.contentMax}
                       />
+                      <small className="text-muted text-xs">{t("community_blog.image_hint")}</small>
                       <CivicCharacterCount current={content.length} max={FORM_LIMITS.blog.contentMax} min={FORM_LIMITS.blog.contentMin} />
                     </div>
                   </CivicField>
 
-                  <CivicField label={t('community_blog.status')}>
+                  <CivicField label={t("community_blog.status")}>
                     <CivicSelect
                       value={statusTag}
                       options={statusTagOptions}
@@ -189,7 +190,8 @@ export function CommunityBlog() {
                   </CivicField>
 
                   <CivicButton
-                    label={t('community_blog.publish')}
+                    type="button"
+                    label={t("community_blog.publish")}
                     icon="pi pi-send"
                     onClick={createPost}
                     disabled={!canPublish}
@@ -208,66 +210,71 @@ export function CommunityBlog() {
               <CivicCard>
                 <CivicEmptyState
                   icon="pi-map-marker"
-                  title={t('community_blog.empty_title')}
-                  description={t('report.community_required')}
-                  actionLabel={t('nav.communities')}
-                  onAction={() => navigate('/communities')}
+                  title={t("community_blog.empty_title")}
+                  description={t("report.community_required")}
+                  actionLabel={t("nav.communities")}
+                  onAction={() => navigate("/communities")}
                 />
               </CivicCard>
             ) : posts.length === 0 ? (
               <CivicCard>
                 <CivicEmptyState
                   icon="pi-history"
-                  title={t('community_blog.empty_title')}
-                  description={t('community_blog.empty_desc')}
+                  title={t("community_blog.empty_title")}
+                  description={t("community_blog.empty_desc")}
                 />
               </CivicCard>
             ) : (
-              <div className="grid">
-                {posts.map((post) => (
-                  <div key={post.id} className="col-12 xl:col-6 flex flex-column gap-4 p-3">
-                    <div className="glass-panel border-round-3xl p-5 hover:border-white-alpha-30 transition-all duration-300 flex-1 flex flex-column justify-content-between">
-                      <div>
-                        <div className="flex justify-content-between align-items-start mb-5">
+              <div className="flex flex-column gap-4">
+                {posts.map((post) => {
+                  const coverImage = extractFirstImageUrl(post.content);
+                  return (
+                    <article key={post.id} className="glass-panel border-round-3xl overflow-hidden">
+                      {coverImage && (
+                        <img
+                          src={coverImage}
+                          alt={post.title}
+                          loading="lazy"
+                          className="w-full"
+                          style={{ maxHeight: "320px", objectFit: "cover" }}
+                        />
+                      )}
+
+                      <div className="p-5 md:p-6 flex flex-column gap-4">
+                        <header className="flex justify-content-between align-items-start gap-3">
                           <div className="flex align-items-center gap-3">
-                            <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold shadow-4" />
+                            <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
                             <div className="flex flex-column">
                               <span className="text-sm font-bold text-main">{post.authorUsername}</span>
-                              <span className="text-xs text-muted font-bold uppercase tracking-tighter">{post.authorRole}</span>
+                              <span className="text-xs text-muted">{post.authorRole}</span>
                             </div>
                           </div>
-                          <CivicBadge label={post.statusTag.replace('_', ' ')} severity={getStatusSeverity(post.statusTag)} />
-                        </div>
+                          <CivicBadge label={post.statusTag.replace("_", " ")} severity={getStatusSeverity(post.statusTag)} />
+                        </header>
 
-                        <h2 className="text-2xl font-black text-main m-0 mb-3 tracking-tight leading-tight">{post.title}</h2>
-                        <div className="mb-4">
+                        <div>
+                          <h2 className="text-2xl font-black text-main m-0 mb-3">{post.title}</h2>
                           {renderContent(post.content)}
                         </div>
-                      </div>
 
-                      <div>
-                        <div className="flex justify-content-between align-items-center pt-5 border-top-1 border-white-alpha-10 mb-5">
-                          <div className="flex align-items-center gap-2 text-xs text-muted font-bold uppercase tracking-widest">
-                            <i className="pi pi-calendar"></i>
-                            <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
-                            <span className="mx-1">•</span>
-                            <span>{new Date(post.publishedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                          </div>
+                        <div className="flex align-items-center gap-2 text-xs text-muted border-top-1 border-white-alpha-10 pt-3">
+                          <i className="pi pi-calendar" />
+                          <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+                          <span>•</span>
+                          <span>{new Date(post.publishedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                         </div>
 
-                        <div className="px-2">
-                          <CivicEngagement
-                            parentId={post.id}
-                            parentType="BLOG"
-                            initialReactions={post.reactions}
-                            initialCommentCount={commentCountsByPost[post.id] ?? 0}
-                            autoloadComments={false}
-                          />
-                        </div>
+                        <CivicEngagement
+                          parentId={post.id}
+                          parentType="BLOG"
+                          initialReactions={post.reactions}
+                          initialCommentCount={commentCountsByPost[post.id] ?? 0}
+                          autoloadComments={false}
+                        />
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
             )}
           </div>

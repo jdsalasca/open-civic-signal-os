@@ -9,6 +9,7 @@ public record CommunityThreadMessageResponse(
     UUID threadId,
     UUID authorId,
     UUID sourceCommunityId,
+    UUID parentMessageId,
     String content,
     boolean hidden,
     String moderationReason,

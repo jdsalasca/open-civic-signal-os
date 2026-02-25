@@ -92,6 +92,7 @@ public class CommunityCollaborationService {
         UUID threadId,
         UUID sourceCommunityId,
         String content,
+        UUID parentMessageId,
         String username
     ) {
         User user = accessService.getCurrentUser(username);
@@ -117,6 +118,16 @@ public class CommunityCollaborationService {
         message.setThreadId(threadId);
         message.setAuthorId(user.getId());
         message.setSourceCommunityId(sourceCommunityId);
+        if (parentMessageId != null) {
+            CommunityThreadMessage parent = messageRepository.findById(parentMessageId)
+                .orElseThrow(() -> new ResourceNotFoundException("Parent message not found: " + parentMessageId));
+            if (!parent.getThreadId().equals(threadId)) {
+                throw new ResourceNotFoundException(
+                    "Parent message does not belong to thread: " + parentMessageId
+                );
+            }
+            message.setParentMessageId(parentMessageId);
+        }
         message.setContent(content);
         message.setCreatedAt(LocalDateTime.now());
         CommunityThreadMessage saved = messageRepository.save(message);
@@ -330,6 +341,7 @@ public class CommunityCollaborationService {
             message.getThreadId(),
             message.getAuthorId(),
             message.getSourceCommunityId(),
+            message.getParentMessageId(),
             message.getContent(),
             message.isHidden(),
             message.getModerationReason(),

@@ -676,6 +676,9 @@ components:
         sourceCommunityId:
           type: string
           format: uuid
+        parentMessageId:
+          type: string
+          format: uuid
         content:
           type: string
         hidden:
@@ -818,6 +821,9 @@ components:
           format: uuid
         content:
           type: string
+        parentMessageId:
+          type: string
+          format: uuid
     ModerateThreadMessageRequest:
       type: object
       required: [reason]

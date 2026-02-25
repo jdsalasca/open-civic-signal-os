@@ -6,5 +6,6 @@ import java.util.UUID;
 
 public record CreateCommunityThreadMessageRequest(
     @NotNull UUID sourceCommunityId,
-    @NotBlank String content
+    @NotBlank String content,
+    UUID parentMessageId
 ) {}

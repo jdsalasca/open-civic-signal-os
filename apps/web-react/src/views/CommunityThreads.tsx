@@ -5,7 +5,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputText } from "primereact/inputtext";
 import { Avatar } from "primereact/avatar";
 import { useTranslation } from "react-i18next";
-import { CommunityMembership, CommunityThread } from "../types";
+import { CommunityMembership, CommunityThread, CommunityThreadMessage } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
 import apiClient from "../api/axios";
@@ -30,15 +30,18 @@ export function CommunityThreads() {
   const [threads, setThreads] = useState<CommunityThread[]>([]);
   const [targetCommunityId, setTargetCommunityId] = useState<string>("");
   const [newThreadTitle, setNewThreadTitle] = useState("");
-  const [selectedThreadId, setSelectedThreadId] = useState<string>("");
-  const [newMessage, setNewMessage] = useState("");
+  const [messageDraftByThread, setMessageDraftByThread] = useState<Record<string, string>>({});
+  const [replyTargetByThread, setReplyTargetByThread] = useState<Record<string, CommunityThreadMessage | null>>({});
+  const [sendingByThread, setSendingByThread] = useState<Record<string, boolean>>({});
+
   const threadTitleLength = newThreadTitle.trim().length;
-  const messageLength = newMessage.trim().length;
 
   const activeMembership = useMemo(
     () => memberships.find((m) => m.communityId === activeCommunityId),
     [memberships, activeCommunityId]
   );
+
+  const canModerate = activeMembership?.role === "MODERATOR" || activeMembership?.role === "COORDINATOR";
 
   const loadThreads = useCallback(async () => {
     if (!activeCommunityId) return;
@@ -47,7 +50,7 @@ export function CommunityThreads() {
       setThreads(res.data || []);
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t('community_threads.load_error'));
+      toast.error(apiErr.friendlyMessage || t("community_threads.load_error"));
     }
   }, [activeCommunityId, t]);
 
@@ -65,27 +68,11 @@ export function CommunityThreads() {
       });
       setNewThreadTitle("");
       setTargetCommunityId("");
-      toast.success(t('community_threads.create_success'));
+      toast.success(t("community_threads.create_success"));
       loadThreads();
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t('community_threads.create_error'));
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!selectedThreadId || !activeCommunityId || messageLength < FORM_LIMITS.threads.messageMin) return;
-    try {
-      await apiClient.post(`community/threads/${selectedThreadId}/messages`, {
-        sourceCommunityId: activeCommunityId,
-        content: newMessage,
-      });
-      setNewMessage("");
-      toast.success(t('community_threads.message_success'));
-      loadThreads();
-    } catch (err) {
-      const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t('community_threads.message_error'));
+      toast.error(apiErr.friendlyMessage || t("community_threads.create_error"));
     }
   };
 
@@ -94,7 +81,8 @@ export function CommunityThreads() {
       await apiClient.post(`community/threads/${threadId}/messages/${messageId}/react`, { type });
       loadThreads();
     } catch (err) {
-      console.error("Reaction failed", err);
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_threads.reaction_error"));
     }
   };
 
@@ -102,14 +90,47 @@ export function CommunityThreads() {
     try {
       await apiClient.patch(`community/threads/${threadId}/messages/${messageId}/moderate`, {
         hidden,
-        reason: hidden ? t('community_threads.hidden_reason') : t('community_threads.restored_reason'),
+        reason: hidden ? t("community_threads.hidden_reason") : t("community_threads.restored_reason"),
       });
-      toast.success(t('community_threads.moderation_success'));
+      toast.success(t("community_threads.moderation_success"));
       loadThreads();
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t('community_threads.moderation_error'));
+      toast.error(apiErr.friendlyMessage || t("community_threads.moderation_error"));
     }
+  };
+
+  const sendMessage = async (threadId: string) => {
+    const draft = (messageDraftByThread[threadId] || "").trim();
+    if (!activeCommunityId || draft.length < FORM_LIMITS.threads.messageMin) return;
+
+    setSendingByThread((prev) => ({ ...prev, [threadId]: true }));
+    try {
+      const replyTarget = replyTargetByThread[threadId];
+      await apiClient.post(`community/threads/${threadId}/messages`, {
+        sourceCommunityId: activeCommunityId,
+        content: draft,
+        parentMessageId: replyTarget?.id,
+      });
+      setMessageDraftByThread((prev) => ({ ...prev, [threadId]: "" }));
+      setReplyTargetByThread((prev) => ({ ...prev, [threadId]: null }));
+      toast.success(t("community_threads.message_success"));
+      loadThreads();
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_threads.message_error"));
+    } finally {
+      setSendingByThread((prev) => ({ ...prev, [threadId]: false }));
+    }
+  };
+
+  const setReplyTarget = (threadId: string, message: CommunityThreadMessage) => {
+    setReplyTargetByThread((prev) => ({ ...prev, [threadId]: message }));
+    setMessageDraftByThread((prev) => ({ ...prev, [threadId]: prev[threadId] || `@${message.authorId.slice(0, 4)} ` }));
+  };
+
+  const clearReplyTarget = (threadId: string) => {
+    setReplyTargetByThread((prev) => ({ ...prev, [threadId]: null }));
   };
 
   const targetOptions = memberships
@@ -117,35 +138,125 @@ export function CommunityThreads() {
     .map((m: CommunityMembership) => ({ label: m.communityName, value: m.communityId }));
 
   const canCreateThread = Boolean(activeCommunityId && targetCommunityId && threadTitleLength >= FORM_LIMITS.threads.titleMin);
-  const canSendMessage = Boolean(selectedThreadId && activeCommunityId && messageLength >= FORM_LIMITS.threads.messageMin);
+
+  const buildThreadTree = (messages: CommunityThreadMessage[]) => {
+    const childrenByParent: Record<string, CommunityThreadMessage[]> = {};
+    const roots: CommunityThreadMessage[] = [];
+
+    messages.forEach((message) => {
+      if (!message.parentMessageId) {
+        roots.push(message);
+        return;
+      }
+      if (!childrenByParent[message.parentMessageId]) {
+        childrenByParent[message.parentMessageId] = [];
+      }
+      childrenByParent[message.parentMessageId].push(message);
+    });
+
+    return { roots, childrenByParent };
+  };
+
+  const renderMessageNode = (
+    thread: CommunityThread,
+    message: CommunityThreadMessage,
+    childrenByParent: Record<string, CommunityThreadMessage[]>,
+    depth = 0
+  ): JSX.Element => {
+    const children = childrenByParent[message.id] || [];
+    const leftPadding = Math.min(depth, 4) * 1.2;
+
+    return (
+      <div key={message.id} className="flex flex-column gap-3" style={{ marginLeft: `${leftPadding}rem` }}>
+        <div className={`p-4 border-round-2xl border-1 ${depth === 0 ? "bg-surface border-subtle" : "bg-white-alpha-5 border-white-alpha-10"} ${message.hidden ? "opacity-60" : ""}`}>
+          <div className="flex justify-content-between align-items-start gap-3 mb-3">
+            <div className="flex align-items-center gap-3">
+              <Avatar label={depth === 0 ? "OP" : "R"} shape="circle" className="bg-brand-primary text-white font-bold text-xs" />
+              <div className="flex flex-column">
+                <span className="text-sm font-black text-main">
+                  {t("community_threads.member_id", { id: message.authorId.slice(0, 4) })}
+                </span>
+                <span className="text-min text-muted">{new Date(message.createdAt).toLocaleString()}</span>
+              </div>
+            </div>
+            <div className="flex align-items-center gap-2 flex-wrap justify-content-end">
+              <CivicButton
+                type="button"
+                variant="ghost"
+                size="small"
+                icon="pi pi-reply"
+                label={t("community_threads.reply")}
+                onClick={() => setReplyTarget(thread.id, message)}
+              />
+              {canModerate && (
+                <CivicButton
+                  type="button"
+                  variant="ghost"
+                  size="small"
+                  icon={message.hidden ? "pi pi-eye" : "pi pi-eye-slash"}
+                  label={message.hidden ? t("community_threads.restore") : t("community_threads.hide")}
+                  onClick={() => moderateMessage(thread.id, message.id, !message.hidden)}
+                />
+              )}
+            </div>
+          </div>
+
+          <p className={`m-0 line-height-3 ${message.hidden ? "text-muted italic" : "text-secondary"}`}>
+            {message.hidden ? `[${t("community_threads.hidden_label")}: ${message.moderationReason}]` : message.content}
+          </p>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {REACTION_TYPES.map((emoji) => (
+              <button
+                key={`${message.id}-${emoji}`}
+                type="button"
+                onClick={() => reactToMessage(thread.id, message.id, emoji)}
+                aria-label={t("community_threads.react_with", { emoji })}
+                className="flex align-items-center gap-2 px-2 py-1 border-round-lg border-1 border-white-alpha-10 bg-black-alpha-20 hover:border-brand-primary-alpha-30"
+              >
+                <span>{emoji}</span>
+                <span className="text-xs font-bold text-main">{message.reactions?.[emoji] || 0}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {children.length > 0 && (
+          <div className="flex flex-column gap-3">
+            {children.map((child) => renderMessageNode(thread, child, childrenByParent, depth + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Layout>
       <div className="animate-fade-up">
-        <CivicPageHeader title={t('community_threads.title')} description={t('community_threads.desc')} />
+        <CivicPageHeader title={t("community_threads.title")} description={t("community_threads.desc")} />
 
         {!activeCommunityId && (
           <CivicCard className="mb-6">
             <CivicEmptyState
               icon="pi-map-marker"
-              title={t('community_threads.none')}
-              description={t('report.community_required')}
-              actionLabel={t('nav.communities')}
-              onAction={() => navigate('/communities')}
+              title={t("community_threads.none")}
+              description={t("report.community_required")}
+              actionLabel={t("nav.communities")}
+              onAction={() => navigate("/communities")}
             />
           </CivicCard>
         )}
 
         <div className="grid">
           <div className="col-12 lg:col-4">
-            <CivicCard title={t('community_threads.channel_title')} className="mb-6" variant="brand">
+            <CivicCard title={t("community_threads.channel_title")} className="mb-6" variant="brand">
               <div className="flex flex-column gap-2">
-                <CivicField label={t('community_threads.topic')}>
+                <CivicField label={t("community_threads.topic")}>
                   <div className="flex flex-column gap-2">
                     <InputText
                       value={newThreadTitle}
                       onChange={(e) => setNewThreadTitle(e.target.value)}
-                      placeholder={t('community_threads.topic_placeholder')}
+                      placeholder={t("community_threads.topic_placeholder")}
                       className="w-full"
                       data-testid="thread-title-input"
                       maxLength={FORM_LIMITS.threads.titleMax}
@@ -153,20 +264,21 @@ export function CommunityThreads() {
                     <CivicCharacterCount current={newThreadTitle.length} max={FORM_LIMITS.threads.titleMax} min={FORM_LIMITS.threads.titleMin} />
                   </div>
                 </CivicField>
-                <CivicField label={t('community_threads.target_sector')}>
+                <CivicField label={t("community_threads.target_sector")}>
                   <CivicSelect
                     value={targetCommunityId}
                     options={targetOptions}
                     onChange={(e) => setTargetCommunityId(e.value)}
-                    placeholder={t('community_threads.select_community')}
-                    className="w-full bg-black-alpha-20"
+                    placeholder={t("community_threads.select_community")}
+                    className="w-full"
                     disabled={!activeCommunityId || targetOptions.length === 0}
-                    emptyMessage={t('community_threads.join_other')}
+                    emptyMessage={t("community_threads.join_other")}
                     data-testid="thread-target-dropdown"
                   />
                 </CivicField>
                 <CivicButton
-                  label={t('community_threads.create')}
+                  type="button"
+                  label={t("community_threads.create")}
                   icon="pi pi-plus-circle"
                   onClick={createThread}
                   disabled={!canCreateThread}
@@ -176,143 +288,94 @@ export function CommunityThreads() {
                 />
               </div>
             </CivicCard>
-
-            <CivicCard title={t('community_threads.transmission_title')}>
-              <div className="flex flex-column gap-2">
-                <CivicField label={t('community_threads.active_thread')}>
-                  <CivicSelect
-                    value={selectedThreadId}
-                    options={threads.map((thread) => ({ label: thread.title, value: thread.id }))}
-                    onChange={(e) => setSelectedThreadId(e.value)}
-                    placeholder={t('community_threads.select_dialogue')}
-                    className="w-full bg-black-alpha-20"
-                    disabled={!activeCommunityId || threads.length === 0}
-                    data-testid="thread-select-dropdown"
-                  />
-                </CivicField>
-                <CivicField label={t('community_threads.message')}>
-                  <div className="flex flex-column gap-2">
-                    <InputTextarea
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      rows={4}
-                      className="w-full"
-                      placeholder={t('community_threads.message_placeholder')}
-                      disabled={!activeCommunityId || threads.length === 0}
-                      data-testid="thread-message-input"
-                      maxLength={FORM_LIMITS.threads.messageMax}
-                    />
-                    <CivicCharacterCount current={newMessage.length} max={FORM_LIMITS.threads.messageMax} min={FORM_LIMITS.threads.messageMin} />
-                  </div>
-                </CivicField>
-                <CivicButton
-                  label={t('community_threads.send')}
-                  icon="pi pi-send"
-                  onClick={sendMessage}
-                  disabled={!canSendMessage}
-                  className="w-full py-4 mt-2"
-                  data-testid="send-thread-message-button"
-                />
-              </div>
-            </CivicCard>
           </div>
 
           <div className="col-12 lg:col-8">
-            <CivicCard title={t('community_threads.feed_title', { community: activeMembership?.communityName || t('community_threads.none') })} padding="none">
+            <CivicCard title={t("community_threads.feed_title", { community: activeMembership?.communityName || t("community_threads.none") })} padding="none">
               {threads.length === 0 ? (
                 <CivicEmptyState
                   icon="pi-comments"
-                  title={t('community_threads.empty')}
-                  description={t('community_threads.join_other')}
+                  title={t("community_threads.empty")}
+                  description={t("community_threads.join_other")}
                 />
               ) : (
                 <div className="flex flex-column gap-px bg-white-alpha-10">
-                  {threads.map((thread) => (
-                    <div key={thread.id} className="bg-surface p-6 hover:bg-white-alpha-5 transition-colors">
-                      <div className="flex justify-content-between align-items-center mb-6">
-                        <div>
-                          <h3 className="text-2xl font-black text-main m-0 tracking-tight leading-none mb-2">{thread.title}</h3>
-                          <span className="text-xs text-muted font-bold uppercase tracking-widest">
-                            {t('community_threads.link_label')}: {thread.id.substring(0, 8)}
-                          </span>
+                  {threads.map((thread) => {
+                    const { roots, childrenByParent } = buildThreadTree(thread.messages || []);
+                    const draft = messageDraftByThread[thread.id] || "";
+                    const replyTarget = replyTargetByThread[thread.id];
+                    const canSend = draft.trim().length >= FORM_LIMITS.threads.messageMin;
+
+                    return (
+                      <div key={thread.id} className="bg-surface p-5 md:p-6 flex flex-column gap-4">
+                        <div className="flex justify-content-between align-items-start gap-3">
+                          <div>
+                            <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2">{thread.title}</h3>
+                            <span className="text-xs text-muted font-bold uppercase tracking-wider">
+                              {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
+                            </span>
+                          </div>
+                          <CivicBadge label={t("community_threads.verified_channel")} severity="progress" />
                         </div>
-                        <div className="flex align-items-center gap-2">
-                          <CivicBadge label={t('community_threads.verified_channel')} severity="progress" />
-                        </div>
-                      </div>
 
-                      <div className="flex flex-column gap-4 mt-4 relative">
-                        {/* Thread connection line for replies */}
-                        <div className="absolute left-0 top-0 bottom-0 w-2px bg-gradient-to-b from-brand-primary-alpha-20 to-transparent ml-5 z-0 hidden md:block"></div>
-
-                        {thread.messages.map((message, idx) => {
-                          const isRoot = idx === 0;
-                          return (
-                            <div key={message.id} className={`group flex flex-column gap-3 transition-all animate-fade-up z-1 relative ${isRoot ? 'p-5 border-round-3xl bg-surface border-1 border-subtle shadow-1' : 'ml-0 md:ml-8 p-4 border-round-2xl surface-ground border-1 border-white-alpha-10'} ${message.hidden ? 'opacity-50' : ''}`}>
-                              {isRoot && <div className="absolute top-0 right-0 w-4rem h-4rem bg-brand-primary-alpha-20 border-circle blur-xl -mt-2 -mr-2 pointer-events-none"></div>}
-
-                              <div className="flex justify-content-between align-items-start mb-1">
-                                <div className="flex align-items-center gap-3">
-                                  <Avatar label={isRoot ? "OP" : "R"} shape="circle" className={`${isRoot ? 'bg-brand-primary' : 'bg-black-alpha-40 border-1 border-white-alpha-10'} text-white font-bold text-xs`} />
-                                  <div className="flex flex-column">
-                                    <span className="text-sm font-black text-main uppercase flex align-items-center gap-2">
-                                      Identity {message.authorId.substring(0, 4)}
-                                      {isRoot && <CivicBadge label="AUTHOR" severity="neutral" />}
-                                    </span>
-                                    <span className="text-min font-bold text-muted uppercase tracking-tighter" style={{ fontSize: '9px' }}>{new Date(message.createdAt).toLocaleString()}</span>
-                                  </div>
-                                </div>
-
-                                <div className="hover-actions flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-black-alpha-80 backdrop-blur-md border-round-3xl px-2 py-1 border-1 border-white-alpha-10 shadow-4 absolute top-0 right-0 -mt-3 mr-4 z-2">
-                                  {REACTION_TYPES.map(emoji => (
-                                    <button
-                                      key={emoji}
-                                      type="button"
-                                      onClick={() => reactToMessage(thread.id, message.id, emoji)}
-                                      aria-label={t('community_threads.react_with', { emoji })}
-                                      className="p-2 border-circle bg-transparent border-none text-base hover:bg-brand-primary-alpha-20 transition-all cursor-pointer transform hover:scale-125"
-                                    >
-                                      {emoji}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-
-                              <div className={`${isRoot ? 'text-lg text-main' : 'text-base text-secondary'} font-medium leading-relaxed ${message.hidden ? 'italic text-muted' : ''}`}>
-                                {message.hidden ? `[${t('community_threads.hidden_label')}: ${message.moderationReason}]` : message.content}
-                              </div>
-
-                              <div className="mt-2 flex flex-wrap gap-2 align-items-center justify-content-between border-top-1 border-white-alpha-5 pt-3">
-                                <div className="flex flex-wrap gap-2">
-                                  {Object.entries(message.reactions || {}).map(([emoji, count]) => (
-                                    <button
-                                      key={emoji}
-                                      type="button"
-                                      onClick={() => reactToMessage(thread.id, message.id, emoji)}
-                                      aria-label={t('community_threads.react_with', { emoji })}
-                                      className="flex align-items-center gap-2 px-3 py-1 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl hover:bg-brand-primary-alpha-30 transition-colors cursor-pointer"
-                                    >
-                                      <span className="text-sm">{emoji}</span>
-                                      <span className="text-xs font-black text-brand-primary">{count}</span>
-                                    </button>
-                                  ))}
-                                </div>
-
-                                <CivicButton
-                                  variant="ghost"
-                                  size="small"
-                                  icon={message.hidden ? "pi pi-eye" : "pi pi-eye-slash"}
-                                  label={message.hidden ? t('community_threads.restore') : t('community_threads.hide')}
-                                  className="text-min font-black opacity-40 hover:opacity-100 transition-opacity"
-                                  onClick={() => moderateMessage(thread.id, message.id, !message.hidden)}
-                                />
-                              </div>
+                        <div className="flex flex-column gap-3">
+                          {roots.length === 0 ? (
+                            <div className="p-4 border-round-xl bg-white-alpha-5 text-muted text-sm">
+                              {t("community_threads.no_messages")}
                             </div>
-                          );
-                        })}
+                          ) : (
+                            roots.map((root) => renderMessageNode(thread, root, childrenByParent, 0))
+                          )}
+                        </div>
+
+                        <div className="p-4 border-round-2xl bg-black-alpha-20 border-1 border-white-alpha-10">
+                          {replyTarget && (
+                            <div className="mb-3 flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">
+                              <span className="text-sm text-main">
+                                {t("community_threads.replying_to", { id: replyTarget.authorId.slice(0, 4) })}
+                              </span>
+                              <CivicButton
+                                type="button"
+                                variant="ghost"
+                                size="small"
+                                label={t("community_threads.cancel_reply")}
+                                onClick={() => clearReplyTarget(thread.id)}
+                              />
+                            </div>
+                          )}
+
+                          <div className="flex flex-column gap-2">
+                            <InputTextarea
+                              value={draft}
+                              onChange={(e) => setMessageDraftByThread((prev) => ({ ...prev, [thread.id]: e.target.value }))}
+                              rows={3}
+                              className="w-full"
+                              placeholder={t("community_threads.message_placeholder")}
+                              data-testid={`thread-message-input-${thread.id}`}
+                              maxLength={FORM_LIMITS.threads.messageMax}
+                            />
+                            <CivicCharacterCount
+                              current={draft.length}
+                              max={FORM_LIMITS.threads.messageMax}
+                              min={FORM_LIMITS.threads.messageMin}
+                            />
+                          </div>
+
+                          <div className="flex justify-content-end mt-3">
+                            <CivicButton
+                              type="button"
+                              label={t("community_threads.send")}
+                              icon="pi pi-send"
+                              onClick={() => sendMessage(thread.id)}
+                              disabled={!canSend}
+                              loading={Boolean(sendingByThread[thread.id])}
+                              data-testid={`send-thread-message-button-${thread.id}`}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </CivicCard>

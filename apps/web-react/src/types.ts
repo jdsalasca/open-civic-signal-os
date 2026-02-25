@@ -73,6 +73,7 @@ export type CommunityThreadMessage = {
   threadId: string;
   authorId: string;
   sourceCommunityId: string;
+  parentMessageId?: string;
   content: string;
   hidden: boolean;
   moderationReason?: string;

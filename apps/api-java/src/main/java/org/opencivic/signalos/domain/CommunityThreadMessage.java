@@ -31,6 +31,8 @@ public class CommunityThreadMessage {
     @Column(nullable = false)
     private UUID sourceCommunityId;
 
+    private UUID parentMessageId;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -75,6 +77,14 @@ public class CommunityThreadMessage {
 
     public void setSourceCommunityId(UUID sourceCommunityId) {
         this.sourceCommunityId = sourceCommunityId;
+    }
+
+    public UUID getParentMessageId() {
+        return parentMessageId;
+    }
+
+    public void setParentMessageId(UUID parentMessageId) {
+        this.parentMessageId = parentMessageId;
     }
 
     public String getContent() {
