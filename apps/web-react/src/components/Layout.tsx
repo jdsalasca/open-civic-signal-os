@@ -15,6 +15,14 @@ type Props = {
   authMode?: boolean;
 };
 
+type NavItem = {
+  label: string;
+  to: string;
+  icon: string;
+  visible: boolean;
+  testId?: string;
+};
+
 export function Layout({ children, authMode = false }: Props) {
   const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
   const { t } = useTranslation();
@@ -68,18 +76,18 @@ export function Layout({ children, authMode = false }: Props) {
 
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
 
-  const mainNav = [
+  const mainNav: NavItem[] = [
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
     { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
   ];
 
-  const socialNav = [
+  const socialNav: NavItem[] = [
     { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
     { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
   ];
 
-  const personalNav = [
+  const personalNav: NavItem[] = [
     { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
     { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && isStaff },
     { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
@@ -91,6 +99,13 @@ export function Layout({ children, authMode = false }: Props) {
     value: m.communityId,
     role: m.role
   }));
+
+  const quickActions = [
+    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn },
+    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
+  ];
+
+  const mobileNav = [mainNav[0], mainNav[2], personalNav[0], socialNav[0], personalNav[3]].filter((item) => item?.visible);
 
   if (authMode) return <div className="auth-page min-h-screen">{children}</div>;
 
@@ -206,9 +221,23 @@ export function Layout({ children, authMode = false }: Props) {
               </div>
             )}
 
-            <div className="hidden xl:flex align-items-center gap-3 bg-surface px-4 py-2 border-round-xl border-1 border-subtle">
+            <div className="hidden xl:flex align-items-center gap-3 u-pill">
               <div className="w-8px h-8px border-circle bg-status-resolved animate-pulse"></div>
               <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
+            </div>
+
+            <div className="hidden lg:flex align-items-center gap-2">
+              {quickActions.map((action) => (
+                <Button
+                  key={action.to}
+                  type="button"
+                  icon={action.icon}
+                  label={action.label}
+                  text
+                  className="u-surface-chip px-3 py-2 text-xs font-black"
+                  onClick={() => navigate(action.to)}
+                />
+              ))}
             </div>
 
             <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
@@ -222,7 +251,7 @@ export function Layout({ children, authMode = false }: Props) {
         </main>
 
         <nav className="lg:hidden flex justify-content-around align-items-center bg-card border-top-1 border-subtle h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
-          {mainNav.concat(socialNav).slice(0, 5).map(link => (
+          {mobileNav.map(link => (
             <Link
               key={link.to}
               to={link.to}

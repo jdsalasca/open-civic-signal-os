@@ -45,7 +45,7 @@ export function ReportSignal() {
     formState: { isSubmitting, errors },
   } = useForm<ReportForm>({
     mode: "onChange",
-    defaultValues: { title: '', description: '', category: '', urgency: 3, impact: 3, affectedPeople: 10 }
+    defaultValues: { title: '', description: '', category: 'safety', urgency: 3, impact: 3, affectedPeople: 10 }
   });
 
   const [isLocating, setIsLocating] = useState(false);
@@ -162,7 +162,7 @@ export function ReportSignal() {
                     <CivicField label={t('report.scale')}>
                       <Controller name="affectedPeople" control={control}
                         render={({ field }) => (
-                          <div className="flex flex-column gap-3 p-3 border-round-xl bg-black-alpha-20 border-1 border-white-alpha-10">
+                          <div className="flex flex-column gap-3 p-3 border-round-xl border-1 border-subtle" style={{ background: "var(--panel-soft-bg)" }}>
                             <div className="flex justify-content-between font-black text-main">
                               <span className="text-xs uppercase opacity-50">Citizens</span>
                               <span className="text-brand-primary">{field.value}</span>
@@ -274,7 +274,7 @@ export function ReportSignal() {
                   </div>
                 ) : (
                   <div className="flex flex-column gap-4">
-                    <div className="flex align-items-center gap-3 p-3 bg-white-alpha-5 border-round-xl border-1 border-white-alpha-10">
+                    <div className="u-pill w-full justify-content-start px-3">
                       <i className="pi pi-shield text-brand-primary text-xl"></i>
                       <div className="flex flex-column">
                         <span className="text-xs font-bold text-main uppercase">{t('settings.encryption')}</span>

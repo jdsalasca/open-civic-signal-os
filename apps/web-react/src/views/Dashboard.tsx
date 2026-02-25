@@ -199,11 +199,11 @@ export function Dashboard() {
           <div>
             <div className="flex align-items-center gap-3 mb-4">
               <CivicBadge label="Operations Live" severity="new" />
-              <div className="flex align-items-center gap-2 px-3 py-1 bg-white-alpha-5 border-round-lg border-1 border-white-alpha-10 text-xs font-bold text-secondary" data-testid="welcome-message">
+              <div className="u-pill" data-testid="welcome-message">
                 <i className="pi pi-user text-brand-primary"></i>
                 {userName}
               </div>
-              <div className="flex align-items-center gap-2 px-3 py-1 bg-white-alpha-5 border-round-lg border-1 border-white-alpha-10 text-xs font-bold text-secondary" data-testid="dashboard-freshness-badge">
+              <div className="u-pill" data-testid="dashboard-freshness-badge">
                 <i className="pi pi-clock text-brand-primary"></i>
                 {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
               </div>
@@ -254,11 +254,7 @@ export function Dashboard() {
                     type="button"
                     onClick={() => handleFilterChange(f.value)}
                     data-testid={`dashboard-filter-${f.value.toLowerCase()}`}
-                    className={`flex align-items-center gap-2 px-4 py-2 border-round-xl border-1 transition-all cursor-pointer whitespace-nowrap font-bold text-xs uppercase tracking-widest
-                      ${activeFilter === f.value 
-                        ? 'bg-brand-primary border-brand-primary text-white shadow-lg' 
-                        : 'bg-white-alpha-5 border-white-alpha-10 text-secondary hover:border-white-alpha-30'
-                      }`}
+                    className={`u-filter-chip cursor-pointer whitespace-nowrap ${activeFilter === f.value ? 'is-active' : ''}`}
                   >
                     <i className={`pi ${f.icon}`}></i>
                     {f.label}
