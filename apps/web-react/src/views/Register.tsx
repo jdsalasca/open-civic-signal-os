@@ -22,6 +22,14 @@ type RegisterForm = {
   confirmPassword: string;
 };
 
+type RegisterResponse = {
+  message?: string;
+  username?: string;
+  emailDeliveryStatus?: "SENT" | "FAILED";
+  supportEmail?: string;
+  deliveryFailureReason?: string;
+};
+
 export function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -34,11 +42,23 @@ export function Register() {
   const onSubmit = async (data: RegisterForm) => {
     try {
       const { confirmPassword, ...registerData } = data;
-      const res = await apiClient.post("auth/register", registerData);
+      const res = await apiClient.post<RegisterResponse>("auth/register", registerData);
 
       if (res.status === 200 || res.status === 201) {
-        toast.success(t('auth.register_success'));
-        navigate("/verify", { state: { username: data.username } });
+        const emailDeliveryFailed = res.data?.emailDeliveryStatus === "FAILED";
+        if (emailDeliveryFailed) {
+          toast.error(t('auth.register_email_degraded'));
+        } else {
+          toast.success(t('auth.register_success'));
+        }
+        navigate("/verify", {
+          state: {
+            username: data.username,
+            emailDeliveryFailed,
+            supportEmail: res.data?.supportEmail,
+            deliveryMessage: res.data?.message,
+          }
+        });
       }
     } catch (err) {
       const apiErr = err as ApiError;

@@ -6,6 +6,7 @@ import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.UnauthorizedActionException;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.EmailService;
+import org.opencivic.signalos.service.EmailDeliveryResult;
 import org.opencivic.signalos.service.JwtService;
 import org.opencivic.signalos.web.dto.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,6 +43,9 @@ public class AuthController {
     @Value("${spring.profiles.active:prod}")
     private String activeProfile;
 
+    @Value("${support.contact.email:support@open-civic.local}")
+    private String supportContactEmail;
+
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, 
                           EmailService emailService, JwtService jwtService, 
                           AuthenticationManager authenticationManager,
@@ -58,7 +62,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
-        // ... implementation ...
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new ConflictException("Username already exists in the registry.");
         }
@@ -74,7 +77,6 @@ public class AuthController {
             "ROLE_CITIZEN"
         );
         
-        // Generate a real random 6-digit code for all profiles to test mail delivery flow
         String verificationCode = String.format("%06d", secureRandom.nextInt(999999));
         
         user.setVerificationCode(verificationCode);
@@ -83,11 +85,22 @@ public class AuthController {
         
         userRepository.save(user);
 
-        emailService.sendVerificationCode(user.getEmail(), user.getUsername(), verificationCode);
+        EmailDeliveryResult delivery = emailService.sendVerificationCode(user.getEmail(), user.getUsername(), verificationCode);
+        if (delivery.delivered()) {
+            return ResponseEntity.ok(Map.of(
+                "message", "Registration successful. A verification protocol has been initiated via email.",
+                "username", user.getUsername(),
+                "emailDeliveryStatus", "SENT",
+                "supportEmail", supportContactEmail
+            ));
+        }
 
         return ResponseEntity.ok(Map.of(
-            "message", "Registration successful. A verification protocol has been initiated via email.",
-            "username", user.getUsername()
+            "message", "Registration successful, but verification email could not be delivered. Use resend or contact support.",
+            "username", user.getUsername(),
+            "emailDeliveryStatus", "FAILED",
+            "supportEmail", supportContactEmail,
+            "deliveryFailureReason", delivery.failureReason() == null ? "unknown" : delivery.failureReason()
         ));
     }
 
@@ -106,9 +119,21 @@ public class AuthController {
         user.setVerificationCode(code);
         userRepository.save(user);
 
-        emailService.sendVerificationCode(user.getEmail(), user.getUsername(), code);
+        EmailDeliveryResult delivery = emailService.sendVerificationCode(user.getEmail(), user.getUsername(), code);
+        if (delivery.delivered()) {
+            return ResponseEntity.ok(Map.of(
+                "message", "A new verification code has been dispatched.",
+                "emailDeliveryStatus", "SENT",
+                "supportEmail", supportContactEmail
+            ));
+        }
 
-        return ResponseEntity.ok(Map.of("message", "A new verification code has been dispatched."));
+        return ResponseEntity.ok(Map.of(
+            "message", "Could not deliver verification email. Retry later or contact support.",
+            "emailDeliveryStatus", "FAILED",
+            "supportEmail", supportContactEmail,
+            "deliveryFailureReason", delivery.failureReason() == null ? "unknown" : delivery.failureReason()
+        ));
     }
 
     @PostMapping("/verify")
@@ -138,7 +163,6 @@ public class AuthController {
             user.setVerificationCode(null);
             userRepository.save(user);
             
-            // New: Send welcome email after verification
             emailService.sendWelcomeEmail(user.getEmail(), user.getUsername());
             rateLimitService.reset(username);
             

@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -13,13 +14,39 @@ type VerifyForm = {
   code: string;
 };
 
+type VerifyLocationState = {
+  username?: string;
+  emailDeliveryFailed?: boolean;
+  supportEmail?: string;
+  deliveryMessage?: string;
+};
+
+type ResendResponse = {
+  message?: string;
+  emailDeliveryStatus?: "SENT" | "FAILED";
+  supportEmail?: string;
+};
+
 export function Verify() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const username = location.state?.username;
+  const routeState = (location.state as VerifyLocationState | null) ?? null;
+  const username = routeState?.username;
+  const [resendCooldownSeconds, setResendCooldownSeconds] = useState(0);
+  const [lastResendFailed, setLastResendFailed] = useState(routeState?.emailDeliveryFailed ?? false);
+  const [supportEmail, setSupportEmail] = useState(routeState?.supportEmail || "support@open-civic.local");
+  const [deliveryMessage, setDeliveryMessage] = useState(routeState?.deliveryMessage || "");
   
   const { control, handleSubmit, formState: { isSubmitting, errors } } = useForm<VerifyForm>();
+  const canResend = resendCooldownSeconds === 0;
+
+  const resendLabel = useMemo(() => {
+    if (resendCooldownSeconds === 0) {
+      return t('auth.resend_button');
+    }
+    return t('auth.resend_button_wait', { seconds: resendCooldownSeconds });
+  }, [resendCooldownSeconds, t]);
 
   if (!username) {
     navigate("/login");
@@ -37,9 +64,33 @@ export function Verify() {
   };
 
   const handleResend = async () => {
+    if (!canResend) {
+      return;
+    }
     try {
-      await apiClient.post("auth/resend-code", { username });
-      toast.success(t('auth.code_resent') || "Verification code resent to your email.");
+      const res = await apiClient.post<ResendResponse>("auth/resend-code", { username });
+      const emailFailed = res.data?.emailDeliveryStatus === "FAILED";
+      setLastResendFailed(emailFailed);
+      setDeliveryMessage(res.data?.message || "");
+      if (res.data?.supportEmail) {
+        setSupportEmail(res.data.supportEmail);
+      }
+      setResendCooldownSeconds(30);
+      const interval = window.setInterval(() => {
+        setResendCooldownSeconds((current) => {
+          if (current <= 1) {
+            window.clearInterval(interval);
+            return 0;
+          }
+          return current - 1;
+        });
+      }, 1000);
+
+      if (emailFailed) {
+        toast.error(t('auth.code_resend_degraded'));
+      } else {
+        toast.success(t('auth.code_resent'));
+      }
     } catch (err: any) {
       toast.error(err.friendlyMessage || "Failed to resend code.");
     }
@@ -56,6 +107,17 @@ export function Verify() {
             <h1 className="text-4xl font-black text-main m-0 tracking-tighter">{t('auth.activate_title')}</h1>
             <p className="text-secondary mt-2 font-medium">{t('auth.activate_subtitle')}</p>
           </div>
+
+          {lastResendFailed && (
+            <div className="mb-5 p-3 border-round-xl border-1 border-white-alpha-20 bg-white-alpha-5 text-sm text-left line-height-3">
+              <div className="font-bold mb-2 text-main">
+                <i className="pi pi-exclamation-triangle mr-2 text-status-progress" />
+                {t('auth.email_delivery_warning_title')}
+              </div>
+              <div className="mb-2">{deliveryMessage || t('auth.email_delivery_warning_body')}</div>
+              <div>{t('auth.email_delivery_support', { email: supportEmail })}</div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-column gap-2 text-left" aria-label="Verification Form">
             <CivicField 
@@ -90,11 +152,13 @@ export function Verify() {
               <p className="text-muted text-sm m-0">Didn't receive the code?</p>
               <CivicButton 
                 type="button" 
-                label={t('auth.resend_button') || "Dispatch New Code"} 
+                label={resendLabel}
                 variant="ghost"
                 onClick={handleResend}
                 className="text-xs"
+                disabled={!canResend}
               />
+              <p className="text-xs text-secondary m-0">{t('auth.email_delivery_help')}</p>
             </div>
           </form>
         </CivicCard>
