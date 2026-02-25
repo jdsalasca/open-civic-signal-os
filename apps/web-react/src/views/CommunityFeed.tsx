@@ -10,7 +10,8 @@ import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
-import { CivicToolbar } from "../components/ui/CivicToolbar";
+import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { CivicButton } from "../components/ui/CivicButton";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -68,7 +69,7 @@ export function CommunityFeed() {
 
   return (
     <Layout>
-      <div className="animate-fade-up">
+      <div className="animate-fade-up motion-page">
         <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-8 gap-4">
           <CivicPageHeader
             title="Live Ecosystem"
@@ -76,7 +77,7 @@ export function CommunityFeed() {
             className="mb-0"
           />
           
-          <CivicToolbar>
+          <CivicActionBar>
             <CivicSelect
               value={typeFilter}
               options={typeOptions}
@@ -95,7 +96,19 @@ export function CommunityFeed() {
               className="w-full md:w-12rem bg-transparent border-none font-bold"
               disabled={!activeCommunityId}
             />
-          </CivicToolbar>
+            <CivicButton
+              icon="pi pi-comments"
+              label="Threads"
+              variant="secondary"
+              onClick={() => navigate("/communities/threads")}
+            />
+            <CivicButton
+              icon="pi pi-megaphone"
+              label="Blog"
+              variant="ghost"
+              onClick={() => navigate("/communities/blog")}
+            />
+          </CivicActionBar>
         </div>
 
         {!activeCommunityId ? (
@@ -122,10 +135,10 @@ export function CommunityFeed() {
               ) : (
                 <div className="flex flex-column gap-4">
                   {filteredItems.map((item) => (
-                    <div 
+                    <div
                       key={`${item.type}-${item.id}`} 
                       onClick={() => handleItemClick(item)}
-                      className="group cursor-pointer glass-panel p-5 border-round-3xl transition-all duration-300 hover:scale-[1.02] hover:border-white-alpha-30 relative overflow-hidden"
+                      className="group motion-card-hover cursor-pointer glass-panel p-5 border-round-3xl transition-all duration-300 hover:scale-[1.02] hover:border-white-alpha-30 relative overflow-hidden"
                     >
                       <div className="flex align-items-start gap-4">
                         <div className="bg-white-alpha-5 border-round-2xl p-3 flex align-items-center justify-content-center border-1 border-white-alpha-10 group-hover:bg-brand-primary-alpha-10 transition-colors">

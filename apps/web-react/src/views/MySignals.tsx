@@ -11,6 +11,8 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
+import { CivicStat } from "../components/ui/CivicStat";
+import { CivicActionBar } from "../components/ui/CivicActionBar";
 
 export function MySignals() {
   const { t } = useTranslation();
@@ -44,53 +46,32 @@ export function MySignals() {
 
   return (
     <Layout>
-      <div className="animate-fade-up">
+      <div className="animate-fade-up motion-page">
         <div className="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-8 gap-4">
           <div>
             <h1 className="text-5xl font-black m-0 text-main tracking-tighter">{t('my_contributions.title')}</h1>
             <p className="text-secondary text-lg font-medium mt-2">{t('my_contributions.desc')}</p>
           </div>
-          <CivicButton label={t('dashboard.new_issue')} icon="pi pi-plus" onClick={() => navigate("/report")} glow />
+          <CivicActionBar className="ml-auto">
+            <CivicButton label={t('dashboard.new_issue')} icon="pi pi-plus" onClick={() => navigate("/report")} glow />
+            <CivicButton label={t('nav.dialogues')} icon="pi pi-comments" variant="secondary" onClick={() => navigate("/communities/threads")} />
+          </CivicActionBar>
         </div>
 
         <div className="grid mb-8">
           <div className="col-12 md:col-4">
             <CivicCard variant="brand" className="h-full">
-              <div className="flex align-items-center gap-4">
-                <div className="bg-brand-primary-alpha-10 p-3 border-round-xl">
-                  <i className="pi pi-file text-3xl text-brand-primary"></i>
-                </div>
-                <div>
-                  <span className="block text-muted font-bold uppercase text-xs tracking-widest mb-1">{t('my_contributions.total_reports')}</span>
-                  <span className="text-4xl font-black text-main">{signals.length}</span>
-                </div>
-              </div>
+              <CivicStat label={t('my_contributions.total_reports')} value={signals.length} icon="pi-file" tone="brand" />
             </CivicCard>
           </div>
           <div className="col-12 md:col-4">
             <CivicCard variant="success" className="h-full">
-              <div className="flex align-items-center gap-4">
-                <div className="bg-status-resolved-alpha-10 p-3 border-round-xl">
-                  <i className="pi pi-check-circle text-3xl text-status-resolved"></i>
-                </div>
-                <div>
-                  <span className="block text-muted font-bold uppercase text-xs tracking-widest mb-1">{t('my_contributions.resolved')}</span>
-                  <span className="text-4xl font-black text-main">{signals.filter(s => s.status === 'RESOLVED').length}</span>
-                </div>
-              </div>
+              <CivicStat label={t('my_contributions.resolved')} value={signals.filter(s => s.status === 'RESOLVED').length} icon="pi-check-circle" tone="success" />
             </CivicCard>
           </div>
           <div className="col-12 md:col-4">
             <CivicCard className="h-full">
-              <div className="flex align-items-center gap-4">
-                <div className="bg-white-alpha-5 p-3 border-round-xl">
-                  <i className="pi pi-heart text-3xl text-status-rejected"></i>
-                </div>
-                <div>
-                  <span className="block text-muted font-bold uppercase text-xs tracking-widest mb-1">{t('my_contributions.community_votes')}</span>
-                  <span className="text-4xl font-black text-main">{totalVotes}</span>
-                </div>
-              </div>
+              <CivicStat label={t('my_contributions.community_votes')} value={totalVotes} icon="pi-heart" tone="neutral" />
             </CivicCard>
           </div>
         </div>

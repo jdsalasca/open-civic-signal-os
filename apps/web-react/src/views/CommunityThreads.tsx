@@ -18,6 +18,7 @@ import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
+import { CivicActionBar } from "../components/ui/CivicActionBar";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -234,6 +235,16 @@ export function CommunityThreads() {
     <Layout>
       <div className="animate-fade-up motion-page">
         <CivicPageHeader title={t("community_threads.title")} description={t("community_threads.desc")} />
+        <CivicActionBar className="mb-5">
+          <CivicButton
+            type="button"
+            icon="pi pi-plus-circle"
+            label="New thread"
+            onClick={() => document.getElementById("thread-compose-card")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          />
+          <CivicButton type="button" icon="pi pi-megaphone" label="Blog" variant="secondary" onClick={() => navigate("/communities/blog")} />
+          <CivicButton type="button" icon="pi pi-bolt" label="Live feed" variant="ghost" onClick={() => navigate("/communities/feed")} />
+        </CivicActionBar>
 
         {!activeCommunityId && (
           <CivicCard className="mb-6">
@@ -249,7 +260,7 @@ export function CommunityThreads() {
 
         <div className="grid">
           <div className="col-12 lg:col-4">
-            <CivicCard title={t("community_threads.channel_title")} className="mb-6" variant="brand">
+            <CivicCard id="thread-compose-card" title={t("community_threads.channel_title")} className="mb-6" variant="brand">
               <div className="flex flex-column gap-2">
                 <CivicField label={t("community_threads.topic")}>
                   <div className="flex flex-column gap-2">

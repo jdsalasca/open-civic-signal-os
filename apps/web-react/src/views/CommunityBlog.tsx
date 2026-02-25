@@ -20,6 +20,7 @@ import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
+import { CivicActionBar } from "../components/ui/CivicActionBar";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -144,11 +145,23 @@ export function CommunityBlog() {
           title={t("community_blog.title")}
           description={t("community_blog.desc", { community: activeCommunityName || t("community_blog.default_community") })}
         />
+        <CivicActionBar className="mb-5">
+          {isStaff && (
+            <CivicButton
+              type="button"
+              icon="pi pi-pencil"
+              label="Write post"
+              onClick={() => document.getElementById("blog-compose-card")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            />
+          )}
+          <CivicButton type="button" icon="pi pi-comments" label="Threads" variant="secondary" onClick={() => navigate("/communities/threads")} />
+          <CivicButton type="button" icon="pi pi-bolt" label="Live feed" variant="ghost" onClick={() => navigate("/communities/feed")} />
+        </CivicActionBar>
 
         <div className="grid">
           {isStaff && (
             <div className="col-12 lg:col-4">
-              <CivicCard title={t("community_blog.dispatch_title")} variant="brand">
+              <CivicCard id="blog-compose-card" title={t("community_blog.dispatch_title")} variant="brand">
                 <div className="flex flex-column gap-3">
                   <CivicField label={t("community_blog.headline")}>
                     <div className="flex flex-column gap-2">

@@ -15,6 +15,8 @@ import { CivicField } from "../components/ui/CivicField";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicMetaRow } from "../components/ui/CivicMetaRow";
+import { CivicActionBar } from "../components/ui/CivicActionBar";
 
 interface ThemeOption {
   label: string;
@@ -98,7 +100,7 @@ export function Settings() {
 
   return (
     <Layout>
-      <div className="animate-fade-up max-w-50rem mx-auto">
+      <div className="animate-fade-up motion-page max-w-50rem mx-auto">
         <CivicPageHeader title={t('settings.title')} description={t('settings.desc')} />
 
         <div className="grid">
@@ -106,8 +108,8 @@ export function Settings() {
             <CivicCard title={t('settings.identity_profile')} variant="brand" className="h-full">
               <div className="flex flex-column align-items-center text-center py-4">
                 <div className="relative mb-4">
-                  <Avatar label={userName?.[0].toUpperCase()} shape="circle" size="xlarge" className="bg-brand-primary text-white font-black shadow-xl" style={{ width: '80px', height: '80px', fontSize: '2rem' }} />
-                  <div className="absolute bottom-0 right-0 bg-status-resolved border-circle border-2 border-surface-0" style={{ width: '20px', height: '20px' }}></div>
+                  <Avatar label={userName?.[0].toUpperCase()} shape="circle" size="xlarge" className="bg-brand-primary text-on-brand font-black shadow-xl" style={{ width: '80px', height: '80px', fontSize: '2rem' }} />
+                  <div className="absolute bottom-0 right-0 bg-status-resolved border-circle border-2 border-subtle" style={{ width: '20px', height: '20px' }}></div>
                 </div>
                 <h2 className="text-2xl font-black text-main m-0 tracking-tight">{userName}</h2>
                 <div className="mt-2 flex gap-2 justify-content-center">
@@ -118,18 +120,9 @@ export function Settings() {
                 <Divider className="my-6 opacity-10" />
                 
                 <div className="w-full text-left">
-                  <div className="flex justify-content-between mb-3">
-                    <span className="text-xs font-bold text-muted uppercase">{t('settings.clearance_level')}</span>
-                    <span className="text-xs font-mono text-main">{t('settings.clearance_level_value')}</span>
-                  </div>
-                  <div className="flex justify-content-between mb-3">
-                    <span className="text-xs font-bold text-muted uppercase">{t('settings.encryption')}</span>
-                    <span className="text-xs font-mono text-main">{t('settings.encryption_value')}</span>
-                  </div>
-                  <div className="flex justify-content-between">
-                    <span className="text-xs font-bold text-muted uppercase">{t('settings.protocol')}</span>
-                    <span className="text-xs font-mono text-main">{t('settings.protocol_value')}</span>
-                  </div>
+                  <CivicMetaRow label={t('settings.clearance_level')} value={t('settings.clearance_level_value')} />
+                  <CivicMetaRow label={t('settings.encryption')} value={t('settings.encryption_value')} />
+                  <CivicMetaRow label={t('settings.protocol')} value={t('settings.protocol_value')} />
                 </div>
               </div>
             </CivicCard>
@@ -172,7 +165,7 @@ export function Settings() {
                       optionLabel="label"
                       optionValue="value"
                       onChange={handleRoleChange}
-                      className="w-full bg-black-alpha-20 p-inputtext-lg"
+                      className="w-full p-inputtext-lg"
                       disabled={rawRoles.length <= 1}
                       placeholder={roleOptions[0]?.label ?? activeRole}
                       itemTemplate={(option: RoleOption) => (
@@ -206,10 +199,12 @@ export function Settings() {
           </div>
         </div>
 
-        <div className="text-center mt-8 p-6 bg-white-alpha-5 border-round-3xl border-1 border-white-alpha-10 mb-8">
-          <p className="text-muted text-xs font-bold uppercase tracking-widest m-0">
-            {t('settings.footer')}
-          </p>
+        <div className="text-center mt-8 mb-8">
+          <CivicActionBar className="justify-content-center">
+            <p className="text-muted text-xs font-bold uppercase tracking-widest m-0">
+              {t('settings.footer')}
+            </p>
+          </CivicActionBar>
         </div>
       </div>
     </Layout>

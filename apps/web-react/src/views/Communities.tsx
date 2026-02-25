@@ -12,7 +12,7 @@ import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
-import { CivicToolbar } from "../components/ui/CivicToolbar";
+import { CivicActionBar } from "../components/ui/CivicActionBar";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -104,14 +104,14 @@ export function Communities() {
 
   return (
     <Layout>
-      <div className="animate-fade-up">
+      <div className="animate-fade-up motion-page">
         <CivicPageHeader title="Community Hub" description="Manage your civic ecosystem and regional memberships." />
 
         <div className="grid">
           <div className="col-12 lg:col-7">
             <CivicCard title="My Memberships" className="h-full">
               <div className="flex flex-column gap-4">
-                <CivicToolbar className="mb-4 p-4">
+                <CivicActionBar className="mb-4 p-4">
                   <div className="flex-1" style={{ minWidth: "14rem" }}>
                     <CivicSelect
                       value={selectedCommunityId}
@@ -142,7 +142,7 @@ export function Communities() {
                       data-testid="join-community-button"
                     />
                   </div>
-                </CivicToolbar>
+                </CivicActionBar>
 
                 <div className="flex flex-column gap-3">
                   {memberships.map((membership) => (
@@ -158,7 +158,7 @@ export function Communities() {
                         value={membership.role}
                         options={roleOptions}
                         onChange={(e) => roleUpdate(membership, e.value)}
-                        className="w-full md:w-14rem bg-black-alpha-30"
+                        className="w-full md:w-14rem"
                         data-testid={`membership-role-dropdown-${membership.communityId}`}
                       />
                     </div>
@@ -197,7 +197,7 @@ export function Communities() {
               ) : (
                 <div className="flex flex-column gap-3">
                   {communities.map((community) => (
-                    <div key={community.id} className="p-4 border-round-xl border-1 border-white-alpha-10 bg-black-alpha-20 flex justify-content-between align-items-center">
+                    <div key={community.id} className="p-4 border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 flex justify-content-between align-items-center">
                       <div className="font-bold text-main">{community.name}</div>
                       <CivicBadge label={community.slug} type="category" />
                     </div>
