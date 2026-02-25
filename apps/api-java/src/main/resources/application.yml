@@ -21,20 +21,20 @@ spring:
     baseline-on-migrate: true
 
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${SMTP_USERNAME:no-reply@localhost}
-    password: ${SMTP_PASSWORD:dummy}
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:no-reply@localhost}
+    password: ${SPRING_MAIL_PASSWORD:dummy}
     properties:
       mail:
         smtp:
-          auth: true
+          auth: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:true}
           starttls:
-            enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+            enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:true}
+            required: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED:true}
+          connectiontimeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT:5000}
+          timeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT:5000}
+          writetimeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT:5000}
 
 application:
   security:
