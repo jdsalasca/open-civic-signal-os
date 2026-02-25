@@ -45,7 +45,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health", "/api/test/**").permitAll()
+                .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/export/**").hasRole("SUPER_ADMIN")
                 

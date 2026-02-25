@@ -33,8 +33,8 @@ public interface PrioritizationService {
     Page<Signal> getFlaggedSignals(Pageable pageable);
     
     Signal moderateSignal(UUID id, String action, String reason);
-    Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String username);
-    Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String username, UUID communityId);
+    Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, Double latitude, Double longitude, String username);
+    Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, Double latitude, Double longitude, String username, UUID communityId);
     Signal saveSignal(Signal signal);
     Optional<Signal> updateStatus(UUID id, String newStatus);
     Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId);

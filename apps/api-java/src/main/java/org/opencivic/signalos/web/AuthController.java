@@ -92,9 +92,8 @@ public class AuthController {
     }
 
     @PostMapping("/resend-code")
-    public ResponseEntity<Map<String, String>> resendCode(@RequestBody Map<String, String> body) {
-        // ... implementation ...
-        String username = body.get("username");
+    public ResponseEntity<Map<String, String>> resendCode(@Valid @RequestBody ResendCodeRequest request) {
+        String username = request.username();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedActionException("Identity not found."));
 
@@ -113,14 +112,14 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<Map<String, String>> verify(@RequestBody Map<String, String> body) {
-        String username = body.get("username");
+    public ResponseEntity<Map<String, String>> verify(@Valid @RequestBody VerifyAccountRequest request) {
+        String username = request.username();
         
         if (!rateLimitService.tryAcquire(username)) {
             return ResponseEntity.status(429).body(Map.of("message", "Too many attempts. Please wait."));
         }
 
-        String code = body.get("code");
+        String code = request.code();
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedActionException("Identity not found."));
