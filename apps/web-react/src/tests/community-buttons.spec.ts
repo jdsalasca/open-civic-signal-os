@@ -35,11 +35,11 @@ test.describe('Community Buttons UX (P0)', () => {
     await page.getByTestId('create-thread-button').click();
     await expect(page.getByText(threadTitle)).toBeVisible();
 
-    await page.getByTestId('thread-select-dropdown').click();
-    await page.locator('.p-dropdown-item', { hasText: threadTitle }).first().click();
-    await page.getByTestId('thread-message-input').fill(threadMessage);
-    await expect(page.getByTestId('send-thread-message-button')).toBeEnabled();
-    await page.getByTestId('send-thread-message-button').click();
+    const firstThreadInput = page.locator('[data-testid^="thread-message-input-"]').first();
+    await firstThreadInput.fill(threadMessage);
+    const firstThreadSend = page.locator('[data-testid^="send-thread-message-button-"]').first();
+    await expect(firstThreadSend).toBeEnabled();
+    await firstThreadSend.click();
     await expect(page.getByText(threadMessage)).toBeVisible();
 
     await page.goto('/communities/blog');
