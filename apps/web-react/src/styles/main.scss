@@ -93,6 +93,18 @@ body {
   letter-spacing: 0.04em !important;
 }
 
+.dashboard-hero-actions {
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+@media (max-width: 991px) {
+  .dashboard-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
 .u-filter-chip {
   display: inline-flex;
   align-items: center;

@@ -5,9 +5,10 @@ import { CivicCard } from "./ui/CivicCard";
 
 type Props = {
   signals: Signal[];
+  onMetricSelect?: (metricId: "total" | "new" | "analysis" | "avg") => void;
 };
 
-export function MetricsGrid({ signals }: Props) {
+export function MetricsGrid({ signals, onMetricSelect }: Props) {
   const { t } = useTranslation();
   const metrics = useMemo(() => {
     const total = signals.length;
@@ -32,8 +33,21 @@ export function MetricsGrid({ signals }: Props) {
         <div key={m.title} className="col-12 sm:col-6 lg:col-3 flex">
           <CivicCard 
             variant={m.variant}
-            className="w-full transition-transform transition-duration-200 hover:scale-105"
+            className={`w-full transition-transform transition-duration-200 hover:scale-105 ${onMetricSelect ? "cursor-pointer" : ""}`}
             data-testid={`metric-card-${m.id}`}
+            role={onMetricSelect ? "button" : undefined}
+            tabIndex={onMetricSelect ? 0 : undefined}
+            onClick={onMetricSelect ? () => onMetricSelect(m.id as "total" | "new" | "analysis" | "avg") : undefined}
+            onKeyDown={
+              onMetricSelect
+                ? (event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onMetricSelect(m.id as "total" | "new" | "analysis" | "avg");
+                    }
+                  }
+                : undefined
+            }
           >
             <div className="flex justify-content-between align-items-center">
               <div className="flex flex-column gap-1">

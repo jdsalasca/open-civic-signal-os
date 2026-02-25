@@ -15,6 +15,7 @@ import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 import { CivicToolbar } from "../components/ui/CivicToolbar";
+import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { useCommunityStore } from "../store/useCommunityStore";
 
 interface ApiError extends Error {
@@ -191,6 +192,16 @@ export function Dashboard() {
     { label: t('signals.filter_resolved'), value: "RESOLVED", icon: "pi-check-circle" },
   ];
 
+  const handleMetricSelect = (metricId: "total" | "new" | "analysis" | "avg") => {
+    const filterByMetric: Record<typeof metricId, string> = {
+      total: "ALL",
+      new: "NEW",
+      analysis: "IN_PROGRESS",
+      avg: "ALL",
+    };
+    handleFilterChange(filterByMetric[metricId]);
+  };
+
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
@@ -214,31 +225,48 @@ export function Dashboard() {
             </p>
           </div>
 
-          <div className="flex gap-3">
+          <CivicActionBar className="dashboard-hero-actions">
+            <CivicButton
+              type="button"
+              label={t('dashboard.new_issue')}
+              icon="pi pi-plus"
+              onClick={() => navigate("/report")}
+              data-testid="dashboard-action-report"
+            />
+            <CivicButton
+              type="button"
+              label={t('nav.dialogues')}
+              icon="pi pi-comments"
+              variant="secondary"
+              onClick={() => navigate("/communities/threads")}
+              data-testid="dashboard-action-threads"
+            />
+            <CivicButton
+              type="button"
+              label={t('nav.public_blog')}
+              icon="pi pi-megaphone"
+              variant="ghost"
+              onClick={() => navigate("/communities/blog")}
+              data-testid="dashboard-action-blog"
+            />
             {isStaff && (
-              <CivicButton 
+              <CivicButton
+                type="button"
                 label={t('dashboard.broadcast')}
-                icon="pi pi-bolt" 
+                icon="pi pi-bolt"
                 variant="danger"
-                className="py-4 px-6 shadow-xl"
                 onClick={handleRelay}
+                data-testid="dashboard-action-broadcast"
               />
             )}
-            <CivicButton 
-              label={t('dashboard.new_issue')}
-              icon="pi pi-plus" 
-              glow
-              className="py-4 px-6 shadow-xl"
-              onClick={() => navigate("/report")}
-            />
-          </div>
+          </CivicActionBar>
         </section>
 
         <div className="mb-8">
           {loading ? (
             <CivicSkeleton type="metric" count={4} />
           ) : (
-            <MetricsGrid signals={displayedSignals} />
+            <MetricsGrid signals={displayedSignals} onMetricSelect={handleMetricSelect} />
           )}
         </div>
 
