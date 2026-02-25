@@ -11,7 +11,7 @@ export function NotFound() {
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="w-full max-w-30rem text-center animate-fade-up" padding="lg">
           <div className="mb-8">
-            <div className="inline-flex align-items-center justify-content-center p-4 bg-status-rejected-alpha-10 border-round-3xl mb-6 border-1 border-status-rejected-alpha-20">
+            <div className="inline-flex align-items-center justify-content-center p-4 bg-surface border-round-3xl mb-6 border-1 border-subtle">
               <i className="pi pi-map text-5xl text-status-rejected"></i>
             </div>
             <h1 className="text-6xl font-black text-main m-0 tracking-tighter">404</h1>
@@ -22,18 +22,18 @@ export function NotFound() {
           </div>
 
           <div className="flex flex-column gap-3">
-            <CivicButton 
-              label="Return to Command Center" 
-              icon="pi pi-home" 
-              className="py-4 text-base" 
+            <CivicButton
+              label="Return to Command Center"
+              icon="pi pi-home"
+              className="py-4 text-base"
               onClick={() => navigate("/")}
               glow
             />
-            <CivicButton 
-              label="Report System Anomaly" 
+            <CivicButton
+              label="Report System Anomaly"
               variant="ghost"
-              icon="pi pi-info-circle" 
-              className="text-xs" 
+              icon="pi pi-info-circle"
+              className="text-xs"
             />
           </div>
         </CivicCard>

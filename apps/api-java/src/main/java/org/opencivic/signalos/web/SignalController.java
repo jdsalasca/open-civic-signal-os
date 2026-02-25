@@ -289,6 +289,8 @@ public class SignalController {
             request.urgency(),
             request.impact(),
             request.affectedPeople(),
+            request.latitude(),
+            request.longitude(),
             authentication.getName(),
             communityId
         );
@@ -323,7 +325,9 @@ public class SignalController {
             s.getCategory(),
             s.getStatus(),
             s.getPriorityScore(),
-            s.getScoreBreakdown()
+            s.getScoreBreakdown(),
+            s.getLatitude(),
+            s.getLongitude()
         );
     }
 
@@ -347,3 +351,4 @@ public class SignalController {
             .toList();
     }
 }
+

@@ -18,21 +18,21 @@ export function CivicCard({ children, title, className, padding = 'md', variant 
   };
 
   const variantClasses = {
-    'neutral': 'border-white-alpha-10',
-    'brand': 'border-brand-primary/30',
-    'success': 'border-status-resolved/30',
-    'warning': 'border-status-progress/30',
-    'danger': 'border-status-rejected/30',
+    'neutral': '',
+    'brand': 'border-brand-primary border-opacity-30',
+    'success': 'border-status-resolved border-opacity-30',
+    'warning': 'border-status-progress border-opacity-30',
+    'danger': 'border-status-rejected border-opacity-30',
   };
 
   return (
     <div className={classNames(
-      'glass-panel rounded-2xl overflow-hidden transition-all duration-300 hover:border-white-alpha-20',
+      'glass-panel rounded-2xl overflow-hidden',
       variantClasses[variant],
       className
     )} {...rest}>
       {title && (
-        <div className="px-5 py-4 border-bottom-1 border-white-alpha-10 bg-white-alpha-5">
+        <div className="px-5 py-4 border-bottom-1 border-subtle bg-surface opacity-90">
           <h3 className="m-0 text-xs font-black uppercase tracking-widest text-brand-primary">
             {title}
           </h3>

@@ -23,6 +23,36 @@ import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 
 type ApiError = Error & { friendlyMessage?: string };
 
+const renderContent = (content: string) => {
+  const imgRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = imgRegex.exec(content)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex, match.index)}</span>);
+    }
+    parts.push(
+      <img
+        key={`img-${match.index}`}
+        src={match[2]}
+        alt={match[1]}
+        loading="lazy"
+        className="max-w-full h-auto border-round-xl shadow-2 my-4 block"
+        style={{ width: '100%', maxHeight: '400px', objectFit: 'cover' }}
+      />
+    );
+    lastIndex = imgRegex.lastIndex;
+  }
+
+  if (lastIndex < content.length) {
+    parts.push(<span key={`text-${lastIndex}`}>{content.substring(lastIndex)}</span>);
+  }
+
+  return <div className="text-secondary text-base line-height-4 font-medium opacity-90 m-0 mb-4" style={{ whiteSpace: 'pre-wrap' }}>{parts.length > 0 ? parts : content}</div>;
+};
+
 export function CommunityBlog() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -133,7 +163,7 @@ export function CommunityBlog() {
                       <CivicCharacterCount current={title.length} max={FORM_LIMITS.blog.titleMax} min={FORM_LIMITS.blog.titleMin} />
                     </div>
                   </CivicField>
-                  
+
                   <CivicField label={t('community_blog.context')}>
                     <div className="flex flex-column gap-2">
                       <InputTextarea
@@ -193,42 +223,48 @@ export function CommunityBlog() {
                 />
               </CivicCard>
             ) : (
-              <div className="flex flex-column gap-8">
+              <div className="grid">
                 {posts.map((post) => (
-                  <div key={post.id} className="flex flex-column gap-4">
-                    <div className="glass-panel border-round-3xl p-6 hover:border-white-alpha-30 transition-all duration-300">
-                      <div className="flex justify-content-between align-items-start mb-6">
-                        <div className="flex align-items-center gap-3">
-                          <Avatar label={post.authorUsername?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold shadow-4" />
-                          <div className="flex flex-column">
-                            <span className="text-sm font-bold text-main">{post.authorUsername}</span>
-                            <span className="text-xs text-muted font-bold uppercase tracking-tighter">{post.authorRole}</span>
+                  <div key={post.id} className="col-12 xl:col-6 flex flex-column gap-4 p-3">
+                    <div className="glass-panel border-round-3xl p-5 hover:border-white-alpha-30 transition-all duration-300 flex-1 flex flex-column justify-content-between">
+                      <div>
+                        <div className="flex justify-content-between align-items-start mb-5">
+                          <div className="flex align-items-center gap-3">
+                            <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold shadow-4" />
+                            <div className="flex flex-column">
+                              <span className="text-sm font-bold text-main">{post.authorUsername}</span>
+                              <span className="text-xs text-muted font-bold uppercase tracking-tighter">{post.authorRole}</span>
+                            </div>
                           </div>
+                          <CivicBadge label={post.statusTag.replace('_', ' ')} severity={getStatusSeverity(post.statusTag)} />
                         </div>
-                        <CivicBadge label={post.statusTag.replace('_', ' ')} severity={getStatusSeverity(post.statusTag)} />
+
+                        <h2 className="text-2xl font-black text-main m-0 mb-3 tracking-tight leading-tight">{post.title}</h2>
+                        <div className="mb-4">
+                          {renderContent(post.content)}
+                        </div>
                       </div>
 
-                      <h2 className="text-3xl font-black text-main m-0 mb-4 tracking-tight leading-tight">{post.title}</h2>
-                      <p className="text-secondary text-lg line-height-4 font-medium opacity-90 m-0 mb-6" style={{whiteSpace: 'pre-wrap'}}>{post.content}</p>
-                      
-                      <div className="flex justify-content-between align-items-center pt-6 border-top-1 border-white-alpha-10">
-                        <div className="flex align-items-center gap-2 text-xs text-muted font-bold uppercase tracking-widest">
-                          <i className="pi pi-calendar"></i>
-                          <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
-                          <span className="mx-1">•</span>
-                          <span>{new Date(post.publishedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      <div>
+                        <div className="flex justify-content-between align-items-center pt-5 border-top-1 border-white-alpha-10 mb-5">
+                          <div className="flex align-items-center gap-2 text-xs text-muted font-bold uppercase tracking-widest">
+                            <i className="pi pi-calendar"></i>
+                            <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+                            <span className="mx-1">•</span>
+                            <span>{new Date(post.publishedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </div>
+
+                        <div className="px-2">
+                          <CivicEngagement
+                            parentId={post.id}
+                            parentType="BLOG"
+                            initialReactions={post.reactions}
+                            initialCommentCount={commentCountsByPost[post.id] ?? 0}
+                            autoloadComments={false}
+                          />
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="px-4">
-                      <CivicEngagement 
-                        parentId={post.id} 
-                        parentType="BLOG" 
-                        initialReactions={post.reactions} 
-                        initialCommentCount={commentCountsByPost[post.id] ?? 0}
-                        autoloadComments={false}
-                      />
                     </div>
                   </div>
                 ))}

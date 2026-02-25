@@ -57,86 +57,86 @@ export function Register() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-column gap-2" aria-label="Registration Form">
             <CivicField label={t('auth.username')} error={errors.username?.message}>
-              <Controller name="username" control={control} rules={{ required: t('common.required'), minLength: { value: 4, message: t('auth.username_too_short') } }} 
+              <Controller name="username" control={control} rules={{ required: t('common.required'), minLength: { value: 4, message: t('auth.username_too_short') } }}
                 render={({ field, fieldState }) => (
-                  <InputText 
-                    {...field} 
+                  <InputText
+                    {...field}
                     autoComplete="username"
-                    className={classNames('w-full p-inputtext-lg', { 'p-invalid': fieldState.error })} 
+                    className={classNames('w-full p-inputtext-lg', { 'p-invalid': fieldState.error })}
                     data-testid="register-username-input"
                     placeholder={t('auth.username_placeholder')}
                   />
-                )} 
+                )}
               />
             </CivicField>
 
             <CivicField label={t('auth.email')} error={errors.email?.message}>
-              <Controller name="email" control={control} rules={{ required: t('common.required'), pattern: { value: /^\S+@\S+$/i, message: t('common.invalid_email') } }} 
+              <Controller name="email" control={control} rules={{ required: t('common.required'), pattern: { value: /^\S+@\S+$/i, message: t('common.invalid_email') } }}
                 render={({ field, fieldState }) => (
-                  <InputText 
-                    {...field} 
+                  <InputText
+                    {...field}
                     autoComplete="email"
-                    className={classNames('w-full p-inputtext-lg', { 'p-invalid': fieldState.error })} 
+                    className={classNames('w-full p-inputtext-lg', { 'p-invalid': fieldState.error })}
                     data-testid="register-email-input"
                     placeholder="email@example.com"
                   />
-                )} 
+                )}
               />
             </CivicField>
 
             <CivicField label={t('auth.password')} error={errors.password?.message}>
-              <Controller name="password" control={control} rules={{ required: t('common.required'), minLength: { value: 8, message: t('auth.password_too_short') } }} 
+              <Controller name="password" control={control} rules={{ required: t('common.required'), minLength: { value: 8, message: t('auth.password_too_short') } }}
                 render={({ field, fieldState }) => (
-                  <Password 
-                    {...field} 
-                    toggleMask 
-                    inputId="password-input" 
+                  <Password
+                    {...field}
+                    toggleMask
+                    inputId="password-input"
                     autoComplete="new-password"
                     placeholder="Min. 8 characters"
-                    inputClassName="w-full p-inputtext-lg" 
-                    className={classNames('w-full', { 'p-invalid': fieldState.error })} 
+                    inputClassName="w-full p-inputtext-lg"
+                    className={classNames('w-full', { 'p-invalid': fieldState.error })}
                     data-testid="register-password-input"
                   />
-                )} 
+                )}
               />
             </CivicField>
 
             <CivicField label={t('auth.confirm_password')} error={errors.confirmPassword?.message}>
-              <Controller name="confirmPassword" control={control} 
-                rules={{ 
-                  required: t('common.required'), 
+              <Controller name="confirmPassword" control={control}
+                rules={{
+                  required: t('common.required'),
                   validate: value => value === password || t('auth.passwords_mismatch') || "Passwords must match"
-                }} 
+                }}
                 render={({ field, fieldState }) => (
-                  <Password 
-                    {...field} 
-                    toggleMask 
+                  <Password
+                    {...field}
+                    toggleMask
                     feedback={false}
-                    inputId="confirm-password-input" 
+                    inputId="confirm-password-input"
                     autoComplete="new-password"
                     placeholder="Repeat password"
-                    inputClassName="w-full p-inputtext-lg" 
-                    className={classNames('w-full', { 'p-invalid': fieldState.error })} 
+                    inputClassName="w-full p-inputtext-lg"
+                    className={classNames('w-full', { 'p-invalid': fieldState.error })}
                     data-testid="register-confirm-password-input"
                   />
-                )} 
+                )}
               />
             </CivicField>
 
-            <div className="p-4 bg-white-alpha-5 border-round-xl text-xs text-secondary flex align-items-center gap-3 border-1 border-white-alpha-10 mb-4">
+            <div className="p-4 bg-surface border-round-xl text-xs text-secondary flex align-items-center gap-3 border-1 border-subtle mb-4">
               <i className="pi pi-shield text-brand-primary text-lg"></i>
               <span className="font-bold uppercase tracking-wider leading-relaxed">{t('auth.clearance_level')}</span>
             </div>
 
-            <CivicButton 
-              type="submit" 
-              label={t('auth.create_account')} 
-              className="py-4 text-base" 
+            <CivicButton
+              type="submit"
+              label={t('auth.create_account')}
+              className="py-4 text-base"
               loading={isSubmitting}
               glow
               data-testid="register-submit-button"
             />
-            
+
             <p className="text-center text-muted text-sm font-medium mt-6">
               {t('auth.already_member')} <Link to="/login" className="text-brand-primary font-bold no-underline hover:underline" data-testid="go-to-login">{t('auth.sign_in_here')}</Link>
             </p>

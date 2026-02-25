@@ -99,10 +99,10 @@ export function Layout({ children, authMode = false }: Props) {
       <div className="text-muted text-xs font-black uppercase tracking-widest mb-3 ml-4 opacity-40">{title}</div>
       <div className="flex flex-column gap-1">
         {items.filter(l => l.visible).map(link => (
-          <Link 
-            key={link.to} 
-            to={link.to} 
-            className={`flex align-items-center justify-content-between px-4 py-3 border-round-xl no-underline transition-all font-bold ${location.pathname === link.to ? 'bg-white-alpha-10 text-main shadow-sm' : 'text-secondary hover:text-main hover:bg-white-alpha-5'}`}
+          <Link
+            key={link.to}
+            to={link.to}
+            className={`flex align-items-center justify-content-between px-4 py-3 border-round-xl no-underline transition-all font-bold ${location.pathname === link.to ? 'bg-elevated text-main shadow-sm' : 'text-secondary hover:text-main hover:bg-surface'}`}
             data-testid={link.testId}
             aria-label={link.label}
             aria-current={location.pathname === link.to ? "page" : undefined}
@@ -137,7 +137,7 @@ export function Layout({ children, authMode = false }: Props) {
           <NavGroup title={t('nav.group_personal')} items={personalNav} />
         </nav>
 
-        <div className="mt-auto p-4 border-top-1 border-white-alpha-5 bg-black-alpha-20">
+        <div className="mt-auto p-4 border-top-1 border-subtle bg-surface">
           <div className="flex flex-column gap-4">
             <div className="flex align-items-center gap-3 px-2">
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
@@ -146,11 +146,11 @@ export function Layout({ children, authMode = false }: Props) {
                 <span className="text-min font-bold text-muted uppercase" style={{ fontSize: '8px' }}>{t('nav.clearance')}: {activeRole}</span>
               </div>
             </div>
-            <Button 
+            <Button
               label={t('nav.sign_out')}
-              icon="pi pi-power-off" 
-              text 
-              className="w-full justify-content-start text-xs font-black text-muted hover:text-danger py-3" 
+              icon="pi pi-power-off"
+              text
+              className="w-full justify-content-start text-xs font-black text-muted hover:text-danger py-3"
               onClick={handleLogout}
               data-testid="logout-button-desktop"
             />
@@ -160,7 +160,7 @@ export function Layout({ children, authMode = false }: Props) {
 
       {/* VIEW AREA */}
       <div className="flex flex-column flex-grow-1 overflow-hidden relative">
-        <header className="h-5rem flex align-items-center justify-content-between px-6 border-bottom-1 border-white-alpha-5 bg-black-alpha-40 backdrop-blur-xl z-1">
+        <header className="h-5rem flex align-items-center justify-content-between px-6 border-bottom-1 border-subtle bg-nav backdrop-blur-xl z-1">
           <div className="flex align-items-center gap-6 flex-grow-1">
             <Button
               icon="pi pi-bars"
@@ -170,13 +170,13 @@ export function Layout({ children, authMode = false }: Props) {
               aria-label={t('nav.open_navigation')}
               data-testid="mobile-menu-toggle"
             />
-            
+
             <div className="hidden md:flex align-items-center flex-grow-1 max-w-30rem">
               <span className="p-input-icon-left w-full relative group">
                 <i className="pi pi-search text-muted group-focus-within:text-brand-primary transition-colors" />
-                <InputText 
-                  placeholder="Search intelligence, commands, or signals... (Ctrl + K)" 
-                  className="w-full bg-white-alpha-5 border-white-alpha-10 border-round-xl py-2 pl-5 text-xs font-bold uppercase tracking-wider hover:bg-white-alpha-10 transition-all"
+                <InputText
+                  placeholder="Search intelligence, commands, or signals... (Ctrl + K)"
+                  className="w-full bg-surface border-subtle border-round-xl py-2 pl-5 text-xs font-bold uppercase tracking-wider hover:bg-elevated transition-all"
                 />
                 <div className="absolute right-0 top-0 bottom-0 flex align-items-center pr-3 pointer-events-none">
                   <kbd className="bg-white-alpha-10 px-2 py-1 border-round text-min font-mono opacity-40">CTRL K</kbd>
@@ -187,7 +187,7 @@ export function Layout({ children, authMode = false }: Props) {
 
           <div className="flex align-items-center gap-4">
             {communityOptions.length > 0 && (
-              <div className="hidden sm:flex align-items-center gap-3 bg-white-alpha-5 border-round-xl px-4 py-2 border-1 border-white-alpha-10 hover:border-white-alpha-20 transition-colors cursor-pointer">
+              <div className="hidden sm:flex align-items-center gap-3 bg-surface border-round-xl px-4 py-2 border-1 border-subtle hover:border-brand-primary transition-colors cursor-pointer">
                 <i className="pi pi-map-marker text-brand-primary text-sm"></i>
                 <CivicSelect
                   value={activeCommunityId || communityOptions[0].value}
@@ -206,11 +206,11 @@ export function Layout({ children, authMode = false }: Props) {
               </div>
             )}
 
-            <div className="hidden xl:flex align-items-center gap-3 bg-white-alpha-5 px-4 py-2 border-round-xl border-1 border-white-alpha-10">
+            <div className="hidden xl:flex align-items-center gap-3 bg-surface px-4 py-2 border-round-xl border-1 border-subtle">
               <div className="w-8px h-8px border-circle bg-status-resolved animate-pulse"></div>
               <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
             </div>
-            
+
             <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
           </div>
         </header>
@@ -221,11 +221,11 @@ export function Layout({ children, authMode = false }: Props) {
           </div>
         </main>
 
-        <nav className="lg:hidden flex justify-content-around align-items-center bg-card border-top-1 border-white-alpha-5 h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
+        <nav className="lg:hidden flex justify-content-around align-items-center bg-card border-top-1 border-subtle h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
           {mainNav.concat(socialNav).slice(0, 5).map(link => (
-            <Link 
-              key={link.to} 
-              to={link.to} 
+            <Link
+              key={link.to}
+              to={link.to}
               className={`flex flex-column align-items-center gap-1 no-underline ${location.pathname === link.to ? 'text-brand-primary' : 'text-muted'}`}
               data-testid={link.testId}
               aria-label={link.label}

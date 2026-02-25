@@ -320,30 +320,22 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     @Transactional
-    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String username) {
-        return createSignal(title, description, category, urgency, impact, affectedPeople, username, null);
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, Double latitude, Double longitude, String username) {
+        return createSignal(title, description, category, urgency, impact, affectedPeople, latitude, longitude, username, null);
     }
 
     @Override
     @Transactional
-    public Signal createSignal(
-        String title,
-        String description,
-        String category,
-        int urgency,
-        int impact,
-        int affectedPeople,
-        String username,
-        UUID communityId
-    ) {
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, Double latitude, Double longitude, String username, UUID communityId) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Author user not found: " + username));
 
         Signal signal = new Signal(
             UUID.randomUUID(), title, description, category,
             urgency, impact, affectedPeople,
-            0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), java.time.LocalDateTime.now(), communityId
-        );
+            0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), java.time.LocalDateTime.now(), communityId);
+        signal.setLatitude(latitude);
+        signal.setLongitude(longitude);
         
         ScoreBreakdown breakdown = getBreakdown(signal);
         double score = breakdown.urgency() + breakdown.impact() + breakdown.affectedPeople() + breakdown.communityVotes();
@@ -434,3 +426,4 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         }
     }
 }
+

@@ -7,9 +7,52 @@ type Props = {
 };
 
 export function NotificationSidebar({ notifications }: Props) {
+  const parseAlertMessage = (msg: string) => {
+    if (!msg.startsWith('Top unresolved community issues:')) {
+      return (
+        <p className="text-sm text-secondary m-0 leading-relaxed font-medium">
+          {msg}
+        </p>
+      );
+    }
+    const issuesPart = msg.replace('Top unresolved community issues:', '').trim();
+    const issues = issuesPart.split(',').map(i => i.trim()).filter(Boolean);
+
+    return (
+      <div className="flex flex-column gap-2 mt-2">
+        <span className="text-xs font-bold text-main uppercase tracking-widest mb-1 flex align-items-center gap-2">
+          <span className="w-1rem h-1rem border-circle bg-status-rejected shadow-1" style={{ animation: 'pulse 2s infinite' }}></span>
+          Top Unresolved Issues
+        </span>
+        <div className="flex flex-column gap-1 max-h-15rem overflow-y-auto pr-2 custom-scrollbar">
+          {issues.map((issue, idx) => {
+            const match = issue.match(/^\[(.*?)\]\s*(.*)$/);
+            if (match) {
+              const [, category, title] = match;
+              return (
+                <div key={idx} className="flex align-items-center gap-2 text-sm p-2 bg-black-alpha-20 border-round-lg border-1 border-white-alpha-10 surface-ground">
+                  <span className="text-status-rejected font-mono text-min uppercase tracking-tighter bg-status-rejected-alpha-10 px-1 border-round">[{category}]</span>
+                  <span className="text-main font-medium line-height-3 text-sm">{title}</span>
+                </div>
+              );
+            }
+            return <div key={idx} className="text-sm text-secondary border-bottom-1 border-white-alpha-10 pb-2">{issue}</div>;
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <CivicCard title="Operational Alerts" variant="danger">
+    <CivicCard
+      title={(
+        <div className="flex align-items-center gap-2">
+          <i className="pi pi-bolt text-status-rejected"></i>
+          <span>Operational Alerts</span>
+        </div>
+      )}
+      variant="danger"
+    >
       <div className="flex flex-column gap-4">
         {notifications.length === 0 ? (
           <div className="text-center py-4 text-muted italic text-sm">
@@ -22,10 +65,9 @@ export function NotificationSidebar({ notifications }: Props) {
                 <CivicBadge label={n.channel} severity="progress" />
                 <span className="text-xs font-mono text-muted">{new Date(n.sentAt).toLocaleTimeString()}</span>
               </div>
-              <p className="text-sm text-secondary m-0 leading-relaxed font-medium">
-                {n.message}
-              </p>
-              <div className="mt-3 text-min font-black uppercase tracking-tighter text-muted">
+              {parseAlertMessage(n.message)}
+              <div className="mt-3 text-min font-black uppercase tracking-tighter text-muted flex align-items-center gap-2">
+                <i className="pi pi-users text-muted"></i>
                 Target: {n.recipientGroup}
               </div>
             </div>

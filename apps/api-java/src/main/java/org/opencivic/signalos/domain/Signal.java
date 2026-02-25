@@ -45,6 +45,9 @@ public class Signal {
     private UUID communityId;
     
     private LocalDateTime createdAt;
+    
+    private Double latitude;
+    private Double longitude;
 
     @ElementCollection
     @CollectionTable(name = "signal_reactions", joinColumns = @JoinColumn(name = "signal_id"))
@@ -100,6 +103,8 @@ public class Signal {
     public UUID getAuthorId() { return authorId; }
     public UUID getCommunityId() { return communityId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public Double getLatitude() { return latitude; }
+    public Double getLongitude() { return longitude; }
     
     public List<UUID> getMergedFrom() { 
         if (mergedFrom == null) mergedFrom = new ArrayList<>();
@@ -122,6 +127,8 @@ public class Signal {
     public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }
     public void setAuthorId(UUID authorId) { this.authorId = authorId; }
     public void setCommunityId(UUID communityId) { this.communityId = communityId; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 
     public Signal withScore(double score, ScoreBreakdown breakdown) {
         this.priorityScore = score;

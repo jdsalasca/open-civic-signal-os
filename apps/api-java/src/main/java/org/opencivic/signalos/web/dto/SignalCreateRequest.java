@@ -26,5 +26,8 @@ public record SignalCreateRequest(
     int impact,
     
     @Min(value = 1, message = "Affected scale must be at least 1 citizen") 
-    int affectedPeople
+    int affectedPeople,
+    
+    Double latitude,
+    Double longitude
 ) {}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -28,6 +29,8 @@ type ReportForm = {
   urgency: number;
   impact: number;
   affectedPeople: number;
+  latitude?: number;
+  longitude?: number;
 };
 
 export function ReportSignal() {
@@ -38,11 +41,36 @@ export function ReportSignal() {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { isSubmitting, errors },
   } = useForm<ReportForm>({
     mode: "onChange",
     defaultValues: { title: '', description: '', category: '', urgency: 3, impact: 3, affectedPeople: 10 }
   });
+
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationFound, setLocationFound] = useState(false);
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by your browser');
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setValue('latitude', position.coords.latitude);
+        setValue('longitude', position.coords.longitude);
+        setLocationFound(true);
+        setIsLocating(false);
+        toast.success(t('report.geolocation_success', 'Location acquired automatically.'));
+      },
+      () => {
+        setIsLocating(false);
+        toast.error('Failed to get location. Please check browser permissions.');
+      }
+    );
+  };
 
   const currentUrgency = watch('urgency');
   const currentImpact = watch('impact');
@@ -89,7 +117,7 @@ export function ReportSignal() {
             <div className="col-12 lg:col-7">
               <CivicCard title={t('report.title')} className="mb-6">
                 <CivicField label={t('report.issue_title')} error={errors.title?.message}>
-                  <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.titleMin, message: t('report.title_too_short') }, maxLength: { value: FORM_LIMITS.report.titleMax, message: t('report.title_too_long') } }} 
+                  <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.titleMin, message: t('report.title_too_short') }, maxLength: { value: FORM_LIMITS.report.titleMax, message: t('report.title_too_long') } }}
                     render={({ field, fieldState }) => (
                       <div className="flex flex-column gap-2">
                         <InputText
@@ -102,14 +130,14 @@ export function ReportSignal() {
                         />
                         <CivicCharacterCount current={currentTitleLength} max={FORM_LIMITS.report.titleMax} min={FORM_LIMITS.report.titleMin} />
                       </div>
-                    )} 
+                    )}
                   />
                 </CivicField>
 
                 <div className="grid">
                   <div className="col-12 md:col-6">
                     <CivicField label={t('common.category')} error={errors.category?.message}>
-                      <Controller name="category" control={control} rules={{ required: t('common.required') }} 
+                      <Controller name="category" control={control} rules={{ required: t('common.required') }}
                         render={({ field, fieldState }) => (
                           <CivicSelect
                             value={field.value}
@@ -126,13 +154,13 @@ export function ReportSignal() {
                               </div>
                             )}
                           />
-                        )} 
+                        )}
                       />
                     </CivicField>
                   </div>
                   <div className="col-12 md:col-6">
                     <CivicField label={t('report.scale')}>
-                      <Controller name="affectedPeople" control={control} 
+                      <Controller name="affectedPeople" control={control}
                         render={({ field }) => (
                           <div className="flex flex-column gap-3 p-3 border-round-xl bg-black-alpha-20 border-1 border-white-alpha-10">
                             <div className="flex justify-content-between font-black text-main">
@@ -141,14 +169,25 @@ export function ReportSignal() {
                             </div>
                             <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={1000} className="w-full" />
                           </div>
-                        )} 
+                        )}
                       />
                     </CivicField>
                   </div>
                 </div>
 
+                <div className="mb-4">
+                  <CivicButton
+                    type="button"
+                    variant={locationFound ? "primary" : "secondary"}
+                    icon={isLocating ? "pi pi-spin pi-spinner" : (locationFound ? "pi pi-check" : "pi pi-map-marker")}
+                    label={isLocating ? "Detecting Coordinates..." : (locationFound ? "Coordinates Secured" : "Detect Location Automatically (GPS)")}
+                    onClick={detectLocation}
+                    className="w-full py-3"
+                  />
+                </div>
+
                 <CivicField label={t('report.context')} error={errors.description?.message}>
-                  <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.descriptionMin, message: t('report.desc_too_short') }, maxLength: { value: FORM_LIMITS.report.descriptionMax, message: t('report.desc_too_long') } }} 
+                  <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.descriptionMin, message: t('report.desc_too_short') }, maxLength: { value: FORM_LIMITS.report.descriptionMax, message: t('report.desc_too_long') } }}
                     render={({ field }) => (
                       <div className="flex flex-column gap-2">
                         <InputTextarea
@@ -162,7 +201,7 @@ export function ReportSignal() {
                         />
                         <CivicCharacterCount current={currentDescriptionLength} max={FORM_LIMITS.report.descriptionMax} min={FORM_LIMITS.report.descriptionMin} />
                       </div>
-                      )} 
+                    )}
                   />
                 </CivicField>
               </CivicCard>
@@ -182,9 +221,9 @@ export function ReportSignal() {
                     </div>
                     <div className="p-4 border-round-2xl transition-colors duration-500 shadow-inner" style={{ background: `linear-gradient(135deg, ${getScaleColor(currentUrgency)}15 0%, transparent 100%)`, border: `1px solid ${getScaleColor(currentUrgency)}30` }}>
                       <div data-testid="report-urgency-slider">
-                      <Controller name="urgency" control={control} render={({ field }) => (
-                        <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
-                      )} />
+                        <Controller name="urgency" control={control} render={({ field }) => (
+                          <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
+                        )} />
                       </div>
                       <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
                         <span>{t('report.urgency_low')}</span>
@@ -204,9 +243,9 @@ export function ReportSignal() {
                     </div>
                     <div className="p-4 border-round-2xl transition-colors duration-500 shadow-inner" style={{ background: `linear-gradient(135deg, ${getScaleColor(currentImpact)}15 0%, transparent 100%)`, border: `1px solid ${getScaleColor(currentImpact)}30` }}>
                       <div data-testid="report-impact-slider">
-                      <Controller name="impact" control={control} render={({ field }) => (
-                        <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
-                      )} />
+                        <Controller name="impact" control={control} render={({ field }) => (
+                          <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
+                        )} />
                       </div>
                       <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
                         <span>{t('report.impact_minor')}</span>

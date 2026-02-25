@@ -10,5 +10,7 @@ public record SignalResponse(
     String category,
     String status,
     double priorityScore,
-    ScoreBreakdown scoreBreakdown
+    ScoreBreakdown scoreBreakdown,
+    Double latitude,
+    Double longitude
 ) {}

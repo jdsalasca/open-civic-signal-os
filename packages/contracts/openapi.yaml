@@ -583,6 +583,8 @@ components:
         - status
         - priorityScore
         - scoreBreakdown
+        - latitude
+        - longitude
       properties:
         id:
           type: string
@@ -599,6 +601,12 @@ components:
           type: number
         scoreBreakdown:
           $ref: '#/components/schemas/ScoreBreakdown'
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
     SignalMeta:
       type: object
       required:
