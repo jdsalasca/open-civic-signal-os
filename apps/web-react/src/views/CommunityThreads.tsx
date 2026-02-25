@@ -4,8 +4,9 @@ import { toast } from "react-hot-toast";
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputText } from "primereact/inputtext";
 import { Avatar } from "primereact/avatar";
+import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import { useTranslation } from "react-i18next";
-import { CommunityMembership, CommunityThread, CommunityThreadMessage } from "../types";
+import { CommunityMembership, CommunityThread, CommunityThreadMessage, PageResponse, ThreadStatusFilter } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
 import apiClient from "../api/axios";
@@ -27,8 +28,12 @@ const REACTION_TYPES = ["👍", "🔥", "🙌", "📍", "👏", "🆘"];
 export function CommunityThreads() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { memberships, activeCommunityId } = useCommunityStore();
+  const { memberships, activeCommunityId, getThreadListState, setThreadListState } = useCommunityStore();
   const [threads, setThreads] = useState<CommunityThread[]>([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [threadPage, setThreadPage] = useState(0);
+  const [threadRows, setThreadRows] = useState(10);
+  const [threadStatusFilter, setThreadStatusFilter] = useState<ThreadStatusFilter>("ALL");
   const [targetCommunityId, setTargetCommunityId] = useState<string>("");
   const [newThreadTitle, setNewThreadTitle] = useState("");
   const [messageDraftByThread, setMessageDraftByThread] = useState<Record<string, string>>({});
@@ -43,21 +48,43 @@ export function CommunityThreads() {
   );
 
   const canModerate = activeMembership?.role === "MODERATOR" || activeMembership?.role === "COORDINATOR";
+  const threadFilterOptions = [
+    { label: t("community_threads.filter_all"), value: "ALL" },
+    { label: t("community_threads.filter_active"), value: "ACTIVE" },
+    { label: t("community_threads.filter_stale"), value: "STALE" },
+  ];
+
+  useEffect(() => {
+    if (!activeCommunityId) return;
+    const persisted = getThreadListState(activeCommunityId);
+    setThreadPage(persisted.page);
+    setThreadRows(persisted.rows);
+    setThreadStatusFilter(persisted.status);
+  }, [activeCommunityId, getThreadListState]);
 
   const loadThreads = useCallback(async () => {
     if (!activeCommunityId) return;
     try {
-      const res = await apiClient.get(`community/threads?communityId=${activeCommunityId}`);
-      setThreads(res.data || []);
+      const statusQuery = threadStatusFilter === "ALL" ? "" : `&status=${threadStatusFilter}`;
+      const res = await apiClient.get<PageResponse<CommunityThread>>(
+        `community/threads?communityId=${activeCommunityId}&page=${threadPage}&size=${threadRows}${statusQuery}`
+      );
+      setThreads(res.data?.content || []);
+      setTotalRecords(res.data?.totalElements || 0);
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t("community_threads.load_error"));
     }
-  }, [activeCommunityId, t]);
+  }, [activeCommunityId, t, threadPage, threadRows, threadStatusFilter]);
 
   useEffect(() => {
     loadThreads();
   }, [loadThreads]);
+
+  useEffect(() => {
+    if (!activeCommunityId) return;
+    setThreadListState(activeCommunityId, { page: threadPage, rows: threadRows, status: threadStatusFilter });
+  }, [activeCommunityId, threadPage, threadRows, threadStatusFilter, setThreadListState]);
 
   const createThread = async () => {
     if (!activeCommunityId || !targetCommunityId || threadTitleLength < FORM_LIMITS.threads.titleMin) return;
@@ -139,6 +166,16 @@ export function CommunityThreads() {
     .map((m: CommunityMembership) => ({ label: m.communityName, value: m.communityId }));
 
   const canCreateThread = Boolean(activeCommunityId && targetCommunityId && threadTitleLength >= FORM_LIMITS.threads.titleMin);
+
+  const onPageChange = (event: PaginatorPageChangeEvent) => {
+    setThreadPage(event.page);
+    setThreadRows(event.rows);
+  };
+
+  const onStatusFilterChange = (value: ThreadStatusFilter) => {
+    setThreadStatusFilter(value);
+    setThreadPage(0);
+  };
 
   const buildThreadTree = (messages: CommunityThreadMessage[]) => {
     const childrenByParent: Record<string, CommunityThreadMessage[]> = {};
@@ -244,6 +281,16 @@ export function CommunityThreads() {
           />
           <CivicButton type="button" icon="pi pi-megaphone" label="Blog" variant="secondary" onClick={() => navigate("/communities/blog")} />
           <CivicButton type="button" icon="pi pi-bolt" label="Live feed" variant="ghost" onClick={() => navigate("/communities/feed")} />
+          <div className="w-full md:w-16rem">
+            <CivicSelect
+              value={threadStatusFilter}
+              options={threadFilterOptions}
+              onChange={(e) => onStatusFilterChange(e.value as ThreadStatusFilter)}
+              className="w-full"
+              placeholder={t("community_threads.filter_label")}
+              data-testid="threads-status-filter"
+            />
+          </div>
         </CivicActionBar>
 
         {!activeCommunityId && (
@@ -310,84 +357,105 @@ export function CommunityThreads() {
                   description={t("community_threads.join_other")}
                 />
               ) : (
-                <div className="flex flex-column gap-px bg-white-alpha-10">
-                  {threads.map((thread) => {
-                    const { roots, childrenByParent } = buildThreadTree(thread.messages || []);
-                    const draft = messageDraftByThread[thread.id] || "";
-                    const replyTarget = replyTargetByThread[thread.id];
-                    const canSend = draft.trim().length >= FORM_LIMITS.threads.messageMin;
+                <>
+                  <div className="px-5 pt-4 text-sm text-muted font-semibold">
+                    {t("community_threads.page_summary", {
+                      from: totalRecords === 0 ? 0 : threadPage * threadRows + 1,
+                      to: Math.min((threadPage + 1) * threadRows, totalRecords),
+                      total: totalRecords,
+                    })}
+                  </div>
+                  <div className="flex flex-column gap-px bg-white-alpha-10">
+                    {threads.map((thread) => {
+                      const { roots, childrenByParent } = buildThreadTree(thread.messages || []);
+                      const draft = messageDraftByThread[thread.id] || "";
+                      const replyTarget = replyTargetByThread[thread.id];
+                      const canSend = draft.trim().length >= FORM_LIMITS.threads.messageMin;
 
-                    return (
-                      <div key={thread.id} className="bg-surface p-5 md:p-6 flex flex-column gap-4">
-                        <div className="flex justify-content-between align-items-start gap-3">
-                          <div>
-                            <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2">{thread.title}</h3>
-                            <span className="text-xs text-muted font-bold uppercase tracking-wider">
-                              {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
-                            </span>
-                          </div>
-                          <CivicBadge label={t("community_threads.verified_channel")} severity="progress" />
-                        </div>
-
-                        <div className="flex flex-column gap-3">
-                          {roots.length === 0 ? (
-                            <div className="p-4 border-round-xl bg-white-alpha-5 text-muted text-sm">
-                              {t("community_threads.no_messages")}
-                            </div>
-                          ) : (
-                            roots.map((root) => renderMessageNode(thread, root, childrenByParent, 0))
-                          )}
-                        </div>
-
-                        <div className="p-4 border-round-2xl bg-black-alpha-20 border-1 border-white-alpha-10">
-                          {replyTarget && (
-                            <div className="mb-3 flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">
-                              <span className="text-sm text-main">
-                                {t("community_threads.replying_to", { id: replyTarget.authorId.slice(0, 4) })}
+                      return (
+                        <div key={thread.id} className="bg-surface p-5 md:p-6 flex flex-column gap-4">
+                          <div className="flex justify-content-between align-items-start gap-3">
+                            <div>
+                              <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2">{thread.title}</h3>
+                              <span className="text-xs text-muted font-bold uppercase tracking-wider">
+                                {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
                               </span>
-                              <CivicButton
-                                type="button"
-                                variant="ghost"
-                                size="small"
-                                label={t("community_threads.cancel_reply")}
-                                onClick={() => clearReplyTarget(thread.id)}
+                            </div>
+                            <CivicBadge label={t("community_threads.verified_channel")} severity="progress" />
+                          </div>
+
+                          <div className="flex flex-column gap-3">
+                            {roots.length === 0 ? (
+                              <div className="p-4 border-round-xl bg-white-alpha-5 text-muted text-sm">
+                                {t("community_threads.no_messages")}
+                              </div>
+                            ) : (
+                              roots.map((root) => renderMessageNode(thread, root, childrenByParent, 0))
+                            )}
+                          </div>
+
+                          <div className="p-4 border-round-2xl bg-black-alpha-20 border-1 border-white-alpha-10">
+                            {replyTarget && (
+                              <div className="mb-3 flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">
+                                <span className="text-sm text-main">
+                                  {t("community_threads.replying_to", { id: replyTarget.authorId.slice(0, 4) })}
+                                </span>
+                                <CivicButton
+                                  type="button"
+                                  variant="ghost"
+                                  size="small"
+                                  label={t("community_threads.cancel_reply")}
+                                  onClick={() => clearReplyTarget(thread.id)}
+                                />
+                              </div>
+                            )}
+
+                            <div className="flex flex-column gap-2">
+                              <InputTextarea
+                                value={draft}
+                                onChange={(e) => setMessageDraftByThread((prev) => ({ ...prev, [thread.id]: e.target.value }))}
+                                rows={3}
+                                className="w-full"
+                                placeholder={t("community_threads.message_placeholder")}
+                                data-testid={`thread-message-input-${thread.id}`}
+                                maxLength={FORM_LIMITS.threads.messageMax}
+                              />
+                              <CivicCharacterCount
+                                current={draft.length}
+                                max={FORM_LIMITS.threads.messageMax}
+                                min={FORM_LIMITS.threads.messageMin}
                               />
                             </div>
-                          )}
 
-                          <div className="flex flex-column gap-2">
-                            <InputTextarea
-                              value={draft}
-                              onChange={(e) => setMessageDraftByThread((prev) => ({ ...prev, [thread.id]: e.target.value }))}
-                              rows={3}
-                              className="w-full"
-                              placeholder={t("community_threads.message_placeholder")}
-                              data-testid={`thread-message-input-${thread.id}`}
-                              maxLength={FORM_LIMITS.threads.messageMax}
-                            />
-                            <CivicCharacterCount
-                              current={draft.length}
-                              max={FORM_LIMITS.threads.messageMax}
-                              min={FORM_LIMITS.threads.messageMin}
-                            />
-                          </div>
-
-                          <div className="flex justify-content-end mt-3">
-                            <CivicButton
-                              type="button"
-                              label={t("community_threads.send")}
-                              icon="pi pi-send"
-                              onClick={() => sendMessage(thread.id)}
-                              disabled={!canSend}
-                              loading={Boolean(sendingByThread[thread.id])}
-                              data-testid={`send-thread-message-button-${thread.id}`}
-                            />
+                            <div className="flex justify-content-end mt-3">
+                              <CivicButton
+                                type="button"
+                                label={t("community_threads.send")}
+                                icon="pi pi-send"
+                                onClick={() => sendMessage(thread.id)}
+                                disabled={!canSend}
+                                loading={Boolean(sendingByThread[thread.id])}
+                                data-testid={`send-thread-message-button-${thread.id}`}
+                              />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                  <div className="p-4 border-top-1 border-white-alpha-10">
+                    <Paginator
+                      first={threadPage * threadRows}
+                      rows={threadRows}
+                      totalRecords={totalRecords}
+                      rowsPerPageOptions={[5, 10, 20]}
+                      onPageChange={onPageChange}
+                      className="justify-content-end"
+                      template="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                      currentPageReportTemplate="{first} - {last} / {totalRecords}"
+                    />
+                  </div>
+                </>
               )}
             </CivicCard>
           </div>

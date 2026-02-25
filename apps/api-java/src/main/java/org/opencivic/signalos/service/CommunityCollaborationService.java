@@ -26,6 +26,8 @@ import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,13 +57,22 @@ public class CommunityCollaborationService {
         this.userRepository = userRepository;
     }
 
-    public List<CommunityThreadResponse> getThreads(UUID communityId, String username) {
+    public Page<CommunityThreadResponse> getThreads(
+        UUID communityId,
+        String statusFilter,
+        Pageable pageable,
+        String username
+    ) {
         User user = accessService.getCurrentUser(username);
         accessService.requireMembership(user.getId(), communityId);
-        return threadRepository.findBySourceCommunityIdOrTargetCommunityIdOrderByUpdatedAtDesc(communityId, communityId)
-            .stream()
-            .map(this::toThreadResponse)
-            .toList();
+        String normalizedStatus = normalizeThreadStatusFilter(statusFilter);
+        Page<CommunityThread> page = threadRepository.findByCommunityAndStatus(
+            communityId,
+            normalizedStatus,
+            LocalDateTime.now().minusDays(7),
+            pageable
+        );
+        return page.map(this::toThreadResponse);
     }
 
     @Transactional
@@ -387,5 +398,16 @@ public class CommunityCollaborationService {
             return "updated " + hours + "h ago";
         }
         return "updated " + (hours / 24) + "d ago";
+    }
+
+    private String normalizeThreadStatusFilter(String statusFilter) {
+        if (statusFilter == null || statusFilter.isBlank()) {
+            return null;
+        }
+        String normalized = statusFilter.trim().toUpperCase();
+        if (!normalized.equals("ACTIVE") && !normalized.equals("STALE")) {
+            throw new IllegalArgumentException("Invalid thread status filter. Use ACTIVE or STALE.");
+        }
+        return normalized;
     }
 }

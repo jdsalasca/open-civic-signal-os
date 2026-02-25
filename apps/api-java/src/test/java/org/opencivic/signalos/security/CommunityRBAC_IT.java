@@ -2,6 +2,8 @@ package org.opencivic.signalos.security;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -57,6 +59,7 @@ class CommunityRBAC_IT {
     private UUID liaisonUserId;
     private UUID targetUserId;
     private UUID threadId;
+    private UUID staleThreadId;
     private UUID messageId;
 
     @BeforeEach
@@ -92,6 +95,16 @@ class CommunityRBAC_IT {
         thread.setUpdatedAt(LocalDateTime.now());
         thread = threadRepository.save(thread);
         threadId = thread.getId();
+
+        CommunityThread staleThread = new CommunityThread();
+        staleThread.setSourceCommunityId(communityId);
+        staleThread.setTargetCommunityId(communityId);
+        staleThread.setTitle("Stale thread for pagination filter");
+        staleThread.setCreatedBy(coordinatorUserId);
+        staleThread.setCreatedAt(LocalDateTime.now().minusDays(14));
+        staleThread.setUpdatedAt(LocalDateTime.now().minusDays(10));
+        staleThread = threadRepository.save(staleThread);
+        staleThreadId = staleThread.getId();
 
         CommunityThreadMessage message = new CommunityThreadMessage();
         message.setThreadId(threadId);
@@ -164,6 +177,31 @@ class CommunityRBAC_IT {
                     )
             )
             .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(username = "member_user", roles = {"CITIZEN"})
+    void memberCanListThreadsWithPagingAndStatusFilter() throws Exception {
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("page", "0")
+                    .param("size", "1")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.totalElements").value(2));
+
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("status", "STALE")
+                    .param("page", "0")
+                    .param("size", "10")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].id").value(staleThreadId.toString()));
     }
 
     private User createUser(String username) {

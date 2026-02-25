@@ -126,3 +126,13 @@ export type CommunityFeedItem = {
   happenedAt: string;
   freshness: string;
 };
+
+export type PageResponse<T> = {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+};
+
+export type ThreadStatusFilter = "ALL" | "ACTIVE" | "STALE";
