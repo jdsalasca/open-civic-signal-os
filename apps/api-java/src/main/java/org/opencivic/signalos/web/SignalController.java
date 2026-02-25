@@ -19,10 +19,12 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.CommunityAccessService;
 import org.opencivic.signalos.service.ExportService;
 import org.opencivic.signalos.service.PrioritizationService;
+import org.opencivic.signalos.service.UserReactionService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
+import org.opencivic.signalos.web.dto.ReactionStateResponse;
 import org.opencivic.signalos.service.CivicEngagementService;
 import org.opencivic.signalos.web.dto.CivicCommentResponse;
 import org.springframework.core.io.InputStreamResource;
@@ -60,6 +62,7 @@ public class SignalController {
     private final UserRepository userRepository;
     private final SignalRepository signalRepository;
     private final CommunityAccessService communityAccessService;
+    private final UserReactionService userReactionService;
     private final MeterRegistry meterRegistry;
     private final CivicEngagementService engagementService;
 
@@ -69,6 +72,7 @@ public class SignalController {
         UserRepository userRepository,
         SignalRepository signalRepository,
         CommunityAccessService communityAccessService,
+        UserReactionService userReactionService,
         MeterRegistry meterRegistry,
         CivicEngagementService engagementService
     ) {
@@ -77,6 +81,7 @@ public class SignalController {
         this.userRepository = userRepository;
         this.signalRepository = signalRepository;
         this.communityAccessService = communityAccessService;
+        this.userReactionService = userReactionService;
         this.meterRegistry = meterRegistry;
         this.engagementService = engagementService;
     }
@@ -92,8 +97,8 @@ public class SignalController {
     }
 
     @PostMapping("/{id}/react")
-    public Map<String, Integer> react(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-        return engagementService.react(id, "SIGNAL", body.get("type"));
+    public ReactionStateResponse react(@PathVariable UUID id, @RequestBody Map<String, String> body, Authentication auth) {
+        return engagementService.react(id, "SIGNAL", body.get("type"), auth.getName());
     }
 
     @GetMapping("/{id}/trust-packet")
@@ -125,7 +130,7 @@ public class SignalController {
         );
         try {
             Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses)
-                .map(this::mapToResponse);
+                .map(signal -> mapToResponse(signal, authentication.getName()));
 
             meterRegistry.counter("signalos.prioritized.requests.total", "scope", scope).increment();
             DistributionSummary.builder("signalos.prioritized.result.size")
@@ -158,7 +163,7 @@ public class SignalController {
     ) {
         validateCommunityScope(authentication, communityId);
         return prioritizationService.getSignalById(id, communityId)
-            .map(this::mapToResponse)
+            .map(signal -> mapToResponse(signal, authentication.getName()))
             .map(ResponseEntity::ok)
             .orElseThrow(() -> new ResourceNotFoundException("Civic signal not found: " + id));
     }
@@ -176,7 +181,7 @@ public class SignalController {
             throw new IllegalArgumentException("Status field is mandatory.");
         }
         return prioritizationService.updateStatus(id, newStatusStr, communityId)
-            .map(this::mapToResponse)
+            .map(signal -> mapToResponse(signal, authentication.getName()))
             .map(ResponseEntity::ok)
             .orElseThrow(() -> new ResourceNotFoundException("Signal not found for status update: " + id));
     }
@@ -189,7 +194,7 @@ public class SignalController {
     ) {
         validateCommunityScope(authentication, communityId);
         return ResponseEntity.ok(
-            mapToResponse(prioritizationService.voteForSignal(id, authentication.getName(), communityId))
+            mapToResponse(prioritizationService.voteForSignal(id, authentication.getName(), communityId), authentication.getName())
         );
     }
 
@@ -204,13 +209,13 @@ public class SignalController {
         );
         return ApiPageResponse.from(
             prioritizationService.getFlaggedSignals(sanitized)
-                .map(this::mapToResponse)
+                .map(signal -> mapToResponse(signal, null))
         );
     }
 
     @PostMapping("/{id}/moderate")
     public SignalResponse moderate(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-        return mapToResponse(prioritizationService.moderateSignal(id, body.get("action"), body.get("reason")));
+        return mapToResponse(prioritizationService.moderateSignal(id, body.get("action"), body.get("reason")), null);
     }
 
     @GetMapping("/export/csv")
@@ -232,7 +237,7 @@ public class SignalController {
     ) {
         validateCommunityScope(authentication, communityId);
         return prioritizationService.getTopUnresolved(10, communityId).stream()
-            .map(this::mapToResponse)
+            .map(signal -> mapToResponse(signal, authentication.getName()))
             .collect(Collectors.toList());
     }
 
@@ -276,7 +281,7 @@ public class SignalController {
             (communityId == null
                 ? signalRepository.findByAuthorId(user.getId(), sanitized)
                 : signalRepository.findByAuthorIdAndCommunityId(user.getId(), communityId, sanitized))
-                .map(this::mapToResponse)
+                .map(signal -> mapToResponse(signal, authentication.getName()))
         );
     }
 
@@ -294,12 +299,13 @@ public class SignalController {
             request.urgency(),
             request.impact(),
             request.affectedPeople(),
+            request.imageUrl(),
             request.latitude(),
             request.longitude(),
             authentication.getName(),
             communityId
         );
-        return mapToResponse(s);
+        return mapToResponse(s, authentication.getName());
     }
 
     @GetMapping("/duplicates")
@@ -309,7 +315,7 @@ public class SignalController {
         return prioritizationService.findDuplicates(communityId).entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                e -> e.getValue().stream().map(this::mapToResponse).collect(Collectors.toList())
+                e -> e.getValue().stream().map(signal -> mapToResponse(signal, null)).collect(Collectors.toList())
             ));
     }
 
@@ -319,21 +325,33 @@ public class SignalController {
         @RequestBody List<UUID> duplicateIds
     ) {
         Signal merged = prioritizationService.mergeSignals(targetId, duplicateIds);
-        return ResponseEntity.ok(mapToResponse(merged));
+        return ResponseEntity.ok(mapToResponse(merged, null));
     }
 
-    private SignalResponse mapToResponse(Signal s) {
+    private SignalResponse mapToResponse(Signal s, String username) {
+        UUID viewerId = resolveViewerId(username);
         return new SignalResponse(
             s.getId(),
             s.getTitle(),
             s.getDescription(),
+            s.getImageUrl(),
             s.getCategory(),
             s.getStatus(),
             s.getPriorityScore(),
             s.getScoreBreakdown(),
+            s.getCommunityVotes(),
+            s.getReactions(),
+            userReactionService.getViewerReaction("SIGNAL", s.getId(), viewerId),
             s.getLatitude(),
             s.getLongitude()
         );
+    }
+
+    private UUID resolveViewerId(String username) {
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+        return userRepository.findByUsername(username).map(User::getId).orElse(null);
     }
 
     private void validateCommunityScope(Authentication authentication, UUID communityId) {

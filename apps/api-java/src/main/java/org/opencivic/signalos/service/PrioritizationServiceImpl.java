@@ -320,13 +320,13 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     @Transactional
-    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, Double latitude, Double longitude, String username) {
-        return createSignal(title, description, category, urgency, impact, affectedPeople, latitude, longitude, username, null);
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, Double latitude, Double longitude, String username) {
+        return createSignal(title, description, category, urgency, impact, affectedPeople, imageUrl, latitude, longitude, username, null);
     }
 
     @Override
     @Transactional
-    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, Double latitude, Double longitude, String username, UUID communityId) {
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, Double latitude, Double longitude, String username, UUID communityId) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Author user not found: " + username));
 
@@ -336,6 +336,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), java.time.LocalDateTime.now(), communityId);
         signal.setLatitude(latitude);
         signal.setLongitude(longitude);
+        signal.setImageUrl(imageUrl);
         
         ScoreBreakdown breakdown = getBreakdown(signal);
         double score = breakdown.urgency() + breakdown.impact() + breakdown.affectedPeople() + breakdown.communityVotes();

@@ -106,8 +106,18 @@ export function CommunityThreads() {
 
   const reactToMessage = async (threadId: string, messageId: string, type: string) => {
     try {
-      await apiClient.post(`community/threads/${threadId}/messages/${messageId}/react`, { type });
-      loadThreads();
+      const res = await apiClient.post<CommunityThreadMessage>(`community/threads/${threadId}/messages/${messageId}/react`, { type });
+      const nextMessage = res.data;
+      setThreads((prev) =>
+        prev.map((thread) =>
+          thread.id === threadId
+            ? {
+                ...thread,
+                messages: (thread.messages || []).map((message) => (message.id === messageId ? { ...message, ...nextMessage } : message)),
+              }
+            : thread
+        )
+      );
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t("community_threads.reaction_error"));
@@ -251,7 +261,11 @@ export function CommunityThreads() {
                 type="button"
                 onClick={() => reactToMessage(thread.id, message.id, emoji)}
                 aria-label={t("community_threads.react_with", { emoji })}
-                className="flex align-items-center gap-2 px-2 py-1 border-round-lg border-1 border-white-alpha-10 bg-black-alpha-20 hover:border-brand-primary-alpha-30"
+                className={`flex align-items-center gap-2 px-2 py-1 border-round-lg border-1 ${
+                  message.viewerReaction === emoji
+                    ? "border-brand-primary-alpha-40 bg-brand-primary-alpha-15"
+                    : "border-white-alpha-10 bg-black-alpha-20 hover:border-brand-primary-alpha-30"
+                }`}
               >
                 <span>{emoji}</span>
                 <span className="text-xs font-bold text-main">{message.reactions?.[emoji] || 0}</span>

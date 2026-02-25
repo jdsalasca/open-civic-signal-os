@@ -20,12 +20,14 @@ export type Signal = {
   id: string;
   title: string;
   description: string;
+  imageUrl?: string;
   category: string;
   status: string;
   priorityScore: number;
   scoreBreakdown: ScoreBreakdown;
   communityVotes: number;
   reactions: Record<string, number>;
+  viewerReaction?: string;
 };
 
 export type Notification = {
@@ -79,6 +81,7 @@ export type CommunityThreadMessage = {
   moderationReason?: string;
   createdAt: string;
   reactions: Record<string, number>;
+  viewerReaction?: string;
 };
 
 export type CommunityThread = {
@@ -105,6 +108,7 @@ export type CommunityBlogPost = {
   publishedAt: string;
   updatedAt: string;
   reactions: Record<string, number>;
+  viewerReaction?: string;
 };
 
 export type SignalStatusEntry = {

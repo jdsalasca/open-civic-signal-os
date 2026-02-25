@@ -286,6 +286,7 @@ export function CommunityBlog() {
                           parentId={post.id}
                           parentType="BLOG"
                           initialReactions={post.reactions}
+                          initialViewerReaction={post.viewerReaction}
                           initialCommentCount={commentCountsByPost[post.id] ?? 0}
                           autoloadComments={false}
                         />

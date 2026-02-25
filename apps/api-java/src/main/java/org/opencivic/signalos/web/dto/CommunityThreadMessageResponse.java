@@ -16,5 +16,6 @@ public record CommunityThreadMessageResponse(
     UUID hiddenBy,
     LocalDateTime hiddenAt,
     LocalDateTime createdAt,
-    Map<String, Integer> reactions
+    Map<String, Integer> reactions,
+    String viewerReaction
 ) {}

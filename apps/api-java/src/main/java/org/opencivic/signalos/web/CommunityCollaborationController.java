@@ -15,6 +15,7 @@ import org.opencivic.signalos.web.dto.CreateCommunityThreadRequest;
 import org.opencivic.signalos.web.dto.ModerateThreadMessageRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
+import org.opencivic.signalos.web.dto.ReactionStateResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -59,8 +60,8 @@ public class CommunityCollaborationController {
     }
 
     @PostMapping("/blog/{id}/react")
-    public Map<String, Integer> reactToBlog(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-        return engagementService.react(id, "BLOG", body.get("type"));
+    public ReactionStateResponse reactToBlog(@PathVariable UUID id, @RequestBody Map<String, String> body, Principal principal) {
+        return engagementService.react(id, "BLOG", body.get("type"), principal.getName());
     }
 
     @GetMapping("/threads")

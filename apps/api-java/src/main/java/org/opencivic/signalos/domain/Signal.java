@@ -14,6 +14,9 @@ public class Signal {
     private String title;
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl;
     private String category;
     private int urgency;
     private int impact;
@@ -91,6 +94,7 @@ public class Signal {
     public UUID getId() { return id; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
+    public String getImageUrl() { return imageUrl; }
     public String getStatus() { return status; }
     public double getPriorityScore() { return priorityScore; }
     public int getUrgency() { return urgency; }
@@ -115,6 +119,7 @@ public class Signal {
     public void setId(UUID id) { this.id = id; }
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public void setCategory(String category) { this.category = category; }
     public void setUrgency(int urgency) { this.urgency = urgency; }
     public void setImpact(int impact) { this.impact = impact; }

@@ -3,6 +3,7 @@ package org.opencivic.signalos.web.dto;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record SignalCreateRequest(
@@ -25,8 +26,15 @@ public record SignalCreateRequest(
     @Max(value = 5, message = "Social impact factor cannot exceed 5")
     int impact,
     
-    @Min(value = 1, message = "Affected scale must be at least 1 citizen") 
+    @Min(value = 1, message = "Affected scale must be at least 1 citizen")
     int affectedPeople,
+
+    @Size(max = 1200, message = "Image URL must be at most 1200 characters")
+    @Pattern(
+        regexp = "^(https?://.*)?$",
+        message = "Image URL must start with http:// or https://"
+    )
+    String imageUrl,
     
     Double latitude,
     Double longitude

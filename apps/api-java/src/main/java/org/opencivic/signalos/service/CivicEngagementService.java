@@ -10,6 +10,7 @@ import org.opencivic.signalos.repository.CommunityBlogPostRepository;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.web.dto.CivicCommentResponse;
+import org.opencivic.signalos.web.dto.ReactionStateResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +28,20 @@ public class CivicEngagementService {
     private final CommunityBlogPostRepository blogRepository;
     private final UserRepository userRepository;
     private final CommunityAccessService accessService;
+    private final UserReactionService userReactionService;
 
     public CivicEngagementService(CivicCommentRepository commentRepository, 
                                   SignalRepository signalRepository, 
                                   CommunityBlogPostRepository blogRepository,
                                   UserRepository userRepository,
-                                  CommunityAccessService accessService) {
+                                  CommunityAccessService accessService,
+                                  UserReactionService userReactionService) {
         this.commentRepository = commentRepository;
         this.signalRepository = signalRepository;
         this.blogRepository = blogRepository;
         this.userRepository = userRepository;
         this.accessService = accessService;
+        this.userReactionService = userReactionService;
     }
 
     public List<CivicCommentResponse> getComments(UUID parentId, String parentType) {
@@ -71,19 +75,32 @@ public class CivicEngagementService {
     }
 
     @Transactional
-    public Map<String, Integer> react(UUID parentId, String parentType, String reactionType) {
+    public ReactionStateResponse react(UUID parentId, String parentType, String reactionType, String username) {
+        User user = accessService.getCurrentUser(username);
         if ("SIGNAL".equalsIgnoreCase(parentType)) {
             Signal signal = signalRepository.findById(parentId).orElseThrow(() -> new ResourceNotFoundException("Signal not found"));
-            Map<String, Integer> reactions = signal.getReactions();
-            reactions.put(reactionType, reactions.getOrDefault(reactionType, 0) + 1);
-            signal.setReactions(reactions);
-            return signalRepository.save(signal).getReactions();
+            ReactionStateResponse reactionState = userReactionService.toggleReaction(
+                "SIGNAL",
+                parentId,
+                user.getId(),
+                reactionType,
+                signal::getReactions
+            );
+            signal.setReactions(reactionState.reactions());
+            signalRepository.save(signal);
+            return reactionState;
         } else {
             CommunityBlogPost blog = blogRepository.findById(parentId).orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
-            Map<String, Integer> reactions = blog.getReactions();
-            reactions.put(reactionType, reactions.getOrDefault(reactionType, 0) + 1);
-            blog.setReactions(reactions);
-            return blogRepository.save(blog).getReactions();
+            ReactionStateResponse reactionState = userReactionService.toggleReaction(
+                "BLOG",
+                parentId,
+                user.getId(),
+                reactionType,
+                blog::getReactions
+            );
+            blog.setReactions(reactionState.reactions());
+            blogRepository.save(blog);
+            return reactionState;
         }
     }
 

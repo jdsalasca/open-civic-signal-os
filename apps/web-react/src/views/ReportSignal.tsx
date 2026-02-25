@@ -26,6 +26,7 @@ type ReportForm = {
   title: string;
   description: string;
   category: string;
+  imageUrl?: string;
   urgency: number;
   impact: number;
   affectedPeople: number;
@@ -74,6 +75,7 @@ export function ReportSignal() {
 
   const currentUrgency = watch('urgency');
   const currentImpact = watch('impact');
+  const currentImageUrl = watch('imageUrl')?.trim() ?? '';
   const currentTitleLength = watch('title')?.length ?? 0;
   const currentDescriptionLength = watch('description')?.length ?? 0;
 
@@ -204,6 +206,37 @@ export function ReportSignal() {
                     )}
                   />
                 </CivicField>
+
+                <CivicField label={t('report.image_url')} error={errors.imageUrl?.message}>
+                  <Controller
+                    name="imageUrl"
+                    control={control}
+                    rules={{
+                      pattern: {
+                        value: /^https?:\/\/.+/i,
+                        message: t('report.image_url_invalid'),
+                      },
+                      maxLength: {
+                        value: 1200,
+                        message: t('report.image_url_too_long'),
+                      },
+                    }}
+                    render={({ field, fieldState }) => (
+                      <div className="flex flex-column gap-2">
+                        <InputText
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                          placeholder={t('report.image_url_placeholder')}
+                          data-testid="report-image-url-input"
+                          maxLength={1200}
+                        />
+                        <small className="text-muted text-xs">{t('report.image_url_help')}</small>
+                      </div>
+                    )}
+                  />
+                </CivicField>
               </CivicCard>
             </div>
 
@@ -281,6 +314,16 @@ export function ReportSignal() {
                         <span className="text-min text-muted">{t('settings.encryption_value')}</span>
                       </div>
                     </div>
+                    {currentImageUrl && (
+                      <div className="border-round-xl overflow-hidden border-1 border-subtle">
+                        <img
+                          src={currentImageUrl}
+                          alt={t('report.image_preview_alt')}
+                          className="w-full"
+                          style={{ maxHeight: '14rem', objectFit: 'cover' }}
+                        />
+                      </div>
+                    )}
                     <CivicButton
                       label={t('common.discard')}
                       variant="secondary"

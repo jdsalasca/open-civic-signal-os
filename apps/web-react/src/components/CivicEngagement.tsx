@@ -11,6 +11,7 @@ interface Props {
   parentId: string;
   parentType: 'SIGNAL' | 'BLOG';
   initialReactions?: Record<string, number>;
+  initialViewerReaction?: string;
   initialCommentCount?: number;
   autoloadComments?: boolean;
 }
@@ -21,11 +22,13 @@ export function CivicEngagement({
   parentId,
   parentType,
   initialReactions = {},
+  initialViewerReaction,
   initialCommentCount = 0,
   autoloadComments = true,
 }: Props) {
   const [comments, setComments] = useState<CivicComment[]>([]);
   const [reactions, setReactions] = useState<Record<string, number>>(initialReactions);
+  const [viewerReaction, setViewerReaction] = useState<string | undefined>(initialViewerReaction);
   const [newComment, setNewMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [commentsVisible, setCommentsVisible] = useState(autoloadComments);
@@ -59,13 +62,22 @@ export function CivicEngagement({
     }
   }, [autoloadComments, commentsVisible, commentsLoaded, loadData]);
 
+  useEffect(() => {
+    setReactions(initialReactions || {});
+  }, [initialReactions]);
+
+  useEffect(() => {
+    setViewerReaction(initialViewerReaction);
+  }, [initialViewerReaction]);
+
   const handleReact = async (type: string) => {
     try {
       const endpoint = parentType === 'SIGNAL' 
         ? `signals/${parentId}/react` 
         : `community/blog/${parentId}/react`;
       const res = await apiClient.post(endpoint, { type });
-      setReactions(res.data);
+      setReactions(res.data?.reactions || {});
+      setViewerReaction(res.data?.viewerReaction || undefined);
     } catch (err) {
       toast.error("Reaction failed");
     }
@@ -102,7 +114,11 @@ export function CivicEngagement({
             key={emoji}
             type="button"
             onClick={() => handleReact(emoji)}
-            className="flex align-items-center gap-2 px-3 py-2 border-round-xl bg-black-alpha-40 border-1 border-transparent hover:border-brand-primary-alpha-30 transition-all cursor-pointer group"
+            className={`flex align-items-center gap-2 px-3 py-2 border-round-xl border-1 transition-all cursor-pointer group ${
+              viewerReaction === emoji
+                ? "bg-brand-primary-alpha-20 border-brand-primary-alpha-40"
+                : "bg-black-alpha-40 border-transparent hover:border-brand-primary-alpha-30"
+            }`}
           >
             <span className="text-base group-hover:scale-125 transition-transform">{emoji}</span>
             <span className="text-xs font-black text-main">{reactions[emoji] || 0}</span>

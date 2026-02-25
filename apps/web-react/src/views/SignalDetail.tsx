@@ -140,6 +140,18 @@ export function SignalDetail() {
               <p className="text-xl line-height-4 m-0 text-secondary font-medium leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
                 {signal.description}
               </p>
+
+              {signal.imageUrl && (
+                <div className="mt-5 border-round-2xl overflow-hidden border-1 border-subtle">
+                  <img
+                    src={signal.imageUrl}
+                    alt={signal.title}
+                    loading="lazy"
+                    className="w-full"
+                    style={{ maxHeight: "24rem", objectFit: "cover" }}
+                  />
+                </div>
+              )}
               
               <Divider className="my-8 opacity-10" />
               
@@ -197,6 +209,7 @@ export function SignalDetail() {
               parentId={signal.id} 
               parentType="SIGNAL" 
               initialReactions={signal.reactions} 
+              initialViewerReaction={signal.viewerReaction}
             />
           </div>
 

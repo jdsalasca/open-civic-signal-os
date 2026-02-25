@@ -40,6 +40,7 @@ public class CommunityCollaborationService {
     private final CommunityBlogPostRepository blogPostRepository;
     private final SignalRepository signalRepository;
     private final UserRepository userRepository;
+    private final UserReactionService userReactionService;
 
     public CommunityCollaborationService(
         CommunityAccessService accessService,
@@ -47,7 +48,8 @@ public class CommunityCollaborationService {
         CommunityThreadMessageRepository messageRepository,
         CommunityBlogPostRepository blogPostRepository,
         SignalRepository signalRepository,
-        UserRepository userRepository
+        UserRepository userRepository,
+        UserReactionService userReactionService
     ) {
         this.accessService = accessService;
         this.threadRepository = threadRepository;
@@ -55,6 +57,7 @@ public class CommunityCollaborationService {
         this.blogPostRepository = blogPostRepository;
         this.signalRepository = signalRepository;
         this.userRepository = userRepository;
+        this.userReactionService = userReactionService;
     }
 
     public Page<CommunityThreadResponse> getThreads(
@@ -72,7 +75,7 @@ public class CommunityCollaborationService {
             LocalDateTime.now().minusDays(7),
             pageable
         );
-        return page.map(this::toThreadResponse);
+        return page.map(thread -> toThreadResponse(thread, user.getId()));
     }
 
     @Transactional
@@ -95,7 +98,7 @@ public class CommunityCollaborationService {
         thread.setCreatedAt(LocalDateTime.now());
         thread.setUpdatedAt(LocalDateTime.now());
         CommunityThread saved = threadRepository.save(thread);
-        return toThreadResponse(saved);
+        return toThreadResponse(saved, user.getId());
     }
 
     @Transactional
@@ -144,7 +147,7 @@ public class CommunityCollaborationService {
         CommunityThreadMessage saved = messageRepository.save(message);
         thread.setUpdatedAt(LocalDateTime.now());
         threadRepository.save(thread);
-        return toMessageResponse(saved);
+        return toMessageResponse(saved, null);
     }
 
     @Transactional
@@ -174,7 +177,7 @@ public class CommunityCollaborationService {
         CommunityThreadMessage saved = messageRepository.save(message);
         thread.setUpdatedAt(LocalDateTime.now());
         threadRepository.save(thread);
-        return toMessageResponse(saved);
+        return toMessageResponse(saved, null);
     }
 
     public List<CommunityBlogPostResponse> getBlogTimeline(UUID communityId, String username) {
@@ -186,8 +189,13 @@ public class CommunityCollaborationService {
         Map<UUID, User> authors = userRepository.findAllById(authorIds).stream()
             .collect(Collectors.toMap(User::getId, Function.identity()));
 
+        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
+            "BLOG",
+            posts.stream().map(CommunityBlogPost::getId).toList(),
+            user.getId()
+        );
         return posts.stream()
-            .map(post -> toBlogResponse(post, authors.get(post.getAuthorId())))
+            .map(post -> toBlogResponse(post, authors.get(post.getAuthorId()), viewerReactions.get(post.getId())))
             .toList();
     }
 
@@ -308,11 +316,16 @@ public class CommunityCollaborationService {
         }
     }
 
-    private CommunityThreadResponse toThreadResponse(CommunityThread thread) {
-        List<CommunityThreadMessageResponse> messages = messageRepository
-            .findByThreadIdOrderByCreatedAtAsc(thread.getId())
+    private CommunityThreadResponse toThreadResponse(CommunityThread thread, UUID viewerUserId) {
+        List<CommunityThreadMessage> threadMessages = messageRepository.findByThreadIdOrderByCreatedAtAsc(thread.getId());
+        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
+            "THREAD_MESSAGE",
+            threadMessages.stream().map(CommunityThreadMessage::getId).toList(),
+            viewerUserId
+        );
+        List<CommunityThreadMessageResponse> messages = threadMessages
             .stream()
-            .map(this::toMessageResponse)
+            .map(message -> toMessageResponse(message, viewerReactions.get(message.getId())))
             .toList();
         return new CommunityThreadResponse(
             thread.getId(),
@@ -337,16 +350,23 @@ public class CommunityCollaborationService {
         User user = accessService.getCurrentUser(username);
         CommunityThreadMessage message = messageRepository.findById(messageId)
             .orElseThrow(() -> new ResourceNotFoundException("Thread message not found: " + messageId));
-        
-        Map<String, Integer> reactions = message.getReactions();
-        reactions.put(reactionType, reactions.getOrDefault(reactionType, 0) + 1);
-        message.setReactions(reactions);
-        
+        if (!message.getThreadId().equals(threadId)) {
+            throw new ResourceNotFoundException("Thread message does not belong to thread: " + threadId);
+        }
+
+        var reactionState = userReactionService.toggleReaction(
+            "THREAD_MESSAGE",
+            messageId,
+            user.getId(),
+            reactionType,
+            message::getReactions
+        );
+        message.setReactions(reactionState.reactions());
         CommunityThreadMessage saved = messageRepository.save(message);
-        return toMessageResponse(saved);
+        return toMessageResponse(saved, reactionState.viewerReaction());
     }
 
-    private CommunityThreadMessageResponse toMessageResponse(CommunityThreadMessage message) {
+    private CommunityThreadMessageResponse toMessageResponse(CommunityThreadMessage message, String viewerReaction) {
         return new CommunityThreadMessageResponse(
             message.getId(),
             message.getThreadId(),
@@ -359,11 +379,12 @@ public class CommunityCollaborationService {
             message.getHiddenBy(),
             message.getHiddenAt(),
             message.getCreatedAt(),
-            message.getReactions()
+            message.getReactions(),
+            viewerReaction
         );
     }
 
-    private CommunityBlogPostResponse toBlogResponse(CommunityBlogPost post, User author) {
+    private CommunityBlogPostResponse toBlogResponse(CommunityBlogPost post, User author, String viewerReaction) {
         String username = author != null ? author.getUsername() : "deleted_user";
         String roles = author != null ? author.getRoles() : "";
         return new CommunityBlogPostResponse(
@@ -375,6 +396,8 @@ public class CommunityCollaborationService {
             post.getTitle(),
             post.getContent(),
             post.getStatusTag(),
+            post.getReactions(),
+            viewerReaction,
             post.getPublishedAt(),
             post.getUpdatedAt()
         );
@@ -382,7 +405,7 @@ public class CommunityCollaborationService {
 
     private CommunityBlogPostResponse toBlogResponse(CommunityBlogPost post) {
         User author = userRepository.findById(post.getAuthorId()).orElse(null);
-        return toBlogResponse(post, author);
+        return toBlogResponse(post, author, null);
     }
 
     private String freshness(LocalDateTime timestamp) {
