@@ -1,6 +1,6 @@
-@import "base/variables";
-@import "base/themes";
-@import "base/mixins";
+@use "base/variables" as *;
+@use "base/themes";
+@use "base/mixins" as *;
 
 // --- GLOBAL BASE STYLES ---
 body {
