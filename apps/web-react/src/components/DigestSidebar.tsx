@@ -30,7 +30,7 @@ export function DigestSidebar({ signals }: Props) {
                 </h4>
                 <div className="flex align-items-center gap-2">
                   <span className="text-xs text-brand-primary font-black">{s.priorityScore.toFixed(0)} Pts</span>
-                  <span className="text-white-alpha-10 font-bold">|</span>
+                  <span className="text-muted font-bold">|</span>
                   <CivicBadge label={t(`categories.${s.category}`)} type="category" />
                 </div>
               </div>

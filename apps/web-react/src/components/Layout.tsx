@@ -187,16 +187,15 @@ export function Layout({ children, authMode = false }: Props) {
             />
 
             <div className="hidden md:flex align-items-center flex-grow-1 max-w-30rem">
-              <span className="p-input-icon-left w-full relative group">
-                <i className="pi pi-search text-muted group-focus-within:text-brand-primary transition-colors" />
+              <div className="app-search-shell">
+                <i className="pi pi-search app-search-icon" />
                 <InputText
                   placeholder="Search intelligence, commands, or signals... (Ctrl + K)"
-                  className="w-full bg-surface border-subtle border-round-xl py-2 pl-5 text-xs font-bold uppercase tracking-wider hover:bg-elevated transition-all"
+                  className="app-search-input"
+                  aria-label="Search"
                 />
-                <div className="absolute right-0 top-0 bottom-0 flex align-items-center pr-3 pointer-events-none">
-                  <kbd className="bg-white-alpha-10 px-2 py-1 border-round text-min font-mono opacity-40">CTRL K</kbd>
-                </div>
-              </span>
+                <kbd className="app-search-shortcut">CTRL K</kbd>
+              </div>
             </div>
           </div>
 

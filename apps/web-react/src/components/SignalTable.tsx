@@ -106,15 +106,15 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
         </div>
         <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">Live Intelligence Feed</h2>
       </div>
-      <span className="p-input-icon-left w-full md:w-auto">
-        <i className="pi pi-search text-muted text-xs" />
-        <InputText 
-          value={globalFilterValue} 
-          onChange={onGlobalFilterChange} 
-          placeholder="Filter protocols..." 
-          className="w-full md:w-20rem p-inputtext-sm bg-black-alpha-40 border-white-alpha-10 text-xs font-bold uppercase tracking-wider" 
+      <div className="app-search-shell w-full md:w-auto md:ml-auto" style={{ maxWidth: "20rem" }}>
+        <i className="pi pi-search app-search-icon" />
+        <InputText
+          value={globalFilterValue}
+          onChange={onGlobalFilterChange}
+          placeholder="Filter protocols..."
+          className="app-search-input"
         />
-      </span>
+      </div>
     </div>
   );
 

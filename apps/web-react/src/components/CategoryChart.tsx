@@ -26,7 +26,7 @@ export function CategoryChart({ signals }: Props) {
         token("--chart-3", "#f59e0b"),
         token("--chart-4", "#e11d48"),
         token("--chart-5", "#0284c7"),
-        token("--chart-6", "#7c3aed")
+        token("--chart-6", "#2563eb")
       ],
       textMuted: token("--text-muted", "#64748b"),
       tooltipBg: token("--tooltip-bg", "#0f172a"),
