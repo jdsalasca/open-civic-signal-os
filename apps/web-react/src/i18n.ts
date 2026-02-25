@@ -175,6 +175,7 @@ const resources = {
         "publish_success": "Post published",
         "publish_error": "Failed to publish update",
         "load_error": "Failed to load blog timeline",
+        "permission_note": "Only community coordinators or public servant liaisons can publish updates in this community.",
         "empty_title": "No posts yet",
         "empty_desc": "This community has not shared updates yet."
       },
@@ -222,7 +223,8 @@ const resources = {
         "no_messages": "No messages in this thread yet.",
         "restore": "Restore",
         "hide": "Hide",
-        "react_with": "React with {{emoji}}"
+        "react_with": "React with {{emoji}}",
+        "permission_note": "Join at least one additional community to open a cross-community thread."
       },
       "signals": {
         "ref": "REF",
@@ -509,6 +511,7 @@ const resources = {
         "publish_success": "Actualización publicada",
         "publish_error": "No se pudo publicar la actualización",
         "load_error": "No se pudo cargar el historial del blog",
+        "permission_note": "Solo coordinadores o enlaces de servicio público de esta comunidad pueden publicar actualizaciones.",
         "empty_title": "Aún no hay publicaciones",
         "empty_desc": "Esta comunidad todavía no comparte novedades."
       },
@@ -556,7 +559,8 @@ const resources = {
         "no_messages": "Todavía no hay mensajes en este hilo.",
         "restore": "Restaurar",
         "hide": "Ocultar",
-        "react_with": "Reaccionar con {{emoji}}"
+        "react_with": "Reaccionar con {{emoji}}",
+        "permission_note": "Únase al menos a una comunidad adicional para abrir un hilo entre comunidades."
       },
       "signals": {
         "ref": "REF",

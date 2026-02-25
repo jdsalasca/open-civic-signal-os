@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 import { CommunityBlogPost } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
-import { useAuthStore } from "../store/useAuthStore";
 import apiClient from "../api/axios";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicButton } from "../components/ui/CivicButton";
@@ -48,7 +47,6 @@ export function CommunityBlog() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeCommunityId, memberships } = useCommunityStore();
-  const { activeRole } = useAuthStore();
   const [posts, setPosts] = useState<CommunityBlogPost[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -56,7 +54,9 @@ export function CommunityBlog() {
   const [publishing, setPublishing] = useState(false);
   const [commentCountsByPost, setCommentCountsByPost] = useState<Record<string, number>>({});
 
-  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
+  const activeMembership = memberships.find((m) => m.communityId === activeCommunityId);
+  const canPublishByRole =
+    activeMembership?.role === "PUBLIC_SERVANT_LIAISON" || activeMembership?.role === "COORDINATOR";
   const titleLength = title.trim().length;
   const contentLength = content.trim().length;
 
@@ -146,7 +146,7 @@ export function CommunityBlog() {
           description={t("community_blog.desc", { community: activeCommunityName || t("community_blog.default_community") })}
         />
         <CivicActionBar className="mb-5">
-          {isStaff && (
+          {canPublishByRole && (
             <CivicButton
               type="button"
               icon="pi pi-pencil"
@@ -156,10 +156,15 @@ export function CommunityBlog() {
           )}
           <CivicButton type="button" icon="pi pi-comments" label="Threads" variant="secondary" onClick={() => navigate("/communities/threads")} />
           <CivicButton type="button" icon="pi pi-bolt" label="Live feed" variant="ghost" onClick={() => navigate("/communities/feed")} />
+          {activeCommunityId && !canPublishByRole && (
+            <span className="text-sm text-muted font-semibold" data-testid="blog-create-permission-note">
+              {t("community_blog.permission_note")}
+            </span>
+          )}
         </CivicActionBar>
 
         <div className="grid">
-          {isStaff && (
+          {canPublishByRole && (
             <div className="col-12 lg:col-4">
               <CivicCard id="blog-compose-card" title={t("community_blog.dispatch_title")} variant="brand">
                 <div className="flex flex-column gap-3">
@@ -218,7 +223,7 @@ export function CommunityBlog() {
             </div>
           )}
 
-          <div className={isStaff ? "col-12 lg:col-8" : "col-12 lg:col-8 lg:col-offset-2"}>
+          <div className={canPublishByRole ? "col-12 lg:col-8" : "col-12 lg:col-8 lg:col-offset-2"}>
             {!activeCommunityId ? (
               <CivicCard>
                 <CivicEmptyState

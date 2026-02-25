@@ -165,6 +165,7 @@ export function CommunityThreads() {
     .filter((m: CommunityMembership) => m.communityId !== activeCommunityId)
     .map((m: CommunityMembership) => ({ label: m.communityName, value: m.communityId }));
 
+  const canOpenCrossCommunityThread = Boolean(activeCommunityId && targetOptions.length > 0);
   const canCreateThread = Boolean(activeCommunityId && targetCommunityId && threadTitleLength >= FORM_LIMITS.threads.titleMin);
 
   const onPageChange = (event: PaginatorPageChangeEvent) => {
@@ -334,12 +335,17 @@ export function CommunityThreads() {
                     data-testid="thread-target-dropdown"
                   />
                 </CivicField>
+                {!canOpenCrossCommunityThread && activeCommunityId && (
+                  <small className="text-muted text-xs" data-testid="thread-create-permission-note">
+                    {t("community_threads.permission_note")}
+                  </small>
+                )}
                 <CivicButton
                   type="button"
                   label={t("community_threads.create")}
                   icon="pi pi-plus-circle"
                   onClick={createThread}
-                  disabled={!canCreateThread}
+                  disabled={!canCreateThread || !canOpenCrossCommunityThread}
                   className="w-full py-4 mt-2"
                   glow
                   data-testid="create-thread-button"
