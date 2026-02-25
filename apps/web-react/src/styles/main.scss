@@ -77,6 +77,22 @@ body {
   color: var(--text-main);
 }
 
+.u-surface-chip-compact {
+  text-transform: none !important;
+  letter-spacing: 0.02em !important;
+  white-space: nowrap !important;
+  min-width: fit-content !important;
+}
+
+.nav-group-title {
+  opacity: 0.78 !important;
+}
+
+.nav-clearance-label {
+  font-size: 10px !important;
+  letter-spacing: 0.04em !important;
+}
+
 .u-filter-chip {
   display: inline-flex;
   align-items: center;

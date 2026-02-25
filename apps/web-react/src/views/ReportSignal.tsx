@@ -54,7 +54,7 @@ export function ReportSignal() {
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported by your browser');
+      toast.error(t('report.geolocation_not_supported'));
       return;
     }
     setIsLocating(true);
@@ -64,11 +64,11 @@ export function ReportSignal() {
         setValue('longitude', position.coords.longitude);
         setLocationFound(true);
         setIsLocating(false);
-        toast.success(t('report.geolocation_success', 'Location acquired automatically.'));
+        toast.success(t('report.geolocation_success'));
       },
       () => {
         setIsLocating(false);
-        toast.error('Failed to get location. Please check browser permissions.');
+        toast.error(t('report.geolocation_error'));
       }
     );
   };
@@ -166,7 +166,7 @@ export function ReportSignal() {
                         render={({ field }) => (
                           <div className="flex flex-column gap-3 p-3 border-round-xl border-1 border-subtle" style={{ background: "var(--panel-soft-bg)" }}>
                             <div className="flex justify-content-between font-black text-main">
-                              <span className="text-xs uppercase opacity-50">Citizens</span>
+                              <span className="text-xs uppercase opacity-50">{t('signals.citizens')}</span>
                               <span className="text-brand-primary">{field.value}</span>
                             </div>
                             <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={1000} className="w-full" />
@@ -182,7 +182,7 @@ export function ReportSignal() {
                     type="button"
                     variant={locationFound ? "primary" : "secondary"}
                     icon={isLocating ? "pi pi-spin pi-spinner" : (locationFound ? "pi pi-check" : "pi pi-map-marker")}
-                    label={isLocating ? "Detecting Coordinates..." : (locationFound ? "Coordinates Secured" : "Detect Location Automatically (GPS)")}
+                    label={isLocating ? t('report.detecting_coordinates') : (locationFound ? t('report.coordinates_secured') : t('report.detect_location_auto'))}
                     onClick={detectLocation}
                     className="w-full py-3"
                   />

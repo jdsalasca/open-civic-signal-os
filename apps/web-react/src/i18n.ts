@@ -26,7 +26,7 @@ const resources = {
         "insights": "Insights",
         "report": "Public Report",
         "my_contributions": "My Contributions",
-        "my_contributions_short": "Contributions",
+        "my_contributions_short": "Contribs",
         "moderation": "Moderation",
         "settings": "Settings",
         "communities": "Registry",
@@ -153,6 +153,12 @@ const resources = {
         "image_url_invalid": "Image URL must start with http:// or https://",
         "image_url_too_long": "Image URL must not exceed 1200 characters.",
         "image_preview_alt": "Incident evidence preview",
+        "geolocation_not_supported": "Geolocation is not supported by your browser.",
+        "geolocation_success": "Location acquired automatically.",
+        "geolocation_error": "Failed to get location. Please check browser permissions.",
+        "detecting_coordinates": "Detecting Coordinates...",
+        "coordinates_secured": "Coordinates Secured",
+        "detect_location_auto": "Detect Location Automatically (GPS)",
         "urgency": "Urgency Factor",
         "urgency_low": "LOW",
         "urgency_critical": "CRITICAL",
@@ -317,7 +323,11 @@ const resources = {
         "roles": {
           "SUPER_ADMIN": "Super Admin",
           "PUBLIC_SERVANT": "Public Servant",
-          "CITIZEN": "Citizen"
+          "CITIZEN": "Citizen",
+          "COORDINATOR": "Coordinator",
+          "MODERATOR": "Moderator",
+          "MEMBER": "Member",
+          "PUBLIC_SERVANT_LIAISON": "Public Servant Liaison"
         }
       },
       "exceptions": {
@@ -368,7 +378,7 @@ const resources = {
         "insights": "Perspectivas",
         "report": "Reporte Público",
         "my_contributions": "Mis Contribuciones",
-        "my_contributions_short": "Contribuciones",
+        "my_contributions_short": "Aportes",
         "moderation": "Moderación",
         "settings": "Configuración",
         "communities": "Registro",
@@ -495,6 +505,12 @@ const resources = {
         "image_url_invalid": "La URL de imagen debe iniciar con http:// o https://",
         "image_url_too_long": "La URL de imagen no debe superar 1200 caracteres.",
         "image_preview_alt": "Vista previa de evidencia de incidencia",
+        "geolocation_not_supported": "La geolocalización no está disponible en su navegador.",
+        "geolocation_success": "Ubicación obtenida automáticamente.",
+        "geolocation_error": "No se pudo obtener la ubicación. Revise los permisos del navegador.",
+        "detecting_coordinates": "Detectando coordenadas...",
+        "coordinates_secured": "Coordenadas capturadas",
+        "detect_location_auto": "Detectar ubicación automáticamente (GPS)",
         "urgency": "Factor de Urgencia",
         "urgency_low": "BAJA",
         "urgency_critical": "CRÍTICA",
@@ -659,7 +675,11 @@ const resources = {
         "roles": {
           "SUPER_ADMIN": "Super Admin",
           "PUBLIC_SERVANT": "Servidor Público",
-          "CITIZEN": "Ciudadano"
+          "CITIZEN": "Ciudadano",
+          "COORDINATOR": "Coordinador",
+          "MODERATOR": "Moderador",
+          "MEMBER": "Miembro",
+          "PUBLIC_SERVANT_LIAISON": "Enlace de Servicio Público"
         }
       },
       "exceptions": {

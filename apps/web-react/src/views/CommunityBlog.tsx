@@ -20,6 +20,7 @@ import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { toRoleListLabel } from "../constants/roleLabels";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -264,7 +265,7 @@ export function CommunityBlog() {
                             <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
                             <div className="flex flex-column">
                               <span className="text-sm font-bold text-main">{post.authorUsername}</span>
-                              <span className="text-xs text-muted">{post.authorRole}</span>
+                              <span className="text-xs text-muted">{toRoleListLabel(post.authorRole, t)}</span>
                             </div>
                           </div>
                           <CivicBadge label={post.statusTag.replace("_", " ")} severity={getStatusSeverity(post.statusTag)} />

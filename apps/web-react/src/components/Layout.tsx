@@ -8,6 +8,7 @@ import { useCommunityStore } from "../store/useCommunityStore";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 import { CivicSelect } from "./ui/CivicSelect";
+import { toRoleLabel } from "../constants/roleLabels";
 
 type Props = {
   children: ReactNode;
@@ -110,7 +111,7 @@ export function Layout({ children, authMode = false }: Props) {
 
   const NavGroup = ({ title, items }: { title: string, items: any[] }) => (
     <div className="mb-6">
-      <div className="text-muted text-xs font-black uppercase tracking-widest mb-3 ml-4 opacity-40">{title}</div>
+      <div className="text-muted text-xs font-black uppercase tracking-widest mb-3 ml-4 nav-group-title">{title}</div>
       <div className="flex flex-column gap-1">
         {items.filter(l => l.visible).map(link => (
           <Link
@@ -157,7 +158,9 @@ export function Layout({ children, authMode = false }: Props) {
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
               <div className="flex flex-column overflow-hidden">
                 <span className="text-xs font-black text-main truncate uppercase tracking-wider">{userName}</span>
-                <span className="text-min font-bold text-muted uppercase" style={{ fontSize: '8px' }}>{t('nav.clearance')}: {activeRole}</span>
+                <span className="text-min font-bold text-muted uppercase nav-clearance-label">
+                  {t('nav.clearance')}: {toRoleLabel(activeRole, t)}
+                </span>
               </div>
             </div>
             <Button
@@ -205,7 +208,7 @@ export function Layout({ children, authMode = false }: Props) {
                   itemTemplate={(option) => (
                     <div className="flex flex-column py-1">
                       <span className="font-black text-xs uppercase tracking-widest">{option.label}</span>
-                      <small className="text-muted text-min font-mono mt-1">{option.role}</small>
+                      <small className="text-muted text-min font-mono mt-1">{toRoleLabel(option.role, t)}</small>
                     </div>
                   )}
                 />
@@ -225,7 +228,7 @@ export function Layout({ children, authMode = false }: Props) {
                   icon={action.icon}
                   label={action.label}
                   text
-                  className="u-surface-chip px-3 py-2 text-xs font-black"
+                  className="u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
                   onClick={() => navigate(action.to)}
                 />
               ))}
