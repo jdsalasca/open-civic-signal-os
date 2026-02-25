@@ -302,7 +302,7 @@ export function Dashboard() {
                     </CivicCard>
                   )}
                   <DigestSidebar signals={displayedSignals} />
-                  {isStaff && (
+                  {isStaff && notifications.length > 0 && (
                     <NotificationSidebar notifications={notifications} />
                   )}
                   {isStaff && (

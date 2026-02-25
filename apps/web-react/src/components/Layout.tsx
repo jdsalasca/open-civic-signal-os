@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
 import { Sidebar } from "primereact/sidebar";
-import { InputText } from "primereact/inputtext";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useTranslation } from "react-i18next";
@@ -176,7 +175,7 @@ export function Layout({ children, authMode = false }: Props) {
       {/* VIEW AREA */}
       <div className="flex flex-column flex-grow-1 overflow-hidden relative">
         <header className="h-5rem flex align-items-center justify-content-between px-6 border-bottom-1 border-subtle bg-nav backdrop-blur-xl z-1">
-          <div className="flex align-items-center gap-6 flex-grow-1">
+          <div className="flex align-items-center gap-4 flex-grow-1">
             <Button
               icon="pi pi-bars"
               text
@@ -185,17 +184,10 @@ export function Layout({ children, authMode = false }: Props) {
               aria-label={t('nav.open_navigation')}
               data-testid="mobile-menu-toggle"
             />
-
-            <div className="hidden md:flex align-items-center flex-grow-1 max-w-30rem">
-              <div className="app-search-shell">
-                <i className="pi pi-search app-search-icon" />
-                <InputText
-                  placeholder="Search intelligence, commands, or signals... (Ctrl + K)"
-                  className="app-search-input"
-                  aria-label="Search"
-                />
-                <kbd className="app-search-shortcut">CTRL K</kbd>
-              </div>
+            <div className="hidden md:flex align-items-center">
+              <span className="text-sm text-muted font-semibold">
+                {t('dashboard.focus_today')}
+              </span>
             </div>
           </div>
 

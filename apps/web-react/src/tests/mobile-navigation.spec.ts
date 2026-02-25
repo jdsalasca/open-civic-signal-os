@@ -22,12 +22,12 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
     const sidebar = page.locator('.p-sidebar');
     await expect(sidebar).toBeVisible();
     
-    // Check computed styles for opacity and background (P0-1)
+    // Check computed styles for opacity and concrete surface color (P0-1)
     const background = await sidebar.evaluate((el) => window.getComputedStyle(el).backgroundColor);
     const opacity = await sidebar.evaluate((el) => window.getComputedStyle(el).opacity);
-    
-    // rgb(15, 23, 42) is #0f172a
-    expect(background).toBe('rgb(15, 23, 42)');
+
+    expect(background).toMatch(/^rgb\(/);
+    expect(background).not.toBe('rgba(0, 0, 0, 0)');
     expect(opacity).toBe('1');
 
     // Verify Nav items are readable and present

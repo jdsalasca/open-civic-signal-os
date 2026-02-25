@@ -16,7 +16,7 @@ export function NotificationSidebar({ notifications }: Props) {
       );
     }
     const issuesPart = msg.replace('Top unresolved community issues:', '').trim();
-    const issues = issuesPart.split(',').map(i => i.trim()).filter(Boolean);
+    const issues = issuesPart.split(',').map(i => i.trim()).filter(Boolean).slice(0, 3);
 
     return (
       <div className="flex flex-column gap-2 mt-2">
@@ -24,19 +24,19 @@ export function NotificationSidebar({ notifications }: Props) {
           <span className="w-1rem h-1rem border-circle bg-status-rejected shadow-1" style={{ animation: 'pulse 2s infinite' }}></span>
           Top Unresolved Issues
         </span>
-        <div className="flex flex-column gap-1 max-h-15rem overflow-y-auto pr-2 custom-scrollbar">
+        <div className="flex flex-column gap-1">
           {issues.map((issue, idx) => {
             const match = issue.match(/^\[(.*?)\]\s*(.*)$/);
             if (match) {
               const [, category, title] = match;
               return (
-                <div key={idx} className="flex align-items-center gap-2 text-sm p-2 bg-black-alpha-20 border-round-lg border-1 border-white-alpha-10 surface-ground">
+                <div key={idx} className="flex align-items-center gap-2 text-sm p-2 bg-surface border-round-lg border-1 border-subtle">
                   <span className="text-status-rejected font-mono text-min uppercase tracking-tighter bg-status-rejected-alpha-10 px-1 border-round">[{category}]</span>
                   <span className="text-main font-medium line-height-3 text-sm">{title}</span>
                 </div>
               );
             }
-            return <div key={idx} className="text-sm text-secondary border-bottom-1 border-white-alpha-10 pb-2">{issue}</div>;
+            return <div key={idx} className="text-sm text-secondary border-bottom-1 border-subtle pb-2">{issue}</div>;
           })}
         </div>
       </div>
@@ -59,7 +59,7 @@ export function NotificationSidebar({ notifications }: Props) {
             No system alerts recorded.
           </div>
         ) : (
-          notifications.slice(0, 5).map((n) => (
+          notifications.slice(0, 3).map((n) => (
             <div key={n.id} className="p-4 bg-white-alpha-5 border-round-2xl border-1 border-white-alpha-10 hover:bg-white-alpha-10 transition-colors">
               <div className="flex justify-content-between align-items-center mb-3">
                 <CivicBadge label={n.channel} severity="progress" />

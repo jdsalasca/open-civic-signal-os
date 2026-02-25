@@ -91,27 +91,30 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
         <span className="font-bold text-main text-sm mb-1 group-hover:text-brand-primary transition-colors truncate">
           {rowData.title}
         </span>
-        <div className="flex align-items-center gap-2 opacity-50">
-          <span className="text-min font-mono font-bold uppercase tracking-tighter">SIG-ID: {rowData.id?.substring(0,8)}</span>
+        <div className="flex align-items-center gap-2">
+          <span className="text-min text-muted font-mono font-bold uppercase tracking-tighter">SIG-ID: {rowData.id?.substring(0,8)}</span>
         </div>
       </div>
     );
   };
 
   const header = (
-    <div className="flex flex-column md:flex-row justify-content-between md:align-items-center gap-4 px-6 py-4 border-bottom-1 border-white-alpha-5 bg-black-alpha-20">
+    <div className="flex flex-column md:flex-row justify-content-between md:align-items-center gap-4 px-6 py-4 border-bottom-1 border-subtle bg-surface">
       <div className="flex align-items-center gap-3">
         <div className="w-2rem h-2rem bg-brand-primary border-round-sm flex align-items-center justify-content-center shadow-lg">
           <i className="pi pi-database text-on-brand font-bold text-xs"></i>
         </div>
-        <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">Priority issues</h2>
+        <div className="flex flex-column gap-1">
+          <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">Priority issues</h2>
+          <span className="text-xs text-muted">Visible list filter</span>
+        </div>
       </div>
       <div className="app-search-shell w-full md:w-auto md:ml-auto" style={{ maxWidth: "20rem" }}>
         <i className="pi pi-search app-search-icon" />
         <InputText
           value={globalFilterValue}
           onChange={onGlobalFilterChange}
-          placeholder="Search by title, status, category or ID..."
+          placeholder="Filter by title, status, category or ID"
           className="app-search-input"
         />
       </div>

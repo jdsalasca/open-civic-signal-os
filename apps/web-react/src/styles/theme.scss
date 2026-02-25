@@ -126,10 +126,10 @@
     --alpha-border-10: rgba(29, 78, 216, 0.2);
     --alpha-border-20: rgba(29, 78, 216, 0.3);
     --alpha-border-30: rgba(29, 78, 216, 0.4);
-    --alpha-overlay-20: rgba(15, 23, 42, 0.08);
-    --alpha-overlay-30: rgba(15, 23, 42, 0.12);
-    --alpha-overlay-40: rgba(15, 23, 42, 0.16);
-    --alpha-overlay-80: rgba(15, 23, 42, 0.28);
+    --alpha-overlay-20: rgba(255, 255, 255, 0.72);
+    --alpha-overlay-30: rgba(255, 255, 255, 0.82);
+    --alpha-overlay-40: rgba(255, 255, 255, 0.9);
+    --alpha-overlay-80: rgba(255, 255, 255, 0.96);
   }
 
   --primary-color: var(--brand-primary);
