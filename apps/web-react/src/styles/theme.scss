@@ -6,6 +6,8 @@
   --brand-accent: #0d9488;
   --on-brand: #f8fafc;
   --on-surface-strong: #f8fafc;
+  --link-color: #2563eb;
+  --link-color-hover: #1d4ed8;
 
   --status-new: #0ea5e9;
   --status-progress: #f59e0b;
@@ -82,15 +84,15 @@
   }
 
   &.light-theme {
-    --bg-app: #eef3fb;
+    --bg-app: #e8eef8;
     --bg-nav: rgba(255, 255, 255, 0.9);
     --bg-surface: #f8fbff;
     --bg-card: #ffffff;
     --bg-elevated: #eaf0fb;
 
     --text-main: #0f172a;
-    --text-secondary: #1e293b;
-    --text-muted: #334155;
+    --text-secondary: #172338;
+    --text-muted: #3f516b;
 
     --border-subtle: #c9d6ea;
     --glass-stroke: rgba(15, 23, 42, 0.09);

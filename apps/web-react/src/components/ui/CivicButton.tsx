@@ -11,7 +11,7 @@ export function CivicButton({ variant = 'primary', glow, className, ...props }: 
     'primary': 'p-button-primary',
     'secondary': 'p-button-secondary',
     'danger': 'p-button-danger',
-    'ghost': 'p-button-text bg-transparent border-none text-muted hover:text-main hover:bg-white-alpha-5',
+    'ghost': 'p-button-text bg-surface border-1 border-subtle text-secondary hover:text-main hover:bg-white-alpha-5',
   };
 
   return (
