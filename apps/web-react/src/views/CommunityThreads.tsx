@@ -20,6 +20,7 @@ import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { extractFirstImageUrl, prependImageToContent, stripMarkdownImages, isValidImageUrl } from "../utils/communityContent";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -37,8 +38,10 @@ export function CommunityThreads() {
   const [targetCommunityId, setTargetCommunityId] = useState<string>("");
   const [newThreadTitle, setNewThreadTitle] = useState("");
   const [messageDraftByThread, setMessageDraftByThread] = useState<Record<string, string>>({});
+  const [messageImageByThread, setMessageImageByThread] = useState<Record<string, string>>({});
   const [replyTargetByThread, setReplyTargetByThread] = useState<Record<string, CommunityThreadMessage | null>>({});
   const [sendingByThread, setSendingByThread] = useState<Record<string, boolean>>({});
+  const [reactingByMessage, setReactingByMessage] = useState<Record<string, boolean>>({});
 
   const threadTitleLength = newThreadTitle.trim().length;
 
@@ -105,6 +108,9 @@ export function CommunityThreads() {
   };
 
   const reactToMessage = async (threadId: string, messageId: string, type: string) => {
+    const reactionKey = `${threadId}:${messageId}`;
+    if (reactingByMessage[reactionKey]) return;
+    setReactingByMessage((prev) => ({ ...prev, [reactionKey]: true }));
     try {
       const res = await apiClient.post<CommunityThreadMessage>(`community/threads/${threadId}/messages/${messageId}/react`, { type });
       const nextMessage = res.data;
@@ -121,6 +127,8 @@ export function CommunityThreads() {
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t("community_threads.reaction_error"));
+    } finally {
+      setReactingByMessage((prev) => ({ ...prev, [reactionKey]: false }));
     }
   };
 
@@ -140,17 +148,19 @@ export function CommunityThreads() {
 
   const sendMessage = async (threadId: string) => {
     const draft = (messageDraftByThread[threadId] || "").trim();
-    if (!activeCommunityId || draft.length < FORM_LIMITS.threads.messageMin) return;
+    const imageUrl = (messageImageByThread[threadId] || "").trim();
+    if (!activeCommunityId || draft.length < FORM_LIMITS.threads.messageMin || !isValidImageUrl(imageUrl)) return;
 
     setSendingByThread((prev) => ({ ...prev, [threadId]: true }));
     try {
       const replyTarget = replyTargetByThread[threadId];
       await apiClient.post(`community/threads/${threadId}/messages`, {
         sourceCommunityId: activeCommunityId,
-        content: draft,
+        content: prependImageToContent(draft, imageUrl, t("community_threads.image_alt")),
         parentMessageId: replyTarget?.id,
       });
       setMessageDraftByThread((prev) => ({ ...prev, [threadId]: "" }));
+      setMessageImageByThread((prev) => ({ ...prev, [threadId]: "" }));
       setReplyTargetByThread((prev) => ({ ...prev, [threadId]: null }));
       toast.success(t("community_threads.message_success"));
       loadThreads();
@@ -251,8 +261,19 @@ export function CommunityThreads() {
           </div>
 
           <p className={`m-0 line-height-3 ${message.hidden ? "text-muted italic" : "text-secondary"}`}>
-            {message.hidden ? `[${t("community_threads.hidden_label")}: ${message.moderationReason}]` : message.content}
+            {message.hidden
+              ? `[${t("community_threads.hidden_label")}: ${message.moderationReason}]`
+              : stripMarkdownImages(message.content) || t("community_threads.image_only_message")}
           </p>
+          {extractFirstImageUrl(message.content) && !message.hidden && (
+            <img
+              src={extractFirstImageUrl(message.content) ?? ""}
+              alt={t("community_threads.image_alt")}
+              className="w-full border-round-xl mt-3 border-1 border-subtle"
+              style={{ maxHeight: "18rem", objectFit: "cover" }}
+              loading="lazy"
+            />
+          )}
 
           <div className="mt-3 flex flex-wrap gap-2">
             {REACTION_TYPES.map((emoji) => (
@@ -261,9 +282,10 @@ export function CommunityThreads() {
                 type="button"
                 onClick={() => reactToMessage(thread.id, message.id, emoji)}
                 aria-label={t("community_threads.react_with", { emoji })}
+                disabled={Boolean(reactingByMessage[`${thread.id}:${message.id}`])}
                 className={`flex align-items-center gap-2 px-2 py-1 border-round-lg border-1 ${
                   message.viewerReaction === emoji
-                    ? "border-brand-primary-alpha-40 bg-brand-primary-alpha-15"
+                    ? "border-brand-primary-alpha-60 bg-brand-primary-alpha-20 shadow-1"
                     : "border-white-alpha-10 bg-black-alpha-20 hover:border-brand-primary-alpha-30"
                 }`}
               >
@@ -389,8 +411,10 @@ export function CommunityThreads() {
                     {threads.map((thread) => {
                       const { roots, childrenByParent } = buildThreadTree(thread.messages || []);
                       const draft = messageDraftByThread[thread.id] || "";
+                      const draftImageUrl = messageImageByThread[thread.id] || "";
+                      const hasValidDraftImage = isValidImageUrl(draftImageUrl);
                       const replyTarget = replyTargetByThread[thread.id];
-                      const canSend = draft.trim().length >= FORM_LIMITS.threads.messageMin;
+                      const canSend = draft.trim().length >= FORM_LIMITS.threads.messageMin && hasValidDraftImage;
 
                       return (
                         <div key={thread.id} className="bg-surface p-5 md:p-6 flex flex-column gap-4">
@@ -446,6 +470,32 @@ export function CommunityThreads() {
                                 min={FORM_LIMITS.threads.messageMin}
                               />
                             </div>
+                            <div className="flex flex-column gap-2 mt-2">
+                              <InputText
+                                value={draftImageUrl}
+                                onChange={(e) => setMessageImageByThread((prev) => ({ ...prev, [thread.id]: e.target.value }))}
+                                className="w-full"
+                                placeholder={t("community_threads.image_url_placeholder")}
+                                maxLength={1200}
+                                data-testid={`thread-image-input-${thread.id}`}
+                              />
+                              {!hasValidDraftImage ? (
+                                <small className="p-error">{t("community_threads.image_url_invalid")}</small>
+                              ) : (
+                                <small className="text-muted text-xs">{t("community_threads.image_url_help")}</small>
+                              )}
+                            </div>
+                            {draftImageUrl.trim() && hasValidDraftImage && (
+                              <div className="border-round-xl overflow-hidden border-1 border-subtle mt-2">
+                                <img
+                                  src={draftImageUrl.trim()}
+                                  alt={t("community_threads.image_alt")}
+                                  className="w-full"
+                                  style={{ maxHeight: "12rem", objectFit: "cover" }}
+                                  loading="lazy"
+                                />
+                              </div>
+                            )}
 
                             <div className="flex justify-content-end mt-3">
                               <CivicButton

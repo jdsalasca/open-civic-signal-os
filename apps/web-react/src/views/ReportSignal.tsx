@@ -109,6 +109,12 @@ export function ReportSignal() {
     return 'var(--status-rejected)';
   };
 
+  const severityPresets = [
+    { key: "low", urgency: 1, impact: 1, label: t("report.preset_low") },
+    { key: "medium", urgency: 3, impact: 3, label: t("report.preset_medium") },
+    { key: "high", urgency: 5, impact: 5, label: t("report.preset_high") },
+  ] as const;
+
   return (
     <Layout>
       <div className="animate-fade-up max-w-60rem mx-auto pb-8">
@@ -243,6 +249,27 @@ export function ReportSignal() {
             <div className="col-12 lg:col-5">
               <CivicCard title={t('signals.why_ranked_title')} variant="brand" className="mb-6">
                 <div className="flex flex-column gap-8 py-4">
+                  <div className="flex flex-column gap-3">
+                    <label className="text-xs font-black uppercase tracking-widest text-main">{t("report.quick_preset_label")}</label>
+                    <div className="flex flex-wrap gap-2">
+                      {severityPresets.map((preset) => {
+                        const selected = currentUrgency === preset.urgency && currentImpact === preset.impact;
+                        return (
+                          <CivicButton
+                            key={preset.key}
+                            type="button"
+                            size="small"
+                            variant={selected ? "primary" : "ghost"}
+                            label={preset.label}
+                            onClick={() => {
+                              setValue("urgency", preset.urgency);
+                              setValue("impact", preset.impact);
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
                   {/* Urgency Picker */}
                   <div className="flex flex-column gap-4">
                     <div className="flex justify-content-between align-items-end">

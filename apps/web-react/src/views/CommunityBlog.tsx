@@ -21,19 +21,9 @@ import { FORM_LIMITS } from "../constants/formLimits";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { toRoleListLabel } from "../constants/roleLabels";
+import { extractFirstImageUrl, isValidImageUrl, prependImageToContent, stripMarkdownImages } from "../utils/communityContent";
 
 type ApiError = Error & { friendlyMessage?: string };
-
-const imageRegex = /!\[[^\]]*\]\(([^)]+)\)/;
-
-const extractFirstImageUrl = (content: string): string | null => {
-  const match = content.match(imageRegex);
-  return match?.[1] || null;
-};
-
-const stripMarkdownImages = (content: string): string => {
-  return content.replace(/!\[[^\]]*\]\(([^)]+)\)/g, "").trim();
-};
 
 const renderContent = (content: string) => {
   const cleaned = stripMarkdownImages(content);
@@ -51,6 +41,7 @@ export function CommunityBlog() {
   const [posts, setPosts] = useState<CommunityBlogPost[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [statusTag, setStatusTag] = useState("IN_PROGRESS");
   const [publishing, setPublishing] = useState(false);
   const [commentCountsByPost, setCommentCountsByPost] = useState<Record<string, number>>({});
@@ -60,6 +51,7 @@ export function CommunityBlog() {
     activeMembership?.role === "PUBLIC_SERVANT_LIAISON" || activeMembership?.role === "COORDINATOR";
   const titleLength = title.trim().length;
   const contentLength = content.trim().length;
+  const hasValidImageUrl = isValidImageUrl(imageUrl);
 
   const statusTagOptions = useMemo(
     () => [
@@ -74,7 +66,8 @@ export function CommunityBlog() {
   const canPublish = Boolean(
     activeCommunityId &&
       titleLength >= FORM_LIMITS.blog.titleMin &&
-      contentLength >= FORM_LIMITS.blog.contentMin
+      contentLength >= FORM_LIMITS.blog.contentMin &&
+      hasValidImageUrl
   );
 
   const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
@@ -111,11 +104,12 @@ export function CommunityBlog() {
       await apiClient.post("community/blog", {
         communityId: activeCommunityId,
         title,
-        content,
+        content: prependImageToContent(content, imageUrl, t("community_blog.image_alt")),
         statusTag,
       });
       setTitle("");
       setContent("");
+      setImageUrl("");
       toast.success(t("community_blog.publish_success"));
       loadPosts();
     } catch (err) {
@@ -198,6 +192,34 @@ export function CommunityBlog() {
                       <CivicCharacterCount current={content.length} max={FORM_LIMITS.blog.contentMax} min={FORM_LIMITS.blog.contentMin} />
                     </div>
                   </CivicField>
+                  <CivicField label={t("community_blog.image_url")}>
+                    <div className="flex flex-column gap-2">
+                      <InputText
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder={t("community_blog.image_url_placeholder")}
+                        className="w-full"
+                        data-testid="blog-image-url-input"
+                        maxLength={1200}
+                      />
+                      {!hasValidImageUrl ? (
+                        <small className="p-error">{t("community_blog.image_url_invalid")}</small>
+                      ) : (
+                        <small className="text-muted text-xs">{t("community_blog.image_url_help")}</small>
+                      )}
+                    </div>
+                  </CivicField>
+                  {imageUrl.trim() && hasValidImageUrl && (
+                    <div className="border-round-xl overflow-hidden border-1 border-subtle">
+                      <img
+                        src={imageUrl.trim()}
+                        alt={t("community_blog.image_alt")}
+                        className="w-full"
+                        style={{ maxHeight: "14rem", objectFit: "cover" }}
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
 
                   <CivicField label={t("community_blog.status")}>
                     <CivicSelect
