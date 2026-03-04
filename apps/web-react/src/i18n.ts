@@ -188,7 +188,8 @@ const resources = {
         "preset_medium": "Medium",
         "preset_high": "Critical",
         "submit": "Ingest Signal",
-        "success": "Civic signal ingested. Prioritizing..."
+        "success": "Civic signal ingested. Prioritizing...",
+        "submit_shortcut_hint": "Shortcut: Ctrl/Cmd + Enter to submit."
       },
       "community_blog": {
         "title": "Community Blog",
@@ -200,6 +201,7 @@ const resources = {
         "context": "Post Content",
         "context_placeholder": "Share progress, blockers, next steps, and include image markdown if needed...",
         "image_hint": "Tip: add images using markdown, for example ![alt](https://image-url)",
+        "submit_shortcut_hint": "Shortcut: Ctrl/Cmd + Enter to publish.",
         "image_url": "Cover image URL (optional)",
         "image_url_placeholder": "https://example.com/update.jpg",
         "image_url_help": "Optional. If provided, the image is attached to the post.",
@@ -233,6 +235,7 @@ const resources = {
         "select_dialogue": "Select dialogue",
         "message": "Message",
         "message_placeholder": "Write your message...",
+        "submit_shortcut_hint": "Shortcut: Ctrl/Cmd + Enter to send quickly.",
         "image_url_placeholder": "Optional image URL (http/https)",
         "image_url_help": "Optional. Attach one image for context.",
         "image_url_invalid": "Image URL must start with http:// or https://",
@@ -283,6 +286,7 @@ const resources = {
         "hide_comments": "Hide comments",
         "empty_comments": "No comments yet. Be the first to comment.",
         "comment_placeholder": "Share your perspective...",
+        "submit_shortcut_hint": "Shortcut: Ctrl/Cmd + Enter to post.",
         "post_comment": "Post Comment",
         "comment_added": "Comment added",
         "comment_failed": "Failed to post comment",
@@ -597,7 +601,8 @@ const resources = {
         "preset_medium": "Medio",
         "preset_high": "Crítico",
         "submit": "Ingresar Señal",
-        "success": "Señal ingresada. Priorizando..."
+        "success": "Señal ingresada. Priorizando...",
+        "submit_shortcut_hint": "Atajo: Ctrl/Cmd + Enter para enviar."
       },
       "community_blog": {
         "title": "Blog Comunitario",
@@ -609,6 +614,7 @@ const resources = {
         "context": "Contenido de la Publicación",
         "context_placeholder": "Comparta avances, bloqueos, próximos pasos e incluya imágenes si aplica...",
         "image_hint": "Tip: agregue imágenes con markdown, por ejemplo ![texto](https://url-imagen)",
+        "submit_shortcut_hint": "Atajo: Ctrl/Cmd + Enter para publicar.",
         "image_url": "URL de imagen de portada (opcional)",
         "image_url_placeholder": "https://ejemplo.com/actualizacion.jpg",
         "image_url_help": "Opcional. Si se incluye, la imagen se adjunta a la publicación.",
@@ -642,6 +648,7 @@ const resources = {
         "select_dialogue": "Seleccione diálogo",
         "message": "Mensaje",
         "message_placeholder": "Escriba su mensaje para la comunidad...",
+        "submit_shortcut_hint": "Atajo: Ctrl/Cmd + Enter para enviar rápido.",
         "image_url_placeholder": "URL de imagen opcional (http/https)",
         "image_url_help": "Opcional. Adjunte una imagen para dar contexto.",
         "image_url_invalid": "La URL de imagen debe iniciar con http:// o https://",
@@ -692,6 +699,7 @@ const resources = {
         "hide_comments": "Ocultar comentarios",
         "empty_comments": "Aún no hay comentarios. Sea el primero en comentar.",
         "comment_placeholder": "Comparta su perspectiva...",
+        "submit_shortcut_hint": "Atajo: Ctrl/Cmd + Enter para publicar.",
         "post_comment": "Publicar comentario",
         "comment_added": "Comentario agregado",
         "comment_failed": "No se pudo publicar el comentario",

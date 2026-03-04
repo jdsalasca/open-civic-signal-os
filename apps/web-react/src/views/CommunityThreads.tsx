@@ -21,6 +21,7 @@ import { FORM_LIMITS } from "../constants/formLimits";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { extractFirstImageUrl, prependImageToContent, stripMarkdownImages, isValidImageUrl } from "../utils/communityContent";
+import { isSubmitShortcut } from "../utils/keyboard";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -482,6 +483,12 @@ export function CommunityThreads() {
                               <InputTextarea
                                 value={draft}
                                 onChange={(e) => setMessageDraftByThread((prev) => ({ ...prev, [thread.id]: e.target.value }))}
+                                onKeyDown={(e) => {
+                                  if (isSubmitShortcut(e) && canSend && !sendingByThread[thread.id]) {
+                                    e.preventDefault();
+                                    sendMessage(thread.id);
+                                  }
+                                }}
                                 rows={3}
                                 className="w-full"
                                 placeholder={t("community_threads.message_placeholder")}
@@ -509,6 +516,7 @@ export function CommunityThreads() {
                                 <small className="text-muted text-xs">{t("community_threads.image_url_help")}</small>
                               )}
                             </div>
+                            <small className="text-muted text-xs">{t("community_threads.submit_shortcut_hint")}</small>
                             {draftImageUrl.trim() && hasValidDraftImage && (
                               <div className="border-round-xl overflow-hidden border-1 border-subtle mt-2">
                                 <img

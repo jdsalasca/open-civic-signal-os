@@ -17,6 +17,7 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
+import { isSubmitShortcut } from "../utils/keyboard";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -277,12 +278,20 @@ export function ReportSignal() {
                           {...field}
                           id="report-description"
                           rows={6}
+                          onKeyDown={(e) => {
+                            if (isSubmitShortcut(e)) {
+                              e.preventDefault();
+                              const form = e.currentTarget.form;
+                              form?.requestSubmit();
+                            }
+                          }}
                           className="w-full"
                           placeholder={t('report.context_placeholder')}
                           data-testid="report-description-textarea"
                           maxLength={FORM_LIMITS.report.descriptionMax}
                         />
                         <CivicCharacterCount current={currentDescriptionLength} max={FORM_LIMITS.report.descriptionMax} min={FORM_LIMITS.report.descriptionMin} />
+                        <small className="text-muted text-xs">{t("report.submit_shortcut_hint")}</small>
                       </div>
                     )}
                   />

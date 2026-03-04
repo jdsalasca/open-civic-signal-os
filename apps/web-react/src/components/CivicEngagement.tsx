@@ -10,6 +10,7 @@ import { CivicCard } from './ui/CivicCard';
 import { toRoleListLabel } from "../constants/roleLabels";
 import { CivicCharacterCount } from "./ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
+import { isSubmitShortcut } from "../utils/keyboard";
 
 interface Props {
   parentId: string;
@@ -217,12 +218,19 @@ export function CivicEngagement({
               <InputTextarea 
                 value={newComment}
                 onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (isSubmitShortcut(e) && currentCommentLength >= minCommentLength && !loading) {
+                    e.preventDefault();
+                    handleAddComment();
+                  }
+                }}
                 placeholder={t("engagement.comment_placeholder")}
                 rows={3}
                 className="w-full bg-surface"
                 maxLength={maxCommentLength}
               />
               <CivicCharacterCount current={currentCommentLength} max={maxCommentLength} min={minCommentLength} />
+              <small className="text-muted text-xs">{t("engagement.submit_shortcut_hint")}</small>
               <div className="flex justify-content-end">
                 <CivicButton 
                   label={t("engagement.post_comment")} 

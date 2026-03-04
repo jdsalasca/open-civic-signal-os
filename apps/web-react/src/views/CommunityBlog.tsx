@@ -22,6 +22,7 @@ import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { toRoleListLabel } from "../constants/roleLabels";
 import { extractFirstImageUrl, isValidImageUrl, prependImageToContent, stripMarkdownImages } from "../utils/communityContent";
+import { isSubmitShortcut } from "../utils/keyboard";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -182,6 +183,12 @@ export function CommunityBlog() {
                       <InputTextarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (isSubmitShortcut(e) && canPublish && !publishing) {
+                            e.preventDefault();
+                            createPost();
+                          }
+                        }}
                         rows={8}
                         className="w-full"
                         placeholder={t("community_blog.context_placeholder")}
@@ -189,6 +196,7 @@ export function CommunityBlog() {
                         maxLength={FORM_LIMITS.blog.contentMax}
                       />
                       <small className="text-muted text-xs">{t("community_blog.image_hint")}</small>
+                      <small className="text-muted text-xs">{t("community_blog.submit_shortcut_hint")}</small>
                       <CivicCharacterCount current={content.length} max={FORM_LIMITS.blog.contentMax} min={FORM_LIMITS.blog.contentMin} />
                     </div>
                   </CivicField>
