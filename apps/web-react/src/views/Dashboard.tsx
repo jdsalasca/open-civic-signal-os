@@ -159,6 +159,14 @@ export function Dashboard() {
   }, [signals, activeFilter]);
 
   const visibleRecords = activeFilter === "CRITICAL" ? displayedSignals.length : totalRecords;
+  const criticalCount = useMemo(
+    () => signals.filter((s) => (s.priorityScore ?? 0) >= CRITICAL_SCORE_THRESHOLD).length,
+    [signals]
+  );
+  const newCount = useMemo(
+    () => signals.filter((s) => s.status === "NEW").length,
+    [signals]
+  );
 
   const handleRelay = async () => {
     try {
@@ -262,6 +270,46 @@ export function Dashboard() {
           </CivicActionBar>
         </section>
 
+        <CivicCard className="mb-6" variant="brand">
+          <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
+            <div className="flex flex-column gap-1">
+              <span className="text-xs font-black uppercase tracking-widest text-muted">{t("dashboard.priority_strip_title")}</span>
+              <span className="text-sm text-secondary">{t("dashboard.priority_strip_desc")}</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <CivicButton
+                type="button"
+                size="small"
+                variant={activeFilter === "CRITICAL" ? "primary" : "ghost"}
+                label={t("dashboard.priority_strip_critical", { count: criticalCount })}
+                icon="pi pi-exclamation-triangle"
+                onClick={() => handleFilterChange("CRITICAL")}
+                data-testid="dashboard-priority-critical"
+              />
+              <CivicButton
+                type="button"
+                size="small"
+                variant={activeFilter === "NEW" ? "primary" : "ghost"}
+                label={t("dashboard.priority_strip_new", { count: newCount })}
+                icon="pi pi-clock"
+                onClick={() => handleFilterChange("NEW")}
+                data-testid="dashboard-priority-new"
+              />
+              {isStaff && (
+                <CivicButton
+                  type="button"
+                  size="small"
+                  variant="ghost"
+                  label={t("dashboard.priority_strip_review_queue")}
+                  icon="pi pi-shield"
+                  onClick={() => navigate("/moderation")}
+                  data-testid="dashboard-priority-moderation"
+                />
+              )}
+            </div>
+          </div>
+        </CivicCard>
+
         <div className="mb-8">
           {loading ? (
             <CivicSkeleton type="metric" count={4} />
@@ -322,10 +370,10 @@ export function Dashboard() {
                         <li className="line-height-3">2. {t('dashboard.quickstart_step_2')}</li>
                         <li className="line-height-3">3. {t('dashboard.quickstart_step_3')}</li>
                       </ul>
-                      <div className="mt-4 flex flex-column gap-2">
+                      <div className="mt-4 flex flex-column md:flex-row gap-2">
                         <CivicButton label={t('dashboard.quickstart_report')} onClick={() => navigate('/report')} />
                         <CivicButton label={t('dashboard.quickstart_forums')} variant="secondary" onClick={() => navigate('/communities/threads')} />
-                        <CivicButton label={t('dashboard.quickstart_contributions')} variant="ghost" onClick={() => navigate('/mine')} />
+                        <CivicButton label={t('dashboard.quickstart_contributions')} variant="ghost" onClick={() => navigate('/mine')} className="md:ml-auto" />
                       </div>
                     </CivicCard>
                   )}

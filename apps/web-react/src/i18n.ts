@@ -128,7 +128,12 @@ const resources = {
         "quickstart_step_3": "Track your contributions and support priority issues.",
         "quickstart_report": "Create Report",
         "quickstart_forums": "Open Forums",
-        "quickstart_contributions": "My Contributions"
+        "quickstart_contributions": "My Contributions",
+        "priority_strip_title": "Operational priorities",
+        "priority_strip_desc": "Use one click to focus the backlog on urgent work.",
+        "priority_strip_critical": "{{count}} critical",
+        "priority_strip_new": "{{count}} new",
+        "priority_strip_review_queue": "Review queue"
       },
       "metrics": {
         "total": "Total Signals",
@@ -532,7 +537,12 @@ const resources = {
         "quickstart_step_3": "Revise sus contribuciones y apoye prioridades clave.",
         "quickstart_report": "Crear Reporte",
         "quickstart_forums": "Abrir Foros",
-        "quickstart_contributions": "Mis Contribuciones"
+        "quickstart_contributions": "Mis Contribuciones",
+        "priority_strip_title": "Prioridades operativas",
+        "priority_strip_desc": "Use un clic para enfocar el backlog en trabajo urgente.",
+        "priority_strip_critical": "{{count}} críticas",
+        "priority_strip_new": "{{count}} nuevas",
+        "priority_strip_review_queue": "Revisar cola"
       },
       "metrics": {
         "total": "Total de Señales",
