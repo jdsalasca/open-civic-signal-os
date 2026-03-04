@@ -88,6 +88,41 @@ export function ReportSignal() {
     { label: t('categories.education'), value: 'education', icon: 'pi-book' },
   ];
 
+  const quickTemplates = [
+    {
+      key: "pothole",
+      title: t("report.template_pothole_title"),
+      description: t("report.template_pothole_desc"),
+      category: "infrastructure",
+      urgency: 3,
+      impact: 2,
+      affectedPeople: 40,
+      label: t("report.template_pothole_label"),
+    },
+    {
+      key: "lighting",
+      title: t("report.template_lighting_title"),
+      description: t("report.template_lighting_desc"),
+      category: "safety",
+      urgency: 4,
+      impact: 3,
+      affectedPeople: 60,
+      label: t("report.template_lighting_label"),
+    },
+    {
+      key: "waste",
+      title: t("report.template_waste_title"),
+      description: t("report.template_waste_desc"),
+      category: "environment",
+      urgency: 2,
+      impact: 3,
+      affectedPeople: 30,
+      label: t("report.template_waste_label"),
+    },
+  ] as const;
+
+  const citizenPresets = [10, 30, 60, 120, 300];
+
   const onSubmit = async (data: ReportForm) => {
     try {
       await apiClient.post("signals", data);
@@ -109,6 +144,19 @@ export function ReportSignal() {
     return 'var(--status-rejected)';
   };
 
+  const applyTemplate = (templateKey: (typeof quickTemplates)[number]["key"]) => {
+    const template = quickTemplates.find((item) => item.key === templateKey);
+    if (!template) return;
+
+    setValue("title", template.title, { shouldDirty: true, shouldValidate: true });
+    setValue("description", template.description, { shouldDirty: true, shouldValidate: true });
+    setValue("category", template.category, { shouldDirty: true, shouldValidate: true });
+    setValue("urgency", template.urgency, { shouldDirty: true, shouldValidate: true });
+    setValue("impact", template.impact, { shouldDirty: true, shouldValidate: true });
+    setValue("affectedPeople", template.affectedPeople, { shouldDirty: true, shouldValidate: true });
+    toast.success(t("report.template_applied"));
+  };
+
   const severityPresets = [
     { key: "low", urgency: 1, impact: 1, label: t("report.preset_low") },
     { key: "medium", urgency: 3, impact: 3, label: t("report.preset_medium") },
@@ -124,6 +172,21 @@ export function ReportSignal() {
           <div className="grid">
             <div className="col-12 lg:col-7">
               <CivicCard title={t('report.title')} className="mb-6">
+                <div className="mb-4">
+                  <label className="text-xs font-black uppercase tracking-widest text-main block mb-2">{t("report.quick_templates_label")}</label>
+                  <div className="flex flex-wrap gap-2">
+                    {quickTemplates.map((template) => (
+                      <CivicButton
+                        key={template.key}
+                        type="button"
+                        variant="ghost"
+                        size="small"
+                        label={template.label}
+                        onClick={() => applyTemplate(template.key)}
+                      />
+                    ))}
+                  </div>
+                </div>
                 <CivicField label={t('report.issue_title')} error={errors.title?.message}>
                   <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.titleMin, message: t('report.title_too_short') }, maxLength: { value: FORM_LIMITS.report.titleMax, message: t('report.title_too_long') } }}
                     render={({ field, fieldState }) => (
@@ -176,6 +239,18 @@ export function ReportSignal() {
                               <span className="text-brand-primary">{field.value}</span>
                             </div>
                             <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={1000} className="w-full" />
+                            <div className="flex flex-wrap gap-2">
+                              {citizenPresets.map((preset) => (
+                                <CivicButton
+                                  key={preset}
+                                  type="button"
+                                  variant={field.value === preset ? "primary" : "ghost"}
+                                  size="small"
+                                  label={String(preset)}
+                                  onClick={() => field.onChange(preset)}
+                                />
+                              ))}
+                            </div>
                           </div>
                         )}
                       />
