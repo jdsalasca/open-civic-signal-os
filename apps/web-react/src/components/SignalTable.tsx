@@ -4,8 +4,10 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Signal } from "../types";
 import { CivicBadge } from "./ui/CivicBadge";
+import { CivicButton } from "./ui/CivicButton";
 
 type Props = {
   signals: Signal[];
@@ -23,6 +25,7 @@ interface SkeletonRow {
 
 export function SignalTable({ signals, loading, totalRecords, rows, first, onPage }: Props) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [globalFilterValue, setGlobalFilterValue] = useState("");
 
   const filteredSignals = useMemo(() => {
@@ -67,16 +70,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
 
   const scoreTemplate = (rowData: Signal | SkeletonRow) => {
     if ('_skeleton' in rowData) return <Skeleton width="2rem" />;
-    return (
-      <div className="flex align-items-center gap-3">
-        <span className="font-black text-main text-lg tabular-nums">{rowData.priorityScore?.toFixed(0)}</span>
-        <div className="hidden xl:flex flex-column gap-1 flex-grow-1" style={{ maxWidth: '60px' }}>
-           <div className="bg-white-alpha-10 border-round-sm overflow-hidden" style={{ height: '4px' }}>
-              <div className="bg-brand-primary h-full" style={{ width: `${Math.min(((rowData.priorityScore || 0) / 350) * 100, 100)}%` }}></div>
-           </div>
-        </div>
-      </div>
-    );
+    return <span className="font-black text-main text-lg tabular-nums">{rowData.priorityScore?.toFixed(0)}</span>;
   };
 
   const titleTemplate = (rowData: Signal | SkeletonRow) => {
@@ -105,8 +99,8 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
           <i className="pi pi-database text-on-brand font-bold text-xs"></i>
         </div>
         <div className="flex flex-column gap-1">
-          <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">Priority issues</h2>
-          <span className="text-xs text-muted">Visible list filter</span>
+          <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">{t('dashboard.feed_title')}</h2>
+          <span className="text-xs text-muted">{t('dashboard.focus_subtitle')}</span>
         </div>
       </div>
       <div className="app-search-shell w-full md:w-auto md:ml-auto" style={{ maxWidth: "20rem" }}>
@@ -114,7 +108,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
         <InputText
           value={globalFilterValue}
           onChange={onGlobalFilterChange}
-          placeholder="Filter by title, status, category or ID"
+          placeholder={t('dashboard.search_placeholder')}
           className="app-search-input"
         />
       </div>
@@ -140,20 +134,42 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
           }
         }}
         rowClassName={(d) => (loading || ('_skeleton' in (d as object))) ? '' : 'cursor-pointer group hover:bg-white-alpha-5 transition-colors'}
-        emptyMessage={loading ? null : <div className="p-8 text-center text-muted font-bold uppercase tracking-widest text-xs">No results match your filters</div>}
+        emptyMessage={loading ? null : <div className="p-8 text-center text-muted font-bold uppercase tracking-widest text-xs">{t('signals.no_results')}</div>}
         className="p-datatable-sm"
         sortField="priorityScore"
         sortOrder={-1}
         removableSort
         tableStyle={{ minWidth: '50rem' }}
       >
-        <Column header="Intelligence Context" body={titleTemplate} sortable sortField="title" className="pl-6" />
-        <Column field="category" header="Sector" sortable body={(s) => (loading || ('_skeleton' in (s as object))) ? <Skeleton width="4rem" /> : (
+        <Column header={t('signals.context_header')} body={titleTemplate} sortable sortField="title" className="pl-6" />
+        <Column field="category" header={t('signals.sector_header')} sortable body={(s) => (loading || ('_skeleton' in (s as object))) ? <Skeleton width="4rem" /> : (
           <CivicBadge type="category" label={(s as Signal).category} />
         )} />
-        <Column header="Lifecycle" sortable sortField="status" body={statusTemplate} style={{ width: '10rem' }} />
-        <Column header="Index" sortable sortField="priorityScore" body={scoreTemplate} style={{ width: '10rem' }} />
-        <Column body={(d) => (!loading && !('_skeleton' in (d as object))) && <i className="pi pi-arrow-right text-muted group-hover:text-brand-primary group-hover:translate-x-1 transition-all text-xs" />} style={{ width: '4rem' }} className="pr-6" />
+        <Column header={t('signals.lifecycle_header')} sortable sortField="status" body={statusTemplate} style={{ width: '10rem' }} />
+        <Column header={t('signals.index_header')} sortable sortField="priorityScore" body={scoreTemplate} style={{ width: '8rem' }} />
+        <Column
+          style={{ width: '10rem' }}
+          className="pr-6"
+          body={(d) => {
+            if (loading || ('_skeleton' in (d as object))) {
+              return <Skeleton width="6rem" height="2rem" />;
+            }
+            const signal = d as Signal;
+            return (
+              <CivicButton
+                type="button"
+                variant="ghost"
+                size="small"
+                label={t('signals.view_details')}
+                icon="pi pi-arrow-right"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  navigate(`/signal/${signal.id}`);
+                }}
+              />
+            );
+          }}
+        />
       </DataTable>
     </div>
   );
