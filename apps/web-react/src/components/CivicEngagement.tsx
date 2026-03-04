@@ -8,6 +8,8 @@ import apiClient from '../api/axios';
 import { CivicButton } from './ui/CivicButton';
 import { CivicCard } from './ui/CivicCard';
 import { toRoleListLabel } from "../constants/roleLabels";
+import { CivicCharacterCount } from "./ui/CivicCharacterCount";
+import { FORM_LIMITS } from "../constants/formLimits";
 
 interface Props {
   parentId: string;
@@ -38,6 +40,11 @@ export function CivicEngagement({
   const [commentsVisible, setCommentsVisible] = useState(autoloadComments);
   const [commentsLoaded, setCommentsLoaded] = useState(false);
   const [commentCount, setCommentCount] = useState(initialCommentCount);
+  const [replyTarget, setReplyTarget] = useState<CivicComment | null>(null);
+
+  const minCommentLength = FORM_LIMITS.threads.messageMin;
+  const maxCommentLength = FORM_LIMITS.threads.messageMax;
+  const currentCommentLength = newComment.trim().length;
 
   const loadData = useCallback(async () => {
     try {
@@ -92,7 +99,8 @@ export function CivicEngagement({
   };
 
   const handleAddComment = async () => {
-    if (!newComment.trim()) return;
+    const trimmedComment = newComment.trim();
+    if (trimmedComment.length < minCommentLength) return;
     if (!commentsVisible) {
       setCommentsVisible(true);
     }
@@ -101,8 +109,10 @@ export function CivicEngagement({
       const endpoint = parentType === 'SIGNAL' 
         ? `signals/${parentId}/comments` 
         : `community/blog/${parentId}/comments`;
-      await apiClient.post(endpoint, { content: newComment });
+      const replyPrefix = replyTarget ? `@${replyTarget.authorUsername} ` : "";
+      await apiClient.post(endpoint, { content: `${replyPrefix}${trimmedComment}`.trim() });
       setNewMessage("");
+      setReplyTarget(null);
       toast.success(t("engagement.comment_added"));
       loadData();
     } catch (err) {
@@ -168,6 +178,20 @@ export function CivicEngagement({
                     <span className="text-min text-muted ml-auto">{new Date(comment.createdAt).toLocaleString()}</span>
                   </div>
                   <p className="m-0 text-secondary text-base line-height-3 font-medium">{comment.content}</p>
+                  <div className="mt-3 flex justify-content-end">
+                    <CivicButton
+                      type="button"
+                      variant="ghost"
+                      size="small"
+                      icon="pi pi-reply"
+                      label={t("engagement.reply")}
+                      onClick={() => {
+                        setCommentsVisible(true);
+                        setReplyTarget(comment);
+                        setNewMessage((prev) => prev || `@${comment.authorUsername} `);
+                      }}
+                    />
+                  </div>
                 </div>
               ))
             )}
@@ -176,20 +200,36 @@ export function CivicEngagement({
           {/* INPUT AREA */}
           <div className="p-5 bg-black-alpha-20 border-top-1 border-white-alpha-10">
             <div className="flex flex-column gap-3">
+              {replyTarget && (
+                <div className="flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">
+                  <span className="text-sm text-main">
+                    {t("engagement.replying_to", { user: replyTarget.authorUsername })}
+                  </span>
+                  <CivicButton
+                    type="button"
+                    variant="ghost"
+                    size="small"
+                    label={t("engagement.cancel_reply")}
+                    onClick={() => setReplyTarget(null)}
+                  />
+                </div>
+              )}
               <InputTextarea 
                 value={newComment}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder={t("engagement.comment_placeholder")}
                 rows={3}
                 className="w-full bg-surface"
+                maxLength={maxCommentLength}
               />
+              <CivicCharacterCount current={currentCommentLength} max={maxCommentLength} min={minCommentLength} />
               <div className="flex justify-content-end">
                 <CivicButton 
                   label={t("engagement.post_comment")} 
                   icon="pi pi-send" 
                   onClick={handleAddComment} 
                   loading={loading}
-                  disabled={!newComment.trim()}
+                  disabled={currentCommentLength < minCommentLength}
                 />
               </div>
             </div>

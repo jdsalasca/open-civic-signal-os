@@ -37,6 +37,7 @@ export function CommunityThreads() {
   const [threadStatusFilter, setThreadStatusFilter] = useState<ThreadStatusFilter>("ALL");
   const [targetCommunityId, setTargetCommunityId] = useState<string>("");
   const [newThreadTitle, setNewThreadTitle] = useState("");
+  const [threadQuery, setThreadQuery] = useState("");
   const [messageDraftByThread, setMessageDraftByThread] = useState<Record<string, string>>({});
   const [messageImageByThread, setMessageImageByThread] = useState<Record<string, string>>({});
   const [replyTargetByThread, setReplyTargetByThread] = useState<Record<string, CommunityThreadMessage | null>>({});
@@ -188,6 +189,15 @@ export function CommunityThreads() {
   const canOpenCrossCommunityThread = Boolean(activeCommunityId && targetOptions.length > 0);
   const canCreateThread = Boolean(activeCommunityId && targetCommunityId && threadTitleLength >= FORM_LIMITS.threads.titleMin);
 
+  const filteredThreads = useMemo(() => {
+    const query = threadQuery.trim().toLowerCase();
+    if (!query) return threads;
+    return threads.filter((thread) => {
+      if (thread.title.toLowerCase().includes(query)) return true;
+      return (thread.messages || []).some((message) => message.content.toLowerCase().includes(query));
+    });
+  }, [threadQuery, threads]);
+
   const onPageChange = (event: PaginatorPageChangeEvent) => {
     setThreadPage(event.page);
     setThreadRows(event.rows);
@@ -328,6 +338,18 @@ export function CommunityThreads() {
               data-testid="threads-status-filter"
             />
           </div>
+          <div className="w-full md:w-20rem">
+            <span className="p-input-icon-left w-full">
+              <i className="pi pi-search" />
+              <InputText
+                value={threadQuery}
+                onChange={(e) => setThreadQuery(e.target.value)}
+                className="w-full"
+                placeholder={t("community_threads.search_placeholder")}
+                data-testid="threads-search-input"
+              />
+            </span>
+          </div>
         </CivicActionBar>
 
         {!activeCommunityId && (
@@ -392,23 +414,25 @@ export function CommunityThreads() {
 
           <div className="col-12 lg:col-8">
             <CivicCard title={t("community_threads.feed_title", { community: activeMembership?.communityName || t("community_threads.none") })} padding="none">
-              {threads.length === 0 ? (
+              {filteredThreads.length === 0 ? (
                 <CivicEmptyState
                   icon="pi-comments"
-                  title={t("community_threads.empty")}
-                  description={t("community_threads.join_other")}
+                  title={threadQuery.trim() ? t("community_threads.search_empty_title") : t("community_threads.empty")}
+                  description={threadQuery.trim() ? t("community_threads.search_empty_desc") : t("community_threads.join_other")}
                 />
               ) : (
                 <>
                   <div className="px-5 pt-4 text-sm text-muted font-semibold">
-                    {t("community_threads.page_summary", {
-                      from: totalRecords === 0 ? 0 : threadPage * threadRows + 1,
-                      to: Math.min((threadPage + 1) * threadRows, totalRecords),
-                      total: totalRecords,
-                    })}
+                    {threadQuery.trim()
+                      ? t("community_threads.search_summary", { total: filteredThreads.length })
+                      : t("community_threads.page_summary", {
+                          from: totalRecords === 0 ? 0 : threadPage * threadRows + 1,
+                          to: Math.min((threadPage + 1) * threadRows, totalRecords),
+                          total: totalRecords,
+                        })}
                   </div>
                   <div className="flex flex-column gap-px bg-white-alpha-10">
-                    {threads.map((thread) => {
+                    {filteredThreads.map((thread) => {
                       const { roots, childrenByParent } = buildThreadTree(thread.messages || []);
                       const draft = messageDraftByThread[thread.id] || "";
                       const draftImageUrl = messageImageByThread[thread.id] || "";

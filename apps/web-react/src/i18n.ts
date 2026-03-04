@@ -252,7 +252,11 @@ const resources = {
         "restore": "Restore",
         "hide": "Hide",
         "react_with": "React with {{emoji}}",
-        "permission_note": "Join at least one additional community to open a cross-community thread."
+        "permission_note": "Join at least one additional community to open a cross-community thread.",
+        "search_placeholder": "Search threads by topic or message...",
+        "search_empty_title": "No threads match your search",
+        "search_empty_desc": "Try a shorter keyword or clear the search field.",
+        "search_summary": "{{total}} threads match your search"
       },
       "engagement": {
         "reactions": "Reactions",
@@ -265,7 +269,10 @@ const resources = {
         "comment_placeholder": "Share your perspective...",
         "post_comment": "Post Comment",
         "comment_added": "Comment added",
-        "comment_failed": "Failed to post comment"
+        "comment_failed": "Failed to post comment",
+        "reply": "Reply",
+        "replying_to": "Replying to {{user}}",
+        "cancel_reply": "Cancel"
       },
       "signals": {
         "ref": "REF",
@@ -638,7 +645,11 @@ const resources = {
         "restore": "Restaurar",
         "hide": "Ocultar",
         "react_with": "Reaccionar con {{emoji}}",
-        "permission_note": "Únase al menos a una comunidad adicional para abrir un hilo entre comunidades."
+        "permission_note": "Únase al menos a una comunidad adicional para abrir un hilo entre comunidades.",
+        "search_placeholder": "Buscar hilos por tema o mensaje...",
+        "search_empty_title": "Ningún hilo coincide con su búsqueda",
+        "search_empty_desc": "Pruebe con una palabra más corta o limpie el campo.",
+        "search_summary": "{{total}} hilos coinciden con su búsqueda"
       },
       "engagement": {
         "reactions": "Reacciones",
@@ -651,7 +662,10 @@ const resources = {
         "comment_placeholder": "Comparta su perspectiva...",
         "post_comment": "Publicar comentario",
         "comment_added": "Comentario agregado",
-        "comment_failed": "No se pudo publicar el comentario"
+        "comment_failed": "No se pudo publicar el comentario",
+        "reply": "Responder",
+        "replying_to": "Respondiendo a {{user}}",
+        "cancel_reply": "Cancelar"
       },
       "signals": {
         "ref": "REF",
