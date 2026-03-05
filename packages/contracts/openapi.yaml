@@ -1260,6 +1260,12 @@ components:
           type: string
         imageUrl:
           type: string
+        locationLabel:
+          type: string
+        evidenceUrls:
+          type: array
+          items:
+            type: string
         category:
           type: string
         status:
@@ -1347,6 +1353,15 @@ components:
         imageUrl:
           type: string
           maxLength: 1200
+        locationLabel:
+          type: string
+          maxLength: 180
+        evidenceUrls:
+          type: array
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 1200
         latitude:
           type: number
           format: double

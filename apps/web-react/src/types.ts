@@ -32,6 +32,8 @@ export type Signal = {
   title: string;
   description: string;
   imageUrl?: string;
+  locationLabel?: string | null;
+  evidenceUrls?: string[];
   category: string;
   status: string;
   priorityScore: number;
@@ -40,6 +42,8 @@ export type Signal = {
   reactions: Record<string, number>;
   viewerReaction?: string;
   explainabilitySummary: ExplainabilitySummary;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export type Notification = {

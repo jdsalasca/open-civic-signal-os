@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public record SignalCreateRequest(
     @NotBlank(message = "Signal title is mandatory")
@@ -35,6 +36,19 @@ public record SignalCreateRequest(
         message = "Image URL must start with http:// or https://"
     )
     String imageUrl,
+
+    @Size(max = 180, message = "Location label must be at most 180 characters")
+    String locationLabel,
+
+    @Size(max = 5, message = "Evidence list cannot exceed 5 entries")
+    List<
+        @Size(max = 1200, message = "Evidence URL must be at most 1200 characters")
+        @Pattern(
+            regexp = "^https?://.*$",
+            message = "Evidence URL must start with http:// or https://"
+        )
+        String
+    > evidenceUrls,
     
     Double latitude,
     Double longitude

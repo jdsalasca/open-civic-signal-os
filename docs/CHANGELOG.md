@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Issue Tracker-Grade Report Intake**: Reporting now uses a 3-step wizard with guided validation, readable location capture, multi-evidence links, optional GPS, and backend-owned `locationLabel` plus `evidenceUrls` contract support for more actionable institutional intake. (`story:OCS-P1-037`)
 - **Unified Community Home**: `/communities/feed` now behaves as a true community home backed by one composite endpoint that surfaces official updates, hot discussions, top open issues, and freshness in a calmer, more legible layout. (`story:OCS-P1-036`)
 - **Thread Relevance Ordering**: Community talks now support backend-owned `sortBy` ordering (`RELEVANCE` or `RECENT`), explicit relevance metadata, and bounded nested replies so high-signal discussions remain usable as volume grows. (`story:OCS-P1-034`)
 - **Community-First Home Layer**: Dashboard and shell now foreground the active community with clearer belonging context, direct community actions, community-home copy, and a calmer first-view flow that feels less like a generic admin panel. (`story:OCS-P1-032` refinement)

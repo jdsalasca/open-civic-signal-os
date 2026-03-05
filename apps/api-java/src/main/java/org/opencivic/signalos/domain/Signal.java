@@ -17,6 +17,8 @@ public class Signal {
 
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
+    @Column(columnDefinition = "TEXT")
+    private String locationLabel;
     private String category;
     private int urgency;
     private int impact;
@@ -51,6 +53,11 @@ public class Signal {
     
     private Double latitude;
     private Double longitude;
+
+    @ElementCollection
+    @CollectionTable(name = "signal_evidence_urls", joinColumns = @JoinColumn(name = "signal_id"))
+    @Column(name = "evidence_url", columnDefinition = "TEXT")
+    private List<String> evidenceUrls = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "signal_reactions", joinColumns = @JoinColumn(name = "signal_id"))
@@ -95,6 +102,7 @@ public class Signal {
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public String getImageUrl() { return imageUrl; }
+    public String getLocationLabel() { return locationLabel; }
     public String getStatus() { return status; }
     public double getPriorityScore() { return priorityScore; }
     public int getUrgency() { return urgency; }
@@ -109,6 +117,10 @@ public class Signal {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public Double getLatitude() { return latitude; }
     public Double getLongitude() { return longitude; }
+    public List<String> getEvidenceUrls() {
+        if (evidenceUrls == null) evidenceUrls = new ArrayList<>();
+        return evidenceUrls;
+    }
     
     public List<UUID> getMergedFrom() { 
         if (mergedFrom == null) mergedFrom = new ArrayList<>();
@@ -120,6 +132,7 @@ public class Signal {
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setLocationLabel(String locationLabel) { this.locationLabel = locationLabel; }
     public void setCategory(String category) { this.category = category; }
     public void setUrgency(int urgency) { this.urgency = urgency; }
     public void setImpact(int impact) { this.impact = impact; }
@@ -134,6 +147,9 @@ public class Signal {
     public void setCommunityId(UUID communityId) { this.communityId = communityId; }
     public void setLatitude(Double latitude) { this.latitude = latitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public void setEvidenceUrls(List<String> evidenceUrls) {
+        this.evidenceUrls = evidenceUrls != null ? new ArrayList<>(evidenceUrls) : new ArrayList<>();
+    }
 
     public Signal withScore(double score, ScoreBreakdown breakdown) {
         this.priorityScore = score;

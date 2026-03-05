@@ -87,6 +87,8 @@ export function SignalDetail() {
   if (loading) return <Layout><div className="p-6"><ProgressBar mode="indeterminate" style={{ height: '6px' }} /></div></Layout>;
   if (!signal) return null;
 
+  const evidenceUrls = (signal.evidenceUrls?.length ? signal.evidenceUrls : signal.imageUrl ? [signal.imageUrl] : []).filter(Boolean) as string[];
+
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
   
   let severity: 'new' | 'progress' | 'resolved' | 'rejected' = 'new';
@@ -141,15 +143,31 @@ export function SignalDetail() {
                 {signal.description}
               </p>
 
-              {signal.imageUrl && (
-                <div className="mt-5 border-round-2xl overflow-hidden border-1 border-subtle">
-                  <img
-                    src={signal.imageUrl}
-                    alt={signal.title}
-                    loading="lazy"
-                    className="w-full"
-                    style={{ maxHeight: "24rem", objectFit: "cover" }}
-                  />
+              {(signal.locationLabel || evidenceUrls.length > 0) && (
+                <div className="mt-5 flex flex-column gap-4">
+                  {signal.locationLabel && (
+                    <div className="u-pill w-fit" data-testid="signal-detail-location-label">
+                      <i className="pi pi-map-marker text-brand-primary"></i>
+                      {signal.locationLabel}
+                    </div>
+                  )}
+                  {evidenceUrls.length > 0 && (
+                    <div className="grid">
+                      {evidenceUrls.map((url, index) => (
+                        <div key={`${url}-${index}`} className="col-12 md:col-6">
+                          <div className="border-round-2xl overflow-hidden border-1 border-subtle h-full">
+                            <img
+                              src={url}
+                              alt={`${signal.title} evidence ${index + 1}`}
+                              loading="lazy"
+                              className="w-full h-full"
+                              style={{ maxHeight: "20rem", objectFit: "cover" }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               

@@ -4,6 +4,9 @@ export const FORM_LIMITS = {
     titleMax: 120,
     descriptionMin: 20,
     descriptionMax: 1200,
+    locationMax: 180,
+    evidenceMax: 5,
+    evidenceUrlMax: 1200,
   },
   blog: {
     titleMin: 8,
