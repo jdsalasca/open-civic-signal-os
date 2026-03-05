@@ -18,6 +18,7 @@ import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { isSubmitShortcut } from "../utils/keyboard";
+import { Signal } from "../types";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -52,6 +53,7 @@ export function ReportSignal() {
 
   const [isLocating, setIsLocating] = useState(false);
   const [locationFound, setLocationFound] = useState(false);
+  const [submittedSignal, setSubmittedSignal] = useState<Signal | null>(null);
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
@@ -126,9 +128,9 @@ export function ReportSignal() {
 
   const onSubmit = async (data: ReportForm) => {
     try {
-      await apiClient.post("signals", data);
+      const response = await apiClient.post<Signal>("signals", data);
+      setSubmittedSignal(response.data);
       toast.success(t('report.success'));
-      navigate("/");
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('common.error'));
@@ -163,6 +165,96 @@ export function ReportSignal() {
     { key: "medium", urgency: 3, impact: 3, label: t("report.preset_medium") },
     { key: "high", urgency: 5, impact: 5, label: t("report.preset_high") },
   ] as const;
+
+  if (submittedSignal) {
+    const topFactors = submittedSignal.explainabilitySummary?.topFactors ?? [];
+    const primaryFactor = topFactors[0]?.key
+      ? t(`signals.factor_keys.${topFactors[0].key}`)
+      : t('report.success_factor_fallback');
+    const secondaryFactor = topFactors[1]?.key
+      ? t(`signals.factor_keys.${topFactors[1].key}`)
+      : null;
+
+    return (
+      <Layout>
+        <div className="animate-fade-up max-w-50rem mx-auto pb-8">
+          <CivicPageHeader
+            title={t('report.success_title')}
+            description={t('report.success_desc')}
+          />
+          <CivicCard variant="brand" className="mb-6" data-testid="report-success-card">
+            <div className="flex flex-column gap-4">
+              <div className="u-pill w-fit" data-testid="report-success-status">
+                <i className="pi pi-check-circle text-brand-primary"></i>
+                {t('report.success_status')}
+              </div>
+              <h2 className="text-3xl font-black text-main m-0" data-testid="report-success-title">
+                {submittedSignal.title}
+              </h2>
+              <p className="text-secondary m-0" data-testid="report-success-lifecycle-intro">
+                {t('report.success_lifecycle_intro')}
+              </p>
+              <div className="grid">
+                <div className="col-12 md:col-4">
+                  <div className="p-4 border-round-xl border-1 border-subtle h-full" data-testid="report-success-step-review">
+                    <div className="text-xs font-black uppercase tracking-widest text-muted mb-2">{t('report.success_step_1_label')}</div>
+                    <div className="text-sm text-secondary">{t('report.success_step_1_desc')}</div>
+                  </div>
+                </div>
+                <div className="col-12 md:col-4">
+                  <div className="p-4 border-round-xl border-1 border-subtle h-full" data-testid="report-success-step-priority">
+                    <div className="text-xs font-black uppercase tracking-widest text-muted mb-2">{t('report.success_step_2_label')}</div>
+                    <div className="text-sm text-secondary">
+                      {secondaryFactor
+                        ? t('report.success_step_2_desc_with_secondary', { primary: primaryFactor, secondary: secondaryFactor })
+                        : t('report.success_step_2_desc', { primary: primaryFactor })}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-12 md:col-4">
+                  <div className="p-4 border-round-xl border-1 border-subtle h-full" data-testid="report-success-step-followup">
+                    <div className="text-xs font-black uppercase tracking-widest text-muted mb-2">{t('report.success_step_3_label')}</div>
+                    <div className="text-sm text-secondary">{t('report.success_step_3_desc')}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 border-round-xl border-1 border-subtle bg-surface" data-testid="report-success-why-ranked">
+                <div className="text-xs font-black uppercase tracking-widest text-muted mb-2">{t('report.success_why_ranked_label')}</div>
+                <div className="text-sm text-secondary">
+                  {submittedSignal.explainabilitySummary?.summary || t('report.success_why_ranked_fallback')}
+                </div>
+              </div>
+              <div className="flex flex-column md:flex-row gap-3">
+                <CivicButton
+                  type="button"
+                  label={t('report.success_cta_my_reports')}
+                  icon="pi pi-user"
+                  onClick={() => navigate('/mine')}
+                  data-testid="report-success-go-mine"
+                />
+                <CivicButton
+                  type="button"
+                  label={t('report.success_cta_view_detail')}
+                  icon="pi pi-arrow-right"
+                  variant="secondary"
+                  onClick={() => navigate(`/signals/${submittedSignal.id}`)}
+                  data-testid="report-success-go-detail"
+                />
+                <CivicButton
+                  type="button"
+                  label={t('report.success_cta_backlog')}
+                  icon="pi pi-list"
+                  variant="ghost"
+                  onClick={() => navigate('/')}
+                  data-testid="report-success-go-dashboard"
+                />
+              </div>
+            </div>
+          </CivicCard>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
