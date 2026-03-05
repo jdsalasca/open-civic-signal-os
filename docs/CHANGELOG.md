@@ -29,6 +29,7 @@
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 
 ### Fixed
+- **Action-Oriented Empty and Restricted States**: My activity, community hub, and unauthorized views now explain why the user is blocked or empty and offer an immediate next action instead of dead-end copy. (`story:OCS-P1-027`)
 - **Report Trust Loop**: Successful report submission now stays in-context with a visible lifecycle explanation, ranking summary, and direct follow-up actions instead of a blind redirect. (`story:OCS-P1-026`)
 - **Navigation Clarity**: Main navigation now keeps only the core path always visible and progressively reveals secondary tools, reducing duplicated actions across desktop and mobile. (`story:OCS-P1-025`)
 - **Role-Aware Guided Home**: Dashboard hero and guidance card now adapt to citizen, moderator, and public-servant intent so each user sees one clearer next step instead of generic messaging. (`story:OCS-P1-024`)

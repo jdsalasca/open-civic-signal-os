@@ -13,6 +13,7 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { useTranslation } from "react-i18next";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -24,6 +25,7 @@ const roleOptions = [
 ];
 
 export function Communities() {
+  const { t } = useTranslation();
   const { memberships, setMemberships, setActiveCommunityId } = useCommunityStore();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [selectedCommunityId, setSelectedCommunityId] = useState<string>("");
@@ -105,11 +107,11 @@ export function Communities() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <CivicPageHeader title="Community Hub" description="Manage your civic ecosystem and regional memberships." />
+        <CivicPageHeader title={t('communities_hub.title')} description={t('communities_hub.desc')} />
 
         <div className="grid">
           <div className="col-12 lg:col-7">
-            <CivicCard title="My Memberships" className="h-full">
+            <CivicCard title={t('communities_hub.memberships_title')} className="h-full">
               <div className="flex flex-column gap-4">
                 <CivicActionBar className="mb-4 p-4">
                   <div className="flex-1" style={{ minWidth: "14rem" }}>
@@ -117,7 +119,7 @@ export function Communities() {
                       value={selectedCommunityId}
                       options={communityOptions}
                       onChange={(e) => setSelectedCommunityId(e.value)}
-                      placeholder="Select a community"
+                      placeholder={t('communities_hub.select_placeholder')}
                       className="w-full"
                       data-testid="join-community-dropdown"
                     />
@@ -133,7 +135,7 @@ export function Communities() {
                   </div>
                   <div className="flex-1" style={{ minWidth: "10rem" }}>
                     <CivicButton
-                      label="Join"
+                      label={t('communities_hub.join_action')}
                       icon="pi pi-user-plus"
                       onClick={handleJoin}
                       disabled={!selectedCommunityId}
@@ -166,8 +168,14 @@ export function Communities() {
                   {memberships.length === 0 && (
                     <CivicEmptyState
                       icon="pi-users"
-                      title="No memberships yet"
-                      description="Join a community from the selector above to start participating."
+                      title={t('communities_hub.empty_memberships_title')}
+                      description={t('communities_hub.empty_memberships_desc')}
+                      actionLabel={t('communities_hub.empty_memberships_action')}
+                      onAction={() => {
+                        const firstCommunity = communities[0];
+                        if (!firstCommunity) return;
+                        setSelectedCommunityId(firstCommunity.id);
+                      }}
                     />
                   )}
                 </div>
@@ -176,11 +184,11 @@ export function Communities() {
           </div>
 
           <div className="col-12 lg:col-5">
-            <CivicCard title="Registry Explorer" variant="brand">
+            <CivicCard title={t('communities_hub.registry_title')} variant="brand">
               <div className="flex justify-content-between align-items-center mb-6">
-                <p className="text-secondary text-sm font-medium m-0">Public directory of verified communities.</p>
+                <p className="text-secondary text-sm font-medium m-0">{t('communities_hub.registry_desc')}</p>
                 <CivicButton
-                  label="Create"
+                  label={t('communities_hub.create_short')}
                   icon="pi pi-plus"
                   onClick={() => setCreating(true)}
                   variant="secondary"
@@ -191,8 +199,10 @@ export function Communities() {
               {communities.length === 0 ? (
                 <CivicEmptyState
                   icon="pi-globe"
-                  title="Registry is empty"
-                  description="Create the first community to initialize the public registry."
+                  title={t('communities_hub.empty_registry_title')}
+                  description={t('communities_hub.empty_registry_desc')}
+                  actionLabel={t('communities_hub.empty_registry_action')}
+                  onAction={() => setCreating(true)}
                 />
               ) : (
                 <div className="flex flex-column gap-3">
@@ -210,7 +220,7 @@ export function Communities() {
       </div>
 
       <Dialog 
-        header={<div className="text-xl font-black uppercase tracking-tight text-main">Create New Community</div>} 
+        header={<div className="text-xl font-black uppercase tracking-tight text-main">{t('communities_hub.create_dialog_title')}</div>} 
         visible={creating} 
         onHide={() => setCreating(false)} 
         className="w-full max-w-30rem mx-3"
@@ -218,27 +228,27 @@ export function Communities() {
       >
         <div className="flex flex-column gap-4 pt-2">
           <div className="flex flex-column gap-2">
-            <label htmlFor="comm-name" className="text-xs font-bold uppercase text-muted tracking-widest">Community Name</label>
-            <InputText id="comm-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Springfield Heights" className="w-full p-inputtext-lg" />
+            <label htmlFor="comm-name" className="text-xs font-bold uppercase text-muted tracking-widest">{t('communities_hub.create_name')}</label>
+            <InputText id="comm-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t('communities_hub.create_name_placeholder')} className="w-full p-inputtext-lg" />
           </div>
           <div className="flex flex-column gap-2">
-            <label htmlFor="comm-slug" className="text-xs font-bold uppercase text-muted tracking-widest">URL Slug</label>
-            <InputText id="comm-slug" value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder="e.g. springfield-heights" className="w-full font-mono" />
+            <label htmlFor="comm-slug" className="text-xs font-bold uppercase text-muted tracking-widest">{t('communities_hub.create_slug')}</label>
+            <InputText id="comm-slug" value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder={t('communities_hub.create_slug_placeholder')} className="w-full font-mono" />
           </div>
           <div className="flex flex-column gap-2">
-            <label htmlFor="comm-desc" className="text-xs font-bold uppercase text-muted tracking-widest">Description</label>
+            <label htmlFor="comm-desc" className="text-xs font-bold uppercase text-muted tracking-widest">{t('communities_hub.create_description')}</label>
             <InputText
               id="comm-desc"
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="Provide a brief context for this community"
+              placeholder={t('communities_hub.create_description_placeholder')}
               className="w-full"
             />
           </div>
           <div className="flex gap-2 justify-content-end mt-2">
-            <CivicButton label="Cancel" variant="ghost" onClick={() => setCreating(false)} />
+            <CivicButton label={t('common.cancel')} variant="ghost" onClick={() => setCreating(false)} />
             <CivicButton
-              label="Create Community"
+              label={t('communities_hub.create_action')}
               icon="pi pi-check"
               onClick={handleCreate}
               disabled={!newName.trim() || !newSlug.trim()}

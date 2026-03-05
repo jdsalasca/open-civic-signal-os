@@ -83,9 +83,9 @@ export function MySignals() {
             emptyMessage={
               <CivicEmptyState 
                 icon="pi-file-edit"
-                title="No Contributions Found"
-                description="Your operational history is currently empty. Start by reporting a new civic signal."
-                actionLabel="Report First Issue"
+                title={t('my_contributions.empty_title')}
+                description={t('my_contributions.empty_desc')}
+                actionLabel={t('my_contributions.empty_action')}
                 onAction={() => navigate("/report")}
               />
             }
