@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
@@ -46,6 +46,7 @@ export function CommunityBlog() {
   const [statusTag, setStatusTag] = useState("IN_PROGRESS");
   const [publishing, setPublishing] = useState(false);
   const [commentCountsByPost, setCommentCountsByPost] = useState<Record<string, number>>({});
+  const timelineLoadInFlightRef = useRef<string | null>(null);
 
   const activeMembership = memberships.find((m) => m.communityId === activeCommunityId);
   const canPublishByRole =
@@ -75,6 +76,8 @@ export function CommunityBlog() {
 
   const loadPosts = useCallback(async () => {
     if (!activeCommunityId) return;
+    if (timelineLoadInFlightRef.current === activeCommunityId) return;
+    timelineLoadInFlightRef.current = activeCommunityId;
     try {
       const res = await apiClient.get(`community/blog?communityId=${activeCommunityId}`);
       const timeline = res.data || [];
@@ -85,14 +88,21 @@ export function CommunityBlog() {
         return;
       }
 
-      const postIds = timeline.map((post: CommunityBlogPost) => post.id).join(",");
-      const countRes = await apiClient.get(`community/blog/comments/count?postIds=${postIds}`);
-      setCommentCountsByPost(countRes.data || {});
+      const missingPostIds = timeline
+        .map((post: CommunityBlogPost) => post.id)
+        .filter((postId: string) => commentCountsByPost[postId] === undefined);
+
+      if (missingPostIds.length > 0) {
+        const countRes = await apiClient.get(`community/blog/comments/count?postIds=${missingPostIds.join(",")}`);
+        setCommentCountsByPost((current) => ({ ...current, ...(countRes.data || {}) }));
+      }
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t("community_blog.load_error"));
+    } finally {
+      timelineLoadInFlightRef.current = null;
     }
-  }, [activeCommunityId, t]);
+  }, [activeCommunityId, commentCountsByPost, t]);
 
   useEffect(() => {
     loadPosts();

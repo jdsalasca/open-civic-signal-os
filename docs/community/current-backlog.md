@@ -86,6 +86,9 @@ Operational backlog snapshot for immediate execution in Open Civic Signal OS.
      - API integration tests validate at least detail + meta contract examples
 4. `P1 performance: remove N+1 engagement calls in community blog timeline`
    - Replace per-post `GET /api/community/blog/{id}/comments` fetch pattern with batched comment summary/list endpoint.
+   - 2026-03-04 remediation evidence:
+     - Blog initial load now uses batched `GET /api/community/blog/comments/count` and avoids per-post comments fetch.
+     - Playwright validation: `apps/web-react/src/tests/community-threads-paging.spec.ts` (`community blog initial load uses batched comment count endpoint without per-post comment fan-out`).
    - Acceptance criteria:
      - blog timeline load requires O(1) or O(log n) API calls for engagement data
      - Playwright trace shows at least 70% fewer blog comment requests on initial load

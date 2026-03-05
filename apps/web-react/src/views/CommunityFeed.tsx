@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { CommunityFeedItem } from "../types";
@@ -28,11 +28,15 @@ export function CommunityFeed() {
   const [items, setItems] = useState<CommunityFeedItem[]>([]);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [days, setDays] = useState<number>(7);
+  const feedLoadInFlightRef = useRef<string | null>(null);
 
   const activeCommunityName = memberships.find(m => m.communityId === activeCommunityId)?.communityName;
 
   const loadFeed = useCallback(async () => {
     if (!activeCommunityId) return;
+    const requestKey = `${activeCommunityId}:${days}`;
+    if (feedLoadInFlightRef.current === requestKey) return;
+    feedLoadInFlightRef.current = requestKey;
     try {
       const res = await apiClient.get(
         `community/feed?communityId=${activeCommunityId}&days=${days}`
@@ -41,6 +45,8 @@ export function CommunityFeed() {
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || "Failed to load feed");
+    } finally {
+      feedLoadInFlightRef.current = null;
     }
   }, [activeCommunityId, days]);
 
