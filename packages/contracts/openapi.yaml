@@ -174,6 +174,265 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/signals:
+    post:
+      summary: Create a civic signal
+      parameters:
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalCreateRequest'
+      responses:
+        '200':
+          description: Created signal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalResponse'
+  /api/signals/{id}/status:
+    patch:
+      summary: Update signal lifecycle status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalStatusUpdateRequest'
+      responses:
+        '200':
+          description: Updated signal status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalResponse'
+        '404':
+          description: Signal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/signals/{id}/history:
+    get:
+      summary: Get status transition history for one signal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Signal status history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SignalStatusEntry'
+  /api/signals/{id}/trust-packet:
+    get:
+      summary: Get trust packet with score formula and verification hash
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Trust packet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustPacket'
+  /api/signals/{id}/comments:
+    get:
+      summary: List comments for one signal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Signal comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CivicComment'
+    post:
+      summary: Add comment to one signal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CivicCommentCreateRequest'
+      responses:
+        '200':
+          description: Created comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CivicComment'
+  /api/signals/{id}/react:
+    post:
+      summary: Toggle reaction state for one signal
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactionRequest'
+      responses:
+        '200':
+          description: Updated reactions and viewer state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReactionState'
+  /api/signals/flagged:
+    get:
+      summary: List flagged signals for moderation queue
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated flagged signals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedPrioritizedSignals'
+  /api/signals/{id}/moderate:
+    post:
+      summary: Moderate one signal (approve/reject with reason)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalModerationRequest'
+      responses:
+        '200':
+          description: Moderated signal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalResponse'
+  /api/signals/duplicates:
+    get:
+      summary: Find near-duplicate signals
+      parameters:
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Duplicate clusters keyed by canonical signal ID
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SignalResponse'
+  /api/signals/merge:
+    post:
+      summary: Merge duplicate signals into one target
+      parameters:
+        - name: targetId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: uuid
+      responses:
+        '200':
+          description: Merged signal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalResponse'
+  /api/signals/export/csv:
+    get:
+      summary: Export full civic intelligence as CSV (super admin only)
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema:
+                type: string
   /api/notifications/recent:
     get:
       summary: Get recent outgoing notification relays
@@ -304,15 +563,31 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, STALE]
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            default: 20
       responses:
         '200':
-          description: Thread list
+          description: Paginated thread list
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CommunityThread'
+                $ref: '#/components/schemas/PagedCommunityThreads'
     post:
       summary: Create a cross-community thread linked to an optional signal
       requestBody:
@@ -327,7 +602,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommunityThread'
+                $ref: '#/components/schemas/CommunityThreadResponse'
   /api/community/threads/{threadId}/messages:
     post:
       summary: Add message to thread
@@ -350,7 +625,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommunityThreadMessage'
+                $ref: '#/components/schemas/CommunityThreadMessageResponse'
   /api/community/threads/{threadId}/messages/{messageId}/moderate:
     patch:
       summary: Hide or unhide thread message
@@ -379,9 +654,38 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommunityThreadMessage'
+                $ref: '#/components/schemas/CommunityThreadMessageResponse'
         '403':
           description: Forbidden
+  /api/community/threads/{threadId}/messages/{messageId}/react:
+    post:
+      summary: Toggle reaction on one thread message
+      parameters:
+        - in: path
+          name: threadId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: messageId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactionRequest'
+      responses:
+        '200':
+          description: Updated message reaction state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityThreadMessageResponse'
   /api/community/blog:
     get:
       summary: List community public-servant updates
@@ -418,6 +722,70 @@ paths:
                 $ref: '#/components/schemas/CommunityBlogPost'
         '403':
           description: Forbidden
+  /api/community/blog/{id}/comments:
+    get:
+      summary: List comments for one community blog post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Blog comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CivicComment'
+    post:
+      summary: Add comment to one community blog post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CivicCommentCreateRequest'
+      responses:
+        '200':
+          description: Created comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CivicComment'
+  /api/community/blog/{id}/react:
+    post:
+      summary: Toggle reaction state for one community blog post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReactionRequest'
+      responses:
+        '200':
+          description: Updated reactions and viewer state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReactionState'
   /api/community/blog/{postId}:
     put:
       summary: Update community blog post
@@ -573,6 +941,10 @@ components:
           type: integer
         number:
           type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
     SignalResponse:
       type: object
       required:
@@ -593,6 +965,8 @@ components:
           type: string
         description:
           type: string
+        imageUrl:
+          type: string
         category:
           type: string
         status:
@@ -601,12 +975,157 @@ components:
           type: number
         scoreBreakdown:
           $ref: '#/components/schemas/ScoreBreakdown'
+        communityVotes:
+          type: integer
+        reactions:
+          type: object
+          additionalProperties:
+            type: integer
+        viewerReaction:
+          type: string
         latitude:
           type: number
           format: double
         longitude:
           type: number
           format: double
+    SignalCreateRequest:
+      type: object
+      required:
+        - title
+        - description
+        - category
+        - urgency
+        - impact
+        - affectedPeople
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 150
+        description:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        category:
+          type: string
+        urgency:
+          type: integer
+          minimum: 1
+          maximum: 5
+        impact:
+          type: integer
+          minimum: 1
+          maximum: 5
+        affectedPeople:
+          type: integer
+          minimum: 1
+        imageUrl:
+          type: string
+          maxLength: 1200
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+    SignalStatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    SignalModerationRequest:
+      type: object
+      properties:
+        action:
+          type: string
+        reason:
+          type: string
+    SignalStatusEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        signalId:
+          type: string
+          format: uuid
+        statusFrom:
+          type: string
+        statusTo:
+          type: string
+        changedBy:
+          type: string
+        reason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    TrustPacket:
+      type: object
+      properties:
+        signalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        finalScore:
+          type: number
+        scoreBreakdown:
+          $ref: '#/components/schemas/ScoreBreakdown'
+        prioritizationFormula:
+          type: string
+        verificationHash:
+          type: string
+    CivicComment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        parentId:
+          type: string
+          format: uuid
+        parentType:
+          type: string
+        authorId:
+          type: string
+          format: uuid
+        authorUsername:
+          type: string
+        authorRole:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CivicCommentCreateRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+    ReactionRequest:
+      type: object
+      properties:
+        type:
+          type: string
+    ReactionState:
+      type: object
+      properties:
+        reactions:
+          type: object
+          additionalProperties:
+            type: integer
+        viewerReaction:
+          type: string
     SignalMeta:
       type: object
       required:
@@ -694,6 +1213,15 @@ components:
         createdAt:
           type: string
           format: date-time
+        reactions:
+          type: object
+          additionalProperties:
+            type: integer
+        viewerReaction:
+          type: string
+    CommunityThreadMessageResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommunityThreadMessage'
     CommunityThread:
       type: object
       properties:
@@ -724,6 +1252,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommunityThreadMessage'
+    CommunityThreadResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommunityThread'
+    PagedCommunityThreads:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityThreadResponse'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
     CommunityBlogPost:
       type: object
       properties:
@@ -745,6 +1295,12 @@ components:
         content:
           type: string
         statusTag:
+          type: string
+        reactions:
+          type: object
+          additionalProperties:
+            type: integer
+        viewerReaction:
           type: string
         publishedAt:
           type: string
