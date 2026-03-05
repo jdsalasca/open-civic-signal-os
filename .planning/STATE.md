@@ -12,9 +12,9 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 Phase: 4 of 4 (Frontend Audience and Usability Growth)  
 Plan: 4 of 4 in current phase  
 Status: In progress  
-Last activity: 2026-03-04 - Stabilized local Docker dev runtime with resilient full-stack hot reload (Phase 4 plan 04-03)
+Last activity: 2026-03-05 - Re-sequenced phase 4 around product clarity, simplified navigation, and user-friendly value communication (Phase 4 plan 04-04)
 
-Progress: [█████████░] 94%
+Progress: [█████████░] 96%
 
 ## Performance Metrics
 
@@ -51,10 +51,19 @@ Progress: [█████████░] 94%
 - 2026-03-04: Expanded frontend audience/usability backlog with story-level API/contract/UI mapping and measurable outcomes.
 - 2026-03-04: Added explicit onboarding step progress cues on register/verify with EN/ES copy and Playwright coverage.
 - 2026-03-04: Reworked dev Docker runtime with retry entrypoints, persistent caches, and reliable hot reload defaults.
+- 2026-03-05: Added list-level explainability summaries so users understand ranking before opening detail pages.
+- 2026-03-05: Surfaced backend permission reasons inline in blog/thread creation instead of opaque 403 failures.
+- 2026-03-05: Fixed Windows Playwright screenshot output path behavior to match documented agent workflow.
+- 2026-03-05: Strengthened skip-link keyboard behavior so focus moves into main content instead of trapping at page chrome.
+- 2026-03-05: Reframed phase 4 priorities toward product clarity, reduced choice overload, and clearer user-facing value communication.
 
 ### Pending Todos
 
-See: `docs/community/current-backlog.md` (critical fix backlog, 2026-02-19 and 2026-02-25 entries).
+See:
+
+- `docs/community/current-backlog.md`
+- `docs/community/frontend-audience-usability-backlog.md`
+- `docs/community/frontend-product-clarity-backlog.md`
 
 ### Blockers/Concerns
 
@@ -64,5 +73,5 @@ See: `docs/community/current-backlog.md` (critical fix backlog, 2026-02-19 and 2
 ## Session Continuity
 
 Last session: 2026-03-04  
-Stopped at: Completed phase 4 plan 04-03 dev runtime hardening; next target is 04-04 explainability/shareability/re-engagement execution  
+Stopped at: Planned phase 4 work around product clarity and documentation refresh; next target is executing `OCS-P1-023` dashboard hierarchy simplification and guided-home reduction of first-view choice overload  
 Resume file: None

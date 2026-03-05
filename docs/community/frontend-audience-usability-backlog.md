@@ -145,6 +145,19 @@ Spec-driven backlog to increase civic reach, activation, and retention through f
 - `milestone:frontend-audience-sprint-2` -> `OCS-P1-017`, `OCS-P1-019`, `OCS-P1-020`
 - `milestone:frontend-audience-sprint-3` -> `OCS-P1-021`, `OCS-P1-022`
 
+## Follow-On Clarity Wave (GSD 2026-03-05)
+
+The next frontend wave should prioritize product clarity and reduced cognitive load before adding more growth surfaces.
+
+- Reference pack: `docs/community/frontend-product-clarity-backlog.md`
+- Recommended execution order:
+  - `OCS-P1-023`
+  - `OCS-P1-024`
+  - `OCS-P1-025`
+  - `OCS-P1-026`
+  - `OCS-P1-027`
+  - `OCS-P1-028`
+
 ## Labels
 
 - `impact-high` for stories with measurable participation gain in <30 days.

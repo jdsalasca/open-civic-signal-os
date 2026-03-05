@@ -6,6 +6,49 @@
 
 Monorepo civic-tech platform that converts community signals into transparent public priorities.
 
+## Why this product exists
+
+Open Civic Signal OS helps communities turn repeated local problems into a public backlog that people can understand, trust, and act on.
+
+For a citizen, the promise is simple:
+
+1. Report a real local problem in plain language.
+2. See why it was prioritized.
+3. Follow what changed, who responded, and what is still pending.
+
+For public servants and community leaders, the product should reduce noise, surface what matters first, and keep evidence visible.
+
+## What users should understand in the first minute
+
+- What the product helps solve.
+- What the main action is right now.
+- What happens after a report is submitted.
+- Why some issues rank higher than others.
+- Where to return to track progress.
+
+Current UX gap: the repo and app explain the technical platform well, but they still expose too many navigation and workflow choices too early for first-time users. Ongoing frontend work is focused on simplifying first-run experience, clarifying primary actions, and reducing cognitive load.
+
+## Core user journeys
+
+### Community member
+
+- Report a problem.
+- Support an existing issue instead of duplicating it.
+- Understand why a problem is high priority.
+- Track updates from the community or institution.
+
+### Community moderator or coordinator
+
+- Review community conversations.
+- Publish progress updates with clear role boundaries.
+- Keep discussion channels usable and auditable.
+
+### Public servant
+
+- Identify highest-priority problems fast.
+- Publish progress updates.
+- Use transparent evidence to justify action ordering.
+
 ## Official Stack
 
 - Backend: Java 21 + Spring Boot
@@ -77,6 +120,16 @@ Community voice should become visible, measurable, and actionable.
 - Stop: `npm run docker:dev:down`
 
 See full guide: `docs/DOCKER_CLAUDE.md` and `CLAUDE.md`.
+
+## Product direction
+
+Current product work is centered on:
+
+- simpler first-screen hierarchy
+- clearer primary calls to action
+- lower-friction onboarding and verification
+- accessible keyboard/mobile navigation
+- trust surfaces that explain ranking and progress without jargon
 
 ## GHCR Quickstart
 

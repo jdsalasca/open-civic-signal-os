@@ -73,7 +73,7 @@ Plans:
 - [x] 04-01: Build spec-driven frontend audience/usability backlog pack and story sequencing.
 - [x] 04-02: Implement OCS-P1-015 onboarding funnel progress/recovery UX with test evidence.
 - [x] 04-03: Stabilize local Docker dev runtime with resilient backend/frontend hot reload.
-- [ ] 04-04: Execute explainability/shareability/re-engagement tranche with evidence.
+- [ ] 04-04: Re-sequence phase 4 around product clarity, simplified navigation, and user-value communication before follow-on growth surfaces.
 
 ## Progress
 

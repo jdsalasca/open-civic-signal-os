@@ -118,5 +118,11 @@ Use `.github/workflows/seed-community-issues.yml` to persist these as GitHub iss
 6. `story:OCS-P1-020 expose list-level explainability snippets to improve ranking trust for new users`
 7. `story:OCS-P1-021 add notification preference UX for re-engagement and community follow-ups`
 8. `story:OCS-P1-022 instrument frontend conversion funnel analytics with auditable event contracts`
+9. `story:OCS-P1-023 simplify dashboard action hierarchy to reduce first-view choice overload`
+10. `story:OCS-P1-024 add role-aware guided home with one recommended next action`
+11. `story:OCS-P1-025 simplify navigation labels and progressively disclose advanced options`
+12. `story:OCS-P1-026 explain the report-to-outcome lifecycle in plain language after submission`
+13. `story:OCS-P1-027 make empty and restricted states action-oriented with recovery paths`
+14. `story:OCS-P1-028 rewrite public-facing README and landing narrative around user value`
 
 Reference pack: `docs/community/frontend-audience-usability-backlog.md`

@@ -87,6 +87,31 @@ Next tranche:
 
 Backlog reference: `docs/community/frontend-audience-usability-backlog.md`
 
+## Frontend Product Clarity Wave (GSD 2026-03-05)
+
+Primary objective: make the app easier to understand and use by reducing early decision overload and clarifying the first valuable action.
+
+1. `story:OCS-P1-023` simplify dashboard action hierarchy.
+   - Measurable civic outcome: more first-session users reach one meaningful action instead of abandoning after scan confusion.
+   - Validation commands: Playwright dashboard hierarchy audit + keyboard navigation pass.
+2. `story:OCS-P1-024` role-aware guided home.
+   - Measurable civic outcome: users understand what to do next based on role without onboarding friction.
+   - Validation commands: Playwright role-based route checks + EN/ES copy review.
+3. `story:OCS-P1-025` simplify navigation and progressively disclose advanced actions.
+   - Measurable civic outcome: lower navigation confusion and faster path to core workflows.
+   - Validation commands: Playwright desktop/mobile navigation audit.
+4. `story:OCS-P1-026` explain report-to-outcome lifecycle after submission.
+   - Measurable civic outcome: stronger trust that reporting leads to visible next steps.
+   - Validation commands: Playwright report success journey + copy parity review.
+5. `story:OCS-P1-027` action-oriented empty and restricted states.
+   - Measurable civic outcome: fewer dead ends and lower perception that the product is broken.
+   - Validation commands: Playwright empty/restricted-state checks + accessibility assertions.
+6. `story:OCS-P1-028` user-value rewrite for README/public-facing narrative.
+   - Measurable civic outcome: visitors understand the product promise before reading technical setup details.
+   - Validation commands: README/app consistency review.
+
+Backlog reference: `docs/community/frontend-product-clarity-backlog.md`
+
 ## Definition of Ready for Any New Story
 
 - Story ID exists in `docs/community/issue-backlog.md`.
