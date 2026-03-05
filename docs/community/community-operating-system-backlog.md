@@ -142,11 +142,13 @@ The current app already supports reporting, prioritization, community context, a
 - Contract change:
   - add user preference field for interface mode
 - UI workflow:
-  - default simple mode with guided actions; advanced mode reveals filters, analytics, and admin utilities
+  - default simple mode with guided actions, calmer first-view hierarchy, and a standardized community-first visual shell
+  - advanced mode reveals filters, analytics, and admin utilities without breaking the shared design system
 - Civic outcome:
   - broader usability across tech comfort levels
 - Acceptance criteria:
   - [ ] simple mode hides non-essential complexity
+  - [ ] first-view shell uses a consistent identity system across navigation, cards, badges, and high-impact pages
   - [ ] advanced mode preserves full governance tooling
   - [ ] preference persists across sessions and devices
 - Validation:

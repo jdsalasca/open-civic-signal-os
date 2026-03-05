@@ -121,13 +121,21 @@ export function Layout({ children, authMode = false }: Props) {
     value: m.communityId,
     role: m.role
   }));
+  const activeMembership =
+    memberships.find((membership) => membership.communityId === activeCommunityId) ??
+    memberships[0] ??
+    null;
+  const activeBreadcrumb = activeMembership?.breadcrumb ?? [];
+  const activeSection =
+    [...primaryNav, ...collaborationNav, ...advancedNav].find((item) => item.to === location.pathname)?.label ??
+    t("nav.insights");
 
   const visibleMoreCount = [...collaborationNav, ...advancedNav].filter((item) => item.visible).length;
   const mobileNav = primaryNav.filter((item) => item.visible);
 
   if (authMode) return <div className="auth-page min-h-screen">{children}</div>;
 
-  const NavGroup = ({ title, items }: { title: string, items: any[] }) => (
+  const NavGroup = ({ title, items }: { title: string, items: NavItem[] }) => (
     <div className="mb-6">
       <div className="text-muted text-xs font-black uppercase tracking-widest mb-3 ml-4 nav-group-title">{title}</div>
       <div className="flex flex-column gap-1">
@@ -135,17 +143,17 @@ export function Layout({ children, authMode = false }: Props) {
           <Link
             key={link.to}
             to={link.to}
-            className={`flex align-items-center justify-content-between px-4 py-3 border-round-xl no-underline transition-all font-bold ${location.pathname === link.to ? 'bg-elevated text-main shadow-sm' : 'text-secondary hover:text-main hover:bg-surface'}`}
+            className={`app-nav-link font-bold ${location.pathname === link.to ? 'is-active' : ''}`}
             data-testid={link.testId}
             aria-label={link.label}
             aria-current={location.pathname === link.to ? "page" : undefined}
             onClick={() => setMobileMenuVisible(false)}
           >
             <div className="flex align-items-center gap-3">
-              <i className={`${link.icon} text-base ${location.pathname === link.to ? 'text-brand-primary' : 'opacity-70'}`}></i>
+              <i className={`${link.icon} app-nav-link-icon text-base`}></i>
               <span className="text-sm tracking-tight">{link.label}</span>
             </div>
-            {location.pathname === link.to && <div className="w-4px h-4px border-circle bg-brand-primary shadow-lg"></div>}
+            {location.pathname === link.to && <div className="app-nav-link-dot"></div>}
           </Link>
         ))}
       </div>
@@ -153,7 +161,7 @@ export function Layout({ children, authMode = false }: Props) {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-app">
+    <div className="app-shell flex h-screen overflow-hidden bg-app">
       <a
         href={`#${mainContentId}`}
         className="skip-link"
@@ -163,15 +171,42 @@ export function Layout({ children, authMode = false }: Props) {
         {t('nav.skip_to_content')}
       </a>
       {/* SIDEBAR */}
-      <aside className="hidden lg:flex flex-column w-18rem border-right-1 border-white-alpha-5 bg-card z-2">
-        <div className="p-6 flex align-items-center gap-3">
-          <div className="u-logo-badge border-round-xl flex align-items-center justify-content-center shadow-premium" style={{ width: '36px', height: '36px' }}>
-            <i className="pi pi-signal u-logo-icon text-lg"></i>
+      <aside className="app-sidebar hidden lg:flex flex-column w-21rem border-right-1 border-white-alpha-5 z-2">
+        <div className="app-sidebar-brand">
+          <div className="app-brand-panel motion-card">
+            <div className="flex align-items-center gap-3 mb-4">
+              <div className="u-logo-badge border-round-2xl flex align-items-center justify-content-center shadow-premium" style={{ width: '44px', height: '44px' }}>
+                <i className="pi pi-signal u-logo-icon text-xl"></i>
+              </div>
+              <div className="flex flex-column">
+                <span className="app-brand-kicker">{t("nav.brand_kicker")}</span>
+                <span className="app-brand-title text-2xl">SignalOS</span>
+              </div>
+            </div>
+            <p className="app-brand-copy m-0">
+              {t("dashboard.guided_home.citizen.hero_subtitle")}
+            </p>
           </div>
-          <span className="text-xl font-black tracking-tighter uppercase text-main">Signal<span className="text-brand-primary">OS</span></span>
         </div>
 
         <nav className="flex-grow-1 px-3 py-4 overflow-y-auto" aria-label={t('nav.main_navigation')}>
+          {activeMembership && (
+            <div className="app-context-card mb-5 mx-3 motion-card" data-testid="layout-community-context-card">
+              <span className="app-context-label">{t("nav.active_community")}</span>
+              <div className="app-context-value mt-2">{activeMembership.communityName}</div>
+              {activeBreadcrumb.length > 1 && (
+                <p className="text-xs text-muted mt-2 mb-0 line-height-3">
+                  {activeBreadcrumb.map((item) => item.name).join(" / ")}
+                </p>
+              )}
+              <div className="flex align-items-center gap-2 mt-3">
+                <span className="u-pill">
+                  <i className="pi pi-users text-brand-primary"></i>
+                  {toRoleLabel(activeMembership.role, t)}
+                </span>
+              </div>
+            </div>
+          )}
           <NavGroup title={t('nav.group_primary')} items={primaryNav} />
           <div className="mb-6">
             <div className="px-2">
@@ -226,7 +261,7 @@ export function Layout({ children, authMode = false }: Props) {
 
       {/* VIEW AREA */}
       <div className="flex flex-column flex-grow-1 overflow-hidden relative">
-        <header className="h-5rem flex align-items-center justify-content-between px-6 border-bottom-1 border-subtle bg-nav backdrop-blur-xl z-1">
+        <header className="app-topbar h-6rem flex align-items-center justify-content-between px-4 lg:px-6 border-bottom-1 border-subtle z-1">
           <div className="flex align-items-center gap-4 flex-grow-1">
             <Button
               icon="pi pi-bars"
@@ -238,10 +273,9 @@ export function Layout({ children, authMode = false }: Props) {
               aria-controls={mobileNavId}
               data-testid="mobile-menu-toggle"
             />
-            <div className="hidden md:flex align-items-center">
-              <span className="text-sm text-muted font-semibold">
-                {t('dashboard.focus_today')}
-              </span>
+            <div className="app-topbar-intro">
+              <span className="app-topbar-label">{t('dashboard.focus_today')}</span>
+              <span className="app-topbar-title">{activeSection}</span>
             </div>
           </div>
 
@@ -289,7 +323,7 @@ export function Layout({ children, authMode = false }: Props) {
           id={mainContentId}
           ref={mainContentRef}
           tabIndex={-1}
-          className="flex-grow-1 overflow-y-auto p-6 lg:p-10 bg-app"
+          className="app-main flex-grow-1 overflow-y-auto p-4 md:p-6 lg:p-10 bg-app"
           data-testid="main-content"
         >
           <div className="page-container mx-auto" style={{ maxWidth: '1300px' }}>
@@ -297,7 +331,7 @@ export function Layout({ children, authMode = false }: Props) {
           </div>
         </main>
 
-        <nav className="lg:hidden flex justify-content-around align-items-center bg-card border-top-1 border-subtle h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
+        <nav className="app-mobile-nav lg:hidden flex justify-content-around align-items-center border-top-1 border-subtle h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
           {mobileNav.map(link => (
             <Link
               key={link.to}
@@ -333,13 +367,16 @@ export function Layout({ children, authMode = false }: Props) {
         id={mobileNavId}
       >
         <div className="p-4 flex flex-column gap-6">
-          <div className="flex align-items-center gap-3">
-            <div className="u-logo-badge border-round-xl p-2 shadow-lg"><i className="pi pi-signal u-logo-icon"></i></div>
-            <span className="text-xl font-black text-main">SignalOS</span>
+          <div className="app-brand-panel">
+            <div className="flex align-items-center gap-3 mb-3">
+              <div className="u-logo-badge border-round-2xl p-3 shadow-lg"><i className="pi pi-signal u-logo-icon"></i></div>
+              <div className="flex flex-column">
+                <span className="app-brand-kicker">{t("nav.brand_kicker")}</span>
+                <span className="app-brand-title text-xl">SignalOS</span>
+              </div>
+            </div>
+            <p className="app-brand-copy m-0">{t('nav.mobile_drawer_guidance')}</p>
           </div>
-          <p className="text-sm text-secondary m-0" data-testid="mobile-drawer-guidance">
-            {t('nav.mobile_drawer_guidance')}
-          </p>
           <nav className="flex flex-column gap-4" aria-label={t('nav.main_navigation')}>
             <NavGroup title={t('nav.group_primary')} items={primaryNav} />
             <NavGroup title={t('nav.group_collaboration')} items={collaborationNav} />

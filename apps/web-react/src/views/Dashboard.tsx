@@ -167,6 +167,31 @@ export function Dashboard() {
     () => signals.filter((s) => s.status === "NEW").length,
     [signals]
   );
+  const formatLastUpdated = (isoDate: string | null) => {
+    if (!isoDate) return t('dashboard.freshness_pending');
+    const date = new Date(isoDate);
+    const diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+    if (diffMinutes < 1) return t('dashboard.freshness_now');
+    if (diffMinutes < 60) return t('dashboard.freshness_minutes', { count: diffMinutes });
+    return t('dashboard.freshness_hours', { count: Math.floor(diffMinutes / 60) });
+  };
+  const heroStats = useMemo(
+    () => [
+      {
+        label: t("dashboard.priority_strip_critical", { count: criticalCount }),
+        value: criticalCount.toString(),
+      },
+      {
+        label: t("dashboard.priority_strip_new", { count: newCount }),
+        value: newCount.toString(),
+      },
+      {
+        label: t("dashboard.freshness_label"),
+        value: formatLastUpdated(meta?.lastUpdatedAt ?? null),
+      },
+    ],
+    [criticalCount, meta?.lastUpdatedAt, newCount, t]
+  );
 
   const handleRelay = async () => {
     try {
@@ -253,15 +278,6 @@ export function Dashboard() {
     };
   }, [activeMembership?.communityName, isCommunityModerator, isStaff, navigate, t]);
 
-  const formatLastUpdated = (isoDate: string | null) => {
-    if (!isoDate) return t('dashboard.freshness_pending');
-    const date = new Date(isoDate);
-    const diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
-    if (diffMinutes < 1) return t('dashboard.freshness_now');
-    if (diffMinutes < 60) return t('dashboard.freshness_minutes', { count: diffMinutes });
-    return t('dashboard.freshness_hours', { count: Math.floor(diffMinutes / 60) });
-  };
-
   const quickFilters = [
     { label: t('signals.filter_all'), value: "ALL", icon: "pi-list" },
     { label: t('signals.filter_critical'), value: "CRITICAL", icon: "pi-exclamation-triangle" },
@@ -283,8 +299,8 @@ export function Dashboard() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <section className="mb-8 flex flex-column lg:flex-row justify-content-between align-items-end gap-6" data-testid="dashboard-hero">
-          <div>
+        <section className="dashboard-hero-shell mb-8" data-testid="dashboard-hero">
+          <CivicCard className="dashboard-story-card" padding="lg">
             <div className="flex align-items-center flex-wrap gap-3 mb-4">
               <div className="u-pill" data-testid="welcome-message">
                 <i className="pi pi-user text-brand-primary"></i>
@@ -299,7 +315,7 @@ export function Dashboard() {
                 {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black m-0 tracking-tight text-main line-height-2">
+            <h1 className="u-page-title text-4xl md:text-5xl font-black m-0 line-height-2">
               {guidedHome.heroTitle}
             </h1>
             <p className="text-secondary text-lg mt-3 mb-0 font-medium max-w-30rem">
@@ -308,18 +324,66 @@ export function Dashboard() {
             <p className="text-sm text-muted mt-3 mb-0 max-w-28rem" data-testid="dashboard-primary-guidance">
               {guidedHome.heroGuidance}
             </p>
-          </div>
-
-          <CivicActionBar className="dashboard-hero-actions">
-            <CivicButton
-              type="button"
-              label={guidedHome.primaryActionLabel}
-              icon={guidedHome.primaryActionIcon}
-              onClick={guidedHome.primaryAction}
-              className="shadow-xl"
-              data-testid="dashboard-action-report"
-            />
-          </CivicActionBar>
+            <div className="dashboard-story-grid mt-5">
+              {heroStats.map((item) => (
+                <div key={item.label} className="dashboard-story-metric">
+                  <div className="dashboard-story-metric-label">{item.label}</div>
+                  <div className="dashboard-story-metric-value mt-2">{item.value}</div>
+                </div>
+              ))}
+            </div>
+            <CivicActionBar className="dashboard-hero-actions mt-5">
+              <CivicButton
+                type="button"
+                label={guidedHome.primaryActionLabel}
+                icon={guidedHome.primaryActionIcon}
+                onClick={guidedHome.primaryAction}
+                className="shadow-xl"
+                data-testid="dashboard-action-report"
+              />
+            </CivicActionBar>
+          </CivicCard>
+          <CivicCard variant="brand" padding="lg" data-testid="dashboard-guided-home-card">
+            <span className="u-section-title text-xs">{guidedHome.cardTitle}</span>
+            <p className="text-secondary text-sm mt-3 mb-4" data-testid="dashboard-guided-home-description">
+              {guidedHome.cardDescription}
+            </p>
+            <ul className="m-0 p-0 list-none flex flex-column gap-3 text-sm text-secondary">
+              {guidedHome.steps.map((step, index) => (
+                <li
+                  key={step}
+                  className="line-height-3"
+                  data-testid={`dashboard-guided-step-${index + 1}`}
+                >
+                  <span className="u-pill mr-2">{index + 1}</span>
+                  {step}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-5 pt-4 border-top-1 border-white-alpha-10">
+              <span className="text-xs font-black uppercase tracking-widest text-muted">
+                {t("dashboard.secondary_actions_title")}
+              </span>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <CivicButton
+                  type="button"
+                  label={t('nav.dialogues')}
+                  icon="pi pi-comments"
+                  variant="ghost"
+                  onClick={() => navigate("/communities/threads")}
+                  data-testid="dashboard-action-threads"
+                />
+                <CivicButton
+                  type="button"
+                  label={t('dashboard.track_contributions')}
+                  icon="pi pi-user"
+                  variant="ghost"
+                  onClick={() => navigate("/mine")}
+                  data-testid="dashboard-hero-action-mine"
+                />
+              </div>
+            </div>
+          </CivicCard>
         </section>
 
         <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
@@ -333,14 +397,6 @@ export function Dashboard() {
               </span>
             </div>
             <div className="flex flex-wrap gap-2">
-              <CivicButton
-                type="button"
-                label={t('nav.dialogues')}
-                icon="pi pi-comments"
-                variant="ghost"
-                onClick={() => navigate("/communities/threads")}
-                data-testid="dashboard-action-threads"
-              />
               <CivicButton
                 type="button"
                 label={t('nav.public_blog')}
@@ -463,22 +519,6 @@ export function Dashboard() {
                   {displayedSignals.length > 0 && (
                     <CategoryChart signals={displayedSignals} />
                   )}
-                  <CivicCard title={guidedHome.cardTitle} variant="brand" data-testid="dashboard-guided-home-card">
-                    <p className="text-secondary text-sm m-0 mb-4" data-testid="dashboard-guided-home-description">
-                      {guidedHome.cardDescription}
-                    </p>
-                    <ul className="m-0 p-0 list-none flex flex-column gap-2 text-sm text-secondary">
-                      {guidedHome.steps.map((step, index) => (
-                        <li
-                          key={step}
-                          className="line-height-3"
-                          data-testid={`dashboard-guided-step-${index + 1}`}
-                        >
-                          {index + 1}. {step}
-                        </li>
-                      ))}
-                    </ul>
-                  </CivicCard>
                   {!isStaff && (
                     <CivicCard title={t('dashboard.quickstart_title')} variant="brand">
                       <p className="text-secondary text-sm m-0 mb-4">{t('dashboard.quickstart_desc')}</p>

@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Visual Core Refresh Foundation**: Established a warmer community-first visual system across the shell, shared UI primitives, dashboard hero, navigation hierarchy, and typographic identity to make the product feel less generic and easier to inhabit. (`story:OCS-P1-032` foundation)
 - **Official Announcements Channel**: Added pinned official updates, searchable announcement archive, archive metadata, and a clearer official-only communication surface in the community blog workflow. (`story:OCS-P1-033`)
 - **Community Permission Policy Matrix**: Added backend-owned per-community permission scopes, editable policy overrides, structured permission-denied responses, and Communities hub controls for coordinators to govern collaboration actions without frontend-owned RBAC logic. (`story:OCS-P1-031`)
 - **Docker Dev Runtime Guardrail**: Added a canonical `docker:dev` wrapper with health-aware startup, Docker availability checks, and explicit agent guidance so integrated frontend/backend work always uses the hot-reload compose stack. (`devex`)
