@@ -1099,6 +1099,23 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CommunityFeedItem'
+  /api/community/home:
+    get:
+      summary: Unified community home
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Composite community home response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityHome'
 components:
   schemas:
     ApiError:
@@ -1727,6 +1744,44 @@ components:
           format: date-time
         freshness:
           type: string
+    CommunityHomeSignal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+        priorityScore:
+          type: number
+          format: double
+    CommunityHome:
+      type: object
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        generatedAt:
+          type: string
+          format: date-time
+        freshness:
+          type: string
+        activeRoomsCount:
+          type: integer
+        officialUpdates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityBlogPost'
+        hotThreads:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityThreadResponse'
+        topSignals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityHomeSignal'
     ProfileVisibility:
       type: string
       enum: [PUBLIC, COMMUNITY, ADMINS]

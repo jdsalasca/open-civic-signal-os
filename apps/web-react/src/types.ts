@@ -207,6 +207,23 @@ export type CommunityFeedItem = {
   freshness: string;
 };
 
+export type CommunityHomeSignal = {
+  id: string;
+  title: string;
+  status: string;
+  priorityScore?: number | null;
+};
+
+export type CommunityHome = {
+  communityId: string;
+  generatedAt: string;
+  freshness: string;
+  activeRoomsCount: number;
+  officialUpdates: CommunityBlogPost[];
+  hotThreads: CommunityThread[];
+  topSignals: CommunityHomeSignal[];
+};
+
 export type PageResponse<T> = {
   content: T[];
   totalElements: number;

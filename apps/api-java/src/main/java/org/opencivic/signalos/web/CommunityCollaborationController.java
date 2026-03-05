@@ -9,6 +9,7 @@ import org.opencivic.signalos.service.CommunityCollaborationService;
 import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
+import org.opencivic.signalos.web.dto.CommunityHomeResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityBlogPostRequest;
@@ -215,5 +216,13 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return collaborationService.getCommunityFeed(communityId, days, principal.getName());
+    }
+
+    @GetMapping("/home")
+    public CommunityHomeResponse getCommunityHome(
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        return collaborationService.getCommunityHome(communityId, principal.getName());
     }
 }

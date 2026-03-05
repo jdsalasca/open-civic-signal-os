@@ -27,6 +27,8 @@ import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
+import org.opencivic.signalos.web.dto.CommunityHomeResponse;
+import org.opencivic.signalos.web.dto.CommunityHomeSignalResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
 import org.springframework.data.domain.Page;
@@ -377,6 +379,67 @@ public class CommunityCollaborationService {
             .sorted(Comparator.comparing(CommunityFeedItemResponse::happenedAt).reversed())
             .limit(100)
             .toList();
+    }
+
+    public CommunityHomeResponse getCommunityHome(UUID communityId, String username) {
+        User user = accessService.getCurrentUser(username);
+        accessService.requireMembership(user.getId(), communityId);
+
+        LocalDateTime generatedAt = LocalDateTime.now();
+        List<CommunityBlogPostResponse> officialUpdates = toBlogResponses(
+            blogPostRepository.findActiveOfficialTimeline(communityId).stream().limit(3).toList(),
+            user.getId()
+        );
+
+        List<CommunityThread> threads = threadRepository.findAllByCommunityAndStatus(
+            communityId,
+            null,
+            generatedAt.minusDays(7)
+        );
+        List<UUID> threadIds = threads.stream().map(CommunityThread::getId).toList();
+        Map<UUID, List<CommunityThreadMessage>> messagesByThreadId = loadThreadMessages(threadIds);
+        List<UUID> messageIds = messagesByThreadId.values().stream()
+            .flatMap(List::stream)
+            .map(CommunityThreadMessage::getId)
+            .toList();
+        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
+            "THREAD_MESSAGE",
+            messageIds,
+            user.getId()
+        );
+        List<CommunityThreadResponse> hotThreads = sortThreadResponses(
+            threads.stream()
+                .map(thread -> toThreadResponse(
+                    thread,
+                    messagesByThreadId.getOrDefault(thread.getId(), List.of()),
+                    viewerReactions
+                ))
+                .toList(),
+            "RELEVANCE"
+        ).stream().limit(3).toList();
+
+        List<CommunityHomeSignalResponse> topSignals = signalRepository.findByStatusNotInAndCommunityId(
+            List.of("RESOLVED", "REJECTED"),
+            communityId,
+            PageRequest.of(0, 3, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "priorityScore"))
+        ).getContent().stream()
+            .map(signal -> new CommunityHomeSignalResponse(
+                signal.getId(),
+                signal.getTitle(),
+                signal.getStatus(),
+                signal.getPriorityScore()
+            ))
+            .toList();
+
+        return new CommunityHomeResponse(
+            communityId,
+            generatedAt,
+            freshness(generatedAt),
+            0,
+            officialUpdates,
+            hotThreads,
+            topSignals
+        );
     }
 
     private boolean hasScope(UUID userId, UUID communityId, CommunityPermissionScope scope) {

@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Unified Community Home**: `/communities/feed` now behaves as a true community home backed by one composite endpoint that surfaces official updates, hot discussions, top open issues, and freshness in a calmer, more legible layout. (`story:OCS-P1-036`)
 - **Thread Relevance Ordering**: Community talks now support backend-owned `sortBy` ordering (`RELEVANCE` or `RECENT`), explicit relevance metadata, and bounded nested replies so high-signal discussions remain usable as volume grows. (`story:OCS-P1-034`)
 - **Community-First Home Layer**: Dashboard and shell now foreground the active community with clearer belonging context, direct community actions, community-home copy, and a calmer first-view flow that feels less like a generic admin panel. (`story:OCS-P1-032` refinement)
 - **Community-Centered Identity Surface**: Settings now shows the communities a user belongs to, active community path, visible role/rank, and direct switching/management actions so community belonging becomes part of product identity instead of hidden system state. (`community UX`)
