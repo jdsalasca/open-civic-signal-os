@@ -19,6 +19,7 @@ interface CommunityState {
   getThreadListState: (communityId: string) => CommunityThreadListState;
   shouldRefreshMemberships: (maxAgeMs: number) => boolean;
   markMembershipsStale: () => void;
+  getActiveMembership: () => CommunityMembership | null;
   clear: () => void;
 }
 
@@ -71,6 +72,13 @@ export const useCommunityStore = create<CommunityState>()(
         return Date.now() - membershipsLoadedAt > maxAgeMs;
       },
       markMembershipsStale: () => set({ membershipsLoadedAt: null }),
+      getActiveMembership: () => {
+        const state = get();
+        if (!state.activeCommunityId) {
+          return null;
+        }
+        return state.memberships.find((membership) => membership.communityId === state.activeCommunityId) ?? null;
+      },
       clear: () =>
         set({
           activeCommunityId: null,

@@ -25,6 +25,8 @@ public class Community {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    private UUID parentCommunityId;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public UUID getId() {
@@ -53,6 +55,14 @@ public class Community {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public UUID getParentCommunityId() {
+        return parentCommunityId;
+    }
+
+    public void setParentCommunityId(UUID parentCommunityId) {
+        this.parentCommunityId = parentCommunityId;
     }
 
     public LocalDateTime getCreatedAt() {

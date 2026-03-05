@@ -66,21 +66,33 @@ public class OpenCivicSignalOsApplication {
 				communityRepository,
 				"rosalistas",
 				"Los rosales",
-				"Community coordination space for Los Rosales district."
+				"Community coordination space for Los Rosales district.",
+				null
 			);
 			Community centralHub = upsertCommunity(
 				communityRepository,
 				"central-hub",
 				"Central Hub",
-				"Cross-community operations and visibility hub."
+				"Cross-community operations and visibility hub.",
+				null
+			);
+			Community rosalistasBuildingA = upsertCommunity(
+				communityRepository,
+				"rosalistas-building-a",
+				"Los Rosales / Building A",
+				"Nested working space for Building A residents.",
+				losRosales.getId()
 			);
 
 			upsertMembership(membershipRepository, adminUser.getId(), losRosales.getId(), CommunityRole.COORDINATOR);
 			upsertMembership(membershipRepository, adminUser.getId(), centralHub.getId(), CommunityRole.COORDINATOR);
+			upsertMembership(membershipRepository, adminUser.getId(), rosalistasBuildingA.getId(), CommunityRole.COORDINATOR);
 			upsertMembership(membershipRepository, servantUser.getId(), losRosales.getId(), CommunityRole.PUBLIC_SERVANT_LIAISON);
 			upsertMembership(membershipRepository, servantUser.getId(), centralHub.getId(), CommunityRole.PUBLIC_SERVANT_LIAISON);
+			upsertMembership(membershipRepository, servantUser.getId(), rosalistasBuildingA.getId(), CommunityRole.PUBLIC_SERVANT_LIAISON);
 			upsertMembership(membershipRepository, citizenUser.getId(), losRosales.getId(), CommunityRole.MEMBER);
 			upsertMembership(membershipRepository, citizenUser.getId(), centralHub.getId(), CommunityRole.MEMBER);
+			upsertMembership(membershipRepository, citizenUser.getId(), rosalistasBuildingA.getId(), CommunityRole.MEMBER);
 		};
 	}
 
@@ -108,12 +120,14 @@ public class OpenCivicSignalOsApplication {
 		CommunityRepository communityRepository,
 		String slug,
 		String name,
-		String description
+		String description,
+		UUID parentCommunityId
 	) {
 		Community community = communityRepository.findBySlug(slug).orElseGet(Community::new);
 		community.setSlug(slug);
 		community.setName(name);
 		community.setDescription(description);
+		community.setParentCommunityId(parentCommunityId);
 		return communityRepository.save(community);
 	}
 

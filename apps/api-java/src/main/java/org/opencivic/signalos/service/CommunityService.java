@@ -1,7 +1,12 @@
 package org.opencivic.signalos.service;
 
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityMembership;
 import org.opencivic.signalos.domain.CommunityMembershipAudit;
@@ -12,7 +17,10 @@ import org.opencivic.signalos.repository.CommunityMembershipAuditRepository;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
 import org.opencivic.signalos.repository.UserRepository;
+import org.opencivic.signalos.web.dto.CommunityBreadcrumbItemResponse;
 import org.opencivic.signalos.web.dto.CommunityMembershipResponse;
+import org.opencivic.signalos.web.dto.CommunityResponse;
+import org.opencivic.signalos.web.dto.CommunityTreeNodeResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,22 +49,52 @@ public class CommunityService {
 
     public List<CommunityMembershipResponse> getMyMemberships(String username) {
         User user = accessService.getCurrentUser(username);
+        Map<UUID, Community> communitiesById = communityRepository.findAll().stream()
+            .collect(Collectors.toMap(Community::getId, Function.identity()));
         return membershipRepository.findByUserId(user.getId()).stream()
-            .map(this::toResponse)
+            .map(membership -> toResponse(membership, communitiesById))
             .toList();
     }
 
-    public List<Community> getAllCommunities() {
-        return communityRepository.findAll();
+    public List<CommunityResponse> getAllCommunities() {
+        return communityRepository.findAll().stream()
+            .map(this::toCommunityResponse)
+            .toList();
+    }
+
+    public List<CommunityTreeNodeResponse> getCommunityTree() {
+        List<Community> communities = communityRepository.findAll();
+        return buildTree(communities, null);
+    }
+
+    public List<CommunityBreadcrumbItemResponse> getCommunityBreadcrumb(UUID communityId) {
+        Map<UUID, Community> communitiesById = communityRepository.findAll().stream()
+            .collect(Collectors.toMap(Community::getId, Function.identity()));
+        Community community = communitiesById.get(communityId);
+        if (community == null) {
+            throw new ResourceNotFoundException("Community not found: " + communityId);
+        }
+        return breadcrumbFor(community, communitiesById);
     }
 
     @Transactional
-    public Community createCommunity(String name, String slug, String description, String username) {
+    public CommunityResponse createCommunity(
+        String name,
+        String slug,
+        String description,
+        UUID parentCommunityId,
+        String username
+    ) {
         User user = accessService.getCurrentUser(username);
+        if (parentCommunityId != null) {
+            communityRepository.findById(parentCommunityId)
+                .orElseThrow(() -> new ResourceNotFoundException("Parent community not found: " + parentCommunityId));
+        }
         Community community = new Community();
         community.setName(name);
         community.setSlug(slug);
         community.setDescription(description);
+        community.setParentCommunityId(parentCommunityId);
         Community savedCommunity = communityRepository.save(community);
 
         CommunityMembership membership = new CommunityMembership();
@@ -66,7 +104,7 @@ public class CommunityService {
         membership.setCreatedBy(user.getId());
         membershipRepository.save(membership);
         saveAudit(savedCommunity.getId(), user.getId(), user.getId(), null, CommunityRole.COORDINATOR);
-        return savedCommunity;
+        return toCommunityResponse(savedCommunity);
     }
 
     @Transactional
@@ -135,18 +173,80 @@ public class CommunityService {
     }
 
     private CommunityMembershipResponse toResponse(CommunityMembership membership) {
-        Community community = communityRepository.findById(membership.getCommunityId())
-            .orElseThrow(() -> new ResourceNotFoundException(
+        Map<UUID, Community> communitiesById = communityRepository.findAll().stream()
+            .collect(Collectors.toMap(Community::getId, Function.identity()));
+        return toResponse(membership, communitiesById);
+    }
+
+    private CommunityMembershipResponse toResponse(
+        CommunityMembership membership,
+        Map<UUID, Community> communitiesById
+    ) {
+        Community community = communitiesById.get(membership.getCommunityId());
+        if (community == null) {
+            throw new ResourceNotFoundException(
                 "Community not found for membership: " + membership.getCommunityId()
-            ));
+            );
+        }
         return new CommunityMembershipResponse(
             membership.getUserId(),
             membership.getCommunityId(),
             community.getName(),
             community.getSlug(),
+            community.getParentCommunityId(),
+            breadcrumbFor(community, communitiesById),
             membership.getRole().name(),
             membership.getCreatedBy(),
             membership.getCreatedAt()
         );
+    }
+
+    private CommunityResponse toCommunityResponse(Community community) {
+        return new CommunityResponse(
+            community.getId(),
+            community.getName(),
+            community.getSlug(),
+            community.getDescription(),
+            community.getParentCommunityId(),
+            community.getCreatedAt()
+        );
+    }
+
+    private List<CommunityTreeNodeResponse> buildTree(List<Community> communities, UUID parentCommunityId) {
+        return communities.stream()
+            .filter(community -> {
+                if (parentCommunityId == null) {
+                    return community.getParentCommunityId() == null;
+                }
+                return parentCommunityId.equals(community.getParentCommunityId());
+            })
+            .sorted(Comparator.comparing(Community::getName, String.CASE_INSENSITIVE_ORDER))
+            .map(community -> new CommunityTreeNodeResponse(
+                community.getId(),
+                community.getName(),
+                community.getSlug(),
+                community.getDescription(),
+                community.getParentCommunityId(),
+                buildTree(communities, community.getId())
+            ))
+            .toList();
+    }
+
+    private List<CommunityBreadcrumbItemResponse> breadcrumbFor(
+        Community community,
+        Map<UUID, Community> communitiesById
+    ) {
+        LinkedList<CommunityBreadcrumbItemResponse> breadcrumb = new LinkedList<>();
+        Community current = community;
+        while (current != null) {
+            breadcrumb.addFirst(new CommunityBreadcrumbItemResponse(
+                current.getId(),
+                current.getName(),
+                current.getSlug()
+            ));
+            UUID parentId = current.getParentCommunityId();
+            current = parentId == null ? null : communitiesById.get(parentId);
+        }
+        return breadcrumb;
     }
 }

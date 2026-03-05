@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Hierarchical Communities**: Added backend-owned parent/child communities, membership breadcrumbs, tree navigation endpoints, and a hierarchy-aware communities hub so users can operate inside nested civic spaces without guessing context. (`story:OCS-P1-030`)
 - **Civic Identity Profiles**: Added backend-enforced civic profile editing and audience-filtered visibility controls for role, bio, and affiliations, surfaced through the Settings experience. (story:OCS-P1-029)
 - **List-level Explainability Summary Contract**: Added backend-owned `explainabilitySummary` to prioritized signal responses and surfaced "why ranked here" snippets directly in dashboard rows, with API + Playwright coverage. (`story:OCS-P1-020`)
 - **RBAC Hardening & Testing**: Reinforced Role-Based Access Control at the API level and implemented dedicated integration tests (`SecurityRBAC_IT`) to ensure unauthorized access is blocked. (#43)

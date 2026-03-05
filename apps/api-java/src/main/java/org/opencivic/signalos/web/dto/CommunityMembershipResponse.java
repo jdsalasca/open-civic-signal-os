@@ -8,6 +8,8 @@ public record CommunityMembershipResponse(
     UUID communityId,
     String communityName,
     String communitySlug,
+    UUID parentCommunityId,
+    java.util.List<CommunityBreadcrumbItemResponse> breadcrumb,
     String role,
     UUID createdBy,
     LocalDateTime createdAt

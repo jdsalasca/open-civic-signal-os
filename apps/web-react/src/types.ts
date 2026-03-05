@@ -84,7 +84,23 @@ export type Community = {
   name: string;
   slug: string;
   description?: string;
+  parentCommunityId?: string | null;
   createdAt?: string;
+};
+
+export type CommunityBreadcrumbItem = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+export type CommunityTreeNode = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parentCommunityId?: string | null;
+  children: CommunityTreeNode[];
 };
 
 export type CommunityMembership = {
@@ -92,6 +108,8 @@ export type CommunityMembership = {
   communityId: string;
   communityName: string;
   communitySlug: string;
+  parentCommunityId?: string | null;
+  breadcrumb: CommunityBreadcrumbItem[];
   role: "MEMBER" | "MODERATOR" | "COORDINATOR" | "PUBLIC_SERVANT_LIAISON";
   createdBy: string;
   createdAt: string;

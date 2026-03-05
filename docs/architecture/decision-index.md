@@ -20,6 +20,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260222-prioritized-status-filter-contract.md` (accepted)
 - `ADR-20260304-prioritized-explainability-summary-contract.md` (accepted)
 - `ADR-20260305-civic-profile-visibility-contract.md` (accepted)
+- `ADR-20260305-community-hierarchy-contract.md` (accepted)
 
 ## Review Rule
 

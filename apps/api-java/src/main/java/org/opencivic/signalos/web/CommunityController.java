@@ -5,9 +5,11 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.opencivic.signalos.domain.Community;
+import org.opencivic.signalos.web.dto.CommunityBreadcrumbItemResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityRequest;
 import org.opencivic.signalos.web.dto.CommunityMembershipResponse;
+import org.opencivic.signalos.web.dto.CommunityResponse;
+import org.opencivic.signalos.web.dto.CommunityTreeNodeResponse;
 import org.opencivic.signalos.web.dto.JoinCommunityRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityRoleRequest;
 import org.opencivic.signalos.service.CommunityService;
@@ -30,12 +32,22 @@ public class CommunityController {
     }
 
     @GetMapping
-    public List<Community> getAllCommunities() {
+    public List<CommunityResponse> getAllCommunities() {
         return communityService.getAllCommunities();
     }
 
+    @GetMapping("/tree")
+    public List<CommunityTreeNodeResponse> getCommunityTree() {
+        return communityService.getCommunityTree();
+    }
+
+    @GetMapping("/{communityId}/breadcrumb")
+    public List<CommunityBreadcrumbItemResponse> getCommunityBreadcrumb(@PathVariable UUID communityId) {
+        return communityService.getCommunityBreadcrumb(communityId);
+    }
+
     @PostMapping
-    public Community createCommunity(
+    public CommunityResponse createCommunity(
         @Valid @RequestBody CreateCommunityRequest request,
         Principal principal
     ) {
@@ -43,6 +55,7 @@ public class CommunityController {
             request.name(),
             request.slug(),
             request.description(),
+            request.parentCommunityId(),
             principal.getName()
         );
     }
