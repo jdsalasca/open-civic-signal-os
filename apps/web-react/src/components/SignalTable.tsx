@@ -5,7 +5,7 @@ import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Signal } from "../types";
+import { ExplainabilityFactor, Signal } from "../types";
 import { CivicBadge } from "./ui/CivicBadge";
 import { CivicButton } from "./ui/CivicButton";
 
@@ -80,6 +80,35 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
         <Skeleton width="6rem" height="0.5rem" />
       </div>
     );
+
+    const backendTopFactors = rowData.explainabilitySummary?.topFactors || [];
+    const topFactors = backendTopFactors.length
+      ? backendTopFactors
+      : ([
+          { key: "urgency", contribution: rowData.scoreBreakdown?.urgency || 0 },
+          { key: "impact", contribution: rowData.scoreBreakdown?.impact || 0 },
+          { key: "affectedPeople", contribution: rowData.scoreBreakdown?.affectedPeople || 0 },
+          { key: "communityVotes", contribution: rowData.scoreBreakdown?.communityVotes || 0 },
+        ] as ExplainabilityFactor[])
+          .sort((a, b) => b.contribution - a.contribution)
+          .slice(0, 2);
+    const primary = topFactors[0];
+    const secondary = topFactors[1];
+    const factorLabel = (factor?: ExplainabilityFactor) =>
+      factor ? t(`signals.factor_keys.${factor.key}`) : null;
+
+    let previewText = rowData.explainabilitySummary?.summary || "";
+    if (primary && secondary) {
+      previewText = t("signals.why_ranked_preview", {
+        primary: factorLabel(primary),
+        secondary: factorLabel(secondary),
+      });
+    } else if (primary) {
+      previewText = t("signals.why_ranked_preview_single", {
+        primary: factorLabel(primary),
+      });
+    }
+
     return (
       <div className="flex flex-column py-2 overflow-hidden">
         <span className="font-bold text-main text-sm mb-1 group-hover:text-brand-primary transition-colors truncate">
@@ -88,6 +117,14 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
         <div className="flex align-items-center gap-2">
           <span className="text-min text-muted font-mono font-bold uppercase tracking-tighter">SIG-ID: {rowData.id?.substring(0,8)}</span>
         </div>
+        {previewText && (
+          <span
+            className="text-xs text-secondary mt-2 line-height-3"
+            data-testid={`signal-explainability-${rowData.id}`}
+          >
+            {previewText}
+          </span>
+        )}
       </div>
     );
   };

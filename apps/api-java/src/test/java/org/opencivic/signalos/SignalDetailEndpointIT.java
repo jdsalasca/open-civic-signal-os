@@ -57,7 +57,10 @@ class SignalDetailEndpointIT {
             .andExpect(jsonPath("$.id").value(signalId.toString()))
             .andExpect(jsonPath("$.title").value("Unsafe crossing near school"))
             .andExpect(jsonPath("$.status").value("NEW"))
-            .andExpect(jsonPath("$.scoreBreakdown.urgency").value(150.0));
+            .andExpect(jsonPath("$.scoreBreakdown.urgency").value(150.0))
+            .andExpect(jsonPath("$.explainabilitySummary.version").value("v1"))
+            .andExpect(jsonPath("$.explainabilitySummary.topFactors[0].key").value("urgency"))
+            .andExpect(jsonPath("$.explainabilitySummary.topFactors[1].key").value("impact"));
     }
 
     @Test

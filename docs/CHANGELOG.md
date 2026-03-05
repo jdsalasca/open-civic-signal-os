@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **List-level Explainability Summary Contract**: Added backend-owned `explainabilitySummary` to prioritized signal responses and surfaced "why ranked here" snippets directly in dashboard rows, with API + Playwright coverage. (`story:OCS-P1-020`)
 - **RBAC Hardening & Testing**: Reinforced Role-Based Access Control at the API level and implemented dedicated integration tests (`SecurityRBAC_IT`) to ensure unauthorized access is blocked. (#43)
 - **Database Schema Validation**: Enforced strict schema validation (`ddl-auto: validate`) using Flyway as the source of truth for database migrations. (#42)
 - **Standardized Logging**: Replaced legacy console outputs with professional SLF4J logging across all backend services for improved observability. (#41)

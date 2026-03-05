@@ -1,0 +1,21 @@
+# ADR-20260304-prioritized-explainability-summary-contract
+
+- Date: 2026-03-04
+- Status: accepted
+- Decision: Add `explainabilitySummary` to signal list/detail response contracts (`PrioritizedSignal` and `SignalResponse`) with deterministic top-factor metadata from backend scoring output.
+- Context:
+  - Story: `OCS-P1-020` requires list-level trust explainability before detail click-through.
+  - Existing API only exposed raw `scoreBreakdown`, forcing UI to infer presentation intent.
+  - Ranking ownership must remain backend-side and auditable.
+- Alternatives considered:
+  - Keep only `scoreBreakdown` and build list snippets purely in frontend.
+  - Add a single backend plain-text string with no structured factors.
+- Consequences:
+  - Contract now includes structured explainability hints (`version`, `topFactors`, `summary`) for dashboard list rendering.
+  - Frontend can localize labels while preserving backend-owned factor ordering.
+  - Existing consumers of `SignalResponse` should tolerate the additive field.
+- Rollback plan:
+  - Revert `explainabilitySummary` fields from OpenAPI + backend DTO mapping.
+  - Frontend falls back to existing detail explainability card only.
+- Related issues/PRs:
+  - `story:OCS-P1-020`

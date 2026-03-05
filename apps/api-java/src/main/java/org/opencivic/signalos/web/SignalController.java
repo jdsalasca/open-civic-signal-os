@@ -7,7 +7,9 @@ import io.micrometer.core.instrument.Timer;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,6 +23,8 @@ import org.opencivic.signalos.service.ExportService;
 import org.opencivic.signalos.service.PrioritizationService;
 import org.opencivic.signalos.service.UserReactionService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
+import org.opencivic.signalos.web.dto.ExplainabilityFactor;
+import org.opencivic.signalos.web.dto.ExplainabilitySummary;
 import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
@@ -344,9 +348,38 @@ public class SignalController {
             s.getCommunityVotes(),
             s.getReactions(),
             userReactionService.getViewerReaction("SIGNAL", s.getId(), viewerId),
+            buildExplainabilitySummary(s),
             s.getLatitude(),
             s.getLongitude()
         );
+    }
+
+    private ExplainabilitySummary buildExplainabilitySummary(Signal signal) {
+        if (signal.getScoreBreakdown() == null) {
+            return new ExplainabilitySummary(
+                "v1",
+                List.of(),
+                "Priority is calculated from deterministic civic scoring factors."
+            );
+        }
+
+        List<ExplainabilityFactor> topFactors = List.of(
+                new ExplainabilityFactor("urgency", signal.getScoreBreakdown().urgency()),
+                new ExplainabilityFactor("impact", signal.getScoreBreakdown().impact()),
+                new ExplainabilityFactor("affectedPeople", signal.getScoreBreakdown().affectedPeople()),
+                new ExplainabilityFactor("communityVotes", signal.getScoreBreakdown().communityVotes())
+            ).stream()
+            .sorted(Comparator.comparingDouble(ExplainabilityFactor::contribution).reversed())
+            .limit(2)
+            .toList();
+
+        String summary = topFactors.isEmpty()
+            ? "Priority is calculated from deterministic civic scoring factors."
+            : "Top drivers: " + topFactors.stream()
+                .map(f -> f.key() + " (" + String.format(Locale.ROOT, "%.1f", f.contribution()) + ")")
+                .collect(Collectors.joining(", "));
+
+        return new ExplainabilitySummary("v1", topFactors, summary);
     }
 
     private UUID resolveViewerId(String username) {

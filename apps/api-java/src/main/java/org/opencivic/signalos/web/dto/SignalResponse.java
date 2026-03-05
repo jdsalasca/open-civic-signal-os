@@ -16,6 +16,7 @@ public record SignalResponse(
     int communityVotes,
     Map<String, Integer> reactions,
     String viewerReaction,
+    ExplainabilitySummary explainabilitySummary,
     Double latitude,
     Double longitude
 ) {}

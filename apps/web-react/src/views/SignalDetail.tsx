@@ -230,7 +230,7 @@ export function SignalDetail() {
 
             <div className="mb-8"></div>
 
-            <CivicCard title={t('signals.why_ranked_title')} className="mb-8">
+            <CivicCard title={t('signals.why_ranked_title')} className="mb-8" data-testid="signal-detail-why-ranked">
               <p className="text-sm text-secondary mt-0 mb-5 leading-relaxed">
                 {t('signals.why_ranked_desc')}
               </p>

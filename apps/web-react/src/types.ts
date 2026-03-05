@@ -5,6 +5,17 @@ export type ScoreBreakdown = {
   communityVotes: number;
 };
 
+export type ExplainabilityFactor = {
+  key: "urgency" | "impact" | "affectedPeople" | "communityVotes";
+  contribution: number;
+};
+
+export type ExplainabilitySummary = {
+  version: string;
+  topFactors: ExplainabilityFactor[];
+  summary: string;
+};
+
 export type CivicComment = {
   id: string;
   parentId: string;
@@ -28,6 +39,7 @@ export type Signal = {
   communityVotes: number;
   reactions: Record<string, number>;
   viewerReaction?: string;
+  explainabilitySummary: ExplainabilitySummary;
 };
 
 export type Notification = {

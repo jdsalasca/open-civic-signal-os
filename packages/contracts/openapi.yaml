@@ -912,6 +912,7 @@ components:
         - scoreBreakdown
         - priorityScore
         - status
+        - explainabilitySummary
       properties:
         id:
           type: string
@@ -926,6 +927,8 @@ components:
         status:
           type: string
           enum: [NEW, IN_PROGRESS, RESOLVED]
+        explainabilitySummary:
+          $ref: '#/components/schemas/ExplainabilitySummary'
     PagedPrioritizedSignals:
       type: object
       properties:
@@ -955,6 +958,7 @@ components:
         - status
         - priorityScore
         - scoreBreakdown
+        - explainabilitySummary
         - latitude
         - longitude
       properties:
@@ -983,12 +987,43 @@ components:
             type: integer
         viewerReaction:
           type: string
+        explainabilitySummary:
+          $ref: '#/components/schemas/ExplainabilitySummary'
         latitude:
           type: number
           format: double
         longitude:
           type: number
           format: double
+    ExplainabilityFactor:
+      type: object
+      required:
+        - key
+        - contribution
+      properties:
+        key:
+          type: string
+          enum: [urgency, impact, affectedPeople, communityVotes]
+        contribution:
+          type: number
+    ExplainabilitySummary:
+      type: object
+      required:
+        - version
+        - topFactors
+        - summary
+      properties:
+        version:
+          type: string
+          example: v1
+        topFactors:
+          type: array
+          minItems: 0
+          maxItems: 2
+          items:
+            $ref: '#/components/schemas/ExplainabilityFactor'
+        summary:
+          type: string
     SignalCreateRequest:
       type: object
       required:

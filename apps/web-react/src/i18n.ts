@@ -333,7 +333,15 @@ const resources = {
         "impact_formula": "Impact score = impact level x 25 (max 125).",
         "community_trust": "Community Trust",
         "affected_formula": "Affected score = estimated people / 10 (capped at 30).",
-        "votes_formula": "Trust score = community votes / 5 (capped at 15)."
+        "votes_formula": "Trust score = community votes / 5 (capped at 15).",
+        "why_ranked_preview": "{{primary}} and {{secondary}} are driving this ranking.",
+        "why_ranked_preview_single": "{{primary}} is currently the strongest ranking factor.",
+        "factor_keys": {
+          "urgency": "Urgency",
+          "impact": "Impact",
+          "affectedPeople": "Affected people",
+          "communityVotes": "Community support"
+        }
       },
       "my_contributions": {
         "title": "My Contributions",
@@ -750,7 +758,15 @@ const resources = {
         "impact_formula": "Puntaje de impacto = nivel de impacto x 25 (max 125).",
         "community_trust": "Confianza Comunitaria",
         "affected_formula": "Puntaje de afectados = personas estimadas / 10 (tope 30).",
-        "votes_formula": "Puntaje de confianza = votos comunitarios / 5 (tope 15)."
+        "votes_formula": "Puntaje de confianza = votos comunitarios / 5 (tope 15).",
+        "why_ranked_preview": "{{primary}} y {{secondary}} impulsan esta prioridad.",
+        "why_ranked_preview_single": "{{primary}} es actualmente el factor mas fuerte del ranking.",
+        "factor_keys": {
+          "urgency": "Urgencia",
+          "impact": "Impacto",
+          "affectedPeople": "Personas afectadas",
+          "communityVotes": "Apoyo comunitario"
+        }
       },
       "my_contributions": {
         "title": "Mis Contribuciones",
