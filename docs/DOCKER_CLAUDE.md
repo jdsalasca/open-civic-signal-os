@@ -11,7 +11,7 @@ This guide is the default for local development and fast deployment from Claude/
 ## Local Development (hot reload)
 
 ```bash
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up --build
+docker compose -f infra/docker-compose.dev.yml up --build -d
 ```
 
 ## Local Production-like Run
@@ -23,8 +23,14 @@ docker compose -f infra/docker-compose.yml up --build -d
 ## Stop and Clean
 
 ```bash
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml down
+docker compose -f infra/docker-compose.dev.yml down
 ```
+
+## Dev Runtime Notes (Resilient Mode)
+
+- `infra/docker-compose.dev.yml` now includes DB + Mail + API + Web in one stack.
+- API container uses retry bootstrap for Maven dependency resolution and persistent `.m2` cache volume.
+- Web container uses retry bootstrap for `npm ci`, persistent `node_modules` volume, and polling-based file watching for reliable hot reload in Docker Desktop.
 
 ## Claude Deployment Flow
 
