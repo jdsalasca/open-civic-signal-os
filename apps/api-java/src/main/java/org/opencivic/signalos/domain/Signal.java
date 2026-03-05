@@ -46,6 +46,9 @@ public class Signal {
     @Column(name = "author_id")
     private UUID authorId;
 
+    @Column(name = "assigned_to_user_id")
+    private UUID assignedToUserId;
+
     @Column(name = "community_id")
     private UUID communityId;
     
@@ -113,6 +116,7 @@ public class Signal {
     public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
     public String getModerationReason() { return moderationReason; }
     public UUID getAuthorId() { return authorId; }
+    public UUID getAssignedToUserId() { return assignedToUserId; }
     public UUID getCommunityId() { return communityId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public Double getLatitude() { return latitude; }
@@ -144,6 +148,7 @@ public class Signal {
     public void setCommunityVotes(int communityVotes) { this.communityVotes = communityVotes; }
     public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }
     public void setAuthorId(UUID authorId) { this.authorId = authorId; }
+    public void setAssignedToUserId(UUID assignedToUserId) { this.assignedToUserId = assignedToUserId; }
     public void setCommunityId(UUID communityId) { this.communityId = communityId; }
     public void setLatitude(Double latitude) { this.latitude = latitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }

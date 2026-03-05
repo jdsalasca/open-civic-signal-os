@@ -32,6 +32,7 @@ export type Signal = {
   title: string;
   description: string;
   imageUrl?: string;
+  assignedToUsername?: string | null;
   locationLabel?: string | null;
   evidenceUrls?: string[];
   category: string;
@@ -194,9 +195,11 @@ export type CommunityBlogPost = {
 export type SignalStatusEntry = {
   id: string;
   signalId: string;
+  eventType: "CREATED" | "STATUS_CHANGED" | "ASSIGNED";
   statusFrom: string;
   statusTo: string;
   changedBy: string;
+  assignedToUsername?: string | null;
   reason: string;
   createdAt: string;
 };

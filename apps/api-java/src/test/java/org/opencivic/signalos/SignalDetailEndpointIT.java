@@ -10,7 +10,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.repository.SignalRepository;
+import org.opencivic.signalos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,13 +31,27 @@ class SignalDetailEndpointIT {
     @Autowired
     private SignalRepository signalRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Test
     @WithMockUser(username = "citizen", roles = {"CITIZEN"})
     void shouldReturnSignalByIdWhenExisting() throws Exception {
         signalRepository.deleteAll();
+        userRepository.deleteAll();
+
+        User reporter = new User("signal_reporter", "{noop}pw", "signal-reporter@test.dev", "ROLE_CITIZEN");
+        reporter.setEnabled(true);
+        reporter.setVerified(true);
+        reporter = userRepository.save(reporter);
+
+        User assignee = new User("signal_owner", "{noop}pw", "signal-owner@test.dev", "ROLE_PUBLIC_SERVANT");
+        assignee.setEnabled(true);
+        assignee.setVerified(true);
+        assignee = userRepository.save(assignee);
 
         UUID signalId = UUID.randomUUID();
-        signalRepository.save(new Signal(
+        Signal signal = new Signal(
             signalId,
             "Unsafe crossing near school",
             "Crosswalk paint has faded and vehicles do not slow down.",
@@ -48,14 +64,17 @@ class SignalDetailEndpointIT {
             new ScoreBreakdown(150, 125, 9, 0.8),
             "NEW",
             new ArrayList<>(),
-            UUID.randomUUID(),
+            reporter.getId(),
             LocalDateTime.now().minusMinutes(30)
-        ));
+        );
+        signal.setAssignedToUserId(assignee.getId());
+        signalRepository.save(signal);
 
         mockMvc.perform(get("/api/signals/{id}", signalId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(signalId.toString()))
             .andExpect(jsonPath("$.title").value("Unsafe crossing near school"))
+            .andExpect(jsonPath("$.assignedToUsername").value("signal_owner"))
             .andExpect(jsonPath("$.status").value("NEW"))
             .andExpect(jsonPath("$.scoreBreakdown.urgency").value(150.0))
             .andExpect(jsonPath("$.explainabilitySummary.version").value("v1"))

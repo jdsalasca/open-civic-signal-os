@@ -70,6 +70,7 @@ Progress: [██████████] 98%
 - 2026-03-05: Implemented OCS-P1-034 with backend-owned thread relevance ordering, reply-depth enforcement, relevance metadata in thread payloads, and improved thread sorting UX.
 - 2026-03-05: Implemented OCS-P1-036 with a backend-owned community-home composite response and a unified feed route that now foregrounds official updates, hot discussions, and top open issues.
 - 2026-03-05: Implemented OCS-P1-037 with an issue tracker-grade reporting wizard, structured location/evidence fields, signal detail evidence rendering, migration, and contract/ADR updates.
+- 2026-03-05: Implemented OCS-P1-038 with backend-owned signal assignment, typed timeline events, audited lifecycle actor/reason fields, and a stronger case detail responsibility surface.
 
 ### Pending Todos
 
@@ -89,6 +90,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Landed `OCS-P1-037` issue tracker-grade report intake with wizard + contract support; next target is `OCS-P1-038` lifecycle timeline consistency and assignment trail  
+Stopped at: Landed `OCS-P1-038` lifecycle timeline consistency and assignment trail; next target is `OCS-P1-039` geospatial issue map and cluster-ready location views  
 Resume file: None
 

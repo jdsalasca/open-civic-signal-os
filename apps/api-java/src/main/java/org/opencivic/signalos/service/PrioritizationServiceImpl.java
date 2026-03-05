@@ -75,6 +75,31 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         return statusHistoryRepository.findBySignalIdOrderByCreatedAtDesc(signalId);
     }
 
+    @Override
+    @Transactional
+    public Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason) {
+        Signal signal = signalRepository.findById(signalId)
+            .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + signalId));
+
+        User assignee = userRepository.findByUsername(assigneeUsername)
+            .orElseThrow(() -> new ResourceNotFoundException("Assignee not found: " + assigneeUsername));
+
+        signal.setAssignedToUserId(assignee.getId());
+        Signal saved = signalRepository.save(signal);
+
+        statusHistoryRepository.save(new SignalStatusEntry(
+            signalId,
+            signal.getStatus(),
+            signal.getStatus(),
+            "ASSIGNED",
+            changedBy,
+            reason == null || reason.isBlank() ? "Case assignment updated" : reason,
+            assignee.getUsername()
+        ));
+
+        return saved;
+    }
+
     private String generateHash(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -312,7 +337,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         Signal saved = signalRepository.save(signal);
 
         statusHistoryRepository.save(new SignalStatusEntry(
-            id, oldStatus, signal.getStatus(), "moderator", reason
+            id, oldStatus, signal.getStatus(), "STATUS_CHANGED", "moderator", reason, null
         ));
 
         return saved;
@@ -362,7 +387,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         Signal saved = saveSignal(signal);
         
         statusHistoryRepository.save(new SignalStatusEntry(
-            saved.getId(), "NONE", "NEW", username, "Initial report submission"
+            saved.getId(), "NONE", "NEW", "CREATED", username, "Initial report submission", null
         ));
 
         return saved;
@@ -381,12 +406,24 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus) {
-        return updateStatus(id, newStatus, null);
+        return updateStatus(id, newStatus, null, "system_operator", "Standard lifecycle transition");
+    }
+
+    @Override
+    @Transactional
+    public Optional<Signal> updateStatus(UUID id, String newStatus, String changedBy, String reason) {
+        return updateStatus(id, newStatus, null, changedBy, reason);
     }
 
     @Override
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId) {
+        return updateStatus(id, newStatus, communityId, "system_operator", "Standard lifecycle transition");
+    }
+
+    @Override
+    @Transactional
+    public Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId, String changedBy, String reason) {
         log.info("Updating status for signal {}. Target: {}", id, newStatus);
         Signal signal = (communityId == null
             ? signalRepository.findById(id)
@@ -405,7 +442,13 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         Signal saved = signalRepository.save(signal);
         
         statusHistoryRepository.save(new SignalStatusEntry(
-            id, oldStatus, newStatus, "system_operator", "Standard lifecycle transition"
+            id,
+            oldStatus,
+            newStatus,
+            "STATUS_CHANGED",
+            changedBy == null || changedBy.isBlank() ? "system_operator" : changedBy,
+            reason == null || reason.isBlank() ? "Standard lifecycle transition" : reason,
+            null
         ));
         
         return Optional.of(saved);

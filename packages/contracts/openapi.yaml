@@ -285,6 +285,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/signals/{id}/assign:
+    patch:
+      summary: Assign one signal to an institutional owner
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignSignalRequest'
+      responses:
+        '200':
+          description: Updated signal assignment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalResponse'
   /api/signals/{id}/history:
     get:
       summary: Get status transition history for one signal
@@ -1260,6 +1289,8 @@ components:
           type: string
         imageUrl:
           type: string
+        assignedToUsername:
+          type: string
         locationLabel:
           type: string
         evidenceUrls:
@@ -1374,6 +1405,17 @@ components:
       properties:
         status:
           type: string
+        reason:
+          type: string
+    AssignSignalRequest:
+      type: object
+      required: [assigneeUsername]
+      properties:
+        assigneeUsername:
+          type: string
+        reason:
+          type: string
+          maxLength: 400
     SignalModerationRequest:
       type: object
       properties:
@@ -1390,11 +1432,16 @@ components:
         signalId:
           type: string
           format: uuid
+        eventType:
+          type: string
+          enum: [CREATED, STATUS_CHANGED, ASSIGNED]
         statusFrom:
           type: string
         statusTo:
           type: string
         changedBy:
+          type: string
+        assignedToUsername:
           type: string
         reason:
           type: string

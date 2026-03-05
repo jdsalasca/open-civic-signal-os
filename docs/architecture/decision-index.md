@@ -24,6 +24,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260305-community-home-composite-contract.md` (accepted)
 - `ADR-20260305-community-permission-policy-contract.md` (accepted)
 - `ADR-20260305-signal-intake-wizard-contract.md` (accepted)
+- `ADR-20260305-signal-timeline-assignment-contract.md` (accepted)
 - `ADR-20260305-community-thread-relevance-contract.md` (accepted)
 - `ADR-20260305-official-announcements-channel-contract.md` (accepted)
 

@@ -25,6 +25,7 @@ public interface PrioritizationService {
     ScoreBreakdown getBreakdown(Signal signal);
     TrustPacket getTrustPacket(UUID signalId);
     java.util.List<org.opencivic.signalos.domain.SignalStatusEntry> getStatusHistory(UUID signalId);
+    Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason);
     java.util.Map<UUID, java.util.List<Signal>> findDuplicates();
     java.util.Map<UUID, java.util.List<Signal>> findDuplicates(UUID communityId);
     Signal mergeSignals(UUID targetId, java.util.List<UUID> duplicateIds);
@@ -37,7 +38,9 @@ public interface PrioritizationService {
     Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String username, UUID communityId);
     Signal saveSignal(Signal signal);
     Optional<Signal> updateStatus(UUID id, String newStatus);
+    Optional<Signal> updateStatus(UUID id, String newStatus, String changedBy, String reason);
     Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId);
+    Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId, String changedBy, String reason);
     Signal voteForSignal(UUID signalId, String username);
     Signal voteForSignal(UUID signalId, String username, UUID communityId);
 }

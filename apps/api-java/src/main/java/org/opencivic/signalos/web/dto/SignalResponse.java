@@ -10,6 +10,7 @@ public record SignalResponse(
     String title,
     String description,
     String imageUrl,
+    String assignedToUsername,
     String locationLabel,
     List<String> evidenceUrls,
     String category,

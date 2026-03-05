@@ -25,8 +25,10 @@ import org.opencivic.signalos.service.UserReactionService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.ExplainabilityFactor;
 import org.opencivic.signalos.web.dto.ExplainabilitySummary;
+import org.opencivic.signalos.web.dto.AssignSignalRequest;
 import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
+import org.opencivic.signalos.web.dto.SignalTimelineEntryResponse;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
 import org.opencivic.signalos.web.dto.ReactionStateResponse;
 import org.opencivic.signalos.service.CivicEngagementService;
@@ -111,8 +113,20 @@ public class SignalController {
     }
 
     @GetMapping("/{id}/history")
-    public List<org.opencivic.signalos.domain.SignalStatusEntry> getStatusHistory(@PathVariable UUID id) {
-        return prioritizationService.getStatusHistory(id);
+    public List<SignalTimelineEntryResponse> getStatusHistory(@PathVariable UUID id) {
+        return prioritizationService.getStatusHistory(id).stream()
+            .map(entry -> new SignalTimelineEntryResponse(
+                entry.getId(),
+                entry.getSignalId(),
+                entry.getEventType(),
+                entry.getStatusFrom(),
+                entry.getStatusTo(),
+                entry.getChangedBy(),
+                entry.getAssignedToUsername(),
+                entry.getReason(),
+                entry.getCreatedAt()
+            ))
+            .toList();
     }
 
     @GetMapping("/prioritized")
@@ -185,10 +199,26 @@ public class SignalController {
         if (newStatusStr == null || newStatusStr.isBlank()) {
             throw new IllegalArgumentException("Status field is mandatory.");
         }
-        return prioritizationService.updateStatus(id, newStatusStr, communityId)
+        return prioritizationService.updateStatus(id, newStatusStr, communityId, authentication.getName(), body.get("reason"))
             .map(signal -> mapToResponse(signal, authentication.getName()))
             .map(ResponseEntity::ok)
             .orElseThrow(() -> new ResourceNotFoundException("Signal not found for status update: " + id));
+    }
+
+    @PatchMapping("/{id}/assign")
+    public ResponseEntity<SignalResponse> assignSignal(
+        @PathVariable UUID id,
+        @Valid @RequestBody AssignSignalRequest request,
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        return ResponseEntity.ok(
+            mapToResponse(
+                prioritizationService.assignSignal(id, request.assigneeUsername(), authentication.getName(), request.reason()),
+                authentication.getName()
+            )
+        );
     }
 
     @PostMapping("/{id}/vote")
@@ -343,6 +373,7 @@ public class SignalController {
             s.getTitle(),
             s.getDescription(),
             s.getImageUrl(),
+            resolveAssignedUsername(s),
             s.getLocationLabel(),
             s.getEvidenceUrls(),
             s.getCategory(),
@@ -391,6 +422,15 @@ public class SignalController {
             return null;
         }
         return userRepository.findByUsername(username).map(User::getId).orElse(null);
+    }
+
+    private String resolveAssignedUsername(Signal signal) {
+        if (signal.getAssignedToUserId() == null) {
+            return null;
+        }
+        return userRepository.findById(signal.getAssignedToUserId())
+            .map(User::getUsername)
+            .orElse(null);
     }
 
     private String resolveUsername(Authentication authentication) {
