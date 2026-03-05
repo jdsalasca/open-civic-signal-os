@@ -54,7 +54,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Optimize thread/message retrieval and validate paging contracts end-to-end.
+- [x] 03-01: Optimize thread/message retrieval and validate paging contracts end-to-end.
 - [ ] 03-02: Harden community state persistence and route transition behavior with tests.
 - [ ] 03-03: Reduce engagement call fan-out in community blog/feed paths.
 
@@ -64,4 +64,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Trust and Contract Stabilization | 3/3 | Completed | 2026-03-04 |
 | 2. Quality Gate Hardening | 4/4 | Completed | 2026-03-04 |
-| 3. Community Workflow Scalability | 0/3 | Not started | - |
+| 3. Community Workflow Scalability | 1/3 | In progress | - |

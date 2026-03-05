@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 3 of 3 (Community Workflow Scalability)  
-Plan: 1 of 3 in current phase  
+Plan: 2 of 3 in current phase  
 Status: In progress  
-Last activity: 2026-03-04 - Completed auth degraded-mode coverage expansion (Phase 2 plan 02-03)
+Last activity: 2026-03-04 - Completed thread paging/filter scalability hardening (Phase 3 plan 03-01)
 
-Progress: [███████░░░] 70%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: ~28m
-- Total execution time: ~3.3 hours
+- Total execution time: ~4.0 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: [███████░░░] 70%
 |-------|-------|-------|----------|
 | 1 | 3 | 85m | 28m |
 | 2 | 4 | 115m | 29m |
-| 3 | 0 | 0m | - |
+| 3 | 1 | 40m | 40m |
 
 **Recent Trend:**
-- Last 5 plans: 25m, 30m, 25m, 35m, 25m
-- Trend: Stable
+- Last 5 plans: 30m, 25m, 35m, 25m, 40m
+- Trend: Stable to improving
 
 ## Accumulated Context
 
@@ -44,6 +44,7 @@ Progress: [███████░░░] 70%
 - 2026-03-04: Planned all 9 roadmap plans with explicit wave/dependency structure.
 - 2026-03-04: Added deterministic ingest path for reproducible replay and deduplicated merges.
 - 2026-03-04: Added backend + frontend degraded auth resend coverage to protect onboarding trust path.
+- 2026-03-04: Refactored thread retrieval to batch message/reaction loading and reduce avoidable fan-out queries.
 
 ### Pending Todos
 
@@ -57,5 +58,5 @@ See: `docs/community/current-backlog.md` (critical fix backlog, 2026-02-19 and 2
 ## Session Continuity
 
 Last session: 2026-03-04  
-Stopped at: Completed quality gate hardening phase; next target is phase 3 plan 03-01 (thread/message paging + performance)  
+Stopped at: Completed phase 3 plan 03-01; next target is 03-02 (community state persistence across route transitions)  
 Resume file: None

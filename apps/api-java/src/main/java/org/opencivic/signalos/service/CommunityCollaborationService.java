@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,7 @@ import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -75,7 +77,31 @@ public class CommunityCollaborationService {
             LocalDateTime.now().minusDays(7),
             pageable
         );
-        return page.map(thread -> toThreadResponse(thread, user.getId()));
+        List<CommunityThread> threads = page.getContent();
+        if (threads.isEmpty()) {
+            return page.map(thread -> toThreadResponse(thread, List.of(), Map.of()));
+        }
+
+        List<UUID> threadIds = threads.stream().map(CommunityThread::getId).toList();
+        Map<UUID, List<CommunityThreadMessage>> messagesByThreadId = loadThreadMessages(threadIds);
+        List<UUID> messageIds = messagesByThreadId.values().stream()
+            .flatMap(List::stream)
+            .map(CommunityThreadMessage::getId)
+            .toList();
+        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
+            "THREAD_MESSAGE",
+            messageIds,
+            user.getId()
+        );
+
+        List<CommunityThreadResponse> responses = threads.stream()
+            .map(thread -> toThreadResponse(
+                thread,
+                messagesByThreadId.getOrDefault(thread.getId(), List.of()),
+                viewerReactions
+            ))
+            .toList();
+        return new PageImpl<>(responses, pageable, page.getTotalElements());
     }
 
     @Transactional
@@ -98,7 +124,7 @@ public class CommunityCollaborationService {
         thread.setCreatedAt(LocalDateTime.now());
         thread.setUpdatedAt(LocalDateTime.now());
         CommunityThread saved = threadRepository.save(thread);
-        return toThreadResponse(saved, user.getId());
+        return toThreadResponse(saved, List.of(), Map.of());
     }
 
     @Transactional
@@ -316,13 +342,11 @@ public class CommunityCollaborationService {
         }
     }
 
-    private CommunityThreadResponse toThreadResponse(CommunityThread thread, UUID viewerUserId) {
-        List<CommunityThreadMessage> threadMessages = messageRepository.findByThreadIdOrderByCreatedAtAsc(thread.getId());
-        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
-            "THREAD_MESSAGE",
-            threadMessages.stream().map(CommunityThreadMessage::getId).toList(),
-            viewerUserId
-        );
+    private CommunityThreadResponse toThreadResponse(
+        CommunityThread thread,
+        List<CommunityThreadMessage> threadMessages,
+        Map<UUID, String> viewerReactions
+    ) {
         List<CommunityThreadMessageResponse> messages = threadMessages
             .stream()
             .map(message -> toMessageResponse(message, viewerReactions.get(message.getId())))
@@ -338,6 +362,15 @@ public class CommunityCollaborationService {
             thread.getUpdatedAt(),
             messages
         );
+    }
+
+    private Map<UUID, List<CommunityThreadMessage>> loadThreadMessages(List<UUID> threadIds) {
+        List<CommunityThreadMessage> allMessages = messageRepository.findByThreadIdInOrderByThreadIdAscCreatedAtAsc(threadIds);
+        Map<UUID, List<CommunityThreadMessage>> messagesByThreadId = new LinkedHashMap<>();
+        for (CommunityThreadMessage message : allMessages) {
+            messagesByThreadId.computeIfAbsent(message.getThreadId(), ignored -> new ArrayList<>()).add(message);
+        }
+        return messagesByThreadId;
     }
 
     @Transactional
