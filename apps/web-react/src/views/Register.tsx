@@ -70,6 +70,10 @@ export function Register() {
     <Layout authMode>
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="w-full max-w-30rem animate-fade-up" padding="lg">
+          <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface" data-testid="onboarding-progress-register">
+            <div className="text-xs font-black uppercase tracking-widest text-main">{t('auth.onboarding_step_register_title')}</div>
+            <div className="text-xs text-muted mt-2">{t('auth.onboarding_step_register_next')}</div>
+          </div>
           <div className="text-center mb-8">
             <h1 className="text-4xl font-black text-main m-0 tracking-tighter">{t('auth.join_title')}</h1>
             <p className="text-secondary mt-2 font-medium">{t('auth.join_subtitle')}</p>

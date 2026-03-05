@@ -27,7 +27,7 @@ test.describe('Auth Edge Cases (P1)', () => {
     const username = `degraded_${Date.now()}`;
     const email = `${username}@example.com`;
 
-    await page.route('**/api/auth/register', async (route) => {
+    await page.route('**/auth/register', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -41,7 +41,7 @@ test.describe('Auth Edge Cases (P1)', () => {
       });
     });
 
-    await page.route('**/api/auth/resend-code', async (route) => {
+    await page.route('**/auth/resend-code', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -67,5 +67,33 @@ test.describe('Auth Edge Cases (P1)', () => {
 
     await page.getByRole('button', { name: /resend/i }).click();
     await expect(page.getByText(/could not deliver verification email/i)).toBeVisible();
+  });
+
+  test('Should show onboarding progress cues from register to verify', async ({ page }) => {
+    const username = `guided_${Date.now()}`;
+    const email = `${username}@example.com`;
+
+    await page.route('**/auth/register', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Registration successful.',
+          username,
+          emailDeliveryStatus: 'SENT',
+        })
+      });
+    });
+
+    await page.goto('/register');
+    await expect(page.getByTestId('onboarding-progress-register')).toContainText(/step 1 of 3|paso 1 de 3/i);
+    await page.getByTestId('register-username-input').fill(username);
+    await page.getByTestId('register-email-input').fill(email);
+    await page.getByTestId('register-password-input').fill('SecurePass123!');
+    await page.getByTestId('register-confirm-password-input').fill('SecurePass123!');
+    await page.getByTestId('register-submit-button').click();
+
+    await expect(page).toHaveURL(/.*verify/);
+    await expect(page.getByTestId('onboarding-progress-verify')).toContainText(/step 2 of 3|paso 2 de 3/i);
   });
 });

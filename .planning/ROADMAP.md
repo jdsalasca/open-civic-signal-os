@@ -71,7 +71,7 @@ Plans:
 
 Plans:
 - [x] 04-01: Build spec-driven frontend audience/usability backlog pack and story sequencing.
-- [ ] 04-02: Execute onboarding/mobile/accessibility tranche with evidence.
+- [x] 04-02: Implement OCS-P1-015 onboarding funnel progress/recovery UX with test evidence.
 - [ ] 04-03: Execute explainability/shareability/re-engagement tranche with evidence.
 
 ## Progress
@@ -81,4 +81,4 @@ Plans:
 | 1. Trust and Contract Stabilization | 3/3 | Completed | 2026-03-04 |
 | 2. Quality Gate Hardening | 4/4 | Completed | 2026-03-04 |
 | 3. Community Workflow Scalability | 3/3 | Completed | 2026-03-04 |
-| 4. Frontend Audience and Usability Growth | 1/3 | In progress | - |
+| 4. Frontend Audience and Usability Growth | 2/3 | In progress | - |
