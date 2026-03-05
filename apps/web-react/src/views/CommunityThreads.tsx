@@ -6,7 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { Avatar } from "primereact/avatar";
 import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import { useTranslation } from "react-i18next";
-import { CommunityMembership, CommunityThread, CommunityThreadMessage, PageResponse, ThreadStatusFilter } from "../types";
+import { CommunityMembership, CommunityThread, CommunityThreadMessage, PageResponse, ThreadSortBy, ThreadStatusFilter } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
 import apiClient from "../api/axios";
@@ -39,6 +39,7 @@ export function CommunityThreads() {
   const [threadPage, setThreadPage] = useState(0);
   const [threadRows, setThreadRows] = useState(10);
   const [threadStatusFilter, setThreadStatusFilter] = useState<ThreadStatusFilter>("ALL");
+  const [threadSortBy, setThreadSortBy] = useState<ThreadSortBy>("RELEVANCE");
   const [targetCommunityId, setTargetCommunityId] = useState<string>("");
   const [newThreadTitle, setNewThreadTitle] = useState("");
   const [threadQuery, setThreadQuery] = useState("");
@@ -62,6 +63,10 @@ export function CommunityThreads() {
     { label: t("community_threads.filter_active"), value: "ACTIVE" },
     { label: t("community_threads.filter_stale"), value: "STALE" },
   ];
+  const threadSortOptions = [
+    { label: t("community_threads.sort_relevance"), value: "RELEVANCE" },
+    { label: t("community_threads.sort_recent"), value: "RECENT" },
+  ];
 
   useEffect(() => {
     if (!activeCommunityId) return;
@@ -69,14 +74,16 @@ export function CommunityThreads() {
     setThreadPage(persisted.page);
     setThreadRows(persisted.rows);
     setThreadStatusFilter(persisted.status);
+    setThreadSortBy(persisted.sortBy);
   }, [activeCommunityId, getThreadListState]);
 
   const loadThreads = useCallback(async () => {
     if (!activeCommunityId) return;
     try {
       const statusQuery = threadStatusFilter === "ALL" ? "" : `&status=${threadStatusFilter}`;
+      const sortQuery = `&sortBy=${threadSortBy}`;
       const res = await apiClient.get<PageResponse<CommunityThread>>(
-        `community/threads?communityId=${activeCommunityId}&page=${threadPage}&size=${threadRows}${statusQuery}`
+        `community/threads?communityId=${activeCommunityId}&page=${threadPage}&size=${threadRows}${statusQuery}${sortQuery}`
       );
       setThreads(res.data?.content || []);
       setTotalRecords(res.data?.totalElements || 0);
@@ -84,7 +91,7 @@ export function CommunityThreads() {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t("community_threads.load_error"));
     }
-  }, [activeCommunityId, t, threadPage, threadRows, threadStatusFilter]);
+  }, [activeCommunityId, t, threadPage, threadRows, threadSortBy, threadStatusFilter]);
 
   useEffect(() => {
     loadThreads();
@@ -99,8 +106,8 @@ export function CommunityThreads() {
 
   useEffect(() => {
     if (!activeCommunityId) return;
-    setThreadListState(activeCommunityId, { page: threadPage, rows: threadRows, status: threadStatusFilter });
-  }, [activeCommunityId, threadPage, threadRows, threadStatusFilter, setThreadListState]);
+    setThreadListState(activeCommunityId, { page: threadPage, rows: threadRows, status: threadStatusFilter, sortBy: threadSortBy });
+  }, [activeCommunityId, threadPage, threadRows, threadSortBy, threadStatusFilter, setThreadListState]);
 
   const createThread = async () => {
     if (!activeCommunityId || !targetCommunityId || threadTitleLength < FORM_LIMITS.threads.titleMin) return;
@@ -227,6 +234,11 @@ export function CommunityThreads() {
     setThreadPage(0);
   };
 
+  const onSortChange = (value: ThreadSortBy) => {
+    setThreadSortBy(value);
+    setThreadPage(0);
+  };
+
   const buildThreadTree = (messages: CommunityThreadMessage[]) => {
     const childrenByParent: Record<string, CommunityThreadMessage[]> = {};
     const roots: CommunityThreadMessage[] = [];
@@ -252,7 +264,7 @@ export function CommunityThreads() {
     depth = 0
   ): JSX.Element => {
     const children = childrenByParent[message.id] || [];
-    const leftPadding = Math.min(depth, 4) * 1.2;
+    const leftPadding = Math.min(message.depth ?? depth, 4) * 1.2;
 
     return (
       <div key={message.id} className="flex flex-column gap-3" style={{ marginLeft: `${leftPadding}rem` }}>
@@ -268,6 +280,11 @@ export function CommunityThreads() {
               </div>
             </div>
             <div className="flex align-items-center gap-2 flex-wrap justify-content-end">
+              {message.directReplyCount > 0 && (
+                <span className="text-min text-muted font-bold" data-testid={`thread-message-replies-${message.id}`}>
+                  {t("community_threads.reply_count", { count: message.directReplyCount })}
+                </span>
+              )}
               <CivicButton
                 type="button"
                 variant="ghost"
@@ -355,6 +372,16 @@ export function CommunityThreads() {
               className="w-full"
               placeholder={t("community_threads.filter_label")}
               data-testid="threads-status-filter"
+            />
+          </div>
+          <div className="w-full md:w-16rem">
+            <CivicSelect
+              value={threadSortBy}
+              options={threadSortOptions}
+              onChange={(e) => onSortChange(e.value as ThreadSortBy)}
+              className="w-full"
+              placeholder={t("community_threads.sort_label")}
+              data-testid="threads-sort-filter"
             />
           </div>
           <div className="w-full md:w-20rem">
@@ -469,12 +496,33 @@ export function CommunityThreads() {
                           <div className="flex justify-content-between align-items-start gap-3">
                             <div>
                               <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2">{thread.title}</h3>
-                              <span className="text-xs text-muted font-bold uppercase tracking-wider">
-                                {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
-                              </span>
+                              <div className="flex flex-wrap align-items-center gap-2">
+                                <span className="text-xs text-muted font-bold uppercase tracking-wider">
+                                  {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
+                                </span>
+                                <span className="text-xs text-muted font-bold uppercase tracking-wider" data-testid={`thread-score-${thread.id}`}>
+                                  {t("community_threads.relevance_score")}: {Math.round(thread.relevanceScore)}
+                                </span>
+                              </div>
                             </div>
-                            <CivicBadge label={t("community_threads.verified_channel")} severity="progress" />
+                            <div className="flex flex-column align-items-end gap-2">
+                              <CivicBadge
+                                label={threadSortBy === "RELEVANCE" ? t("community_threads.sorted_relevance") : t("community_threads.sorted_recent")}
+                                severity="progress"
+                              />
+                              <CivicBadge label={t("community_threads.verified_channel")} severity="progress" />
+                            </div>
                           </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            <span className="u-pill">{t("community_threads.total_messages", { count: thread.totalMessages })}</span>
+                            <span className="u-pill">{t("community_threads.total_replies", { count: thread.totalReplies })}</span>
+                            <span className="u-pill">{t("community_threads.total_reactions", { count: thread.totalReactions })}</span>
+                          </div>
+
+                          <p className="text-sm text-secondary m-0" data-testid={`thread-relevance-summary-${thread.id}`}>
+                            {thread.relevanceSummary}
+                          </p>
 
                           <div className="flex flex-column gap-3">
                             {roots.length === 0 ? (

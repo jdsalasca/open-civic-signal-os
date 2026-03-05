@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 4C of 5 in current phase  
+Plan: 05 of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-05 - Recentered the dashboard and shell around the active community with a more habitable community-home layer (Phase 5 plan 05-04C)
+Last activity: 2026-03-05 - Added backend-owned thread relevance ordering and explicit nested reply depth rules for community deliberation (Phase 5 plan 05-05)
 
 Progress: [██████████] 98%
 
@@ -67,6 +67,7 @@ Progress: [██████████] 98%
 - 2026-03-05: Extended OCS-P1-032 with persisted `interfaceMode` profile preference, simple/advanced settings controls, backend contract storage, and shell/dashboard behavior changes.
 - 2026-03-05: Refocused identity UX around communities by exposing membership count, active community path, visible role/rank, and direct community actions inside Settings and shell chrome.
 - 2026-03-05: Extended OCS-P1-032 into a community-first home by surfacing active-community context, community actions, and calmer simple-mode guidance directly in the dashboard and shell.
+- 2026-03-05: Implemented OCS-P1-034 with backend-owned thread relevance ordering, reply-depth enforcement, relevance metadata in thread payloads, and improved thread sorting UX.
 
 ### Pending Todos
 
@@ -86,6 +87,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Landed the community-home refinement for `OCS-P1-032`; next target is `OCS-P1-034` nested forum threads with relevance ordering and then `OCS-P1-036` unified community home backend composite support  
+Stopped at: Landed `OCS-P1-034` thread relevance and nested reply guardrails; next target is `OCS-P1-036` unified community home backend composite support and then `OCS-P1-037` report-wizard hardening  
 Resume file: None
 

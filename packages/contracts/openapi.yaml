@@ -713,6 +713,13 @@ paths:
             type: string
             enum: [ACTIVE, STALE]
         - in: query
+          name: sortBy
+          required: false
+          schema:
+            type: string
+            enum: [RELEVANCE, RECENT]
+            default: RELEVANCE
+        - in: query
           name: page
           required: false
           schema:
@@ -1562,6 +1569,10 @@ components:
         parentMessageId:
           type: string
           format: uuid
+        depth:
+          type: integer
+        directReplyCount:
+          type: integer
         content:
           type: string
         hidden:
@@ -1612,6 +1623,17 @@ components:
         updatedAt:
           type: string
           format: date-time
+        totalMessages:
+          type: integer
+        totalReplies:
+          type: integer
+        totalReactions:
+          type: integer
+        relevanceScore:
+          type: number
+          format: double
+        relevanceSummary:
+          type: string
         messages:
           type: array
           items:

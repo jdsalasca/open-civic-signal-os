@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Thread Relevance Ordering**: Community talks now support backend-owned `sortBy` ordering (`RELEVANCE` or `RECENT`), explicit relevance metadata, and bounded nested replies so high-signal discussions remain usable as volume grows. (`story:OCS-P1-034`)
 - **Community-First Home Layer**: Dashboard and shell now foreground the active community with clearer belonging context, direct community actions, community-home copy, and a calmer first-view flow that feels less like a generic admin panel. (`story:OCS-P1-032` refinement)
 - **Community-Centered Identity Surface**: Settings now shows the communities a user belongs to, active community path, visible role/rank, and direct switching/management actions so community belonging becomes part of product identity instead of hidden system state. (`community UX`)
 - **Persisted Interface Modes**: Added backend-owned `interfaceMode` profile preference, simple-vs-advanced shell behavior, Settings controls, contract updates, and validation coverage so interface complexity can be reduced without losing advanced workspace depth. (`story:OCS-P1-032`)

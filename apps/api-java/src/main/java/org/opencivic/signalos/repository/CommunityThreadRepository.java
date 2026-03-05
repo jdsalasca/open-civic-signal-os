@@ -37,4 +37,19 @@ public interface CommunityThreadRepository extends JpaRepository<CommunityThread
         @Param("cutoff") LocalDateTime cutoff,
         Pageable pageable
     );
+
+    @Query("""
+        select t from CommunityThread t
+        where (t.sourceCommunityId = :communityId or t.targetCommunityId = :communityId)
+          and (
+            :status is null
+            or (:status = 'ACTIVE' and t.updatedAt >= :cutoff)
+            or (:status = 'STALE' and t.updatedAt < :cutoff)
+          )
+    """)
+    List<CommunityThread> findAllByCommunityAndStatus(
+        @Param("communityId") UUID communityId,
+        @Param("status") String status,
+        @Param("cutoff") LocalDateTime cutoff
+    );
 }

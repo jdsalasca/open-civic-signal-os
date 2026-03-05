@@ -141,6 +141,8 @@ export type CommunityThreadMessage = {
   authorId: string;
   sourceCommunityId: string;
   parentMessageId?: string;
+  depth: number;
+  directReplyCount: number;
   content: string;
   hidden: boolean;
   moderationReason?: string;
@@ -158,6 +160,11 @@ export type CommunityThread = {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  totalMessages: number;
+  totalReplies: number;
+  totalReactions: number;
+  relevanceScore: number;
+  relevanceSummary: string;
   messages: CommunityThreadMessage[];
 };
 
@@ -209,3 +216,4 @@ export type PageResponse<T> = {
 };
 
 export type ThreadStatusFilter = "ALL" | "ACTIVE" | "STALE";
+export type ThreadSortBy = "RELEVANCE" | "RECENT";

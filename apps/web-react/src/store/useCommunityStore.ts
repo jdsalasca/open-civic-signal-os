@@ -6,6 +6,7 @@ type CommunityThreadListState = {
   page: number;
   rows: number;
   status: "ALL" | "ACTIVE" | "STALE";
+  sortBy: "RELEVANCE" | "RECENT";
 };
 
 interface CommunityState {
@@ -63,7 +64,7 @@ export const useCommunityStore = create<CommunityState>()(
           },
         })),
       getThreadListState: (communityId) =>
-        get().threadListStateByCommunity[communityId] ?? { page: 0, rows: 10, status: "ALL" },
+        get().threadListStateByCommunity[communityId] ?? { page: 0, rows: 10, status: "ALL", sortBy: "RELEVANCE" },
       shouldRefreshMemberships: (maxAgeMs) => {
         const { membershipsLoadedAt } = get();
         if (membershipsLoadedAt === null) {

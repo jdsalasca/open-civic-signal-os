@@ -13,5 +13,10 @@ public record CommunityThreadResponse(
     UUID createdBy,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
+    int totalMessages,
+    int totalReplies,
+    int totalReactions,
+    double relevanceScore,
+    String relevanceSummary,
     List<CommunityThreadMessageResponse> messages
 ) {}

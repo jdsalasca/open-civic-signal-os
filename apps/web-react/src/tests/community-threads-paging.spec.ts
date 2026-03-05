@@ -123,7 +123,10 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
 
     const initialThreadsResponse = page.waitForResponse((resp) => {
       const url = resp.url();
-      return url.includes('/api/community/threads') && url.includes(`communityId=${auth.sourceCommunityId}`) && resp.ok();
+      return url.includes('/api/community/threads')
+        && url.includes(`communityId=${auth.sourceCommunityId}`)
+        && url.includes('sortBy=RELEVANCE')
+        && resp.ok();
     });
     await page.goto('/communities/threads');
     await initialThreadsResponse;
@@ -133,6 +136,7 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
       return (
         url.includes('/api/community/threads') &&
         url.includes(`communityId=${auth.sourceCommunityId}`) &&
+        url.includes('sortBy=RELEVANCE') &&
         url.includes('page=1') &&
         url.includes('size=10') &&
         resp.ok()
@@ -148,6 +152,7 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
       return (
         url.includes('/api/community/threads') &&
         url.includes(`communityId=${auth.sourceCommunityId}`) &&
+        url.includes('sortBy=RELEVANCE') &&
         url.includes('page=1') &&
         url.includes('size=10') &&
         resp.ok()
@@ -155,6 +160,21 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
     });
     await page.goto('/communities/threads');
     await persistedPageResponse;
+
+    await page.getByTestId('threads-sort-filter').click();
+    await Promise.all([
+      page.waitForResponse((resp) => {
+        const url = resp.url();
+        return (
+          url.includes('/api/community/threads') &&
+          url.includes(`communityId=${auth.sourceCommunityId}`) &&
+          url.includes('sortBy=RECENT') &&
+          url.includes('page=0') &&
+          resp.ok()
+        );
+      }),
+      page.locator('.p-dropdown-item', { hasText: /Most recent first|Más recientes primero/i }).click(),
+    ]);
 
     await page.getByTestId('threads-status-filter').click();
     await Promise.all([
@@ -164,6 +184,7 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
           url.includes('/api/community/threads') &&
           url.includes(`communityId=${auth.sourceCommunityId}`) &&
           url.includes('status=STALE') &&
+          url.includes('sortBy=RECENT') &&
           url.includes('page=0') &&
           url.includes('size=10') &&
           resp.ok()
@@ -180,6 +201,7 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
         url.includes('/api/community/threads') &&
         url.includes(`communityId=${auth.sourceCommunityId}`) &&
         url.includes('status=STALE') &&
+        url.includes('sortBy=RECENT') &&
         url.includes('page=0') &&
         url.includes('size=10') &&
         resp.ok()

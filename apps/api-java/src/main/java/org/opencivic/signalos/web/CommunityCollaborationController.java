@@ -70,11 +70,12 @@ public class CommunityCollaborationController {
     public ApiPageResponse<CommunityThreadResponse> getThreads(
         @RequestParam UUID communityId,
         @RequestParam(required = false) String status,
+        @RequestParam(required = false, defaultValue = "RELEVANCE") String sortBy,
         @PageableDefault(size = 20, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
         Principal principal
     ) {
         return ApiPageResponse.from(
-            collaborationService.getThreads(communityId, status, pageable, principal.getName())
+            collaborationService.getThreads(communityId, status, sortBy, pageable, principal.getName())
         );
     }
 
