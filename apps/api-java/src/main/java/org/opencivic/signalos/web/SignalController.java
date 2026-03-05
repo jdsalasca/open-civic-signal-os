@@ -129,8 +129,9 @@ public class SignalController {
             pageable.getSort()
         );
         try {
+            String viewerUsername = resolveUsername(authentication);
             Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses)
-                .map(signal -> mapToResponse(signal, authentication.getName()));
+                .map(signal -> mapToResponse(signal, viewerUsername));
 
             meterRegistry.counter("signalos.prioritized.requests.total", "scope", scope).increment();
             DistributionSummary.builder("signalos.prioritized.result.size")
@@ -236,8 +237,9 @@ public class SignalController {
         Authentication authentication
     ) {
         validateCommunityScope(authentication, communityId);
+        String viewerUsername = resolveUsername(authentication);
         return prioritizationService.getTopUnresolved(10, communityId).stream()
-            .map(signal -> mapToResponse(signal, authentication.getName()))
+            .map(signal -> mapToResponse(signal, viewerUsername))
             .collect(Collectors.toList());
     }
 
@@ -352,6 +354,13 @@ public class SignalController {
             return null;
         }
         return userRepository.findByUsername(username).map(User::getId).orElse(null);
+    }
+
+    private String resolveUsername(Authentication authentication) {
+        if (authentication == null) {
+            return null;
+        }
+        return authentication.getName();
     }
 
     private void validateCommunityScope(Authentication authentication, UUID communityId) {
