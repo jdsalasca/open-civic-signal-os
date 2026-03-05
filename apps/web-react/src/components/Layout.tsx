@@ -39,6 +39,7 @@ export function Layout({ children, authMode = false }: Props) {
     shouldRefreshMemberships,
   } = useCommunityStore();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const [desktopMoreVisible, setDesktopMoreVisible] = useState(false);
   const mainContentRef = useRef<HTMLElement | null>(null);
 
   const focusMainContentTarget = () => {
@@ -97,19 +98,19 @@ export function Layout({ children, authMode = false }: Props) {
 
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
 
-  const mainNav: NavItem[] = [
+  const primaryNav: NavItem[] = [
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
-    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
+    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
   ];
 
-  const socialNav: NavItem[] = [
+  const collaborationNav: NavItem[] = [
+    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
     { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
     { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
   ];
 
-  const personalNav: NavItem[] = [
-    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
+  const advancedNav: NavItem[] = [
     { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && isStaff },
     { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
     { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
@@ -121,12 +122,8 @@ export function Layout({ children, authMode = false }: Props) {
     role: m.role
   }));
 
-  const quickActions = [
-    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn },
-    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
-  ];
-
-  const mobileNav = [mainNav[0], mainNav[2], personalNav[0], socialNav[0], personalNav[3]].filter((item) => item?.visible);
+  const visibleMoreCount = [...collaborationNav, ...advancedNav].filter((item) => item.visible).length;
+  const mobileNav = primaryNav.filter((item) => item.visible);
 
   if (authMode) return <div className="auth-page min-h-screen">{children}</div>;
 
@@ -175,9 +172,33 @@ export function Layout({ children, authMode = false }: Props) {
         </div>
 
         <nav className="flex-grow-1 px-3 py-4 overflow-y-auto" aria-label={t('nav.main_navigation')}>
-          <NavGroup title={t('nav.group_intelligence')} items={mainNav} />
-          <NavGroup title={t('nav.group_collaboration')} items={socialNav} />
-          <NavGroup title={t('nav.group_personal')} items={personalNav} />
+          <NavGroup title={t('nav.group_primary')} items={primaryNav} />
+          <div className="mb-6">
+            <div className="px-2">
+              <button
+                type="button"
+                className="w-full flex align-items-center justify-content-between px-4 py-3 border-round-xl border-1 border-subtle bg-surface text-main font-bold cursor-pointer"
+                onClick={() => setDesktopMoreVisible((current) => !current)}
+                aria-expanded={desktopMoreVisible}
+                data-testid="desktop-more-toggle"
+              >
+                <span className="flex align-items-center gap-2">
+                  <i className="pi pi-compass text-brand-primary"></i>
+                  {desktopMoreVisible ? t('nav.hide_more_tools') : t('nav.show_more_tools')}
+                </span>
+                <span className="text-xs text-muted">{visibleMoreCount}</span>
+              </button>
+              <p className="text-xs text-muted mt-2 mb-0 px-2" data-testid="desktop-more-hint">
+                {t('nav.more_tools_hint')}
+              </p>
+            </div>
+            {desktopMoreVisible && (
+              <div className="mt-4" data-testid="desktop-more-panel">
+                <NavGroup title={t('nav.group_collaboration')} items={collaborationNav} />
+                <NavGroup title={t('nav.group_tools')} items={advancedNav} />
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="mt-auto p-4 border-top-1 border-subtle bg-surface">
@@ -250,19 +271,15 @@ export function Layout({ children, authMode = false }: Props) {
               <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
             </div>
 
-            <div className="hidden lg:flex align-items-center gap-2">
-              {quickActions.map((action) => (
-                <Button
-                  key={action.to}
-                  type="button"
-                  icon={action.icon}
-                  label={action.label}
-                  text
-                  className="u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
-                  onClick={() => navigate(action.to)}
-                />
-              ))}
-            </div>
+            <Button
+              type="button"
+              icon="pi pi-plus-circle"
+              label={t('nav.report')}
+              text
+              className="hidden lg:flex u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
+              onClick={() => navigate('/report')}
+              data-testid="header-primary-report"
+            />
 
             <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
           </div>
@@ -294,6 +311,18 @@ export function Layout({ children, authMode = false }: Props) {
               <span style={{ fontSize: '9px' }} className="font-bold uppercase tracking-widest">{link.label.split(' ')[0]}</span>
             </Link>
           ))}
+          <button
+            type="button"
+            className={`flex flex-column align-items-center gap-1 border-none bg-transparent ${mobileMenuVisible ? 'text-brand-primary' : 'text-muted'}`}
+            onClick={() => setMobileMenuVisible(true)}
+            aria-label={t('nav.open_navigation')}
+            aria-expanded={mobileMenuVisible}
+            aria-controls={mobileNavId}
+            data-testid="mobile-more-toggle"
+          >
+            <i className="pi pi-ellipsis-h text-xl"></i>
+            <span style={{ fontSize: '9px' }} className="font-bold uppercase tracking-widest">{t('nav.more_short')}</span>
+          </button>
         </nav>
       </div>
 
@@ -308,10 +337,13 @@ export function Layout({ children, authMode = false }: Props) {
             <div className="u-logo-badge border-round-xl p-2 shadow-lg"><i className="pi pi-signal u-logo-icon"></i></div>
             <span className="text-xl font-black text-main">SignalOS</span>
           </div>
+          <p className="text-sm text-secondary m-0" data-testid="mobile-drawer-guidance">
+            {t('nav.mobile_drawer_guidance')}
+          </p>
           <nav className="flex flex-column gap-4" aria-label={t('nav.main_navigation')}>
-            <NavGroup title={t('nav.group_main')} items={mainNav} />
-            <NavGroup title={t('nav.group_social')} items={socialNav} />
-            <NavGroup title={t('nav.group_system')} items={personalNav} />
+            <NavGroup title={t('nav.group_primary')} items={primaryNav} />
+            <NavGroup title={t('nav.group_collaboration')} items={collaborationNav} />
+            <NavGroup title={t('nav.group_tools')} items={advancedNav} />
           </nav>
           <Button
             label={t('nav.sign_out')}

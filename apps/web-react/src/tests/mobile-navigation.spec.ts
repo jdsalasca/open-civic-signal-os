@@ -14,7 +14,7 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
     await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 30000 });
 
     // Open Drawer
-    const menuButton = page.locator('button[aria-label="Open navigation menu"]');
+    const menuButton = page.getByTestId('mobile-more-toggle');
     await expect(menuButton).toBeVisible();
     await menuButton.click();
 
@@ -31,7 +31,7 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
     expect(opacity).toBe('1');
 
     // Verify Nav items are readable and present
-    await expect(sidebar.getByText('Insights')).toBeVisible();
+    await expect(sidebar.getByText('Home')).toBeVisible();
     await expect(sidebar.getByText('Moderation')).toBeVisible();
 
     // Verify backdrop mask presence
