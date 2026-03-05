@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +22,7 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.CommunityAccessService;
 import org.opencivic.signalos.service.ExportService;
 import org.opencivic.signalos.service.PrioritizationService;
+import org.opencivic.signalos.service.SignalGeoService;
 import org.opencivic.signalos.service.UserReactionService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.ExplainabilityFactor;
@@ -30,6 +32,8 @@ import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
 import org.opencivic.signalos.web.dto.SignalTimelineEntryResponse;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
+import org.opencivic.signalos.web.dto.CommunitySignalMapResponse;
+import org.opencivic.signalos.web.dto.CommunitySignalsHeatMapResponse;
 import org.opencivic.signalos.web.dto.ReactionStateResponse;
 import org.opencivic.signalos.service.CivicEngagementService;
 import org.opencivic.signalos.web.dto.CivicCommentResponse;
@@ -45,6 +49,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,6 +76,7 @@ public class SignalController {
     private final UserReactionService userReactionService;
     private final MeterRegistry meterRegistry;
     private final CivicEngagementService engagementService;
+    private final SignalGeoService signalGeoService;
 
     public SignalController(
         PrioritizationService prioritizationService,
@@ -80,7 +86,8 @@ public class SignalController {
         CommunityAccessService communityAccessService,
         UserReactionService userReactionService,
         MeterRegistry meterRegistry,
-        CivicEngagementService engagementService
+        CivicEngagementService engagementService,
+        SignalGeoService signalGeoService
     ) {
         this.prioritizationService = prioritizationService;
         this.exportService = exportService;
@@ -90,6 +97,7 @@ public class SignalController {
         this.userReactionService = userReactionService;
         this.meterRegistry = meterRegistry;
         this.engagementService = engagementService;
+        this.signalGeoService = signalGeoService;
     }
 
     @GetMapping("/{id}/comments")
@@ -300,6 +308,43 @@ public class SignalController {
         return new SignalMetaResponse(totalSignals, unresolvedSignals, lastUpdatedAt);
     }
 
+    @GetMapping("/map")
+    public CommunitySignalMapResponse getCommunitySignalMap(
+        @RequestParam("communityId") UUID communityId,
+        @RequestParam(value = "category", required = false) String category,
+        @RequestParam(value = "status", required = false) String statusFilter,
+        @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        return signalGeoService.getCommunityMap(
+            communityId,
+            normalizeCategoryFilter(category),
+            normalizeStatusFilter(statusFilter),
+            fromDate,
+            toDate
+        );
+    }
+
+    @GetMapping("/map/heat")
+    public CommunitySignalsHeatMapResponse getCommunityHeatMap(
+        @RequestParam(value = "category", required = false) String category,
+        @RequestParam(value = "status", required = false) String statusFilter,
+        @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+        Authentication authentication
+    ) {
+        return signalGeoService.getCommunityHeatMap(
+            resolveUsername(authentication),
+            allowGlobalHeatMap(authentication),
+            normalizeCategoryFilter(category),
+            normalizeStatusFilter(statusFilter),
+            fromDate,
+            toDate
+        );
+    }
+
     @GetMapping("/mine")
     public ApiPageResponse<SignalResponse> getMySignals(
         @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
@@ -458,6 +503,22 @@ public class SignalController {
             .map(String::toUpperCase)
             .distinct()
             .toList();
+    }
+
+    private String normalizeCategoryFilter(String category) {
+        if (category == null || category.isBlank()) {
+            return null;
+        }
+        return category.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private boolean allowGlobalHeatMap(Authentication authentication) {
+        if (authentication == null) {
+            return false;
+        }
+        return authentication.getAuthorities().stream().anyMatch(authority ->
+            authority.getAuthority().equals("ROLE_SUPER_ADMIN") || authority.getAuthority().equals("ROLE_PUBLIC_SERVANT")
+        );
     }
 }
 

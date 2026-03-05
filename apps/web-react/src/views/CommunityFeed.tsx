@@ -55,9 +55,16 @@ export function CommunityFeed() {
             </div>
             <CivicButton
               type="button"
+              icon="pi pi-map"
+              label={t("community_map.open_map")}
+              variant="secondary"
+              onClick={() => navigate("/communities/map")}
+            />
+            <CivicButton
+              type="button"
               icon="pi pi-comments"
               label={t("nav.dialogues")}
-              variant="secondary"
+              variant="ghost"
               onClick={() => navigate("/communities/threads")}
             />
             <CivicButton

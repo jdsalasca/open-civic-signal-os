@@ -231,6 +231,84 @@ export type CommunityHome = {
   topSignals: CommunityHomeSignal[];
 };
 
+export type SignalMapFilters = {
+  category?: string | null;
+  statuses: string[];
+  fromDate?: string | null;
+  toDate?: string | null;
+};
+
+export type CommunitySignalMapPoint = {
+  signalId: string;
+  communityId: string;
+  communityName: string;
+  title: string;
+  category: string;
+  status: string;
+  locationLabel?: string | null;
+  latitude: number;
+  longitude: number;
+  priorityScore: number;
+  heatWeight: number;
+  createdAt: string;
+};
+
+export type CommunitySignalCluster = {
+  clusterKey: string;
+  communityId: string;
+  communityName: string;
+  latitude: number;
+  longitude: number;
+  signalCount: number;
+  cumulativePriorityScore: number;
+  primaryCategory: string;
+  topSignalId?: string | null;
+  topSignalTitle?: string | null;
+};
+
+export type CommunitySignalMap = {
+  communityId: string;
+  communityName: string;
+  communitySlug: string;
+  generatedAt: string;
+  freshness: string;
+  filters: SignalMapFilters;
+  availableCategories: string[];
+  availableStatuses: string[];
+  mappedSignalsCount: number;
+  unmappedSignalsCount: number;
+  cumulativeHeatScore: number;
+  points: CommunitySignalMapPoint[];
+  clusters: CommunitySignalCluster[];
+};
+
+export type CommunitySignalHeatCell = {
+  communityId: string;
+  communityName: string;
+  communitySlug: string;
+  latitude: number;
+  longitude: number;
+  mappedSignalsCount: number;
+  unmappedSignalsCount: number;
+  cumulativeHeatScore: number;
+  averagePriorityScore: number;
+  topCategory: string;
+  topSignalId?: string | null;
+  topSignalTitle?: string | null;
+};
+
+export type CommunitySignalsHeatMap = {
+  generatedAt: string;
+  freshness: string;
+  filters: SignalMapFilters;
+  availableCategories: string[];
+  availableStatuses: string[];
+  visibleCommunitiesCount: number;
+  totalMappedSignalsCount: number;
+  totalHeatScore: number;
+  communities: CommunitySignalHeatCell[];
+};
+
 export type PageResponse<T> = {
   content: T[];
   totalElements: number;

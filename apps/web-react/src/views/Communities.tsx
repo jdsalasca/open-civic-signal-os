@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
@@ -104,6 +105,7 @@ function CommunityTreeBranch({
 }
 
 export function Communities() {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { memberships, setMemberships, setActiveCommunityId, activeCommunityId, getActiveMembership } = useCommunityStore();
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -328,6 +330,24 @@ export function Communities() {
     <Layout>
       <div className="animate-fade-up motion-page">
         <CivicPageHeader title={t('communities_hub.title')} description={t('communities_hub.desc')} />
+        <CivicActionBar className="mb-6" data-testid="communities-map-entrybar">
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-black uppercase tracking-widest text-muted mb-1">
+              {t("community_map.communities_entry_label")}
+            </div>
+            <p className="text-sm text-secondary m-0">
+              {t("community_map.communities_entry_desc")}
+            </p>
+          </div>
+          <CivicButton
+            type="button"
+            icon="pi pi-map"
+            label={t("community_map.open_map")}
+            variant="secondary"
+            onClick={() => navigate("/communities/map")}
+            data-testid="communities-open-map-button"
+          />
+        </CivicActionBar>
 
         <div className="grid">
           <div className="col-12 lg:col-7">

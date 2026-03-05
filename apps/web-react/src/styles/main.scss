@@ -261,6 +261,132 @@ a:hover {
   letter-spacing: 0.03em;
 }
 
+.community-map-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.community-map-filter-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: end;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.community-map-date-input {
+  width: 100%;
+  min-height: 2.85rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  padding: 0.75rem 1rem;
+  font: inherit;
+}
+
+.community-map-summary-strip {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.community-map-canvas,
+.community-heat-canvas {
+  position: relative;
+  min-height: 24rem;
+  border-radius: 1.75rem;
+  border: 1px solid var(--border-subtle);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--brand-primary) 10%, transparent), transparent 30%),
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--brand-accent) 18%, transparent), transparent 28%),
+    linear-gradient(180deg, var(--bg-elevated), color-mix(in srgb, var(--bg-card) 92%, transparent));
+  overflow: hidden;
+}
+
+.community-map-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--border-subtle) 70%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--border-subtle) 70%, transparent) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 95%);
+}
+
+.community-map-point,
+.community-heat-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.community-map-point-core {
+  display: block;
+  width: var(--point-size, 16px);
+  height: var(--point-size, 16px);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0, rgba(255, 255, 255, 0.95) 18%, var(--brand-primary) 20%, rgba(222, 98, 44, 0.22) 100%);
+  box-shadow: 0 0 0 10px rgba(222, 98, 44, 0.12);
+}
+
+.community-heat-node-core {
+  display: block;
+  width: var(--heat-size, 24px);
+  height: var(--heat-size, 24px);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 244, 222, 1) 0, rgba(255, 208, 122, 0.92) 35%, rgba(216, 84, 26, 0.86) 100%);
+  box-shadow: 0 0 0 18px rgba(216, 84, 26, 0.12);
+}
+
+.community-heat-node-label {
+  display: inline-flex;
+  margin-top: 0.65rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.community-heat-node.is-active .community-heat-node-label {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.community-map-listing,
+.community-map-hotspot {
+  width: 100%;
+  text-align: left;
+  border-radius: 1.3rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .community-map-canvas,
+  .community-heat-canvas {
+    min-height: 18rem;
+  }
+
+  .community-map-filter-actions {
+    justify-content: stretch;
+  }
+
+  .community-map-filter-actions > * {
+    flex: 1 1 100%;
+  }
+}
+
 .civic-empty-state {
   max-width: 34rem;
   margin: 0 auto;

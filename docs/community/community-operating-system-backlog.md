@@ -273,14 +273,16 @@ The current app already supports reporting, prioritization, community context, a
 
 - Problem: communities need geographic pattern visibility, not just lists.
 - Backend/API change:
-  - add map query endpoint with filters and cluster-ready payload
+  - add one community map endpoint plus one cross-community heat endpoint with filter echo and cluster-ready payloads
 - Contract change:
-  - document map point/cluster response shape
+  - document community point/cluster and cross-community heat-cell response shapes
 - UI workflow:
-  - map with heat/clusters, filter chips, and click-through to issue detail
+  - active-community map with hotspots, federated heat across visible communities, real filters, and click-through to issue detail
 - Civic outcome:
   - spatial hotspots become easier to detect and act on
 - Acceptance criteria:
+  - [ ] every active community has a dedicated issue map surface
+  - [ ] cross-community heat view shows where pressure is building between communities
   - [ ] map filters by category, status, and date
   - [ ] clustered view remains usable on mobile
   - [ ] issue click opens detail context cleanly

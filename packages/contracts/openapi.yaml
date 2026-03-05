@@ -171,6 +171,80 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SignalMeta'
+  /api/signals/map:
+    get:
+      summary: Get one community map with mapped issue points, clusters, and coverage counters
+      parameters:
+        - name: communityId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          description: Optional comma-separated lifecycle status filter.
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Community issue map payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunitySignalMap'
+  /api/signals/map/heat:
+    get:
+      summary: Get heat summary across visible communities
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          description: Optional comma-separated lifecycle status filter.
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Cross-community heat map payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunitySignalsHeatMap'
   /api/signals/mine:
     get:
       summary: Get signals created by the authenticated user
@@ -1321,6 +1395,242 @@ components:
         longitude:
           type: number
           format: double
+    SignalMapFilters:
+      type: object
+      properties:
+        category:
+          type: string
+          nullable: true
+        statuses:
+          type: array
+          items:
+            type: string
+        fromDate:
+          type: string
+          format: date
+          nullable: true
+        toDate:
+          type: string
+          format: date
+          nullable: true
+    CommunitySignalMapPoint:
+      type: object
+      required:
+        - signalId
+        - communityId
+        - communityName
+        - title
+        - category
+        - status
+        - latitude
+        - longitude
+        - priorityScore
+        - heatWeight
+        - createdAt
+      properties:
+        signalId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        locationLabel:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        priorityScore:
+          type: number
+        heatWeight:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    CommunitySignalCluster:
+      type: object
+      required:
+        - clusterKey
+        - communityId
+        - communityName
+        - latitude
+        - longitude
+        - signalCount
+        - cumulativePriorityScore
+        - primaryCategory
+      properties:
+        clusterKey:
+          type: string
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        signalCount:
+          type: integer
+        cumulativePriorityScore:
+          type: number
+        primaryCategory:
+          type: string
+        topSignalId:
+          type: string
+          format: uuid
+          nullable: true
+        topSignalTitle:
+          type: string
+          nullable: true
+    CommunitySignalMap:
+      type: object
+      required:
+        - communityId
+        - communityName
+        - communitySlug
+        - generatedAt
+        - freshness
+        - filters
+        - availableCategories
+        - availableStatuses
+        - mappedSignalsCount
+        - unmappedSignalsCount
+        - cumulativeHeatScore
+        - points
+        - clusters
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        communitySlug:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        freshness:
+          type: string
+        filters:
+          $ref: '#/components/schemas/SignalMapFilters'
+        availableCategories:
+          type: array
+          items:
+            type: string
+        availableStatuses:
+          type: array
+          items:
+            type: string
+        mappedSignalsCount:
+          type: integer
+        unmappedSignalsCount:
+          type: integer
+        cumulativeHeatScore:
+          type: number
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunitySignalMapPoint'
+        clusters:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunitySignalCluster'
+    CommunitySignalHeatCell:
+      type: object
+      required:
+        - communityId
+        - communityName
+        - communitySlug
+        - latitude
+        - longitude
+        - mappedSignalsCount
+        - unmappedSignalsCount
+        - cumulativeHeatScore
+        - averagePriorityScore
+        - topCategory
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        communitySlug:
+          type: string
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        mappedSignalsCount:
+          type: integer
+        unmappedSignalsCount:
+          type: integer
+        cumulativeHeatScore:
+          type: number
+        averagePriorityScore:
+          type: number
+        topCategory:
+          type: string
+        topSignalId:
+          type: string
+          format: uuid
+          nullable: true
+        topSignalTitle:
+          type: string
+          nullable: true
+    CommunitySignalsHeatMap:
+      type: object
+      required:
+        - generatedAt
+        - freshness
+        - filters
+        - availableCategories
+        - availableStatuses
+        - visibleCommunitiesCount
+        - totalMappedSignalsCount
+        - totalHeatScore
+        - communities
+      properties:
+        generatedAt:
+          type: string
+          format: date-time
+        freshness:
+          type: string
+        filters:
+          $ref: '#/components/schemas/SignalMapFilters'
+        availableCategories:
+          type: array
+          items:
+            type: string
+        availableStatuses:
+          type: array
+          items:
+            type: string
+        visibleCommunitiesCount:
+          type: integer
+        totalMappedSignalsCount:
+          type: integer
+        totalHeatScore:
+          type: number
+        communities:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunitySignalHeatCell'
     ExplainabilityFactor:
       type: object
       required:
