@@ -58,6 +58,21 @@ export type SignalMeta = {
 
 export type UserRole = "SUPER_ADMIN" | "PUBLIC_SERVANT" | "CITIZEN" | "GUEST";
 
+export type ProfileVisibility = "PUBLIC" | "COMMUNITY" | "ADMINS";
+
+export type UserProfile = {
+  username: string;
+  displayName: string;
+  email?: string | null;
+  verified: boolean;
+  civicRole?: string | null;
+  bio?: string | null;
+  affiliations: string[];
+  profileVisibility: ProfileVisibility;
+  affiliationVisibility: ProfileVisibility;
+  viewerScope: ProfileVisibility;
+};
+
 export type AuthInfo = {
   user: string;
   role: UserRole;

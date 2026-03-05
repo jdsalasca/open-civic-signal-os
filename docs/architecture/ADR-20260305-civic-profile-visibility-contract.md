@@ -1,0 +1,23 @@
+# ADR-20260305-civic-profile-visibility-contract
+
+- Date: 2026-03-05
+- Status: accepted
+- Decision: Add authenticated and audience-filtered civic profile endpoints with backend-owned visibility enforcement for role, bio, and affiliations.
+- Context:
+  - Story: `OCS-P1-029` requires enriched civic identity with privacy controls before broader community operating-system features ship.
+  - The product already had users and community memberships, but no explicit civic profile or deterministic privacy rules.
+  - Privacy and trust must be enforced by API behavior, not frontend convention.
+- Alternatives considered:
+  - Store identity fields only in frontend preferences and never expose them as contract data.
+  - Expose full profile details to any authenticated viewer and rely on UI to hide sensitive fields.
+  - Delay identity work until verified identity tiers are implemented.
+- Consequences:
+  - Contract now includes `GET/PUT /api/auth/profile/me` and `GET /api/auth/profile/{username}`.
+  - Viewer audience is resolved server-side into `PUBLIC`, `COMMUNITY`, or `ADMINS`.
+  - The API can support future profile cards, proposal authorship, and community people directories without leaking hidden fields.
+- Rollback plan:
+  - Remove profile columns and endpoints.
+  - Revert Settings profile editing UI to non-persistent identity badges.
+  - Remove profile schemas from OpenAPI.
+- Related issues/PRs:
+  - `story:OCS-P1-029`

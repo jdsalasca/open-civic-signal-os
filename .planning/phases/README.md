@@ -30,6 +30,7 @@ This directory contains executable spec-driven plans aligned to `.planning/ROADM
 ## Phase 5: Community Operating System Expansion
 
 - `05-community-operating-system-expansion/05-01-PLAN.md`
+- `05-community-operating-system-expansion/05-02-PLAN.md`
 
 ## Notes
 

@@ -3,6 +3,59 @@ info:
   title: Open Civic Signal OS API
   version: 0.2.0
 paths:
+  /api/auth/profile/me:
+    get:
+      summary: Get full civic identity profile for authenticated user
+      responses:
+        '200':
+          description: Full authenticated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+    put:
+      summary: Update civic identity profile for authenticated user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: Updated full authenticated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+  /api/auth/profile/{username}:
+    get:
+      summary: Get civic identity profile filtered by viewer audience
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Audience-filtered civic identity profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '404':
+          description: Identity not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/health:
     get:
       summary: Health check
@@ -1364,6 +1417,56 @@ components:
           format: date-time
         freshness:
           type: string
+    ProfileVisibility:
+      type: string
+      enum: [PUBLIC, COMMUNITY, ADMINS]
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        civicRole:
+          type: string
+          enum: [STUDENT, TEACHER, NEIGHBOR, ADMINISTRATOR, AUTHORITY]
+        bio:
+          type: string
+        affiliations:
+          type: array
+          items:
+            type: string
+        profileVisibility:
+          $ref: '#/components/schemas/ProfileVisibility'
+        affiliationVisibility:
+          $ref: '#/components/schemas/ProfileVisibility'
+    UserProfileResponse:
+      type: object
+      required: [username, displayName, verified, affiliations, profileVisibility, affiliationVisibility, viewerScope]
+      properties:
+        username:
+          type: string
+        displayName:
+          type: string
+        email:
+          type: string
+          nullable: true
+        verified:
+          type: boolean
+        civicRole:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        affiliations:
+          type: array
+          items:
+            type: string
+        profileVisibility:
+          $ref: '#/components/schemas/ProfileVisibility'
+        affiliationVisibility:
+          $ref: '#/components/schemas/ProfileVisibility'
+        viewerScope:
+          $ref: '#/components/schemas/ProfileVisibility'
     CreateCommunityRequest:
       type: object
       required: [name, slug]
@@ -1446,3 +1549,4 @@ components:
           type: string
         statusTag:
           type: string
+

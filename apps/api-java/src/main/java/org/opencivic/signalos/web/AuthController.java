@@ -1,9 +1,19 @@
 package org.opencivic.signalos.web;
 
 import jakarta.validation.Valid;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.domain.CommunityMembership;
+import org.opencivic.signalos.domain.CommunityRole;
+import org.opencivic.signalos.domain.ProfileVisibility;
 import org.opencivic.signalos.exception.ConflictException;
+import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.exception.UnauthorizedActionException;
+import org.opencivic.signalos.repository.CommunityMembershipRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.EmailService;
 import org.opencivic.signalos.service.EmailDeliveryResult;
@@ -39,6 +49,7 @@ public class AuthController {
     private final UserDetailsService userDetailsService;
     private final SecureRandom secureRandom = new SecureRandom();
     private final RateLimitService rateLimitService;
+    private final CommunityMembershipRepository membershipRepository;
 
     @Value("${spring.profiles.active:prod}")
     private String activeProfile;
@@ -50,7 +61,8 @@ public class AuthController {
                           EmailService emailService, JwtService jwtService, 
                           AuthenticationManager authenticationManager,
                           UserDetailsService userDetailsService,
-                          RateLimitService rateLimitService) {
+                          RateLimitService rateLimitService,
+                          CommunityMembershipRepository membershipRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -58,6 +70,7 @@ public class AuthController {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.rateLimitService = rateLimitService;
+        this.membershipRepository = membershipRepository;
     }
 
     @PostMapping("/register")
@@ -248,6 +261,168 @@ public class AuthController {
     public Map<String, Object> getCurrentUser(Authentication authentication) {
         if (authentication == null) return Map.of("role", "GUEST");
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        return Map.of("username", user.getUsername(), "roles", user.getRoles(), "email", user.getEmail(), "verified", user.isVerified());
+        return Map.of(
+            "username", user.getUsername(),
+            "roles", user.getRoles(),
+            "email", user.getEmail(),
+            "verified", user.isVerified(),
+            "displayName", displayNameFor(user),
+            "civicRole", user.getCivicRole(),
+            "affiliations", user.getAffiliations(),
+            "bio", user.getBio(),
+            "profileVisibility", user.getProfileVisibility().name(),
+            "affiliationVisibility", user.getAffiliationVisibility().name()
+        );
+    }
+
+    @GetMapping("/profile/me")
+    public UserProfileResponse getMyProfile(Authentication authentication) {
+        User user = requireAuthenticatedUser(authentication);
+        return toProfileResponse(user, ViewerScope.ADMINS, true);
+    }
+
+    @PutMapping("/profile/me")
+    public UserProfileResponse updateMyProfile(
+        @Valid @RequestBody UpdateUserProfileRequest request,
+        Authentication authentication
+    ) {
+        User user = requireAuthenticatedUser(authentication);
+        user.setDisplayName(trimToNull(request.displayName()));
+        user.setCivicRole(trimToNull(request.civicRole()));
+        user.setBio(trimToNull(request.bio()));
+        user.setAffiliations(sanitizeAffiliations(request.affiliations()));
+        user.setProfileVisibility(request.profileVisibility() == null ? ProfileVisibility.PUBLIC : request.profileVisibility());
+        user.setAffiliationVisibility(
+            request.affiliationVisibility() == null ? ProfileVisibility.COMMUNITY : request.affiliationVisibility()
+        );
+        userRepository.save(user);
+        return toProfileResponse(user, ViewerScope.ADMINS, true);
+    }
+
+    @GetMapping("/profile/{username}")
+    public UserProfileResponse getProfile(
+        @PathVariable String username,
+        Authentication authentication,
+        @RequestHeader(name = "X-Community-Id", required = false) UUID communityId
+    ) {
+        User viewedUser = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException("Identity not found."));
+        ViewerScope viewerScope = resolveViewerScope(authentication, viewedUser, communityId);
+        return toProfileResponse(viewedUser, viewerScope, false);
+    }
+
+    private User requireAuthenticatedUser(Authentication authentication) {
+        if (authentication == null) {
+            throw new UnauthorizedActionException("Authentication required.");
+        }
+        return userRepository.findByUsername(authentication.getName())
+            .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found."));
+    }
+
+    private ViewerScope resolveViewerScope(Authentication authentication, User viewedUser, UUID communityId) {
+        if (authentication == null) {
+            return ViewerScope.PUBLIC;
+        }
+
+        User viewer = userRepository.findByUsername(authentication.getName()).orElse(null);
+        if (viewer == null) {
+            return ViewerScope.PUBLIC;
+        }
+
+        if (viewer.getId().equals(viewedUser.getId()) || viewer.getRoleList().contains("ROLE_SUPER_ADMIN")) {
+            return ViewerScope.ADMINS;
+        }
+
+        if (communityId != null) {
+            var viewerMembership = membershipRepository.findByUserIdAndCommunityId(viewer.getId(), communityId);
+            var viewedMembership = membershipRepository.findByUserIdAndCommunityId(viewedUser.getId(), communityId);
+            if (viewerMembership.isPresent() && viewedMembership.isPresent()) {
+                return isAdminCommunityRole(viewerMembership.get().getRole()) ? ViewerScope.ADMINS : ViewerScope.COMMUNITY;
+            }
+        }
+
+        Set<UUID> viewedCommunities = new HashSet<>();
+        membershipRepository.findByUserId(viewedUser.getId())
+            .forEach(membership -> viewedCommunities.add(membership.getCommunityId()));
+
+        for (CommunityMembership membership : membershipRepository.findByUserId(viewer.getId())) {
+            if (viewedCommunities.contains(membership.getCommunityId())) {
+                return isAdminCommunityRole(membership.getRole()) ? ViewerScope.ADMINS : ViewerScope.COMMUNITY;
+            }
+        }
+
+        return ViewerScope.PUBLIC;
+    }
+
+    private boolean isAdminCommunityRole(CommunityRole role) {
+        return role == CommunityRole.MODERATOR
+            || role == CommunityRole.COORDINATOR
+            || role == CommunityRole.PUBLIC_SERVANT_LIAISON;
+    }
+
+    private UserProfileResponse toProfileResponse(User user, ViewerScope viewerScope, boolean includeEmail) {
+        String email = includeEmail || viewerScope == ViewerScope.ADMINS ? user.getEmail() : null;
+        boolean revealProfile = canReveal(user.getProfileVisibility(), viewerScope);
+        String displayName = revealProfile ? displayNameFor(user) : user.getUsername();
+        String civicRole = revealProfile ? user.getCivicRole() : null;
+        String bio = revealProfile ? user.getBio() : null;
+        List<String> affiliations = canReveal(user.getAffiliationVisibility(), viewerScope) ? user.getAffiliations() : List.of();
+
+        return new UserProfileResponse(
+            user.getUsername(),
+            displayName,
+            email,
+            user.isVerified(),
+            civicRole,
+            bio,
+            affiliations,
+            user.getProfileVisibility(),
+            user.getAffiliationVisibility(),
+            viewerScope.name()
+        );
+    }
+
+    private boolean canReveal(ProfileVisibility visibility, ViewerScope viewerScope) {
+        if (viewerScope == ViewerScope.ADMINS) {
+            return true;
+        }
+        return switch (visibility) {
+            case PUBLIC -> true;
+            case COMMUNITY -> viewerScope == ViewerScope.COMMUNITY;
+            case ADMINS -> false;
+        };
+    }
+
+    private String displayNameFor(User user) {
+        return user.getDisplayName() == null || user.getDisplayName().isBlank()
+            ? user.getUsername()
+            : user.getDisplayName();
+    }
+
+    private List<String> sanitizeAffiliations(List<String> affiliations) {
+        if (affiliations == null) {
+            return List.of();
+        }
+        return affiliations.stream()
+            .map(this::trimToNull)
+            .filter(value -> value != null && !value.isBlank())
+            .distinct()
+            .sorted(Comparator.naturalOrder())
+            .limit(8)
+            .toList();
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private enum ViewerScope {
+        PUBLIC,
+        COMMUNITY,
+        ADMINS
     }
 }

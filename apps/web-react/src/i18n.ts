@@ -475,6 +475,28 @@ const resources = {
         "protocol": "Protocol",
         "protocol_value": "SignalOS v2.4",
         "interface_protocol": "Interface & Protocol",
+        "public_identity": "Public Identity",
+        "public_identity_help": "Show who you are in community context without exposing more than needed. Profile details and affiliations can each be limited separately.",
+        "display_name": "Display name",
+        "display_name_help": "Use the name or alias your community should recognize.",
+        "civic_role_label": "Community role",
+        "civic_role_help": "Describe your civic context in plain language.",
+        "affiliations_label": "Affiliations",
+        "affiliations_help": "Comma-separated. Example: Central Campus, Building A, Neighborhood 7.",
+        "bio_label": "Short bio",
+        "bio_help": "Optional. Add one sentence about how you participate.",
+        "profile_visibility_label": "Who can see your role and bio",
+        "profile_visibility_help": "Choose whether your civic role and bio are public, limited to shared communities, or reserved for admins.",
+        "affiliation_visibility_label": "Who can see your affiliations",
+        "affiliation_visibility_help": "Affiliations can be more sensitive than your role. Limit them when needed.",
+        "affiliations_preview": "Current affiliations",
+        "no_affiliations": "No affiliations added yet",
+        "identity_ready": "Identity settings are ready to update.",
+        "save_profile": "Save public identity",
+        "profile_saved": "Public identity updated.",
+        "profile_save_error": "Could not update identity profile.",
+        "profile_load_error": "Could not load identity profile.",
+        "identity_role_fallback": "No civic role set",
         "language": "Language",
         "language_help": "Localization for all system notifications and UI elements.",
         "languages": {
@@ -502,6 +524,18 @@ const resources = {
           "MODERATOR": "Moderator",
           "MEMBER": "Member",
           "PUBLIC_SERVANT_LIAISON": "Public Servant Liaison"
+        },
+        "visibility": {
+          "PUBLIC": "Public",
+          "COMMUNITY": "Shared community only",
+          "ADMINS": "Admins only"
+        },
+        "civic_roles": {
+          "STUDENT": "Student",
+          "TEACHER": "Teacher",
+          "NEIGHBOR": "Neighbor",
+          "ADMINISTRATOR": "Administrator",
+          "AUTHORITY": "Authority"
         }
       },
       "exceptions": {
@@ -1002,6 +1036,28 @@ const resources = {
         "protocol": "Protocolo",
         "protocol_value": "SignalOS v2.4",
         "interface_protocol": "Interfaz y Protocolo",
+        "public_identity": "Identidad publica",
+        "public_identity_help": "Muestre quien es dentro del contexto comunitario sin exponer mas de lo necesario. Los datos del perfil y las afiliaciones pueden limitarse por separado.",
+        "display_name": "Nombre visible",
+        "display_name_help": "Use el nombre o alias con el que su comunidad deberia reconocerle.",
+        "civic_role_label": "Rol comunitario",
+        "civic_role_help": "Describa su contexto civico en lenguaje claro.",
+        "affiliations_label": "Afiliaciones",
+        "affiliations_help": "Separadas por comas. Ejemplo: Campus Central, Bloque A, Barrio 7.",
+        "bio_label": "Bio corta",
+        "bio_help": "Opcional. Agregue una frase sobre como participa.",
+        "profile_visibility_label": "Quien puede ver su rol y bio",
+        "profile_visibility_help": "Elija si su rol civico y bio son publicos, solo para comunidades compartidas o reservados para admins.",
+        "affiliation_visibility_label": "Quien puede ver sus afiliaciones",
+        "affiliation_visibility_help": "Las afiliaciones pueden ser mas sensibles que el rol. Limitelas cuando haga falta.",
+        "affiliations_preview": "Afiliaciones actuales",
+        "no_affiliations": "Aun no agrego afiliaciones",
+        "identity_ready": "La configuracion de identidad esta lista para actualizarse.",
+        "save_profile": "Guardar identidad publica",
+        "profile_saved": "Identidad publica actualizada.",
+        "profile_save_error": "No se pudo actualizar el perfil de identidad.",
+        "profile_load_error": "No se pudo cargar el perfil de identidad.",
+        "identity_role_fallback": "Sin rol civico definido",
         "language": "Idioma",
         "language_help": "Localización para todas las notificaciones y elementos de interfaz.",
         "languages": {
@@ -1029,6 +1085,18 @@ const resources = {
           "MODERATOR": "Moderador",
           "MEMBER": "Miembro",
           "PUBLIC_SERVANT_LIAISON": "Enlace de Servicio Público"
+        },
+        "visibility": {
+          "PUBLIC": "Publico",
+          "COMMUNITY": "Solo comunidad compartida",
+          "ADMINS": "Solo admins"
+        },
+        "civic_roles": {
+          "STUDENT": "Estudiante",
+          "TEACHER": "Docente",
+          "NEIGHBOR": "Vecino",
+          "ADMINISTRATOR": "Administrador",
+          "AUTHORITY": "Autoridad"
         }
       },
       "exceptions": {
