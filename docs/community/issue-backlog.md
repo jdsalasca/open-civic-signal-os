@@ -107,3 +107,16 @@ Use `.github/workflows/seed-community-issues.yml` to persist these as GitHub iss
 4. `story:OCS-P1-012 ship public-servant community blog (create/list/update) with public timeline view`
 5. `story:OCS-P1-013 add community context switcher and scoped dashboards/reporting`
 6. `story:OCS-P1-014 add moderation workflow for community conversations and blog comments`
+
+## Frontend Audience and Usability Expansion (GSD 2026-03-04)
+
+1. `story:OCS-P1-015 harden register->verify->first-action funnel with explicit progress and recovery states`
+2. `story:OCS-P1-016 add low-bandwidth mobile UX mode with payload/performance budget enforcement`
+3. `story:OCS-P1-017 ship public shareability surfaces and social card metadata for top civic issues`
+4. `story:OCS-P1-018 complete plain-language EN/ES copy parity for trust-critical and contribution flows`
+5. `story:OCS-P1-019 uplift accessibility baseline (keyboard-first paths, landmarks, focus states, contrast)`
+6. `story:OCS-P1-020 expose list-level explainability snippets to improve ranking trust for new users`
+7. `story:OCS-P1-021 add notification preference UX for re-engagement and community follow-ups`
+8. `story:OCS-P1-022 instrument frontend conversion funnel analytics with auditable event contracts`
+
+Reference pack: `docs/community/frontend-audience-usability-backlog.md`

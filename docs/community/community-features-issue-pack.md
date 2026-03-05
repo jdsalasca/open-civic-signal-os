@@ -100,3 +100,86 @@ Body:
 - `story:OCS-P1-012` Public-servant blog by community.
 - `story:OCS-P1-013` Community context switcher + scoped dashboard.
 - `story:OCS-P1-014` Moderation workflow for threads/blog comments.
+
+## Frontend Audience and Usability Issue Seed Pack (GSD 2026-03-04)
+
+Use labels:
+- `priority:P1`
+- `impact-high`
+- `type:story`
+- add `trust-critical` for explainability/accessibility/onboarding stories
+
+### Issue 6
+
+Title: `frontend-funnel: harden register-verify-first-action conversion path`
+
+Body:
+- Problem: users drop during onboarding when progression and recovery steps are not explicit.
+- Proposed change: add guided step states and trust-safe fallback cues from register to first action.
+- Acceptance criteria:
+  - [ ] Register/verify screens show explicit progress and next step cues.
+  - [ ] Failed email delivery path has visible recoverability without dead ends.
+  - [ ] Funnel events are emitted with deterministic step names.
+- Validation:
+  - [ ] Playwright desktop/mobile onboarding flow.
+  - [ ] Event payload contract checks.
+
+### Issue 7
+
+Title: `frontend-mobile: enforce low-bandwidth UX and payload budgets`
+
+Body:
+- Problem: heavy initial loads hurt participation in constrained network environments.
+- Proposed change: introduce low-bandwidth-friendly loading strategy and enforce performance budgets.
+- Acceptance criteria:
+  - [ ] Dashboard/feed initial render stays under agreed payload limits.
+  - [ ] Critical actions remain usable under network throttling.
+  - [ ] Budget regressions fail CI checks.
+- Validation:
+  - [ ] Playwright throttled-network scenario.
+  - [ ] Build artifact budget diff report.
+
+### Issue 8
+
+Title: `frontend-copy: complete plain-language EN/ES parity for trust-critical flows`
+
+Body:
+- Problem: inconsistent bilingual copy and jargon reduce accessibility for diverse communities.
+- Proposed change: standardize plain-language EN/ES labels/placeholders/help text for key forms.
+- Acceptance criteria:
+  - [ ] Login/register/report/blog/thread forms have synchronized EN/ES updates.
+  - [ ] Character guidance and limits are visible for user-generated content.
+  - [ ] Route + form context persists when language changes.
+- Validation:
+  - [ ] Playwright EN/ES checks on critical routes.
+  - [ ] Missing-translation guard report.
+
+### Issue 9
+
+Title: `frontend-a11y: keyboard-first and semantic navigation baseline`
+
+Body:
+- Problem: keyboard and assistive-tech paths are inconsistent across key workflows.
+- Proposed change: guarantee skip-link, focus-visible, semantic landmarks, and active-nav semantics.
+- Acceptance criteria:
+  - [ ] Core routes can be completed without pointer usage.
+  - [ ] Focus order and visibility are consistent in desktop/mobile.
+  - [ ] Active navigation uses `aria-current` reliably.
+- Validation:
+  - [ ] Playwright keyboard path evidence.
+  - [ ] Accessibility scan output attached to PR.
+
+### Issue 10
+
+Title: `frontend-trust: add list-level explainability snippets on priority cards`
+
+Body:
+- Problem: ranking rationale is often hidden until deep navigation, reducing first-touch trust.
+- Proposed change: show concise "why ranked here" snippets on list cards with detail deep-link.
+- Acceptance criteria:
+  - [ ] Top cards expose explainability summary in plain language.
+  - [ ] Freshness timestamp remains visible near explainability context.
+  - [ ] Detail page keeps full formula transparency.
+- Validation:
+  - [ ] API contract tests for explainability summary fields.
+  - [ ] Playwright assertions for list + detail explainability visibility.

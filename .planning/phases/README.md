@@ -20,6 +20,10 @@ This directory contains executable spec-driven plans aligned to `.planning/ROADM
 - `03-community-workflow-scalability/03-02-PLAN.md`
 - `03-community-workflow-scalability/03-03-PLAN.md`
 
+## Phase 4: Frontend Audience and Usability Growth
+
+- `04-frontend-audience-usability/04-01-PLAN.md`
+
 ## Notes
 
 - Each plan includes requirements mapping, dependencies, wave number, files in scope, and verification criteria.
