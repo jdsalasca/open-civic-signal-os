@@ -29,6 +29,7 @@
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 
 ### Fixed
+- **Playwright Wrapper Reliability (Windows)**: `agent:ux:pw screenshot <path>.png` now works with explicit output paths and saves artifacts in the requested location, matching documented workflow expectations.
 - **Community Permission Transparency**: Blog and thread creation now surface backend `403` permission reasons inline in the UI (EN/ES) to avoid opaque action failures for unauthorized roles. (`P1 trust-critical`)
 - **Double Prefix Bug**: Resolved issue where API requests hit `/api/api/*`. (#UX-001)
 - **Contrast Compliance**: Hardened visual tokens to meet WCAG AA standards across all components. (#UX-007)

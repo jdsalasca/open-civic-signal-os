@@ -19,6 +19,48 @@ function run(cmd, cmdArgs, options = {}) {
   return result.status ?? 1;
 }
 
+function isLikelyScreenshotPath(value) {
+  if (!value) return false;
+  const normalized = value.replace(/\\/g, "/").toLowerCase();
+  return normalized.endsWith(".png") || normalized.endsWith(".jpg") || normalized.endsWith(".jpeg");
+}
+
+function resolveOutputPath(targetPath) {
+  if (path.isAbsolute(targetPath)) {
+    return targetPath;
+  }
+  return path.resolve(root, targetPath);
+}
+
+function findLatestGeneratedScreenshot(dirPath) {
+  if (!fs.existsSync(dirPath)) return null;
+  const files = fs
+    .readdirSync(dirPath)
+    .filter((file) => /^page-.*\.(png|jpg|jpeg)$/i.test(file))
+    .map((file) => {
+      const fullPath = path.join(dirPath, file);
+      const stat = fs.statSync(fullPath);
+      return { fullPath, mtimeMs: stat.mtimeMs };
+    })
+    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+  return files[0]?.fullPath ?? null;
+}
+
+function buildNpxArgs(playwrightArgs) {
+  return ["--yes", "--package", "@playwright/cli", "playwright-cli", ...playwrightArgs];
+}
+
+function runNpx(playwrightArgs) {
+  const npxArgs = buildNpxArgs(playwrightArgs);
+  return isWindows
+    ? run("cmd", ["/c", "npx", ...npxArgs], {
+        env: { ...process.env, PLAYWRIGHT_OUTPUT_DIR: outputDir }
+      })
+    : run("npx", npxArgs, {
+        env: { ...process.env, PLAYWRIGHT_OUTPUT_DIR: outputDir }
+      });
+}
+
 function hasCommand(command) {
   const testArgs = process.platform === "win32" ? ["/c", "where", command] : ["-lc", `command -v ${command} >/dev/null 2>&1`];
   const cmd = process.platform === "win32" ? "cmd" : "bash";
@@ -60,15 +102,31 @@ if (!isWindows && fs.existsSync(wrapper) && hasCommand("bash")) {
   console.warn("Playwright wrapper failed; falling back to npx @playwright/cli.");
 }
 
-const npxArgs = ["--yes", "--package", "@playwright/cli", "playwright-cli", ...args];
-const status = isWindows
-  ? run("cmd", ["/c", "npx", ...npxArgs], {
-      env: { ...process.env, PLAYWRIGHT_OUTPUT_DIR: outputDir }
-    })
-  : run("npx", npxArgs, {
-      env: { ...process.env, PLAYWRIGHT_OUTPUT_DIR: outputDir }
-    });
+let effectiveArgs = args;
+let screenshotTargetPath = null;
+if (args[0] === "screenshot" && isLikelyScreenshotPath(args[1])) {
+  const target = resolveOutputPath(args[1]);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  screenshotTargetPath = target;
+  effectiveArgs = ["screenshot"];
+}
+
+const generatedDir = path.join(root, ".playwright-cli");
+const previousGeneratedScreenshot = screenshotTargetPath ? findLatestGeneratedScreenshot(generatedDir) : null;
+const status = runNpx(effectiveArgs);
 if (status !== 0) {
   console.error("Playwright CLI invocation failed.");
+  process.exit(status);
+}
+
+if (screenshotTargetPath) {
+  const latestGeneratedScreenshot = findLatestGeneratedScreenshot(generatedDir);
+  const shouldCopy = latestGeneratedScreenshot && latestGeneratedScreenshot !== previousGeneratedScreenshot;
+  if (!shouldCopy) {
+    console.error("Could not locate generated screenshot to copy into requested path.");
+    process.exit(1);
+  }
+  fs.copyFileSync(latestGeneratedScreenshot, screenshotTargetPath);
+  console.log(`Saved screenshot to ${screenshotTargetPath}`);
 }
 process.exit(status);
