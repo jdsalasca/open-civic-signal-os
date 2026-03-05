@@ -404,6 +404,21 @@ a:hover {
   max-width: 100%;
 }
 
+.dashboard-community-summary-grid,
+.dashboard-community-surface-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.dashboard-community-surface-card {
+  border-radius: 1.35rem;
+  border: 1px solid var(--alpha-border-10);
+  background: linear-gradient(180deg, var(--alpha-surface-05), color-mix(in srgb, var(--bg-card) 96%, transparent));
+  padding: 1rem;
+  min-height: 100%;
+}
+
 .app-mobile-nav {
   background: color-mix(in srgb, var(--bg-card) 92%, transparent);
   backdrop-filter: blur(16px);
@@ -708,7 +723,9 @@ select:focus-visible,
 }
 
 @media (max-width: 991px) {
-  .dashboard-story-grid {
+  .dashboard-story-grid,
+  .dashboard-community-summary-grid,
+  .dashboard-community-surface-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -18,6 +18,7 @@ import { CivicToolbar } from "../components/ui/CivicToolbar";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useSettingsStore } from "../store/useSettingsStore";
+import { toRoleLabel } from "../constants/roleLabels";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -216,8 +217,15 @@ export function Dashboard() {
       null,
     [activeCommunityId, memberships]
   );
+  const activeBreadcrumb = activeMembership?.breadcrumb ?? [];
   const isCommunityModerator =
     activeMembership?.role === "MODERATOR" || activeMembership?.role === "COORDINATOR";
+  const activeCommunityName = activeMembership?.communityName ?? t("dashboard.community_default");
+  const activeCommunityRoleLabel = activeMembership ? toRoleLabel(activeMembership.role, t) : null;
+  const activeCommunityPath =
+    activeBreadcrumb.length > 0
+      ? activeBreadcrumb.map((item) => item.name).join(" / ")
+      : t("dashboard.community_path_empty");
 
   const guidedHome = useMemo(() => {
     if (isStaff) {
@@ -298,6 +306,39 @@ export function Dashboard() {
     handleFilterChange(filterByMetric[metricId]);
   };
 
+  const communityActionCards = useMemo(
+    () => [
+      {
+        title: t("dashboard.community_surface.official_title"),
+        description: t("dashboard.community_surface.official_desc", { community: activeCommunityName }),
+        icon: "pi pi-megaphone",
+        actionLabel: t("dashboard.community_surface.official_action"),
+        action: () => navigate("/communities/blog"),
+        testId: "dashboard-community-action-blog",
+      },
+      {
+        title: t("dashboard.community_surface.talks_title"),
+        description: t("dashboard.community_surface.talks_desc", { community: activeCommunityName }),
+        icon: "pi pi-comments",
+        actionLabel: t("dashboard.community_surface.talks_action"),
+        action: () => navigate("/communities/threads"),
+        testId: "dashboard-community-action-threads",
+      },
+      {
+        title: t("dashboard.community_surface.membership_title"),
+        description: t("dashboard.community_surface.membership_desc", {
+          count: memberships.length,
+          role: activeCommunityRoleLabel ?? t("dashboard.community_surface.membership_no_role"),
+        }),
+        icon: "pi pi-users",
+        actionLabel: t("dashboard.community_surface.membership_action"),
+        action: () => navigate("/communities"),
+        testId: "dashboard-community-action-hub",
+      },
+    ],
+    [activeCommunityName, activeCommunityRoleLabel, memberships.length, navigate, t]
+  );
+
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
@@ -311,6 +352,10 @@ export function Dashboard() {
               <div className="u-pill" data-testid="dashboard-guided-persona">
                 <i className="pi pi-compass text-brand-primary"></i>
                 {guidedHome.personaLabel}
+              </div>
+              <div className="u-pill" data-testid="dashboard-active-community-pill">
+                <i className="pi pi-globe text-brand-primary"></i>
+                {activeCommunityName}
               </div>
               <div className="u-pill" data-testid="dashboard-freshness-badge">
                 <i className="pi pi-clock text-brand-primary"></i>
@@ -345,39 +390,47 @@ export function Dashboard() {
               />
             </CivicActionBar>
           </CivicCard>
-          <CivicCard variant="brand" padding="lg" data-testid="dashboard-guided-home-card">
-            <span className="u-section-title text-xs">{guidedHome.cardTitle}</span>
-            <p className="text-secondary text-sm mt-3 mb-4" data-testid="dashboard-guided-home-description">
-              {guidedHome.cardDescription}
+          <CivicCard variant="brand" padding="lg" data-testid="dashboard-community-hub-card">
+            <span className="u-section-title text-xs">{t("dashboard.community_hub.title")}</span>
+            <h2 className="text-xl font-black text-main mt-3 mb-0">{activeCommunityName}</h2>
+            <p className="text-secondary text-sm mt-3 mb-0" data-testid="dashboard-guided-home-description">
+              {t("dashboard.community_hub.desc", {
+                community: activeCommunityName,
+                role: activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback"),
+              })}
             </p>
-            <ul className="m-0 p-0 list-none flex flex-column gap-3 text-sm text-secondary">
-              {guidedHome.steps.map((step, index) => (
-                <li
-                  key={step}
-                  className="line-height-3"
-                  data-testid={`dashboard-guided-step-${index + 1}`}
-                >
-                  <span className="u-pill mr-2">{index + 1}</span>
-                  {step}
-                </li>
-              ))}
-            </ul>
+            <div className="dashboard-community-summary-grid mt-4" data-testid="dashboard-community-summary">
+              <div className="dashboard-story-metric">
+                <div className="dashboard-story-metric-label">{t("dashboard.community_hub.path_label")}</div>
+                <div className="text-sm font-bold text-main mt-2 line-height-3">{activeCommunityPath}</div>
+              </div>
+              <div className="dashboard-story-metric">
+                <div className="dashboard-story-metric-label">{t("dashboard.community_hub.role_label")}</div>
+                <div className="text-sm font-bold text-main mt-2">
+                  {activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback")}
+                </div>
+              </div>
+              <div className="dashboard-story-metric">
+                <div className="dashboard-story-metric-label">{t("dashboard.community_hub.memberships_label")}</div>
+                <div className="dashboard-story-metric-value mt-2">{memberships.length}</div>
+              </div>
+            </div>
             <div className="mt-5 pt-4 border-top-1 border-white-alpha-10">
               <span className="text-xs font-black uppercase tracking-widest text-muted">
-                {t("dashboard.secondary_actions_title")}
+                {t("dashboard.community_hub.next_actions_label")}
               </span>
               <div className="flex flex-wrap gap-2 mt-3">
                 <CivicButton
                   type="button"
-                  label={t('nav.dialogues')}
-                  icon="pi pi-comments"
+                  label={t("dashboard.community_hub.action_hub")}
+                  icon="pi pi-globe"
                   variant="ghost"
-                  onClick={() => navigate("/communities/threads")}
-                  data-testid="dashboard-action-threads"
+                  onClick={() => navigate("/communities")}
+                  data-testid="dashboard-community-open-hub"
                 />
                 <CivicButton
                   type="button"
-                  label={t('dashboard.track_contributions')}
+                  label={t("dashboard.track_contributions")}
                   icon="pi pi-user"
                   variant="ghost"
                   onClick={() => navigate("/mine")}
@@ -387,6 +440,48 @@ export function Dashboard() {
             </div>
           </CivicCard>
         </section>
+
+        <CivicCard className="mb-6" data-testid="dashboard-community-focus">
+          <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
+            <div className="flex flex-column gap-1">
+              <span className="text-xs font-black uppercase tracking-widest text-muted">
+                {t("dashboard.community_surface.kicker")}
+              </span>
+              <h2 className="text-2xl font-black text-main m-0">{t("dashboard.community_surface.title", { community: activeCommunityName })}</h2>
+              <p className="text-sm text-secondary m-0">{t("dashboard.community_surface.desc")}</p>
+            </div>
+            {interfaceMode === "simple" && (
+              <div className="u-pill" data-testid="dashboard-community-mode-hint">
+                <i className="pi pi-sparkles text-brand-primary"></i>
+                {t("dashboard.community_surface.simple_mode_hint")}
+              </div>
+            )}
+          </div>
+          <div className="dashboard-community-surface-grid">
+            {communityActionCards.map((card) => (
+              <div key={card.title} className="dashboard-community-surface-card" data-testid={card.testId}>
+                <div className="flex align-items-start justify-content-between gap-3">
+                  <div className="flex-1">
+                    <div className="dashboard-story-metric-label">{card.title}</div>
+                    <p className="text-sm text-secondary mt-3 mb-0 line-height-3">{card.description}</p>
+                  </div>
+                  <div className="u-pill">
+                    <i className={`${card.icon} text-brand-primary`}></i>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <CivicButton
+                    type="button"
+                    label={card.actionLabel}
+                    icon="pi pi-arrow-right"
+                    variant="ghost"
+                    onClick={card.action}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CivicCard>
 
         {interfaceMode === "advanced" && (
           <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
@@ -407,6 +502,14 @@ export function Dashboard() {
                   variant="ghost"
                   onClick={() => navigate("/communities/blog")}
                   data-testid="dashboard-action-blog"
+                />
+                <CivicButton
+                  type="button"
+                  label={t('nav.dialogues')}
+                  icon="pi pi-comments"
+                  variant="ghost"
+                  onClick={() => navigate("/communities/threads")}
+                  data-testid="dashboard-action-threads"
                 />
                 <CivicButton
                   type="button"

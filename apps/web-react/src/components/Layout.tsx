@@ -135,6 +135,10 @@ export function Layout({ children, authMode = false }: Props) {
   const activeSection =
     [...primaryNav, ...collaborationNav, ...advancedNav].find((item) => item.to === location.pathname)?.label ??
     t("nav.insights");
+  const topbarEyebrow =
+    activeMembership && location.pathname === "/"
+      ? t("nav.community_home_label")
+      : t("dashboard.focus_today");
 
   const visibleMoreCount = [...collaborationNav, ...advancedNav].filter((item) => item.visible).length;
   const mobileNav = primaryNav.filter((item) => item.visible);
@@ -284,7 +288,7 @@ export function Layout({ children, authMode = false }: Props) {
               data-testid="mobile-menu-toggle"
             />
             <div className="app-topbar-intro">
-              <span className="app-topbar-label">{t('dashboard.focus_today')}</span>
+              <span className="app-topbar-label">{topbarEyebrow}</span>
               <span className="app-topbar-title">{activeSection}</span>
               {activeMembership && (
                 <span className="text-xs text-muted line-height-3">
@@ -331,6 +335,18 @@ export function Layout({ children, authMode = false }: Props) {
               onClick={() => navigate('/report')}
               data-testid="header-primary-report"
             />
+
+            {activeMembership && location.pathname !== "/communities" && (
+              <Button
+                type="button"
+                icon="pi pi-globe"
+                label={t("nav.open_community_hub")}
+                text
+                className="hidden lg:flex u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
+                onClick={() => navigate('/communities')}
+                data-testid="header-community-hub"
+              />
+            )}
 
             {interfaceMode === "advanced" && (
               <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />

@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 4B of 5 in current phase  
+Plan: 4C of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-05 - Persisted simple-vs-advanced interface modes across backend profile, settings, and shell behavior (Phase 5 plan 05-04B)
+Last activity: 2026-03-05 - Recentered the dashboard and shell around the active community with a more habitable community-home layer (Phase 5 plan 05-04C)
 
 Progress: [██████████] 98%
 
@@ -66,6 +66,7 @@ Progress: [██████████] 98%
 - 2026-03-05: Established the visual core refresh foundation for OCS-P1-032 with a new community-first shell, shared design primitives, typographic identity, and a redesigned dashboard hero validated in Docker.
 - 2026-03-05: Extended OCS-P1-032 with persisted `interfaceMode` profile preference, simple/advanced settings controls, backend contract storage, and shell/dashboard behavior changes.
 - 2026-03-05: Refocused identity UX around communities by exposing membership count, active community path, visible role/rank, and direct community actions inside Settings and shell chrome.
+- 2026-03-05: Extended OCS-P1-032 into a community-first home by surfacing active-community context, community actions, and calmer simple-mode guidance directly in the dashboard and shell.
 
 ### Pending Todos
 
@@ -85,6 +86,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Landed persisted simple/advanced experience mode support for `OCS-P1-032`; next target is broadening mode-aware simplification beyond dashboard/shell and then continuing with `OCS-P1-034` nested forum threads with relevance ordering  
+Stopped at: Landed the community-home refinement for `OCS-P1-032`; next target is `OCS-P1-034` nested forum threads with relevance ordering and then `OCS-P1-036` unified community home backend composite support  
 Resume file: None
 
