@@ -11,8 +11,11 @@ This guide is the default for local development and fast deployment from Claude/
 ## Local Development (hot reload)
 
 ```bash
-docker compose -f infra/docker-compose.dev.yml up --build -d
+npm run docker:dev:up
 ```
+
+This is the canonical integrated runtime for agents and contributors when they need live frontend + backend behavior together.
+If Docker is not available, `npm run docker:dev:doctor` must fail fast instead of switching silently to ad-hoc local processes.
 
 ## Local Production-like Run
 
@@ -23,7 +26,15 @@ docker compose -f infra/docker-compose.yml up --build -d
 ## Stop and Clean
 
 ```bash
-docker compose -f infra/docker-compose.dev.yml down
+npm run docker:dev:down
+```
+
+Useful support commands:
+
+```bash
+npm run docker:dev:doctor
+npm run docker:dev:ps
+npm run docker:dev:logs
 ```
 
 ## Dev Runtime Notes (Resilient Mode)

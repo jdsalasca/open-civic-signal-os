@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-cd /workspace/apps/web-react
+cd /workspace
 
 echo "[web-dev] Installing dependencies with retry..."
 attempt=1
@@ -16,4 +16,4 @@ while [ "$attempt" -le 20 ]; do
 done
 
 echo "[web-dev] Starting Vite dev server with polling hot reload..."
-exec npm run dev -- --host 0.0.0.0 --port 5173
+exec npm --workspace apps/web-react run dev -- --host 0.0.0.0 --port 5173

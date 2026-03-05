@@ -66,6 +66,25 @@ Current UX gap: the repo and app explain the technical platform well, but they s
 
 ## Quick start
 
+### Canonical integrated dev runtime
+
+Use Docker for the full app. This is the required hot-reload path for frontend + backend together:
+
+```bash
+npm run docker:dev:up
+```
+
+Helpful runtime commands:
+
+```bash
+npm run docker:dev:doctor
+npm run docker:dev:ps
+npm run docker:dev:logs
+npm run docker:dev:down
+```
+
+If Docker is unavailable, treat that as a local environment blocker. Do not silently switch to ad-hoc non-Docker app startup when validating integrated behavior.
+
 ### Current MVP scripts
 
 ```bash
@@ -73,7 +92,7 @@ npm install
 npm run prioritize
 ```
 
-### Web app
+### Component-only fallback commands
 
 ```bash
 cd apps/web-react
@@ -87,6 +106,8 @@ npm run dev
 cd apps/api-java
 ./mvnw spring-boot:run
 ```
+
+These direct commands are for isolated component work only. Agent-driven app validation should still use `npm run docker:dev:up`.
 
 ## Launch resources
 
@@ -116,6 +137,8 @@ Community voice should become visible, measurable, and actionable.
 ## Docker Quickstart
 
 - Dev (hot reload): `npm run docker:dev:up`
+- Dev doctor: `npm run docker:dev:doctor`
+- Dev logs: `npm run docker:dev:logs`
 - Prod-like: `npm run docker:prod:up`
 - Stop: `npm run docker:dev:down`
 

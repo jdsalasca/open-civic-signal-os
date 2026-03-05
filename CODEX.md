@@ -23,6 +23,8 @@ This file defines mandatory behavior for Codex-based implementation agents.
 
 ## Required Pre-Push Verification
 
+- Start integrated runtime with `npm run docker:dev:up` before frontend/backend validation work.
+- If `npm run docker:dev:doctor` fails, treat Docker availability as a blocker and report it explicitly.
 - `npm run agent:preflight`
 - `npm run quality:quick`
 - `npm run backlog:current:check`

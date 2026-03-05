@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Docker Dev Runtime Guardrail**: Added a canonical `docker:dev` wrapper with health-aware startup, Docker availability checks, and explicit agent guidance so integrated frontend/backend work always uses the hot-reload compose stack. (`devex`)
 - **Hierarchical Communities**: Added backend-owned parent/child communities, membership breadcrumbs, tree navigation endpoints, and a hierarchy-aware communities hub so users can operate inside nested civic spaces without guessing context. (`story:OCS-P1-030`)
 - **Civic Identity Profiles**: Added backend-enforced civic profile editing and audience-filtered visibility controls for role, bio, and affiliations, surfaced through the Settings experience. (story:OCS-P1-029)
 - **List-level Explainability Summary Contract**: Added backend-owned `explainabilitySummary` to prioritized signal responses and surfaced "why ranked here" snippets directly in dashboard rows, with API + Playwright coverage. (`story:OCS-P1-020`)
@@ -31,6 +32,7 @@
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 
 ### Fixed
+- **Docker Hot Reload Frontend Bootstrap**: Fixed Windows/Docker dev frontend bootstrap by isolating container `node_modules` from the host workspace and disabling unintended workspace-level `npm ci` during Vite startup. (`devex`)
 - **Action-Oriented Empty and Restricted States**: My activity, community hub, and unauthorized views now explain why the user is blocked or empty and offer an immediate next action instead of dead-end copy. (`story:OCS-P1-027`)
 - **Report Trust Loop**: Successful report submission now stays in-context with a visible lifecycle explanation, ranking summary, and direct follow-up actions instead of a blind redirect. (`story:OCS-P1-026`)
 - **Navigation Clarity**: Main navigation now keeps only the core path always visible and progressively reveals secondary tools, reducing duplicated actions across desktop and mobile. (`story:OCS-P1-025`)

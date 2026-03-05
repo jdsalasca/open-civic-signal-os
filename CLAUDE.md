@@ -9,8 +9,11 @@ Run, test, and deploy Open Civic Signal OS reliably with Docker.
 ### Dev mode
 
 ```bash
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up --build
+npm run docker:dev:up
 ```
+
+This is the only canonical hot-reload runtime for integrated frontend + backend validation.
+Do not fall back to bare `npm run dev` or `mvn spring-boot:run` when the task requires app-level verification.
 
 ### Prod-like mode
 
@@ -21,7 +24,7 @@ docker compose -f infra/docker-compose.yml up --build -d
 ### Stop
 
 ```bash
-docker compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml down
+npm run docker:dev:down
 ```
 
 ## Verification Checklist

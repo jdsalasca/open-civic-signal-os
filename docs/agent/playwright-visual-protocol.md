@@ -53,7 +53,7 @@ For PRs touching frontend files, capture at minimum:
 Example flow:
 
 ```bash
-npm run dev:web
+npm run docker:dev:up
 npm run agent:ux:pw -- open http://localhost:5173 --headed
 npm run agent:ux:pw -- snapshot
 npm run agent:ux:pw -- screenshot output/playwright/dashboard.png

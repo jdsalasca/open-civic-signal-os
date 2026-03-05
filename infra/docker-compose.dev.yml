@@ -32,6 +32,7 @@ services:
     volumes:
       - ../:/workspace
       - civic-m2-cache:/root/.m2
+      - civic-api-target:/workspace/apps/api-java/target
     environment:
       SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://civic-db-dev:5432/signalos
@@ -68,6 +69,7 @@ services:
       - sed -i 's/\r$//' /workspace/infra/scripts/dev-web-entrypoint.sh && sh /workspace/infra/scripts/dev-web-entrypoint.sh
     volumes:
       - ../:/workspace
+      - civic-root-node-modules:/workspace/node_modules
       - civic-node-modules:/workspace/apps/web-react/node_modules
     environment:
       VITE_API_BASE_URL: http://localhost:8081/api
@@ -87,4 +89,6 @@ services:
 volumes:
   civic-db-dev-data:
   civic-m2-cache:
+  civic-api-target:
+  civic-root-node-modules:
   civic-node-modules:

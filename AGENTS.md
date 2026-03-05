@@ -262,6 +262,10 @@ If frontend files changed, also run:
 - Development overrides must be defined in `infra/docker-compose.dev.yml`.
 - Frontend API target must be configurable via `VITE_API_BASE_URL`.
 - Health checks are required before considering deployment successful.
+- Agents must use Docker for local app runtime.
+- Canonical hot-reload startup for backend + frontend is `npm run docker:dev:up`.
+- Do not use bare `npm run dev`, `npm run dev:web`, or `mvn spring-boot:run` as the primary agent runtime when validating integrated app behavior.
+- If Docker Engine is unavailable, stop and surface that blocker explicitly instead of silently switching to a non-Docker local stack.
 
 ## Agent PR Hygiene Workflow
 
