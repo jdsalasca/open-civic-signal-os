@@ -29,6 +29,7 @@
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 
 ### Fixed
+- **Dashboard Choice Overload**: The first dashboard viewport now centers one primary report action and moves secondary tools into a lower-emphasis action surface to reduce first-run confusion. (`story:OCS-P1-023`)
 - **Keyboard Navigation Baseline**: The skip link now moves focus into the main content region, and mobile navigation exposes clearer ARIA state for keyboard and assistive-tech users. (`story:OCS-P1-019`)
 - **Playwright Wrapper Reliability (Windows)**: `agent:ux:pw screenshot <path>.png` now works with explicit output paths and saves artifacts in the requested location, matching documented workflow expectations.
 - **Community Permission Transparency**: Blog and thread creation now surface backend `403` permission reasons inline in the UI (EN/ES) to avoid opaque action failures for unauthorized roles. (`P1 trust-critical`)

@@ -231,44 +231,71 @@ export function Dashboard() {
             <p className="text-secondary text-lg mt-3 mb-0 font-medium max-w-30rem">
               {t('dashboard.focus_subtitle')}
             </p>
+            <p className="text-sm text-muted mt-3 mb-0 max-w-28rem" data-testid="dashboard-primary-guidance">
+              {t('dashboard.primary_guidance')}
+            </p>
           </div>
 
           <CivicActionBar className="dashboard-hero-actions">
             <CivicButton
               type="button"
-              label={t('dashboard.new_issue')}
+              label={t('dashboard.primary_action')}
               icon="pi pi-plus"
               onClick={() => navigate("/report")}
+              className="shadow-xl"
               data-testid="dashboard-action-report"
             />
-            <CivicButton
-              type="button"
-              label={t('nav.dialogues')}
-              icon="pi pi-comments"
-              variant="secondary"
-              onClick={() => navigate("/communities/threads")}
-              data-testid="dashboard-action-threads"
-            />
-            <CivicButton
-              type="button"
-              label={t('nav.public_blog')}
-              icon="pi pi-megaphone"
-              variant="ghost"
-              onClick={() => navigate("/communities/blog")}
-              data-testid="dashboard-action-blog"
-            />
-            {isStaff && (
-              <CivicButton
-                type="button"
-                label={t('dashboard.broadcast')}
-                icon="pi pi-bolt"
-                variant="danger"
-                onClick={handleRelay}
-                data-testid="dashboard-action-broadcast"
-              />
-            )}
           </CivicActionBar>
         </section>
+
+        <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
+          <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
+            <div className="flex flex-column gap-1">
+              <span className="text-xs font-black uppercase tracking-widest text-muted">
+                {t("dashboard.secondary_actions_title")}
+              </span>
+              <span className="text-sm text-secondary">
+                {t("dashboard.secondary_actions_desc")}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <CivicButton
+                type="button"
+                label={t('nav.dialogues')}
+                icon="pi pi-comments"
+                variant="ghost"
+                onClick={() => navigate("/communities/threads")}
+                data-testid="dashboard-action-threads"
+              />
+              <CivicButton
+                type="button"
+                label={t('nav.public_blog')}
+                icon="pi pi-megaphone"
+                variant="ghost"
+                onClick={() => navigate("/communities/blog")}
+                data-testid="dashboard-action-blog"
+              />
+              <CivicButton
+                type="button"
+                label={t('dashboard.track_contributions')}
+                icon="pi pi-user"
+                variant="ghost"
+                onClick={() => navigate("/mine")}
+                data-testid="dashboard-action-mine"
+              />
+              {isStaff && (
+                <CivicButton
+                  type="button"
+                  label={t('dashboard.broadcast')}
+                  icon="pi pi-bolt"
+                  variant="ghost"
+                  onClick={handleRelay}
+                  data-testid="dashboard-action-broadcast"
+                />
+              )}
+            </div>
+          </div>
+        </CivicCard>
 
         <CivicCard className="mb-6" variant="brand">
           <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
