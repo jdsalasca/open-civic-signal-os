@@ -22,4 +22,50 @@ test.describe('Auth Edge Cases (P1)', () => {
     // Ensure we are still on register page
     await expect(page).toHaveURL(/.*register/);
   });
+
+  test('Should surface verify recovery path when email delivery fails', async ({ page }) => {
+    const username = `degraded_${Date.now()}`;
+    const email = `${username}@example.com`;
+
+    await page.route('**/api/auth/register', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Registration successful, but verification email could not be delivered.',
+          username,
+          emailDeliveryStatus: 'FAILED',
+          supportEmail: 'support@open-civic.local',
+          deliveryFailureReason: 'smtp down'
+        })
+      });
+    });
+
+    await page.route('**/api/auth/resend-code', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Could not deliver verification email. Retry later or contact support.',
+          emailDeliveryStatus: 'FAILED',
+          supportEmail: 'support@open-civic.local',
+          deliveryFailureReason: 'smtp down'
+        })
+      });
+    });
+
+    await page.goto('/register');
+    await page.getByTestId('register-username-input').fill(username);
+    await page.getByTestId('register-email-input').fill(email);
+    await page.getByTestId('register-password-input').fill('SecurePass123!');
+    await page.getByTestId('register-confirm-password-input').fill('SecurePass123!');
+    await page.getByTestId('register-submit-button').click();
+
+    await expect(page).toHaveURL(/.*verify/);
+    await expect(page.getByText(/verification email could not be delivered/i)).toBeVisible();
+    await expect(page.getByText(/support@open-civic.local/i)).toBeVisible();
+
+    await page.getByRole('button', { name: /resend/i }).click();
+    await expect(page.getByText(/could not deliver verification email/i)).toBeVisible();
+  });
 });
