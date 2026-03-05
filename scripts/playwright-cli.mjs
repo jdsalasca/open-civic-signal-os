@@ -13,7 +13,7 @@ fs.mkdirSync(outputDir, { recursive: true });
 function run(cmd, cmdArgs, options = {}) {
   const result = spawnSync(cmd, cmdArgs, {
     stdio: "inherit",
-    shell: process.platform === "win32",
+    shell: false,
     ...options
   });
   return result.status ?? 1;
@@ -24,6 +24,8 @@ function hasCommand(command) {
   const cmd = process.platform === "win32" ? "cmd" : "bash";
   return spawnSync(cmd, testArgs, { stdio: "ignore" }).status === 0;
 }
+
+const isWindows = process.platform === "win32";
 
 if (!hasCommand("npx")) {
   console.error("npx is required for Playwright CLI usage.\n");
@@ -50,12 +52,23 @@ if (args.length === 0) {
 const codexHome = process.env.CODEX_HOME ?? path.join(process.env.USERPROFILE ?? process.env.HOME ?? "", ".codex");
 const wrapper = path.join(codexHome, "skills", "playwright", "scripts", "playwright_cli.sh");
 
-if (fs.existsSync(wrapper) && hasCommand("bash")) {
+if (!isWindows && fs.existsSync(wrapper) && hasCommand("bash")) {
   const status = run("bash", [wrapper, ...args], { env: { ...process.env, CODEX_HOME: codexHome } });
-  process.exit(status);
+  if (status === 0) {
+    process.exit(0);
+  }
+  console.warn("Playwright wrapper failed; falling back to npx @playwright/cli.");
 }
 
-const status = run("npx", ["--yes", "--package", "@playwright/cli", "playwright-cli", ...args], {
-  env: { ...process.env, PLAYWRIGHT_OUTPUT_DIR: outputDir }
-});
+const npxArgs = ["--yes", "--package", "@playwright/cli", "playwright-cli", ...args];
+const status = isWindows
+  ? run("cmd", ["/c", "npx", ...npxArgs], {
+      env: { ...process.env, PLAYWRIGHT_OUTPUT_DIR: outputDir }
+    })
+  : run("npx", npxArgs, {
+      env: { ...process.env, PLAYWRIGHT_OUTPUT_DIR: outputDir }
+    });
+if (status !== 0) {
+  console.error("Playwright CLI invocation failed.");
+}
 process.exit(status);
