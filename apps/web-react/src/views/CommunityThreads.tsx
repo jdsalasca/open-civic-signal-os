@@ -23,7 +23,10 @@ import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { extractFirstImageUrl, prependImageToContent, stripMarkdownImages, isValidImageUrl } from "../utils/communityContent";
 import { isSubmitShortcut } from "../utils/keyboard";
 
-type ApiError = Error & { friendlyMessage?: string };
+type ApiError = Error & {
+  friendlyMessage?: string;
+  response?: { status?: number; data?: { message?: string } };
+};
 
 const REACTION_TYPES = ["👍", "🔥", "🙌", "📍", "👏", "🆘"];
 
@@ -44,6 +47,7 @@ export function CommunityThreads() {
   const [replyTargetByThread, setReplyTargetByThread] = useState<Record<string, CommunityThreadMessage | null>>({});
   const [sendingByThread, setSendingByThread] = useState<Record<string, boolean>>({});
   const [reactingByMessage, setReactingByMessage] = useState<Record<string, boolean>>({});
+  const [threadCreatePermissionReason, setThreadCreatePermissionReason] = useState("");
 
   const threadTitleLength = newThreadTitle.trim().length;
 
@@ -87,12 +91,20 @@ export function CommunityThreads() {
   }, [loadThreads]);
 
   useEffect(() => {
+    setThreadCreatePermissionReason("");
+  }, [activeCommunityId, targetCommunityId]);
+
+  const resolvePermissionReason = (error: ApiError) =>
+    (error.friendlyMessage || error.response?.data?.message || t("community_threads.permission_reason_fallback")).trim();
+
+  useEffect(() => {
     if (!activeCommunityId) return;
     setThreadListState(activeCommunityId, { page: threadPage, rows: threadRows, status: threadStatusFilter });
   }, [activeCommunityId, threadPage, threadRows, threadStatusFilter, setThreadListState]);
 
   const createThread = async () => {
     if (!activeCommunityId || !targetCommunityId || threadTitleLength < FORM_LIMITS.threads.titleMin) return;
+    setThreadCreatePermissionReason("");
     try {
       await apiClient.post("community/threads", {
         sourceCommunityId: activeCommunityId,
@@ -105,7 +117,13 @@ export function CommunityThreads() {
       loadThreads();
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t("community_threads.create_error"));
+      if (apiErr.response?.status === 403) {
+        const reason = resolvePermissionReason(apiErr);
+        setThreadCreatePermissionReason(reason);
+        toast.error(t("community_threads.permission_denied"));
+      } else {
+        toast.error(apiErr.friendlyMessage || t("community_threads.create_error"));
+      }
     }
   };
 
@@ -397,6 +415,11 @@ export function CommunityThreads() {
                 {!canOpenCrossCommunityThread && activeCommunityId && (
                   <small className="text-muted text-xs" data-testid="thread-create-permission-note">
                     {t("community_threads.permission_note")}
+                  </small>
+                )}
+                {threadCreatePermissionReason && (
+                  <small className="p-error text-xs" data-testid="thread-create-permission-reason">
+                    {t("community_threads.permission_reason_label", { reason: threadCreatePermissionReason })}
                   </small>
                 )}
                 <CivicButton

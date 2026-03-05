@@ -24,7 +24,10 @@ import { toRoleListLabel } from "../constants/roleLabels";
 import { extractFirstImageUrl, isValidImageUrl, prependImageToContent, stripMarkdownImages } from "../utils/communityContent";
 import { isSubmitShortcut } from "../utils/keyboard";
 
-type ApiError = Error & { friendlyMessage?: string };
+type ApiError = Error & {
+  friendlyMessage?: string;
+  response?: { status?: number; data?: { message?: string } };
+};
 
 const renderContent = (content: string) => {
   const cleaned = stripMarkdownImages(content);
@@ -45,6 +48,7 @@ export function CommunityBlog() {
   const [imageUrl, setImageUrl] = useState("");
   const [statusTag, setStatusTag] = useState("IN_PROGRESS");
   const [publishing, setPublishing] = useState(false);
+  const [publishPermissionReason, setPublishPermissionReason] = useState("");
   const [commentCountsByPost, setCommentCountsByPost] = useState<Record<string, number>>({});
   const timelineLoadInFlightRef = useRef<string | null>(null);
 
@@ -108,9 +112,17 @@ export function CommunityBlog() {
     loadPosts();
   }, [loadPosts]);
 
+  useEffect(() => {
+    setPublishPermissionReason("");
+  }, [activeCommunityId, canPublishByRole]);
+
+  const resolvePermissionReason = (error: ApiError) =>
+    (error.friendlyMessage || error.response?.data?.message || t("community_blog.permission_reason_fallback")).trim();
+
   const createPost = async () => {
     if (!canPublish) return;
     setPublishing(true);
+    setPublishPermissionReason("");
     try {
       await apiClient.post("community/blog", {
         communityId: activeCommunityId,
@@ -125,7 +137,13 @@ export function CommunityBlog() {
       loadPosts();
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t("community_blog.publish_error"));
+      if (apiErr.response?.status === 403) {
+        const reason = resolvePermissionReason(apiErr);
+        setPublishPermissionReason(reason);
+        toast.error(t("community_blog.permission_denied"));
+      } else {
+        toast.error(apiErr.friendlyMessage || t("community_blog.publish_error"));
+      }
     } finally {
       setPublishing(false);
     }
@@ -163,9 +181,16 @@ export function CommunityBlog() {
           <CivicButton type="button" icon="pi pi-comments" label="Threads" variant="secondary" onClick={() => navigate("/communities/threads")} />
           <CivicButton type="button" icon="pi pi-bolt" label="Live feed" variant="ghost" onClick={() => navigate("/communities/feed")} />
           {activeCommunityId && !canPublishByRole && (
-            <span className="text-sm text-muted font-semibold" data-testid="blog-create-permission-note">
-              {t("community_blog.permission_note")}
-            </span>
+            <div className="flex flex-column gap-1">
+              <span className="text-sm text-muted font-semibold" data-testid="blog-create-permission-note">
+                {t("community_blog.permission_note")}
+              </span>
+              {publishPermissionReason && (
+                <small className="p-error text-xs" data-testid="blog-create-permission-reason">
+                  {t("community_blog.permission_reason_label", { reason: publishPermissionReason })}
+                </small>
+              )}
+            </div>
           )}
         </CivicActionBar>
 
@@ -259,6 +284,11 @@ export function CommunityBlog() {
                     glow
                     data-testid="publish-blog-button"
                   />
+                  {publishPermissionReason && (
+                    <small className="p-error text-xs mt-2" data-testid="blog-create-permission-reason">
+                      {t("community_blog.permission_reason_label", { reason: publishPermissionReason })}
+                    </small>
+                  )}
                 </div>
               </CivicCard>
             </div>
