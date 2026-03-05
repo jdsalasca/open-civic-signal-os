@@ -6,8 +6,8 @@ This roadmap stabilizes trust-critical behavior first, then aligns contracts and
 
 ## Phases
 
-- [ ] **Phase 1: Trust and Contract Stabilization** - Remove trust-critical runtime mismatches and align OpenAPI with live API behavior.
-- [ ] **Phase 2: Quality Gate Hardening** - Make verification and evidence gates deterministic across environments.
+- [x] **Phase 1: Trust and Contract Stabilization** - Remove trust-critical runtime mismatches and align OpenAPI with live API behavior.
+- [x] **Phase 2: Quality Gate Hardening** - Make verification and evidence gates deterministic across environments.
 - [ ] **Phase 3: Community Workflow Scalability** - Improve paging/performance/state integrity for high-activity communities.
 
 ## Phase Details
@@ -23,9 +23,9 @@ This roadmap stabilizes trust-critical behavior first, then aligns contracts and
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Fix public endpoint auth null-safety and add regression tests.
-- [ ] 01-02: Update OpenAPI to match active routes, pagination, and error schemas.
-- [ ] 01-03: Align CI/gates with non-skipped backend verification policy.
+- [x] 01-01: Fix public endpoint auth null-safety and add regression tests.
+- [x] 01-02: Update OpenAPI to match active routes, pagination, and error schemas.
+- [x] 01-03: Align CI/gates with non-skipped backend verification policy.
 
 ### Phase 2: Quality Gate Hardening
 **Goal**: Quality evidence is reliable and repeatable for contributors and CI.
@@ -35,12 +35,12 @@ Plans:
 1. Playwright evidence command works reliably on Windows/Linux contributor paths.
 2. Coverage gate enforces non-zero thresholds with meaningful coverage summaries.
 3. Onboarding/verification degraded-mode UX is validated with deterministic test evidence.
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 02-01: Fix Playwright wrapper fallback behavior and add Windows path normalization checks.
 - [ ] 02-02: Raise and enforce release coverage minimum with updated reporting.
-- [ ] 02-03: Expand auth/verify degraded-mode tests and UX evidence artifacts.
+- [x] 02-03: Expand auth/verify degraded-mode tests and UX evidence artifacts.
 - [x] 02-04: Make ingest pipeline deterministic and idempotent for reproducible replays.
 
 ### Phase 3: Community Workflow Scalability
@@ -62,6 +62,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Trust and Contract Stabilization | 0/3 | Not started | - |
-| 2. Quality Gate Hardening | 0/3 | Not started | - |
+| 1. Trust and Contract Stabilization | 3/3 | Completed | 2026-03-04 |
+| 2. Quality Gate Hardening | 4/4 | Completed | 2026-03-04 |
 | 3. Community Workflow Scalability | 0/3 | Not started | - |
