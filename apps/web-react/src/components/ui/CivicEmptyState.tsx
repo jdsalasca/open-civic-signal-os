@@ -20,8 +20,8 @@ export function CivicEmptyState({ icon, title, description, actionLabel, onActio
         </div>
       </div>
       
-      <h3 className="text-3xl font-black text-main m-0 tracking-tighter mb-2">{title}</h3>
-      <p className="text-secondary text-base font-medium max-w-24rem mx-auto leading-relaxed mb-6 opacity-80">
+      <h3 className="text-2xl md:text-3xl font-black text-main m-0 tracking-tighter mb-2 civic-empty-state-title">{title}</h3>
+      <p className="text-secondary text-base font-medium max-w-24rem mx-auto leading-relaxed mb-6 opacity-80 civic-empty-state-description">
         {description}
       </p>
       

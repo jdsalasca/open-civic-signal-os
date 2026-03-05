@@ -20,7 +20,8 @@ const resources = {
         "select_category": "Select a category",
         "score": "Score",
         "description": "Description",
-        "title": "Title"
+        "title": "Title",
+        "workspace_context": "Community workspace"
       },
       "nav": {
         "insights": "Home",
@@ -508,6 +509,7 @@ const resources = {
         "hotspot_fallback": "Cluster hotspot",
         "hotspot_summary": "{{count}} mapped issues · score {{score}}",
         "cluster_badge": "Hotspot",
+        "focus_community": "Focus this community",
         "location_missing": "Readable location pending",
         "empty_points_title": "No mapped issues yet",
         "empty_points_desc": "{{community}} still has no issues with coordinates under the current filters.",
@@ -832,7 +834,8 @@ const resources = {
         "select_category": "Seleccione una categoría",
         "score": "Puntaje",
         "description": "Descripción",
-        "title": "Título"
+        "title": "Título",
+        "workspace_context": "Espacio comunitario"
       },
       "nav": {
         "insights": "Inicio",
@@ -1320,6 +1323,7 @@ const resources = {
         "hotspot_fallback": "Zona caliente",
         "hotspot_summary": "{{count}} casos mapeados · puntaje {{score}}",
         "cluster_badge": "Hotspot",
+        "focus_community": "Enfocar esta comunidad",
         "location_missing": "Ubicación legible pendiente",
         "empty_points_title": "Aún no hay casos mapeados",
         "empty_points_desc": "{{community}} todavía no tiene casos con coordenadas bajo los filtros actuales.",

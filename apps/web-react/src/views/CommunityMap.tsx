@@ -169,10 +169,12 @@ export function CommunityMap() {
   const { t } = useTranslation();
   const { activeCommunityId, memberships, setActiveCommunityId } = useCommunityStore();
   const [filters, setFilters] = useState<GeoFiltersState>(defaultFilters);
+  const [appliedFilters, setAppliedFilters] = useState<GeoFiltersState>(defaultFilters);
   const [communityMap, setCommunityMap] = useState<CommunitySignalMap | null>(null);
   const [heatMap, setHeatMap] = useState<CommunitySignalsHeatMap | null>(null);
   const [loading, setLoading] = useState(false);
-  const [requestVersion, setRequestVersion] = useState(0);
+  const [selectedPoint, setSelectedPoint] = useState<CommunitySignalMapPoint | null>(null);
+  const [selectedHeatCommunity, setSelectedHeatCommunity] = useState<CommunitySignalHeatCell | null>(null);
 
   const activeMembership = memberships.find((membership) => membership.communityId === activeCommunityId) ?? null;
 
@@ -184,25 +186,27 @@ export function CommunityMap() {
     }
     setLoading(true);
     try {
-      const query = buildQuery(filters, activeCommunityId);
-      const heatQuery = buildQuery(filters);
+      const query = buildQuery(appliedFilters, activeCommunityId);
+      const heatQuery = buildQuery(appliedFilters);
       const [communityRes, heatRes] = await Promise.all([
         apiClient.get<CommunitySignalMap>(`signals/map?${query}`),
         apiClient.get<CommunitySignalsHeatMap>(`signals/map/heat?${heatQuery}`),
       ]);
       setCommunityMap(communityRes.data);
       setHeatMap(heatRes.data);
+      setSelectedPoint(communityRes.data.points[0] ?? null);
+      setSelectedHeatCommunity(heatRes.data.communities[0] ?? null);
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t("community_map.load_error"));
     } finally {
       setLoading(false);
     }
-  }, [activeCommunityId, filters, t]);
+  }, [activeCommunityId, appliedFilters, t]);
 
   useEffect(() => {
     loadGeo();
-  }, [activeCommunityId, requestVersion, loadGeo]);
+  }, [loadGeo]);
 
   const categoryOptions = useMemo(() => [
     { label: t("community_map.filters.all_categories"), value: "" },
@@ -224,6 +228,8 @@ export function CommunityMap() {
     () => (communityMap?.clusters ?? []).slice(0, 4),
     [communityMap?.clusters]
   );
+  const selectedPointDetails = selectedPoint ?? communityMap?.points[0] ?? null;
+  const selectedCommunityHeat = selectedHeatCommunity ?? heatMap?.communities[0] ?? null;
 
   return (
     <Layout>
@@ -321,7 +327,7 @@ export function CommunityMap() {
                     variant="secondary"
                     onClick={() => {
                       setFilters(defaultFilters);
-                      setRequestVersion((current) => current + 1);
+                      setAppliedFilters(defaultFilters);
                     }}
                     data-testid="community-map-reset-filters"
                   />
@@ -330,7 +336,7 @@ export function CommunityMap() {
                     label={t("community_map.filters.apply")}
                     icon="pi pi-filter"
                     variant="ghost"
-                    onClick={() => setRequestVersion((current) => current + 1)}
+                    onClick={() => setAppliedFilters(filters)}
                     data-testid="community-map-apply-filters"
                   />
                 </div>
@@ -355,15 +361,39 @@ export function CommunityMap() {
                       </div>
                       <CommunityGeoCanvas
                         points={communityMap.points}
-                        onSelect={(point) => navigate(`/signal/${point.signalId}`)}
+                        onSelect={(point) => setSelectedPoint(point)}
                       />
+                      {selectedPointDetails && (
+                        <div className="community-map-inspector" data-testid="community-map-inspector">
+                          <div className="community-map-inspector-copy">
+                            <div className="text-xs font-black uppercase tracking-widest text-muted">
+                              {selectedPointDetails.category}
+                            </div>
+                            <h3 className="text-xl font-black text-main m-0 mt-2">{selectedPointDetails.title}</h3>
+                            <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                              {selectedPointDetails.locationLabel || t("community_map.location_missing")}
+                            </p>
+                          </div>
+                          <div className="community-map-inspector-meta">
+                            <CivicBadge label={selectedPointDetails.status} severity="neutral" />
+                            <span className="u-pill">{t("community_map.summary.heat", { count: Math.round(selectedPointDetails.heatWeight) })}</span>
+                            <CivicButton
+                              type="button"
+                              icon="pi pi-arrow-right"
+                              label={t("signals.view_details")}
+                              variant="secondary"
+                              onClick={() => navigate(`/signal/${selectedPointDetails.signalId}`)}
+                            />
+                          </div>
+                        </div>
+                      )}
                       <div className="grid">
                         {communityMap.points.slice(0, 4).map((point) => (
                           <div key={point.signalId} className="col-12 md:col-6">
                             <button
                               type="button"
-                              className="community-map-listing"
-                              onClick={() => navigate(`/signal/${point.signalId}`)}
+                              className={`community-map-listing ${selectedPointDetails?.signalId === point.signalId ? "is-selected" : ""}`}
+                              onClick={() => setSelectedPoint(point)}
                             >
                               <div className="flex justify-content-between gap-3 align-items-start">
                                 <div>
@@ -439,15 +469,48 @@ export function CommunityMap() {
                       <CommunityHeatCanvas
                         communities={heatMap.communities}
                         activeCommunityId={activeCommunityId}
-                        onSelect={(communityId) => setActiveCommunityId(communityId)}
+                        onSelect={(communityId) => {
+                          setActiveCommunityId(communityId);
+                          const nextCommunity = heatMap.communities.find((community) => community.communityId === communityId) ?? null;
+                          setSelectedHeatCommunity(nextCommunity);
+                        }}
                       />
+                      {selectedCommunityHeat && (
+                        <div className="community-map-inspector" data-testid="community-heat-inspector">
+                          <div className="community-map-inspector-copy">
+                            <div className="text-xs font-black uppercase tracking-widest text-muted">
+                              {selectedCommunityHeat.topCategory}
+                            </div>
+                            <h3 className="text-xl font-black text-main m-0 mt-2">{selectedCommunityHeat.communityName}</h3>
+                            <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                              {t("community_map.community_summary", {
+                                mapped: selectedCommunityHeat.mappedSignalsCount,
+                                score: Math.round(selectedCommunityHeat.cumulativeHeatScore),
+                              })}
+                            </p>
+                          </div>
+                          <div className="community-map-inspector-meta">
+                            <span className="u-pill">{t("community_map.summary.total_points", { count: selectedCommunityHeat.mappedSignalsCount })}</span>
+                            <CivicButton
+                              type="button"
+                              icon="pi pi-crosshairs"
+                              label={t("community_map.focus_community")}
+                              variant="secondary"
+                              onClick={() => setActiveCommunityId(selectedCommunityHeat.communityId)}
+                            />
+                          </div>
+                        </div>
+                      )}
                       <div className="flex flex-column gap-3">
                         {heatMap.communities.slice(0, 4).map((community) => (
                           <button
                             key={community.communityId}
                             type="button"
-                            className="community-map-listing"
-                            onClick={() => setActiveCommunityId(community.communityId)}
+                            className={`community-map-listing ${selectedCommunityHeat?.communityId === community.communityId ? "is-selected" : ""}`}
+                            onClick={() => {
+                              setSelectedHeatCommunity(community);
+                              setActiveCommunityId(community.communityId);
+                            }}
                             data-testid={`community-map-heat-row-${community.communityId}`}
                           >
                             <div className="flex justify-content-between align-items-start gap-3">
