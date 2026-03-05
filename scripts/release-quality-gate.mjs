@@ -80,7 +80,10 @@ function checkCoverage(errors) {
   const keys = ["lines", "statements", "functions", "branches"];
 
   for (const key of keys) {
+    const totalCount = Number(total[key]?.total ?? NaN);
     const pct = Number(total[key]?.pct ?? NaN);
+    assert(Number.isFinite(totalCount), `Coverage metric missing: ${key}.total`, errors);
+    assert(totalCount > 0, `Coverage ${key}.total=${totalCount} indicates empty/incomplete coverage report`, errors);
     assert(Number.isFinite(pct), `Coverage metric missing: ${key}.pct`, errors);
     assert(pct >= minCoverage, `Coverage ${key}.pct=${pct} below minimum ${minCoverage}`, errors);
   }

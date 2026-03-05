@@ -32,6 +32,6 @@
     "agent:ux:pw": "node scripts/playwright-cli.mjs"
   },
   "releaseQuality": {
-    "minimumCoverage": 0
+    "minimumCoverage": 20
   }
 }
