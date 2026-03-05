@@ -59,6 +59,34 @@ Operational backlog snapshot for immediate execution in Open Civic Signal OS.
 4. `story:OCS-P0-006` add abuse detection pipeline and moderator queue.
 5. `story:OCS-P0-008` add reproducibility script for ranking outputs.
 
+## Frontend Audience and Usability Wave (GSD 2026-03-04)
+
+Primary objective: increase participation and trust through lower-friction, mobile-first, and explainable civic UX.
+
+1. `story:OCS-P1-015` onboarding funnel hardening (register -> verify -> first action).
+   - Measurable civic outcome: reduce first-session abandonment.
+   - Validation commands: Playwright onboarding flow (desktop/mobile) + analytics event contract checks.
+2. `story:OCS-P1-016` low-bandwidth mobile performance pack.
+   - Measurable civic outcome: improve successful actions from constrained network sessions.
+   - Validation commands: Playwright throttled-network trace + build budget diff.
+3. `story:OCS-P1-018` plain-language EN/ES copy parity in contribution/auth flows.
+   - Measurable civic outcome: higher completion in bilingual community pilots.
+   - Validation commands: Playwright EN/ES route checks + i18n key parity script.
+4. `story:OCS-P1-019` accessibility baseline uplift.
+   - Measurable civic outcome: full keyboard completion path across top civic workflows.
+   - Validation commands: Playwright keyboard-only scenario + accessibility scan report.
+5. `story:OCS-P1-020` list-level explainability snippets.
+   - Measurable civic outcome: stronger understanding of "why this is prioritized" before detail click.
+   - Validation commands: API contract tests + Playwright assertions in dashboard/detail.
+
+Next tranche:
+
+6. `story:OCS-P1-017` public shareability growth surfaces.
+7. `story:OCS-P1-021` notification preference UX for re-engagement.
+8. `story:OCS-P1-022` frontend funnel analytics instrumentation.
+
+Backlog reference: `docs/community/frontend-audience-usability-backlog.md`
+
 ## Definition of Ready for Any New Story
 
 - Story ID exists in `docs/community/issue-backlog.md`.

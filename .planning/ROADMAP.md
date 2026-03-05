@@ -2,13 +2,14 @@
 
 ## Overview
 
-This roadmap stabilizes trust-critical behavior first, then aligns contracts and quality gates, and finally hardens community workflows for scalable civic operations. The sequence prioritizes reproducibility, explainability, and CI-enforceable reliability before adding new feature breadth.
+This roadmap stabilizes trust-critical behavior first, then aligns contracts and quality gates, hardens community workflows for scale, and finally structures a frontend audience/usability growth wave. The sequence prioritizes reproducibility, explainability, and CI-enforceable reliability before growth-facing UX expansion.
 
 ## Phases
 
 - [x] **Phase 1: Trust and Contract Stabilization** - Remove trust-critical runtime mismatches and align OpenAPI with live API behavior.
 - [x] **Phase 2: Quality Gate Hardening** - Make verification and evidence gates deterministic across environments.
 - [x] **Phase 3: Community Workflow Scalability** - Improve paging/performance/state integrity for high-activity communities.
+- [ ] **Phase 4: Frontend Audience and Usability Growth** - Expand reach, onboarding completion, and usability with measurable frontend outcomes.
 
 ## Phase Details
 
@@ -58,6 +59,21 @@ Plans:
 - [x] 03-02: Harden community state persistence and route transition behavior with tests.
 - [x] 03-03: Reduce engagement call fan-out in community blog/feed paths.
 
+### Phase 4: Frontend Audience and Usability Growth
+**Goal**: Increase civic participation by improving onboarding conversion, accessibility, language clarity, and shareability.
+**Depends on**: Phase 3
+**Requirements**: UX-01, UX-02, GROW-01, GROW-02, ACC-01, TRUST-UX-01
+**Success Criteria**:
+1. Frontend backlog for audience/usability is measurable, prioritized, and seed-ready.
+2. Each story maps to API/contract/UI ownership with explicit validation evidence.
+3. Operational backlog sequence is clear for next implementation wave.
+**Plans**: 3 plans
+
+Plans:
+- [x] 04-01: Build spec-driven frontend audience/usability backlog pack and story sequencing.
+- [ ] 04-02: Execute onboarding/mobile/accessibility tranche with evidence.
+- [ ] 04-03: Execute explainability/shareability/re-engagement tranche with evidence.
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
@@ -65,3 +81,4 @@ Plans:
 | 1. Trust and Contract Stabilization | 3/3 | Completed | 2026-03-04 |
 | 2. Quality Gate Hardening | 4/4 | Completed | 2026-03-04 |
 | 3. Community Workflow Scalability | 3/3 | Completed | 2026-03-04 |
+| 4. Frontend Audience and Usability Growth | 1/3 | In progress | - |

@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-03-04)
 
 **Core value:** Community priorities must be visible, explainable, and reproducible end-to-end.  
-**Current focus:** Next critical backlog wave (security/runtime hardening)
+**Current focus:** Phase 4 - Frontend Audience and Usability Growth
 
 ## Current Position
 
-Phase: 3 of 3 (Community Workflow Scalability)  
-Plan: Completed  
-Status: Completed  
-Last activity: 2026-03-04 - Completed engagement fan-out reduction (Phase 3 plan 03-03)
+Phase: 4 of 4 (Frontend Audience and Usability Growth)  
+Plan: 2 of 3 in current phase  
+Status: In progress  
+Last activity: 2026-03-04 - Completed frontend audience/usability backlog expansion pack (Phase 4 plan 04-01)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 85%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 11
 - Average duration: ~28m
-- Total execution time: ~5.2 hours
+- Total execution time: ~5.6 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [██████████] 100%
 | 1 | 3 | 85m | 28m |
 | 2 | 4 | 115m | 29m |
 | 3 | 3 | 113m | 38m |
+| 4 | 1 | 22m | 22m |
 
 **Recent Trend:**
-- Last 5 plans: 35m, 25m, 40m, 36m, 37m
+- Last 5 plans: 25m, 40m, 36m, 37m, 22m
 - Trend: Stable to improving
 
 ## Accumulated Context
@@ -47,6 +48,7 @@ Progress: [██████████] 100%
 - 2026-03-04: Refactored thread retrieval to batch message/reaction loading and reduce avoidable fan-out queries.
 - 2026-03-04: Hardened community store validation so membership refresh preserves valid active community context.
 - 2026-03-04: Reduced community blog engagement fan-out and added request-level Playwright regression evidence.
+- 2026-03-04: Expanded frontend audience/usability backlog with story-level API/contract/UI mapping and measurable outcomes.
 
 ### Pending Todos
 
@@ -60,5 +62,5 @@ See: `docs/community/current-backlog.md` (critical fix backlog, 2026-02-19 and 2
 ## Session Continuity
 
 Last session: 2026-03-04  
-Stopped at: Completed roadmap phases 1-3; next target is P0 security runtime backlog (`docs/community/current-backlog.md`)  
+Stopped at: Completed phase 4 plan 04-01 backlog expansion; next target is 04-02 onboarding/mobile/accessibility execution  
 Resume file: None
