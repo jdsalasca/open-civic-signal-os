@@ -22,6 +22,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260305-civic-profile-visibility-contract.md` (accepted)
 - `ADR-20260305-community-hierarchy-contract.md` (accepted)
 - `ADR-20260305-community-permission-policy-contract.md` (accepted)
+- `ADR-20260305-official-announcements-channel-contract.md` (accepted)
 
 ## Review Rule
 

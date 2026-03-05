@@ -847,7 +847,7 @@ paths:
                 $ref: '#/components/schemas/CommunityThreadMessageResponse'
   /api/community/blog:
     get:
-      summary: List community public-servant updates
+      summary: List active official announcements for one community
       parameters:
         - in: query
           name: communityId
@@ -865,7 +865,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/CommunityBlogPost'
     post:
-      summary: Create community blog update
+      summary: Create official announcement
       requestBody:
         required: true
         content:
@@ -885,6 +885,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/blog/archive:
+    get:
+      summary: Search archived official announcements
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: dateFrom
+          required: false
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: dateTo
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Archived announcement results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityBlogPost'
   /api/community/blog/{id}/comments:
     get:
       summary: List comments for one community blog post
@@ -951,7 +987,7 @@ paths:
                 $ref: '#/components/schemas/ReactionState'
   /api/community/blog/{postId}:
     put:
-      summary: Update community blog post
+      summary: Update official announcement
       parameters:
         - in: path
           name: postId
@@ -968,6 +1004,35 @@ paths:
       responses:
         '200':
           description: Blog post updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityBlogPost'
+        '403':
+          description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/blog/{postId}/archive:
+    patch:
+      summary: Archive or restore official announcement
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveCommunityBlogPostRequest'
+      responses:
+        '200':
+          description: Updated archived state
           content:
             application/json:
               schema:
@@ -1589,6 +1654,10 @@ components:
           type: string
         authorRole:
           type: string
+        official:
+          type: boolean
+        pinned:
+          type: boolean
         title:
           type: string
         content:
@@ -1601,6 +1670,14 @@ components:
             type: integer
         viewerReaction:
           type: string
+        archivedBy:
+          type: string
+          format: uuid
+          nullable: true
+        archivedAt:
+          type: string
+          format: date-time
+          nullable: true
         publishedAt:
           type: string
           format: date-time
@@ -1773,7 +1850,7 @@ components:
           type: string
     CreateCommunityBlogPostRequest:
       type: object
-      required: [communityId, title, content, statusTag]
+      required: [communityId, title, content, statusTag, pinned]
       properties:
         communityId:
           type: string
@@ -1784,9 +1861,11 @@ components:
           type: string
         statusTag:
           type: string
+        pinned:
+          type: boolean
     UpdateCommunityBlogPostRequest:
       type: object
-      required: [title, content, statusTag]
+      required: [title, content, statusTag, pinned]
       properties:
         title:
           type: string
@@ -1794,4 +1873,12 @@ components:
           type: string
         statusTag:
           type: string
+        pinned:
+          type: boolean
+    ArchiveCommunityBlogPostRequest:
+      type: object
+      required: [archived]
+      properties:
+        archived:
+          type: boolean
 

@@ -1,5 +1,6 @@
 package org.opencivic.signalos.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -200,7 +201,29 @@ public class CommunityCollaborationService {
     public List<CommunityBlogPostResponse> getBlogTimeline(UUID communityId, String username) {
         User user = accessService.getCurrentUser(username);
         accessService.requireMembership(user.getId(), communityId);
-        List<CommunityBlogPost> posts = blogPostRepository.findByCommunityIdOrderByPublishedAtDesc(communityId);
+        List<CommunityBlogPost> posts = blogPostRepository.findActiveOfficialTimeline(communityId);
+        return toBlogResponses(posts, user.getId());
+    }
+
+    public List<CommunityBlogPostResponse> getBlogArchive(
+        UUID communityId,
+        String query,
+        LocalDate dateFrom,
+        LocalDate dateTo,
+        String username
+    ) {
+        User user = accessService.getCurrentUser(username);
+        accessService.requireMembership(user.getId(), communityId);
+        List<CommunityBlogPost> posts = blogPostRepository.findArchivedOfficialTimeline(
+            communityId,
+            normalizeArchiveQuery(query),
+            dateFrom == null ? null : dateFrom.atStartOfDay(),
+            dateTo == null ? null : dateTo.plusDays(1).atStartOfDay()
+        );
+        return toBlogResponses(posts, user.getId());
+    }
+
+    private List<CommunityBlogPostResponse> toBlogResponses(List<CommunityBlogPost> posts, UUID viewerId) {
         
         Set<UUID> authorIds = posts.stream().map(CommunityBlogPost::getAuthorId).collect(Collectors.toSet());
         Map<UUID, User> authors = userRepository.findAllById(authorIds).stream()
@@ -209,7 +232,7 @@ public class CommunityCollaborationService {
         Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
             "BLOG",
             posts.stream().map(CommunityBlogPost::getId).toList(),
-            user.getId()
+            viewerId
         );
         return posts.stream()
             .map(post -> toBlogResponse(post, authors.get(post.getAuthorId()), viewerReactions.get(post.getId())))
@@ -222,6 +245,7 @@ public class CommunityCollaborationService {
         String title,
         String content,
         String statusTag,
+        boolean pinned,
         String username
     ) {
         User user = accessService.getCurrentUser(username);
@@ -229,6 +253,8 @@ public class CommunityCollaborationService {
         CommunityBlogPost post = new CommunityBlogPost();
         post.setCommunityId(communityId);
         post.setAuthorId(user.getId());
+        post.setOfficial(true);
+        post.setPinned(pinned);
         post.setTitle(title);
         post.setContent(content);
         post.setStatusTag(statusTag);
@@ -243,6 +269,7 @@ public class CommunityCollaborationService {
         String title,
         String content,
         String statusTag,
+        boolean pinned,
         String username
     ) {
         User user = accessService.getCurrentUser(username);
@@ -252,6 +279,29 @@ public class CommunityCollaborationService {
         post.setTitle(title);
         post.setContent(content);
         post.setStatusTag(statusTag);
+        post.setPinned(pinned);
+        post.setUpdatedAt(LocalDateTime.now());
+        return toBlogResponse(blogPostRepository.save(post));
+    }
+
+    @Transactional
+    public CommunityBlogPostResponse archiveBlogPost(
+        UUID postId,
+        boolean archived,
+        String username
+    ) {
+        User user = accessService.getCurrentUser(username);
+        CommunityBlogPost post = blogPostRepository.findById(postId)
+            .orElseThrow(() -> new ResourceNotFoundException("Community blog post not found: " + postId));
+        accessService.requireScope(user.getId(), post.getCommunityId(), CommunityPermissionScope.UPDATE_OFFICIAL_UPDATE);
+        if (archived) {
+            post.setArchivedAt(LocalDateTime.now());
+            post.setArchivedBy(user.getId());
+            post.setPinned(false);
+        } else {
+            post.setArchivedAt(null);
+            post.setArchivedBy(null);
+        }
         post.setUpdatedAt(LocalDateTime.now());
         return toBlogResponse(blogPostRepository.save(post));
     }
@@ -278,8 +328,9 @@ public class CommunityCollaborationService {
                 )
             ));
 
-        blogPostRepository.findByCommunityIdOrderByPublishedAtDesc(communityId, limited).stream()
+        blogPostRepository.findActiveOfficialTimeline(communityId).stream()
             .filter(post -> post.getPublishedAt() != null && post.getPublishedAt().isAfter(since))
+            .limit(limited.getPageSize())
             .forEach(post -> items.add(
                 new CommunityFeedItemResponse(
                     "blog",
@@ -405,11 +456,15 @@ public class CommunityCollaborationService {
             post.getAuthorId(),
             username,
             roles,
+            post.isOfficial(),
+            post.isPinned(),
             post.getTitle(),
             post.getContent(),
             post.getStatusTag(),
             post.getReactions(),
             viewerReaction,
+            post.getArchivedBy(),
+            post.getArchivedAt(),
             post.getPublishedAt(),
             post.getUpdatedAt()
         );
@@ -444,5 +499,12 @@ public class CommunityCollaborationService {
             throw new IllegalArgumentException("Invalid thread status filter. Use ACTIVE or STALE.");
         }
         return normalized;
+    }
+
+    private String normalizeArchiveQuery(String query) {
+        if (query == null || query.isBlank()) {
+            return null;
+        }
+        return query.trim();
     }
 }

@@ -8,5 +8,6 @@ public record CreateCommunityBlogPostRequest(
     @NotNull UUID communityId,
     @NotBlank String title,
     @NotBlank String content,
-    @NotBlank String statusTag
+    @NotBlank String statusTag,
+    boolean pinned
 ) {}

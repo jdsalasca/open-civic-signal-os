@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { Checkbox } from "primereact/checkbox";
 import { Avatar } from "primereact/avatar";
 import { useTranslation } from "react-i18next";
 import { CommunityBlogPost } from "../types";
@@ -48,7 +49,14 @@ export function CommunityBlog() {
   const [imageUrl, setImageUrl] = useState("");
   const [statusTag, setStatusTag] = useState("IN_PROGRESS");
   const [publishing, setPublishing] = useState(false);
+  const [pinned, setPinned] = useState(false);
   const [publishPermissionReason, setPublishPermissionReason] = useState("");
+  const [archivingPostId, setArchivingPostId] = useState<string | null>(null);
+  const [archivePosts, setArchivePosts] = useState<CommunityBlogPost[]>([]);
+  const [archiveQuery, setArchiveQuery] = useState("");
+  const [archiveDateFrom, setArchiveDateFrom] = useState("");
+  const [archiveDateTo, setArchiveDateTo] = useState("");
+  const [loadingArchive, setLoadingArchive] = useState(false);
   const [commentCountsByPost, setCommentCountsByPost] = useState<Record<string, number>>({});
   const timelineLoadInFlightRef = useRef<string | null>(null);
 
@@ -77,6 +85,8 @@ export function CommunityBlog() {
   );
 
   const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
+  const pinnedPosts = posts.filter((post) => post.pinned);
+  const timelinePosts = posts.filter((post) => !post.pinned);
 
   const loadPosts = useCallback(async () => {
     if (!activeCommunityId) return;
@@ -116,6 +126,32 @@ export function CommunityBlog() {
     setPublishPermissionReason("");
   }, [activeCommunityId, canPublishByRole]);
 
+  const loadArchive = useCallback(async () => {
+    if (!activeCommunityId) return;
+    setLoadingArchive(true);
+    try {
+      const params = new URLSearchParams({ communityId: activeCommunityId });
+      if (archiveQuery.trim()) params.set("query", archiveQuery.trim());
+      if (archiveDateFrom) params.set("dateFrom", archiveDateFrom);
+      if (archiveDateTo) params.set("dateTo", archiveDateTo);
+      const res = await apiClient.get(`community/blog/archive?${params.toString()}`);
+      setArchivePosts(res.data || []);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_blog.archive_load_error"));
+    } finally {
+      setLoadingArchive(false);
+    }
+  }, [activeCommunityId, archiveDateFrom, archiveDateTo, archiveQuery, t]);
+
+  useEffect(() => {
+    if (!activeCommunityId) {
+      setArchivePosts([]);
+      return;
+    }
+    loadArchive();
+  }, [activeCommunityId, loadArchive]);
+
   const resolvePermissionReason = (error: ApiError) =>
     (error.friendlyMessage || error.response?.data?.message || t("community_blog.permission_reason_fallback")).trim();
 
@@ -129,12 +165,15 @@ export function CommunityBlog() {
         title,
         content: prependImageToContent(content, imageUrl, t("community_blog.image_alt")),
         statusTag,
+        pinned,
       });
       setTitle("");
       setContent("");
       setImageUrl("");
+      setPinned(false);
       toast.success(t("community_blog.publish_success"));
       loadPosts();
+      loadArchive();
     } catch (err) {
       const apiErr = err as ApiError;
       if (apiErr.response?.status === 403) {
@@ -162,6 +201,101 @@ export function CommunityBlog() {
     }
   };
 
+  const toggleArchive = async (post: CommunityBlogPost, archived: boolean) => {
+    setArchivingPostId(post.id);
+    try {
+      await apiClient.patch(`community/blog/${post.id}/archive`, { archived });
+      toast.success(archived ? t("community_blog.archive_success") : t("community_blog.restore_success"));
+      await Promise.all([loadPosts(), loadArchive()]);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_blog.archive_error"));
+    } finally {
+      setArchivingPostId(null);
+    }
+  };
+
+  const renderPostCard = (post: CommunityBlogPost, archived = false) => {
+    const coverImage = extractFirstImageUrl(post.content);
+    return (
+      <article
+        key={post.id}
+        className={`glass-panel border-round-3xl overflow-hidden ${post.pinned && !archived ? "border-2 border-brand-primary" : ""}`}
+        data-testid={archived ? `archived-blog-post-${post.id}` : `blog-post-${post.id}`}
+      >
+        {coverImage && (
+          <img
+            src={coverImage}
+            alt={post.title}
+            loading="lazy"
+            className="w-full"
+            style={{ maxHeight: "320px", objectFit: "cover" }}
+          />
+        )}
+
+        <div className="p-5 md:p-6 flex flex-column gap-4">
+          <header className="flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div className="flex align-items-center gap-3">
+              <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
+              <div className="flex flex-column">
+                <span className="text-sm font-bold text-main">{post.authorUsername}</span>
+                <span className="text-xs text-muted">{toRoleListLabel(post.authorRole, t)}</span>
+              </div>
+            </div>
+            <div className="flex gap-2 flex-wrap justify-content-end">
+              <CivicBadge label={t("community_blog.official_badge")} severity="progress" />
+              {post.pinned && !archived && <CivicBadge label={t("community_blog.pinned_badge")} severity="new" />}
+              {archived && <CivicBadge label={t("community_blog.archived_badge")} severity="neutral" />}
+              <CivicBadge label={post.statusTag.replace("_", " ")} severity={getStatusSeverity(post.statusTag)} />
+            </div>
+          </header>
+
+          <div>
+            <h2 className="text-2xl font-black text-main m-0 mb-3">{post.title}</h2>
+            {renderContent(post.content)}
+          </div>
+
+          <div className="flex align-items-center gap-2 text-xs text-muted border-top-1 border-white-alpha-10 pt-3 flex-wrap">
+            <i className="pi pi-calendar" />
+            <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+            <span>•</span>
+            <span>{new Date(post.publishedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            {archived && post.archivedAt && (
+              <>
+                <span>•</span>
+                <span>{t("community_blog.archived_on", { date: new Date(post.archivedAt).toLocaleDateString() })}</span>
+              </>
+            )}
+          </div>
+
+          {canPublishByRole && (
+            <div className="flex justify-content-end">
+              <CivicButton
+                type="button"
+                size="small"
+                variant="ghost"
+                icon={archived ? "pi pi-replay" : "pi pi-inbox"}
+                label={archived ? t("community_blog.restore_action") : t("community_blog.archive_action")}
+                onClick={() => toggleArchive(post, !archived)}
+                disabled={archivingPostId === post.id}
+                data-testid={`${archived ? "restore" : "archive"}-blog-post-${post.id}`}
+              />
+            </div>
+          )}
+
+          <CivicEngagement
+            parentId={post.id}
+            parentType="BLOG"
+            initialReactions={post.reactions}
+            initialViewerReaction={post.viewerReaction}
+            initialCommentCount={commentCountsByPost[post.id] ?? 0}
+            autoloadComments={false}
+          />
+        </div>
+      </article>
+    );
+  };
+
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
@@ -178,6 +312,7 @@ export function CommunityBlog() {
               onClick={() => document.getElementById("blog-compose-card")?.scrollIntoView({ behavior: "smooth", block: "start" })}
             />
           )}
+          <CivicBadge label={t("community_blog.channel_badge")} severity="progress" />
           <CivicButton type="button" icon="pi pi-comments" label="Threads" variant="secondary" onClick={() => navigate("/communities/threads")} />
           <CivicButton type="button" icon="pi pi-bolt" label="Live feed" variant="ghost" onClick={() => navigate("/communities/feed")} />
           {activeCommunityId && !canPublishByRole && (
@@ -273,6 +408,22 @@ export function CommunityBlog() {
                     />
                   </CivicField>
 
+                  <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-3">
+                    <div className="flex align-items-start gap-3">
+                      <Checkbox
+                        inputId="blog-pinned-checkbox"
+                        checked={pinned}
+                        onChange={(e) => setPinned(Boolean(e.checked))}
+                      />
+                      <div className="flex flex-column gap-1">
+                        <label htmlFor="blog-pinned-checkbox" className="text-sm font-bold text-main cursor-pointer">
+                          {t("community_blog.pin_label")}
+                        </label>
+                        <small className="text-xs text-muted">{t("community_blog.pin_help")}</small>
+                      </div>
+                    </div>
+                  </div>
+
                   <CivicButton
                     type="button"
                     label={t("community_blog.publish")}
@@ -315,56 +466,91 @@ export function CommunityBlog() {
               </CivicCard>
             ) : (
               <div className="flex flex-column gap-4">
-                {posts.map((post) => {
-                  const coverImage = extractFirstImageUrl(post.content);
-                  return (
-                    <article key={post.id} className="glass-panel border-round-3xl overflow-hidden">
-                      {coverImage && (
-                        <img
-                          src={coverImage}
-                          alt={post.title}
-                          loading="lazy"
-                          className="w-full"
-                          style={{ maxHeight: "320px", objectFit: "cover" }}
-                        />
-                      )}
+                {pinnedPosts.length > 0 && (
+                  <section className="flex flex-column gap-3" data-testid="pinned-announcements-section">
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-widest text-muted">{t("community_blog.pinned_section_label")}</div>
+                      <h2 className="text-xl font-black text-main m-0 mt-2">{t("community_blog.pinned_section_title")}</h2>
+                    </div>
+                    {pinnedPosts.map((post) => renderPostCard(post))}
+                  </section>
+                )}
 
-                      <div className="p-5 md:p-6 flex flex-column gap-4">
-                        <header className="flex justify-content-between align-items-start gap-3">
-                          <div className="flex align-items-center gap-3">
-                            <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
-                            <div className="flex flex-column">
-                              <span className="text-sm font-bold text-main">{post.authorUsername}</span>
-                              <span className="text-xs text-muted">{toRoleListLabel(post.authorRole, t)}</span>
-                            </div>
-                          </div>
-                          <CivicBadge label={post.statusTag.replace("_", " ")} severity={getStatusSeverity(post.statusTag)} />
-                        </header>
+                <section className="flex flex-column gap-3" data-testid="official-timeline-section">
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted">{t("community_blog.timeline_section_label")}</div>
+                    <h2 className="text-xl font-black text-main m-0 mt-2">{t("community_blog.timeline_section_title")}</h2>
+                    <p className="text-sm text-secondary m-0 mt-2">{t("community_blog.timeline_section_desc")}</p>
+                  </div>
+                  {timelinePosts.map((post) => renderPostCard(post))}
+                </section>
 
-                        <div>
-                          <h2 className="text-2xl font-black text-main m-0 mb-3">{post.title}</h2>
-                          {renderContent(post.content)}
+                <section className="flex flex-column gap-3" data-testid="official-archive-section">
+                  <CivicCard title={t("community_blog.archive_title")}>
+                    <div className="flex flex-column gap-4">
+                      <p className="text-sm text-secondary m-0">{t("community_blog.archive_desc")}</p>
+                      <div className="grid">
+                        <div className="col-12 lg:col-5">
+                          <CivicField label={t("community_blog.archive_search_label")}>
+                            <InputText
+                              value={archiveQuery}
+                              onChange={(e) => setArchiveQuery(e.target.value)}
+                              placeholder={t("community_blog.archive_search_placeholder")}
+                              className="w-full"
+                              data-testid="blog-archive-search-input"
+                            />
+                          </CivicField>
                         </div>
-
-                        <div className="flex align-items-center gap-2 text-xs text-muted border-top-1 border-white-alpha-10 pt-3">
-                          <i className="pi pi-calendar" />
-                          <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
-                          <span>•</span>
-                          <span>{new Date(post.publishedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        <div className="col-12 md:col-6 lg:col-3">
+                          <CivicField label={t("community_blog.archive_date_from")}>
+                            <InputText
+                              type="date"
+                              value={archiveDateFrom}
+                              onChange={(e) => setArchiveDateFrom(e.target.value)}
+                              className="w-full"
+                              data-testid="blog-archive-date-from-input"
+                            />
+                          </CivicField>
                         </div>
-
-                        <CivicEngagement
-                          parentId={post.id}
-                          parentType="BLOG"
-                          initialReactions={post.reactions}
-                          initialViewerReaction={post.viewerReaction}
-                          initialCommentCount={commentCountsByPost[post.id] ?? 0}
-                          autoloadComments={false}
-                        />
+                        <div className="col-12 md:col-6 lg:col-3">
+                          <CivicField label={t("community_blog.archive_date_to")}>
+                            <InputText
+                              type="date"
+                              value={archiveDateTo}
+                              onChange={(e) => setArchiveDateTo(e.target.value)}
+                              className="w-full"
+                              data-testid="blog-archive-date-to-input"
+                            />
+                          </CivicField>
+                        </div>
+                        <div className="col-12 lg:col-1 flex align-items-end">
+                          <CivicButton
+                            type="button"
+                            label={t("community_blog.archive_search_action")}
+                            icon="pi pi-search"
+                            onClick={loadArchive}
+                            className="w-full"
+                            data-testid="blog-archive-search-button"
+                          />
+                        </div>
                       </div>
-                    </article>
-                  );
-                })}
+
+                      {loadingArchive ? (
+                        <p className="text-sm text-secondary m-0">{t("common.loading")}</p>
+                      ) : archivePosts.length === 0 ? (
+                        <CivicEmptyState
+                          icon="pi-inbox"
+                          title={t("community_blog.archive_empty_title")}
+                          description={t("community_blog.archive_empty_desc")}
+                        />
+                      ) : (
+                        <div className="flex flex-column gap-3">
+                          {archivePosts.map((post) => renderPostCard(post, true))}
+                        </div>
+                      )}
+                    </div>
+                  </CivicCard>
+                </section>
               </div>
             )}
           </div>

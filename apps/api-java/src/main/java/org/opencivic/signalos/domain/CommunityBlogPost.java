@@ -31,6 +31,14 @@ public class CommunityBlogPost {
     @Column(nullable = false)
     private String statusTag;
 
+    @Column(nullable = false)
+    private boolean official = true;
+
+    @Column(nullable = false)
+    private boolean pinned = false;
+
+    private UUID archivedBy;
+    private LocalDateTime archivedAt;
     private LocalDateTime publishedAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
 
@@ -91,6 +99,38 @@ public class CommunityBlogPost {
 
     public void setStatusTag(String statusTag) {
         this.statusTag = statusTag;
+    }
+
+    public boolean isOfficial() {
+        return official;
+    }
+
+    public void setOfficial(boolean official) {
+        this.official = official;
+    }
+
+    public boolean isPinned() {
+        return pinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
+    }
+
+    public UUID getArchivedBy() {
+        return archivedBy;
+    }
+
+    public void setArchivedBy(UUID archivedBy) {
+        this.archivedBy = archivedBy;
+    }
+
+    public LocalDateTime getArchivedAt() {
+        return archivedAt;
+    }
+
+    public void setArchivedAt(LocalDateTime archivedAt) {
+        this.archivedAt = archivedAt;
     }
 
     public LocalDateTime getPublishedAt() {

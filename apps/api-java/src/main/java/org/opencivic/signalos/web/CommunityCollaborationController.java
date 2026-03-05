@@ -2,9 +2,11 @@ package org.opencivic.signalos.web;
 
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.service.CommunityCollaborationService;
+import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
@@ -144,6 +146,23 @@ public class CommunityCollaborationController {
         return collaborationService.getBlogTimeline(communityId, principal.getName());
     }
 
+    @GetMapping("/blog/archive")
+    public List<CommunityBlogPostResponse> getBlogArchive(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String query,
+        @RequestParam(required = false) LocalDate dateFrom,
+        @RequestParam(required = false) LocalDate dateTo,
+        Principal principal
+    ) {
+        return collaborationService.getBlogArchive(
+            communityId,
+            query,
+            dateFrom,
+            dateTo,
+            principal.getName()
+        );
+    }
+
     @PostMapping("/blog")
     public CommunityBlogPostResponse createBlog(
         @Valid @RequestBody CreateCommunityBlogPostRequest request,
@@ -154,6 +173,7 @@ public class CommunityCollaborationController {
             request.title(),
             request.content(),
             request.statusTag(),
+            request.pinned(),
             principal.getName()
         );
     }
@@ -169,6 +189,20 @@ public class CommunityCollaborationController {
             request.title(),
             request.content(),
             request.statusTag(),
+            request.pinned(),
+            principal.getName()
+        );
+    }
+
+    @PatchMapping("/blog/{postId}/archive")
+    public CommunityBlogPostResponse archiveBlog(
+        @PathVariable UUID postId,
+        @Valid @RequestBody ArchiveCommunityBlogPostRequest request,
+        Principal principal
+    ) {
+        return collaborationService.archiveBlogPost(
+            postId,
+            request.archived(),
             principal.getName()
         );
     }

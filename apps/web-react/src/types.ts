@@ -165,9 +165,13 @@ export type CommunityBlogPost = {
   authorId: string;
   authorUsername: string;
   authorRole: string;
+  official: boolean;
+  pinned: boolean;
   title: string;
   content: string;
   statusTag: string;
+  archivedBy?: string | null;
+  archivedAt?: string | null;
   publishedAt: string;
   updatedAt: string;
   reactions: Record<string, number>;

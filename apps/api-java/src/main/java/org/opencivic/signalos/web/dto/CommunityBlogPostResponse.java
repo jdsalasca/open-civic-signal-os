@@ -10,11 +10,15 @@ public record CommunityBlogPostResponse(
     UUID authorId,
     String authorUsername,
     String authorRole,
+    boolean official,
+    boolean pinned,
     String title,
     String content,
     String statusTag,
     Map<String, Integer> reactions,
     String viewerReaction,
+    UUID archivedBy,
+    LocalDateTime archivedAt,
     LocalDateTime publishedAt,
     LocalDateTime updatedAt
 ) {}

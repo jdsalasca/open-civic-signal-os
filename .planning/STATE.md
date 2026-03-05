@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 3 of 5 in current phase  
+Plan: 4 of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-05 - Implemented community-scoped permission policies, structured permission-denied contracts, and editable policy matrix UX (Phase 5 plan 05-03)
+Last activity: 2026-03-05 - Implemented official announcements with pinning, archive search, and trust labeling across API and UI (Phase 5 plan 05-04)
 
-Progress: [██████████] 96%
+Progress: [██████████] 98%
 
 ## Performance Metrics
 
@@ -31,10 +31,10 @@ Progress: [██████████] 96%
 | 2 | 4 | 115m | 29m |
 | 3 | 3 | 113m | 38m |
 | 4 | 4 | 88m | 22m |
-| 5 | 2 | 58m | 29m |
+| 5 | 3 | 92m | 31m |
 
 **Recent Trend:**
-- Last 5 plans: 22m, 21m, 24m, 28m, 30m
+- Last 5 plans: 21m, 24m, 28m, 30m, 34m
 - Trend: Stable
 
 ## Accumulated Context
@@ -62,6 +62,7 @@ Progress: [██████████] 96%
 - 2026-03-05: Implemented OCS-P1-029 with persisted civic profiles, audience-based visibility filtering, Settings UX, contract, and ADR updates.
 - 2026-03-05: Implemented OCS-P1-030 with nested community hierarchy, breadcrumb contract support, seeded child spaces, and hierarchy-aware Communities UX.
 - 2026-03-05: Implemented OCS-P1-031 with backend-owned community permission scopes, structured 403 permission responses, policy overrides, and coordinator-facing policy matrix UX.
+- 2026-03-05: Implemented OCS-P1-033 with pinned official announcements, archive search/mutation support, and a more legible official updates channel.
 
 ### Pending Todos
 
@@ -81,6 +82,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Implemented `OCS-P1-031`; next target is `OCS-P1-033` community wall/discussion foundations  
+Stopped at: Implemented `OCS-P1-033`; next target is `OCS-P1-034` nested forum threads with relevance ordering  
 Resume file: None
 

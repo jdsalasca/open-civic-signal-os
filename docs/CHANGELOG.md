@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Official Announcements Channel**: Added pinned official updates, searchable announcement archive, archive metadata, and a clearer official-only communication surface in the community blog workflow. (`story:OCS-P1-033`)
 - **Community Permission Policy Matrix**: Added backend-owned per-community permission scopes, editable policy overrides, structured permission-denied responses, and Communities hub controls for coordinators to govern collaboration actions without frontend-owned RBAC logic. (`story:OCS-P1-031`)
 - **Docker Dev Runtime Guardrail**: Added a canonical `docker:dev` wrapper with health-aware startup, Docker availability checks, and explicit agent guidance so integrated frontend/backend work always uses the hot-reload compose stack. (`devex`)
 - **Hierarchical Communities**: Added backend-owned parent/child communities, membership breadcrumbs, tree navigation endpoints, and a hierarchy-aware communities hub so users can operate inside nested civic spaces without guessing context. (`story:OCS-P1-030`)
