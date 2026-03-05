@@ -40,6 +40,24 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
 - Expose "why this item is ranked here" in every UI list.
 - Support mobile-first layouts for community leaders in the field.
 - Make dashboards readable in low-bandwidth scenarios.
+- Never expose raw enum identifiers directly in role/lifecycle selectors when user-friendly labels are available.
+- Any role-switch UI must preserve selected role across route transitions and provide immediate feedback about what changed.
+- Keep notifications and logs from covering interactive fields:
+  - no toast/overlay in viewport center during form workflows
+  - reserve safe top/bottom offsets for sticky nav + mobile keyboards
+  - validate registration/login/verify screens with Playwright in desktop + mobile
+- Standardize inclusive form UX across app:
+  - all user-generated text flows (report, blog, threads) must expose min/max guidance and live character counters
+  - use plain-language labels/placeholders and avoid technical jargon unless role-specific
+  - provide equivalent EN/ES copy updates in the same change set
+- Accessibility baseline is mandatory:
+  - include keyboard-first navigation paths (skip link + focus-visible states on interactive controls)
+  - provide semantic landmarks (`main`, `nav`) and `aria-current` on active navigation links
+  - preserve readability in both themes by using tokenized contrast values, not hardcoded text shades
+- Centralize UI primitives:
+  - prefer shared components (`CivicSelect`, page headers, counters, fields) over repeated local markup
+  - prefer shared containers (`CivicToolbar`, `CivicEmptyState`) for filter bars and empty states
+  - avoid ad-hoc style divergence across views for the same control type
 
 ## Collaboration Workflow
 
@@ -47,6 +65,14 @@ Open Civic Signal OS turns continuous community feedback into transparent, audit
 - Product decisions -> `docs/DECISIONS.md`
 - Concrete execution -> GitHub issues + milestone labels
 - Keep PRs small and linked to one objective
+
+## Actionable Backlog Source (Mandatory)
+
+- Primary executable backlog: `docs/community/issue-backlog.md`
+- Operational sequencing source: `docs/community/current-backlog.md`
+- Community features expansion source: `docs/community/community-features-issue-pack.md`
+- GitHub issue seeding workflow: `.github/workflows/seed-community-issues.yml`
+- Agents must start from these backlog sources before proposing new scope.
 
 ## Labels Convention
 
@@ -88,6 +114,18 @@ When closing an issue, agents must include:
 - which contract file changed
 - sample input/output
 - known limitations
+## Frontend Component Integrity Standards (Mandatory)
+
+To prevent "dead pickers" or squashed inputs, all React components using PrimeReact must follow:
+
+1. **Event Mapping:** Always use explicit event mapping in `Controller` or state handlers. 
+   - `onChange={(e) => field.onChange(e.value)}` for Sliders, Dropdowns, SelectButtons.
+   - `onChange={(e) => field.onChange(e.target.value)}` for InputText, InputTextarea.
+2. **Layout Consistency:** Use `className="w-full"` for all form inputs to ensure they occupy the intended container space.
+3. **Explicit Labels:** Prefer explicit `<label>` elements over `p-float-label` for critical forms (Login, Register, Report) to guarantee visibility across dark/light themes.
+4. **Validation Feedback:** Always provide a `<small className="p-error">` block below inputs using `fieldState.error`.
+5. **Score Persistence:** Prioritization scores must be calculated backend-side and stored in the DB (Auditability).
+
 ## Agent Operations
 
 - Agent hard rules: `.agentic-rules`
@@ -169,9 +207,30 @@ These rules were added from recurring AI-generated mistakes in this repository.
 - Do not ship malformed markdown/json:
   - never commit escaped newline literals like `` `n `` as documentation bullets
   - ensure `package.json` remains valid JSON with no trailing literal escape text
+- Do not write fragile E2E selectors:
+  - avoid placeholder/text-only selectors for critical actions
+  - prefer stable `data-testid` hooks for navigation, form submit, and modal actions
+  - when UI copy changes, update tests and selectors in the same PR
+- Do not ship ambiguous form-button behavior:
+  - all non-submit UI buttons inside/near forms must be explicit `type="button"`
+  - keep `type="submit"` only on the primary submit action
+- Do not ship unstable dropdown overlays:
+  - PrimeReact `Dropdown` used in constrained containers/header cards must use body portal mounting (`appendTo={document.body}`)
+  - verify menu layering with Playwright on mobile + desktop whenever dropdown placement changes
 - Do not mix unrelated work:
   - avoid bundling UI redesign + backend + docs automation in one PR unless requested
   - keep one objective and one rollback path
+- Do not stack notification systems without intent:
+  - avoid rendering multiple global toast layers (`react-hot-toast` + PrimeReact `Toast`) in the same layout path
+  - if both are required, document ownership/scope and test z-index/position conflicts
+- Protect global client state integrity:
+  - buttons and navigation actions must not reset persisted global state (`auth`, `settings`, `community`) unless explicitly a logout/reset action
+  - when reloading memberships/preferences, preserve existing selected context if still valid; fallback only when invalid
+  - add Playwright coverage for state persistence across route/button flows when touching shared layout or stores
+- Protect interactive control integrity:
+  - no visual-only filters: any dashboard filter chip/button must change the underlying query or deterministic dataset, not just local highlight state
+  - if filter semantics require backend ownership (status, scope, moderation state), expose explicit API query params and test them
+  - add Playwright assertions that each critical filter triggers the expected API contract (`status`, `community`, paging)
 
 ## Hard Validation Before Push
 

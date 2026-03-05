@@ -51,6 +51,11 @@ Priority legend:
 13. `ci: add changelog and contract consistency checks`
 14. `growth: create civic pilot success story template`
 15. `ops: create triage protocol for trust-critical incidents`
+16. `community-membership: support user membership in one or many communities`
+17. `community-rbac: add community-scoped roles and permission policies`
+18. `community-chat: enable structured inter-community communication channels`
+19. `community-blog: add public-servant progress blog by community`
+20. `community-feed: show cross-community updates and accountability timeline`
 
 ## P2 Issues
 
@@ -93,3 +98,12 @@ Use `.github/workflows/seed-community-issues.yml` to persist these as GitHub iss
 19. `story:OCS-P1-008 ingest community trust pulse inputs and aggregates`
 20. `story:OCS-P2-004 build policy simulation sandbox for scoring weights`
 21. `story:OCS-P2-005 deliver low-bandwidth field dashboard mode`
+
+## Community Features Expansion (Agent-Ready)
+
+1. `story:OCS-P1-009 model community membership with user-community join table, API, and UI selector`
+2. `story:OCS-P1-010 add community-scoped RBAC (member, moderator, coordinator, liaison) with audit trail`
+3. `story:OCS-P1-011 implement inter-community conversation threads linked to civic signals`
+4. `story:OCS-P1-012 ship public-servant community blog (create/list/update) with public timeline view`
+5. `story:OCS-P1-013 add community context switcher and scoped dashboards/reporting`
+6. `story:OCS-P1-014 add moderation workflow for community conversations and blog comments`

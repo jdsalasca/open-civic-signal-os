@@ -1,8 +1,10 @@
 package org.opencivic.signalos.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -23,10 +25,14 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
+
+    @Value("${application.cors.allowed-origins:http://localhost:3002}")
+    private List<String> allowedOrigins;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService) {
         this.jwtAuthFilter = jwtAuthFilter;
@@ -39,8 +45,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/health", "/actuator/health").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10").permitAll()
+                .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/signals/export/**").hasRole("SUPER_ADMIN")
                 
                 .requestMatchers(HttpMethod.POST, "/api/signals/*/vote").hasRole("CITIZEN")
                 .requestMatchers(HttpMethod.POST, "/api/signals").hasAnyRole("CITIZEN", "SUPER_ADMIN")
@@ -79,10 +86,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // P0-3: Permitting both local variants for QA stability
-        configuration.setAllowedOrigins(List.of("http://localhost:3002", "http://127.0.0.1:3002"));
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-Community-Id"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

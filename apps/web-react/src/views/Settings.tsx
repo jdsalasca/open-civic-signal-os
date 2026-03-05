@@ -1,14 +1,22 @@
 import { useTranslation } from "react-i18next";
+import { useMemo } from "react";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { Card } from "primereact/card";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
-import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
-import { Button } from "primereact/button";
+import { DropdownChangeEvent } from "primereact/dropdown";
 import { Divider } from "primereact/divider";
 import { Layout } from "../components/Layout";
 import { toast } from "react-hot-toast";
+import { Avatar } from "primereact/avatar";
 import apiClient from "../api/axios";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicField } from "../components/ui/CivicField";
+import { CivicBadge } from "../components/ui/CivicBadge";
+import { CivicSelect } from "../components/ui/CivicSelect";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicMetaRow } from "../components/ui/CivicMetaRow";
+import { CivicActionBar } from "../components/ui/CivicActionBar";
 
 interface ThemeOption {
   label: string;
@@ -16,14 +24,20 @@ interface ThemeOption {
   icon: string;
 }
 
+interface RoleOption {
+  label: string;
+  value: string;
+  code: string;
+}
+
 export function Settings() {
   const { t, i18n } = useTranslation();
   const { language, setLanguage, theme, setTheme } = useSettingsStore();
-  const { activeRole, rawRoles, switchRole } = useAuthStore();
+  const { activeRole, rawRoles, switchRole, userName } = useAuthStore();
 
   const languageOptions = [
-    { label: 'English', value: 'en' },
-    { label: 'Español', value: 'es' }
+    { label: t('settings.languages.en'), value: 'en' },
+    { label: t('settings.languages.es'), value: 'es' }
   ];
 
   const themeOptions: ThemeOption[] = [
@@ -41,12 +55,32 @@ export function Settings() {
 
   const handleThemeChange = (e: SelectButtonChangeEvent) => {
     const nextTheme = e.value as 'dark' | 'light';
-    if (nextTheme) setTheme(nextTheme);
+    if (nextTheme) {
+      setTheme(nextTheme);
+      document.documentElement.classList.remove('dark-theme', 'light-theme');
+      document.documentElement.classList.add(`${nextTheme}-theme`);
+    }
   };
 
   const handleRoleChange = (e: DropdownChangeEvent) => {
-    switchRole(e.value);
+    const nextRole = e.value as string | undefined;
+    if (!nextRole || nextRole === activeRole) return;
+    const roleLabel = roleOptions.find((option) => option.value === nextRole)?.label ?? nextRole;
+    switchRole(nextRole);
+    toast.success(t('settings.role_switched', { role: roleLabel }));
   };
+
+  const roleOptions: RoleOption[] = useMemo(
+    () =>
+      rawRoles
+        .map((role) => ({
+          label: t(`settings.roles.${role}`, { defaultValue: role.replace(/_/g, ' ') }),
+          value: role,
+          code: role,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [rawRoles, t]
+  );
 
   const handleExportCsv = async () => {
     try {
@@ -54,100 +88,123 @@ export function Settings() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `signalos_export_${new Date().getTime()}.csv`);
+      link.setAttribute('download', `civic_intelligence_export_${new Date().getTime()}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
-      toast.success("Intelligence data exported successfully.");
+      toast.success(t('settings.export_success'));
     } catch (err) {
-      toast.error("Export failed. Insufficient clearance or network error.");
+      toast.error(t('settings.export_error'));
     }
   };
 
   return (
     <Layout>
-      <div className="animate-fade-in max-w-30rem mx-auto mt-4">
-        <div className="mb-5 text-center">
-          <h1 className="text-4xl font-black text-white m-0 tracking-tight">{t('settings.title')}</h1>
-          <p className="text-gray-500 mt-2">{t('settings.desc')}</p>
-        </div>
+      <div className="animate-fade-up motion-page max-w-50rem mx-auto">
+        <CivicPageHeader title={t('settings.title')} description={t('settings.desc')} />
 
-        <Card className="shadow-8 border-1 border-white-alpha-10 mb-4">
-          <div className="flex flex-column gap-4">
-            
-            <div className="flex flex-column gap-2">
-              <label className="font-bold text-sm uppercase tracking-widest text-gray-400">
-                <i className="pi pi-globe mr-2"></i>{t('settings.language')}
-              </label>
-              <SelectButton 
-                value={language} 
-                options={languageOptions} 
-                onChange={handleLanguageChange} 
-                className="w-full"
-              />
-            </div>
-
-            <Divider className="my-2 opacity-10" />
-
-            <div className="flex flex-column gap-2">
-              <label className="font-bold text-sm uppercase tracking-widest text-gray-400">
-                <i className="pi pi-palette mr-2"></i>{t('settings.theme')}
-              </label>
-              <SelectButton 
-                value={theme} 
-                options={themeOptions} 
-                onChange={handleThemeChange}
-                itemTemplate={(option: ThemeOption) => (
-                  <div className="flex align-items-center gap-2">
-                    <i className={option.icon}></i>
-                    <span>{option.label}</span>
-                  </div>
-                )}
-              />
-            </div>
-
-            {rawRoles.length > 1 && (
-              <>
-                <Divider className="my-2 opacity-10" />
-                <div className="flex flex-column gap-2">
-                  <label className="font-bold text-sm uppercase tracking-widest text-cyan-500">
-                    <i className="pi pi-shield mr-2"></i>{t('settings.role')}
-                  </label>
-                  <p className="text-xs text-gray-500 m-0 mb-2">{t('settings.role_desc')}</p>
-                  <Dropdown 
-                    value={activeRole} 
-                    options={rawRoles} 
-                    onChange={handleRoleChange} 
-                    className="w-full bg-gray-900"
-                  />
+        <div className="grid">
+          <div className="col-12 lg:col-5">
+            <CivicCard title={t('settings.identity_profile')} variant="brand" className="h-full">
+              <div className="flex flex-column align-items-center text-center py-4">
+                <div className="relative mb-4">
+                  <Avatar label={userName?.[0].toUpperCase()} shape="circle" size="xlarge" className="bg-brand-primary text-on-brand font-black shadow-xl" style={{ width: '80px', height: '80px', fontSize: '2rem' }} />
+                  <div className="absolute bottom-0 right-0 bg-status-resolved border-circle border-2 border-subtle" style={{ width: '20px', height: '20px' }}></div>
                 </div>
-              </>
-            )}
+                <h2 className="text-2xl font-black text-main m-0 tracking-tight">{userName}</h2>
+                <div className="mt-2 flex gap-2 justify-content-center">
+                  <CivicBadge label={activeRole} severity="progress" />
+                  <CivicBadge label={t('settings.verified_user')} severity="resolved" />
+                </div>
+                
+                <Divider className="my-6 opacity-10" />
+                
+                <div className="w-full text-left">
+                  <CivicMetaRow label={t('settings.clearance_level')} value={t('settings.clearance_level_value')} />
+                  <CivicMetaRow label={t('settings.encryption')} value={t('settings.encryption_value')} />
+                  <CivicMetaRow label={t('settings.protocol')} value={t('settings.protocol_value')} />
+                </div>
+              </div>
+            </CivicCard>
+          </div>
 
-            {/* OCS-P2-011: Admin Audit Tools */}
+          <div className="col-12 lg:col-7">
+            <CivicCard title={t('settings.interface_protocol')} className="mb-6">
+              <div className="flex flex-column gap-6">
+                <CivicField label={t('settings.language')} helpText={t('settings.language_help')}>
+                  <SelectButton
+                    value={language}
+                    options={languageOptions}
+                    onChange={handleLanguageChange}
+                    className="w-full"
+                    data-testid="language-select"
+                  />
+                </CivicField>
+
+                <CivicField label={t('settings.theme')} helpText={t('settings.theme_help')}>
+                  <SelectButton
+                    value={theme}
+                    options={themeOptions}
+                    onChange={handleThemeChange}
+                    className="w-full"
+                    data-testid="theme-select"
+                    itemTemplate={(option: ThemeOption) => (
+                      <div className="flex align-items-center justify-content-center gap-3 w-full py-1">
+                        <i className={option.icon}></i>
+                        <span className="font-bold">{option.label}</span>
+                      </div>
+                    )}
+                  />
+                </CivicField>
+
+                <CivicField label={t('settings.role')} helpText={t('settings.role_desc')}>
+                  <div data-testid="role-switch-dropdown">
+                    <CivicSelect
+                      value={activeRole}
+                      options={roleOptions}
+                      optionLabel="label"
+                      optionValue="value"
+                      onChange={handleRoleChange}
+                      className="w-full p-inputtext-lg"
+                      disabled={rawRoles.length <= 1}
+                      placeholder={roleOptions[0]?.label ?? activeRole}
+                      itemTemplate={(option: RoleOption) => (
+                        <div className="flex flex-column py-1">
+                          <span className="font-bold text-main">{option.label}</span>
+                          <small className="text-muted font-mono uppercase text-min">{option.code}</small>
+                        </div>
+                      )}
+                    />
+                  </div>
+                </CivicField>
+              </div>
+            </CivicCard>
+
             {activeRole === 'SUPER_ADMIN' && (
-              <>
-                <Divider className="my-2 opacity-10" />
-                <div className="flex flex-column gap-2">
-                  <label className="font-bold text-sm uppercase tracking-widest text-red-400">
-                    <i className="pi pi-database mr-2"></i>Administrative Tools
-                  </label>
-                  <p className="text-xs text-gray-500 m-0 mb-3">Download complete intelligence datasets for external auditing.</p>
-                  <Button 
-                    label="Export Signal Registry (CSV)" 
+              <CivicCard title={t('settings.admin_tools')} variant="danger">
+                <div className="flex flex-column gap-4">
+                  <p className="text-secondary text-sm m-0 leading-relaxed">
+                    {t('settings.admin_desc')}
+                  </p>
+                  <CivicButton
+                    label={t('settings.export_button')}
                     icon="pi pi-download" 
-                    className="p-button-danger outlined w-full"
+                    variant="danger"
+                    className="w-full py-4 text-sm"
                     onClick={handleExportCsv}
                   />
                 </div>
-              </>
+              </CivicCard>
             )}
-
           </div>
-        </Card>
+        </div>
 
-        <div className="text-center p-4 bg-white-alpha-5 border-round-xl border-1 border-white-alpha-10">
-          <span className="text-xs text-gray-600 font-mono">Signal OS Core v0.3.0-hardened | Session: Persistent</span>
+        <div className="text-center mt-8 mb-8">
+          <CivicActionBar className="justify-content-center">
+            <p className="text-muted text-xs font-bold uppercase tracking-widest m-0">
+              {t('settings.footer')}
+            </p>
+          </CivicActionBar>
         </div>
       </div>
     </Layout>

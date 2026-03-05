@@ -56,7 +56,12 @@ jobs:
               "scripts: generate monthly transparency report",
               "exports: municipal ticket export format adapter",
               "security: add public data anonymization checklist enforcement",
-              "ops: create triage protocol for trust-critical incidents"
+              "ops: create triage protocol for trust-critical incidents",
+              "community-membership: support user membership in one or many communities",
+              "community-rbac: add community-scoped roles and permission policies",
+              "community-chat: enable structured inter-community communication channels",
+              "community-blog: add public-servant progress blog by community",
+              "community-feed: show cross-community updates and accountability timeline"
             ].map((title) => ({ title, labels: ["priority:P1", "help wanted", "good first issue", "pilot-ready"] }));
 
             const p2 = [
@@ -83,6 +88,12 @@ jobs:
               "story:OCS-P1-006 add data freshness monitoring and stale-source alerts",
               "story:OCS-P1-007 add explainability export snapshots for assemblies",
               "story:OCS-P1-008 ingest community trust pulse inputs and aggregates",
+              "story:OCS-P1-009 model community membership with user-community join table, API, and UI selector",
+              "story:OCS-P1-010 add community-scoped RBAC (member, moderator, coordinator, liaison) with audit trail",
+              "story:OCS-P1-011 implement inter-community conversation threads linked to civic signals",
+              "story:OCS-P1-012 ship public-servant community blog (create/list/update) with public timeline view",
+              "story:OCS-P1-013 add community context switcher and scoped dashboards/reporting",
+              "story:OCS-P1-014 add moderation workflow for community conversations and blog comments",
               "story:OCS-P2-001 prototype assembly mode for townhall facilitation",
               "story:OCS-P2-002 implement trust-proof snapshot for backlog publish",
               "story:OCS-P2-004 build policy simulation sandbox for scoring weights",

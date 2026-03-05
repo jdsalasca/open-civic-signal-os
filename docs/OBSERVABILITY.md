@@ -12,6 +12,11 @@
 - Error rate by endpoint and operation.
 - Latency distribution for critical paths.
 - Domain KPIs for product trust and impact.
+- Prioritized feed custom metrics:
+  - `signalos.prioritized.latency`
+  - `signalos.prioritized.requests.total`
+  - `signalos.prioritized.requests.errors.total`
+  - `signalos.prioritized.result.size`
 
 ## Alerts
 

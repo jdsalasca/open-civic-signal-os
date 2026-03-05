@@ -1,6 +1,8 @@
 import { Signal } from "../types";
-import { Card } from "primereact/card";
 import { useTranslation } from "react-i18next";
+import { CivicCard } from "./ui/CivicCard";
+import { CivicBadge } from "./ui/CivicBadge";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   signals: Signal[];
@@ -8,31 +10,36 @@ type Props = {
 
 export function DigestSidebar({ signals }: Props) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const top3 = [...signals]
     .sort((a, b) => b.priorityScore - a.priorityScore)
     .slice(0, 3);
 
   return (
-    <Card title={t('dashboard.broadcast')} className="shadow-4 border-1 border-white-alpha-10 bg-gray-900">
-      <div className="flex flex-column gap-3">
+    <CivicCard title={t('dashboard.digest_title')} variant="brand">
+      <div className="flex flex-column gap-5">
         {top3.length === 0 ? (
-          <p className="text-gray-500 text-sm italic">{t('dashboard.empty_title')}</p>
+          <div className="text-center py-4 text-muted italic text-sm">
+            {t('dashboard.digest_empty')}
+          </div>
         ) : (
           top3.map((s, i) => (
-            <div key={s.id} className="flex gap-3 align-items-start">
-              <span className="text-2xl font-black text-white-alpha-20">0{i + 1}</span>
-              <div>
-                <h4 className="text-sm font-bold text-white m-0 line-height-2 mb-1">{s.title}</h4>
+            <div key={s.id} className="flex gap-4 align-items-start group cursor-pointer" onClick={() => navigate(`/signal/${s.id}`)}>
+              <span className="text-3xl font-black text-brand-primary opacity-20 group-hover:opacity-100 transition-opacity">0{i + 1}</span>
+              <div className="flex flex-column gap-1 overflow-hidden">
+                <h4 className="text-sm font-black text-main m-0 leading-tight truncate group-hover:text-brand-primary transition-colors">
+                  {s.title}
+                </h4>
                 <div className="flex align-items-center gap-2">
-                  <span className="text-xs text-cyan-500 font-black uppercase">{s.priorityScore.toFixed(0)}</span>
-                  <span className="text-gray-600">•</span>
-                  <span className="text-xs text-gray-500 font-bold uppercase">{t(`categories.${s.category}`)}</span>
+                  <span className="text-xs text-brand-primary font-black">{s.priorityScore.toFixed(0)} Pts</span>
+                  <span className="text-muted font-bold">|</span>
+                  <CivicBadge label={t(`categories.${s.category}`)} type="category" />
                 </div>
               </div>
             </div>
           ))
         )}
       </div>
-    </Card>
+    </CivicCard>
   );
 }

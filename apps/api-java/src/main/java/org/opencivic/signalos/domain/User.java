@@ -23,9 +23,13 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String roles; // Comma-separated: ROLE_CITIZEN,ROLE_PUBLIC_SERVANT
+    private String roles; // Comma-separated
 
     private boolean enabled = false;
+    
+    // V3: Verification Flow
+    private String verificationCode;
+    private boolean isVerified = false;
 
     public User() {}
 
@@ -53,9 +57,11 @@ public class User {
     public void setEmail(String email) { this.email = email; }
     public String getRoles() { return roles; }
     public void setRoles(String roles) { this.roles = roles; }
-    // Compatibility getter for Spring Security single-role logic if needed
-    public String getRole() { return roles; } 
-    public void setRole(String role) { this.roles = role; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    
+    public String getVerificationCode() { return verificationCode; }
+    public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
+    public boolean isVerified() { return isVerified; }
+    public void setVerified(boolean verified) { isVerified = verified; }
 }

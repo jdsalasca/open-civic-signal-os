@@ -3,12 +3,13 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { classNames } from "primereact/utils";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicField } from "../components/ui/CivicField";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -18,22 +19,46 @@ type RegisterForm = {
   username: string;
   email: string;
   password: string;
+  confirmPassword: string;
+};
+
+type RegisterResponse = {
+  message?: string;
+  username?: string;
+  emailDeliveryStatus?: "SENT" | "FAILED";
+  supportEmail?: string;
+  deliveryFailureReason?: string;
 };
 
 export function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { control, handleSubmit, formState: { errors } } = useForm<RegisterForm>({
-    defaultValues: { username: '', email: '', password: '' }
+  const { control, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<RegisterForm>({
+    defaultValues: { username: '', email: '', password: '', confirmPassword: '' }
   });
+
+  const password = watch('password');
 
   const onSubmit = async (data: RegisterForm) => {
     try {
-      const res = await apiClient.post("auth/register", data);
+      const { confirmPassword, ...registerData } = data;
+      const res = await apiClient.post<RegisterResponse>("auth/register", registerData);
 
       if (res.status === 200 || res.status === 201) {
-        toast.success(t('auth.register_success'));
-        navigate("/login");
+        const emailDeliveryFailed = res.data?.emailDeliveryStatus === "FAILED";
+        if (emailDeliveryFailed) {
+          toast.error(t('auth.register_email_degraded'));
+        } else {
+          toast.success(t('auth.register_success'));
+        }
+        navigate("/verify", {
+          state: {
+            username: data.username,
+            emailDeliveryFailed,
+            supportEmail: res.data?.supportEmail,
+            deliveryMessage: res.data?.message,
+          }
+        });
       }
     } catch (err) {
       const apiErr = err as ApiError;
@@ -43,91 +68,100 @@ export function Register() {
 
   return (
     <Layout authMode>
-      <div className="flex justify-content-center align-items-center mt-6">
-        <Card 
-          title={<div className="text-center w-full">{t('auth.join_title')}</div>} 
-          subTitle={<div className="text-center w-full">{t('auth.join_subtitle')}</div>} 
-          style={{ width: '100%', maxWidth: '450px' }}
-          data-testid="register-card"
-        >
-          <form onSubmit={handleSubmit(onSubmit)} className="p-fluid" aria-label="Registration Form">
-            <div className="field mt-2">
-              <span className="p-float-label p-input-icon-left">
-                <i className="pi pi-user text-cyan-500" />
-                <Controller name="username" control={control} rules={{ required: true, minLength: 4 }} 
-                  render={({ field, fieldState }) => (
-                    <InputText 
-                      id="username-input" 
-                      {...field} 
-                      autoComplete="username"
-                      className={classNames('py-3 pl-5', { 'p-invalid': fieldState.error })} 
-                      data-testid="register-username-input"
-                    />
-                  )} 
-                />
-                <label htmlFor="username-input">{t('auth.username')}</label>
-              </span>
-              {errors.username && <small className="p-error block mt-1">{t('common.required')}</small>}
+      <div className="min-h-screen flex justify-content-center align-items-center p-4">
+        <CivicCard className="w-full max-w-30rem animate-fade-up" padding="lg">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-black text-main m-0 tracking-tighter">{t('auth.join_title')}</h1>
+            <p className="text-secondary mt-2 font-medium">{t('auth.join_subtitle')}</p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-column gap-2" aria-label="Registration Form">
+            <CivicField label={t('auth.username')} error={errors.username?.message}>
+              <Controller name="username" control={control} rules={{ required: t('common.required'), minLength: { value: 4, message: t('auth.username_too_short') } }}
+                render={({ field, fieldState }) => (
+                  <InputText
+                    {...field}
+                    autoComplete="username"
+                    className={classNames('w-full p-inputtext-lg', { 'p-invalid': fieldState.error })}
+                    data-testid="register-username-input"
+                    placeholder={t('auth.username_placeholder')}
+                  />
+                )}
+              />
+            </CivicField>
+
+            <CivicField label={t('auth.email')} error={errors.email?.message}>
+              <Controller name="email" control={control} rules={{ required: t('common.required'), pattern: { value: /^\S+@\S+$/i, message: t('common.invalid_email') } }}
+                render={({ field, fieldState }) => (
+                  <InputText
+                    {...field}
+                    autoComplete="email"
+                    className={classNames('w-full p-inputtext-lg', { 'p-invalid': fieldState.error })}
+                    data-testid="register-email-input"
+                    placeholder="email@example.com"
+                  />
+                )}
+              />
+            </CivicField>
+
+            <CivicField label={t('auth.password')} error={errors.password?.message}>
+              <Controller name="password" control={control} rules={{ required: t('common.required'), minLength: { value: 8, message: t('auth.password_too_short') } }}
+                render={({ field, fieldState }) => (
+                  <Password
+                    {...field}
+                    toggleMask
+                    inputId="password-input"
+                    autoComplete="new-password"
+                    placeholder="Min. 8 characters"
+                    inputClassName="w-full p-inputtext-lg"
+                    className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                    data-testid="register-password-input"
+                  />
+                )}
+              />
+            </CivicField>
+
+            <CivicField label={t('auth.confirm_password')} error={errors.confirmPassword?.message}>
+              <Controller name="confirmPassword" control={control}
+                rules={{
+                  required: t('common.required'),
+                  validate: value => value === password || t('auth.passwords_mismatch') || "Passwords must match"
+                }}
+                render={({ field, fieldState }) => (
+                  <Password
+                    {...field}
+                    toggleMask
+                    feedback={false}
+                    inputId="confirm-password-input"
+                    autoComplete="new-password"
+                    placeholder="Repeat password"
+                    inputClassName="w-full p-inputtext-lg"
+                    className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                    data-testid="register-confirm-password-input"
+                  />
+                )}
+              />
+            </CivicField>
+
+            <div className="p-4 bg-surface border-round-xl text-xs text-secondary flex align-items-center gap-3 border-1 border-subtle mb-4">
+              <i className="pi pi-shield text-brand-primary text-lg"></i>
+              <span className="font-bold uppercase tracking-wider leading-relaxed">{t('auth.clearance_level')}</span>
             </div>
 
-            <div className="field mt-5">
-              <span className="p-float-label p-input-icon-left">
-                <i className="pi pi-envelope text-cyan-500" />
-                <Controller name="email" control={control} rules={{ required: true, pattern: /^\S+@\S+$/i }} 
-                  render={({ field, fieldState }) => (
-                    <InputText 
-                      id="email-input" 
-                      {...field} 
-                      autoComplete="email"
-                      className={classNames('py-3 pl-5', { 'p-invalid': fieldState.error })} 
-                      data-testid="register-email-input"
-                    />
-                  )} 
-                />
-                <label htmlFor="email-input">{t('auth.email')}</label>
-              </span>
-              {errors.email && <small className="p-error block mt-1">{t('common.invalid_email')}</small>}
-            </div>
-
-            <div className="field mt-5">
-              <span className="p-float-label">
-                <Controller name="password" control={control} rules={{ required: true, minLength: 8 }} 
-                  render={({ field, fieldState }) => (
-                    <Password 
-                      id="password-input-container" 
-                      {...field} 
-                      toggleMask 
-                      inputId="password-input" 
-                      autoComplete="new-password"
-                      inputClassName="py-3" 
-                      className={classNames('w-full', { 'p-invalid': fieldState.error })} 
-                      data-testid="register-password-input"
-                    />
-                  )} 
-                />
-                <label htmlFor="password-input">{t('auth.password')}</label>
-              </span>
-              {errors.password && <small className="p-error block mt-1">{t('common.required')}</small>}
-            </div>
-
-            <div className="mt-5 p-3 bg-blue-900-alpha-20 border-round text-xs text-blue-300 flex align-items-center gap-2 border-1 border-blue-800">
-              <i className="pi pi-shield"></i>
-              <span className="font-bold uppercase tracking-wider">{t('auth.clearance_level')}</span>
-            </div>
-
-            <Button 
-              type="submit" 
-              label={t('auth.create_account')} 
-              className="p-button-primary mt-5 py-3 font-bold" 
+            <CivicButton
+              type="submit"
+              label={t('auth.create_account')}
+              className="py-4 text-base"
+              loading={isSubmitting}
+              glow
               data-testid="register-submit-button"
-              aria-label="Submit Registration"
             />
-            
-            <p className="text-center mt-5 text-gray-500 text-sm font-medium">
-              {t('auth.already_member')} <Link to="/login" className="text-cyan-400 cursor-pointer font-bold hover:underline" data-testid="go-to-login">{t('auth.sign_in_here')}</Link>
+
+            <p className="text-center text-muted text-sm font-medium mt-6">
+              {t('auth.already_member')} <Link to="/login" className="text-brand-primary font-bold no-underline hover:underline" data-testid="go-to-login">{t('auth.sign_in_here')}</Link>
             </p>
           </form>
-        </Card>
+        </CivicCard>
       </div>
     </Layout>
   );

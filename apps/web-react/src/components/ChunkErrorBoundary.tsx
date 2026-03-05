@@ -1,7 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from "react";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { withTranslation, WithTranslation } from "react-i18next";
+import { CivicButton } from "./ui/CivicButton";
+import { CivicCard } from "./ui/CivicCard";
 
 interface Props extends WithTranslation {
   children: ReactNode;
@@ -41,22 +41,22 @@ class ChunkErrorBoundaryBase extends Component<Props, State> {
 
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex align-items-center justify-content-center bg-gray-900 p-4">
-          <Card className="exception-card shadow-8 border-cyan-900 border-1 w-full max-w-25rem">
+        <div className="min-h-screen flex align-items-center justify-content-center bg-app p-4">
+          <CivicCard className="w-full max-w-25rem">
             <div className="text-center">
-              <i className="pi pi-refresh text-cyan-500 text-5xl mb-4"></i>
-              <h2 className="text-white font-black mb-2">{t('exceptions.chunk_title')}</h2>
-              <p className="text-gray-400 mb-5 line-height-3">
+              <i className="pi pi-refresh text-brand-primary text-5xl mb-4 motion-pulse-soft"></i>
+              <h2 className="text-main font-black mb-2">{t('exceptions.chunk_title')}</h2>
+              <p className="text-secondary mb-5 line-height-3">
                 {t('exceptions.chunk_desc')}
               </p>
-              <Button 
+              <CivicButton
                 label={t('exceptions.chunk_button')} 
                 icon="pi pi-sync" 
-                className="p-button-primary w-full py-3 font-bold" 
+                className="w-full py-3 font-bold"
                 onClick={this.handleReload} 
               />
             </div>
-          </Card>
+          </CivicCard>
         </div>
       );
     }

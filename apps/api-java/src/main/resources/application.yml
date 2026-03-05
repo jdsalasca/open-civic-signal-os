@@ -2,8 +2,6 @@ server:
   port: 8080
 
 spring:
-  profiles:
-    active: dev
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/signalos}
     username: ${SPRING_DATASOURCE_USERNAME:admin}
@@ -23,16 +21,20 @@ spring:
     baseline-on-migrate: true
 
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:no-reply@localhost}
+    password: ${SPRING_MAIL_PASSWORD:dummy}
     properties:
       mail:
         smtp:
-          auth: true
+          auth: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:true}
           starttls:
-            enable: true
+            enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:true}
+            required: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED:true}
+          connectiontimeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT:5000}
+          timeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT:5000}
+          writetimeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT:5000}
 
 application:
   security:
@@ -45,7 +47,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
   health:
     mail:
       enabled: false

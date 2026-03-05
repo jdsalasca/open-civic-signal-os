@@ -1,4 +1,10 @@
 services:
+  civic-mail:
+    image: axllent/mailpit:latest
+    container_name: civic-mail
+    ports:
+      - "8025:8025"
+
   civic-db:
     image: postgres:15-alpine
     container_name: civic-db
@@ -28,10 +34,20 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://civic-db:5432/signalos
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: password
-      JWT_SECRET: "strategic-civic-intelligence-key-secure-2026-v1"
+      SPRING_MAIL_HOST: civic-mail
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_USERNAME: no-reply@open-civic.local
+      SPRING_MAIL_PASSWORD: ""
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: "false"
+      SUPPORT_CONTACT_EMAIL: support@open-civic.local
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       CORS_ALLOWED_ORIGINS: "http://localhost:3002"
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: prod
     depends_on:
+      civic-mail:
+        condition: service_started
       civic-db:
         condition: service_healthy
     healthcheck:

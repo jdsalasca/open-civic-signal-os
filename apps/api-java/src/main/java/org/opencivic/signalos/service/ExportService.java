@@ -2,6 +2,7 @@ package org.opencivic.signalos.service;
 
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.repository.SignalRepository;
+import org.opencivic.signalos.web.dto.TrustPacket;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -14,9 +15,11 @@ import java.util.List;
 public class ExportService {
 
     private final SignalRepository signalRepository;
+    private final PrioritizationService prioritizationService;
 
-    public ExportService(SignalRepository signalRepository) {
+    public ExportService(SignalRepository signalRepository, PrioritizationService prioritizationService) {
         this.signalRepository = signalRepository;
+        this.prioritizationService = prioritizationService;
     }
 
     public ByteArrayInputStream exportSignalsToCsv() {
@@ -25,19 +28,22 @@ public class ExportService {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (PrintWriter writer = new PrintWriter(out)) {
             // Header
-            writer.println("ID,Title,Category,Status,PriorityScore,Urgency,Impact,AffectedPeople,Votes,CreatedAt");
+            writer.println("ID,Title,Category,Status,PriorityScore,Score_Urgency,Score_Impact,Score_People,Score_Votes,VerificationHash,CreatedAt");
 
             for (Signal s : signals) {
+                TrustPacket packet = prioritizationService.getTrustPacket(s.getId());
+                
                 List<String> data = Arrays.asList(
                     s.getId().toString(),
                     escapeCsv(s.getTitle()),
                     s.getCategory(),
                     s.getStatus(),
-                    String.valueOf(s.getPriorityScore()),
-                    String.valueOf(s.getUrgency()),
-                    String.valueOf(s.getImpact()),
-                    String.valueOf(s.getAffectedPeople()),
-                    String.valueOf(s.getCommunityVotes()),
+                    String.valueOf(packet.finalScore()),
+                    String.valueOf(packet.scoreBreakdown().urgency()),
+                    String.valueOf(packet.scoreBreakdown().impact()),
+                    String.valueOf(packet.scoreBreakdown().affectedPeople()),
+                    String.valueOf(packet.scoreBreakdown().communityVotes()),
+                    packet.verificationHash(),
                     s.getCreatedAt() != null ? s.getCreatedAt().toString() : ""
                 );
                 writer.println(String.join(",", data));

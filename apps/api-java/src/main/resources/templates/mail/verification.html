@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Signal OS Verification</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e1e8e7; }
+        .header { background: #00bcd4; color: white; padding: 30px; text-align: center; }
+        .content { padding: 40px; color: #37474f; line-height: 1.6; }
+        .code-box { background: #f1f8f9; border: 2px dashed #00bcd4; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0; font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #00bcd4; }
+        .footer { padding: 20px; text-align: center; color: #90a4ae; font-size: 12px; background: #fafbfc; border-top: 1px solid #eee; }
+        .btn { display: inline-block; padding: 12px 24px; background: #00bcd4; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin:0; font-size: 24px;">Open Civic Signal OS</h1>
+        </div>
+        <div class="content">
+            <h2 style="margin-top:0;">Verify your Identity</h2>
+            <p>Hello <strong th:text="${username}">User</strong>,</p>
+            <p>Your strategic civic intelligence account is almost ready. Please use the following activation code to complete your registration:</p>
+            
+            <div class="code-box" th:text="${code}">000000</div>
+            
+            <p>This code is mandatory for protocol validation and will expire shortly. If you did not initiate this request, please ignore this communication.</p>
+            
+            <p style="margin-bottom:0;">Best regards,<br>The Open Civic Team</p>
+        </div>
+        <div class="footer">
+            &copy; 2026 Open Civic Signal OS. This is an automated system notification.
+        </div>
+    </div>
+</body>
+</html>

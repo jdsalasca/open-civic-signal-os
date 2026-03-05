@@ -48,6 +48,19 @@
 - Use the branch naming convention: `feat/<issue-number>-<short-slug>`.
 - Every PR requires a structured summary covering Scope, API changes, Contract changes, and Verification.
 
+### 5. Actionable Backlog Routing (Mandatory)
+- Create implementation tasks only from:
+  - `docs/community/issue-backlog.md`
+  - `docs/community/current-backlog.md`
+  - `docs/community/community-features-issue-pack.md`
+- Use `.github/workflows/seed-community-issues.yml` when backlog items need persistence as GitHub issues.
+- Do not start implementation from ad-hoc ideas without mapping to a backlog item/story ID first.
+
+### 4. UI/UX Integrity Rules
+- **No Invisible Controls:** Ensure Sliders and Dropdowns have `w-full` class and are not squashed by flex containers.
+- **Direct Event Mapping:** In React Hook Form Controllers, map PrimeReact events manually: `onChange={(e) => field.onChange(e.value)}`.
+- **Contrast Guarantee:** Critical form labels must be explicit and use `text-main` or `text-muted` tokens to ensure visibility in both themes.
+
 ## Quality Gates
 - Backend tests must run (no test skipping): `mvn -q test`.
 - Frontend must build: `npm run build:web`.
@@ -63,3 +76,30 @@
 - Never ship malformed markdown or JSON (check for escaped newline fragments and JSON parse errors).
 - Never weaken checks (`skipTests`, bypass CI, incomplete verification evidence).
 - Never ship frontend changes without Playwright CLI flow audit evidence.
+- Never place notifications where they block form interaction:
+  - do not use center-screen toast placement for auth/report forms
+  - enforce safe offsets from sticky nav and mobile viewport controls
+  - validate login/register/verify with Playwright on desktop and mobile after UI changes
+- Never run duplicate global notification containers on the same page unless explicitly required and tested for z-index conflicts.
+- Never allow non-logout buttons/navigation to reset persisted global state (`auth-storage`, `settings-storage`, `community-storage`):
+  - preserve active community, language, theme, and active role across route transitions
+  - if context data is refreshed from API, keep prior selection when still valid and only fallback when invalid
+  - include Playwright state-persistence checks whenever layout/store wiring changes
+- Never rely on implicit button types in forms:
+  - set `type="button"` for all non-submit actions (cancel/discard/open-panel/secondary actions)
+  - reserve `type="submit"` for the intended primary form action only
+- Never ship dropdown overlays without portal hardening:
+  - for PrimeReact `Dropdown` in header cards, sidebars, dialogs, and dense forms, use `appendTo={document.body}`
+  - validate no overlap/clipping with Playwright in desktop and mobile viewports
+- Never ship inconsistent form quality across participation workflows:
+  - report/blog/thread creation must include min/max guidance and live character counters
+  - keep copy localized (EN/ES) in the same PR whenever labels/placeholders/feedback change
+  - prefer shared UI primitives for repeated patterns (`CivicSelect`, page headers, counters, fields, toolbars, empty states)
+- Never regress accessibility fundamentals:
+  - keep keyboard navigation discoverable (skip-to-content + visible focus rings)
+  - use semantic landmarks and active-link state (`aria-current`) in shared navigation
+  - keep contrast token-driven for light/dark parity (no ad-hoc hardcoded low-contrast text colors)
+- Never ship visual-only filters or dead search boxes:
+  - if a filter is shown as active in UI, it must deterministically affect returned/visible records
+  - status/scope filters must be API-contract backed when domain-owned by backend
+  - add Playwright checks that filter actions emit expected query parameters and update visible data

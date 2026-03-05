@@ -1,19 +1,36 @@
 package org.opencivic.signalos.web;
 
 import jakarta.validation.Valid;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.opencivic.signalos.domain.Signal;
-import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
-import org.opencivic.signalos.service.PrioritizationService;
+import org.opencivic.signalos.service.CommunityAccessService;
 import org.opencivic.signalos.service.ExportService;
+import org.opencivic.signalos.service.PrioritizationService;
+import org.opencivic.signalos.service.UserReactionService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
+import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
-import org.opencivic.signalos.exception.ResourceNotFoundException;
+import org.opencivic.signalos.web.dto.ApiPageResponse;
+import org.opencivic.signalos.web.dto.ReactionStateResponse;
+import org.opencivic.signalos.service.CivicEngagementService;
+import org.opencivic.signalos.web.dto.CivicCommentResponse;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -22,76 +39,185 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import org.opencivic.signalos.web.dto.TrustPacket;
 
 @RestController
 @RequestMapping("/api/signals")
 public class SignalController {
 
+    private static final int MAX_PAGE_SIZE = 100;
+    private static final Collection<String> RESOLVED_STATUSES = List.of("RESOLVED", "REJECTED");
     private final PrioritizationService prioritizationService;
     private final ExportService exportService;
     private final UserRepository userRepository;
     private final SignalRepository signalRepository;
+    private final CommunityAccessService communityAccessService;
+    private final UserReactionService userReactionService;
+    private final MeterRegistry meterRegistry;
+    private final CivicEngagementService engagementService;
 
-    public SignalController(PrioritizationService prioritizationService, ExportService exportService, UserRepository userRepository, SignalRepository signalRepository) {
+    public SignalController(
+        PrioritizationService prioritizationService,
+        ExportService exportService,
+        UserRepository userRepository,
+        SignalRepository signalRepository,
+        CommunityAccessService communityAccessService,
+        UserReactionService userReactionService,
+        MeterRegistry meterRegistry,
+        CivicEngagementService engagementService
+    ) {
         this.prioritizationService = prioritizationService;
         this.exportService = exportService;
         this.userRepository = userRepository;
         this.signalRepository = signalRepository;
+        this.communityAccessService = communityAccessService;
+        this.userReactionService = userReactionService;
+        this.meterRegistry = meterRegistry;
+        this.engagementService = engagementService;
+    }
+
+    @GetMapping("/{id}/comments")
+    public List<CivicCommentResponse> getComments(@PathVariable UUID id) {
+        return engagementService.getComments(id, "SIGNAL");
+    }
+
+    @PostMapping("/{id}/comments")
+    public CivicCommentResponse addComment(@PathVariable UUID id, @RequestBody Map<String, String> body, Authentication auth) {
+        return engagementService.addComment(id, "SIGNAL", body.get("content"), auth.getName());
+    }
+
+    @PostMapping("/{id}/react")
+    public ReactionStateResponse react(@PathVariable UUID id, @RequestBody Map<String, String> body, Authentication auth) {
+        return engagementService.react(id, "SIGNAL", body.get("type"), auth.getName());
+    }
+
+    @GetMapping("/{id}/trust-packet")
+    public ResponseEntity<TrustPacket> getTrustPacket(@PathVariable UUID id) {
+        return ResponseEntity.ok(prioritizationService.getTrustPacket(id));
+    }
+
+    @GetMapping("/{id}/history")
+    public List<org.opencivic.signalos.domain.SignalStatusEntry> getStatusHistory(@PathVariable UUID id) {
+        return prioritizationService.getStatusHistory(id);
     }
 
     @GetMapping("/prioritized")
-    public Page<SignalResponse> getPrioritizedSignals(
-            @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable) {
-        return prioritizationService.getPrioritizedSignals(pageable)
-                .map(this::mapToResponse);
+    public ApiPageResponse<SignalResponse> getPrioritizedSignals(
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        @RequestParam(value = "status", required = false) String statusFilter,
+        Authentication authentication,
+        @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        String scope = communityId == null ? "global" : "community";
+        Timer.Sample latencySample = Timer.start(meterRegistry);
+        String status = "success";
+        validateCommunityScope(authentication, communityId);
+        List<String> statuses = normalizeStatusFilter(statusFilter);
+        Pageable sanitized = PageRequest.of(
+            pageable.getPageNumber(),
+            Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
+            pageable.getSort()
+        );
+        try {
+            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses)
+                .map(signal -> mapToResponse(signal, authentication.getName()));
+
+            meterRegistry.counter("signalos.prioritized.requests.total", "scope", scope).increment();
+            DistributionSummary.builder("signalos.prioritized.result.size")
+                .baseUnit("signals")
+                .tag("scope", scope)
+                .register(meterRegistry)
+                .record(response.getNumberOfElements());
+
+            return ApiPageResponse.from(response);
+        } catch (RuntimeException ex) {
+            status = "error";
+            meterRegistry.counter("signalos.prioritized.requests.errors.total", "scope", scope).increment();
+            throw ex;
+        } finally {
+            latencySample.stop(
+                Timer.builder("signalos.prioritized.latency")
+                    .description("Latency for prioritized feed retrieval")
+                    .tag("scope", scope)
+                    .tag("status", status)
+                    .register(meterRegistry)
+            );
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SignalResponse> getSignalById(@PathVariable UUID id) {
-        return prioritizationService.getSignalById(id)
-                .map(this::mapToResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResourceNotFoundException("Civic signal not found: " + id));
+    public ResponseEntity<SignalResponse> getSignalById(
+        @PathVariable UUID id,
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        return prioritizationService.getSignalById(id, communityId)
+            .map(signal -> mapToResponse(signal, authentication.getName()))
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new ResourceNotFoundException("Civic signal not found: " + id));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<SignalResponse> updateStatus(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<SignalResponse> updateStatus(
+        @PathVariable UUID id,
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        @RequestBody Map<String, String> body,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
         String newStatusStr = body.get("status");
         if (newStatusStr == null || newStatusStr.isBlank()) {
             throw new IllegalArgumentException("Status field is mandatory.");
         }
-        return prioritizationService.updateStatus(id, newStatusStr)
-                .map(this::mapToResponse)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResourceNotFoundException("Signal not found for status update: " + id));
+        return prioritizationService.updateStatus(id, newStatusStr, communityId)
+            .map(signal -> mapToResponse(signal, authentication.getName()))
+            .map(ResponseEntity::ok)
+            .orElseThrow(() -> new ResourceNotFoundException("Signal not found for status update: " + id));
     }
 
     @PostMapping("/{id}/vote")
-    public ResponseEntity<SignalResponse> vote(@PathVariable UUID id, Authentication authentication) {
-        return ResponseEntity.ok(mapToResponse(prioritizationService.voteForSignal(id, authentication.getName())));
+    public ResponseEntity<SignalResponse> vote(
+        @PathVariable UUID id,
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        return ResponseEntity.ok(
+            mapToResponse(prioritizationService.voteForSignal(id, authentication.getName(), communityId), authentication.getName())
+        );
     }
 
     @GetMapping("/flagged")
-    public Page<SignalResponse> getFlaggedSignals(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return prioritizationService.getFlaggedSignals(pageable)
-                .map(this::mapToResponse);
+    public ApiPageResponse<SignalResponse> getFlaggedSignals(
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Pageable sanitized = PageRequest.of(
+            pageable.getPageNumber(),
+            Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
+            pageable.getSort()
+        );
+        return ApiPageResponse.from(
+            prioritizationService.getFlaggedSignals(sanitized)
+                .map(signal -> mapToResponse(signal, null))
+        );
     }
 
     @PostMapping("/{id}/moderate")
     public SignalResponse moderate(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-        return mapToResponse(prioritizationService.moderateSignal(id, body.get("action"), body.get("reason")));
+        return mapToResponse(prioritizationService.moderateSignal(id, body.get("action"), body.get("reason")), null);
     }
 
-    // OCS-P2-011: Data Export restricted to SUPER_ADMIN
     @GetMapping("/export/csv")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Resource> exportCsv() {
@@ -99,59 +225,153 @@ public class SignalController {
         InputStreamResource file = new InputStreamResource(exportService.exportSignalsToCsv());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
-                .contentType(MediaType.parseMediaType("text/csv"))
-                .body(file);
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+            .contentType(MediaType.parseMediaType("text/csv"))
+            .body(file);
     }
 
     @GetMapping("/top-10")
-    public List<SignalResponse> getTopUnresolved() {
-        return prioritizationService.getTopUnresolved(10).stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+    public List<SignalResponse> getTopUnresolved(
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        return prioritizationService.getTopUnresolved(10, communityId).stream()
+            .map(signal -> mapToResponse(signal, authentication.getName()))
+            .collect(Collectors.toList());
+    }
+
+    @GetMapping("/meta")
+    public SignalMetaResponse getSignalsMeta(
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        long totalSignals = communityId == null
+            ? signalRepository.count()
+            : signalRepository.countByCommunityId(communityId);
+
+        long unresolvedSignals = communityId == null
+            ? signalRepository.countByStatusNotIn(RESOLVED_STATUSES)
+            : signalRepository.countByStatusNotInAndCommunityId(RESOLVED_STATUSES, communityId);
+
+        LocalDateTime lastUpdatedAt = (communityId == null
+            ? signalRepository.findTopByOrderByCreatedAtDesc()
+            : signalRepository.findTopByCommunityIdOrderByCreatedAtDesc(communityId))
+                .map(Signal::getCreatedAt)
+                .orElse(null);
+
+        return new SignalMetaResponse(totalSignals, unresolvedSignals, lastUpdatedAt);
     }
 
     @GetMapping("/mine")
-    public List<SignalResponse> getMySignals(Authentication authentication) {
+    public ApiPageResponse<SignalResponse> getMySignals(
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+        Authentication authentication
+    ) {
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        return signalRepository.findByAuthorIdOrderByCreatedAtDesc(user.getId())
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        validateCommunityScope(authentication, communityId);
+        Pageable sanitized = PageRequest.of(
+            pageable.getPageNumber(),
+            Math.min(pageable.getPageSize(), MAX_PAGE_SIZE),
+            pageable.getSort()
+        );
+        return ApiPageResponse.from(
+            (communityId == null
+                ? signalRepository.findByAuthorId(user.getId(), sanitized)
+                : signalRepository.findByAuthorIdAndCommunityId(user.getId(), communityId, sanitized))
+                .map(signal -> mapToResponse(signal, authentication.getName()))
+        );
     }
 
     @PostMapping
-    public SignalResponse createSignal(@Valid @RequestBody SignalCreateRequest request, Authentication authentication) {
-        User author = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        Signal s = new Signal(
-            UUID.randomUUID(), request.title(), request.description(), request.category(),
-            request.urgency(), request.impact(), request.affectedPeople(),
-            0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), LocalDateTime.now()
+    public SignalResponse createSignal(
+        @Valid @RequestBody SignalCreateRequest request,
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        Signal s = prioritizationService.createSignal(
+            request.title(),
+            request.description(),
+            request.category(),
+            request.urgency(),
+            request.impact(),
+            request.affectedPeople(),
+            request.imageUrl(),
+            request.latitude(),
+            request.longitude(),
+            authentication.getName(),
+            communityId
         );
-        s.setPriorityScore(prioritizationService.calculateScore(s));
-        s.setScoreBreakdown(prioritizationService.getBreakdown(s));
-        return mapToResponse(prioritizationService.saveSignal(s));
+        return mapToResponse(s, authentication.getName());
     }
 
     @GetMapping("/duplicates")
-    public Map<UUID, List<SignalResponse>> getDuplicates() {
-        return prioritizationService.findDuplicates().entrySet().stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    e -> e.getValue().stream().map(this::mapToResponse).collect(Collectors.toList())
-                ));
+    public Map<UUID, List<SignalResponse>> getDuplicates(
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId
+    ) {
+        return prioritizationService.findDuplicates(communityId).entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().stream().map(signal -> mapToResponse(signal, null)).collect(Collectors.toList())
+            ));
     }
 
     @PostMapping("/merge")
-    public ResponseEntity<SignalResponse> mergeSignals(@RequestParam UUID targetId, @RequestBody List<UUID> duplicateIds) {
+    public ResponseEntity<SignalResponse> mergeSignals(
+        @RequestParam UUID targetId,
+        @RequestBody List<UUID> duplicateIds
+    ) {
         Signal merged = prioritizationService.mergeSignals(targetId, duplicateIds);
-        return ResponseEntity.ok(mapToResponse(merged));
+        return ResponseEntity.ok(mapToResponse(merged, null));
     }
 
-    private SignalResponse mapToResponse(Signal s) {
+    private SignalResponse mapToResponse(Signal s, String username) {
+        UUID viewerId = resolveViewerId(username);
         return new SignalResponse(
-            s.getId(), s.getTitle(), s.getDescription(), s.getCategory(),
-            s.getStatus(), s.getPriorityScore(), s.getScoreBreakdown()
+            s.getId(),
+            s.getTitle(),
+            s.getDescription(),
+            s.getImageUrl(),
+            s.getCategory(),
+            s.getStatus(),
+            s.getPriorityScore(),
+            s.getScoreBreakdown(),
+            s.getCommunityVotes(),
+            s.getReactions(),
+            userReactionService.getViewerReaction("SIGNAL", s.getId(), viewerId),
+            s.getLatitude(),
+            s.getLongitude()
         );
     }
+
+    private UUID resolveViewerId(String username) {
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+        return userRepository.findByUsername(username).map(User::getId).orElse(null);
+    }
+
+    private void validateCommunityScope(Authentication authentication, UUID communityId) {
+        if (communityId == null || authentication == null) {
+            return;
+        }
+        User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
+        communityAccessService.requireMembership(user.getId(), communityId);
+    }
+
+    private List<String> normalizeStatusFilter(String statusFilter) {
+        if (statusFilter == null || statusFilter.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(statusFilter.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isBlank())
+            .map(String::toUpperCase)
+            .distinct()
+            .toList();
+    }
 }
+

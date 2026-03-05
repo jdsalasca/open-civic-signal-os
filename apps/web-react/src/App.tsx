@@ -7,15 +7,20 @@ import { useSettingsStore } from "./store/useSettingsStore";
 import { AuthGuard } from "./components/AuthGuard";
 import { ChunkErrorBoundary } from "./components/ChunkErrorBoundary";
 
-// P2-16: Code-splitting for optimized bundle size
+// P2-16: Code-splitting
 const Dashboard = lazy(() => import("./views/Dashboard").then(m => ({ default: m.Dashboard })));
 const ReportSignal = lazy(() => import("./views/ReportSignal").then(m => ({ default: m.ReportSignal })));
 const SignalDetail = lazy(() => import("./views/SignalDetail").then(m => ({ default: m.SignalDetail })));
 const MySignals = lazy(() => import("./views/MySignals").then(m => ({ default: m.MySignals })));
 const Settings = lazy(() => import("./views/Settings").then(m => ({ default: m.Settings })));
 const Register = lazy(() => import("./views/Register").then(m => ({ default: m.Register })));
+const Verify = lazy(() => import("./views/Verify").then(m => ({ default: m.Verify })));
 const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
 const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
+const Communities = lazy(() => import("./views/Communities").then(m => ({ default: m.Communities })));
+const CommunityThreads = lazy(() => import("./views/CommunityThreads").then(m => ({ default: m.CommunityThreads })));
+const CommunityBlog = lazy(() => import("./views/CommunityBlog").then(m => ({ default: m.CommunityBlog })));
+const CommunityFeed = lazy(() => import("./views/CommunityFeed").then(m => ({ default: m.CommunityFeed })));
 const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
 const Unauthorized = lazy(() => import("./views/Unauthorized").then(m => ({ default: m.Unauthorized })));
 
@@ -29,7 +34,6 @@ export function App() {
   const { isLoggedIn } = useAuthStore();
   const { theme } = useSettingsStore();
 
-  // Reactive Theme Application
   useEffect(() => {
     const html = document.documentElement;
     if (theme === 'dark') {
@@ -45,13 +49,43 @@ export function App() {
     <BrowserRouter>
       <Toaster 
         position="top-center"
+        containerStyle={{
+          top: '1rem',
+          zIndex: 99999,
+        }}
+        gutter={12}
         toastOptions={{
+          duration: 5000,
+          className: 'glass-panel',
           style: {
-            background: theme === 'dark' ? '#111827' : '#fff',
-            color: theme === 'dark' ? '#fff' : '#111827',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '12px',
-            fontSize: '14px'
+            background: 'var(--bg-nav)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid var(--glass-stroke)',
+            color: 'var(--text-main)',
+            borderRadius: '16px',
+            padding: '16px 24px',
+            fontSize: '14px',
+            fontWeight: '600',
+            boxShadow: 'var(--shadow-premium)',
+            maxWidth: '400px',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--status-resolved)',
+              secondary: '#fff',
+            },
+            style: {
+              borderLeft: '4px solid var(--status-resolved)',
+            }
+          },
+          error: {
+            iconTheme: {
+              primary: 'var(--status-rejected)',
+              secondary: '#fff',
+            },
+            style: {
+              borderLeft: '4px solid var(--status-rejected)',
+            }
           },
         }}
       />
@@ -60,6 +94,7 @@ export function App() {
           <Routes>
             <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
+            <Route path="/verify" element={<Verify />} />
             
             <Route element={<AuthGuard />}>
               <Route path="/" element={<Dashboard />} />
@@ -67,6 +102,10 @@ export function App() {
               <Route path="/signal/:id" element={<SignalDetail />} />
               <Route path="/mine" element={<MySignals />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/communities" element={<Communities />} />
+              <Route path="/communities/threads" element={<CommunityThreads />} />
+              <Route path="/communities/blog" element={<CommunityBlog />} />
+              <Route path="/communities/feed" element={<CommunityFeed />} />
             </Route>
 
             <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>
@@ -74,6 +113,7 @@ export function App() {
             </Route>
             
             <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/forbidden" element={<Unauthorized />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

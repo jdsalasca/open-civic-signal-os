@@ -1,7 +1,10 @@
 package org.opencivic.signalos.exception;
 
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -10,9 +13,23 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
+        String errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed: " + errors);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> handleDataIntegrity(DataIntegrityViolationException ex) {
+        return buildResponse(HttpStatus.CONFLICT, "Data integrity violation: Identity or resource already exists.");
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<?> handleNotFound(ResourceNotFoundException ex, WebRequest request) {
@@ -43,6 +60,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleValidation(IllegalArgumentException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String requiredType = ex.getRequiredType() == null ? "valid value" : ex.getRequiredType().getSimpleName();
+        String message = "Invalid parameter '%s'. Expected %s.".formatted(ex.getName(), requiredType);
+        return buildResponse(HttpStatus.BAD_REQUEST, message);
     }
 
     // P0-D: RuntimeException defaults to 500 for uncontrolled internal errors

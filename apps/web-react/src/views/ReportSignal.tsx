@@ -1,16 +1,23 @@
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Dropdown } from "primereact/dropdown";
 import { Slider } from "primereact/slider";
-import { Button } from "primereact/button";
-import { Card } from "primereact/card";
 import { classNames } from "primereact/utils";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { useCommunityStore } from "../store/useCommunityStore";
+import { CivicButton } from "../components/ui/CivicButton";
+import { CivicCard } from "../components/ui/CivicCard";
+import { CivicField } from "../components/ui/CivicField";
+import { CivicSelect } from "../components/ui/CivicSelect";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
+import { FORM_LIMITS } from "../constants/formLimits";
+import { isSubmitShortcut } from "../utils/keyboard";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -20,26 +27,102 @@ type ReportForm = {
   title: string;
   description: string;
   category: string;
+  imageUrl?: string;
   urgency: number;
   impact: number;
   affectedPeople: number;
+  latitude?: number;
+  longitude?: number;
 };
 
 export function ReportSignal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { control, handleSubmit, formState: { errors, isSubmitting } } = useForm<ReportForm>({
-    defaultValues: { title: '', description: '', category: '', urgency: 3, impact: 3, affectedPeople: 10 }
+  const { activeCommunityId } = useCommunityStore();
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { isSubmitting, errors },
+  } = useForm<ReportForm>({
+    mode: "onChange",
+    defaultValues: { title: '', description: '', category: 'safety', urgency: 3, impact: 3, affectedPeople: 10 }
   });
 
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationFound, setLocationFound] = useState(false);
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error(t('report.geolocation_not_supported'));
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setValue('latitude', position.coords.latitude);
+        setValue('longitude', position.coords.longitude);
+        setLocationFound(true);
+        setIsLocating(false);
+        toast.success(t('report.geolocation_success'));
+      },
+      () => {
+        setIsLocating(false);
+        toast.error(t('report.geolocation_error'));
+      }
+    );
+  };
+
+  const currentUrgency = watch('urgency');
+  const currentImpact = watch('impact');
+  const currentImageUrl = watch('imageUrl')?.trim() ?? '';
+  const currentTitleLength = watch('title')?.length ?? 0;
+  const currentDescriptionLength = watch('description')?.length ?? 0;
+
   const categories = [
-    { label: t('categories.safety'), value: 'safety' },
-    { label: t('categories.infrastructure'), value: 'infrastructure' },
-    { label: t('categories.environment'), value: 'environment' },
-    { label: t('categories.social'), value: 'social' },
-    { label: t('categories.mobility'), value: 'mobility' },
-    { label: t('categories.education'), value: 'education' },
+    { label: t('categories.safety'), value: 'safety', icon: 'pi-shield' },
+    { label: t('categories.infrastructure'), value: 'infrastructure', icon: 'pi-building' },
+    { label: t('categories.environment'), value: 'environment', icon: 'pi-sun' },
+    { label: t('categories.social'), value: 'social', icon: 'pi-users' },
+    { label: t('categories.mobility'), value: 'mobility', icon: 'pi-car' },
+    { label: t('categories.education'), value: 'education', icon: 'pi-book' },
   ];
+
+  const quickTemplates = [
+    {
+      key: "pothole",
+      title: t("report.template_pothole_title"),
+      description: t("report.template_pothole_desc"),
+      category: "infrastructure",
+      urgency: 3,
+      impact: 2,
+      affectedPeople: 40,
+      label: t("report.template_pothole_label"),
+    },
+    {
+      key: "lighting",
+      title: t("report.template_lighting_title"),
+      description: t("report.template_lighting_desc"),
+      category: "safety",
+      urgency: 4,
+      impact: 3,
+      affectedPeople: 60,
+      label: t("report.template_lighting_label"),
+    },
+    {
+      key: "waste",
+      title: t("report.template_waste_title"),
+      description: t("report.template_waste_desc"),
+      category: "environment",
+      urgency: 2,
+      impact: 3,
+      affectedPeople: 30,
+      label: t("report.template_waste_label"),
+    },
+  ] as const;
+
+  const citizenPresets = [10, 30, 60, 120, 300];
 
   const onSubmit = async (data: ReportForm) => {
     try {
@@ -52,93 +135,328 @@ export function ReportSignal() {
     }
   };
 
+  const handleDiscard = () => {
+    navigate("/");
+  };
+
+  const getScaleColor = (val: number) => {
+    if (val <= 2) return 'var(--status-resolved)';
+    if (val <= 3) return 'var(--status-progress)';
+    return 'var(--status-rejected)';
+  };
+
+  const applyTemplate = (templateKey: (typeof quickTemplates)[number]["key"]) => {
+    const template = quickTemplates.find((item) => item.key === templateKey);
+    if (!template) return;
+
+    setValue("title", template.title, { shouldDirty: true, shouldValidate: true });
+    setValue("description", template.description, { shouldDirty: true, shouldValidate: true });
+    setValue("category", template.category, { shouldDirty: true, shouldValidate: true });
+    setValue("urgency", template.urgency, { shouldDirty: true, shouldValidate: true });
+    setValue("impact", template.impact, { shouldDirty: true, shouldValidate: true });
+    setValue("affectedPeople", template.affectedPeople, { shouldDirty: true, shouldValidate: true });
+    toast.success(t("report.template_applied"));
+  };
+
+  const severityPresets = [
+    { key: "low", urgency: 1, impact: 1, label: t("report.preset_low") },
+    { key: "medium", urgency: 3, impact: 3, label: t("report.preset_medium") },
+    { key: "high", urgency: 5, impact: 5, label: t("report.preset_high") },
+  ] as const;
+
   return (
     <Layout>
-      <div className="flex justify-content-center mt-4 pb-6">
-        <Card title={t('report.title')} style={{ width: '100%', maxWidth: '700px' }} className="shadow-8 border-round-2xl">
-          <p className="text-gray-500 mb-5">{t('report.desc')}</p>
-          
-          <form onSubmit={handleSubmit(onSubmit)} className="p-fluid grid">
-            <div className="field col-12">
-              <label htmlFor="title" className="font-bold block mb-2">{t('report.issue_title')}</label>
-              <Controller name="title" control={control} rules={{ required: true }} 
-                render={({ field, fieldState }) => (
-                  <InputText id="title" {...field} className={classNames({ 'p-invalid': fieldState.error })} placeholder={t('report.issue_title_placeholder')} />
-                )} 
-              />
-              {errors.title && <small className="p-error">{t('common.required')}</small>}
-            </div>
+      <div className="animate-fade-up max-w-60rem mx-auto pb-8">
+        <CivicPageHeader title={t('report.title')} description={t('report.desc')} />
 
-            <div className="field col-12 md:col-6">
-              <label htmlFor="category" className="font-bold block mb-2">{t('common.category')}</label>
-              <Controller name="category" control={control} rules={{ required: true }} 
-                render={({ field, fieldState }) => (
-                  <Dropdown id="category" {...field} options={categories} className={classNames({ 'p-invalid': fieldState.error })} placeholder={t('common.select_category')} />
-                )} 
-              />
-            </div>
-
-            <div className="field col-12 md:col-6">
-              <label htmlFor="affectedPeople" className="font-bold block mb-2">{t('report.scale')}</label>
-              <Controller name="affectedPeople" control={control} 
-                render={({ field }) => (
-                  <div className="flex align-items-center gap-3 bg-gray-900 p-2 border-round border-1 border-white-alpha-10">
-                    <Slider {...field} min={1} max={1000} className="flex-grow-1" />
-                    <span className="font-black text-cyan-400" style={{ minWidth: '40px' }}>{field.value}</span>
-                  </div>
-                )} 
-              />
-            </div>
-
-            <div className="field col-12">
-              <label htmlFor="description" className="font-bold block mb-2">{t('report.context')}</label>
-              <Controller name="description" control={control} rules={{ required: true }} 
-                render={({ field, fieldState }) => (
-                  <InputTextarea id="description" {...field} rows={4} className={classNames({ 'p-invalid': fieldState.error })} placeholder={t('report.context_placeholder')} />
-                )} 
-              />
-            </div>
-
-            <div className="field col-12 md:col-6">
-              <div className="flex justify-content-between mb-2">
-                <label className="font-bold">{t('report.urgency')}</label>
-                <span className="text-xs text-gray-500 uppercase font-black">{t('common.score')}: 1-5</span>
-              </div>
-              <Controller name="urgency" control={control} render={({ field }) => (
-                <div className="p-3 bg-black-alpha-20 border-round">
-                  <Slider {...field} min={1} max={5} step={1} />
-                  <div className="flex justify-content-between mt-2 text-xs font-bold text-gray-600">
-                    <span>{t('report.urgency_low')}</span>
-                    <span className="text-cyan-500">{field.value}</span>
-                    <span>{t('report.urgency_critical')}</span>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid">
+            <div className="col-12 lg:col-7">
+              <CivicCard title={t('report.title')} className="mb-6">
+                <div className="mb-4">
+                  <label className="text-xs font-black uppercase tracking-widest text-main block mb-2">{t("report.quick_templates_label")}</label>
+                  <div className="flex flex-wrap gap-2">
+                    {quickTemplates.map((template) => (
+                      <CivicButton
+                        key={template.key}
+                        type="button"
+                        variant="ghost"
+                        size="small"
+                        label={template.label}
+                        onClick={() => applyTemplate(template.key)}
+                      />
+                    ))}
                   </div>
                 </div>
-              )} />
-            </div>
+                <CivicField label={t('report.issue_title')} error={errors.title?.message}>
+                  <Controller name="title" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.titleMin, message: t('report.title_too_short') }, maxLength: { value: FORM_LIMITS.report.titleMax, message: t('report.title_too_long') } }}
+                    render={({ field, fieldState }) => (
+                      <div className="flex flex-column gap-2">
+                        <InputText
+                          {...field}
+                          id="report-title"
+                          className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                          placeholder={t('report.issue_title_placeholder')}
+                          data-testid="report-title-input"
+                          maxLength={FORM_LIMITS.report.titleMax}
+                        />
+                        <CivicCharacterCount current={currentTitleLength} max={FORM_LIMITS.report.titleMax} min={FORM_LIMITS.report.titleMin} />
+                      </div>
+                    )}
+                  />
+                </CivicField>
 
-            <div className="field col-12 md:col-6">
-              <div className="flex justify-content-between mb-2">
-                <label className="font-bold">{t('report.impact')}</label>
-                <span className="text-xs text-gray-500 uppercase font-black">{t('common.score')}: 1-5</span>
-              </div>
-              <Controller name="impact" control={control} render={({ field }) => (
-                <div className="p-3 bg-black-alpha-20 border-round">
-                  <Slider {...field} min={1} max={5} step={1} />
-                  <div className="flex justify-content-between mt-2 text-xs font-bold text-gray-600">
-                    <span>{t('report.impact_minor')}</span>
-                    <span className="text-purple-500">{field.value}</span>
-                    <span>{t('report.impact_systemic')}</span>
+                <div className="grid">
+                  <div className="col-12 md:col-6">
+                    <CivicField label={t('common.category')} error={errors.category?.message}>
+                      <Controller name="category" control={control} rules={{ required: t('common.required') }}
+                        render={({ field, fieldState }) => (
+                          <CivicSelect
+                            value={field.value}
+                            onChange={(e) => field.onChange(e.value)}
+                            options={categories}
+                            placeholder={t('common.select_category')}
+                            inputId="report-category"
+                            className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                            data-testid="report-category-dropdown"
+                            itemTemplate={(option) => (
+                              <div className="flex align-items-center gap-2">
+                                <i className={`pi ${option.icon} text-brand-primary`}></i>
+                                <span>{option.label}</span>
+                              </div>
+                            )}
+                          />
+                        )}
+                      />
+                    </CivicField>
+                  </div>
+                  <div className="col-12 md:col-6">
+                    <CivicField label={t('report.scale')}>
+                      <Controller name="affectedPeople" control={control}
+                        render={({ field }) => (
+                          <div className="flex flex-column gap-3 p-3 border-round-xl border-1 border-subtle" style={{ background: "var(--panel-soft-bg)" }}>
+                            <div className="flex justify-content-between font-black text-main">
+                              <span className="text-xs uppercase opacity-50">{t('signals.citizens')}</span>
+                              <span className="text-brand-primary">{field.value}</span>
+                            </div>
+                            <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={1000} className="w-full" />
+                            <div className="flex flex-wrap gap-2">
+                              {citizenPresets.map((preset) => (
+                                <CivicButton
+                                  key={preset}
+                                  type="button"
+                                  variant={field.value === preset ? "primary" : "ghost"}
+                                  size="small"
+                                  label={String(preset)}
+                                  onClick={() => field.onChange(preset)}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      />
+                    </CivicField>
                   </div>
                 </div>
-              )} />
+
+                <div className="mb-4">
+                  <CivicButton
+                    type="button"
+                    variant={locationFound ? "primary" : "secondary"}
+                    icon={isLocating ? "pi pi-spin pi-spinner" : (locationFound ? "pi pi-check" : "pi pi-map-marker")}
+                    label={isLocating ? t('report.detecting_coordinates') : (locationFound ? t('report.coordinates_secured') : t('report.detect_location_auto'))}
+                    onClick={detectLocation}
+                    className="w-full py-3"
+                  />
+                </div>
+
+                <CivicField label={t('report.context')} error={errors.description?.message}>
+                  <Controller name="description" control={control} rules={{ required: t('common.required'), minLength: { value: FORM_LIMITS.report.descriptionMin, message: t('report.desc_too_short') }, maxLength: { value: FORM_LIMITS.report.descriptionMax, message: t('report.desc_too_long') } }}
+                    render={({ field }) => (
+                      <div className="flex flex-column gap-2">
+                        <InputTextarea
+                          {...field}
+                          id="report-description"
+                          rows={6}
+                          onKeyDown={(e) => {
+                            if (isSubmitShortcut(e)) {
+                              e.preventDefault();
+                              const form = e.currentTarget.form;
+                              form?.requestSubmit();
+                            }
+                          }}
+                          className="w-full"
+                          placeholder={t('report.context_placeholder')}
+                          data-testid="report-description-textarea"
+                          maxLength={FORM_LIMITS.report.descriptionMax}
+                        />
+                        <CivicCharacterCount current={currentDescriptionLength} max={FORM_LIMITS.report.descriptionMax} min={FORM_LIMITS.report.descriptionMin} />
+                        <small className="text-muted text-xs">{t("report.submit_shortcut_hint")}</small>
+                      </div>
+                    )}
+                  />
+                </CivicField>
+
+                <CivicField label={t('report.image_url')} error={errors.imageUrl?.message}>
+                  <Controller
+                    name="imageUrl"
+                    control={control}
+                    rules={{
+                      pattern: {
+                        value: /^https?:\/\/.+/i,
+                        message: t('report.image_url_invalid'),
+                      },
+                      maxLength: {
+                        value: 1200,
+                        message: t('report.image_url_too_long'),
+                      },
+                    }}
+                    render={({ field, fieldState }) => (
+                      <div className="flex flex-column gap-2">
+                        <InputText
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          className={classNames('w-full', { 'p-invalid': fieldState.error })}
+                          placeholder={t('report.image_url_placeholder')}
+                          data-testid="report-image-url-input"
+                          maxLength={1200}
+                        />
+                        <small className="text-muted text-xs">{t('report.image_url_help')}</small>
+                      </div>
+                    )}
+                  />
+                </CivicField>
+              </CivicCard>
             </div>
 
-            <div className="col-12 mt-4 flex gap-3">
-              <Button type="button" label={t('common.discard')} outlined className="p-button-secondary border-gray-700" onClick={() => navigate("/")} />
-              <Button type="submit" label={t('report.submit')} icon="pi pi-bolt" loading={isSubmitting} className="p-button-primary" />
+            <div className="col-12 lg:col-5">
+              <CivicCard title={t('signals.why_ranked_title')} variant="brand" className="mb-6">
+                <div className="flex flex-column gap-8 py-4">
+                  <div className="flex flex-column gap-3">
+                    <label className="text-xs font-black uppercase tracking-widest text-main">{t("report.quick_preset_label")}</label>
+                    <div className="flex flex-wrap gap-2">
+                      {severityPresets.map((preset) => {
+                        const selected = currentUrgency === preset.urgency && currentImpact === preset.impact;
+                        return (
+                          <CivicButton
+                            key={preset.key}
+                            type="button"
+                            size="small"
+                            variant={selected ? "primary" : "ghost"}
+                            label={preset.label}
+                            onClick={() => {
+                              setValue("urgency", preset.urgency);
+                              setValue("impact", preset.impact);
+                            }}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* Urgency Picker */}
+                  <div className="flex flex-column gap-4">
+                    <div className="flex justify-content-between align-items-end">
+                      <div>
+                        <label className="text-xs font-black uppercase tracking-widest text-main block mb-1">{t('report.urgency')}</label>
+                        <span className="text-xs text-muted font-bold">{t('signals.urgency_formula')}</span>
+                      </div>
+                      <span className="text-3xl font-black" style={{ color: getScaleColor(currentUrgency) }}>{currentUrgency}</span>
+                    </div>
+                    <div className="p-4 border-round-2xl transition-colors duration-500 shadow-inner" style={{ background: `linear-gradient(135deg, ${getScaleColor(currentUrgency)}15 0%, transparent 100%)`, border: `1px solid ${getScaleColor(currentUrgency)}30` }}>
+                      <div data-testid="report-urgency-slider">
+                        <Controller name="urgency" control={control} render={({ field }) => (
+                          <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
+                        )} />
+                      </div>
+                      <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
+                        <span>{t('report.urgency_low')}</span>
+                        <span>{t('report.urgency_critical')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Impact Picker */}
+                  <div className="flex flex-column gap-4">
+                    <div className="flex justify-content-between align-items-end">
+                      <div>
+                        <label className="text-xs font-black uppercase tracking-widest text-main block mb-1">{t('report.impact')}</label>
+                        <span className="text-xs text-muted font-bold">{t('signals.impact_formula')}</span>
+                      </div>
+                      <span className="text-3xl font-black" style={{ color: getScaleColor(currentImpact) }}>{currentImpact}</span>
+                    </div>
+                    <div className="p-4 border-round-2xl transition-colors duration-500 shadow-inner" style={{ background: `linear-gradient(135deg, ${getScaleColor(currentImpact)}15 0%, transparent 100%)`, border: `1px solid ${getScaleColor(currentImpact)}30` }}>
+                      <div data-testid="report-impact-slider">
+                        <Controller name="impact" control={control} render={({ field }) => (
+                          <Slider value={field.value} onChange={(e) => field.onChange(e.value)} min={1} max={5} step={1} className="w-full" />
+                        )} />
+                      </div>
+                      <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
+                        <span>{t('report.impact_minor')}</span>
+                        <span>{t('report.impact_systemic')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CivicCard>
+
+              <CivicCard title={t('auth.verify_protocol')}>
+                {!activeCommunityId ? (
+                  <div className="flex flex-column gap-3">
+                    <div className="p-4 border-round-xl bg-status-rejected-alpha-10 border-1 border-status-rejected-alpha-20 text-status-rejected text-sm font-bold flex align-items-center gap-3">
+                      <i className="pi pi-lock text-xl"></i>
+                      {t('report.community_required')}
+                    </div>
+                    <CivicButton
+                      label={t('nav.communities')}
+                      icon="pi pi-users"
+                      variant="secondary"
+                      className="w-full py-3"
+                      onClick={() => navigate("/communities")}
+                      data-testid="report-go-communities-button"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex flex-column gap-4">
+                    <div className="u-pill w-full justify-content-start px-3">
+                      <i className="pi pi-shield text-brand-primary text-xl"></i>
+                      <div className="flex flex-column">
+                        <span className="text-xs font-bold text-main uppercase">{t('settings.encryption')}</span>
+                        <span className="text-min text-muted">{t('settings.encryption_value')}</span>
+                      </div>
+                    </div>
+                    {currentImageUrl && (
+                      <div className="border-round-xl overflow-hidden border-1 border-subtle">
+                        <img
+                          src={currentImageUrl}
+                          alt={t('report.image_preview_alt')}
+                          className="w-full"
+                          style={{ maxHeight: '14rem', objectFit: 'cover' }}
+                        />
+                      </div>
+                    )}
+                    <CivicButton
+                      label={t('common.discard')}
+                      variant="secondary"
+                      className="w-full py-4 text-lg"
+                      onClick={handleDiscard}
+                      data-testid="report-discard-button"
+                    />
+                    <CivicButton
+                      type="submit"
+                      label={t('report.submit')}
+                      icon="pi pi-bolt"
+                      loading={isSubmitting}
+                      className="w-full py-4 text-lg"
+                      glow
+                      data-testid="report-submit-button"
+                    />
+                  </div>
+                )}
+              </CivicCard>
             </div>
-          </form>
-        </Card>
+          </div>
+        </form>
       </div>
     </Layout>
   );

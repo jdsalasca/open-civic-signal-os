@@ -1,29 +1,58 @@
-import { ReactNode, useRef, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
-import { Toast } from "primereact/toast";
 import { Sidebar } from "primereact/sidebar";
 import { useAuthStore } from "../store/useAuthStore";
+import { useCommunityStore } from "../store/useCommunityStore";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { CivicSelect } from "./ui/CivicSelect";
+import { toRoleLabel } from "../constants/roleLabels";
 
 type Props = {
   children: ReactNode;
   authMode?: boolean;
 };
 
+type NavItem = {
+  label: string;
+  to: string;
+  icon: string;
+  visible: boolean;
+  testId?: string;
+};
+
 export function Layout({ children, authMode = false }: Props) {
+  const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn, activeRole, userName, logout } = useAuthStore();
-  const toastRef = useRef<Toast>(null);
+  const {
+    memberships,
+    activeCommunityId,
+    setMemberships,
+    setActiveCommunityId,
+    shouldRefreshMemberships,
+  } = useCommunityStore();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
   useEffect(() => {
-    setMobileMenuVisible(false);
-  }, [location.pathname]);
+    const loadMemberships = async () => {
+      if (!isLoggedIn) return;
+      if (!shouldRefreshMemberships(MEMBERSHIP_CACHE_TTL_MS)) return;
+      try {
+        const res = await apiClient.get("communities/my");
+        if (res.status === 200) {
+          setMemberships(res.data || []);
+        }
+      } catch (err) {
+        console.warn("Failed to load community memberships", err);
+      }
+    };
+    loadMemberships();
+  }, [isLoggedIn, setMemberships, shouldRefreshMemberships]);
 
   const handleLogout = async () => {
     try {
@@ -32,138 +61,227 @@ export function Layout({ children, authMode = false }: Props) {
       console.warn(t('auth.logout_warn'));
     } finally {
       logout();
-      setMobileMenuVisible(false);
       navigate("/login");
+    }
+  };
+
+  const handleCommunitySwitch = async (communityId: string) => {
+    try {
+      await apiClient.post(`communities/${communityId}/switch`);
+      setActiveCommunityId(communityId);
+    } catch (err) {
+      console.warn("Community switch failed", err);
     }
   };
 
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
 
-  const navLinks = [
-    { label: t('nav.insights'), to: '/', icon: 'pi pi-chart-line', visible: isLoggedIn },
-    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn },
-    { label: t('nav.my_contributions'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
+  const mainNav: NavItem[] = [
+    { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
+    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
+    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
+  ];
+
+  const socialNav: NavItem[] = [
+    { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
+    { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
+  ];
+
+  const personalNav: NavItem[] = [
+    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
     { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && isStaff },
+    { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
     { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
   ];
 
-  return (
-    <div className={`min-h-screen flex flex-column bg-gray-900 ${authMode ? 'auth-page' : ''}`}>
-      <Toast ref={toastRef} />
-      
-      <Sidebar 
-        visible={mobileMenuVisible} 
-        onHide={() => setMobileMenuVisible(false)} 
-        position="left" 
-        className="bg-gray-900 border-right-1 border-white-alpha-10 w-20rem"
-        aria-label={t('nav.settings')}
-      >
-        <div className="flex flex-column h-full p-3">
-          <div className="flex align-items-center gap-2 mb-5">
-            <div className="bg-cyan-500 border-round flex align-items-center justify-content-center shadow-4" style={{ width: '32px', height: '32px' }}>
-              <i className="pi pi-signal text-gray-900 font-bold"></i>
+  const communityOptions = memberships.map((m) => ({
+    label: m.communityName,
+    value: m.communityId,
+    role: m.role
+  }));
+
+  const quickActions = [
+    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn },
+    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
+  ];
+
+  const mobileNav = [mainNav[0], mainNav[2], personalNav[0], socialNav[0], personalNav[3]].filter((item) => item?.visible);
+
+  if (authMode) return <div className="auth-page min-h-screen">{children}</div>;
+
+  const NavGroup = ({ title, items }: { title: string, items: any[] }) => (
+    <div className="mb-6">
+      <div className="text-muted text-xs font-black uppercase tracking-widest mb-3 ml-4 nav-group-title">{title}</div>
+      <div className="flex flex-column gap-1">
+        {items.filter(l => l.visible).map(link => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className={`flex align-items-center justify-content-between px-4 py-3 border-round-xl no-underline transition-all font-bold ${location.pathname === link.to ? 'bg-elevated text-main shadow-sm' : 'text-secondary hover:text-main hover:bg-surface'}`}
+            data-testid={link.testId}
+            aria-label={link.label}
+            aria-current={location.pathname === link.to ? "page" : undefined}
+            onClick={() => setMobileMenuVisible(false)}
+          >
+            <div className="flex align-items-center gap-3">
+              <i className={`${link.icon} text-base ${location.pathname === link.to ? 'text-brand-primary' : 'opacity-70'}`}></i>
+              <span className="text-sm tracking-tight">{link.label}</span>
             </div>
-            <span className="text-xl font-black text-white tracking-tighter uppercase">Signal<span className="text-cyan-500">OS</span></span>
+            {location.pathname === link.to && <div className="w-4px h-4px border-circle bg-brand-primary shadow-lg"></div>}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-app">
+      <a href="#main-content" className="skip-link">{t('nav.skip_to_content')}</a>
+      {/* SIDEBAR */}
+      <aside className="hidden lg:flex flex-column w-18rem border-right-1 border-white-alpha-5 bg-card z-2">
+        <div className="p-6 flex align-items-center gap-3">
+          <div className="u-logo-badge border-round-xl flex align-items-center justify-content-center shadow-premium" style={{ width: '36px', height: '36px' }}>
+            <i className="pi pi-signal u-logo-icon text-lg"></i>
+          </div>
+          <span className="text-xl font-black tracking-tighter uppercase text-main">Signal<span className="text-brand-primary">OS</span></span>
+        </div>
+
+        <nav className="flex-grow-1 px-3 py-4 overflow-y-auto" aria-label={t('nav.main_navigation')}>
+          <NavGroup title={t('nav.group_intelligence')} items={mainNav} />
+          <NavGroup title={t('nav.group_collaboration')} items={socialNav} />
+          <NavGroup title={t('nav.group_personal')} items={personalNav} />
+        </nav>
+
+        <div className="mt-auto p-4 border-top-1 border-subtle bg-surface">
+          <div className="flex flex-column gap-4">
+            <div className="flex align-items-center gap-3 px-2">
+              <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
+              <div className="flex flex-column overflow-hidden">
+                <span className="text-xs font-black text-main truncate uppercase tracking-wider">{userName}</span>
+                <span className="text-min font-bold text-muted uppercase nav-clearance-label">
+                  {t('nav.clearance')}: {toRoleLabel(activeRole, t)}
+                </span>
+              </div>
+            </div>
+            <Button
+              label={t('nav.sign_out')}
+              icon="pi pi-power-off"
+              text
+              className="w-full justify-content-start text-xs font-black text-muted hover:text-danger py-3"
+              onClick={handleLogout}
+              data-testid="logout-button-desktop"
+            />
+          </div>
+        </div>
+      </aside>
+
+      {/* VIEW AREA */}
+      <div className="flex flex-column flex-grow-1 overflow-hidden relative">
+        <header className="h-5rem flex align-items-center justify-content-between px-6 border-bottom-1 border-subtle bg-nav backdrop-blur-xl z-1">
+          <div className="flex align-items-center gap-4 flex-grow-1">
+            <Button
+              icon="pi pi-bars"
+              text
+              className="lg:hidden text-main"
+              onClick={() => setMobileMenuVisible(true)}
+              aria-label={t('nav.open_navigation')}
+              data-testid="mobile-menu-toggle"
+            />
+            <div className="hidden md:flex align-items-center">
+              <span className="text-sm text-muted font-semibold">
+                {t('dashboard.focus_today')}
+              </span>
+            </div>
           </div>
 
-          <nav className="flex flex-column gap-2 flex-grow-1">
-            {navLinks.filter(l => l.visible).map(link => (
-              <Link 
-                key={link.to} 
-                to={link.to} 
-                className={`flex align-items-center gap-3 p-3 border-round-lg no-underline transition-colors font-bold ${location.pathname === link.to ? 'bg-cyan-900 text-cyan-400' : 'text-gray-400 hover:text-white hover:bg-white-alpha-5'}`}
-              >
-                <i className={link.icon}></i>
-                <span>{link.label}</span>
-              </Link>
-            ))}
-          </nav>
-
-          {isLoggedIn && (
-            <div className="mt-auto border-top-1 border-white-alpha-10 pt-4">
-              <div className="flex align-items-center gap-3 mb-4 px-2">
-                <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-cyan-600 text-white font-bold" />
-                <div className="flex flex-column">
-                  <span className="text-sm font-bold text-white line-height-1 mb-1">{userName}</span>
-                  <span className="text-xs text-cyan-500 font-bold uppercase tracking-widest" style={{fontSize: '9px'}}>{activeRole}</span>
-                </div>
+          <div className="flex align-items-center gap-4">
+            {communityOptions.length > 0 && (
+              <div className="hidden sm:flex align-items-center gap-3 bg-surface border-round-xl px-4 py-2 border-1 border-subtle hover:border-brand-primary transition-colors cursor-pointer">
+                <i className="pi pi-map-marker text-brand-primary text-sm"></i>
+                <CivicSelect
+                  value={activeCommunityId || communityOptions[0].value}
+                  options={communityOptions}
+                  onChange={(e) => handleCommunitySwitch(e.value)}
+                  placeholder="Sector"
+                  className="w-10rem border-none bg-transparent font-bold text-sm"
+                  data-testid="community-switch-dropdown"
+                  itemTemplate={(option) => (
+                    <div className="flex flex-column py-1">
+                      <span className="font-black text-xs uppercase tracking-widest">{option.label}</span>
+                      <small className="text-muted text-min font-mono mt-1">{toRoleLabel(option.role, t)}</small>
+                    </div>
+                  )}
+                />
               </div>
-              <Button label={t('nav.sign_out')} icon="pi pi-power-off" severity="danger" text className="w-full justify-content-start font-bold py-3" onClick={handleLogout} />
+            )}
+
+            <div className="hidden xl:flex align-items-center gap-3 u-pill">
+              <div className="w-8px h-8px border-circle bg-status-resolved animate-pulse"></div>
+              <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
             </div>
-          )}
-        </div>
-      </Sidebar>
-      
-      <nav className="surface-section px-4 md:px-6 py-3 shadow-4 flex justify-content-between align-items-center border-bottom-1 border-white-alpha-10 z-5 sticky top-0">
-        <div className="flex align-items-center gap-5">
-          <Link to="/" className="flex align-items-center gap-2 no-underline">
-            <div className="bg-cyan-500 border-round-md flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
-              <i className="pi pi-signal text-gray-900 font-bold"></i>
-            </div>
-            <span className="text-xl font-black text-white tracking-tighter uppercase">Signal<span className="text-cyan-500">OS</span></span>
-          </Link>
-          
-          {!authMode && isLoggedIn && (
-            <div className="hidden lg:flex align-items-center gap-4 ml-4">
-              {navLinks.filter(l => l.visible).map(link => (
-                <Link 
-                  key={link.to} 
-                  to={link.to} 
-                  className={`no-underline font-bold text-sm transition-colors transition-duration-200 ${location.pathname === link.to ? 'text-cyan-400' : 'text-gray-400 hover:text-white'}`}
-                >
-                  {link.label}
-                </Link>
+
+            <div className="hidden lg:flex align-items-center gap-2">
+              {quickActions.map((action) => (
+                <Button
+                  key={action.to}
+                  type="button"
+                  icon={action.icon}
+                  label={action.label}
+                  text
+                  className="u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
+                  onClick={() => navigate(action.to)}
+                />
               ))}
             </div>
-          )}
-        </div>
 
-        <div className="flex align-items-center gap-3">
-          {!authMode && isLoggedIn && (
-            <Button icon="pi pi-bars" text className="lg:hidden text-white p-0" onClick={() => setMobileMenuVisible(true)} aria-label={t('nav.settings')} />
-          )}
+            <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
+          </div>
+        </header>
 
-          {!authMode && !isLoggedIn && (
-            <div className="flex gap-2">
-              <Link to="/login" className="no-underline">
-                <Button label={t('nav.sign_in')} size="small" text className="text-white hover:text-cyan-400 font-bold" />
-              </Link>
-              <Link to="/register" className="no-underline">
-                <Button label={t('nav.join_now')} size="small" className="p-button-primary px-3 font-bold" />
-              </Link>
-            </div>
-          )}
+        <main id="main-content" className="flex-grow-1 overflow-y-auto p-6 lg:p-10 bg-app">
+          <div className="page-container mx-auto" style={{ maxWidth: '1300px' }}>
+            {children}
+          </div>
+        </main>
 
-          {isLoggedIn && (
-            <div className="hidden lg:flex align-items-center gap-3 bg-gray-800 py-1 pl-3 pr-1 border-round-right-3xl border-round-left-xl border-1 border-white-alpha-10">
-              <div className="flex flex-column align-items-end mr-1">
-                <span className="text-xs font-bold text-white line-height-1 mb-1">{userName}</span>
-                <span className="text-min font-bold text-cyan-500 uppercase tracking-tighter" style={{ fontSize: '9px' }}>{activeRole}</span>
-              </div>
-              <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-cyan-600 text-white font-bold" />
-              <Button icon="pi pi-power-off" rounded text className="text-gray-500 hover:text-red-400 ml-1" onClick={handleLogout} aria-label={t('nav.sign_out')} />
-            </div>
-          )}
-        </div>
-      </nav>
+        <nav className="lg:hidden flex justify-content-around align-items-center bg-card border-top-1 border-subtle h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
+          {mobileNav.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`flex flex-column align-items-center gap-1 no-underline ${location.pathname === link.to ? 'text-brand-primary' : 'text-muted'}`}
+              data-testid={link.testId}
+              aria-label={link.label}
+              aria-current={location.pathname === link.to ? "page" : undefined}
+            >
+              <i className={`${link.icon} text-xl`}></i>
+              <span style={{ fontSize: '9px' }} className="font-bold uppercase tracking-widest">{link.label.split(' ')[0]}</span>
+            </Link>
+          ))}
+        </nav>
+      </div>
 
-      <main className="flex-grow-1 p-4 md:p-6 bg-gray-950">
-        <div className="page-container h-full">{children}</div>
-      </main>
-
-      <footer className="bg-gray-950 p-6 flex flex-column md:flex-row justify-content-between align-items-center border-top-1 border-white-alpha-10 gap-4">
-        <div className="flex align-items-center gap-2">
-          <i className="pi pi-globe text-gray-500"></i>
-          <span className="text-gray-400 text-sm font-bold uppercase tracking-widest text-xs">{t('nav.global_standard')}</span>
+      <Sidebar visible={mobileMenuVisible} onHide={() => setMobileMenuVisible(false)} className="w-20rem bg-app">
+        <div className="p-4 flex flex-column gap-6">
+          <div className="flex align-items-center gap-3">
+            <div className="u-logo-badge border-round-xl p-2 shadow-lg"><i className="pi pi-signal u-logo-icon"></i></div>
+            <span className="text-xl font-black text-main">SignalOS</span>
+          </div>
+          <nav className="flex flex-column gap-4" aria-label={t('nav.main_navigation')}>
+            <NavGroup title={t('nav.group_main')} items={mainNav} />
+            <NavGroup title={t('nav.group_social')} items={socialNav} />
+            <NavGroup title={t('nav.group_system')} items={personalNav} />
+          </nav>
+          <Button
+            label={t('nav.sign_out')}
+            icon="pi pi-power-off"
+            text
+            className="w-full justify-content-start text-xs font-black text-muted hover:text-danger py-3"
+            onClick={handleLogout}
+            data-testid="logout-button-mobile"
+          />
         </div>
-        <div className="text-gray-400 text-xs text-center font-bold">
-          &copy; 2026 Open Civic Signal OS. {t('nav.protocol_version')}
-        </div>
-        <div className="flex gap-4">
-          <i className="pi pi-github text-gray-500 hover:text-white cursor-pointer transition-colors text-xl"></i>
-          <i className="pi pi-twitter text-gray-500 hover:text-white cursor-pointer transition-colors text-xl"></i>
-        </div>
-      </footer>
+      </Sidebar>
     </div>
   );
 }

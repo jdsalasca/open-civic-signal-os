@@ -1,6 +1,11 @@
 node_modules/
 apps/web-react/dist/
 output/playwright/
+apps/web-react/output/playwright/
+output/playwright-report/
+apps/web-react/test-results/
+.playwright-cli/
+apps/web-react/dashboard-audit.png
 !coverage/coverage-summary.json
 !coverage/
 !coverage/coverage-summary.json

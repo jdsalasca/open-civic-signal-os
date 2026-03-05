@@ -16,6 +16,8 @@ Create/update an ADR when any of the following changes:
 
 - Add ADR files here using `ADR-YYYYMMDD-<slug>.md`.
 - Keep status updated (`proposed`, `accepted`, `superseded`).
+- `ADR-20260220-community-collaboration-model.md` (accepted)
+- `ADR-20260222-prioritized-status-filter-contract.md` (accepted)
 
 ## Review Rule
 

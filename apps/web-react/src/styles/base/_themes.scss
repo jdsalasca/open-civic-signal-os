@@ -1,0 +1,104 @@
+:root {
+  // --- CORE BRAND TOKENS (CIVIC AURORA) ---
+  --brand-primary: #1d4ed8;
+  --brand-primary-hover: #1e40af;
+  --brand-primary-glow: rgba(29, 78, 216, 0.35);
+  --brand-primary-glow-strong: rgba(29, 78, 216, 0.55);
+  --brand-accent: #0d9488;
+  --brand-accent-soft: rgba(13, 148, 136, 0.22);
+  --on-brand: #f8fafc;
+
+  --status-new: #0ea5e9;
+  --status-progress: #f59e0b;
+  --status-resolved: #10b981;
+  --status-rejected: #e11d48;
+  --status-rejected-glow: rgba(225, 29, 72, 0.42);
+
+  --chart-1: #1d4ed8;
+  --chart-2: #0d9488;
+  --chart-3: #f59e0b;
+  --chart-4: #e11d48;
+  --chart-5: #0284c7;
+  --chart-6: #2563eb;
+
+  // --- DARK THEME ---
+  &.dark-theme,
+  &:not(.light-theme) {
+    --bg-app: #0b1220;
+    --bg-nav: rgba(11, 18, 32, 0.84);
+    --bg-surface: #111a2b;
+    --bg-card: #152033;
+    --bg-elevated: #1b2a42;
+
+    --text-main: #e6edf7;
+    --text-secondary: #c5d2e6;
+    --text-muted: #8ea0bc;
+
+    --border-subtle: #2b3c5a;
+    --glass-stroke: rgba(148, 163, 184, 0.2);
+    --shadow-premium: 0 0 0 1px rgba(148, 163, 184, 0.16), 0 20px 45px -14px rgba(2, 6, 23, 0.72);
+    --shadow-lift: 0 24px 48px -20px rgba(2, 6, 23, 0.78);
+
+    --mesh-gradient-1: rgba(29, 78, 216, 0.2);
+    --mesh-gradient-2: rgba(13, 148, 136, 0.14);
+
+    --scrollbar-thumb: #314667;
+    --tooltip-bg: #0f172a;
+    --tooltip-text: #f8fafc;
+    --field-bg: rgba(15, 23, 42, 0.74);
+    --field-bg-focus: rgba(21, 32, 51, 0.95);
+    --field-text: #e6edf7;
+    --field-border: #375075;
+    --field-border-focus: #3b82f6;
+    --bg-sidebar: #111a2b;
+    --surface-hover: rgba(148, 163, 184, 0.11);
+    --table-row-hover: rgba(148, 163, 184, 0.08);
+    --focus-ring: rgba(59, 130, 246, 0.45);
+    --tooltip-shadow: 0 10px 30px -18px rgba(2, 6, 23, 0.8);
+    --shimmer-highlight: rgba(148, 163, 184, 0.13);
+    --pill-bg: rgba(148, 163, 184, 0.12);
+    --pill-border: rgba(148, 163, 184, 0.22);
+    --pill-hover: rgba(148, 163, 184, 0.2);
+    --panel-soft-bg: rgba(148, 163, 184, 0.08);
+  }
+
+  // --- LIGHT THEME ---
+  &.light-theme {
+    --bg-app: #eef3fb;
+    --bg-nav: rgba(255, 255, 255, 0.85);
+    --bg-surface: #f8fbff;
+    --bg-card: #ffffff;
+    --bg-elevated: #eaf0fb;
+
+    --text-main: #0f172a;
+    --text-secondary: #1e293b;
+    --text-muted: #475569;
+
+    --border-subtle: #c9d6ea;
+    --glass-stroke: rgba(15, 23, 42, 0.09);
+    --shadow-premium: 0 1px 0 0 rgba(148, 163, 184, 0.35), 0 18px 40px -28px rgba(30, 41, 59, 0.36);
+    --shadow-lift: 0 20px 34px -28px rgba(30, 41, 59, 0.46);
+
+    --mesh-gradient-1: rgba(29, 78, 216, 0.09);
+    --mesh-gradient-2: rgba(13, 148, 136, 0.08);
+
+    --scrollbar-thumb: #b5c5de;
+    --tooltip-bg: #0f172a;
+    --tooltip-text: #ffffff;
+    --field-bg: #ffffff;
+    --field-bg-focus: #f8fbff;
+    --field-text: #0f172a;
+    --field-border: #b8c8df;
+    --field-border-focus: #1d4ed8;
+    --bg-sidebar: #ffffff;
+    --surface-hover: rgba(29, 78, 216, 0.08);
+    --table-row-hover: rgba(29, 78, 216, 0.06);
+    --focus-ring: rgba(29, 78, 216, 0.3);
+    --tooltip-shadow: 0 18px 32px -24px rgba(15, 23, 42, 0.45);
+    --shimmer-highlight: rgba(30, 64, 175, 0.12);
+    --pill-bg: rgba(29, 78, 216, 0.08);
+    --pill-border: rgba(29, 78, 216, 0.22);
+    --pill-hover: rgba(29, 78, 216, 0.14);
+    --panel-soft-bg: rgba(29, 78, 216, 0.05);
+  }
+}
