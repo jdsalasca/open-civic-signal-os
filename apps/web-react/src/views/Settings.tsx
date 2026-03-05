@@ -19,7 +19,7 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicMetaRow } from "../components/ui/CivicMetaRow";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
-import { ProfileVisibility, UserProfile } from "../types";
+import { InterfaceMode, ProfileVisibility, UserProfile } from "../types";
 
 interface ThemeOption {
   label: string;
@@ -38,6 +38,12 @@ interface Option {
   value: string;
 }
 
+interface InterfaceModeOption {
+  label: string;
+  value: 'simple' | 'advanced';
+  icon: string;
+}
+
 interface ProfileFormState {
   displayName: string;
   civicRole: string;
@@ -45,6 +51,7 @@ interface ProfileFormState {
   affiliationsText: string;
   profileVisibility: ProfileVisibility;
   affiliationVisibility: ProfileVisibility;
+  interfaceMode: 'simple' | 'advanced';
 }
 
 const EMPTY_PROFILE_FORM: ProfileFormState = {
@@ -53,12 +60,13 @@ const EMPTY_PROFILE_FORM: ProfileFormState = {
   bio: '',
   affiliationsText: '',
   profileVisibility: 'PUBLIC',
-  affiliationVisibility: 'COMMUNITY'
+  affiliationVisibility: 'COMMUNITY',
+  interfaceMode: 'simple'
 };
 
 export function Settings() {
   const { t, i18n } = useTranslation();
-  const { language, setLanguage, theme, setTheme } = useSettingsStore();
+  const { language, setLanguage, theme, setTheme, interfaceMode, setInterfaceMode } = useSettingsStore();
   const { activeRole, rawRoles, switchRole, userName } = useAuthStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileForm, setProfileForm] = useState<ProfileFormState>(EMPTY_PROFILE_FORM);
@@ -73,6 +81,10 @@ export function Settings() {
   const themeOptions: ThemeOption[] = [
     { label: t('settings.dark'), value: 'dark', icon: 'pi pi-moon' },
     { label: t('settings.light'), value: 'light', icon: 'pi pi-sun' }
+  ];
+  const interfaceModeOptions: InterfaceModeOption[] = [
+    { label: t('settings.interface_modes.simple'), value: 'simple', icon: 'pi pi-sparkles' },
+    { label: t('settings.interface_modes.advanced'), value: 'advanced', icon: 'pi pi-sliders-h' }
   ];
 
   const civicRoleOptions: Option[] = [
@@ -104,8 +116,10 @@ export function Settings() {
           bio: response.data.bio ?? '',
           affiliationsText: response.data.affiliations.join(', '),
           profileVisibility: response.data.profileVisibility,
-          affiliationVisibility: response.data.affiliationVisibility
+          affiliationVisibility: response.data.affiliationVisibility,
+          interfaceMode: response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple'
         });
+        setInterfaceMode(response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple');
       } catch (error) {
         if (!mounted) return;
         toast.error(t('settings.profile_load_error'));
@@ -120,7 +134,7 @@ export function Settings() {
     return () => {
       mounted = false;
     };
-  }, [t]);
+  }, [setInterfaceMode, t]);
 
   const handleLanguageChange = (e: SelectButtonChangeEvent) => {
     const lang = e.value as 'en' | 'es';
@@ -136,6 +150,14 @@ export function Settings() {
       setTheme(nextTheme);
       document.documentElement.classList.remove('dark-theme', 'light-theme');
       document.documentElement.classList.add(`${nextTheme}-theme`);
+    }
+  };
+
+  const handleInterfaceModeChange = (e: SelectButtonChangeEvent) => {
+    const nextMode = e.value as 'simple' | 'advanced';
+    if (nextMode) {
+      setInterfaceMode(nextMode);
+      handleProfileField('interfaceMode', nextMode);
     }
   };
 
@@ -175,7 +197,8 @@ export function Settings() {
           .map((value) => value.trim())
           .filter(Boolean),
         profileVisibility: profileForm.profileVisibility,
-        affiliationVisibility: profileForm.affiliationVisibility
+        affiliationVisibility: profileForm.affiliationVisibility,
+        interfaceMode: profileForm.interfaceMode.toUpperCase() as InterfaceMode
       };
       const response = await apiClient.put<UserProfile>('auth/profile/me', payload);
       setProfile(response.data);
@@ -185,8 +208,10 @@ export function Settings() {
         bio: response.data.bio ?? '',
         affiliationsText: response.data.affiliations.join(', '),
         profileVisibility: response.data.profileVisibility,
-        affiliationVisibility: response.data.affiliationVisibility
+        affiliationVisibility: response.data.affiliationVisibility,
+        interfaceMode: response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple'
       });
+      setInterfaceMode(response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple');
       toast.success(t('settings.profile_saved'));
     } catch {
       toast.error(t('settings.profile_save_error'));
@@ -362,6 +387,22 @@ export function Settings() {
                     className="w-full"
                     data-testid="theme-select"
                     itemTemplate={(option: ThemeOption) => (
+                      <div className="flex align-items-center justify-content-center gap-3 w-full py-1">
+                        <i className={option.icon}></i>
+                        <span className="font-bold">{option.label}</span>
+                      </div>
+                    )}
+                  />
+                </CivicField>
+
+                <CivicField label={t('settings.interface_mode')} helpText={t('settings.interface_mode_help')}>
+                  <SelectButton
+                    value={interfaceMode}
+                    options={interfaceModeOptions}
+                    onChange={handleInterfaceModeChange}
+                    className="w-full"
+                    data-testid="interface-mode-select"
+                    itemTemplate={(option: InterfaceModeOption) => (
                       <div className="flex align-items-center justify-content-center gap-3 w-full py-1">
                         <i className={option.icon}></i>
                         <span className="font-bold">{option.label}</span>

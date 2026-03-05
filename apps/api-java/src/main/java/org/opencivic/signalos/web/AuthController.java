@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.domain.CommunityMembership;
 import org.opencivic.signalos.domain.CommunityRole;
+import org.opencivic.signalos.domain.InterfaceMode;
 import org.opencivic.signalos.domain.ProfileVisibility;
 import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
@@ -261,17 +262,18 @@ public class AuthController {
     public Map<String, Object> getCurrentUser(Authentication authentication) {
         if (authentication == null) return Map.of("role", "GUEST");
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        return Map.of(
-            "username", user.getUsername(),
-            "roles", user.getRoles(),
-            "email", user.getEmail(),
-            "verified", user.isVerified(),
-            "displayName", displayNameFor(user),
-            "civicRole", user.getCivicRole(),
-            "affiliations", user.getAffiliations(),
-            "bio", user.getBio(),
-            "profileVisibility", user.getProfileVisibility().name(),
-            "affiliationVisibility", user.getAffiliationVisibility().name()
+        return Map.ofEntries(
+            Map.entry("username", user.getUsername()),
+            Map.entry("roles", user.getRoles()),
+            Map.entry("email", user.getEmail()),
+            Map.entry("verified", user.isVerified()),
+            Map.entry("displayName", displayNameFor(user)),
+            Map.entry("civicRole", user.getCivicRole()),
+            Map.entry("affiliations", user.getAffiliations()),
+            Map.entry("bio", user.getBio()),
+            Map.entry("profileVisibility", user.getProfileVisibility().name()),
+            Map.entry("affiliationVisibility", user.getAffiliationVisibility().name()),
+            Map.entry("interfaceMode", user.getInterfaceMode().name())
         );
     }
 
@@ -295,6 +297,7 @@ public class AuthController {
         user.setAffiliationVisibility(
             request.affiliationVisibility() == null ? ProfileVisibility.COMMUNITY : request.affiliationVisibility()
         );
+        user.setInterfaceMode(request.interfaceMode() == null ? InterfaceMode.SIMPLE : request.interfaceMode());
         userRepository.save(user);
         return toProfileResponse(user, ViewerScope.ADMINS, true);
     }
@@ -378,6 +381,7 @@ public class AuthController {
             affiliations,
             user.getProfileVisibility(),
             user.getAffiliationVisibility(),
+            user.getInterfaceMode(),
             viewerScope.name()
         );
     }

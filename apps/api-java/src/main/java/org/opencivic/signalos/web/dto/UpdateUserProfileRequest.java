@@ -2,6 +2,7 @@ package org.opencivic.signalos.web.dto;
 
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import org.opencivic.signalos.domain.InterfaceMode;
 import org.opencivic.signalos.domain.ProfileVisibility;
 
 public record UpdateUserProfileRequest(
@@ -10,5 +11,6 @@ public record UpdateUserProfileRequest(
     @Size(max = 240) String bio,
     List<@Size(max = 80) String> affiliations,
     ProfileVisibility profileVisibility,
-    ProfileVisibility affiliationVisibility
+    ProfileVisibility affiliationVisibility,
+    InterfaceMode interfaceMode
 ) {}

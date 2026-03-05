@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityMembership;
 import org.opencivic.signalos.domain.CommunityRole;
+import org.opencivic.signalos.domain.InterfaceMode;
 import org.opencivic.signalos.domain.ProfileVisibility;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
@@ -65,6 +66,7 @@ class UserProfileVisibilityIT {
         owner.setAffiliations(java.util.List.of("Central Campus", "Neighborhood 7"));
         owner.setProfileVisibility(ProfileVisibility.COMMUNITY);
         owner.setAffiliationVisibility(ProfileVisibility.ADMINS);
+        owner.setInterfaceMode(InterfaceMode.ADVANCED);
         owner = userRepository.save(owner);
 
         User viewer = new User("community_viewer", "encoded", "viewer@example.com", "ROLE_CITIZEN");
@@ -94,7 +96,8 @@ class UserProfileVisibilityIT {
                       "bio": "Coordinates reading circles and reports service issues.",
                       "affiliations": ["Central Campus", "Library Committee"],
                       "profileVisibility": "COMMUNITY",
-                      "affiliationVisibility": "ADMINS"
+                      "affiliationVisibility": "ADMINS",
+                      "interfaceMode": "SIMPLE"
                     }
                     """))
             .andExpect(status().isOk())
@@ -102,6 +105,7 @@ class UserProfileVisibilityIT {
             .andExpect(jsonPath("$.civicRole").value("TEACHER"))
             .andExpect(jsonPath("$.affiliations[0]").value("Central Campus"))
             .andExpect(jsonPath("$.affiliationVisibility").value("ADMINS"))
+            .andExpect(jsonPath("$.interfaceMode").value("SIMPLE"))
             .andExpect(jsonPath("$.viewerScope").value("ADMINS"))
             .andExpect(jsonPath("$.email").value("owner@example.com"));
     }

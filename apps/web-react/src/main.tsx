@@ -14,11 +14,13 @@ import "primeflex/primeflex.css";
 // Initial Theme Application
 const initialSettings = useSettingsStore.getState();
 const initialTheme = initialSettings.theme;
+const initialInterfaceMode = initialSettings.interfaceMode;
 if (initialTheme === 'dark') {
   document.documentElement.classList.add('dark-theme');
 } else {
   document.documentElement.classList.add('light-theme');
 }
+document.documentElement.classList.add(`interface-mode-${initialInterfaceMode}`);
 
 if (i18n.language !== initialSettings.language) {
   i18n.changeLanguage(initialSettings.language);

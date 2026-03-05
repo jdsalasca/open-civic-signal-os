@@ -42,6 +42,10 @@ public class User {
     @Column(nullable = false)
     private ProfileVisibility affiliationVisibility = ProfileVisibility.COMMUNITY;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private InterfaceMode interfaceMode = InterfaceMode.SIMPLE;
+
     private boolean enabled = false;
     
     // V3: Verification Flow
@@ -86,6 +90,8 @@ public class User {
     public void setProfileVisibility(ProfileVisibility profileVisibility) { this.profileVisibility = profileVisibility; }
     public ProfileVisibility getAffiliationVisibility() { return affiliationVisibility; }
     public void setAffiliationVisibility(ProfileVisibility affiliationVisibility) { this.affiliationVisibility = affiliationVisibility; }
+    public InterfaceMode getInterfaceMode() { return interfaceMode; }
+    public void setInterfaceMode(InterfaceMode interfaceMode) { this.interfaceMode = interfaceMode; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     

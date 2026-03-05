@@ -32,7 +32,7 @@ const LoadingFallback = () => (
 
 export function App() {
   const { isLoggedIn } = useAuthStore();
-  const { theme } = useSettingsStore();
+  const { theme, interfaceMode, setInterfaceMode } = useSettingsStore();
 
   useEffect(() => {
     const html = document.documentElement;
@@ -44,6 +44,35 @@ export function App() {
       html.classList.remove('dark-theme');
     }
   }, [theme]);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.remove('interface-mode-simple', 'interface-mode-advanced');
+    html.classList.add(`interface-mode-${interfaceMode}`);
+  }, [interfaceMode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const syncInterfaceMode = async () => {
+      if (!isLoggedIn) {
+        return;
+      }
+      try {
+        const module = await import("./api/axios");
+        const response = await module.default.get("auth/me");
+        const backendMode = response.data?.interfaceMode;
+        if (!cancelled && (backendMode === "SIMPLE" || backendMode === "ADVANCED")) {
+          setInterfaceMode(backendMode.toLowerCase());
+        }
+      } catch {
+        // Keep local preference if server sync is unavailable.
+      }
+    };
+    syncInterfaceMode();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, setInterfaceMode]);
 
   return (
     <BrowserRouter>

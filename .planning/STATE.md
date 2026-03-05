@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 4A of 5 in current phase  
+Plan: 4B of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-05 - Standardized the visual core and shell identity as the frontend foundation for simple-vs-advanced experience modes (Phase 5 plan 05-04A)
+Last activity: 2026-03-05 - Persisted simple-vs-advanced interface modes across backend profile, settings, and shell behavior (Phase 5 plan 05-04B)
 
 Progress: [██████████] 98%
 
@@ -64,6 +64,7 @@ Progress: [██████████] 98%
 - 2026-03-05: Implemented OCS-P1-031 with backend-owned community permission scopes, structured 403 permission responses, policy overrides, and coordinator-facing policy matrix UX.
 - 2026-03-05: Implemented OCS-P1-033 with pinned official announcements, archive search/mutation support, and a more legible official updates channel.
 - 2026-03-05: Established the visual core refresh foundation for OCS-P1-032 with a new community-first shell, shared design primitives, typographic identity, and a redesigned dashboard hero validated in Docker.
+- 2026-03-05: Extended OCS-P1-032 with persisted `interfaceMode` profile preference, simple/advanced settings controls, backend contract storage, and shell/dashboard behavior changes.
 
 ### Pending Todos
 
@@ -83,6 +84,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Landed the visual core refresh foundation for `OCS-P1-032`; next target is persisting simple/advanced mode preferences and then continuing with `OCS-P1-034` nested forum threads with relevance ordering  
+Stopped at: Landed persisted simple/advanced experience mode support for `OCS-P1-032`; next target is broadening mode-aware simplification beyond dashboard/shell and then continuing with `OCS-P1-034` nested forum threads with relevance ordering  
 Resume file: None
 

@@ -1,6 +1,7 @@
 package org.opencivic.signalos.web.dto;
 
 import java.util.List;
+import org.opencivic.signalos.domain.InterfaceMode;
 import org.opencivic.signalos.domain.ProfileVisibility;
 
 public record UserProfileResponse(
@@ -13,5 +14,6 @@ public record UserProfileResponse(
     List<String> affiliations,
     ProfileVisibility profileVisibility,
     ProfileVisibility affiliationVisibility,
+    InterfaceMode interfaceMode,
     String viewerScope
 ) {}

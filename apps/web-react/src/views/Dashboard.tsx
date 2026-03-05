@@ -17,6 +17,7 @@ import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 import { CivicToolbar } from "../components/ui/CivicToolbar";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { useCommunityStore } from "../store/useCommunityStore";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -40,6 +41,7 @@ export function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeRole, userName } = useAuthStore();
+  const interfaceMode = useSettingsStore((state) => state.interfaceMode);
   const { activeCommunityId, memberships } = useCommunityStore();
   
   const [signals, setSignals] = useState<Signal[]>([]);
@@ -386,46 +388,48 @@ export function Dashboard() {
           </CivicCard>
         </section>
 
-        <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
-          <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
-            <div className="flex flex-column gap-1">
-              <span className="text-xs font-black uppercase tracking-widest text-muted">
-                {t("dashboard.secondary_actions_title")}
-              </span>
-              <span className="text-sm text-secondary">
-                {t("dashboard.secondary_actions_desc")}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <CivicButton
-                type="button"
-                label={t('nav.public_blog')}
-                icon="pi pi-megaphone"
-                variant="ghost"
-                onClick={() => navigate("/communities/blog")}
-                data-testid="dashboard-action-blog"
-              />
-              <CivicButton
-                type="button"
-                label={t('dashboard.track_contributions')}
-                icon="pi pi-user"
-                variant="ghost"
-                onClick={() => navigate("/mine")}
-                data-testid="dashboard-action-mine"
-              />
-              {isStaff && (
+        {interfaceMode === "advanced" && (
+          <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
+            <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
+              <div className="flex flex-column gap-1">
+                <span className="text-xs font-black uppercase tracking-widest text-muted">
+                  {t("dashboard.secondary_actions_title")}
+                </span>
+                <span className="text-sm text-secondary">
+                  {t("dashboard.secondary_actions_desc")}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 <CivicButton
                   type="button"
-                  label={t('dashboard.broadcast')}
-                  icon="pi pi-bolt"
+                  label={t('nav.public_blog')}
+                  icon="pi pi-megaphone"
                   variant="ghost"
-                  onClick={handleRelay}
-                  data-testid="dashboard-action-broadcast"
+                  onClick={() => navigate("/communities/blog")}
+                  data-testid="dashboard-action-blog"
                 />
-              )}
+                <CivicButton
+                  type="button"
+                  label={t('dashboard.track_contributions')}
+                  icon="pi pi-user"
+                  variant="ghost"
+                  onClick={() => navigate("/mine")}
+                  data-testid="dashboard-action-mine"
+                />
+                {isStaff && (
+                  <CivicButton
+                    type="button"
+                    label={t('dashboard.broadcast')}
+                    icon="pi pi-bolt"
+                    variant="ghost"
+                    onClick={handleRelay}
+                    data-testid="dashboard-action-broadcast"
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        </CivicCard>
+          </CivicCard>
+        )}
 
         <CivicCard className="mb-6" variant="brand">
           <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
@@ -516,7 +520,7 @@ export function Dashboard() {
                 <CivicSkeleton type="text" count={3} />
               ) : (
                 <>
-                  {displayedSignals.length > 0 && (
+                  {interfaceMode === "advanced" && displayedSignals.length > 0 && (
                     <CategoryChart signals={displayedSignals} />
                   )}
                   {!isStaff && (
@@ -538,7 +542,7 @@ export function Dashboard() {
                   {isStaff && notifications.length > 0 && (
                     <NotificationSidebar notifications={notifications} />
                   )}
-                  {isStaff && (
+                  {isStaff && interfaceMode === "advanced" && (
                     <CivicCard title="Integrity Alerts" variant="danger">
                       <div className="flex flex-column gap-4">
                         <div className="flex align-items-center justify-content-between bg-status-rejected-alpha-10 p-3 border-round-xl">

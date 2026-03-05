@@ -1708,6 +1708,9 @@ components:
     ProfileVisibility:
       type: string
       enum: [PUBLIC, COMMUNITY, ADMINS]
+    InterfaceMode:
+      type: string
+      enum: [SIMPLE, ADVANCED]
     UpdateUserProfileRequest:
       type: object
       properties:
@@ -1726,9 +1729,11 @@ components:
           $ref: '#/components/schemas/ProfileVisibility'
         affiliationVisibility:
           $ref: '#/components/schemas/ProfileVisibility'
+        interfaceMode:
+          $ref: '#/components/schemas/InterfaceMode'
     UserProfileResponse:
       type: object
-      required: [username, displayName, verified, affiliations, profileVisibility, affiliationVisibility, viewerScope]
+      required: [username, displayName, verified, affiliations, profileVisibility, affiliationVisibility, interfaceMode, viewerScope]
       properties:
         username:
           type: string
@@ -1753,6 +1758,8 @@ components:
           $ref: '#/components/schemas/ProfileVisibility'
         affiliationVisibility:
           $ref: '#/components/schemas/ProfileVisibility'
+        interfaceMode:
+          $ref: '#/components/schemas/InterfaceMode'
         viewerScope:
           $ref: '#/components/schemas/ProfileVisibility'
     CreateCommunityRequest:

@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Persisted Interface Modes**: Added backend-owned `interfaceMode` profile preference, simple-vs-advanced shell behavior, Settings controls, contract updates, and validation coverage so interface complexity can be reduced without losing advanced workspace depth. (`story:OCS-P1-032`)
 - **Visual Core Refresh Foundation**: Established a warmer community-first visual system across the shell, shared UI primitives, dashboard hero, navigation hierarchy, and typographic identity to make the product feel less generic and easier to inhabit. (`story:OCS-P1-032` foundation)
 - **Official Announcements Channel**: Added pinned official updates, searchable announcement archive, archive metadata, and a clearer official-only communication surface in the community blog workflow. (`story:OCS-P1-033`)
 - **Community Permission Policy Matrix**: Added backend-owned per-community permission scopes, editable policy overrides, structured permission-denied responses, and Communities hub controls for coordinators to govern collaboration actions without frontend-owned RBAC logic. (`story:OCS-P1-031`)

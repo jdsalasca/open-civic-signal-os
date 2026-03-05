@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 import { CivicSelect } from "./ui/CivicSelect";
 import { toRoleLabel } from "../constants/roleLabels";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 type Props = {
   children: ReactNode;
@@ -30,6 +31,7 @@ export function Layout({ children, authMode = false }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const interfaceMode = useSettingsStore((state) => state.interfaceMode);
   const { isLoggedIn, activeRole, userName, logout } = useAuthStore();
   const {
     memberships,
@@ -39,7 +41,7 @@ export function Layout({ children, authMode = false }: Props) {
     shouldRefreshMemberships,
   } = useCommunityStore();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
-  const [desktopMoreVisible, setDesktopMoreVisible] = useState(false);
+  const [desktopMoreVisible, setDesktopMoreVisible] = useState(interfaceMode === "advanced");
   const mainContentRef = useRef<HTMLElement | null>(null);
 
   const focusMainContentTarget = () => {
@@ -52,6 +54,10 @@ export function Layout({ children, authMode = false }: Props) {
     );
     (firstFocusable ?? mainElement).focus();
   };
+
+  useEffect(() => {
+    setDesktopMoreVisible(interfaceMode === "advanced");
+  }, [interfaceMode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -161,7 +167,7 @@ export function Layout({ children, authMode = false }: Props) {
   );
 
   return (
-    <div className="app-shell flex h-screen overflow-hidden bg-app">
+    <div className={`app-shell flex h-screen overflow-hidden bg-app interface-mode-shell-${interfaceMode}`}>
       <a
         href={`#${mainContentId}`}
         className="skip-link"
@@ -203,6 +209,10 @@ export function Layout({ children, authMode = false }: Props) {
                 <span className="u-pill">
                   <i className="pi pi-users text-brand-primary"></i>
                   {toRoleLabel(activeMembership.role, t)}
+                </span>
+                <span className="u-pill" data-testid="interface-mode-badge">
+                  <i className={`pi ${interfaceMode === "simple" ? "pi-sparkles" : "pi-sliders-h"} text-brand-primary`}></i>
+                  {interfaceMode === "simple" ? t("settings.interface_modes.simple") : t("settings.interface_modes.advanced")}
                 </span>
               </div>
             </div>
@@ -300,10 +310,12 @@ export function Layout({ children, authMode = false }: Props) {
               </div>
             )}
 
-            <div className="hidden xl:flex align-items-center gap-3 u-pill">
-              <div className="w-8px h-8px border-circle bg-status-resolved animate-pulse"></div>
-              <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
-            </div>
+            {interfaceMode === "advanced" && (
+              <div className="hidden xl:flex align-items-center gap-3 u-pill">
+                <div className="w-8px h-8px border-circle bg-status-resolved animate-pulse"></div>
+                <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
+              </div>
+            )}
 
             <Button
               type="button"
@@ -315,7 +327,9 @@ export function Layout({ children, authMode = false }: Props) {
               data-testid="header-primary-report"
             />
 
-            <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
+            {interfaceMode === "advanced" && (
+              <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
+            )}
           </div>
         </header>
 

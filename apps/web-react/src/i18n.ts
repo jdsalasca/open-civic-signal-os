@@ -572,6 +572,12 @@ const resources = {
         },
         "theme": "Interface Theme",
         "theme_help": "Adjust the interface contrast for your current workspace.",
+        "interface_mode": "Interface mode",
+        "interface_mode_help": "Simple keeps the product calm and guided. Advanced reveals more monitoring and workspace controls.",
+        "interface_modes": {
+          "simple": "Simple Mode",
+          "advanced": "Advanced Mode"
+        },
         "role": "Active Identity Role",
         "role_desc": "Switch between your authorized security clearances.",
         "role_switched": "Active role switched to {{role}}.",
@@ -1200,6 +1206,12 @@ const resources = {
         },
         "theme": "Tema de Interfaz",
         "theme_help": "Ajuste el contraste de la interfaz para su espacio de trabajo actual.",
+        "interface_mode": "Modo de interfaz",
+        "interface_mode_help": "Simple mantiene el producto calmado y guiado. Avanzado muestra más monitoreo y controles del espacio.",
+        "interface_modes": {
+          "simple": "Modo Simple",
+          "advanced": "Modo Avanzado"
+        },
         "role": "Rol de Identidad Activo",
         "role_desc": "Cambie entre sus niveles de seguridad autorizados.",
         "role_switched": "Rol activo actualizado a {{role}}.",

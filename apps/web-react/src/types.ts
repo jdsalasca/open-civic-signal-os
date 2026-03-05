@@ -59,6 +59,7 @@ export type SignalMeta = {
 export type UserRole = "SUPER_ADMIN" | "PUBLIC_SERVANT" | "CITIZEN" | "GUEST";
 
 export type ProfileVisibility = "PUBLIC" | "COMMUNITY" | "ADMINS";
+export type InterfaceMode = "SIMPLE" | "ADVANCED";
 
 export type UserProfile = {
   username: string;
@@ -70,6 +71,7 @@ export type UserProfile = {
   affiliations: string[];
   profileVisibility: ProfileVisibility;
   affiliationVisibility: ProfileVisibility;
+  interfaceMode: InterfaceMode;
   viewerScope: ProfileVisibility;
 };
 
