@@ -41,6 +41,7 @@ Plans:
 - [ ] 02-01: Fix Playwright wrapper fallback behavior and add Windows path normalization checks.
 - [ ] 02-02: Raise and enforce release coverage minimum with updated reporting.
 - [ ] 02-03: Expand auth/verify degraded-mode tests and UX evidence artifacts.
+- [x] 02-04: Make ingest pipeline deterministic and idempotent for reproducible replays.
 
 ### Phase 3: Community Workflow Scalability
 **Goal**: Community collaboration surfaces remain performant and predictable at scale.
