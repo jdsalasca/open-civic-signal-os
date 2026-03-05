@@ -2,14 +2,15 @@
 
 ## Overview
 
-This roadmap stabilizes trust-critical behavior first, then aligns contracts and quality gates, hardens community workflows for scale, and finally structures a frontend audience/usability growth wave. The sequence prioritizes reproducibility, explainability, and CI-enforceable reliability before growth-facing UX expansion.
+This roadmap stabilizes trust-critical behavior first, then aligns contracts and quality gates, hardens community workflows for scale, expands frontend audience/usability, and then grows into a full community operating system. The sequence prioritizes reproducibility, explainability, and CI-enforceable reliability before introducing higher-order governance, execution, and transparency capabilities.
 
 ## Phases
 
 - [x] **Phase 1: Trust and Contract Stabilization** - Remove trust-critical runtime mismatches and align OpenAPI with live API behavior.
 - [x] **Phase 2: Quality Gate Hardening** - Make verification and evidence gates deterministic across environments.
 - [x] **Phase 3: Community Workflow Scalability** - Improve paging/performance/state integrity for high-activity communities.
-- [ ] **Phase 4: Frontend Audience and Usability Growth** - Expand reach, onboarding completion, and usability with measurable frontend outcomes.
+- [x] **Phase 4: Frontend Audience and Usability Growth** - Expand reach, onboarding completion, and usability with measurable frontend outcomes.
+- [ ] **Phase 5: Community Operating System Expansion** - Add identity, deliberation, execution, governance, and transparency layers for real community operations.
 
 ## Phase Details
 
@@ -73,7 +74,24 @@ Plans:
 - [x] 04-01: Build spec-driven frontend audience/usability backlog pack and story sequencing.
 - [x] 04-02: Implement OCS-P1-015 onboarding funnel progress/recovery UX with test evidence.
 - [x] 04-03: Stabilize local Docker dev runtime with resilient backend/frontend hot reload.
-- [ ] 04-04: Re-sequence phase 4 around product clarity, simplified navigation, and user-value communication before follow-on growth surfaces.
+- [x] 04-04: Re-sequence phase 4 around product clarity, simplified navigation, and user-value communication before follow-on growth surfaces.
+
+### Phase 5: Community Operating System Expansion
+**Goal**: turn the current civic signal product into a modular community operating system that supports identity, communication, deliberation, execution, and transparency for universities, neighborhoods, and local institutions.
+**Depends on**: Phase 4
+**Requirements**: COS-01, COS-02, COS-03, COS-04, COS-05, COS-06, COS-07, COS-08
+**Success Criteria**:
+1. Communities can model people, roles, spaces, and permissions without leaking sensitive data or creating opaque rules.
+2. The product supports the full loop from issue reporting and proposals to execution boards, decisions, and public metrics.
+3. Every new governance-sensitive feature maps to API, contract, and UI ownership with auditable validation evidence.
+**Plans**: 5 plans
+
+Plans:
+- [x] 05-01: Convert community operating system redesign into executable GSD backlog, requirements, and wave sequencing.
+- [ ] 05-02: Implement identity, hierarchy, and permissions foundations.
+- [ ] 05-03: Implement communication, issue workflow, and deliberation foundations.
+- [ ] 05-04: Implement execution, governance, and transparency foundations.
+- [ ] 05-05: Validate privacy, accessibility, onboarding, integrations, and pilot readiness.
 
 ## Progress
 
@@ -82,4 +100,5 @@ Plans:
 | 1. Trust and Contract Stabilization | 3/3 | Completed | 2026-03-04 |
 | 2. Quality Gate Hardening | 4/4 | Completed | 2026-03-04 |
 | 3. Community Workflow Scalability | 3/3 | Completed | 2026-03-04 |
-| 4. Frontend Audience and Usability Growth | 3/4 | In progress | - |
+| 4. Frontend Audience and Usability Growth | 4/4 | Completed | 2026-03-05 |
+| 5. Community Operating System Expansion | 1/5 | In progress | - |

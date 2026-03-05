@@ -183,3 +183,70 @@ Backlog reference: `docs/community/frontend-product-clarity-backlog.md`
    - Acceptance criteria:
      - wrapper resolves Windows paths correctly or cleanly falls back to `npx @playwright/cli`
      - `agent:ux:pw` open/snapshot workflow works from Windows and Linux without manual env overrides
+
+## Community Operating System Foundation Wave (GSD 2026-03-05)
+
+Primary objective: evolve the app from civic signal visibility into an actionable community operating system without compromising trust, privacy, or explainability.
+
+Execution order:
+
+1. `story:OCS-P1-029` enriched civic identity profiles + privacy visibility controls.
+   - Measurable civic outcome: users can participate with clearer role/context while controlling exposure of sensitive affiliation data.
+   - Validation commands: backend profile/privacy tests + Playwright profile visibility checks.
+2. `story:OCS-P1-030` hierarchical communities and breadcrumb navigation.
+   - Measurable civic outcome: large institutions and neighborhoods can navigate from top-level entity to local working space without confusion.
+   - Validation commands: API hierarchy contract tests + Playwright tree/breadcrumb route checks.
+3. `story:OCS-P1-031` configurable community-scoped RBAC policies.
+   - Measurable civic outcome: sensitive actions become predictable and auditable by role/community scope.
+   - Validation commands: backend authorization matrix tests + OpenAPI permission/error schema review.
+4. `story:OCS-P1-033` official announcements channel.
+   - Measurable civic outcome: communities can distinguish institutional communications from discussion noise.
+   - Validation commands: API create/list/archive tests + Playwright official channel audit.
+5. `story:OCS-P1-037` issue tracker-grade reporting flow.
+   - Measurable civic outcome: report quality improves and follow-up becomes actionable for institutions.
+   - Validation commands: wizard Playwright flow + API attachment/location contract tests.
+6. `story:OCS-P1-038` case timeline and assignment trail.
+   - Measurable civic outcome: communities can see who changed what and what state every case is in.
+   - Validation commands: backend lifecycle/audit tests + detail timeline UI checks.
+7. `story:OCS-P1-040` structured proposal templates.
+   - Measurable civic outcome: proposals become comparable and decision-ready instead of ad-hoc text dumps.
+   - Validation commands: proposal contract tests + Playwright creation/detail flow.
+8. `story:OCS-P1-041` structured deliberation with pro/con evidence.
+   - Measurable civic outcome: discussions move from flat comment noise to decision-supporting deliberation.
+   - Validation commands: backend discussion tests + Playwright pro/con evidence interactions.
+9. `story:OCS-P1-043` community project boards.
+   - Measurable civic outcome: approved decisions can be translated into visible execution work.
+   - Validation commands: task lifecycle tests + Playwright kanban interactions.
+10. `story:OCS-P1-046` governance library and searchable agreements.
+   - Measurable civic outcome: rules and prior decisions become easy to find before conflicts escalate.
+   - Validation commands: document search/filter tests + responsive library UI audit.
+11. `story:OCS-P1-047` decision ledger.
+   - Measurable civic outcome: communities can trace proposals to votes to execution responsibility.
+   - Validation commands: linked-record contract tests + timeline UI evidence.
+12. `story:OCS-P1-048` public trust metrics dashboard.
+   - Measurable civic outcome: resolution rates, participation, and execution visibility become measurable in public.
+   - Validation commands: dashboard metric contract tests + freshness timestamp UI checks.
+
+Second tranche after foundations:
+
+13. `story:OCS-P1-034` nested forum discussions with relevance ranking.
+14. `story:OCS-P1-035` real-time chat rooms, mentions, and mute controls.
+15. `story:OCS-P1-036` unified community home across announcements/discussions/chat.
+16. `story:OCS-P1-039` geospatial issue map.
+17. `story:OCS-P1-042` verifiable community voting.
+18. `story:OCS-P1-044` volunteering and activity slots.
+19. `story:OCS-P1-045` shared resource booking.
+20. `story:OCS-P1-049` moderation queue and sanction policy engine.
+21. `story:OCS-P1-050` privacy center and sensitive-data access logs.
+22. `story:OCS-P1-051` civic onboarding and help center.
+23. `story:OCS-P1-052` open data exports and scoped public API.
+24. `story:OCS-P1-053` outbound integrations layer.
+
+Strategic phase-gated bets:
+
+25. `story:OCS-P2-006` verified identity tiers for sensitive actions.
+26. `story:OCS-P2-007` auditable secure elections.
+27. `story:OCS-P2-008` participatory budgeting allocation.
+28. `story:OCS-P2-009` bounded civic reputation model.
+
+Backlog reference: `docs/community/community-operating-system-backlog.md`

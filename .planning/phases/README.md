@@ -25,6 +25,11 @@ This directory contains executable spec-driven plans aligned to `.planning/ROADM
 - `04-frontend-audience-usability/04-01-PLAN.md`
 - `04-frontend-audience-usability/04-02-PLAN.md`
 - `04-frontend-audience-usability/04-03-PLAN.md`
+- `04-frontend-audience-usability/04-04-PLAN.md`
+
+## Phase 5: Community Operating System Expansion
+
+- `05-community-operating-system-expansion/05-01-PLAN.md`
 
 ## Notes
 
