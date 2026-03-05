@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
@@ -25,6 +25,8 @@ type NavItem = {
 
 export function Layout({ children, authMode = false }: Props) {
   const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
+  const mainContentId = "main-content";
+  const mobileNavId = "mobile-navigation-drawer";
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,6 +39,18 @@ export function Layout({ children, authMode = false }: Props) {
     shouldRefreshMemberships,
   } = useCommunityStore();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const mainContentRef = useRef<HTMLElement | null>(null);
+
+  const focusMainContentTarget = () => {
+    const mainElement = mainContentRef.current;
+    if (!mainElement) {
+      return;
+    }
+    const firstFocusable = mainElement.querySelector<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    (firstFocusable ?? mainElement).focus();
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -143,7 +157,14 @@ export function Layout({ children, authMode = false }: Props) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-app">
-      <a href="#main-content" className="skip-link">{t('nav.skip_to_content')}</a>
+      <a
+        href={`#${mainContentId}`}
+        className="skip-link"
+        data-testid="skip-to-content-link"
+        onClick={() => window.requestAnimationFrame(focusMainContentTarget)}
+      >
+        {t('nav.skip_to_content')}
+      </a>
       {/* SIDEBAR */}
       <aside className="hidden lg:flex flex-column w-18rem border-right-1 border-white-alpha-5 bg-card z-2">
         <div className="p-6 flex align-items-center gap-3">
@@ -192,6 +213,8 @@ export function Layout({ children, authMode = false }: Props) {
               className="lg:hidden text-main"
               onClick={() => setMobileMenuVisible(true)}
               aria-label={t('nav.open_navigation')}
+              aria-expanded={mobileMenuVisible}
+              aria-controls={mobileNavId}
               data-testid="mobile-menu-toggle"
             />
             <div className="hidden md:flex align-items-center">
@@ -245,7 +268,13 @@ export function Layout({ children, authMode = false }: Props) {
           </div>
         </header>
 
-        <main id="main-content" className="flex-grow-1 overflow-y-auto p-6 lg:p-10 bg-app">
+        <main
+          id={mainContentId}
+          ref={mainContentRef}
+          tabIndex={-1}
+          className="flex-grow-1 overflow-y-auto p-6 lg:p-10 bg-app"
+          data-testid="main-content"
+        >
           <div className="page-container mx-auto" style={{ maxWidth: '1300px' }}>
             {children}
           </div>
@@ -268,7 +297,12 @@ export function Layout({ children, authMode = false }: Props) {
         </nav>
       </div>
 
-      <Sidebar visible={mobileMenuVisible} onHide={() => setMobileMenuVisible(false)} className="w-20rem bg-app">
+      <Sidebar
+        visible={mobileMenuVisible}
+        onHide={() => setMobileMenuVisible(false)}
+        className="w-20rem bg-app"
+        id={mobileNavId}
+      >
         <div className="p-4 flex flex-column gap-6">
           <div className="flex align-items-center gap-3">
             <div className="u-logo-badge border-round-xl p-2 shadow-lg"><i className="pi pi-signal u-logo-icon"></i></div>
