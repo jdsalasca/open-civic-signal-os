@@ -286,6 +286,11 @@ export function Layout({ children, authMode = false }: Props) {
             <div className="app-topbar-intro">
               <span className="app-topbar-label">{t('dashboard.focus_today')}</span>
               <span className="app-topbar-title">{activeSection}</span>
+              {activeMembership && (
+                <span className="text-xs text-muted line-height-3">
+                  {activeMembership.breadcrumb.map((item) => item.name).join(' / ')} · {toRoleLabel(activeMembership.role, t)}
+                </span>
+              )}
             </div>
           </div>
 

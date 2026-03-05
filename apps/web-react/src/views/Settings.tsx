@@ -2,12 +2,14 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { useCommunityStore } from "../store/useCommunityStore";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
 import { DropdownChangeEvent } from "primereact/dropdown";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Layout } from "../components/Layout";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { Avatar } from "primereact/avatar";
 import apiClient from "../api/axios";
@@ -20,6 +22,7 @@ import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicMetaRow } from "../components/ui/CivicMetaRow";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { InterfaceMode, ProfileVisibility, UserProfile } from "../types";
+import { toRoleLabel } from "../constants/roleLabels";
 
 interface ThemeOption {
   label: string;
@@ -66,8 +69,10 @@ const EMPTY_PROFILE_FORM: ProfileFormState = {
 
 export function Settings() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { language, setLanguage, theme, setTheme, interfaceMode, setInterfaceMode } = useSettingsStore();
   const { activeRole, rawRoles, switchRole, userName } = useAuthStore();
+  const { memberships, activeCommunityId, setActiveCommunityId } = useCommunityStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileForm, setProfileForm] = useState<ProfileFormState>(EMPTY_PROFILE_FORM);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -240,6 +245,8 @@ export function Settings() {
   const identityRole = profile?.civicRole ? t(`settings.civic_roles.${profile.civicRole}`, { defaultValue: profile.civicRole }) : t('settings.identity_role_fallback');
   const profileVisibilityLabel = t(`settings.visibility.${profile?.profileVisibility ?? 'PUBLIC'}`);
   const affiliationVisibilityLabel = t(`settings.visibility.${profile?.affiliationVisibility ?? 'COMMUNITY'}`);
+  const activeMembership = memberships.find((membership) => membership.communityId === activeCommunityId) ?? memberships[0] ?? null;
+  const activeCommunityPath = activeMembership?.breadcrumb.map((item) => item.name).join(' / ') ?? t('settings.community_membership_empty_desc');
 
   return (
     <Layout>
@@ -267,7 +274,92 @@ export function Settings() {
                   <CivicMetaRow label={t('settings.profile_visibility_label')} value={profileVisibilityLabel} />
                   <CivicMetaRow label={t('settings.affiliation_visibility_label')} value={affiliationVisibilityLabel} />
                   <CivicMetaRow label={t('settings.affiliations_preview')} value={profile?.affiliations.length ? profile.affiliations.join(', ') : t('settings.no_affiliations')} />
+                  <CivicMetaRow label={t('settings.community_count_label')} value={memberships.length.toString()} />
                 </div>
+              </div>
+            </CivicCard>
+
+            <CivicCard title={t('settings.community_membership_title')} className="mt-6" data-testid="settings-community-memberships-card">
+              <div className="flex flex-column gap-4">
+                <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4">
+                  <div className="text-xs font-bold uppercase text-muted tracking-widest mb-2">
+                    {t('settings.community_active_label')}
+                  </div>
+                  <div className="font-black text-main text-lg">
+                    {activeMembership?.communityName ?? t('settings.community_none')}
+                  </div>
+                  <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                    {activeCommunityPath}
+                  </p>
+                  {activeMembership && (
+                    <div className="mt-3 flex gap-2 flex-wrap">
+                      <CivicBadge label={toRoleLabel(activeMembership.role, t)} severity="progress" />
+                      <CivicBadge label={activeMembership.communitySlug} type="category" />
+                    </div>
+                  )}
+                </div>
+
+                {memberships.length > 0 ? (
+                  <div className="flex flex-column gap-3">
+                    {memberships.map((membership) => {
+                      const isActive = membership.communityId === activeCommunityId;
+                      return (
+                        <div
+                          key={`${membership.communityId}-${membership.userId}`}
+                          className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4"
+                          data-testid={`settings-community-membership-${membership.communityId}`}
+                        >
+                          <div className="flex justify-content-between gap-3 flex-wrap align-items-start">
+                            <div className="flex-1 min-w-0">
+                              <div className="font-black text-main">{membership.communityName}</div>
+                              <div className="text-xs text-muted mt-1">/{membership.communitySlug}</div>
+                              <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                                {membership.breadcrumb.map((item) => item.name).join(' / ')}
+                              </p>
+                            </div>
+                            <div className="flex align-items-center gap-2 flex-wrap justify-content-end">
+                              <CivicBadge label={toRoleLabel(membership.role, t)} severity="progress" />
+                              {isActive && <CivicBadge label={t('settings.community_active_badge')} severity="resolved" />}
+                            </div>
+                          </div>
+                          <div className="mt-3 flex gap-2 flex-wrap">
+                            {!isActive && (
+                              <CivicButton
+                                label={t('settings.community_switch_action')}
+                                icon="pi pi-arrow-right"
+                                type="button"
+                                variant="ghost"
+                                size="small"
+                                onClick={() => setActiveCommunityId(membership.communityId)}
+                                data-testid={`settings-community-switch-${membership.communityId}`}
+                              />
+                            )}
+                            <CivicButton
+                              label={t('settings.community_manage_action')}
+                              icon="pi pi-globe"
+                              type="button"
+                              variant="secondary"
+                              size="small"
+                              onClick={() => navigate('/communities')}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4">
+                    <p className="text-sm text-secondary m-0">{t('settings.community_membership_empty_desc')}</p>
+                    <div className="mt-3">
+                      <CivicButton
+                        label={t('settings.community_join_action')}
+                        icon="pi pi-users"
+                        type="button"
+                        onClick={() => navigate('/communities')}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </CivicCard>
           </div>

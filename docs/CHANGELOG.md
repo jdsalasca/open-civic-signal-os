@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Community-Centered Identity Surface**: Settings now shows the communities a user belongs to, active community path, visible role/rank, and direct switching/management actions so community belonging becomes part of product identity instead of hidden system state. (`community UX`)
 - **Persisted Interface Modes**: Added backend-owned `interfaceMode` profile preference, simple-vs-advanced shell behavior, Settings controls, contract updates, and validation coverage so interface complexity can be reduced without losing advanced workspace depth. (`story:OCS-P1-032`)
 - **Visual Core Refresh Foundation**: Established a warmer community-first visual system across the shell, shared UI primitives, dashboard hero, navigation hierarchy, and typographic identity to make the product feel less generic and easier to inhabit. (`story:OCS-P1-032` foundation)
 - **Official Announcements Channel**: Added pinned official updates, searchable announcement archive, archive metadata, and a clearer official-only communication surface in the community blog workflow. (`story:OCS-P1-033`)

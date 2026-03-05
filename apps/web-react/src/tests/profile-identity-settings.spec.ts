@@ -38,5 +38,7 @@ test.describe('Profile Identity Settings', () => {
     await expect(page.getByTestId('profile-settings-card')).toContainText('Shared community only');
     await expect(page.getByTestId('profile-settings-card')).toContainText('Admins only');
     await expect(page.getByTestId('profile-settings-card')).toContainText('Authority');
+    await expect(page.getByTestId('settings-community-memberships-card')).toContainText('Community belonging');
+    await expect(page.getByTestId('settings-community-memberships-card')).toContainText('Communities');
   });
 });

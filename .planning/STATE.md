@@ -65,6 +65,7 @@ Progress: [██████████] 98%
 - 2026-03-05: Implemented OCS-P1-033 with pinned official announcements, archive search/mutation support, and a more legible official updates channel.
 - 2026-03-05: Established the visual core refresh foundation for OCS-P1-032 with a new community-first shell, shared design primitives, typographic identity, and a redesigned dashboard hero validated in Docker.
 - 2026-03-05: Extended OCS-P1-032 with persisted `interfaceMode` profile preference, simple/advanced settings controls, backend contract storage, and shell/dashboard behavior changes.
+- 2026-03-05: Refocused identity UX around communities by exposing membership count, active community path, visible role/rank, and direct community actions inside Settings and shell chrome.
 
 ### Pending Todos
 
