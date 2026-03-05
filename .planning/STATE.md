@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 3 of 3 (Community Workflow Scalability)  
-Plan: 2 of 3 in current phase  
+Plan: 3 of 3 in current phase  
 Status: In progress  
-Last activity: 2026-03-04 - Completed thread paging/filter scalability hardening (Phase 3 plan 03-01)
+Last activity: 2026-03-04 - Completed global community context persistence hardening (Phase 3 plan 03-02)
 
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: ~28m
-- Total execution time: ~4.0 hours
+- Total execution time: ~4.6 hours
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: [████████░░] 80%
 |-------|-------|-------|----------|
 | 1 | 3 | 85m | 28m |
 | 2 | 4 | 115m | 29m |
-| 3 | 1 | 40m | 40m |
+| 3 | 2 | 76m | 38m |
 
 **Recent Trend:**
-- Last 5 plans: 30m, 25m, 35m, 25m, 40m
+- Last 5 plans: 25m, 35m, 25m, 40m, 36m
 - Trend: Stable to improving
 
 ## Accumulated Context
@@ -45,6 +45,7 @@ Progress: [████████░░] 80%
 - 2026-03-04: Added deterministic ingest path for reproducible replay and deduplicated merges.
 - 2026-03-04: Added backend + frontend degraded auth resend coverage to protect onboarding trust path.
 - 2026-03-04: Refactored thread retrieval to batch message/reaction loading and reduce avoidable fan-out queries.
+- 2026-03-04: Hardened community store validation so membership refresh preserves valid active community context.
 
 ### Pending Todos
 
@@ -58,5 +59,5 @@ See: `docs/community/current-backlog.md` (critical fix backlog, 2026-02-19 and 2
 ## Session Continuity
 
 Last session: 2026-03-04  
-Stopped at: Completed phase 3 plan 03-01; next target is 03-02 (community state persistence across route transitions)  
+Stopped at: Completed phase 3 plan 03-02; next target is 03-03 (blog/feed engagement fan-out reduction)  
 Resume file: None

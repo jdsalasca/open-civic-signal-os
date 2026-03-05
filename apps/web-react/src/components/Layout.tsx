@@ -39,12 +39,13 @@ export function Layout({ children, authMode = false }: Props) {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const loadMemberships = async () => {
       if (!isLoggedIn) return;
       if (!shouldRefreshMemberships(MEMBERSHIP_CACHE_TTL_MS)) return;
       try {
         const res = await apiClient.get("communities/my");
-        if (res.status === 200) {
+        if (!cancelled && res.status === 200) {
           setMemberships(res.data || []);
         }
       } catch (err) {
@@ -52,6 +53,9 @@ export function Layout({ children, authMode = false }: Props) {
       }
     };
     loadMemberships();
+    return () => {
+      cancelled = true;
+    };
   }, [isLoggedIn, setMemberships, shouldRefreshMemberships]);
 
   const handleLogout = async () => {
@@ -66,6 +70,9 @@ export function Layout({ children, authMode = false }: Props) {
   };
 
   const handleCommunitySwitch = async (communityId: string) => {
+    if (communityId === activeCommunityId) {
+      return;
+    }
     try {
       await apiClient.post(`communities/${communityId}/switch`);
       setActiveCommunityId(communityId);
