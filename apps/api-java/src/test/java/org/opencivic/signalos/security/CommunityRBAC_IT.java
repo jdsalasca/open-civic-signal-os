@@ -59,6 +59,7 @@ class CommunityRBAC_IT {
     private UUID liaisonUserId;
     private UUID targetUserId;
     private UUID threadId;
+    private UUID recentThreadId;
     private UUID staleThreadId;
     private UUID messageId;
 
@@ -95,6 +96,16 @@ class CommunityRBAC_IT {
         thread.setUpdatedAt(LocalDateTime.now());
         thread = threadRepository.save(thread);
         threadId = thread.getId();
+
+        CommunityThread recentThread = new CommunityThread();
+        recentThread.setSourceCommunityId(communityId);
+        recentThread.setTargetCommunityId(communityId);
+        recentThread.setTitle("Recent active thread for paging order");
+        recentThread.setCreatedBy(coordinatorUserId);
+        recentThread.setCreatedAt(LocalDateTime.now().minusDays(1));
+        recentThread.setUpdatedAt(LocalDateTime.now().minusHours(4));
+        recentThread = threadRepository.save(recentThread);
+        recentThreadId = recentThread.getId();
 
         CommunityThread staleThread = new CommunityThread();
         staleThread.setSourceCommunityId(communityId);
@@ -190,7 +201,30 @@ class CommunityRBAC_IT {
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()").value(1))
-            .andExpect(jsonPath("$.totalElements").value(2));
+            .andExpect(jsonPath("$.totalElements").value(3))
+            .andExpect(jsonPath("$.content[0].id").value(threadId.toString()));
+
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("page", "1")
+                    .param("size", "1")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].id").value(recentThreadId.toString()));
+
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("status", "ACTIVE")
+                    .param("page", "0")
+                    .param("size", "10")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(2))
+            .andExpect(jsonPath("$.content[0].id").value(threadId.toString()))
+            .andExpect(jsonPath("$.content[1].id").value(recentThreadId.toString()));
 
         mockMvc.perform(
                 get("/api/community/threads")
@@ -202,6 +236,15 @@ class CommunityRBAC_IT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()").value(1))
             .andExpect(jsonPath("$.content[0].id").value(staleThreadId.toString()));
+
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("page", "0")
+                    .param("size", "1")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id").value(threadId.toString()));
     }
 
     private User createUser(String username) {
