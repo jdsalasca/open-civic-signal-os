@@ -40,7 +40,7 @@ export function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeRole, userName } = useAuthStore();
-  const { activeCommunityId } = useCommunityStore();
+  const { activeCommunityId, memberships } = useCommunityStore();
   
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -182,6 +182,76 @@ export function Dashboard() {
   };
 
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
+  const activeMembership = useMemo(
+    () =>
+      memberships.find((membership) => membership.communityId === activeCommunityId) ??
+      memberships[0] ??
+      null,
+    [activeCommunityId, memberships]
+  );
+  const isCommunityModerator =
+    activeMembership?.role === "MODERATOR" || activeMembership?.role === "COORDINATOR";
+
+  const guidedHome = useMemo(() => {
+    if (isStaff) {
+      return {
+        personaLabel: t("dashboard.guided_home.public_servant.persona"),
+        heroTitle: t("dashboard.guided_home.public_servant.hero_title"),
+        heroSubtitle: t("dashboard.guided_home.public_servant.hero_subtitle"),
+        heroGuidance: t("dashboard.guided_home.public_servant.hero_guidance"),
+        primaryActionLabel: t("dashboard.guided_home.public_servant.primary_action"),
+        primaryActionIcon: "pi pi-megaphone",
+        primaryAction: () => navigate("/communities/blog"),
+        cardTitle: t("dashboard.guided_home.public_servant.card_title"),
+        cardDescription: t("dashboard.guided_home.public_servant.card_description"),
+        steps: [
+          t("dashboard.guided_home.public_servant.step_1"),
+          t("dashboard.guided_home.public_servant.step_2"),
+          t("dashboard.guided_home.public_servant.step_3"),
+        ],
+      };
+    }
+
+    if (isCommunityModerator) {
+      return {
+        personaLabel: t("dashboard.guided_home.moderator.persona"),
+        heroTitle: t("dashboard.guided_home.moderator.hero_title"),
+        heroSubtitle: t("dashboard.guided_home.moderator.hero_subtitle"),
+        heroGuidance: t("dashboard.guided_home.moderator.hero_guidance", {
+          community: activeMembership?.communityName ?? t("dashboard.community_default"),
+        }),
+        primaryActionLabel: t("dashboard.guided_home.moderator.primary_action"),
+        primaryActionIcon: "pi pi-comments",
+        primaryAction: () => navigate("/communities/threads"),
+        cardTitle: t("dashboard.guided_home.moderator.card_title"),
+        cardDescription: t("dashboard.guided_home.moderator.card_description", {
+          community: activeMembership?.communityName ?? t("dashboard.community_default"),
+        }),
+        steps: [
+          t("dashboard.guided_home.moderator.step_1"),
+          t("dashboard.guided_home.moderator.step_2"),
+          t("dashboard.guided_home.moderator.step_3"),
+        ],
+      };
+    }
+
+    return {
+      personaLabel: t("dashboard.guided_home.citizen.persona"),
+      heroTitle: t("dashboard.guided_home.citizen.hero_title"),
+      heroSubtitle: t("dashboard.guided_home.citizen.hero_subtitle"),
+      heroGuidance: t("dashboard.guided_home.citizen.hero_guidance"),
+      primaryActionLabel: t("dashboard.guided_home.citizen.primary_action"),
+      primaryActionIcon: "pi pi-plus",
+      primaryAction: () => navigate("/report"),
+      cardTitle: t("dashboard.guided_home.citizen.card_title"),
+      cardDescription: t("dashboard.guided_home.citizen.card_description"),
+      steps: [
+        t("dashboard.guided_home.citizen.step_1"),
+        t("dashboard.guided_home.citizen.step_2"),
+        t("dashboard.guided_home.citizen.step_3"),
+      ],
+    };
+  }, [activeMembership?.communityName, isCommunityModerator, isStaff, navigate, t]);
 
   const formatLastUpdated = (isoDate: string | null) => {
     if (!isoDate) return t('dashboard.freshness_pending');
@@ -220,28 +290,32 @@ export function Dashboard() {
                 <i className="pi pi-user text-brand-primary"></i>
                 {userName}
               </div>
+              <div className="u-pill" data-testid="dashboard-guided-persona">
+                <i className="pi pi-compass text-brand-primary"></i>
+                {guidedHome.personaLabel}
+              </div>
               <div className="u-pill" data-testid="dashboard-freshness-badge">
                 <i className="pi pi-clock text-brand-primary"></i>
                 {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-black m-0 tracking-tight text-main line-height-2">
-              {t('dashboard.focus_today')}
+              {guidedHome.heroTitle}
             </h1>
             <p className="text-secondary text-lg mt-3 mb-0 font-medium max-w-30rem">
-              {t('dashboard.focus_subtitle')}
+              {guidedHome.heroSubtitle}
             </p>
             <p className="text-sm text-muted mt-3 mb-0 max-w-28rem" data-testid="dashboard-primary-guidance">
-              {t('dashboard.primary_guidance')}
+              {guidedHome.heroGuidance}
             </p>
           </div>
 
           <CivicActionBar className="dashboard-hero-actions">
             <CivicButton
               type="button"
-              label={t('dashboard.primary_action')}
-              icon="pi pi-plus"
-              onClick={() => navigate("/report")}
+              label={guidedHome.primaryActionLabel}
+              icon={guidedHome.primaryActionIcon}
+              onClick={guidedHome.primaryAction}
               className="shadow-xl"
               data-testid="dashboard-action-report"
             />
@@ -389,6 +463,22 @@ export function Dashboard() {
                   {displayedSignals.length > 0 && (
                     <CategoryChart signals={displayedSignals} />
                   )}
+                  <CivicCard title={guidedHome.cardTitle} variant="brand" data-testid="dashboard-guided-home-card">
+                    <p className="text-secondary text-sm m-0 mb-4" data-testid="dashboard-guided-home-description">
+                      {guidedHome.cardDescription}
+                    </p>
+                    <ul className="m-0 p-0 list-none flex flex-column gap-2 text-sm text-secondary">
+                      {guidedHome.steps.map((step, index) => (
+                        <li
+                          key={step}
+                          className="line-height-3"
+                          data-testid={`dashboard-guided-step-${index + 1}`}
+                        >
+                          {index + 1}. {step}
+                        </li>
+                      ))}
+                    </ul>
+                  </CivicCard>
                   {!isStaff && (
                     <CivicCard title={t('dashboard.quickstart_title')} variant="brand">
                       <p className="text-secondary text-sm m-0 mb-4">{t('dashboard.quickstart_desc')}</p>
