@@ -593,7 +593,7 @@ paths:
                 $ref: '#/components/schemas/CommunityMembership'
   /api/communities/{communityId}/memberships/{userId}/role:
     patch:
-      summary: Update community role for a member (coordinator only)
+      summary: Update community role for a member using community policy scope
       parameters:
         - in: path
           name: communityId
@@ -621,7 +621,66 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommunityMembership'
         '403':
-          description: Forbidden
+          description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/communities/{communityId}/permissions:
+    get:
+      summary: List effective permission policies for one community
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Effective permission matrix including defaults and overrides
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityPermissionPolicy'
+        '401':
+          description: User is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    put:
+      summary: Update permission policies for one community
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommunityPermissionPoliciesRequest'
+      responses:
+        '200':
+          description: Updated effective permission matrix
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityPermissionPolicy'
+        '403':
+          description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/communities/{communityId}/switch:
     post:
       summary: Validate and activate community context
@@ -687,6 +746,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityThreadResponse'
+        '403':
+          description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/threads/{threadId}/messages:
     post:
       summary: Add message to thread
@@ -710,6 +775,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityThreadMessageResponse'
+        '403':
+          description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/threads/{threadId}/messages/{messageId}/moderate:
     patch:
       summary: Hide or unhide thread message
@@ -740,7 +811,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommunityThreadMessageResponse'
         '403':
-          description: Forbidden
+          description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/threads/{threadId}/messages/{messageId}/react:
     post:
       summary: Toggle reaction on one thread message
@@ -805,7 +880,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/CommunityBlogPost'
         '403':
-          description: Forbidden
+          description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/blog/{id}/comments:
     get:
       summary: List comments for one community blog post
@@ -893,6 +972,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityBlogPost'
+        '403':
+          description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/blog/comments/count:
     get:
       summary: Get comment counts for a set of blog post IDs
@@ -956,6 +1041,37 @@ components:
           type: string
         message:
           type: string
+    CommunityPermissionDeniedError:
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+        - type: object
+          required: [code, communityId, permissionScope, currentRole, allowedRoles]
+          properties:
+            code:
+              type: string
+              enum: [COMMUNITY_PERMISSION_DENIED]
+            communityId:
+              type: string
+              format: uuid
+            permissionScope:
+              type: string
+              enum:
+                - CREATE_THREAD
+                - ADD_THREAD_MESSAGE
+                - MODERATE_THREAD_MESSAGE
+                - CREATE_OFFICIAL_UPDATE
+                - UPDATE_OFFICIAL_UPDATE
+                - MANAGE_MEMBERSHIPS
+                - MANAGE_PERMISSION_POLICIES
+                - VIEW_SENSITIVE_DATA
+            currentRole:
+              type: string
+              enum: [MEMBER, MODERATOR, COORDINATOR, PUBLIC_SERVANT_LIAISON]
+            allowedRoles:
+              type: array
+              items:
+                type: string
+                enum: [MEMBER, MODERATOR, COORDINATOR, PUBLIC_SERVANT_LIAISON]
     Notification:
       type: object
       properties:
@@ -1332,6 +1448,37 @@ components:
         createdAt:
           type: string
           format: date-time
+    CommunityPermissionPolicy:
+      type: object
+      required: [communityId, scope, allowedRoles]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        scope:
+          type: string
+          enum:
+            - CREATE_THREAD
+            - ADD_THREAD_MESSAGE
+            - MODERATE_THREAD_MESSAGE
+            - CREATE_OFFICIAL_UPDATE
+            - UPDATE_OFFICIAL_UPDATE
+            - MANAGE_MEMBERSHIPS
+            - MANAGE_PERMISSION_POLICIES
+            - VIEW_SENSITIVE_DATA
+        allowedRoles:
+          type: array
+          items:
+            type: string
+            enum: [MEMBER, MODERATOR, COORDINATOR, PUBLIC_SERVANT_LIAISON]
+        updatedBy:
+          type: string
+          format: uuid
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
     CommunityThreadMessage:
       type: object
       properties:
@@ -1559,6 +1706,36 @@ components:
         role:
           type: string
           enum: [MEMBER, MODERATOR, COORDINATOR, PUBLIC_SERVANT_LIAISON]
+    CommunityPermissionPolicyRuleRequest:
+      type: object
+      required: [scope, allowedRoles]
+      properties:
+        scope:
+          type: string
+          enum:
+            - CREATE_THREAD
+            - ADD_THREAD_MESSAGE
+            - MODERATE_THREAD_MESSAGE
+            - CREATE_OFFICIAL_UPDATE
+            - UPDATE_OFFICIAL_UPDATE
+            - MANAGE_MEMBERSHIPS
+            - MANAGE_PERMISSION_POLICIES
+            - VIEW_SENSITIVE_DATA
+        allowedRoles:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [MEMBER, MODERATOR, COORDINATOR, PUBLIC_SERVANT_LIAISON]
+    UpdateCommunityPermissionPoliciesRequest:
+      type: object
+      required: [policies]
+      properties:
+        policies:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/CommunityPermissionPolicyRuleRequest'
     CreateCommunityThreadRequest:
       type: object
       required: [sourceCommunityId, targetCommunityId, title]

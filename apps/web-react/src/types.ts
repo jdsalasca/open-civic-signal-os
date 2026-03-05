@@ -115,6 +115,24 @@ export type CommunityMembership = {
   createdAt: string;
 };
 
+export type CommunityPermissionScope =
+  | "CREATE_THREAD"
+  | "ADD_THREAD_MESSAGE"
+  | "MODERATE_THREAD_MESSAGE"
+  | "CREATE_OFFICIAL_UPDATE"
+  | "UPDATE_OFFICIAL_UPDATE"
+  | "MANAGE_MEMBERSHIPS"
+  | "MANAGE_PERMISSION_POLICIES"
+  | "VIEW_SENSITIVE_DATA";
+
+export type CommunityPermissionPolicy = {
+  communityId: string;
+  scope: CommunityPermissionScope;
+  allowedRoles: CommunityMembership["role"][];
+  updatedBy?: string | null;
+  updatedAt?: string | null;
+};
+
 export type CommunityThreadMessage = {
   id: string;
   threadId: string;

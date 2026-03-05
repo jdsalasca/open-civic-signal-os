@@ -2,7 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { Community, CommunityMembership, CommunityTreeNode } from "../types";
+import {
+  Community,
+  CommunityMembership,
+  CommunityPermissionPolicy,
+  CommunityPermissionScope,
+  CommunityTreeNode,
+} from "../types";
 import { Layout } from "../components/Layout";
 import apiClient from "../api/axios";
 import { useCommunityStore } from "../store/useCommunityStore";
@@ -16,6 +22,17 @@ import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { useTranslation } from "react-i18next";
 
 type ApiError = Error & { friendlyMessage?: string };
+
+const permissionScopeOrder: CommunityPermissionScope[] = [
+  "CREATE_THREAD",
+  "ADD_THREAD_MESSAGE",
+  "MODERATE_THREAD_MESSAGE",
+  "CREATE_OFFICIAL_UPDATE",
+  "UPDATE_OFFICIAL_UPDATE",
+  "MANAGE_MEMBERSHIPS",
+  "MANAGE_PERMISSION_POLICIES",
+  "VIEW_SENSITIVE_DATA",
+];
 
 function CommunityTreeBranch({
   nodes,
@@ -91,6 +108,9 @@ export function Communities() {
   const { memberships, setMemberships, setActiveCommunityId, activeCommunityId, getActiveMembership } = useCommunityStore();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [communityTree, setCommunityTree] = useState<CommunityTreeNode[]>([]);
+  const [permissionPolicies, setPermissionPolicies] = useState<CommunityPermissionPolicy[]>([]);
+  const [loadingPolicies, setLoadingPolicies] = useState(false);
+  const [savingPolicies, setSavingPolicies] = useState(false);
   const [selectedCommunityId, setSelectedCommunityId] = useState<string>("");
   const [joinRole, setJoinRole] = useState<string>("MEMBER");
   const [creating, setCreating] = useState(false);
@@ -118,6 +138,34 @@ export function Communities() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const loadPolicies = useCallback(async (communityId: string) => {
+    setLoadingPolicies(true);
+    try {
+      const response = await apiClient.get(`communities/${communityId}/permissions`);
+      setPermissionPolicies(
+        permissionScopeOrder
+          .map((scope) =>
+            (response.data || []).find((policy: CommunityPermissionPolicy) => policy.scope === scope)
+          )
+          .filter(Boolean)
+      );
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("communities_hub.permissions_load_error"));
+      setPermissionPolicies([]);
+    } finally {
+      setLoadingPolicies(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    if (!activeCommunityId) {
+      setPermissionPolicies([]);
+      return;
+    }
+    loadPolicies(activeCommunityId);
+  }, [activeCommunityId, loadPolicies]);
 
   const handleJoin = async () => {
     if (!selectedCommunityId) return;
@@ -198,11 +246,83 @@ export function Communities() {
     [roleOptions]
   );
   const activeRoleLabel = activeMembership ? roleLabels[activeMembership.role] ?? activeMembership.role : null;
+  const isPolicyEditor = activeMembership?.role === "COORDINATOR";
+  const scopeLabelMap = useMemo(
+    () =>
+      Object.fromEntries(
+        permissionScopeOrder.map((scope) => [scope, t(`communities_hub.permissions_scope.${scope}`)])
+      ),
+    [t]
+  );
+  const policyRows = useMemo(
+    () =>
+      permissionScopeOrder.map((scope) => {
+        const existingPolicy = permissionPolicies.find((policy) => policy.scope === scope);
+        return {
+          scope,
+          allowedRoles: existingPolicy?.allowedRoles ?? [],
+        };
+      }),
+    [permissionPolicies]
+  );
 
   const unjoinedCommunityOptions = useMemo(() => {
     const joinedIds = new Set(memberships.map((membership) => membership.communityId));
     return communityOptions.filter((option) => !joinedIds.has(option.value));
   }, [communityOptions, memberships]);
+
+  const togglePolicyRole = (scope: CommunityPermissionScope, role: CommunityMembership["role"]) => {
+    if (!isPolicyEditor) {
+      return;
+    }
+    setPermissionPolicies((current) =>
+      permissionScopeOrder.map((orderedScope) => {
+        const existing = current.find((policy) => policy.scope === orderedScope) ?? {
+          communityId: activeCommunityId ?? "",
+          scope: orderedScope,
+          allowedRoles: [],
+        };
+        if (orderedScope !== scope) {
+          return existing;
+        }
+        const hasRole = existing.allowedRoles.includes(role);
+        const nextRoles = hasRole
+          ? existing.allowedRoles.filter((item) => item !== role)
+          : [...existing.allowedRoles, role];
+        return {
+          ...existing,
+          allowedRoles: nextRoles,
+        };
+      }).filter((policy) => policy.allowedRoles.length > 0)
+    );
+  };
+
+  const handleSavePolicies = async () => {
+    if (!activeCommunityId) {
+      return;
+    }
+    const invalidPolicy = policyRows.find((policy) => policy.allowedRoles.length === 0);
+    if (invalidPolicy) {
+      toast.error(t("communities_hub.permissions_empty_role_error", { scope: scopeLabelMap[invalidPolicy.scope] }));
+      return;
+    }
+    setSavingPolicies(true);
+    try {
+      const response = await apiClient.put(`communities/${activeCommunityId}/permissions`, {
+        policies: policyRows.map((policy) => ({
+          scope: policy.scope,
+          allowedRoles: policy.allowedRoles,
+        })),
+      });
+      setPermissionPolicies(response.data || []);
+      toast.success(t("communities_hub.permissions_save_success"));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("communities_hub.permissions_save_error"));
+    } finally {
+      setSavingPolicies(false);
+    }
+  };
 
   return (
     <Layout>
@@ -314,6 +434,100 @@ export function Communities() {
                     />
                   )}
                 </div>
+              </div>
+            </CivicCard>
+
+            <CivicCard
+              title={t("communities_hub.permissions_title")}
+              className="h-full"
+              data-testid="community-permission-card"
+            >
+              <div className="flex flex-column gap-4">
+                <div className="flex justify-content-between align-items-start gap-3 flex-wrap">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-secondary text-sm m-0 leading-relaxed">
+                      {t("communities_hub.permissions_desc")}
+                    </p>
+                    <p className="text-xs text-muted mt-2 mb-0">
+                      {activeMembership
+                        ? t("communities_hub.permissions_context", {
+                            community: activeMembership.communityName,
+                            role: activeRoleLabel ?? activeMembership.role,
+                          })
+                        : t("communities_hub.permissions_no_context")}
+                    </p>
+                  </div>
+                  <CivicBadge
+                    label={isPolicyEditor ? t("communities_hub.permissions_editor_badge") : t("communities_hub.permissions_read_only_badge")}
+                    severity={isPolicyEditor ? "progress" : "neutral"}
+                  />
+                </div>
+
+                {!activeMembership ? (
+                  <CivicEmptyState
+                    icon="pi-shield"
+                    title={t("communities_hub.permissions_empty_title")}
+                    description={t("communities_hub.permissions_empty_desc")}
+                  />
+                ) : loadingPolicies ? (
+                  <p className="text-secondary text-sm m-0">{t("common.loading")}</p>
+                ) : (
+                  <>
+                    {!isPolicyEditor && (
+                      <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-3" data-testid="community-permission-readonly-note">
+                        <p className="text-sm text-secondary m-0">
+                          {t("communities_hub.permissions_read_only_note", {
+                            role: activeRoleLabel ?? activeMembership.role,
+                          })}
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex flex-column gap-3">
+                      {policyRows.map((policy) => (
+                        <div
+                          key={policy.scope}
+                          className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4"
+                          data-testid={`community-permission-row-${policy.scope}`}
+                        >
+                          <div className="flex flex-column gap-3">
+                            <div>
+                              <div className="font-bold text-main">{scopeLabelMap[policy.scope]}</div>
+                              <div className="text-xs text-muted mt-1">{policy.scope}</div>
+                            </div>
+                            <div className="flex gap-2 flex-wrap">
+                              {roleOptions.map((roleOption) => {
+                                const selected = policy.allowedRoles.includes(roleOption.value as CommunityMembership["role"]);
+                                return (
+                                  <CivicButton
+                                    key={`${policy.scope}-${roleOption.value}`}
+                                    label={roleOption.label}
+                                    type="button"
+                                    size="small"
+                                    variant={selected ? "secondary" : "ghost"}
+                                    onClick={() => togglePolicyRole(policy.scope, roleOption.value as CommunityMembership["role"])}
+                                    disabled={!isPolicyEditor}
+                                    data-testid={`community-permission-toggle-${policy.scope}-${roleOption.value}`}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-content-end">
+                      <CivicButton
+                        label={t("communities_hub.permissions_save_action")}
+                        icon="pi pi-check"
+                        type="button"
+                        onClick={handleSavePolicies}
+                        disabled={!isPolicyEditor || savingPolicies || policyRows.length === 0}
+                        data-testid="community-permission-save-button"
+                        glow
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </CivicCard>
           </div>

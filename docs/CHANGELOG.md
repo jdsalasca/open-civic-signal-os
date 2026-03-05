@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Community Permission Policy Matrix**: Added backend-owned per-community permission scopes, editable policy overrides, structured permission-denied responses, and Communities hub controls for coordinators to govern collaboration actions without frontend-owned RBAC logic. (`story:OCS-P1-031`)
 - **Docker Dev Runtime Guardrail**: Added a canonical `docker:dev` wrapper with health-aware startup, Docker availability checks, and explicit agent guidance so integrated frontend/backend work always uses the hot-reload compose stack. (`devex`)
 - **Hierarchical Communities**: Added backend-owned parent/child communities, membership breadcrumbs, tree navigation endpoints, and a hierarchy-aware communities hub so users can operate inside nested civic spaces without guessing context. (`story:OCS-P1-030`)
 - **Civic Identity Profiles**: Added backend-enforced civic profile editing and audience-filtered visibility controls for role, bio, and affiliations, surfaced through the Settings experience. (story:OCS-P1-029)

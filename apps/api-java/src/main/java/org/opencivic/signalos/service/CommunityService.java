@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityMembership;
 import org.opencivic.signalos.domain.CommunityMembershipAudit;
+import org.opencivic.signalos.domain.CommunityPermissionScope;
 import org.opencivic.signalos.domain.CommunityRole;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
@@ -137,11 +138,7 @@ public class CommunityService {
         String username
     ) {
         User actor = accessService.getCurrentUser(username);
-        accessService.requireAnyRole(
-            actor.getId(),
-            communityId,
-            java.util.Set.of(CommunityRole.COORDINATOR)
-        );
+        accessService.requireScope(actor.getId(), communityId, CommunityPermissionScope.MANAGE_MEMBERSHIPS);
         userRepository.findById(targetUserId)
             .orElseThrow(() -> new ResourceNotFoundException("Target user not found: " + targetUserId));
         CommunityMembership membership = membershipRepository

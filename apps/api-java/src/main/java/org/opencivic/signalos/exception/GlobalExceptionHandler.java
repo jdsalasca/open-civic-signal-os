@@ -54,6 +54,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleForbidden(AccessDeniedException ex) {
+        if (ex instanceof CommunityPermissionDeniedException permissionDeniedException) {
+            return new ResponseEntity<>(Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.FORBIDDEN.value(),
+                "error", HttpStatus.FORBIDDEN.getReasonPhrase(),
+                "message", permissionDeniedException.getMessage(),
+                "code", "COMMUNITY_PERMISSION_DENIED",
+                "communityId", permissionDeniedException.getCommunityId(),
+                "permissionScope", permissionDeniedException.getScope().name(),
+                "currentRole", permissionDeniedException.getCurrentRole().name(),
+                "allowedRoles", permissionDeniedException.getAllowedRoles().stream().map(Enum::name).sorted().toList()
+            ), HttpStatus.FORBIDDEN);
+        }
         return buildResponse(HttpStatus.FORBIDDEN, "Security clearance insufficient for this sector.");
     }
 

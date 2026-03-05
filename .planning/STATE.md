@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 2 of 5 in current phase  
+Plan: 3 of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-05 - Extended Phase 5 foundations with hierarchical communities, backend breadcrumbs, and hierarchy-aware community navigation (Phase 5 plan 05-02)
+Last activity: 2026-03-05 - Implemented community-scoped permission policies, structured permission-denied contracts, and editable policy matrix UX (Phase 5 plan 05-03)
 
-Progress: [█████████░] 93%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -31,10 +31,10 @@ Progress: [█████████░] 93%
 | 2 | 4 | 115m | 29m |
 | 3 | 3 | 113m | 38m |
 | 4 | 4 | 88m | 22m |
-| 5 | 1 | 28m | 28m |
+| 5 | 2 | 58m | 29m |
 
 **Recent Trend:**
-- Last 5 plans: 37m, 22m, 21m, 24m, 28m
+- Last 5 plans: 22m, 21m, 24m, 28m, 30m
 - Trend: Stable
 
 ## Accumulated Context
@@ -61,6 +61,7 @@ Progress: [█████████░] 93%
 - 2026-03-05: Opened Phase 5 for identity, communication, deliberation, execution, governance, and transparency expansion.
 - 2026-03-05: Implemented OCS-P1-029 with persisted civic profiles, audience-based visibility filtering, Settings UX, contract, and ADR updates.
 - 2026-03-05: Implemented OCS-P1-030 with nested community hierarchy, breadcrumb contract support, seeded child spaces, and hierarchy-aware Communities UX.
+- 2026-03-05: Implemented OCS-P1-031 with backend-owned community permission scopes, structured 403 permission responses, policy overrides, and coordinator-facing policy matrix UX.
 
 ### Pending Todos
 
@@ -75,10 +76,11 @@ See:
 
 - JAVA_HOME is not globally configured on this workstation; backend validation requires setting it per shell session.
 - Existing duplicate-email Playwright case is flaky/not deterministic in current environment and should be stabilized.
+- Local frontend E2E execution still depends on workspace dependencies living in Docker volumes; use Docker runtime or wrapper commands, not raw host `npx playwright`.
 
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Implemented `OCS-P1-030`; next target is `OCS-P1-031` flexible scopes/permissions foundations  
+Stopped at: Implemented `OCS-P1-031`; next target is `OCS-P1-033` community wall/discussion foundations  
 Resume file: None
 

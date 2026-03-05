@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.opencivic.signalos.domain.CommunityBlogPost;
-import org.opencivic.signalos.domain.CommunityRole;
+import org.opencivic.signalos.domain.CommunityPermissionScope;
 import org.opencivic.signalos.domain.CommunityThread;
 import org.opencivic.signalos.domain.CommunityThreadMessage;
 import org.opencivic.signalos.domain.Signal;
@@ -113,7 +113,7 @@ public class CommunityCollaborationService {
         String username
     ) {
         User user = accessService.getCurrentUser(username);
-        accessService.requireMembership(user.getId(), sourceCommunityId);
+        accessService.requireScope(user.getId(), sourceCommunityId, CommunityPermissionScope.CREATE_THREAD);
         accessService.requireMembership(user.getId(), targetCommunityId);
         CommunityThread thread = new CommunityThread();
         thread.setSourceCommunityId(sourceCommunityId);
@@ -136,16 +136,7 @@ public class CommunityCollaborationService {
         String username
     ) {
         User user = accessService.getCurrentUser(username);
-        accessService.requireAnyRole(
-            user.getId(),
-            sourceCommunityId,
-            Set.of(
-                CommunityRole.MEMBER,
-                CommunityRole.MODERATOR,
-                CommunityRole.COORDINATOR,
-                CommunityRole.PUBLIC_SERVANT_LIAISON
-            )
-        );
+        accessService.requireScope(user.getId(), sourceCommunityId, CommunityPermissionScope.ADD_THREAD_MESSAGE);
         CommunityThread thread = threadRepository.findById(threadId)
             .orElseThrow(() -> new ResourceNotFoundException("Thread not found: " + threadId));
         if (!thread.getSourceCommunityId().equals(sourceCommunityId)
@@ -187,8 +178,8 @@ public class CommunityCollaborationService {
         User user = accessService.getCurrentUser(username);
         CommunityThread thread = threadRepository.findById(threadId)
             .orElseThrow(() -> new ResourceNotFoundException("Thread not found: " + threadId));
-        boolean canModerateSource = hasModerationRole(user.getId(), thread.getSourceCommunityId());
-        boolean canModerateTarget = hasModerationRole(user.getId(), thread.getTargetCommunityId());
+        boolean canModerateSource = hasScope(user.getId(), thread.getSourceCommunityId(), CommunityPermissionScope.MODERATE_THREAD_MESSAGE);
+        boolean canModerateTarget = hasScope(user.getId(), thread.getTargetCommunityId(), CommunityPermissionScope.MODERATE_THREAD_MESSAGE);
         if (!canModerateSource && !canModerateTarget) {
             throw new org.springframework.security.access.AccessDeniedException(
                 "Moderator or coordinator role required."
@@ -234,11 +225,7 @@ public class CommunityCollaborationService {
         String username
     ) {
         User user = accessService.getCurrentUser(username);
-        accessService.requireAnyRole(
-            user.getId(),
-            communityId,
-            Set.of(CommunityRole.PUBLIC_SERVANT_LIAISON, CommunityRole.COORDINATOR)
-        );
+        accessService.requireScope(user.getId(), communityId, CommunityPermissionScope.CREATE_OFFICIAL_UPDATE);
         CommunityBlogPost post = new CommunityBlogPost();
         post.setCommunityId(communityId);
         post.setAuthorId(user.getId());
@@ -261,11 +248,7 @@ public class CommunityCollaborationService {
         User user = accessService.getCurrentUser(username);
         CommunityBlogPost post = blogPostRepository.findById(postId)
             .orElseThrow(() -> new ResourceNotFoundException("Community blog post not found: " + postId));
-        accessService.requireAnyRole(
-            user.getId(),
-            post.getCommunityId(),
-            Set.of(CommunityRole.PUBLIC_SERVANT_LIAISON, CommunityRole.COORDINATOR)
-        );
+        accessService.requireScope(user.getId(), post.getCommunityId(), CommunityPermissionScope.UPDATE_OFFICIAL_UPDATE);
         post.setTitle(title);
         post.setContent(content);
         post.setStatusTag(statusTag);
@@ -329,13 +312,9 @@ public class CommunityCollaborationService {
             .toList();
     }
 
-    private boolean hasModerationRole(UUID userId, UUID communityId) {
+    private boolean hasScope(UUID userId, UUID communityId, CommunityPermissionScope scope) {
         try {
-            accessService.requireAnyRole(
-                userId,
-                communityId,
-                Set.of(CommunityRole.MODERATOR, CommunityRole.COORDINATOR)
-            );
+            accessService.requireScope(userId, communityId, scope);
             return true;
         } catch (RuntimeException ex) {
             return false;
