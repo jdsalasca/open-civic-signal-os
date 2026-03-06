@@ -256,7 +256,7 @@ export function Layout({ children, authMode = false }: Props) {
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
               <div className="flex flex-column overflow-hidden">
                 <span className="text-sm font-black text-main app-user-name">{userName}</span>
-                <span className="text-min font-bold text-muted nav-clearance-label app-user-role">
+                <span className="text-xs font-bold text-muted nav-clearance-label app-user-role">
                   {t('nav.clearance')}: {toRoleLabel(activeRole, t)}
                 </span>
               </div>
@@ -312,7 +312,7 @@ export function Layout({ children, authMode = false }: Props) {
                   itemTemplate={(option) => (
                     <div className="flex flex-column py-1">
                       <span className="font-black text-sm layout-community-option-label">{option.label}</span>
-                      <small className="text-muted text-min mt-1 layout-community-option-role">{toRoleLabel(option.role, t)}</small>
+                      <small className="text-muted text-xs mt-1 layout-community-option-role">{toRoleLabel(option.role, t)}</small>
                     </div>
                   )}
                 />

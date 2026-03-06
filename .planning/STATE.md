@@ -115,3 +115,5 @@ Resume file: None
 - 2026-03-05: Removed another set of residual legacy alpha utilities from dashboard, report wizard, and communities so steppers, membership rows, and dialog inputs now inherit the same semantic surface/border system as the rest of the refreshed UI.
 
 - 2026-03-05: Polished another residual UX pass by aligning blog/thread metadata borders, calming thread meta tracking, and replacing remaining overly technical mono-style identifiers in user-facing contribution lists.
+
+- 2026-03-05: Aligned the remaining error-state and shell microcopy layer by localizing the 404 view and replacing harsher micro-label sizing in the shared layout with calmer, more legible text tokens.

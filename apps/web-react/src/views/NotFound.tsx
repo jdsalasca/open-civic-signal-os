@@ -2,8 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { Layout } from "../components/Layout";
+import { useTranslation } from "react-i18next";
 
 export function NotFound() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -14,23 +16,23 @@ export function NotFound() {
             <div className="inline-flex align-items-center justify-content-center p-4 bg-surface border-round-3xl mb-6 border-1 border-subtle">
               <i className="pi pi-map text-5xl text-status-rejected"></i>
             </div>
-            <h1 className="text-6xl font-black text-main m-0 tracking-tighter">404</h1>
-            <h2 className="text-2xl font-bold text-main mt-2 tracking-tight">Sector Not Found</h2>
+            <h1 className="text-6xl font-black text-main m-0 tracking-tighter">{t('exceptions.404_title')}</h1>
+            <h2 className="text-2xl font-bold text-main mt-2 tracking-tight">{t('exceptions.404_subtitle')}</h2>
             <p className="text-secondary mt-4 mb-0 font-medium leading-relaxed">
-              The coordinate you are trying to access does not exist in the current civic grid.
+              {t('exceptions.404_desc')}
             </p>
           </div>
 
           <div className="flex flex-column gap-3">
             <CivicButton
-              label="Return to Command Center"
+              label={t('exceptions.404_home')}
               icon="pi pi-home"
               className="py-4 text-base"
               onClick={() => navigate("/")}
               glow
             />
             <CivicButton
-              label="Report System Anomaly"
+              label={t('exceptions.404_verify')}
               variant="ghost"
               icon="pi pi-info-circle"
               className="text-xs"
