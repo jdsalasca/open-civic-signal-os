@@ -49,12 +49,12 @@ export function MetricsGrid({ signals, onMetricSelect }: Props) {
                 : undefined
             }
           >
-            <div className="flex justify-content-between align-items-center">
-              <div className="flex flex-column gap-1">
-                <span className="text-muted font-black uppercase tracking-widest text-xs" aria-hidden="true">{m.title}</span>
-                <div className={`text-4xl font-black ${m.color} tracking-tight`} data-testid={`metric-value-${m.id}`}>{m.value}</div>
+            <div className="u-metric-shell">
+              <div className="u-metric-copy">
+                <span className="u-eyebrow" aria-hidden="true">{m.title}</span>
+                <div className={`u-metric-value ${m.color}`} data-testid={`metric-value-${m.id}`}>{m.value}</div>
               </div>
-              <div className="flex align-items-center justify-content-center bg-white-alpha-5 border-round-xl shadow-4 border-1 border-white-alpha-10" style={{ width: '3.5rem', height: '3.5rem' }} aria-hidden="true">
+              <div className="u-metric-icon-shell shadow-4" aria-hidden="true">
                 <i className={`pi ${m.icon} text-2xl ${m.color}`}></i>
               </div>
             </div>

@@ -62,7 +62,7 @@ function CommunityTreeBranch({
         return (
           <div key={node.id} className="flex flex-column gap-2">
             <div
-              className="border-round-xl border-1 p-3 bg-white-alpha-5"
+              className="community-tree-card"
               style={{ marginLeft: `${level * 1.25}rem` }}
             >
               <div className="flex justify-content-between align-items-start gap-3 flex-wrap">
@@ -337,10 +337,10 @@ export function Communities() {
         <CivicPageHeader title={t('communities_hub.title')} description={t('communities_hub.desc')} />
         <CivicActionBar className="mb-6" data-testid="communities-map-entrybar">
           <div className="flex-1 min-w-0">
-            <div className="text-xs font-black uppercase tracking-widest text-muted mb-1">
+            <div className="u-eyebrow mb-1">
               {t("community_map.communities_entry_label")}
             </div>
-            <p className="text-sm text-secondary m-0">
+            <p className="u-section-copy text-sm m-0">
               {t("community_map.communities_entry_desc")}
             </p>
           </div>
@@ -358,7 +358,7 @@ export function Communities() {
           <div className="col-12 lg:col-7">
             <CivicCard title={t('communities_hub.memberships_title')} className="h-full mb-6">
               <div className="flex flex-column gap-4">
-                <div className="civic-stat-grid" data-testid="active-community-breadcrumb-card">
+                <div className="civic-stat-grid civic-stat-grid-comfortable" data-testid="active-community-breadcrumb-card">
                   <CivicStatCard
                     label={t('communities_hub.active_path_label')}
                     value={activeMembership?.communityName ?? t('settings.community_none')}
@@ -416,12 +416,12 @@ export function Communities() {
                   {memberships.map((membership) => (
                     <div
                       key={`${membership.communityId}-${membership.userId}`}
-                      className="flex justify-content-between align-items-center p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10 hover:border-white-alpha-20 transition-colors gap-3 flex-wrap"
+                      className="community-membership-row flex justify-content-between align-items-center hover:border-white-alpha-20 transition-colors gap-3 flex-wrap"
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="font-black text-main uppercase tracking-tight">{membership.communityName}</div>
-                        <div className="text-xs font-mono text-muted mt-1">/{membership.communitySlug}</div>
-                        <div className="text-xs text-secondary mt-2">
+                        <div className="u-list-item-title">{membership.communityName}</div>
+                        <div className="text-xs text-muted u-meta-value mt-1">/{membership.communitySlug}</div>
+                        <div className="u-list-item-copy text-xs mt-2">
                           {membership.breadcrumb.map((item) => item.name).join(' / ')}
                         </div>
                       </div>
@@ -499,8 +499,8 @@ export function Communities() {
                 ) : (
                   <>
                     {!isPolicyEditor && (
-                      <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-3" data-testid="community-permission-readonly-note">
-                        <p className="text-sm text-secondary m-0">
+                      <div className="u-surface-note" data-testid="community-permission-readonly-note">
+                        <p className="u-section-copy text-sm m-0">
                           {t("communities_hub.permissions_read_only_note", {
                             role: activeRoleLabel ?? activeMembership.role,
                           })}
@@ -511,7 +511,7 @@ export function Communities() {
                       {policyRows.map((policy) => (
                         <div
                           key={policy.scope}
-                          className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4"
+                          className="community-policy-row"
                           data-testid={`community-permission-row-${policy.scope}`}
                         >
                           <div className="flex flex-column gap-3">

@@ -10,6 +10,8 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -55,15 +57,24 @@ export function Moderation() {
     <Layout>
       <div className="animate-fade-up">
         <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-10 gap-4">
-          <div>
-            <h1 className="text-5xl font-black mb-2 text-main tracking-tighter uppercase">Triage Terminal</h1>
-            <p className="text-secondary text-lg font-medium opacity-70">Securing community data integrity via high-level review.</p>
+          <div className="min-w-0 flex-1">
+            <CivicPageHeader
+              title="Triage Terminal"
+              description="Securing community data integrity via high-level review."
+              className="mb-0"
+              eyebrow="Moderation"
+            />
           </div>
           
-          <div className="flex gap-4">
-            <div className="flex flex-column align-items-end">
-              <span className="text-xs font-black text-muted uppercase tracking-widest">Queue Status</span>
-              <span className="text-2xl font-black text-brand-primary tabular-nums">{flagged.length} Pending</span>
+          <div className="flex gap-4 align-items-stretch flex-wrap">
+            <div className="w-full sm:w-16rem">
+              <CivicStatCard
+                label="Queue Status"
+                value={`${flagged.length} Pending`}
+                supportingText="Signals waiting for moderation"
+                compact
+                tone="brand"
+              />
             </div>
             <CivicButton icon="pi pi-sync" variant="ghost" onClick={loadFlagged} className="p-3" />
           </div>
@@ -86,9 +97,9 @@ export function Moderation() {
               header="Operational Context" 
               className="pl-6 py-5"
               body={(s: Signal) => (
-                <div className="flex flex-column gap-1">
-                  <span className="font-bold text-main text-base">{s.title}</span>
-                  <span className="text-min font-mono text-muted uppercase tracking-tighter">SIG-REF: {s.id.substring(0,8)}</span>
+                <div className="flex flex-column gap-2 min-w-0">
+                  <span className="u-list-item-title text-base">{s.title}</span>
+                  <span className="text-min text-muted u-meta-value">SIG-REF: {s.id.substring(0,8)}</span>
                 </div>
               )} 
             />

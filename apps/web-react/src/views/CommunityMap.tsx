@@ -270,7 +270,7 @@ export function CommunityMap() {
             <CivicCard className="mb-6" data-testid="community-map-filter-card">
               <div className="community-map-filter-grid">
                 <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-muted mb-2 block">
+                  <label className="u-eyebrow mb-2 block">
                     {t("community_map.filters.category")}
                   </label>
                   <CivicSelect
@@ -282,7 +282,7 @@ export function CommunityMap() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-muted mb-2 block">
+                  <label className="u-eyebrow mb-2 block">
                     {t("community_map.filters.status")}
                   </label>
                   <CivicSelect
@@ -294,7 +294,7 @@ export function CommunityMap() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="community-map-from-date" className="text-xs font-black uppercase tracking-widest text-muted mb-2 block">
+                  <label htmlFor="community-map-from-date" className="u-eyebrow mb-2 block">
                     {t("community_map.filters.from_date")}
                   </label>
                   <input
@@ -307,7 +307,7 @@ export function CommunityMap() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="community-map-to-date" className="text-xs font-black uppercase tracking-widest text-muted mb-2 block">
+                  <label htmlFor="community-map-to-date" className="u-eyebrow mb-2 block">
                     {t("community_map.filters.to_date")}
                   </label>
                   <input
@@ -366,11 +366,11 @@ export function CommunityMap() {
                       {selectedPointDetails && (
                         <div className="community-map-inspector" data-testid="community-map-inspector">
                           <div className="community-map-inspector-copy">
-                            <div className="text-xs font-black uppercase tracking-widest text-muted">
+                            <div className="u-eyebrow">
                               {selectedPointDetails.category}
                             </div>
-                            <h3 className="text-xl font-black text-main m-0 mt-2">{selectedPointDetails.title}</h3>
-                            <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                            <h3 className="u-section-title-lg m-0 mt-2">{selectedPointDetails.title}</h3>
+                            <p className="u-section-copy text-sm mt-2 mb-0 line-height-3">
                               {selectedPointDetails.locationLabel || t("community_map.location_missing")}
                             </p>
                           </div>
@@ -397,11 +397,11 @@ export function CommunityMap() {
                             >
                               <div className="flex justify-content-between gap-3 align-items-start">
                                 <div>
-                                  <div className="text-xs font-black uppercase tracking-widest text-muted">
+                                  <div className="u-eyebrow">
                                     {point.category}
                                   </div>
-                                  <h3 className="text-base font-black text-main m-0 mt-2">{point.title}</h3>
-                                  <p className="text-sm text-secondary mt-2 mb-0">
+                                  <h3 className="u-list-item-title text-base m-0 mt-2">{point.title}</h3>
+                                  <p className="u-list-item-copy text-sm mt-2 mb-0">
                                     {point.locationLabel || t("community_map.location_missing")}
                                   </p>
                                 </div>
@@ -432,13 +432,13 @@ export function CommunityMap() {
                         <div key={cluster.clusterKey} className="community-map-hotspot">
                           <div className="flex justify-content-between gap-3">
                             <div>
-                              <div className="text-xs font-black uppercase tracking-widest text-muted">
+                              <div className="u-eyebrow">
                                 {cluster.primaryCategory}
                               </div>
-                              <h3 className="text-base font-black text-main m-0 mt-2">
+                              <h3 className="u-list-item-title text-base m-0 mt-2">
                                 {cluster.topSignalTitle || t("community_map.hotspot_fallback")}
                               </h3>
-                              <p className="text-sm text-secondary mt-2 mb-0">
+                              <p className="u-list-item-copy text-sm mt-2 mb-0">
                                 {t("community_map.hotspot_summary", {
                                   count: cluster.signalCount,
                                   score: Math.round(cluster.cumulativePriorityScore),
@@ -478,11 +478,11 @@ export function CommunityMap() {
                       {selectedCommunityHeat && (
                         <div className="community-map-inspector" data-testid="community-heat-inspector">
                           <div className="community-map-inspector-copy">
-                            <div className="text-xs font-black uppercase tracking-widest text-muted">
+                            <div className="u-eyebrow">
                               {selectedCommunityHeat.topCategory}
                             </div>
-                            <h3 className="text-xl font-black text-main m-0 mt-2">{selectedCommunityHeat.communityName}</h3>
-                            <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                            <h3 className="u-section-title-lg m-0 mt-2">{selectedCommunityHeat.communityName}</h3>
+                            <p className="u-section-copy text-sm mt-2 mb-0 line-height-3">
                               {t("community_map.community_summary", {
                                 mapped: selectedCommunityHeat.mappedSignalsCount,
                                 score: Math.round(selectedCommunityHeat.cumulativeHeatScore),
@@ -515,11 +515,11 @@ export function CommunityMap() {
                           >
                             <div className="flex justify-content-between align-items-start gap-3">
                               <div>
-                                <div className="text-xs font-black uppercase tracking-widest text-muted">
+                                <div className="u-eyebrow">
                                   {community.topCategory}
                                 </div>
-                                <h3 className="text-base font-black text-main m-0 mt-2">{community.communityName}</h3>
-                                <p className="text-sm text-secondary mt-2 mb-0">
+                                <h3 className="u-list-item-title text-base m-0 mt-2">{community.communityName}</h3>
+                                <p className="u-list-item-copy text-sm mt-2 mb-0">
                                   {t("community_map.community_summary", {
                                     mapped: community.mappedSignalsCount,
                                     score: Math.round(community.cumulativeHeatScore),

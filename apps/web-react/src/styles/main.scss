@@ -392,6 +392,46 @@ a:hover {
   padding: 0.95rem 1rem;
 }
 
+.u-surface-note-compact {
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.9rem;
+}
+
+.u-metric-shell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.u-metric-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.u-metric-value {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+.u-metric-icon-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--alpha-border-10);
+  background: var(--alpha-surface-05);
+  flex: 0 0 auto;
+}
+
 .u-card-meta-row {
   display: flex;
   align-items: center;
@@ -483,6 +523,10 @@ a:hover {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.community-map-summary-strip > * {
+  min-width: 0;
 }
 
 .community-map-canvas,
@@ -598,6 +642,7 @@ a:hover {
   background: color-mix(in srgb, var(--bg-card) 94%, transparent);
   padding: 1rem;
   transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  min-width: 0;
 }
 
 .community-map-listing:hover {
@@ -613,6 +658,27 @@ a:hover {
 .community-map-listing h3,
 .community-map-hotspot h3 {
   overflow-wrap: anywhere;
+}
+
+.community-tree-card,
+.community-membership-row,
+.community-policy-row {
+  min-width: 0;
+}
+
+.community-membership-row,
+.community-policy-row {
+  border-radius: 1rem;
+  border: 1px solid var(--alpha-border-10);
+  background: var(--alpha-surface-05);
+  padding: 1rem;
+}
+
+.community-tree-card {
+  border-radius: 1rem;
+  border: 1px solid var(--alpha-border-10);
+  background: var(--alpha-surface-05);
+  padding: 0.95rem 1rem;
 }
 
 .u-pill {
