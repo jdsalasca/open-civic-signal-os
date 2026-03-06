@@ -332,6 +332,9 @@ a:hover {
 
 .civic-button-base {
   min-height: 2.8rem;
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.2;
 }
 
 .civic-button-secondary,
@@ -341,6 +344,10 @@ a:hover {
 
 .civic-badge {
   letter-spacing: 0.03em;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .community-map-filter-grid {

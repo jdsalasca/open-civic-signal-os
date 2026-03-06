@@ -20,6 +20,7 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { useTranslation } from "react-i18next";
 
 type ApiError = Error & { friendlyMessage?: string };
@@ -249,6 +250,10 @@ export function Communities() {
   );
   const activeRoleLabel = activeMembership ? roleLabels[activeMembership.role] ?? activeMembership.role : null;
   const isPolicyEditor = activeMembership?.role === "COORDINATOR";
+  const activeCommunityPath =
+    activeBreadcrumb.length > 0
+      ? activeBreadcrumb.map((item) => item.name).join(" / ")
+      : t('communities_hub.active_path_empty');
   const scopeLabelMap = useMemo(
     () =>
       Object.fromEntries(
@@ -353,29 +358,29 @@ export function Communities() {
           <div className="col-12 lg:col-7">
             <CivicCard title={t('communities_hub.memberships_title')} className="h-full mb-6">
               <div className="flex flex-column gap-4">
-                <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4" data-testid="active-community-breadcrumb-card">
-                  <div className="text-xs font-bold uppercase text-muted tracking-widest mb-2">
-                    {t('communities_hub.active_path_label')}
-                  </div>
-                  {activeBreadcrumb.length > 0 ? (
-                    <div className="flex flex-wrap align-items-center gap-2">
-                      {activeBreadcrumb.map((item, index) => (
-                        <div key={item.id} className="flex align-items-center gap-2">
-                          <span className={`font-bold ${index === activeBreadcrumb.length - 1 ? 'text-main' : 'text-secondary'}`}>
-                            {item.name}
-                          </span>
-                          {index < activeBreadcrumb.length - 1 && <span className="text-muted">/</span>}
-                        </div>
-                      ))}
-                      {activeRoleLabel && <CivicBadge label={activeRoleLabel} severity="progress" />}
-                    </div>
-                  ) : (
-                    <p className="text-secondary text-sm m-0">{t('communities_hub.active_path_empty')}</p>
-                  )}
+                <div className="civic-stat-grid" data-testid="active-community-breadcrumb-card">
+                  <CivicStatCard
+                    label={t('communities_hub.active_path_label')}
+                    value={activeMembership?.communityName ?? t('settings.community_none')}
+                    supportingText={activeCommunityPath}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t('dashboard.community_hub.role_label')}
+                    value={activeRoleLabel ?? t('settings.identity_role_fallback')}
+                    supportingText={activeMembership?.communitySlug ? `/${activeMembership.communitySlug}` : null}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t('settings.community_count_label')}
+                    value={memberships.length}
+                    supportingText={t('communities_hub.memberships_title')}
+                    compact
+                  />
                 </div>
 
                 <CivicActionBar className="mb-4 p-4">
-                  <div className="flex-1" style={{ minWidth: "14rem" }}>
+                  <div className="flex-1 min-w-0" style={{ minWidth: "14rem" }}>
                     <CivicSelect
                       value={selectedCommunityId}
                       options={unjoinedCommunityOptions}
@@ -385,7 +390,7 @@ export function Communities() {
                       data-testid="join-community-dropdown"
                     />
                   </div>
-                  <div className="flex-1" style={{ minWidth: "12rem" }}>
+                  <div className="flex-1 min-w-0" style={{ minWidth: "12rem" }}>
                     <CivicSelect
                       value={joinRole}
                       options={roleOptions}
@@ -394,7 +399,7 @@ export function Communities() {
                       data-testid="join-role-dropdown"
                     />
                   </div>
-                  <div className="flex-1" style={{ minWidth: "10rem" }}>
+                  <div className="flex-1 min-w-0" style={{ minWidth: "10rem" }}>
                     <CivicButton
                       label={t('communities_hub.join_action')}
                       icon="pi pi-user-plus"

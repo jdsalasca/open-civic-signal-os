@@ -76,6 +76,7 @@ Progress: [██████████] 99%
 - 2026-03-05: Standardized `CivicCard` header/actions and adopted the new reusable card-surface utilities across community blog, community threads, and signal detail to reduce layout drift and long-copy overlap.
 - 2026-03-05: Extended civic identity profiles with persisted avatar presets, backend-owned achievement milestones, tag-based affiliation editing, and a stronger recognition-oriented Settings experience.
 - 2026-03-05: Introduced reusable `CivicStatCard` and migrated the highest-risk summary grids in Settings, Dashboard, and CommunityFeed to shared responsive tokens instead of local metric blocks.
+- 2026-03-05: Finished the cross-app stat-grid hardening pass by moving Communities and SignalDetail onto shared summary primitives, localizing remaining signal-detail chrome, and improving global badge/button wrapping for ES-heavy layouts.
 
 ### Pending Todos
 
@@ -95,6 +96,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Landed a cross-app stat-card refactor for community summary surfaces; next target is `OCS-P1-040` structured proposal templates  
+Stopped at: Finished the cross-app stat-grid hardening pass and restored shared summary consistency across Communities and SignalDetail; next target is `OCS-P1-040` structured proposal templates  
 Resume file: None
 

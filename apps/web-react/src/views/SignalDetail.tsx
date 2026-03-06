@@ -15,6 +15,7 @@ import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicEngagement } from "../components/CivicEngagement";
 import { PriorityRadar } from "../components/PriorityRadar";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -151,7 +152,9 @@ export function SignalDetail() {
             <div className="min-w-0">
               <div className="u-card-meta-row mb-2">
                 <CivicBadge label={signal.status} severity={severity} />
-                <span className="text-xs text-muted font-mono font-bold uppercase tracking-widest">Protocol ID: {signal.id.substring(0,8)}</span>
+                <span className="text-xs text-muted font-mono font-bold uppercase tracking-widest">
+                  {t("signals.protocol_id")}: {signal.id.substring(0,8)}
+                </span>
               </div>
               <CivicPageHeader
                 title={signal.title}
@@ -162,7 +165,7 @@ export function SignalDetail() {
             </div>
           </div>
           <CivicButton 
-            label={voting ? "Processing..." : "Support Signal"} 
+            label={voting ? t("signals.support_loading") : t("signals.support_button")} 
             icon="pi pi-heart-fill" 
             variant="danger"
             className="py-4 px-6 text-lg shadow-xl"
@@ -180,7 +183,7 @@ export function SignalDetail() {
               headerActions={(
                 <CivicButton
                   icon="pi pi-download"
-                  label="Trust Packet"
+                  label={t("signals.trust_packet")}
                   variant="ghost"
                   className="text-xs"
                   onClick={() => window.open(`/api/signals/${signal.id}/trust-packet`, '_blank')}
@@ -206,7 +209,7 @@ export function SignalDetail() {
                           <div className="u-media-frame h-full">
                             <img
                               src={url}
-                              alt={`${signal.title} evidence ${index + 1}`}
+                              alt={t("signals.evidence_alt", { title: signal.title, index: index + 1 })}
                               loading="lazy"
                               className="w-full h-full"
                               style={{ maxHeight: "20rem", objectFit: "cover" }}
@@ -221,25 +224,19 @@ export function SignalDetail() {
               
               <Divider className="my-8 opacity-10" />
               
-              <div className="grid grid-nogutter">
-                <div className="col-12 md:col-6 flex align-items-center gap-4 mb-4">
-                  <div className="bg-brand-primary-alpha-10 border-round-xl p-4 flex align-items-center justify-content-center shadow-lg" style={{ width: '4.5rem', height: '4rem' }}>
-                    <i className="pi pi-users text-brand-primary text-2xl"></i>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">Affected Citizens</div>
-                    <div className="text-2xl font-black text-main">{signal.scoreBreakdown?.affectedPeople * 10} Estimated</div>
-                  </div>
-                </div>
-                <div className="col-12 md:col-6 flex align-items-center gap-4 mb-4">
-                  <div className="bg-status-progress-alpha-10 border-round-xl p-4 flex align-items-center justify-content-center shadow-lg" style={{ width: '4.5rem', height: '4rem' }}>
-                    <i className="pi pi-tag text-status-progress text-2xl"></i>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">Classification</div>
-                    <div className="text-2xl font-black text-main uppercase tracking-tighter u-card-title-wrap">{t(`categories.${signal.category}`)}</div>
-                  </div>
-                </div>
+              <div className="civic-stat-grid">
+                <CivicStatCard
+                  label={t("signals.affected_estimation")}
+                  value={`${(signal.scoreBreakdown?.affectedPeople || 0) * 10} ${t("signals.citizens")}`}
+                  supportingText={t("signals.affected_summary")}
+                  icon={<i className="pi pi-users text-brand-primary"></i>}
+                />
+                <CivicStatCard
+                  label={t("signals.civic_category")}
+                  value={t(`categories.${signal.category}`)}
+                  supportingText={t("signals.classification_summary")}
+                  icon={<i className="pi pi-tag text-status-progress"></i>}
+                />
               </div>
             </CivicCard>
 
@@ -341,11 +338,11 @@ export function SignalDetail() {
               </div>
             </CivicCard>
 
-            <CivicCard className="text-center mb-8" variant="brand" title="Intelligence Index">
+            <CivicCard className="text-center mb-8" variant="brand" title={t("signals.intel_index")}>
               <div className="text-8xl font-black text-main mb-2 tracking-tighter">
                 {signal.priorityScore?.toFixed(0)}
               </div>
-              <p className="text-muted text-sm font-bold mb-8 uppercase tracking-widest">Public Priority Rank</p>
+              <p className="text-muted text-sm font-bold mb-8 uppercase tracking-widest">{t("signals.priority_rank")}</p>
             </CivicCard>
 
             <PriorityRadar 
@@ -363,10 +360,10 @@ export function SignalDetail() {
               </p>
               <div className="flex flex-column gap-4">
                 {[
-                  { label: "Urgency", formula: "Urgency Factor * 30" },
-                  { label: "Social Impact", formula: "Impact Score * 25" },
-                  { label: "Affected Citizens", formula: "min(People/10, 30)" },
-                  { label: "Community Support", formula: "min(Votes/5, 15)" }
+                  { label: t("signals.urgency_factor"), formula: t("signals.urgency_formula") },
+                  { label: t("signals.social_impact"), formula: t("signals.impact_formula") },
+                  { label: t("signals.affected_estimation"), formula: t("signals.affected_formula") },
+                  { label: t("signals.community_trust"), formula: t("signals.votes_formula") }
                 ].map((item, idx) => (
                   <div key={idx} className="p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10 shadow-sm">
                     <div className="text-xs font-black text-main uppercase tracking-widest mb-1">
@@ -381,11 +378,11 @@ export function SignalDetail() {
             </CivicCard>
 
             {isStaff && (
-              <CivicCard title="Protocol Management" variant="brand" className="mb-8">
+              <CivicCard title={t("signals.lifecycle_admin")} variant="brand" className="mb-8">
                 <div className="flex flex-column gap-3">
-                  <CivicButton label="Restore to Pending" variant="secondary" className="text-xs w-full" onClick={() => updateStatus('NEW')} disabled={signal.status === 'NEW'} />
-                  <CivicButton label="Authorize Progress" icon="pi pi-bolt" className="bg-status-progress text-black text-xs w-full" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} />
-                  <CivicButton label="Finalize Resolution" icon="pi pi-check" className="bg-status-resolved text-black text-xs w-full" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} />
+                  <CivicButton label={t("signals.reset_new")} variant="secondary" className="text-xs w-full" onClick={() => updateStatus('NEW')} disabled={signal.status === 'NEW'} />
+                  <CivicButton label={t("signals.mark_inprogress")} icon="pi pi-bolt" className="bg-status-progress text-black text-xs w-full" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} />
+                  <CivicButton label={t("signals.mark_resolved")} icon="pi pi-check" className="bg-status-resolved text-black text-xs w-full" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} />
                 </div>
               </CivicCard>
             )}
