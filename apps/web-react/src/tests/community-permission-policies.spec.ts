@@ -99,6 +99,13 @@ test.describe('Community permission policies', () => {
           body: JSON.stringify([
             {
               communityId: rootCommunity.id,
+              scope: 'CREATE_PROPOSAL',
+              allowedRoles: ['MEMBER', 'MODERATOR', 'COORDINATOR', 'PUBLIC_SERVANT_LIAISON'],
+              updatedBy: '33333333-3333-3333-3333-333333333333',
+              updatedAt: '2026-03-05T11:00:00'
+            },
+            {
+              communityId: rootCommunity.id,
               scope: 'CREATE_THREAD',
               allowedRoles: ['COORDINATOR'],
               updatedBy: '33333333-3333-3333-3333-333333333333',
@@ -162,6 +169,13 @@ test.describe('Community permission policies', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify([
+          {
+            communityId: rootCommunity.id,
+            scope: 'CREATE_PROPOSAL',
+            allowedRoles: ['MEMBER', 'MODERATOR', 'COORDINATOR', 'PUBLIC_SERVANT_LIAISON'],
+            updatedBy: '33333333-3333-3333-3333-333333333333',
+            updatedAt: '2026-03-05T10:10:00'
+          },
           {
             communityId: rootCommunity.id,
             scope: 'CREATE_THREAD',

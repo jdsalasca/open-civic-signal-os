@@ -28,6 +28,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260305-community-geospatial-map-contract.md` (accepted)
 - `ADR-20260305-community-thread-relevance-contract.md` (accepted)
 - `ADR-20260305-official-announcements-channel-contract.md` (accepted)
+- `ADR-20260305-community-proposal-templates-contract.md` (accepted)
 
 ## Review Rule
 

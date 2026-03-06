@@ -22,6 +22,7 @@ const CommunityThreads = lazy(() => import("./views/CommunityThreads").then(m =>
 const CommunityBlog = lazy(() => import("./views/CommunityBlog").then(m => ({ default: m.CommunityBlog })));
 const CommunityFeed = lazy(() => import("./views/CommunityFeed").then(m => ({ default: m.CommunityFeed })));
 const CommunityMap = lazy(() => import("./views/CommunityMap").then(m => ({ default: m.CommunityMap })));
+const CommunityProposals = lazy(() => import("./views/CommunityProposals").then(m => ({ default: m.CommunityProposals })));
 const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
 const Unauthorized = lazy(() => import("./views/Unauthorized").then(m => ({ default: m.Unauthorized })));
 
@@ -137,6 +138,7 @@ export function App() {
               <Route path="/communities/blog" element={<CommunityBlog />} />
               <Route path="/communities/feed" element={<CommunityFeed />} />
               <Route path="/communities/map" element={<CommunityMap />} />
+              <Route path="/communities/proposals" element={<CommunityProposals />} />
             </Route>
 
             <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>

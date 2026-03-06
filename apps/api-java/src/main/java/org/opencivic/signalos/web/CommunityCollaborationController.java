@@ -6,17 +6,21 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.service.CommunityCollaborationService;
+import org.opencivic.signalos.service.CommunityProposalService;
 import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityHomeResponse;
+import org.opencivic.signalos.web.dto.CommunityProposalResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityBlogPostRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityProposalRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadMessageRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadRequest;
 import org.opencivic.signalos.web.dto.ModerateThreadMessageRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityBlogPostRequest;
+import org.opencivic.signalos.web.dto.UpdateCommunityProposalRequest;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
 import org.opencivic.signalos.web.dto.ReactionStateResponse;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,10 +44,16 @@ import java.util.Map;
 @RequestMapping("/api/community")
 public class CommunityCollaborationController {
     private final CommunityCollaborationService collaborationService;
+    private final CommunityProposalService proposalService;
     private final CivicEngagementService engagementService;
 
-    public CommunityCollaborationController(CommunityCollaborationService collaborationService, CivicEngagementService engagementService) {
+    public CommunityCollaborationController(
+        CommunityCollaborationService collaborationService,
+        CommunityProposalService proposalService,
+        CivicEngagementService engagementService
+    ) {
         this.collaborationService = collaborationService;
+        this.proposalService = proposalService;
         this.engagementService = engagementService;
     }
 
@@ -224,5 +234,38 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return collaborationService.getCommunityHome(communityId, principal.getName());
+    }
+
+    @GetMapping("/proposals")
+    public List<CommunityProposalResponse> getProposals(
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        return proposalService.getProposals(communityId, principal.getName());
+    }
+
+    @GetMapping("/proposals/{proposalId}")
+    public CommunityProposalResponse getProposal(
+        @PathVariable UUID proposalId,
+        Principal principal
+    ) {
+        return proposalService.getProposal(proposalId, principal.getName());
+    }
+
+    @PostMapping("/proposals")
+    public CommunityProposalResponse createProposal(
+        @Valid @RequestBody CreateCommunityProposalRequest request,
+        Principal principal
+    ) {
+        return proposalService.createProposal(request, principal.getName());
+    }
+
+    @PutMapping("/proposals/{proposalId}")
+    public CommunityProposalResponse updateProposal(
+        @PathVariable UUID proposalId,
+        @Valid @RequestBody UpdateCommunityProposalRequest request,
+        Principal principal
+    ) {
+        return proposalService.updateProposal(proposalId, request, principal.getName());
     }
 }

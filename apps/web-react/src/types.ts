@@ -132,6 +132,7 @@ export type CommunityMembership = {
 };
 
 export type CommunityPermissionScope =
+  | "CREATE_PROPOSAL"
   | "CREATE_THREAD"
   | "ADD_THREAD_MESSAGE"
   | "MODERATE_THREAD_MESSAGE"
@@ -221,6 +222,25 @@ export type CommunityFeedItem = {
   summary: string;
   happenedAt: string;
   freshness: string;
+};
+
+export type CommunityProposal = {
+  id: string;
+  communityId: string;
+  authorId: string;
+  authorUsername: string;
+  relatedSignalId?: string | null;
+  relatedSignalTitle?: string | null;
+  title: string;
+  templateKey: string;
+  status: string;
+  problemStatement: string;
+  proposedSolution: string;
+  estimatedCost: string;
+  beneficiariesSummary: string;
+  supportingLinks: string[];
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CommunityHomeSignal = {

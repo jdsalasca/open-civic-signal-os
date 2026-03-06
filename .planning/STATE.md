@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 11 of 5 in current phase  
+Plan: 20 of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-05 - Added reusable CivicStatCard and standardized responsive summary grids across Settings, Dashboard, and CommunityFeed
+Last activity: 2026-03-05 - Implemented structured proposal templates with backend-owned proposal contracts and community UI workflow
 
 Progress: [██████████] 99%
 
@@ -83,6 +83,7 @@ Progress: [██████████] 99%
 - 2026-03-05: Hardened light-theme contrast and responsive copy handling across shared selects, stat cards, mobile nav, topbar community context, Settings identity density, report summaries, and signal detail lifecycle controls to remove remaining cross-app breakpoints.
 - 2026-03-05: Standardized shared typography and note/list surfaces across page headers, meta rows, dashboard signal tables, digest/alert sidebars, community blog, and threads so repeated content types now use one visual language instead of view-specific markup.
 - 2026-03-05: Extended the responsive hardening pass into MetricsGrid, Communities, CommunityMap, and Moderation so the remaining dense community hubs now share the same card, heading, and metadata standards with better wrapping under narrow layouts.
+- 2026-03-05: Implemented OCS-P1-040 with backend-owned structured proposals, the `CREATE_PROPOSAL` permission scope, linked-issue validation, a community proposal workspace route, OpenAPI schema coverage, and ADR-backed contract documentation.
 
 ### Pending Todos
 
@@ -102,7 +103,7 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Finished the cross-app responsive hardening pass across community hubs; next target is `OCS-P1-040` structured proposal templates  
+Stopped at: Finished `OCS-P1-040` structured proposal templates; next target is `OCS-P1-041` structured deliberation and evidence  
 Resume file: None
 
 

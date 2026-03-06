@@ -302,12 +302,12 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - communities can compare and prioritize proposals more fairly
 - Acceptance criteria:
-  - [ ] templates enforce minimum structure
-  - [ ] proposals link to related issues or documents
-  - [ ] detail view clearly separates problem, solution, and cost logic
+  - [x] templates enforce minimum structure
+  - [x] proposals link to related issues or documents
+  - [x] detail view clearly separates problem, solution, and cost logic
 - Validation:
-  - [ ] backend proposal tests
-  - [ ] Playwright create/detail flow
+  - [x] backend proposal tests
+  - [x] Playwright create/detail flow
 
 ### `story:OCS-P1-041` Structured Deliberation and Evidence
 

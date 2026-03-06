@@ -214,6 +214,7 @@ Execution order:
 8. `story:OCS-P1-040` structured proposal templates.
    - Measurable civic outcome: proposals become comparable and decision-ready instead of ad-hoc text dumps.
    - Validation commands: proposal contract tests + Playwright creation/detail flow.
+   - 2026-03-05 completion note: backend proposal domain + migration + `CREATE_PROPOSAL` scope + `/communities/proposals` workflow shipped.
 9. `story:OCS-P1-041` structured deliberation with pro/con evidence.
    - Measurable civic outcome: discussions move from flat comment noise to decision-supporting deliberation.
    - Validation commands: backend discussion tests + Playwright pro/con evidence interactions.

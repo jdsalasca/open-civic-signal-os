@@ -62,6 +62,13 @@ export function CommunityFeed() {
             <div className="dashboard-action-cluster">
               <CivicButton
                 type="button"
+                icon="pi pi-file-edit"
+                label={t("community_proposals.open_hub")}
+                variant="ghost"
+                onClick={() => navigate("/communities/proposals")}
+              />
+              <CivicButton
+                type="button"
                 icon="pi pi-map"
                 label={t("community_map.open_map")}
                 variant="secondary"
@@ -144,11 +151,18 @@ export function CommunityFeed() {
                     </p>
                   </div>
                   <div className="dashboard-action-cluster">
-                    <CivicButton
-                      type="button"
-                      label={t("nav.public_blog")}
-                      icon="pi pi-megaphone"
-                      variant="ghost"
+                  <CivicButton
+                    type="button"
+                    label={t("community_proposals.open_hub")}
+                    icon="pi pi-file-edit"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/proposals")}
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t("nav.public_blog")}
+                    icon="pi pi-megaphone"
+                    variant="ghost"
                       onClick={() => navigate("/communities/blog")}
                     />
                     <CivicButton

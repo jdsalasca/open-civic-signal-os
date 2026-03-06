@@ -1219,6 +1219,103 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityHome'
+  /api/community/proposals:
+    get:
+      summary: List structured proposals for one community
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Community proposal backlog ordered by last update
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityProposal'
+        '401':
+          description: User is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    post:
+      summary: Create one structured proposal in the active community
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityProposalRequest'
+      responses:
+        '200':
+          description: Created community proposal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProposal'
+        '403':
+          description: Community policy denied proposal creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/proposals/{proposalId}:
+    get:
+      summary: Get one structured proposal by ID
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Community proposal detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProposal'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    put:
+      summary: Update one structured proposal
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommunityProposalRequest'
+      responses:
+        '200':
+          description: Updated community proposal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProposal'
+        '403':
+          description: Only the author or community coordinators can edit the proposal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
 components:
   schemas:
     ApiError:
@@ -1248,6 +1345,7 @@ components:
             permissionScope:
               type: string
               enum:
+                - CREATE_PROPOSAL
                 - CREATE_THREAD
                 - ADD_THREAD_MESSAGE
                 - MODERATE_THREAD_MESSAGE
@@ -1919,6 +2017,7 @@ components:
         scope:
           type: string
           enum:
+            - CREATE_PROPOSAL
             - CREATE_THREAD
             - ADD_THREAD_MESSAGE
             - MODERATE_THREAD_MESSAGE
@@ -2154,6 +2253,153 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommunityHomeSignal'
+    CommunityProposal:
+      type: object
+      required:
+        - id
+        - communityId
+        - authorId
+        - authorUsername
+        - title
+        - templateKey
+        - status
+        - problemStatement
+        - proposedSolution
+        - estimatedCost
+        - beneficiariesSummary
+        - supportingLinks
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorUsername:
+          type: string
+        relatedSignalId:
+          type: string
+          format: uuid
+          nullable: true
+        relatedSignalTitle:
+          type: string
+          nullable: true
+        title:
+          type: string
+        templateKey:
+          type: string
+          enum: [STANDARD_COMMUNITY_PROPOSAL]
+        status:
+          type: string
+          enum: [PROPOSED]
+        problemStatement:
+          type: string
+        proposedSolution:
+          type: string
+        estimatedCost:
+          type: string
+        beneficiariesSummary:
+          type: string
+        supportingLinks:
+          type: array
+          items:
+            type: string
+            format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateCommunityProposalRequest:
+      type: object
+      required:
+        - communityId
+        - title
+        - problemStatement
+        - proposedSolution
+        - estimatedCost
+        - beneficiariesSummary
+        - supportingLinks
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        relatedSignalId:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+          minLength: 8
+          maxLength: 160
+        problemStatement:
+          type: string
+          minLength: 20
+          maxLength: 4000
+        proposedSolution:
+          type: string
+          minLength: 20
+          maxLength: 4000
+        estimatedCost:
+          type: string
+          minLength: 5
+          maxLength: 1200
+        beneficiariesSummary:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        supportingLinks:
+          type: array
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 1200
+    UpdateCommunityProposalRequest:
+      type: object
+      required:
+        - title
+        - problemStatement
+        - proposedSolution
+        - estimatedCost
+        - beneficiariesSummary
+        - supportingLinks
+      properties:
+        relatedSignalId:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+          minLength: 8
+          maxLength: 160
+        problemStatement:
+          type: string
+          minLength: 20
+          maxLength: 4000
+        proposedSolution:
+          type: string
+          minLength: 20
+          maxLength: 4000
+        estimatedCost:
+          type: string
+          minLength: 5
+          maxLength: 1200
+        beneficiariesSummary:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        supportingLinks:
+          type: array
+          maxItems: 5
+          items:
+            type: string
+            maxLength: 1200
     ProfileVisibility:
       type: string
       enum: [PUBLIC, COMMUNITY, ADMINS]
@@ -2277,6 +2523,7 @@ components:
         scope:
           type: string
           enum:
+            - CREATE_PROPOSAL
             - CREATE_THREAD
             - ADD_THREAD_MESSAGE
             - MODERATE_THREAD_MESSAGE

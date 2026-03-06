@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 type ApiError = Error & { friendlyMessage?: string };
 
 const permissionScopeOrder: CommunityPermissionScope[] = [
+  "CREATE_PROPOSAL",
   "CREATE_THREAD",
   "ADD_THREAD_MESSAGE",
   "MODERATE_THREAD_MESSAGE",
@@ -351,6 +352,14 @@ export function Communities() {
             variant="secondary"
             onClick={() => navigate("/communities/map")}
             data-testid="communities-open-map-button"
+          />
+          <CivicButton
+            type="button"
+            icon="pi pi-file-edit"
+            label={t("community_proposals.open_hub")}
+            variant="ghost"
+            onClick={() => navigate("/communities/proposals")}
+            data-testid="communities-open-proposals-button"
           />
         </CivicActionBar>
 

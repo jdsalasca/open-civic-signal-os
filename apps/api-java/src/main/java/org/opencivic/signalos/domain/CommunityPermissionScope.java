@@ -3,6 +3,12 @@ package org.opencivic.signalos.domain;
 import java.util.Set;
 
 public enum CommunityPermissionScope {
+    CREATE_PROPOSAL(Set.of(
+        CommunityRole.MEMBER,
+        CommunityRole.MODERATOR,
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
     CREATE_THREAD(Set.of(
         CommunityRole.MEMBER,
         CommunityRole.MODERATOR,

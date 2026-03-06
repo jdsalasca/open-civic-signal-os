@@ -20,4 +20,16 @@ export const FORM_LIMITS = {
     messageMin: 8,
     messageMax: 2000,
   },
+  proposals: {
+    titleMin: 8,
+    titleMax: 160,
+    sectionMin: 20,
+    sectionMax: 4000,
+    costMin: 5,
+    costMax: 1200,
+    beneficiariesMin: 10,
+    beneficiariesMax: 2000,
+    linksMax: 5,
+    linkMax: 1200,
+  },
 } as const;
