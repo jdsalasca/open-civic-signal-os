@@ -484,6 +484,18 @@ a:hover {
   backdrop-filter: blur(10px);
 }
 
+.civic-button-ghost {
+  background: var(--interactive-neutral-bg) !important;
+  border: 1px solid var(--interactive-neutral-border) !important;
+  color: var(--interactive-neutral-text) !important;
+}
+
+.civic-button-ghost:hover {
+  background: var(--interactive-neutral-hover) !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--text-main) !important;
+}
+
 .civic-badge {
   letter-spacing: 0.03em;
   max-width: 100%;
@@ -491,6 +503,12 @@ a:hover {
   text-align: center;
   line-height: 1.2;
   overflow-wrap: anywhere;
+}
+
+.civic-badge-neutral {
+  background: var(--interactive-neutral-bg) !important;
+  color: var(--interactive-neutral-text) !important;
+  border: 1px solid var(--interactive-neutral-border) !important;
 }
 
 .community-map-filter-grid {
@@ -1374,10 +1392,10 @@ select:focus-visible,
   }
 
   &.p-button-text {
-    color: var(--text-secondary) !important;
+    color: var(--interactive-neutral-text) !important;
 
     &:hover {
-      background: var(--surface-hover) !important;
+      background: var(--interactive-neutral-hover) !important;
       color: var(--text-main) !important;
     }
   }

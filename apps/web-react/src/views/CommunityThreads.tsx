@@ -268,7 +268,7 @@ export function CommunityThreads() {
 
     return (
       <div key={message.id} className="flex flex-column gap-3" style={{ marginLeft: `${leftPadding}rem` }}>
-        <div className={`u-card-surface-block ${depth === 0 ? "bg-surface border-subtle" : "bg-white-alpha-5 border-white-alpha-10"} ${message.hidden ? "opacity-60" : ""}`}>
+        <div className={`u-card-surface-block ${depth === 0 ? "bg-surface border-subtle" : "bg-surface-soft border-surface-soft"} ${message.hidden ? "opacity-60" : ""}`}>
           <div className="u-card-split-header mb-3">
             <div className="flex align-items-center gap-3 u-card-copy">
               <Avatar label={depth === 0 ? "OP" : "R"} shape="circle" className="bg-brand-primary text-white font-bold text-xs" />
@@ -332,7 +332,7 @@ export function CommunityThreads() {
                 className={`flex align-items-center gap-2 px-2 py-1 border-round-lg border-1 ${
                   message.viewerReaction === emoji
                     ? "border-brand-primary-alpha-60 bg-brand-primary-alpha-20 shadow-1"
-                    : "border-white-alpha-10 bg-black-alpha-20 hover:border-brand-primary-alpha-30"
+                    : "border-surface-soft bg-surface-soft-strong hover:border-brand-primary-alpha-30"
                 }`}
               >
                 <span>{emoji}</span>
@@ -482,7 +482,7 @@ export function CommunityThreads() {
                           total: totalRecords,
                         })}
                   </div>
-                  <div className="flex flex-column gap-px bg-white-alpha-10">
+                  <div className="flex flex-column gap-px bg-surface-soft">
                     {filteredThreads.map((thread) => {
                       const { roots, childrenByParent } = buildThreadTree(thread.messages || []);
                       const draft = messageDraftByThread[thread.id] || "";
@@ -534,7 +534,7 @@ export function CommunityThreads() {
                             )}
                           </div>
 
-                          <div className="u-surface-note bg-black-alpha-20 border-white-alpha-10">
+                          <div className="u-surface-note bg-surface-soft-strong border-surface-soft">
                             {replyTarget && (
                               <div className="mb-3 flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">
                                 <span className="text-sm text-main">

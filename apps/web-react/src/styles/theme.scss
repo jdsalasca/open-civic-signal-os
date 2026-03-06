@@ -73,6 +73,14 @@
     --pill-border: rgba(255, 248, 241, 0.1);
     --pill-hover: rgba(255, 248, 241, 0.11);
     --panel-soft-bg: rgba(255, 248, 241, 0.04);
+    --surface-soft: rgba(255, 248, 241, 0.06);
+    --surface-soft-strong: rgba(10, 10, 12, 0.28);
+    --surface-soft-hover: rgba(255, 248, 241, 0.11);
+    --surface-soft-border: rgba(255, 248, 241, 0.12);
+    --interactive-neutral-bg: rgba(255, 248, 241, 0.08);
+    --interactive-neutral-hover: rgba(255, 248, 241, 0.14);
+    --interactive-neutral-border: rgba(255, 248, 241, 0.14);
+    --interactive-neutral-text: #f4ece3;
     --logo-surface: #efc066;
     --logo-icon: #1f2a37;
     --alpha-surface-05: rgba(255, 248, 241, 0.04);
@@ -125,6 +133,14 @@
     --pill-border: rgba(198, 93, 46, 0.16);
     --pill-hover: rgba(198, 93, 46, 0.14);
     --panel-soft-bg: rgba(198, 93, 46, 0.05);
+    --surface-soft: rgba(198, 93, 46, 0.06);
+    --surface-soft-strong: rgba(198, 93, 46, 0.1);
+    --surface-soft-hover: rgba(198, 93, 46, 0.14);
+    --surface-soft-border: rgba(198, 93, 46, 0.16);
+    --interactive-neutral-bg: #f5ede4;
+    --interactive-neutral-hover: #efdfd1;
+    --interactive-neutral-border: #d8c7b8;
+    --interactive-neutral-text: #1f2a37;
     --logo-surface: #1f2a37;
     --logo-icon: #fff8f1;
     --alpha-surface-05: rgba(198, 93, 46, 0.04);
@@ -181,6 +197,8 @@
 .bg-status-rejected-alpha-10 { background: var(--status-rejected-alpha-10) !important; }
 .bg-white-alpha-5 { background: var(--alpha-surface-05) !important; }
 .bg-white-alpha-10 { background: var(--alpha-surface-10) !important; }
+.bg-surface-soft { background: var(--surface-soft) !important; }
+.bg-surface-soft-strong { background: var(--surface-soft-strong) !important; }
 .bg-black-alpha-20 { background: var(--alpha-overlay-20) !important; }
 .bg-black-alpha-30 { background: var(--alpha-overlay-30) !important; }
 .bg-black-alpha-40 { background: var(--alpha-overlay-40) !important; }
@@ -191,6 +209,7 @@
 .border-white-alpha-10 { border-color: var(--alpha-border-10) !important; }
 .border-white-alpha-20 { border-color: var(--alpha-border-20) !important; }
 .border-white-alpha-30 { border-color: var(--alpha-border-30) !important; }
+.border-surface-soft { border-color: var(--surface-soft-border) !important; }
 .border-brand-primary-alpha-20 { border-color: var(--brand-primary-alpha-20) !important; }
 .border-brand-primary-alpha-30 { border-color: var(--brand-primary-alpha-30) !important; }
 .border-status-rejected-alpha-20 { border-color: var(--status-rejected-alpha-20) !important; }

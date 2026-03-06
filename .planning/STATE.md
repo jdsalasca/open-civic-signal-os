@@ -105,3 +105,5 @@ Last session: 2026-03-05
 Stopped at: Finished the cross-app responsive hardening pass across community hubs; next target is `OCS-P1-040` structured proposal templates  
 Resume file: None
 
+
+- 2026-03-05: Hardened light-theme contrast semantics by introducing theme-aware neutral surface tokens, reworking shared ghost/button and neutral badge contrast, and replacing legacy overlay backgrounds in engagement and thread surfaces so text no longer falls into dark-on-dark failures across themes.

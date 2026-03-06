@@ -126,7 +126,7 @@ export function CivicEngagement({
   return (
     <div className="flex flex-column gap-6 mt-8">
       {/* REACTION BAR */}
-      <div className="flex flex-wrap align-items-center gap-2 p-3 bg-white-alpha-5 border-round-2xl border-1 border-white-alpha-10">
+      <div className="flex flex-wrap align-items-center gap-2 p-3 bg-surface-soft border-round-2xl border-1 border-surface-soft">
         <span className="text-xs font-black uppercase text-muted px-2 mr-2">{t("engagement.reactions")}</span>
         {REACTION_TYPES.map(emoji => (
           <button 
@@ -137,7 +137,7 @@ export function CivicEngagement({
             className={`flex align-items-center gap-2 px-3 py-2 border-round-xl border-1 transition-all cursor-pointer group ${
               viewerReaction === emoji
                 ? "bg-brand-primary-alpha-25 border-brand-primary-alpha-60 shadow-1"
-                : "bg-black-alpha-40 border-transparent hover:border-brand-primary-alpha-30"
+                : "bg-surface-soft-strong border-surface-soft hover:border-brand-primary-alpha-30"
             }`}
           >
             <span className="text-base group-hover:scale-125 transition-transform">{emoji}</span>
@@ -149,7 +149,7 @@ export function CivicEngagement({
       {/* COMMENTS SECTION */}
       <CivicCard title={t("engagement.public_discussion")} padding="none">
         <div className="flex flex-column">
-          <div className="flex align-items-center justify-content-between p-4 bg-black-alpha-20 border-bottom-1 border-white-alpha-10">
+          <div className="flex align-items-center justify-content-between p-4 bg-surface-soft-strong border-bottom-1 border-surface-soft">
             <span className="text-xs font-black uppercase tracking-widest text-muted">
               {t("engagement.comments")} ({commentCount})
             </span>
@@ -164,7 +164,7 @@ export function CivicEngagement({
           {commentsVisible && (
             <>
           {/* COMMENT LIST */}
-          <div className="flex flex-column gap-px bg-white-alpha-10">
+          <div className="flex flex-column gap-px bg-surface-soft">
             {comments.length === 0 ? (
               <div className="p-8 text-center text-muted italic">{t("engagement.empty_comments")}</div>
             ) : (
@@ -199,7 +199,7 @@ export function CivicEngagement({
           </div>
 
           {/* INPUT AREA */}
-          <div className="p-5 bg-black-alpha-20 border-top-1 border-white-alpha-10">
+          <div className="p-5 bg-surface-soft-strong border-top-1 border-surface-soft">
             <div className="flex flex-column gap-3">
               {replyTarget && (
                 <div className="flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">

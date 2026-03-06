@@ -73,3 +73,4 @@
 - **Container Accessibility**: Corrected Docker Compose dependencies to ensure the `civic-web` container starts reliably.
 - **Production Build Error**: Resolved `ReferenceError: React is not defined` by correctly configuring `@vitejs/plugin-react`. (#17)
 
+- **Light Theme Contrast Token Hardening**: Replaced weak neutral/ghost contrast combinations with semantic theme-aware surface tokens and applied them to shared buttons, badges, engagement blocks, and thread reaction surfaces so light theme no longer falls back to dark-looking panels with insufficient text contrast. (cross-app light theme)

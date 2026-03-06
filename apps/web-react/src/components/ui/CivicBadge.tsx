@@ -12,14 +12,14 @@ export function CivicBadge({ label, type = 'status', severity = 'neutral' }: Civ
     'progress': 'bg-status-progress text-on-brand',
     'resolved': 'bg-status-resolved text-on-brand',
     'rejected': 'bg-status-rejected text-on-brand',
-    'neutral': 'bg-white-alpha-10 text-secondary border-1 border-white-alpha-10',
+    'neutral': 'civic-badge-neutral',
   };
 
   return (
     <span className={classNames(
       'px-3 py-2 border-round-xl text-xs font-bold inline-flex align-items-center justify-content-center civic-badge',
       severityColors[severity],
-      { 'bg-white-alpha-10 text-secondary border-1 border-white-alpha-10': type === 'category' }
+      { 'civic-badge-neutral': type === 'category' }
     )}>
       {label}
     </span>
