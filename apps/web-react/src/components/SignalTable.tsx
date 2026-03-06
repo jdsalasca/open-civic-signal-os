@@ -170,7 +170,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
             navigate(`/signal/${row.id}`);
           }
         }}
-        rowClassName={(d) => (loading || ('_skeleton' in (d as object))) ? '' : 'cursor-pointer group hover:bg-white-alpha-5 transition-colors'}
+        rowClassName={(d) => (loading || ('_skeleton' in (d as object))) ? '' : 'cursor-pointer group hover:bg-surface-soft transition-colors'}
         emptyMessage={loading ? null : <div className="p-8 text-center u-eyebrow">{t('signals.no_results')}</div>}
         className="p-datatable-sm"
         sortField="priorityScore"

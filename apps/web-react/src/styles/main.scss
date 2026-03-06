@@ -390,6 +390,7 @@ a:hover {
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg-card) 94%, transparent);
   padding: 0.95rem 1rem;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .u-surface-note-compact {
@@ -764,6 +765,7 @@ a:hover {
 .civic-toolbar {
   background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
   border-radius: 1.3rem;
+  border-color: var(--surface-soft-border) !important;
 }
 
 .u-pill {
@@ -1530,7 +1532,7 @@ select:focus-visible,
     border-bottom: 1px solid var(--alpha-border-05) !important;
 
     &:hover {
-      background: var(--table-row-hover) !important;
+      background: var(--surface-soft) !important;
     }
   }
 

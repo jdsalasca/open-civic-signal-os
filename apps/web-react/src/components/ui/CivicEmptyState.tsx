@@ -15,7 +15,7 @@ export function CivicEmptyState({ icon, title, description, actionLabel, onActio
     <div className={classNames("flex flex-column align-items-center text-center py-8 px-4 animate-fade-up civic-empty-state", className)}>
       <div className="relative mb-6">
         <div className="absolute inset-0 bg-brand-primary blur-3xl opacity-10 border-circle"></div>
-        <div className="relative w-6rem h-6rem bg-white-alpha-5 border-round-3xl border-1 border-white-alpha-10 flex align-items-center justify-content-center shadow-premium civic-empty-state-icon">
+        <div className="relative w-6rem h-6rem bg-surface-soft border-round-3xl border-1 border-surface-soft flex align-items-center justify-content-center shadow-premium civic-empty-state-icon">
           <i className={classNames("pi text-4xl text-muted", icon)}></i>
         </div>
       </div>

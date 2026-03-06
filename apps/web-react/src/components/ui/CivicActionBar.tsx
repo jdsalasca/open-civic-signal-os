@@ -10,7 +10,7 @@ export function CivicActionBar({ children, className, ...rest }: CivicActionBarP
   return (
     <div
       className={classNames(
-        "civic-toolbar motion-card flex flex-wrap align-items-center gap-2 border-round-3xl border-1 border-white-alpha-10 p-2 civic-action-bar",
+        "civic-toolbar motion-card flex flex-wrap align-items-center gap-2 border-round-3xl border-1 border-surface-soft p-2 civic-action-bar",
         className
       )}
       {...rest}

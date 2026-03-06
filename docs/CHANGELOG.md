@@ -75,3 +75,4 @@
 
 - **Light Theme Contrast Token Hardening**: Replaced weak neutral/ghost contrast combinations with semantic theme-aware surface tokens and applied them to shared buttons, badges, engagement blocks, and thread reaction surfaces so light theme no longer falls back to dark-looking panels with insufficient text contrast. (cross-app light theme)
 - **Light Theme Contrast Follow-up**: Moved verify warnings, settings membership panels, signal timelines, and PrimeReact password overlays onto semantic light-theme surfaces so high-traffic flows no longer mix dark-looking alpha blocks with dark text. (cross-app light theme)
+- **Shared Surface Consistency Follow-up**: Toolbars, action bars, empty states, digest/alert sidebars, neutral stats, and datatable hover states now share the same semantic soft-surface treatment, reducing remaining light-theme drift and improving contrast consistency across the app. (cross-app UI system)

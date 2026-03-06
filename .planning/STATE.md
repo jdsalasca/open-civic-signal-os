@@ -109,3 +109,5 @@ Resume file: None
 - 2026-03-05: Hardened light-theme contrast semantics by introducing theme-aware neutral surface tokens, reworking shared ghost/button and neutral badge contrast, and replacing legacy overlay backgrounds in engagement and thread surfaces so text no longer falls into dark-on-dark failures across themes.
 
 - 2026-03-05: Extended the light-theme contrast pass into Verify, Settings, SignalDetail, and PrimeReact password overlays so auth/help/timeline surfaces now inherit semantic soft-surface tokens instead of legacy alpha utility backgrounds.
+
+- 2026-03-05: Normalized another cross-app layer of light-theme surfaces by moving toolbars, action bars, empty states, digest/alerts, and datatable hover states onto the same semantic soft-surface system used by the broader UI refresh.

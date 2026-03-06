@@ -30,8 +30,8 @@ export function NotificationSidebar({ notifications }: Props) {
             if (match) {
               const [, category, title] = match;
               return (
-                <div key={idx} className="u-surface-note flex align-items-center gap-2 text-sm">
-                  <span className="text-status-rejected font-mono text-min uppercase tracking-tighter bg-status-rejected-alpha-10 px-1 border-round">[{category}]</span>
+                <div key={idx} className="u-surface-note u-surface-note-compact flex align-items-center gap-2 text-sm">
+                  <span className="text-status-rejected text-min uppercase tracking-tighter bg-status-rejected-alpha-10 px-2 py-1 border-round-xl border-1 border-status-rejected-alpha-20">[{category}]</span>
                   <span className="u-list-item-copy text-sm">{title}</span>
                 </div>
               );
@@ -60,7 +60,7 @@ export function NotificationSidebar({ notifications }: Props) {
           </div>
         ) : (
           notifications.slice(0, 3).map((n) => (
-            <div key={n.id} className="u-surface-note hover:bg-white-alpha-10 transition-colors">
+            <div key={n.id} className="u-surface-note hover:bg-surface-soft transition-colors">
               <div className="u-card-split-header mb-3">
                 <CivicBadge label={n.channel} severity="progress" />
                 <span className="text-xs text-muted u-meta-value">{new Date(n.sentAt).toLocaleTimeString()}</span>

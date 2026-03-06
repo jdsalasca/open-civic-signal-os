@@ -17,7 +17,7 @@ export function CivicStat({ label, value, icon, tone = "neutral", className }: C
     success: "bg-status-resolved-alpha-10 text-status-resolved",
     warning: "bg-status-progress-alpha-10 text-status-progress",
     danger: "bg-status-rejected-alpha-10 text-status-rejected",
-    neutral: "bg-white-alpha-5 text-main",
+    neutral: "bg-surface-soft text-main border-1 border-surface-soft",
   }[tone];
 
   return (
