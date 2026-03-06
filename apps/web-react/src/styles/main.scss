@@ -1478,6 +1478,32 @@ select:focus-visible,
   }
 }
 
+.p-password-panel {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 1rem !important;
+  box-shadow: var(--shadow-premium) !important;
+  color: var(--text-main) !important;
+}
+
+.p-password-panel .p-password-meter {
+  background: var(--surface-soft) !important;
+  border-radius: 999px !important;
+}
+
+.p-password-panel .p-password-meter .p-password-strength {
+  border-radius: 999px !important;
+}
+
+.p-password-panel .p-password-info {
+  color: var(--text-secondary) !important;
+  font-weight: 700 !important;
+}
+
+.p-password-input-icon {
+  color: var(--text-muted) !important;
+}
+
 .p-datatable {
   background: var(--bg-card) !important;
   color: var(--text-main) !important;

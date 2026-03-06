@@ -113,7 +113,7 @@ export function Verify() {
           </div>
 
           {lastResendFailed && (
-            <div className="mb-5 p-3 border-round-xl border-1 border-white-alpha-20 bg-white-alpha-5 text-sm text-left line-height-3">
+            <div className="mb-5 p-3 border-round-xl border-1 border-surface-soft bg-surface-soft text-sm text-left line-height-3">
               <div className="font-bold mb-2 text-main">
                 <i className="pi pi-exclamation-triangle mr-2 text-status-progress" />
                 {t('auth.email_delivery_warning_title')}
@@ -152,7 +152,7 @@ export function Verify() {
               glow
             />
             
-            <div className="mt-8 pt-6 border-top-1 border-white-alpha-10 flex flex-column gap-3 text-center">
+            <div className="mt-8 pt-6 border-top-1 border-surface-soft flex flex-column gap-3 text-center">
               <p className="text-muted text-sm m-0">Didn't receive the code?</p>
               <CivicButton 
                 type="button" 

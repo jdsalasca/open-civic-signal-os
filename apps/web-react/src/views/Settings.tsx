@@ -405,7 +405,7 @@ export function Settings() {
                       return (
                         <div
                           key={`${membership.communityId}-${membership.userId}`}
-                          className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4"
+                          className="border-round-xl border-1 border-surface-soft bg-surface-soft p-4"
                           data-testid={`settings-community-membership-${membership.communityId}`}
                         >
                           <div className="flex justify-content-between gap-3 flex-wrap align-items-start">
@@ -447,7 +447,7 @@ export function Settings() {
                     })}
                   </div>
                 ) : (
-                  <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4">
+                  <div className="border-round-xl border-1 border-surface-soft bg-surface-soft p-4">
                     <p className="text-sm text-secondary m-0">{t('settings.community_membership_empty_desc')}</p>
                     <div className="mt-3">
                       <CivicButton

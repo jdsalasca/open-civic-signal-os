@@ -241,9 +241,9 @@ export function SignalDetail() {
             </CivicCard>
 
             <CivicCard title={t("signals.timeline_title")} padding="none" className="mb-8" data-testid="signal-detail-timeline">
-              <div className="flex flex-column gap-px bg-white-alpha-10">
+              <div className="flex flex-column gap-px bg-surface-soft">
                 {history.map((entry, idx) => (
-                  <div key={entry.id} className="bg-surface p-5 hover:bg-white-alpha-5 transition-colors flex gap-4" data-testid={`signal-timeline-entry-${idx}`}>
+                  <div key={entry.id} className="bg-surface p-5 hover:bg-surface-soft transition-colors flex gap-4" data-testid={`signal-timeline-entry-${idx}`}>
                     <div className="flex flex-column align-items-center gap-2">
                       <div className="bg-brand-primary-alpha-20 border-circle p-2 flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
                         <i className={`pi ${
@@ -254,7 +254,7 @@ export function SignalDetail() {
                               : "pi-history"
                         } text-brand-primary text-xs`}></i>
                       </div>
-                      {idx !== history.length - 1 && <div className="flex-grow-1 w-2px bg-white-alpha-10"></div>}
+                      {idx !== history.length - 1 && <div className="flex-grow-1 w-2px bg-surface-soft"></div>}
                     </div>
                     <div className="flex-grow-1">
                       <div className="flex justify-content-between align-items-start mb-2">
@@ -365,7 +365,7 @@ export function SignalDetail() {
                   { label: t("signals.affected_estimation"), formula: t("signals.affected_formula") },
                   { label: t("signals.community_trust"), formula: t("signals.votes_formula") }
                 ].map((item, idx) => (
-                  <div key={idx} className="p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10 shadow-sm">
+                  <div key={idx} className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm">
                     <div className="text-xs font-black text-main uppercase tracking-widest mb-1">
                       {item.label}
                     </div>
