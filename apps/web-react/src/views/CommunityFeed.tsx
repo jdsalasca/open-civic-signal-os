@@ -12,6 +12,7 @@ import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicBadge } from "../components/ui/CivicBadge";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -99,12 +100,32 @@ export function CommunityFeed() {
                     <h2 className="text-3xl font-black text-main m-0">{activeCommunityName}</h2>
                     <p className="text-secondary m-0">{t("community_home.overview_desc")}</p>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="u-pill">{t("community_home.rooms_count", { count: home?.activeRoomsCount ?? 0 })}</span>
-                    <span className="u-pill">{t("community_home.official_count", { count: home?.officialUpdates.length ?? 0 })}</span>
-                    <span className="u-pill">{t("community_home.threads_count", { count: home?.hotThreads.length ?? 0 })}</span>
-                    <span className="u-pill">{t("community_home.signals_count", { count: home?.topSignals.length ?? 0 })}</span>
-                  </div>
+                </div>
+                <div className="civic-stat-grid mt-4" data-testid="community-home-overview-stats">
+                  <CivicStatCard
+                    label={t("community_home.rooms_count", { count: home?.activeRoomsCount ?? 0 })}
+                    value={home?.activeRoomsCount ?? 0}
+                    supportingText={t("nav.dialogues")}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t("community_home.official_count", { count: home?.officialUpdates.length ?? 0 })}
+                    value={home?.officialUpdates.length ?? 0}
+                    supportingText={t("community_blog.channel_badge")}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t("community_home.threads_count", { count: home?.hotThreads.length ?? 0 })}
+                    value={home?.hotThreads.length ?? 0}
+                    supportingText={t("nav.dialogues")}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t("community_home.signals_count", { count: home?.topSignals.length ?? 0 })}
+                    value={home?.topSignals.length ?? 0}
+                    supportingText={t("nav.report")}
+                    compact
+                  />
                 </div>
               </CivicCard>
 

@@ -16,6 +16,7 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 import { CivicToolbar } from "../components/ui/CivicToolbar";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { toRoleLabel } from "../constants/roleLabels";
@@ -373,10 +374,13 @@ export function Dashboard() {
             </p>
             <div className="dashboard-story-grid mt-5">
               {heroStats.map((item) => (
-                <div key={item.label} className="dashboard-story-metric">
-                  <div className="dashboard-story-metric-label">{item.label}</div>
-                  <div className="dashboard-story-metric-value mt-2">{item.value}</div>
-                </div>
+                <CivicStatCard
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                  compact
+                  tone="brand"
+                />
               ))}
             </div>
             <CivicActionBar className="dashboard-hero-actions mt-5">
@@ -400,20 +404,27 @@ export function Dashboard() {
               })}
             </p>
             <div className="dashboard-community-summary-grid mt-4" data-testid="dashboard-community-summary">
-              <div className="dashboard-story-metric">
-                <div className="dashboard-story-metric-label">{t("dashboard.community_hub.path_label")}</div>
-                <div className="text-sm font-bold text-main mt-2 line-height-3">{activeCommunityPath}</div>
-              </div>
-              <div className="dashboard-story-metric">
-                <div className="dashboard-story-metric-label">{t("dashboard.community_hub.role_label")}</div>
-                <div className="text-sm font-bold text-main mt-2">
-                  {activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback")}
-                </div>
-              </div>
-              <div className="dashboard-story-metric">
-                <div className="dashboard-story-metric-label">{t("dashboard.community_hub.memberships_label")}</div>
-                <div className="dashboard-story-metric-value mt-2">{memberships.length}</div>
-              </div>
+              <CivicStatCard
+                label={t("dashboard.community_hub.path_label")}
+                value={activeCommunityName}
+                supportingText={activeCommunityPath}
+                compact
+                data-testid="dashboard-community-summary-path"
+              />
+              <CivicStatCard
+                label={t("dashboard.community_hub.role_label")}
+                value={activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback")}
+                supportingText={guidedHome.personaLabel}
+                compact
+                data-testid="dashboard-community-summary-role"
+              />
+              <CivicStatCard
+                label={t("dashboard.community_hub.memberships_label")}
+                value={memberships.length}
+                supportingText={t("settings.community_membership_title")}
+                compact
+                data-testid="dashboard-community-summary-memberships"
+              />
             </div>
             <div className="mt-5 pt-4 border-top-1 border-white-alpha-10">
               <span className="text-xs font-black uppercase tracking-widest text-muted">

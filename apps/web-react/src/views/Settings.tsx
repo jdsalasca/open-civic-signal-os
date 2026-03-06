@@ -22,6 +22,7 @@ import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicMetaRow } from "../components/ui/CivicMetaRow";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicIdentityAvatar } from "../components/ui/CivicIdentityAvatar";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { ACHIEVEMENT_META, AVATAR_PRESETS } from "../constants/profileIdentity";
 import { InterfaceMode, ProfileAchievement, ProfileVisibility, UserProfile } from "../types";
 import { toRoleLabel } from "../constants/roleLabels";
@@ -329,18 +330,24 @@ export function Settings() {
                 </div>
 
                 <div className="civic-stat-grid">
-                  <div className="civic-stat-card">
-                    <span className="civic-stat-label">{t('settings.community_active_label')}</span>
-                    <span className="civic-stat-value">{activeMembership?.communityName ?? t('settings.community_none')}</span>
-                  </div>
-                  <div className="civic-stat-card">
-                    <span className="civic-stat-label">{t('settings.community_role_here')}</span>
-                    <span className="civic-stat-value">{activeMembership ? toRoleLabel(activeMembership.role, t) : t('settings.identity_role_fallback')}</span>
-                  </div>
-                  <div className="civic-stat-card">
-                    <span className="civic-stat-label">{t('settings.community_count_label')}</span>
-                    <span className="civic-stat-value">{memberships.length}</span>
-                  </div>
+                  <CivicStatCard
+                    label={t('settings.community_active_label')}
+                    value={activeMembership?.communityName ?? t('settings.community_none')}
+                    supportingText={activeCommunityPath}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t('settings.community_role_here')}
+                    value={activeMembership ? toRoleLabel(activeMembership.role, t) : t('settings.identity_role_fallback')}
+                    supportingText={activeMembership?.communitySlug ? `/${activeMembership.communitySlug}` : null}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t('settings.community_count_label')}
+                    value={memberships.length}
+                    supportingText={t('settings.community_membership_title')}
+                    compact
+                  />
                 </div>
 
                 <Divider className="my-0 opacity-10" />

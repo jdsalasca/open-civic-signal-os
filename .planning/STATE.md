@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 10 of 5 in current phase  
+Plan: 11 of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-05 - Upgraded civic identity with avatar preset selection, backend-owned achievements, tag-based affiliations, and a more resilient settings profile surface
+Last activity: 2026-03-05 - Added reusable CivicStatCard and standardized responsive summary grids across Settings, Dashboard, and CommunityFeed
 
 Progress: [██████████] 99%
 
@@ -75,6 +75,7 @@ Progress: [██████████] 99%
 - 2026-03-05: Hardened shared UI consistency by localizing page-header chrome, improving empty-state resilience, wrapping chip text safely, and converting the map from click-only bubbles into explicit selected-detail panels.
 - 2026-03-05: Standardized `CivicCard` header/actions and adopted the new reusable card-surface utilities across community blog, community threads, and signal detail to reduce layout drift and long-copy overlap.
 - 2026-03-05: Extended civic identity profiles with persisted avatar presets, backend-owned achievement milestones, tag-based affiliation editing, and a stronger recognition-oriented Settings experience.
+- 2026-03-05: Introduced reusable `CivicStatCard` and migrated the highest-risk summary grids in Settings, Dashboard, and CommunityFeed to shared responsive tokens instead of local metric blocks.
 
 ### Pending Todos
 
@@ -94,6 +95,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Landed civic profile recognition upgrades and seeded follow-up backlog for broader cross-app identity surfaces; next target is `OCS-P1-040` structured proposal templates  
+Stopped at: Landed a cross-app stat-card refactor for community summary surfaces; next target is `OCS-P1-040` structured proposal templates  
 Resume file: None
 

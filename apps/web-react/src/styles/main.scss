@@ -626,6 +626,23 @@ a:hover {
   gap: 0.75rem;
 }
 
+.civic-stat-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.civic-stat-card-compact {
+  min-height: 7.5rem;
+  padding: 1rem;
+}
+
+.civic-stat-card-brand {
+  background: linear-gradient(180deg, var(--alpha-surface-05), color-mix(in srgb, var(--brand-primary-alpha-10) 40%, var(--bg-card)));
+}
+
 .civic-stat-label {
   font-size: 0.72rem;
   font-weight: 800;
@@ -642,6 +659,25 @@ a:hover {
   color: var(--text-main);
   overflow-wrap: anywhere;
   text-wrap: balance;
+}
+
+.civic-stat-supporting {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.civic-stat-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--brand-primary) 14%, transparent);
+  color: var(--brand-primary);
 }
 
 .civic-meta-stack {
@@ -917,30 +953,39 @@ a:hover {
 
 .dashboard-story-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
   gap: 0.85rem;
 }
 
 .dashboard-story-metric {
-  border-radius: 1.15rem;
-  border: 1px solid var(--alpha-border-10);
-  background: var(--alpha-surface-05);
-  padding: 0.95rem;
+  min-width: 0;
+  min-height: 8.75rem;
+  padding: 1.15rem;
+  border-radius: 1.45rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .dashboard-story-metric-label {
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.62rem;
+  font-size: 0.72rem;
   font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
 }
 
 .dashboard-story-metric-value {
-  color: var(--text-main);
-  font-size: 1.35rem;
+  font-size: clamp(1.25rem, 2vw, 2rem);
+  line-height: 1.05;
   font-weight: 900;
-  line-height: 1.1;
+  color: var(--text-main);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .dashboard-hero-actions {
@@ -951,7 +996,7 @@ a:hover {
 .dashboard-community-summary-grid,
 .dashboard-community-surface-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
   gap: 1rem;
 }
 
