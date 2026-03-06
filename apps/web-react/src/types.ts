@@ -133,6 +133,7 @@ export type CommunityMembership = {
 
 export type CommunityPermissionScope =
   | "CREATE_PROPOSAL"
+  | "MANAGE_GOVERNANCE_LIBRARY"
   | "MANAGE_PROJECT_BOARDS"
   | "CREATE_THREAD"
   | "ADD_THREAD_MESSAGE"
@@ -321,6 +322,40 @@ export type CommunityProjectBoard = {
   dueDate?: string | null;
   taskCounts: CommunityProjectTaskCounts;
   tasks: CommunityProjectTask[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GovernanceDocumentType = "STATUTE" | "REGULATION" | "MINUTES" | "AGREEMENT" | "BUDGET" | "REPORT";
+export type GovernanceDocumentVisibility = "PUBLIC" | "COMMUNITY" | "ADMINS";
+
+export type GovernanceDocumentVersion = {
+  id: string;
+  documentId: string;
+  createdBy: string;
+  authorUsername: string;
+  versionNumber: number;
+  content: string;
+  changeSummary: string;
+  sourceUrl: string | null;
+  effectiveDate: string | null;
+  meetingDate: string | null;
+  createdAt: string;
+};
+
+export type GovernanceDocument = {
+  id: string;
+  communityId: string;
+  createdBy: string;
+  authorUsername: string;
+  title: string;
+  summary: string;
+  documentType: GovernanceDocumentType;
+  visibility: GovernanceDocumentVisibility;
+  tags: string[];
+  currentVersionNumber: number;
+  currentVersion: GovernanceDocumentVersion | null;
+  versions: GovernanceDocumentVersion[];
   createdAt: string;
   updatedAt: string;
 };

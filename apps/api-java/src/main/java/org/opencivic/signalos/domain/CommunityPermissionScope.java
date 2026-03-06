@@ -13,6 +13,10 @@ public enum CommunityPermissionScope {
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON
     )),
+    MANAGE_GOVERNANCE_LIBRARY(Set.of(
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
     CREATE_THREAD(Set.of(
         CommunityRole.MEMBER,
         CommunityRole.MODERATOR,

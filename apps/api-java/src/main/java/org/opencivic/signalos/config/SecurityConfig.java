@@ -57,6 +57,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/community/projects/*/tasks").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/community/projects/*/tasks/*").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/community/projects/*/tasks/*/comments").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/community/governance").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/community/governance/*/versions").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/signals/*/status").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/signals/*/assign").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/signals/merge").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")

@@ -416,12 +416,12 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - communities can find the rules before conflict or misinformation spreads
 - Acceptance criteria:
-  - [ ] documents are searchable by type and community
-  - [ ] versions remain accessible
-  - [ ] visibility rules are explicit
+  - [x] documents are searchable by type and community
+  - [x] versions remain accessible
+  - [x] visibility rules are explicit
 - Validation:
-  - [ ] backend search/version tests
-  - [ ] Playwright document discovery flow
+  - [x] backend search/version tests
+  - [x] Playwright document discovery flow
 
 ### `story:OCS-P1-047` Community Decision Ledger
 

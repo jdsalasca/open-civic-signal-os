@@ -9,6 +9,7 @@ import org.opencivic.signalos.service.CommunityCollaborationService;
 import org.opencivic.signalos.service.CommunityProjectBoardService;
 import org.opencivic.signalos.service.CommunityProposalDeliberationService;
 import org.opencivic.signalos.service.CommunityProposalService;
+import org.opencivic.signalos.service.GovernanceLibraryService;
 import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
@@ -22,10 +23,13 @@ import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProposalDeliberationRequest;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
+import org.opencivic.signalos.web.dto.CreateGovernanceDocumentRequest;
+import org.opencivic.signalos.web.dto.CreateGovernanceDocumentVersionRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProposalRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadMessageRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadRequest;
+import org.opencivic.signalos.web.dto.GovernanceDocumentResponse;
 import org.opencivic.signalos.web.dto.ModerateThreadMessageRequest;
 import org.opencivic.signalos.web.dto.ModerateCommunityProposalEntryRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityProjectTaskRequest;
@@ -57,6 +61,7 @@ public class CommunityCollaborationController {
     private final CommunityProjectBoardService projectBoardService;
     private final CommunityProposalService proposalService;
     private final CommunityProposalDeliberationService proposalDeliberationService;
+    private final GovernanceLibraryService governanceLibraryService;
     private final CivicEngagementService engagementService;
 
     public CommunityCollaborationController(
@@ -64,12 +69,14 @@ public class CommunityCollaborationController {
         CommunityProjectBoardService projectBoardService,
         CommunityProposalService proposalService,
         CommunityProposalDeliberationService proposalDeliberationService,
+        GovernanceLibraryService governanceLibraryService,
         CivicEngagementService engagementService
     ) {
         this.collaborationService = collaborationService;
         this.projectBoardService = projectBoardService;
         this.proposalService = proposalService;
         this.proposalDeliberationService = proposalDeliberationService;
+        this.governanceLibraryService = governanceLibraryService;
         this.engagementService = engagementService;
     }
 
@@ -336,6 +343,42 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return projectBoardService.addTaskComment(projectId, taskId, request, principal.getName());
+    }
+
+    @GetMapping("/governance")
+    public List<GovernanceDocumentResponse> getGovernanceDocuments(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String documentType,
+        @RequestParam(required = false) String visibility,
+        @RequestParam(required = false) String query,
+        Principal principal
+    ) {
+        return governanceLibraryService.getDocuments(communityId, documentType, visibility, query, principal.getName());
+    }
+
+    @GetMapping("/governance/{documentId}")
+    public GovernanceDocumentResponse getGovernanceDocument(
+        @PathVariable UUID documentId,
+        Principal principal
+    ) {
+        return governanceLibraryService.getDocument(documentId, principal.getName());
+    }
+
+    @PostMapping("/governance")
+    public GovernanceDocumentResponse createGovernanceDocument(
+        @Valid @RequestBody CreateGovernanceDocumentRequest request,
+        Principal principal
+    ) {
+        return governanceLibraryService.createDocument(request, principal.getName());
+    }
+
+    @PostMapping("/governance/{documentId}/versions")
+    public GovernanceDocumentResponse createGovernanceDocumentVersion(
+        @PathVariable UUID documentId,
+        @Valid @RequestBody CreateGovernanceDocumentVersionRequest request,
+        Principal principal
+    ) {
+        return governanceLibraryService.addVersion(documentId, request, principal.getName());
     }
 
     @GetMapping("/proposals/{proposalId}/deliberation")

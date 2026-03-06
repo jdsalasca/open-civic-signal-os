@@ -226,6 +226,7 @@ Execution order:
 11. `story:OCS-P1-046` governance library and searchable agreements.
    - Measurable civic outcome: rules and prior decisions become easy to find before conflicts escalate.
    - Validation commands: document search/filter tests + responsive library UI audit.
+   - 2026-03-06 completion note: backend-owned governance document library shipped with type/visibility search, version history, `MANAGE_GOVERNANCE_LIBRARY` scope, `/communities/governance` UI workflow, OpenAPI coverage, and ADR-backed contract documentation.
 12. `story:OCS-P1-047` decision ledger.
    - Measurable civic outcome: communities can trace proposals to votes to execution responsibility.
    - Validation commands: linked-record contract tests + timeline UI evidence.

@@ -27,6 +27,7 @@ type ApiError = Error & { friendlyMessage?: string };
 
 const permissionScopeOrder: CommunityPermissionScope[] = [
   "CREATE_PROPOSAL",
+  "MANAGE_GOVERNANCE_LIBRARY",
   "MANAGE_PROJECT_BOARDS",
   "CREATE_THREAD",
   "ADD_THREAD_MESSAGE",
@@ -353,6 +354,14 @@ export function Communities() {
             variant="secondary"
             onClick={() => navigate("/communities/map")}
             data-testid="communities-open-map-button"
+          />
+          <CivicButton
+            type="button"
+            icon="pi pi-book"
+            label={t("nav.community_governance")}
+            variant="ghost"
+            onClick={() => navigate("/communities/governance")}
+            data-testid="communities-open-governance-button"
           />
           <CivicButton
             type="button"

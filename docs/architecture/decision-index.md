@@ -31,6 +31,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260305-community-proposal-templates-contract.md` (accepted)
 - `ADR-20260306-community-proposal-deliberation-contract.md` (accepted)
 - `ADR-20260306-community-project-boards-contract.md` (accepted)
+- `ADR-20260306-governance-library-contract.md` (accepted)
 
 ## Review Rule
 

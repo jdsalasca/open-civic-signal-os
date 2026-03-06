@@ -46,4 +46,17 @@ export const FORM_LIMITS = {
     commentMin: 3,
     commentMax: 1000,
   },
+  governance: {
+    titleMin: 8,
+    titleMax: 180,
+    summaryMin: 20,
+    summaryMax: 1200,
+    tagsMax: 8,
+    tagMax: 120,
+    contentMin: 40,
+    contentMax: 12000,
+    changeSummaryMin: 8,
+    changeSummaryMax: 500,
+    sourceUrlMax: 1200,
+  },
 } as const;

@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 Phase: 5 of 5 (Community Operating System Expansion)  
 Plan: 21 of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-06 - Implemented structured proposal deliberation with backend-owned typed entries, evidence enforcement, moderation, and proposal-detail UI workflow
+Last activity: 2026-03-06 - Implemented governance library with backend-owned searchable documents, version history, and a community governance workspace
 
 Progress: [██████████] 100%
 
@@ -85,6 +85,7 @@ Progress: [██████████] 100%
 - 2026-03-05: Extended the responsive hardening pass into MetricsGrid, Communities, CommunityMap, and Moderation so the remaining dense community hubs now share the same card, heading, and metadata standards with better wrapping under narrow layouts.
 - 2026-03-05: Implemented OCS-P1-040 with backend-owned structured proposals, the `CREATE_PROPOSAL` permission scope, linked-issue validation, a community proposal workspace route, OpenAPI schema coverage, and ADR-backed contract documentation.
 - 2026-03-06: Implemented OCS-P1-041 with backend-owned typed deliberation entries, evidence-link validation, moderation that preserves proposal context, OpenAPI contract coverage, and proposal-detail UI sections for pro/con/questions/evidence.
+- 2026-03-06: Implemented OCS-P1-046 with a backend-owned governance document library, version history, explicit visibility, `MANAGE_GOVERNANCE_LIBRARY` scope, `/communities/governance` workflow, OpenAPI coverage, and ADR-backed contract notes.
 
 ### Pending Todos
 
@@ -104,7 +105,7 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-06  
-Stopped at: Finished `OCS-P1-043` community project boards; next target is `OCS-P1-046` governance library and searchable agreements  
+Stopped at: Finished `OCS-P1-046` governance library and searchable agreements; next target is `OCS-P1-047` community decision ledger  
 Resume file: None
 
 - 2026-03-06: Completed `OCS-P1-043` by adding backend-owned community project boards with linked proposals, deterministic task statuses, assignee and due-date support, task execution notes, `/api/community/projects*` endpoints, a new `/communities/projects` kanban workflow, OpenAPI/ADR updates, and backend plus Playwright validation coverage.
