@@ -9,7 +9,7 @@ export function CivicSelect({ className, appendTo, panelClassName, ...props }: C
       {...props}
       appendTo={appendTo ?? (typeof document !== "undefined" ? document.body : undefined)}
       panelClassName={classNames("civic-select-panel", panelClassName)}
-      className={classNames("w-full bg-black-alpha-20", className)}
+      className={classNames("w-full", className)}
     />
   );
 }

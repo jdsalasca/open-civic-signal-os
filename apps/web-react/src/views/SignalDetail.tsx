@@ -224,7 +224,7 @@ export function SignalDetail() {
               
               <Divider className="my-8 opacity-10" />
               
-              <div className="civic-stat-grid">
+              <div className="civic-stat-grid civic-stat-grid-comfortable">
                 <CivicStatCard
                   label={t("signals.affected_estimation")}
                   value={`${(signal.scoreBreakdown?.affectedPeople || 0) * 10} ${t("signals.citizens")}`}
@@ -381,8 +381,8 @@ export function SignalDetail() {
               <CivicCard title={t("signals.lifecycle_admin")} variant="brand" className="mb-8">
                 <div className="flex flex-column gap-3">
                   <CivicButton label={t("signals.reset_new")} variant="secondary" className="text-xs w-full" onClick={() => updateStatus('NEW')} disabled={signal.status === 'NEW'} />
-                  <CivicButton label={t("signals.mark_inprogress")} icon="pi pi-bolt" className="bg-status-progress text-black text-xs w-full" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} />
-                  <CivicButton label={t("signals.mark_resolved")} icon="pi pi-check" className="bg-status-resolved text-black text-xs w-full" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} />
+                  <CivicButton label={t("signals.mark_inprogress")} icon="pi pi-bolt" className="bg-status-progress text-on-brand text-xs w-full" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} />
+                  <CivicButton label={t("signals.mark_resolved")} icon="pi pi-check" className="bg-status-resolved text-on-brand text-xs w-full" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} />
                 </div>
               </CivicCard>
             )}

@@ -108,7 +108,7 @@ export function CommunityFeed() {
                     <p className="text-secondary m-0">{t("community_home.overview_desc")}</p>
                   </div>
                 </div>
-                <div className="civic-stat-grid mt-4" data-testid="community-home-overview-stats">
+                <div className="civic-stat-grid civic-stat-grid-comfortable mt-4" data-testid="community-home-overview-stats">
                   <CivicStatCard
                     label={t("community_home.rooms_count", { count: home?.activeRoomsCount ?? 0 })}
                     value={home?.activeRoomsCount ?? 0}

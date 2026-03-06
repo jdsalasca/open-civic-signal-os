@@ -80,6 +80,7 @@ Progress: [██████████] 99%
 - 2026-03-05: Reduced Settings card density by separating identity, community belonging, and achievement surfaces, shortened community summary labels, and hardened stat-card/meta wrapping so Spanish copy stays stable under compact layouts.
 - 2026-03-05: Reduced dashboard and community-home control density by grouping secondary actions, introducing calmer action-bar layouts, and standardizing reusable list-card surfaces for official updates, threads, and top issues.
 - 2026-03-05: Added a global overflow-hardening pass for grid columns, card copy, badges, pills, PrimeReact button labels, dropdown labels, and datatable cells so longer strings wrap instead of overlapping surfaces across the app.
+- 2026-03-05: Hardened light-theme contrast and responsive copy handling across shared selects, stat cards, mobile nav, topbar community context, Settings identity density, report summaries, and signal detail lifecycle controls to remove remaining cross-app breakpoints.
 
 ### Pending Todos
 
@@ -99,6 +100,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Finished the cross-app stat-grid hardening pass and restored shared summary consistency across Communities and SignalDetail; next target is `OCS-P1-040` structured proposal templates  
+Stopped at: Finished the cross-app light-theme and responsive consistency hardening pass; next target is `OCS-P1-040` structured proposal templates  
 Resume file: None
 

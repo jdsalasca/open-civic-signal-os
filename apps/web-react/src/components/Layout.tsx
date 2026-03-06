@@ -255,8 +255,8 @@ export function Layout({ children, authMode = false }: Props) {
             <div className="flex align-items-center gap-3 px-2">
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
               <div className="flex flex-column overflow-hidden">
-                <span className="text-xs font-black text-main truncate uppercase tracking-wider">{userName}</span>
-                <span className="text-min font-bold text-muted uppercase nav-clearance-label">
+                <span className="text-sm font-black text-main app-user-name">{userName}</span>
+                <span className="text-min font-bold text-muted nav-clearance-label app-user-role">
                   {t('nav.clearance')}: {toRoleLabel(activeRole, t)}
                 </span>
               </div>
@@ -275,7 +275,7 @@ export function Layout({ children, authMode = false }: Props) {
 
       {/* VIEW AREA */}
       <div className="flex flex-column flex-grow-1 overflow-hidden relative">
-        <header className="app-topbar h-6rem flex align-items-center justify-content-between px-4 lg:px-6 border-bottom-1 border-subtle z-1">
+        <header className="app-topbar min-h-6rem py-3 flex align-items-center justify-content-between px-4 lg:px-6 border-bottom-1 border-subtle z-1">
           <div className="flex align-items-center gap-4 flex-grow-1">
             <Button
               icon="pi pi-bars"
@@ -307,12 +307,12 @@ export function Layout({ children, authMode = false }: Props) {
                   options={communityOptions}
                   onChange={(e) => handleCommunitySwitch(e.value)}
                   placeholder="Sector"
-                  className="w-10rem border-none bg-transparent font-bold text-sm"
+                  className="w-13rem border-none bg-transparent font-bold text-sm"
                   data-testid="community-switch-dropdown"
                   itemTemplate={(option) => (
                     <div className="flex flex-column py-1">
-                      <span className="font-black text-xs uppercase tracking-widest">{option.label}</span>
-                      <small className="text-muted text-min font-mono mt-1">{toRoleLabel(option.role, t)}</small>
+                      <span className="font-black text-sm layout-community-option-label">{option.label}</span>
+                      <small className="text-muted text-min mt-1 layout-community-option-role">{toRoleLabel(option.role, t)}</small>
                     </div>
                   )}
                 />
@@ -366,7 +366,7 @@ export function Layout({ children, authMode = false }: Props) {
           </div>
         </main>
 
-        <nav className="app-mobile-nav lg:hidden flex justify-content-around align-items-center border-top-1 border-subtle h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
+        <nav className="app-mobile-nav lg:hidden flex justify-content-around align-items-center border-top-1 border-subtle min-h-5rem py-2 px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
           {mobileNav.map(link => (
             <Link
               key={link.to}
@@ -377,7 +377,7 @@ export function Layout({ children, authMode = false }: Props) {
               aria-current={location.pathname === link.to ? "page" : undefined}
             >
               <i className={`${link.icon} text-xl`}></i>
-              <span style={{ fontSize: '9px' }} className="font-bold uppercase tracking-widest">{link.label.split(' ')[0]}</span>
+              <span className="font-bold tracking-wide mobile-nav-label">{link.label}</span>
             </Link>
           ))}
           <button
@@ -390,7 +390,7 @@ export function Layout({ children, authMode = false }: Props) {
             data-testid="mobile-more-toggle"
           >
             <i className="pi pi-ellipsis-h text-xl"></i>
-            <span style={{ fontSize: '9px' }} className="font-bold uppercase tracking-widest">{t('nav.more_short')}</span>
+            <span className="font-bold tracking-wide mobile-nav-label">{t('nav.more_short')}</span>
           </button>
         </nav>
       </div>

@@ -329,25 +329,27 @@ export function Settings() {
                   <CivicBadge label={identityRole} severity="neutral" />
                 </div>
 
-                <div className="civic-stat-grid">
-                  <CivicStatCard
-                    label={t('settings.community_active_label')}
-                    value={activeMembership?.communityName ?? t('settings.community_none')}
-                    supportingText={activeCommunityPath}
-                    compact
-                  />
-                  <CivicStatCard
-                    label={t('settings.community_role_here')}
-                    value={activeMembership ? toRoleLabel(activeMembership.role, t) : t('settings.identity_role_fallback')}
-                    supportingText={activeMembership?.communitySlug ? `/${activeMembership.communitySlug}` : null}
-                    compact
-                  />
-                  <CivicStatCard
-                    label={t('settings.community_count_label')}
-                    value={memberships.length}
-                    supportingText={t('settings.community_membership_title')}
-                    compact
-                  />
+                <div className="u-card-surface-block">
+                  <div className="u-card-split-header">
+                    <div className="u-card-copy">
+                      <div className="text-xs font-black uppercase tracking-widest text-muted">
+                        {t('settings.community_membership_title')}
+                      </div>
+                      <div className="text-lg font-black text-main mt-2">
+                        {activeMembership?.communityName ?? t('settings.community_none')}
+                      </div>
+                      <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                        {activeCommunityPath}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 flex-wrap justify-content-end">
+                      {activeMembership && <CivicBadge label={toRoleLabel(activeMembership.role, t)} severity="progress" />}
+                      <span className="u-pill">
+                        <i className="pi pi-users text-brand-primary" />
+                        {memberships.length}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <Divider className="my-0 opacity-10" />
@@ -375,7 +377,7 @@ export function Settings() {
 
             <CivicCard title={t('settings.community_membership_title')} className="mt-6" data-testid="settings-community-memberships-card">
               <div className="flex flex-column gap-4">
-                <div className="civic-stat-grid" data-testid="settings-community-summary-grid">
+                <div className="civic-stat-grid civic-stat-grid-comfortable" data-testid="settings-community-summary-grid">
                   <CivicStatCard
                     label={t('settings.community_active_label')}
                     value={activeMembership?.communityName ?? t('settings.community_none')}

@@ -17,6 +17,7 @@ import { CivicField } from "../components/ui/CivicField";
 import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { isSubmitShortcut } from "../utils/keyboard";
 import { Signal } from "../types";
@@ -709,7 +710,7 @@ export function ReportSignal() {
                           })}>
                             <div className="flex align-items-center gap-2 mb-2">
                               <span className={classNames("flex align-items-center justify-content-center border-circle font-black", {
-                                "bg-brand-primary text-black": isActive || isComplete,
+                                "bg-brand-primary text-on-brand": isActive || isComplete,
                                 "bg-white-alpha-10 text-main": !isActive && !isComplete,
                               })} style={{ width: "2rem", height: "2rem" }}>
                                 {index + 1}
@@ -757,23 +758,27 @@ export function ReportSignal() {
                     <i className="pi pi-users text-brand-primary"></i>
                     {activeCommunityId ? t("report.summary_community_ready") : t("report.community_required")}
                   </div>
-                  <div className="grid">
-                    <div className="col-12">
-                      <div className="text-xs font-black uppercase tracking-widest text-muted mb-1">{t("report.summary_category")}</div>
-                      <div className="text-main font-bold">{t(`categories.${currentCategory}`)}</div>
-                    </div>
-                    <div className="col-12">
-                      <div className="text-xs font-black uppercase tracking-widest text-muted mb-1">{t("report.summary_location")}</div>
-                      <div className="text-main font-bold">{currentLocationLabel.trim() || t("report.summary_missing")}</div>
-                    </div>
-                    <div className="col-12">
-                      <div className="text-xs font-black uppercase tracking-widest text-muted mb-1">{t("report.summary_evidence")}</div>
-                      <div className="text-main font-bold">{t("report.summary_evidence_count", { count: currentEvidenceUrls.length })}</div>
-                    </div>
-                    <div className="col-12">
-                      <div className="text-xs font-black uppercase tracking-widest text-muted mb-1">{t("report.scale")}</div>
-                      <div className="text-main font-bold">{t("report.summary_people", { count: watch("affectedPeople") })}</div>
-                    </div>
+                  <div className="civic-stat-grid civic-stat-grid-comfortable">
+                    <CivicStatCard
+                      label={t("report.summary_category")}
+                      value={t(`categories.${currentCategory}`)}
+                      compact
+                    />
+                    <CivicStatCard
+                      label={t("report.summary_location")}
+                      value={currentLocationLabel.trim() || t("report.summary_missing")}
+                      compact
+                    />
+                    <CivicStatCard
+                      label={t("report.summary_evidence")}
+                      value={t("report.summary_evidence_count", { count: currentEvidenceUrls.length })}
+                      compact
+                    />
+                    <CivicStatCard
+                      label={t("report.scale")}
+                      value={t("report.summary_people", { count: watch("affectedPeople") })}
+                      compact
+                    />
                   </div>
                   {currentImageUrl && (
                     <div className="border-round-xl overflow-hidden border-1 border-subtle">
