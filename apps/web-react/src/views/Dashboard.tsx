@@ -427,7 +427,7 @@ export function Dashboard() {
               />
             </div>
             <div className="mt-5 pt-4 border-top-1 border-surface-soft">
-              <span className="text-xs font-black uppercase tracking-widest text-muted">
+              <span className="text-xs font-black uppercase tracking-wide text-muted">
                 {t("dashboard.community_hub.next_actions_label")}
               </span>
               <div className="dashboard-action-cluster mt-3">
@@ -455,7 +455,7 @@ export function Dashboard() {
         <CivicCard className="mb-6" data-testid="dashboard-community-focus">
           <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
             <div className="flex flex-column gap-1">
-              <span className="text-xs font-black uppercase tracking-widest text-muted">
+              <span className="text-xs font-black uppercase tracking-wide text-muted">
                 {t("dashboard.community_surface.kicker")}
               </span>
               <h2 className="text-2xl font-black text-main m-0">{t("dashboard.community_surface.title", { community: activeCommunityName })}</h2>
@@ -498,7 +498,7 @@ export function Dashboard() {
           <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
             <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
               <div className="flex flex-column gap-1">
-                <span className="text-xs font-black uppercase tracking-widest text-muted">
+                <span className="text-xs font-black uppercase tracking-wide text-muted">
                   {t("dashboard.secondary_actions_title")}
                 </span>
                 <span className="text-sm text-secondary">
@@ -550,7 +550,7 @@ export function Dashboard() {
         <CivicCard className="mb-6" variant="brand">
           <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
             <div className="flex flex-column gap-1">
-                <span className="text-xs font-black uppercase tracking-widest text-muted">{t("dashboard.priority_strip_title")}</span>
+                <span className="text-xs font-black uppercase tracking-wide text-muted">{t("dashboard.priority_strip_title")}</span>
                 <span className="text-sm text-secondary">{t("dashboard.priority_strip_desc")}</span>
               </div>
             <div className="dashboard-action-cluster">

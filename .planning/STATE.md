@@ -125,3 +125,5 @@ Resume file: None
 - 2026-03-05: Softened another auth-and-intake layer by calming onboarding cards, verification-code tracking, report slider helper labels, digest score labels, and support blocks so small-screen readability improves without introducing new local patterns.
 
 - 2026-03-05: Standardized another shared readability layer by softening `CivicField` and `CivicStat` label tracking, moving login/unauthorized hero blocks onto semantic surfaces, and aligning My Contributions with the shared page-header/meta pattern.
+
+- 2026-03-05: Calmed another high-density label layer across Dashboard, Community Home, Signal Detail, and Settings by replacing the widest uppercase tracking treatment with the shared medium-spacing label standard.

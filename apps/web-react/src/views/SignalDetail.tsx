@@ -152,7 +152,7 @@ export function SignalDetail() {
             <div className="min-w-0">
               <div className="u-card-meta-row mb-2">
                 <CivicBadge label={signal.status} severity={severity} />
-                <span className="text-xs text-muted font-bold uppercase tracking-widest">
+                <span className="text-xs text-muted font-bold uppercase tracking-wide">
                   {t("signals.protocol_id")}: {signal.id.substring(0,8)}
                 </span>
               </div>
@@ -278,7 +278,7 @@ export function SignalDetail() {
                         </div>
                       )}
                       <p className="m-0 text-secondary text-sm font-medium">{entry.reason}</p>
-                      <div className="mt-3 text-xs font-black uppercase tracking-widest text-muted">
+                      <div className="mt-3 text-xs font-black uppercase tracking-wide text-muted">
                         {t("signals.timeline_actor_label")}: <span className="text-brand-primary">{entry.changedBy}</span>
                       </div>
                     </div>
@@ -299,13 +299,13 @@ export function SignalDetail() {
             <CivicCard title={t("signals.assignment_title")} className="mb-8" data-testid="signal-detail-assignment-card">
               <div className="flex flex-column gap-4">
                 <div>
-                  <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">{t("signals.assignment_current_label")}</div>
+                  <div className="text-xs text-muted uppercase font-black tracking-wide mb-1">{t("signals.assignment_current_label")}</div>
                   <div className="text-xl font-black text-main" data-testid="signal-assignee-current">
                     {signal.assignedToUsername || t("signals.timeline_unassigned")}
                   </div>
                 </div>
                 <div className="p-3 border-round-xl border-1 border-subtle bg-surface">
-                  <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">{t("signals.assignment_status_label")}</div>
+                  <div className="text-xs text-muted uppercase font-black tracking-wide mb-1">{t("signals.assignment_status_label")}</div>
                   <div className="text-sm text-secondary">
                     {signal.assignedToUsername
                       ? t("signals.assignment_status_assigned", { assignee: signal.assignedToUsername })
@@ -314,7 +314,7 @@ export function SignalDetail() {
                 </div>
                 {isStaff && (
                   <div className="flex flex-column gap-3">
-                    <label htmlFor="signal-assignee-input" className="text-xs font-black uppercase tracking-widest text-main">
+                    <label htmlFor="signal-assignee-input" className="text-xs font-black uppercase tracking-wide text-main">
                       {t("signals.assignment_input_label")}
                     </label>
                     <InputText
@@ -342,7 +342,7 @@ export function SignalDetail() {
               <div className="text-8xl font-black text-main mb-2 tracking-tighter">
                 {signal.priorityScore?.toFixed(0)}
               </div>
-              <p className="text-muted text-sm font-bold mb-8 uppercase tracking-widest">{t("signals.priority_rank")}</p>
+              <p className="text-muted text-sm font-bold mb-8 uppercase tracking-wide">{t("signals.priority_rank")}</p>
             </CivicCard>
 
             <PriorityRadar 
@@ -366,7 +366,7 @@ export function SignalDetail() {
                   { label: t("signals.community_trust"), formula: t("signals.votes_formula") }
                 ].map((item, idx) => (
                   <div key={idx} className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm">
-                    <div className="text-xs font-black text-main uppercase tracking-widest mb-1">
+                    <div className="text-xs font-black text-main uppercase tracking-wide mb-1">
                       {item.label}
                     </div>
                     <div className="text-xs text-muted leading-tight">

@@ -51,7 +51,7 @@ export function CommunityFeed() {
 
           <CivicActionBar className="community-home-action-bar">
             <div className="community-home-action-copy">
-              <div className="text-xs font-black uppercase tracking-widest text-muted">
+              <div className="text-xs font-black uppercase tracking-wide text-muted">
                 {t("dashboard.freshness_label")}
               </div>
               <div className="u-pill mt-2" data-testid="community-home-freshness">
@@ -101,7 +101,7 @@ export function CommunityFeed() {
               <CivicCard className="mb-6" data-testid="community-home-overview">
                 <div className="flex flex-column lg:flex-row justify-content-between gap-4">
                   <div className="flex flex-column gap-2">
-                    <span className="text-xs font-black uppercase tracking-widest text-muted">
+                    <span className="text-xs font-black uppercase tracking-wide text-muted">
                       {t("community_home.kicker")}
                     </span>
                     <h2 className="text-3xl font-black text-main m-0">{activeCommunityName}</h2>
@@ -136,7 +136,7 @@ export function CommunityFeed() {
                 </div>
                 <CivicActionBar className="mt-4 community-home-overview-actions">
                   <div className="community-home-action-copy">
-                    <div className="text-xs font-black uppercase tracking-widest text-muted">
+                    <div className="text-xs font-black uppercase tracking-wide text-muted">
                       {t("community_home.actions_label")}
                     </div>
                     <p className="text-sm text-secondary m-0">

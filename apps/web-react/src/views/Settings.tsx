@@ -332,7 +332,7 @@ export function Settings() {
                 <div className="u-card-surface-block">
                   <div className="u-card-split-header">
                     <div className="u-card-copy">
-                      <div className="text-xs font-black uppercase tracking-widest text-muted">
+                      <div className="text-xs font-black uppercase tracking-wide text-muted">
                         {t('settings.community_membership_title')}
                       </div>
                       <div className="text-lg font-black text-main mt-2">
@@ -588,7 +588,7 @@ export function Settings() {
                     </div>
                     {suggestedAffiliations.length > 0 && (
                       <div className="flex flex-column gap-2">
-                        <span className="text-xs text-muted font-bold uppercase tracking-widest">
+                        <span className="text-xs text-muted font-bold uppercase tracking-wide">
                           {t('settings.affiliations_suggested')}
                         </span>
                         <div className="flex gap-2 flex-wrap">
@@ -755,7 +755,7 @@ export function Settings() {
 
         <div className="text-center mt-8 mb-8">
           <CivicActionBar className="justify-content-center">
-            <p className="text-muted text-xs font-bold uppercase tracking-widest m-0">
+            <p className="text-muted text-xs font-bold uppercase tracking-wide m-0">
               {t('settings.footer')}
             </p>
           </CivicActionBar>
