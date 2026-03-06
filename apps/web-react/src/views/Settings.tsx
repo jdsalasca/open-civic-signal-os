@@ -725,7 +725,7 @@ export function Settings() {
                       itemTemplate={(option: RoleOption) => (
                         <div className="flex flex-column py-1">
                           <span className="font-bold text-main">{option.label}</span>
-                          <small className="text-muted font-mono uppercase text-min">{option.code}</small>
+                          <small className="text-muted uppercase text-xs">{option.code}</small>
                         </div>
                       )}
                     />

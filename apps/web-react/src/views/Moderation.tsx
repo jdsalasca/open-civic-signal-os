@@ -99,7 +99,7 @@ export function Moderation() {
               body={(s: Signal) => (
                 <div className="flex flex-column gap-2 min-w-0">
                   <span className="u-list-item-title text-base">{s.title}</span>
-                  <span className="text-min text-muted u-meta-value">SIG-REF: {s.id.substring(0,8)}</span>
+                  <span className="text-xs text-muted u-meta-value">SIG-REF: {s.id.substring(0,8)}</span>
                 </div>
               )} 
             />

@@ -169,14 +169,14 @@ export function CivicEngagement({
               <div className="p-8 text-center text-muted italic">{t("engagement.empty_comments")}</div>
             ) : (
               comments.map((comment) => (
-                <div key={comment.id} className="bg-surface p-5 hover:bg-white-alpha-5 transition-colors">
+                <div key={comment.id} className="bg-surface p-5 hover:bg-surface-soft transition-colors">
                   <div className="flex align-items-center gap-3 mb-3">
                     <Avatar label={comment.authorUsername[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white" />
                     <div className="flex flex-column">
                       <span className="text-sm font-black text-main">{comment.authorUsername}</span>
-                      <span className="text-min font-bold text-muted uppercase tracking-widest" style={{fontSize: '8px'}}>{toRoleListLabel(comment.authorRole, t)}</span>
+                      <span className="text-xs font-bold text-muted uppercase tracking-widest">{toRoleListLabel(comment.authorRole, t)}</span>
                     </div>
-                    <span className="text-min text-muted ml-auto">{new Date(comment.createdAt).toLocaleString()}</span>
+                    <span className="text-xs text-muted ml-auto">{new Date(comment.createdAt).toLocaleString()}</span>
                   </div>
                   <p className="m-0 text-secondary text-base line-height-3 font-medium">{comment.content}</p>
                   <div className="mt-3 flex justify-content-end">

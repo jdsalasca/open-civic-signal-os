@@ -117,3 +117,5 @@ Resume file: None
 - 2026-03-05: Polished another residual UX pass by aligning blog/thread metadata borders, calming thread meta tracking, and replacing remaining overly technical mono-style identifiers in user-facing contribution lists.
 
 - 2026-03-05: Aligned the remaining error-state and shell microcopy layer by localizing the 404 view and replacing harsher micro-label sizing in the shared layout with calmer, more legible text tokens.
+
+- 2026-03-05: Softened another residual typography layer by removing overly technical mono/min utility treatments from engagement comments, signal detail metadata, moderation refs, and settings role codes.

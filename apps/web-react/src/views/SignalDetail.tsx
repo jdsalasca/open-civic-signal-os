@@ -152,7 +152,7 @@ export function SignalDetail() {
             <div className="min-w-0">
               <div className="u-card-meta-row mb-2">
                 <CivicBadge label={signal.status} severity={severity} />
-                <span className="text-xs text-muted font-mono font-bold uppercase tracking-widest">
+                <span className="text-xs text-muted font-bold uppercase tracking-widest">
                   {t("signals.protocol_id")}: {signal.id.substring(0,8)}
                 </span>
               </div>
@@ -265,7 +265,7 @@ export function SignalDetail() {
                           />
                           <span className="text-xs font-bold text-muted">{renderTimelineLabel(entry)}</span>
                         </div>
-                        <span className="text-xs font-mono text-muted">{new Date(entry.createdAt).toLocaleString()}</span>
+                        <span className="text-xs text-muted">{new Date(entry.createdAt).toLocaleString()}</span>
                       </div>
                       {entry.eventType === "STATUS_CHANGED" && (
                         <div className="text-xs font-bold text-muted mb-2">
@@ -369,7 +369,7 @@ export function SignalDetail() {
                     <div className="text-xs font-black text-main uppercase tracking-widest mb-1">
                       {item.label}
                     </div>
-                    <div className="text-xs text-muted font-mono leading-tight">
+                    <div className="text-xs text-muted leading-tight">
                       {item.formula}
                     </div>
                   </div>
