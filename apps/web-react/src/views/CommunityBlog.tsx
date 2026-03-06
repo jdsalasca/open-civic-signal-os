@@ -220,7 +220,7 @@ export function CommunityBlog() {
     return (
       <article
         key={post.id}
-        className={`glass-panel border-round-3xl overflow-hidden ${post.pinned && !archived ? "border-2 border-brand-primary" : ""}`}
+        className={`glass-panel border-round-3xl overflow-hidden h-full ${post.pinned && !archived ? "border-2 border-brand-primary" : ""}`}
         data-testid={archived ? `archived-blog-post-${post.id}` : `blog-post-${post.id}`}
       >
         {coverImage && (
@@ -233,16 +233,16 @@ export function CommunityBlog() {
           />
         )}
 
-        <div className="p-5 md:p-6 flex flex-column gap-4">
-          <header className="flex justify-content-between align-items-start gap-3 flex-wrap">
-            <div className="flex align-items-center gap-3">
+        <div className="p-5 md:p-6 flex flex-column gap-4 h-full">
+          <header className="u-card-split-header">
+            <div className="flex align-items-center gap-3 u-card-copy">
               <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
-              <div className="flex flex-column">
+              <div className="flex flex-column u-card-copy">
                 <span className="text-sm font-bold text-main">{post.authorUsername}</span>
                 <span className="text-xs text-muted">{toRoleListLabel(post.authorRole, t)}</span>
               </div>
             </div>
-            <div className="flex gap-2 flex-wrap justify-content-end">
+            <div className="u-card-meta-row">
               <CivicBadge label={t("community_blog.official_badge")} severity="progress" />
               {post.pinned && !archived && <CivicBadge label={t("community_blog.pinned_badge")} severity="new" />}
               {archived && <CivicBadge label={t("community_blog.archived_badge")} severity="neutral" />}
@@ -250,12 +250,12 @@ export function CommunityBlog() {
             </div>
           </header>
 
-          <div>
-            <h2 className="text-2xl font-black text-main m-0 mb-3">{post.title}</h2>
+          <div className="u-card-title-wrap">
+            <h2 className="text-2xl font-black text-main m-0 mb-3 u-card-title-xl">{post.title}</h2>
             {renderContent(post.content)}
           </div>
 
-          <div className="flex align-items-center gap-2 text-xs text-muted border-top-1 border-white-alpha-10 pt-3 flex-wrap">
+          <div className="u-card-meta-row text-xs text-muted border-top-1 border-white-alpha-10 pt-3 mt-auto">
             <i className="pi pi-calendar" />
             <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
             <span>•</span>
@@ -332,7 +332,7 @@ export function CommunityBlog() {
         <div className="grid">
           {canPublishByRole && (
             <div className="col-12 lg:col-4">
-              <CivicCard id="blog-compose-card" title={t("community_blog.dispatch_title")} variant="brand">
+              <CivicCard id="blog-compose-card" title={t("community_blog.dispatch_title")} variant="brand" fullHeight>
                 <div className="flex flex-column gap-3">
                   <CivicField label={t("community_blog.headline")}>
                     <div className="flex flex-column gap-2">

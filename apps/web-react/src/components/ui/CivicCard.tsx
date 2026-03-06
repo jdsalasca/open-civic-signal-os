@@ -4,12 +4,27 @@ import { classNames } from 'primereact/utils';
 interface CivicCardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   children: ReactNode;
   title?: ReactNode;
+  headerActions?: ReactNode;
   className?: string;
+  contentClassName?: string;
+  titleClassName?: string;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   variant?: 'neutral' | 'brand' | 'success' | 'warning' | 'danger';
+  fullHeight?: boolean;
 }
 
-export function CivicCard({ children, title, className, padding = 'md', variant = 'neutral', ...rest }: CivicCardProps) {
+export function CivicCard({
+  children,
+  title,
+  headerActions,
+  className,
+  contentClassName,
+  titleClassName,
+  padding = 'md',
+  variant = 'neutral',
+  fullHeight = false,
+  ...rest
+}: CivicCardProps) {
   const paddingClasses = {
     'none': 'p-0',
     'sm': 'p-3',
@@ -28,17 +43,25 @@ export function CivicCard({ children, title, className, padding = 'md', variant 
   return (
     <div className={classNames(
       'glass-panel u-card-surface motion-card motion-card-hover rounded-3xl overflow-hidden civic-card',
+      { 'h-full': fullHeight },
       variantClasses[variant],
       className
     )} {...rest}>
-      {title && (
+      {(title || headerActions) && (
         <div className="px-5 py-4 border-bottom-1 border-subtle bg-white-alpha-5 civic-card-header">
-          <h3 className="m-0 text-xs u-section-title">
-            {title}
-          </h3>
+          <div className="civic-card-header-row">
+            {title ? (
+              <h3 className={classNames('m-0 text-xs u-section-title civic-card-title', titleClassName)}>
+                {title}
+              </h3>
+            ) : (
+              <div />
+            )}
+            {headerActions && <div className="civic-card-header-actions">{headerActions}</div>}
+          </div>
         </div>
       )}
-      <div className={paddingClasses[padding]}>
+      <div className={classNames(paddingClasses[padding], 'civic-card-content', contentClassName)}>
         {children}
       </div>
     </div>

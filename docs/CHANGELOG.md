@@ -43,6 +43,7 @@
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 
 ### Fixed
+- **Card Layout Consistency**: Standardized `CivicCard` header/actions behavior, improved text wrapping and reusable surface blocks, and reduced manual one-off card layouts in blog, threads, and signal detail so cards align more predictably and long text stops spilling across surfaces. (`UI consistency`)
 - **UI Consistency Pass**: Hardened shared page headers and empty states against text overflow, improved chip wrapping, made map selection behavior explicit, and reduced geospatial label overlap so community surfaces stay legible across desktop and mobile. (`community UX consistency`)
 - **Docker Hot Reload Frontend Bootstrap**: Fixed Windows/Docker dev frontend bootstrap by isolating container `node_modules` from the host workspace and disabling unintended workspace-level `npm ci` during Vite startup. (`devex`)
 - **Action-Oriented Empty and Restricted States**: My activity, community hub, and unauthorized views now explain why the user is blocked or empty and offer an immediate next action instead of dead-end copy. (`story:OCS-P1-027`)

@@ -268,18 +268,18 @@ export function CommunityThreads() {
 
     return (
       <div key={message.id} className="flex flex-column gap-3" style={{ marginLeft: `${leftPadding}rem` }}>
-        <div className={`p-4 border-round-2xl border-1 ${depth === 0 ? "bg-surface border-subtle" : "bg-white-alpha-5 border-white-alpha-10"} ${message.hidden ? "opacity-60" : ""}`}>
-          <div className="flex justify-content-between align-items-start gap-3 mb-3">
-            <div className="flex align-items-center gap-3">
+        <div className={`u-card-surface-block ${depth === 0 ? "bg-surface border-subtle" : "bg-white-alpha-5 border-white-alpha-10"} ${message.hidden ? "opacity-60" : ""}`}>
+          <div className="u-card-split-header mb-3">
+            <div className="flex align-items-center gap-3 u-card-copy">
               <Avatar label={depth === 0 ? "OP" : "R"} shape="circle" className="bg-brand-primary text-white font-bold text-xs" />
-              <div className="flex flex-column">
+              <div className="flex flex-column u-card-copy">
                 <span className="text-sm font-black text-main">
                   {t("community_threads.member_id", { id: message.authorId.slice(0, 4) })}
                 </span>
                 <span className="text-min text-muted">{new Date(message.createdAt).toLocaleString()}</span>
               </div>
             </div>
-            <div className="flex align-items-center gap-2 flex-wrap justify-content-end">
+            <div className="u-card-meta-row">
               {message.directReplyCount > 0 && (
                 <span className="text-min text-muted font-bold" data-testid={`thread-message-replies-${message.id}`}>
                   {t("community_threads.reply_count", { count: message.directReplyCount })}
@@ -412,7 +412,7 @@ export function CommunityThreads() {
 
         <div className="grid">
           <div className="col-12 lg:col-4">
-            <CivicCard id="thread-compose-card" title={t("community_threads.channel_title")} className="mb-6" variant="brand">
+            <CivicCard id="thread-compose-card" title={t("community_threads.channel_title")} className="mb-6" variant="brand" fullHeight>
               <div className="flex flex-column gap-2">
                 <CivicField label={t("community_threads.topic")}>
                   <div className="flex flex-column gap-2">
@@ -493,10 +493,10 @@ export function CommunityThreads() {
 
                       return (
                         <div key={thread.id} className="bg-surface p-5 md:p-6 flex flex-column gap-4">
-                          <div className="flex justify-content-between align-items-start gap-3">
-                            <div>
-                              <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2">{thread.title}</h3>
-                              <div className="flex flex-wrap align-items-center gap-2">
+                          <div className="u-card-split-header">
+                            <div className="u-card-title-wrap">
+                              <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2 u-card-title-xl">{thread.title}</h3>
+                              <div className="u-card-meta-row">
                                 <span className="text-xs text-muted font-bold uppercase tracking-wider">
                                   {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
                                 </span>

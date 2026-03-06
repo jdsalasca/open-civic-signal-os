@@ -14,6 +14,7 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicEngagement } from "../components/CivicEngagement";
 import { PriorityRadar } from "../components/PriorityRadar";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -140,19 +141,24 @@ export function SignalDetail() {
     <Layout>
       <div className="animate-fade-up motion-page pb-8">
         <div className="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-8 gap-4">
-          <div className="flex align-items-center gap-4">
+          <div className="flex align-items-start gap-4 min-w-0">
             <CivicButton
               icon="pi pi-arrow-left"
               variant="ghost"
               onClick={() => navigate('/')}
               className="p-3 border-round-circle"
             />
-            <div>
-              <div className="flex align-items-center gap-3 mb-2">
+            <div className="min-w-0">
+              <div className="u-card-meta-row mb-2">
                 <CivicBadge label={signal.status} severity={severity} />
                 <span className="text-xs text-muted font-mono font-bold uppercase tracking-widest">Protocol ID: {signal.id.substring(0,8)}</span>
               </div>
-              <h1 className="text-5xl font-black text-main m-0 tracking-tighter leading-tight">{signal.title}</h1>
+              <CivicPageHeader
+                title={signal.title}
+                description={t("signals.context_header")}
+                className="mb-0"
+                eyebrow={t("signals.priority_rank")}
+              />
             </div>
           </div>
           <CivicButton 
@@ -168,17 +174,19 @@ export function SignalDetail() {
 
         <div className="grid">
           <div className="col-12 lg:col-8">
-            <CivicCard className="mb-8">
-              <div className="flex justify-content-between align-items-center mb-8">
-                <h3 className="text-brand-primary uppercase text-xs font-black tracking-widest m-0">Intelligence Context</h3>
-                <CivicButton 
-                  icon="pi pi-download" 
-                  label="Trust Packet" 
+            <CivicCard
+              className="mb-8"
+              title={t("signals.context_header")}
+              headerActions={(
+                <CivicButton
+                  icon="pi pi-download"
+                  label="Trust Packet"
                   variant="ghost"
                   className="text-xs"
                   onClick={() => window.open(`/api/signals/${signal.id}/trust-packet`, '_blank')}
                 />
-              </div>
+              )}
+            >
               <p className="text-xl line-height-4 m-0 text-secondary font-medium leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
                 {signal.description}
               </p>
@@ -186,16 +194,16 @@ export function SignalDetail() {
               {(signal.locationLabel || evidenceUrls.length > 0) && (
                 <div className="mt-5 flex flex-column gap-4">
                   {signal.locationLabel && (
-                    <div className="u-pill w-fit" data-testid="signal-detail-location-label">
-                      <i className="pi pi-map-marker text-brand-primary"></i>
-                      {signal.locationLabel}
-                    </div>
+                  <div className="u-pill w-fit" data-testid="signal-detail-location-label">
+                    <i className="pi pi-map-marker text-brand-primary"></i>
+                    {signal.locationLabel}
+                  </div>
                   )}
                   {evidenceUrls.length > 0 && (
                     <div className="grid">
                       {evidenceUrls.map((url, index) => (
                         <div key={`${url}-${index}`} className="col-12 md:col-6">
-                          <div className="border-round-2xl overflow-hidden border-1 border-subtle h-full">
+                          <div className="u-media-frame h-full">
                             <img
                               src={url}
                               alt={`${signal.title} evidence ${index + 1}`}
@@ -229,7 +237,7 @@ export function SignalDetail() {
                   </div>
                   <div>
                     <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">Classification</div>
-                    <div className="text-2xl font-black text-main uppercase tracking-tighter">{t(`categories.${signal.category}`)}</div>
+                    <div className="text-2xl font-black text-main uppercase tracking-tighter u-card-title-wrap">{t(`categories.${signal.category}`)}</div>
                   </div>
                 </div>
               </div>

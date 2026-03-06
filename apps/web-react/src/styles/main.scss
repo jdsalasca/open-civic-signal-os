@@ -255,6 +255,76 @@ a:hover {
   background: linear-gradient(180deg, var(--alpha-surface-10), transparent);
 }
 
+.civic-card-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.civic-card-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.civic-card-header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.civic-card-content {
+  min-width: 0;
+}
+
+.u-card-split-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.u-card-copy,
+.u-card-title-wrap,
+.u-card-title-wrap > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.u-card-title-xl {
+  font-size: clamp(1.15rem, 2vw, 1.6rem);
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.u-card-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.u-card-surface-block {
+  border-radius: 1.3rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  padding: 1rem;
+}
+
+.u-media-frame {
+  border-radius: 1.3rem;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+}
+
 .civic-toolbar-shell,
 .civic-action-bar {
   box-shadow: inset 0 1px 0 0 var(--glass-stroke);
@@ -440,6 +510,14 @@ a:hover {
   flex-wrap: wrap;
 }
 
+.u-pill,
+.u-section-title,
+.text-muted,
+.text-secondary,
+.text-main {
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 768px) {
   .community-map-canvas,
   .community-heat-canvas {
@@ -459,6 +537,15 @@ a:hover {
   }
 
   .community-map-inspector-meta {
+    justify-content: flex-start;
+  }
+
+  .civic-card-header-row,
+  .u-card-split-header {
+    align-items: stretch;
+  }
+
+  .civic-card-header-actions {
     justify-content: flex-start;
   }
 }
