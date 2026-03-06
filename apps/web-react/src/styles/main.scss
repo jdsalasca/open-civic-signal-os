@@ -330,6 +330,10 @@ a:hover {
   box-shadow: inset 0 1px 0 0 var(--glass-stroke);
 }
 
+.civic-action-bar > * {
+  min-width: 0;
+}
+
 .civic-button-base {
   min-height: 2.8rem;
   max-width: 100%;
@@ -1010,6 +1014,25 @@ a:hover {
   max-width: 100%;
 }
 
+.dashboard-secondary-action-bar,
+.community-home-action-bar,
+.community-home-overview-actions {
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 0.9rem;
+}
+
+.dashboard-action-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.dashboard-action-cluster > * {
+  min-width: 0;
+}
+
 .dashboard-community-summary-grid,
 .dashboard-community-surface-grid {
   display: grid;
@@ -1023,6 +1046,36 @@ a:hover {
   background: linear-gradient(180deg, var(--alpha-surface-05), color-mix(in srgb, var(--bg-card) 96%, transparent));
   padding: 1rem;
   min-height: 100%;
+}
+
+.dashboard-quickstart-actions {
+  align-items: stretch;
+}
+
+.dashboard-quickstart-actions > * {
+  flex: 1 1 12rem;
+}
+
+.community-home-action-copy {
+  flex: 1 1 14rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.community-feed-list-card {
+  border-radius: 1.35rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 95%, transparent);
+  padding: 1rem;
+  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+
+.community-feed-list-card:hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--brand-primary) 8%, var(--bg-card)), color-mix(in srgb, var(--bg-card) 96%, transparent));
 }
 
 .app-mobile-nav {
@@ -1333,6 +1386,20 @@ select:focus-visible,
   .dashboard-community-summary-grid,
   .dashboard-community-surface-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-secondary-action-bar,
+  .community-home-action-bar,
+  .community-home-overview-actions {
+    justify-content: stretch;
+  }
+
+  .dashboard-action-cluster {
+    width: 100%;
+  }
+
+  .dashboard-action-cluster > * {
+    flex: 1 1 100%;
   }
 }
 

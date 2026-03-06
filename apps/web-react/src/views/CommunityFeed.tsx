@@ -49,32 +49,39 @@ export function CommunityFeed() {
             className="mb-0"
           />
 
-          <CivicActionBar>
-            <div className="u-pill" data-testid="community-home-freshness">
-              <i className="pi pi-clock text-brand-primary"></i>
-              {home?.freshness || t("dashboard.freshness_pending")}
+          <CivicActionBar className="community-home-action-bar">
+            <div className="community-home-action-copy">
+              <div className="text-xs font-black uppercase tracking-widest text-muted">
+                {t("dashboard.freshness_label")}
+              </div>
+              <div className="u-pill mt-2" data-testid="community-home-freshness">
+                <i className="pi pi-clock text-brand-primary"></i>
+                {home?.freshness || t("dashboard.freshness_pending")}
+              </div>
             </div>
-            <CivicButton
-              type="button"
-              icon="pi pi-map"
-              label={t("community_map.open_map")}
-              variant="secondary"
-              onClick={() => navigate("/communities/map")}
-            />
-            <CivicButton
-              type="button"
-              icon="pi pi-comments"
-              label={t("nav.dialogues")}
-              variant="ghost"
-              onClick={() => navigate("/communities/threads")}
-            />
-            <CivicButton
-              type="button"
-              icon="pi pi-megaphone"
-              label={t("nav.public_blog")}
-              variant="ghost"
-              onClick={() => navigate("/communities/blog")}
-            />
+            <div className="dashboard-action-cluster">
+              <CivicButton
+                type="button"
+                icon="pi pi-map"
+                label={t("community_map.open_map")}
+                variant="secondary"
+                onClick={() => navigate("/communities/map")}
+              />
+              <CivicButton
+                type="button"
+                icon="pi pi-comments"
+                label={t("nav.dialogues")}
+                variant="ghost"
+                onClick={() => navigate("/communities/threads")}
+              />
+              <CivicButton
+                type="button"
+                icon="pi pi-megaphone"
+                label={t("nav.public_blog")}
+                variant="ghost"
+                onClick={() => navigate("/communities/blog")}
+              />
+            </div>
           </CivicActionBar>
         </div>
 
@@ -127,6 +134,32 @@ export function CommunityFeed() {
                     compact
                   />
                 </div>
+                <CivicActionBar className="mt-4 community-home-overview-actions">
+                  <div className="community-home-action-copy">
+                    <div className="text-xs font-black uppercase tracking-widest text-muted">
+                      {t("community_home.actions_label")}
+                    </div>
+                    <p className="text-sm text-secondary m-0">
+                      {t("community_home.actions_desc")}
+                    </p>
+                  </div>
+                  <div className="dashboard-action-cluster">
+                    <CivicButton
+                      type="button"
+                      label={t("nav.public_blog")}
+                      icon="pi pi-megaphone"
+                      variant="ghost"
+                      onClick={() => navigate("/communities/blog")}
+                    />
+                    <CivicButton
+                      type="button"
+                      label={t("nav.dialogues")}
+                      icon="pi pi-comments"
+                      variant="ghost"
+                      onClick={() => navigate("/communities/threads")}
+                    />
+                  </div>
+                </CivicActionBar>
               </CivicCard>
 
               <div className="grid">
@@ -141,7 +174,7 @@ export function CommunityFeed() {
                             className="text-left border-none bg-transparent p-0 cursor-pointer"
                             onClick={() => navigate("/communities/blog")}
                           >
-                            <div className="border-round-2xl border-1 border-subtle p-4 hover:border-brand-primary transition-colors">
+                            <div className="community-feed-list-card">
                               <div className="flex justify-content-between gap-3 align-items-start">
                                 <div>
                                   <h3 className="text-lg font-black text-main m-0">{post.title}</h3>
@@ -176,7 +209,7 @@ export function CommunityFeed() {
                             className="text-left border-none bg-transparent p-0 cursor-pointer"
                             onClick={() => navigate("/communities/threads")}
                           >
-                            <div className="border-round-2xl border-1 border-subtle p-4 hover:border-brand-primary transition-colors">
+                            <div className="community-feed-list-card">
                               <div className="flex justify-content-between gap-3 align-items-start">
                                 <div>
                                   <h3 className="text-lg font-black text-main m-0">{thread.title}</h3>
@@ -213,7 +246,7 @@ export function CommunityFeed() {
                         className="text-left border-none bg-transparent p-0 cursor-pointer"
                         onClick={() => navigate(`/signal/${signal.id}`)}
                       >
-                        <div className="border-round-2xl border-1 border-subtle p-4 hover:border-brand-primary transition-colors">
+                        <div className="community-feed-list-card">
                           <div className="flex justify-content-between align-items-start gap-3">
                             <div>
                               <h3 className="text-base font-black text-main m-0">{signal.title}</h3>

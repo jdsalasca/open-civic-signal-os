@@ -430,7 +430,7 @@ export function Dashboard() {
               <span className="text-xs font-black uppercase tracking-widest text-muted">
                 {t("dashboard.community_hub.next_actions_label")}
               </span>
-              <div className="flex flex-wrap gap-2 mt-3">
+              <div className="dashboard-action-cluster mt-3">
                 <CivicButton
                   type="button"
                   label={t("dashboard.community_hub.action_hub")}
@@ -505,42 +505,44 @@ export function Dashboard() {
                   {t("dashboard.secondary_actions_desc")}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <CivicButton
-                  type="button"
-                  label={t('nav.public_blog')}
-                  icon="pi pi-megaphone"
-                  variant="ghost"
-                  onClick={() => navigate("/communities/blog")}
-                  data-testid="dashboard-action-blog"
-                />
-                <CivicButton
-                  type="button"
-                  label={t('nav.dialogues')}
-                  icon="pi pi-comments"
-                  variant="ghost"
-                  onClick={() => navigate("/communities/threads")}
-                  data-testid="dashboard-action-threads"
-                />
-                <CivicButton
-                  type="button"
-                  label={t('dashboard.track_contributions')}
-                  icon="pi pi-user"
-                  variant="ghost"
-                  onClick={() => navigate("/mine")}
-                  data-testid="dashboard-action-mine"
-                />
+              <CivicActionBar className="dashboard-secondary-action-bar">
+                <div className="dashboard-action-cluster">
+                  <CivicButton
+                    type="button"
+                    label={t('nav.public_blog')}
+                    icon="pi pi-megaphone"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/blog")}
+                    data-testid="dashboard-action-blog"
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t('nav.dialogues')}
+                    icon="pi pi-comments"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/threads")}
+                    data-testid="dashboard-action-threads"
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t('dashboard.track_contributions')}
+                    icon="pi pi-user"
+                    variant="ghost"
+                    onClick={() => navigate("/mine")}
+                    data-testid="dashboard-action-mine"
+                  />
+                </div>
                 {isStaff && (
                   <CivicButton
                     type="button"
                     label={t('dashboard.broadcast')}
                     icon="pi pi-bolt"
-                    variant="ghost"
+                    variant="secondary"
                     onClick={handleRelay}
                     data-testid="dashboard-action-broadcast"
                   />
                 )}
-              </div>
+              </CivicActionBar>
             </div>
           </CivicCard>
         )}
@@ -548,10 +550,10 @@ export function Dashboard() {
         <CivicCard className="mb-6" variant="brand">
           <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
             <div className="flex flex-column gap-1">
-              <span className="text-xs font-black uppercase tracking-widest text-muted">{t("dashboard.priority_strip_title")}</span>
-              <span className="text-sm text-secondary">{t("dashboard.priority_strip_desc")}</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
+                <span className="text-xs font-black uppercase tracking-widest text-muted">{t("dashboard.priority_strip_title")}</span>
+                <span className="text-sm text-secondary">{t("dashboard.priority_strip_desc")}</span>
+              </div>
+            <div className="dashboard-action-cluster">
               <CivicButton
                 type="button"
                 size="small"
@@ -645,11 +647,11 @@ export function Dashboard() {
                         <li className="line-height-3">2. {t('dashboard.quickstart_step_2')}</li>
                         <li className="line-height-3">3. {t('dashboard.quickstart_step_3')}</li>
                       </ul>
-                      <div className="mt-4 flex flex-column md:flex-row gap-2">
+                      <CivicActionBar className="dashboard-quickstart-actions mt-4">
                         <CivicButton label={t('dashboard.quickstart_report')} onClick={() => navigate('/report')} />
                         <CivicButton label={t('dashboard.quickstart_forums')} variant="secondary" onClick={() => navigate('/communities/threads')} />
-                        <CivicButton label={t('dashboard.quickstart_contributions')} variant="ghost" onClick={() => navigate('/mine')} className="md:ml-auto" />
-                      </div>
+                        <CivicButton label={t('dashboard.quickstart_contributions')} variant="ghost" onClick={() => navigate('/mine')} />
+                      </CivicActionBar>
                     </CivicCard>
                   )}
                   <DigestSidebar signals={displayedSignals} />
@@ -657,14 +659,16 @@ export function Dashboard() {
                     <NotificationSidebar notifications={notifications} />
                   )}
                   {isStaff && interfaceMode === "advanced" && (
-                    <CivicCard title="Integrity Alerts" variant="danger">
+                    <CivicCard title={t("dashboard.integrity_title")} variant="danger">
                       <div className="flex flex-column gap-4">
-                        <div className="flex align-items-center justify-content-between bg-status-rejected-alpha-10 p-3 border-round-xl">
-                          <span className="text-sm font-bold text-main">Duplicates</span>
-                          <span className="bg-status-rejected text-on-brand px-2 py-1 border-round font-black text-xs">{duplicateClusters}</span>
-                        </div>
+                        <CivicStatCard
+                          label={t("dashboard.integrity_duplicates")}
+                          value={duplicateClusters}
+                          supportingText={t("dashboard.duplicates_desc", { count: duplicateClusters })}
+                          compact
+                        />
                         <CivicButton 
-                          label="Review Queue" 
+                          label={t("dashboard.integrity_review")} 
                           variant="ghost" 
                           className="w-full text-xs" 
                           onClick={() => navigate('/moderation')}
