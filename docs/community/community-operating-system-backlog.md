@@ -359,12 +359,12 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - communities can see execution, not just intention
 - Acceptance criteria:
-  - [ ] tasks move across pending, in progress, done
-  - [ ] every task has owner and due date support
-  - [ ] boards can link back to decision or issue origin
+  - [x] tasks move across pending, in progress, done
+  - [x] every task has owner and due date support
+  - [x] boards can link back to decision or issue origin
 - Validation:
-  - [ ] backend project/task tests
-  - [ ] Playwright kanban interactions
+  - [x] backend project/task tests
+  - [x] Playwright kanban interactions
 
 ### `story:OCS-P1-044` Volunteering and Activity Slots
 

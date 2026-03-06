@@ -1402,6 +1402,174 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/projects:
+    get:
+      summary: List community project boards for one community
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Community project boards ordered by recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityProjectBoard'
+        '401':
+          description: User is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    post:
+      summary: Create one execution board tied to a community
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityProjectBoardRequest'
+      responses:
+        '200':
+          description: Created community project board
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProjectBoard'
+        '403':
+          description: Community policy denied project board creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/projects/{projectId}:
+    get:
+      summary: Get one community project board with tasks and comments
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Community project board detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProjectBoard'
+        '404':
+          description: Project board not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/projects/{projectId}/tasks:
+    post:
+      summary: Add one execution task to a community project board
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityProjectTaskRequest'
+      responses:
+        '200':
+          description: Updated project board after task creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProjectBoard'
+        '403':
+          description: Community policy denied task creation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/projects/{projectId}/tasks/{taskId}:
+    patch:
+      summary: Update one project task status, owner, or details
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommunityProjectTaskRequest'
+      responses:
+        '200':
+          description: Updated project board after task change
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProjectBoard'
+        '403':
+          description: Community policy denied task updates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/projects/{projectId}/tasks/{taskId}/comments:
+    post:
+      summary: Add one execution note to a project task
+      parameters:
+        - in: path
+          name: projectId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityProjectTaskCommentRequest'
+      responses:
+        '200':
+          description: Updated project board after adding a task comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProjectBoard'
+        '403':
+          description: Community policy denied task comments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
 components:
   schemas:
     ApiError:
@@ -2104,6 +2272,7 @@ components:
           type: string
           enum:
             - CREATE_PROPOSAL
+            - MANAGE_PROJECT_BOARDS
             - CREATE_THREAD
             - ADD_THREAD_MESSAGE
             - MODERATE_THREAD_MESSAGE
@@ -2484,6 +2653,139 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommunityProposalDeliberationEntry'
+    CommunityProjectStatus:
+      type: string
+      enum: [TODO, IN_PROGRESS, DONE]
+    CommunityProjectTaskComment:
+      type: object
+      required: [id, taskId, authorId, authorUsername, content, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        taskId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorUsername:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CommunityProjectTask:
+      type: object
+      required:
+        - id
+        - projectBoardId
+        - title
+        - details
+        - status
+        - sortOrder
+        - comments
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectBoardId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        details:
+          type: string
+        status:
+          $ref: '#/components/schemas/CommunityProjectStatus'
+        assigneeId:
+          type: string
+          format: uuid
+          nullable: true
+        assigneeUsername:
+          type: string
+          nullable: true
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        sortOrder:
+          type: integer
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityProjectTaskComment'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CommunityProjectTaskCounts:
+      type: object
+      required: [todo, inProgress, done]
+      properties:
+        todo:
+          type: integer
+        inProgress:
+          type: integer
+        done:
+          type: integer
+    CommunityProjectBoard:
+      type: object
+      required:
+        - id
+        - communityId
+        - ownerId
+        - ownerUsername
+        - title
+        - summary
+        - taskCounts
+        - tasks
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        linkedProposalId:
+          type: string
+          format: uuid
+          nullable: true
+        linkedProposalTitle:
+          type: string
+          nullable: true
+        ownerId:
+          type: string
+          format: uuid
+        ownerUsername:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        taskCounts:
+          $ref: '#/components/schemas/CommunityProjectTaskCounts'
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityProjectTask'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     CreateCommunityProposalRequest:
       type: object
       required:
@@ -2716,6 +3018,7 @@ components:
           type: string
           enum:
             - CREATE_PROPOSAL
+            - MANAGE_PROJECT_BOARDS
             - CREATE_THREAD
             - ADD_THREAD_MESSAGE
             - MODERATE_THREAD_MESSAGE
@@ -2739,6 +3042,77 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/CommunityPermissionPolicyRuleRequest'
+    CreateCommunityProjectBoardRequest:
+      type: object
+      required: [communityId, title, summary]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        linkedProposalId:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+          minLength: 8
+          maxLength: 160
+        summary:
+          type: string
+          minLength: 20
+          maxLength: 4000
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+    CreateCommunityProjectTaskRequest:
+      type: object
+      required: [title, details]
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 160
+        details:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        assigneeUsername:
+          type: string
+          nullable: true
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+    UpdateCommunityProjectTaskRequest:
+      type: object
+      required: [title, details, status]
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 160
+        details:
+          type: string
+          minLength: 10
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/CommunityProjectStatus'
+        assigneeUsername:
+          type: string
+          nullable: true
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+    CreateCommunityProjectTaskCommentRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 3
+          maxLength: 1000
     CreateCommunityThreadRequest:
       type: object
       required: [sourceCommunityId, targetCommunityId, title]

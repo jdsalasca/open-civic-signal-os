@@ -34,4 +34,16 @@ export const FORM_LIMITS = {
     deliberationMin: 8,
     deliberationMax: 2000,
   },
+  projects: {
+    titleMin: 8,
+    titleMax: 160,
+    summaryMin: 20,
+    summaryMax: 4000,
+    taskTitleMin: 5,
+    taskTitleMax: 160,
+    taskDetailsMin: 10,
+    taskDetailsMax: 2000,
+    commentMin: 3,
+    commentMax: 1000,
+  },
 } as const;

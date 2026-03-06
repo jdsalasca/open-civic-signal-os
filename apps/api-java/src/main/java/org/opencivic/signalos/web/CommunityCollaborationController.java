@@ -6,14 +6,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.service.CommunityCollaborationService;
+import org.opencivic.signalos.service.CommunityProjectBoardService;
 import org.opencivic.signalos.service.CommunityProposalDeliberationService;
 import org.opencivic.signalos.service.CommunityProposalService;
 import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityHomeResponse;
+import org.opencivic.signalos.web.dto.CommunityProjectBoardResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalDeliberationResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalResponse;
+import org.opencivic.signalos.web.dto.CreateCommunityProjectBoardRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskCommentRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProposalDeliberationRequest;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
@@ -23,6 +28,7 @@ import org.opencivic.signalos.web.dto.CreateCommunityThreadMessageRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadRequest;
 import org.opencivic.signalos.web.dto.ModerateThreadMessageRequest;
 import org.opencivic.signalos.web.dto.ModerateCommunityProposalEntryRequest;
+import org.opencivic.signalos.web.dto.UpdateCommunityProjectTaskRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityProposalRequest;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
@@ -48,17 +54,20 @@ import java.util.Map;
 @RequestMapping("/api/community")
 public class CommunityCollaborationController {
     private final CommunityCollaborationService collaborationService;
+    private final CommunityProjectBoardService projectBoardService;
     private final CommunityProposalService proposalService;
     private final CommunityProposalDeliberationService proposalDeliberationService;
     private final CivicEngagementService engagementService;
 
     public CommunityCollaborationController(
         CommunityCollaborationService collaborationService,
+        CommunityProjectBoardService projectBoardService,
         CommunityProposalService proposalService,
         CommunityProposalDeliberationService proposalDeliberationService,
         CivicEngagementService engagementService
     ) {
         this.collaborationService = collaborationService;
+        this.projectBoardService = projectBoardService;
         this.proposalService = proposalService;
         this.proposalDeliberationService = proposalDeliberationService;
         this.engagementService = engagementService;
@@ -274,6 +283,59 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return proposalService.updateProposal(proposalId, request, principal.getName());
+    }
+
+    @GetMapping("/projects")
+    public List<CommunityProjectBoardResponse> getProjects(
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        return projectBoardService.getBoards(communityId, principal.getName());
+    }
+
+    @GetMapping("/projects/{projectId}")
+    public CommunityProjectBoardResponse getProject(
+        @PathVariable UUID projectId,
+        Principal principal
+    ) {
+        return projectBoardService.getBoard(projectId, principal.getName());
+    }
+
+    @PostMapping("/projects")
+    public CommunityProjectBoardResponse createProject(
+        @Valid @RequestBody CreateCommunityProjectBoardRequest request,
+        Principal principal
+    ) {
+        return projectBoardService.createBoard(request, principal.getName());
+    }
+
+    @PostMapping("/projects/{projectId}/tasks")
+    public CommunityProjectBoardResponse createProjectTask(
+        @PathVariable UUID projectId,
+        @Valid @RequestBody CreateCommunityProjectTaskRequest request,
+        Principal principal
+    ) {
+        return projectBoardService.createTask(projectId, request, principal.getName());
+    }
+
+    @PatchMapping("/projects/{projectId}/tasks/{taskId}")
+    public CommunityProjectBoardResponse updateProjectTask(
+        @PathVariable UUID projectId,
+        @PathVariable UUID taskId,
+        @Valid @RequestBody UpdateCommunityProjectTaskRequest request,
+        Principal principal
+    ) {
+        return projectBoardService.updateTask(projectId, taskId, request, principal.getName());
+    }
+
+    @PostMapping("/projects/{projectId}/tasks/{taskId}/comments")
+    public CommunityProjectBoardResponse addProjectTaskComment(
+        @PathVariable UUID projectId,
+        @PathVariable UUID taskId,
+        @Valid @RequestBody CreateCommunityProjectTaskCommentRequest request,
+        Principal principal
+    ) {
+        return projectBoardService.addTaskComment(projectId, taskId, request, principal.getName());
     }
 
     @GetMapping("/proposals/{proposalId}/deliberation")

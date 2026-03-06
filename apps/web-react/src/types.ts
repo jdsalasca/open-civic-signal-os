@@ -133,6 +133,7 @@ export type CommunityMembership = {
 
 export type CommunityPermissionScope =
   | "CREATE_PROPOSAL"
+  | "MANAGE_PROJECT_BOARDS"
   | "CREATE_THREAD"
   | "ADD_THREAD_MESSAGE"
   | "MODERATE_THREAD_MESSAGE"
@@ -274,6 +275,54 @@ export type CommunityProposalDeliberation = {
   proposalId: string;
   counts: CommunityProposalDeliberationCounts;
   entries: CommunityProposalDeliberationEntry[];
+};
+
+export type CommunityProjectStatus = "TODO" | "IN_PROGRESS" | "DONE";
+
+export type CommunityProjectTaskComment = {
+  id: string;
+  taskId: string;
+  authorId: string;
+  authorUsername: string;
+  content: string;
+  createdAt: string;
+};
+
+export type CommunityProjectTask = {
+  id: string;
+  projectBoardId: string;
+  title: string;
+  details: string;
+  status: CommunityProjectStatus;
+  assigneeId?: string | null;
+  assigneeUsername?: string | null;
+  dueDate?: string | null;
+  sortOrder: number;
+  comments: CommunityProjectTaskComment[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CommunityProjectTaskCounts = {
+  todo: number;
+  inProgress: number;
+  done: number;
+};
+
+export type CommunityProjectBoard = {
+  id: string;
+  communityId: string;
+  linkedProposalId?: string | null;
+  linkedProposalTitle?: string | null;
+  ownerId: string;
+  ownerUsername: string;
+  title: string;
+  summary: string;
+  dueDate?: string | null;
+  taskCounts: CommunityProjectTaskCounts;
+  tasks: CommunityProjectTask[];
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type CommunityHomeSignal = {

@@ -222,6 +222,7 @@ Execution order:
 10. `story:OCS-P1-043` community project boards.
    - Measurable civic outcome: approved decisions can be translated into visible execution work.
    - Validation commands: task lifecycle tests + Playwright kanban interactions.
+   - 2026-03-06 completion note: backend-owned project boards, `MANAGE_PROJECT_BOARDS` scope, task status movement, assignee/due-date support, task notes, `/communities/projects` kanban workflow, and contract/ADR coverage shipped.
 11. `story:OCS-P1-046` governance library and searchable agreements.
    - Measurable civic outcome: rules and prior decisions become easy to find before conflicts escalate.
    - Validation commands: document search/filter tests + responsive library UI audit.

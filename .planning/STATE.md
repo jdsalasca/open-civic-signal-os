@@ -103,9 +103,11 @@ See:
 
 ## Session Continuity
 
-Last session: 2026-03-05  
-Stopped at: Finished `OCS-P1-041` structured deliberation and evidence; next target is `OCS-P1-043` community project boards  
+Last session: 2026-03-06  
+Stopped at: Finished `OCS-P1-043` community project boards; next target is `OCS-P1-046` governance library and searchable agreements  
 Resume file: None
+
+- 2026-03-06: Completed `OCS-P1-043` by adding backend-owned community project boards with linked proposals, deterministic task statuses, assignee and due-date support, task execution notes, `/api/community/projects*` endpoints, a new `/communities/projects` kanban workflow, OpenAPI/ADR updates, and backend plus Playwright validation coverage.
 
 
 - 2026-03-05: Hardened light-theme contrast semantics by introducing theme-aware neutral surface tokens, reworking shared ghost/button and neutral badge contrast, and replacing legacy overlay backgrounds in engagement and thread surfaces so text no longer falls into dark-on-dark failures across themes.
