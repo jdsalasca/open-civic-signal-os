@@ -16,7 +16,9 @@ test.describe('Profile Identity Settings', () => {
     await expect(page.getByTestId('profile-settings-card')).toBeVisible();
 
     await page.getByTestId('profile-display-name-input').fill('Admin Civic Lead');
+    await page.getByTestId('avatar-preset-harbor-light').click();
     await page.getByTestId('profile-affiliations-input').fill('Central Campus, Block A');
+    await page.getByTestId('profile-affiliations-input').press('Enter');
     await page.getByTestId('profile-bio-input').fill('Coordinates community follow-up and accountability updates.');
 
     await page.getByTestId('profile-civic-role-select').locator('.p-dropdown').click();
@@ -33,11 +35,14 @@ test.describe('Profile Identity Settings', () => {
 
     await page.reload();
     await expect(page.getByTestId('profile-display-name-input')).toHaveValue('Admin Civic Lead');
-    await expect(page.getByTestId('profile-affiliations-input')).toHaveValue('Block A, Central Campus');
+    await expect(page.getByTestId('profile-affiliations-chip-list')).toContainText('Block A');
+    await expect(page.getByTestId('profile-affiliations-chip-list')).toContainText('Central Campus');
     await expect(page.getByTestId('profile-bio-input')).toHaveValue('Coordinates community follow-up and accountability updates.');
     await expect(page.getByTestId('profile-settings-card')).toContainText('Shared community only');
     await expect(page.getByTestId('profile-settings-card')).toContainText('Admins only');
     await expect(page.getByTestId('profile-settings-card')).toContainText('Authority');
+    await expect(page.getByTestId('avatar-preset-harbor-light')).toHaveClass(/avatar-preset-option-selected/);
+    await expect(page.getByTestId('profile-achievements-card')).toContainText('Ten incidents reported');
     await expect(page.getByTestId('settings-community-memberships-card')).toContainText('Community belonging');
     await expect(page.getByTestId('settings-community-memberships-card')).toContainText('Communities');
   });

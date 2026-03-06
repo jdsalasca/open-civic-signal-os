@@ -2180,9 +2180,34 @@ components:
           $ref: '#/components/schemas/ProfileVisibility'
         interfaceMode:
           $ref: '#/components/schemas/InterfaceMode'
+        avatarPreset:
+          type: string
+          enum:
+            - civic-sunrise
+            - neighborhood-garden
+            - library-window
+            - bridge-night
+            - river-route
+            - campus-sky
+            - plaza-echo
+            - forest-circle
+            - signal-lantern
+            - harbor-light
+    ProfileAchievementResponse:
+      type: object
+      required: [key, earned, currentProgress, targetProgress]
+      properties:
+        key:
+          type: string
+        earned:
+          type: boolean
+        currentProgress:
+          type: integer
+        targetProgress:
+          type: integer
     UserProfileResponse:
       type: object
-      required: [username, displayName, verified, affiliations, profileVisibility, affiliationVisibility, interfaceMode, viewerScope]
+      required: [username, displayName, verified, affiliations, profileVisibility, affiliationVisibility, interfaceMode, avatarPreset, achievements, viewerScope]
       properties:
         username:
           type: string
@@ -2209,6 +2234,12 @@ components:
           $ref: '#/components/schemas/ProfileVisibility'
         interfaceMode:
           $ref: '#/components/schemas/InterfaceMode'
+        avatarPreset:
+          type: string
+        achievements:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileAchievementResponse'
         viewerScope:
           $ref: '#/components/schemas/ProfileVisibility'
     CreateCommunityRequest:

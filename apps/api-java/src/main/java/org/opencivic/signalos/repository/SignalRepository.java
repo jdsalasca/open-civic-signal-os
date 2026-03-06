@@ -35,6 +35,7 @@ public interface SignalRepository extends JpaRepository<Signal, UUID> {
     List<Signal> findByCommunityId(UUID communityId);
     List<Signal> findByCommunityIdIn(Collection<UUID> communityIds);
     Page<Signal> findByCommunityIdOrderByCreatedAtDesc(UUID communityId, Pageable pageable);
+    long countByAuthorId(UUID authorId);
     long countByCommunityId(UUID communityId);
     long countByStatusNotIn(Collection<String> statuses);
     long countByStatusNotInAndCommunityId(Collection<String> statuses, UUID communityId);

@@ -548,6 +548,14 @@ a:hover {
   .civic-card-header-actions {
     justify-content: flex-start;
   }
+
+  .civic-meta-stack {
+    flex-direction: column;
+  }
+
+  .avatar-preset-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .civic-empty-state {
@@ -576,6 +584,253 @@ a:hover {
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.02em;
+}
+
+.u-pill-action,
+.u-pill-ghost {
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.u-pill-action:hover,
+.u-pill-ghost:hover {
+  border-color: var(--brand-primary);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.u-pill-action {
+  background: color-mix(in srgb, var(--brand-primary) 10%, var(--pill-bg));
+}
+
+.u-pill-ghost {
+  background: color-mix(in srgb, var(--bg-card) 90%, transparent);
+}
+
+.civic-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem;
+}
+
+.civic-stat-card {
+  min-width: 0;
+  min-height: 8.75rem;
+  padding: 1.15rem;
+  border-radius: 1.45rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.civic-stat-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.civic-stat-value {
+  font-size: clamp(1.25rem, 2vw, 2rem);
+  line-height: 1.05;
+  font-weight: 900;
+  color: var(--text-main);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.civic-meta-stack {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-subtle) 88%, transparent);
+}
+
+.civic-meta-stack:last-child {
+  border-bottom: 0;
+}
+
+.civic-meta-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.achievement-card {
+  border-radius: 1.35rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  padding: 1rem;
+}
+
+.achievement-card-earned {
+  box-shadow: 0 12px 34px -26px var(--brand-primary-glow-strong);
+  border-color: color-mix(in srgb, var(--status-resolved) 50%, var(--border-subtle));
+}
+
+.achievement-icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--brand-primary) 18%, transparent);
+  color: var(--brand-primary);
+  flex: 0 0 auto;
+}
+
+.avatar-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.9rem;
+}
+
+.avatar-preset-option {
+  width: 100%;
+  border-radius: 1.35rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avatar-preset-option:hover,
+.avatar-preset-option-selected {
+  border-color: var(--brand-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px -30px var(--brand-primary-glow-strong);
+}
+
+.civic-identity-avatar {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 88%, transparent);
+  background: color-mix(in srgb, var(--bg-card) 86%, transparent);
+}
+
+.civic-identity-avatar-sm {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.civic-identity-avatar-md {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.civic-identity-avatar-lg {
+  width: 6.5rem;
+  height: 6.5rem;
+}
+
+.civic-identity-avatar-art {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.civic-identity-avatar-glow {
+  position: absolute;
+  inset: 14%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  filter: blur(18px);
+}
+
+.civic-identity-avatar-orb {
+  position: absolute;
+  top: 16%;
+  right: 16%;
+  width: 34%;
+  height: 34%;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+}
+
+.civic-identity-avatar-icon {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.civic-identity-avatar-letter {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.95rem;
+  font-size: clamp(1.1rem, 2vw, 1.8rem);
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: -0.04em;
+}
+
+.avatar-accent-sunrise .civic-identity-avatar-art { background: linear-gradient(160deg, #ff9b54 0%, #e85d04 45%, #652e0f 100%); }
+.avatar-accent-garden .civic-identity-avatar-art { background: linear-gradient(160deg, #77dd77 0%, #2a9d8f 45%, #1d4d4f 100%); }
+.avatar-accent-library .civic-identity-avatar-art { background: linear-gradient(160deg, #ffd166 0%, #a47148 45%, #4b3427 100%); }
+.avatar-accent-bridge .civic-identity-avatar-art { background: linear-gradient(160deg, #7b6dff 0%, #385170 50%, #1b262c 100%); }
+.avatar-accent-river .civic-identity-avatar-art { background: linear-gradient(160deg, #5eead4 0%, #2563eb 45%, #1e3a8a 100%); }
+.avatar-accent-campus .civic-identity-avatar-art { background: linear-gradient(160deg, #c084fc 0%, #7c3aed 45%, #312e81 100%); }
+.avatar-accent-plaza .civic-identity-avatar-art { background: linear-gradient(160deg, #fb7185 0%, #e11d48 45%, #4c0519 100%); }
+.avatar-accent-forest .civic-identity-avatar-art { background: linear-gradient(160deg, #86efac 0%, #15803d 45%, #14532d 100%); }
+.avatar-accent-lantern .civic-identity-avatar-art { background: linear-gradient(160deg, #fbbf24 0%, #f97316 45%, #78350f 100%); }
+.avatar-accent-harbor .civic-identity-avatar-art { background: linear-gradient(160deg, #93c5fd 0%, #0284c7 45%, #082f49 100%); }
+
+.avatar-art-sunrise::before,
+.avatar-art-garden::before,
+.avatar-art-library::before,
+.avatar-art-bridge::before,
+.avatar-art-river::before,
+.avatar-art-campus::before,
+.avatar-art-plaza::before,
+.avatar-art-forest::before,
+.avatar-art-lantern::before,
+.avatar-art-harbor::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 38%;
+  background: rgba(12, 14, 24, 0.28);
+}
+
+.avatar-art-sunrise::after,
+.avatar-art-garden::after,
+.avatar-art-library::after,
+.avatar-art-bridge::after,
+.avatar-art-river::after,
+.avatar-art-campus::after,
+.avatar-art-plaza::after,
+.avatar-art-forest::after,
+.avatar-art-lantern::after,
+.avatar-art-harbor::after {
+  content: "";
+  position: absolute;
+  inset: auto 18% 18% 18%;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .u-filter-chip {

@@ -46,6 +46,9 @@ public class User {
     @Column(nullable = false)
     private InterfaceMode interfaceMode = InterfaceMode.SIMPLE;
 
+    @Column(nullable = false)
+    private String avatarPreset = "civic-sunrise";
+
     private boolean enabled = false;
     
     // V3: Verification Flow
@@ -92,6 +95,8 @@ public class User {
     public void setAffiliationVisibility(ProfileVisibility affiliationVisibility) { this.affiliationVisibility = affiliationVisibility; }
     public InterfaceMode getInterfaceMode() { return interfaceMode; }
     public void setInterfaceMode(InterfaceMode interfaceMode) { this.interfaceMode = interfaceMode; }
+    public String getAvatarPreset() { return avatarPreset; }
+    public void setAvatarPreset(String avatarPreset) { this.avatarPreset = avatarPreset; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     

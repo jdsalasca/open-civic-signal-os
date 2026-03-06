@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCommunityStore } from "../store/useCommunityStore";
+import { ProgressBar } from "primereact/progressbar";
 import { SelectButton, SelectButtonChangeEvent } from "primereact/selectbutton";
 import { DropdownChangeEvent } from "primereact/dropdown";
 import { Divider } from "primereact/divider";
@@ -11,7 +12,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Layout } from "../components/Layout";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { Avatar } from "primereact/avatar";
 import apiClient from "../api/axios";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicButton } from "../components/ui/CivicButton";
@@ -21,7 +21,9 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicMetaRow } from "../components/ui/CivicMetaRow";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
-import { InterfaceMode, ProfileVisibility, UserProfile } from "../types";
+import { CivicIdentityAvatar } from "../components/ui/CivicIdentityAvatar";
+import { ACHIEVEMENT_META, AVATAR_PRESETS } from "../constants/profileIdentity";
+import { InterfaceMode, ProfileAchievement, ProfileVisibility, UserProfile } from "../types";
 import { toRoleLabel } from "../constants/roleLabels";
 
 interface ThemeOption {
@@ -51,20 +53,24 @@ interface ProfileFormState {
   displayName: string;
   civicRole: string;
   bio: string;
-  affiliationsText: string;
+  affiliations: string[];
+  affiliationsInput: string;
   profileVisibility: ProfileVisibility;
   affiliationVisibility: ProfileVisibility;
   interfaceMode: 'simple' | 'advanced';
+  avatarPreset: string;
 }
 
 const EMPTY_PROFILE_FORM: ProfileFormState = {
   displayName: '',
   civicRole: 'NEIGHBOR',
   bio: '',
-  affiliationsText: '',
+  affiliations: [],
+  affiliationsInput: '',
   profileVisibility: 'PUBLIC',
   affiliationVisibility: 'COMMUNITY',
-  interfaceMode: 'simple'
+  interfaceMode: 'simple',
+  avatarPreset: AVATAR_PRESETS[0].id
 };
 
 export function Settings() {
@@ -106,6 +112,11 @@ export function Settings() {
     { label: t('settings.visibility.ADMINS'), value: 'ADMINS' }
   ];
 
+  const sanitizeAffiliationTag = (value: string) => value.trim().replace(/\s+/g, ' ');
+
+  const mergeAffiliationTags = (items: string[]) =>
+    Array.from(new Set(items.map(sanitizeAffiliationTag).filter(Boolean))).slice(0, 8);
+
   useEffect(() => {
     let mounted = true;
 
@@ -119,10 +130,12 @@ export function Settings() {
           displayName: response.data.displayName ?? '',
           civicRole: response.data.civicRole ?? 'NEIGHBOR',
           bio: response.data.bio ?? '',
-          affiliationsText: response.data.affiliations.join(', '),
+          affiliations: response.data.affiliations,
+          affiliationsInput: '',
           profileVisibility: response.data.profileVisibility,
           affiliationVisibility: response.data.affiliationVisibility,
-          interfaceMode: response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple'
+          interfaceMode: response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple',
+          avatarPreset: response.data.avatarPreset ?? AVATAR_PRESETS[0].id
         });
         setInterfaceMode(response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple');
       } catch (error) {
@@ -190,6 +203,30 @@ export function Settings() {
     setProfileForm((current) => ({ ...current, [key]: value }));
   };
 
+  const commitAffiliationInput = () => {
+    const tokens = profileForm.affiliationsInput.split(",");
+    if (tokens.every((token) => !sanitizeAffiliationTag(token))) {
+      if (profileForm.affiliationsInput) {
+        handleProfileField('affiliationsInput', '');
+      }
+      return;
+    }
+    handleProfileField('affiliations', mergeAffiliationTags([...profileForm.affiliations, ...tokens]));
+    handleProfileField('affiliationsInput', '');
+  };
+
+  const removeAffiliation = (value: string) => {
+    handleProfileField(
+      'affiliations',
+      profileForm.affiliations.filter((item) => item !== value)
+    );
+  };
+
+  const addAffiliation = (value: string) => {
+    handleProfileField('affiliations', mergeAffiliationTags([...profileForm.affiliations, value]));
+    handleProfileField('affiliationsInput', '');
+  };
+
   const handleSaveProfile = async () => {
     try {
       setProfileSaving(true);
@@ -197,13 +234,11 @@ export function Settings() {
         displayName: profileForm.displayName.trim() || null,
         civicRole: profileForm.civicRole,
         bio: profileForm.bio.trim() || null,
-        affiliations: profileForm.affiliationsText
-          .split(',')
-          .map((value) => value.trim())
-          .filter(Boolean),
+        affiliations: mergeAffiliationTags([...profileForm.affiliations, ...profileForm.affiliationsInput.split(',')]),
         profileVisibility: profileForm.profileVisibility,
         affiliationVisibility: profileForm.affiliationVisibility,
-        interfaceMode: profileForm.interfaceMode.toUpperCase() as InterfaceMode
+        interfaceMode: profileForm.interfaceMode.toUpperCase() as InterfaceMode,
+        avatarPreset: profileForm.avatarPreset
       };
       const response = await apiClient.put<UserProfile>('auth/profile/me', payload);
       setProfile(response.data);
@@ -211,10 +246,12 @@ export function Settings() {
         displayName: response.data.displayName ?? '',
         civicRole: response.data.civicRole ?? 'NEIGHBOR',
         bio: response.data.bio ?? '',
-        affiliationsText: response.data.affiliations.join(', '),
+        affiliations: response.data.affiliations,
+        affiliationsInput: '',
         profileVisibility: response.data.profileVisibility,
         affiliationVisibility: response.data.affiliationVisibility,
-        interfaceMode: response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple'
+        interfaceMode: response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple',
+        avatarPreset: response.data.avatarPreset ?? AVATAR_PRESETS[0].id
       });
       setInterfaceMode(response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple');
       toast.success(t('settings.profile_saved'));
@@ -247,6 +284,19 @@ export function Settings() {
   const affiliationVisibilityLabel = t(`settings.visibility.${profile?.affiliationVisibility ?? 'COMMUNITY'}`);
   const activeMembership = memberships.find((membership) => membership.communityId === activeCommunityId) ?? memberships[0] ?? null;
   const activeCommunityPath = activeMembership?.breadcrumb.map((item) => item.name).join(' / ') ?? t('settings.community_membership_empty_desc');
+  const communitySuggestions = useMemo(
+    () =>
+      mergeAffiliationTags(
+        memberships.flatMap((membership) => [
+          membership.communityName,
+          ...membership.breadcrumb.map((item) => item.name)
+        ])
+      ),
+    [memberships]
+  );
+  const suggestedAffiliations = communitySuggestions.filter((item) => !profileForm.affiliations.includes(item)).slice(0, 6);
+  const selectedAvatarPreset = AVATAR_PRESETS.find((item) => item.id === profileForm.avatarPreset) ?? AVATAR_PRESETS[0];
+  const achievementList = (profile?.achievements ?? []) as ProfileAchievement[];
 
   return (
     <Layout>
@@ -256,25 +306,108 @@ export function Settings() {
         <div className="grid">
           <div className="col-12 lg:col-5">
             <CivicCard title={t('settings.identity_profile')} variant="brand" className="h-full">
-              <div className="flex flex-column align-items-center text-center py-4">
-                <div className="relative mb-4">
-                  <Avatar label={identityName[0]?.toUpperCase() ?? 'U'} shape="circle" size="xlarge" className="bg-brand-primary text-on-brand font-black shadow-xl" style={{ width: '80px', height: '80px', fontSize: '2rem' }} />
-                  <div className="absolute bottom-0 right-0 bg-status-resolved border-circle border-2 border-subtle" style={{ width: '20px', height: '20px' }}></div>
+              <div className="flex flex-column gap-5 py-3">
+                <div className="flex flex-column align-items-center text-center">
+                  <div className="relative mb-4">
+                    <CivicIdentityAvatar
+                      presetId={selectedAvatarPreset.id}
+                      fallbackLabel={identityName}
+                      size="lg"
+                    />
+                    <div className="absolute bottom-0 right-0 bg-status-resolved border-circle border-2 border-subtle" style={{ width: '20px', height: '20px' }}></div>
+                  </div>
+                  <h2 className="text-2xl font-black text-main m-0 tracking-tight u-card-title-wrap">{identityName}</h2>
+                  <p className="text-sm text-secondary mt-2 mb-0 line-height-3 u-card-copy">
+                    {t(selectedAvatarPreset.labelKey)}
+                  </p>
                 </div>
-                <h2 className="text-2xl font-black text-main m-0 tracking-tight">{identityName}</h2>
-                <div className="mt-2 flex gap-2 justify-content-center flex-wrap">
-                  <CivicBadge label={activeRole} severity="progress" />
+
+                <div className="mt-1 flex gap-2 justify-content-center flex-wrap">
+                  <CivicBadge label={t(`settings.roles.${activeRole}`, { defaultValue: activeRole })} severity="progress" />
                   <CivicBadge label={t('settings.verified_user')} severity="resolved" />
                   <CivicBadge label={identityRole} severity="neutral" />
                 </div>
 
-                <Divider className="my-6 opacity-10" />
+                <div className="civic-stat-grid">
+                  <div className="civic-stat-card">
+                    <span className="civic-stat-label">{t('settings.community_active_label')}</span>
+                    <span className="civic-stat-value">{activeMembership?.communityName ?? t('settings.community_none')}</span>
+                  </div>
+                  <div className="civic-stat-card">
+                    <span className="civic-stat-label">{t('settings.community_role_here')}</span>
+                    <span className="civic-stat-value">{activeMembership ? toRoleLabel(activeMembership.role, t) : t('settings.identity_role_fallback')}</span>
+                  </div>
+                  <div className="civic-stat-card">
+                    <span className="civic-stat-label">{t('settings.community_count_label')}</span>
+                    <span className="civic-stat-value">{memberships.length}</span>
+                  </div>
+                </div>
+
+                <Divider className="my-0 opacity-10" />
 
                 <div className="w-full text-left">
                   <CivicMetaRow label={t('settings.profile_visibility_label')} value={profileVisibilityLabel} />
                   <CivicMetaRow label={t('settings.affiliation_visibility_label')} value={affiliationVisibilityLabel} />
-                  <CivicMetaRow label={t('settings.affiliations_preview')} value={profile?.affiliations.length ? profile.affiliations.join(', ') : t('settings.no_affiliations')} />
-                  <CivicMetaRow label={t('settings.community_count_label')} value={memberships.length.toString()} />
+                  <div className="civic-meta-stack">
+                    <span className="civic-meta-label">{t('settings.affiliations_preview')}</span>
+                    <div className="flex gap-2 flex-wrap justify-content-end">
+                      {(profile?.affiliations.length ?? 0) > 0 ? (
+                        profile?.affiliations.map((affiliation) => (
+                          <span key={affiliation} className="u-pill" data-testid={`profile-affiliation-chip-${affiliation}`}>
+                            {affiliation}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-sm text-secondary">{t('settings.no_affiliations')}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-column gap-3" data-testid="profile-achievements-card">
+                  <div>
+                    <div className="text-xs font-bold uppercase tracking-widest text-muted">{t('settings.achievements_title')}</div>
+                    <p className="text-sm text-secondary mt-2 mb-0 line-height-3">{t('settings.achievements_help')}</p>
+                  </div>
+                  <div className="flex flex-column gap-3">
+                    {achievementList.map((achievement) => {
+                      const meta = ACHIEVEMENT_META[achievement.key];
+                      if (!meta) {
+                        return null;
+                      }
+                      const progress = Math.max(0, Math.min(100, (achievement.currentProgress / achievement.targetProgress) * 100));
+                      return (
+                        <div key={achievement.key} className={`achievement-card ${achievement.earned ? 'achievement-card-earned' : ''}`}>
+                          <div className="u-card-split-header">
+                            <div className="u-card-copy">
+                              <div className="u-card-meta-row">
+                                <span className="achievement-icon">
+                                  <i className={meta.icon} />
+                                </span>
+                                <div className="u-card-copy">
+                                  <div className="font-black text-main">{t(meta.titleKey)}</div>
+                                  <p className="text-sm text-secondary mt-1 mb-0 line-height-3">{t(meta.descriptionKey)}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <CivicBadge
+                              label={achievement.earned ? t('settings.achievement_earned') : t('settings.achievement_in_progress')}
+                              severity={achievement.earned ? 'resolved' : 'progress'}
+                            />
+                          </div>
+                          <div className="mt-3">
+                            <ProgressBar value={progress} showValue={false} style={{ height: '8px' }} />
+                            <div className="text-xs text-muted mt-2">
+                              {t('settings.achievement_progress', {
+                                current: achievement.currentProgress,
+                                target: achievement.targetProgress
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </CivicCard>
@@ -369,6 +502,26 @@ export function Settings() {
               <div className="flex flex-column gap-5" data-testid="profile-settings-card">
                 <p className="text-secondary text-sm m-0 leading-relaxed">{t('settings.public_identity_help')}</p>
 
+                <CivicField label={t('settings.avatar_preset_label')} helpText={t('settings.avatar_preset_help')}>
+                  <div className="avatar-preset-grid" data-testid="avatar-preset-grid">
+                    {AVATAR_PRESETS.map((preset) => {
+                      const selected = profileForm.avatarPreset === preset.id;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          className={`avatar-preset-option ${selected ? 'avatar-preset-option-selected' : ''}`}
+                          onClick={() => handleProfileField('avatarPreset', preset.id)}
+                          data-testid={`avatar-preset-${preset.id}`}
+                        >
+                          <CivicIdentityAvatar presetId={preset.id} fallbackLabel={identityName} size="sm" />
+                          <span className="font-bold text-main text-sm">{t(preset.labelKey)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CivicField>
+
                 <CivicField label={t('settings.display_name')} helpText={t('settings.display_name_help')}>
                   <InputText
                     value={profileForm.displayName}
@@ -393,13 +546,57 @@ export function Settings() {
                 </CivicField>
 
                 <CivicField label={t('settings.affiliations_label')} helpText={t('settings.affiliations_help')}>
-                  <InputText
-                    value={profileForm.affiliationsText}
-                    onChange={(e) => handleProfileField('affiliationsText', e.target.value)}
-                    className="w-full"
-                    disabled={profileLoading}
-                    data-testid="profile-affiliations-input"
-                  />
+                  <div className="flex flex-column gap-3">
+                    <InputText
+                      value={profileForm.affiliationsInput}
+                      onChange={(e) => handleProfileField('affiliationsInput', e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                          e.preventDefault();
+                          commitAffiliationInput();
+                        }
+                      }}
+                      onBlur={commitAffiliationInput}
+                      className="w-full"
+                      disabled={profileLoading}
+                      data-testid="profile-affiliations-input"
+                    />
+                    <div className="flex gap-2 flex-wrap" data-testid="profile-affiliations-chip-list">
+                      {profileForm.affiliations.map((affiliation) => (
+                        <button
+                          key={affiliation}
+                          type="button"
+                          className="u-pill u-pill-action"
+                          onClick={() => removeAffiliation(affiliation)}
+                          data-testid={`profile-affiliation-remove-${affiliation}`}
+                        >
+                          {affiliation}
+                          <i className="pi pi-times" />
+                        </button>
+                      ))}
+                    </div>
+                    {suggestedAffiliations.length > 0 && (
+                      <div className="flex flex-column gap-2">
+                        <span className="text-xs text-muted font-bold uppercase tracking-widest">
+                          {t('settings.affiliations_suggested')}
+                        </span>
+                        <div className="flex gap-2 flex-wrap">
+                          {suggestedAffiliations.map((affiliation) => (
+                            <button
+                              key={affiliation}
+                              type="button"
+                              className="u-pill u-pill-ghost"
+                              onClick={() => addAffiliation(affiliation)}
+                              data-testid={`profile-affiliation-suggestion-${affiliation}`}
+                            >
+                              <i className="pi pi-plus" />
+                              {affiliation}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </CivicField>
 
                 <CivicField label={t('settings.bio_label')} helpText={t('settings.bio_help')}>

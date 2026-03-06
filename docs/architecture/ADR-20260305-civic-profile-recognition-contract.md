@@ -1,0 +1,24 @@
+# ADR-20260305-civic-profile-recognition-contract
+
+- Date: 2026-03-05
+- Status: accepted
+- Decision: Extend civic profile contract with backend-owned `avatarPreset` persistence and computed community achievement milestones.
+- Context:
+  - The civic identity profile was already persisted, but it still behaved like a plain settings form with weak belonging signals.
+  - The product needs stronger identity cues that feel inhabited, community-aware, and easier to scan without pushing recognition logic into the frontend.
+  - Requested UX improvements include selectable profile imagery, tag-based affiliations, and visible milestones such as reporting ten incidents or acting as a community catalyst.
+- Alternatives considered:
+  - Keep avatar selection local-only in frontend preferences and never persist it in API.
+  - Hardcode achievements in frontend based on whatever data is already loaded on the page.
+  - Delay profile recognition until a larger reputation system exists.
+- Consequences:
+  - `UserProfileResponse` now includes `avatarPreset` and computed `achievements`.
+  - `UpdateUserProfileRequest` now accepts `avatarPreset` from a server-validated allowed set.
+  - Milestone progress remains deterministic and backend-owned, while frontend only renders recognition surfaces and tag-based editing.
+- Rollback plan:
+  - Remove `avatar_preset` column and profile achievement payload fields.
+  - Revert Settings UX to text-only identity editing and basic badges.
+  - Remove the additional OpenAPI schemas and response properties.
+- Related issues/PRs:
+  - `story:OCS-P1-029`
+  - `story:OCS-P2-009`

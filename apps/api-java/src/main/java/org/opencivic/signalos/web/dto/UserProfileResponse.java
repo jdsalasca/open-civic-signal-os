@@ -15,5 +15,7 @@ public record UserProfileResponse(
     ProfileVisibility profileVisibility,
     ProfileVisibility affiliationVisibility,
     InterfaceMode interfaceMode,
+    String avatarPreset,
+    List<ProfileAchievementResponse> achievements,
     String viewerScope
 ) {}

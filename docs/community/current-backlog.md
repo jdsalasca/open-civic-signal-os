@@ -251,5 +251,6 @@ Strategic phase-gated bets:
 26. `story:OCS-P2-007` auditable secure elections.
 27. `story:OCS-P2-008` participatory budgeting allocation.
 28. `story:OCS-P2-009` bounded civic reputation model.
+29. `story:OCS-P2-010` cross-app community identity and contributor recognition surfaces.
 
 Backlog reference: `docs/community/community-operating-system-backlog.md`

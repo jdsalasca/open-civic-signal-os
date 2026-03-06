@@ -158,5 +158,6 @@ Reference pack: `docs/community/frontend-audience-usability-backlog.md`
 27. `story:OCS-P1-052 expose open civic data exports and scoped external API access`
 28. `story:OCS-P1-053 add outbound integrations layer for calendar, messaging, email, and maps`
 29. `story:OCS-P2-009 design bounded civic reputation model with non-toxic incentives`
+30. `story:OCS-P2-010 expand community identity surfaces with reusable stat cards, profile covers, and contributor recognition across the app`
 
 Reference pack: `docs/community/community-operating-system-backlog.md`

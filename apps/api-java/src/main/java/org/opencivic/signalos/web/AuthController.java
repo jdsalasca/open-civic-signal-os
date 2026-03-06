@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import org.opencivic.signalos.domain.User;
@@ -15,6 +16,7 @@ import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.exception.UnauthorizedActionException;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
+import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.EmailService;
 import org.opencivic.signalos.service.EmailDeliveryResult;
@@ -51,6 +53,20 @@ public class AuthController {
     private final SecureRandom secureRandom = new SecureRandom();
     private final RateLimitService rateLimitService;
     private final CommunityMembershipRepository membershipRepository;
+    private final SignalRepository signalRepository;
+
+    private static final Set<String> ALLOWED_AVATAR_PRESETS = Set.of(
+        "civic-sunrise",
+        "neighborhood-garden",
+        "library-window",
+        "bridge-night",
+        "river-route",
+        "campus-sky",
+        "plaza-echo",
+        "forest-circle",
+        "signal-lantern",
+        "harbor-light"
+    );
 
     @Value("${spring.profiles.active:prod}")
     private String activeProfile;
@@ -63,7 +79,8 @@ public class AuthController {
                           AuthenticationManager authenticationManager,
                           UserDetailsService userDetailsService,
                           RateLimitService rateLimitService,
-                          CommunityMembershipRepository membershipRepository) {
+                          CommunityMembershipRepository membershipRepository,
+                          SignalRepository signalRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -72,6 +89,7 @@ public class AuthController {
         this.userDetailsService = userDetailsService;
         this.rateLimitService = rateLimitService;
         this.membershipRepository = membershipRepository;
+        this.signalRepository = signalRepository;
     }
 
     @PostMapping("/register")
@@ -273,7 +291,8 @@ public class AuthController {
             Map.entry("bio", user.getBio()),
             Map.entry("profileVisibility", user.getProfileVisibility().name()),
             Map.entry("affiliationVisibility", user.getAffiliationVisibility().name()),
-            Map.entry("interfaceMode", user.getInterfaceMode().name())
+            Map.entry("interfaceMode", user.getInterfaceMode().name()),
+            Map.entry("avatarPreset", sanitizeAvatarPreset(user.getAvatarPreset()))
         );
     }
 
@@ -298,6 +317,7 @@ public class AuthController {
             request.affiliationVisibility() == null ? ProfileVisibility.COMMUNITY : request.affiliationVisibility()
         );
         user.setInterfaceMode(request.interfaceMode() == null ? InterfaceMode.SIMPLE : request.interfaceMode());
+        user.setAvatarPreset(sanitizeAvatarPreset(request.avatarPreset()));
         userRepository.save(user);
         return toProfileResponse(user, ViewerScope.ADMINS, true);
     }
@@ -382,8 +402,50 @@ public class AuthController {
             user.getProfileVisibility(),
             user.getAffiliationVisibility(),
             user.getInterfaceMode(),
+            sanitizeAvatarPreset(user.getAvatarPreset()),
+            buildAchievements(user),
             viewerScope.name()
         );
+    }
+
+    private List<ProfileAchievementResponse> buildAchievements(User user) {
+        int reportCount = Math.toIntExact(signalRepository.countByAuthorId(user.getId()));
+        int communityCount = Math.toIntExact(membershipRepository.countByUserId(user.getId()));
+        int leadershipCount = Math.toIntExact(membershipRepository.countByUserIdAndRoleIn(
+            user.getId(),
+            List.of(CommunityRole.MODERATOR, CommunityRole.COORDINATOR, CommunityRole.PUBLIC_SERVANT_LIAISON)
+        ));
+        int profileCompletion = profileCompletionScore(user);
+
+        return List.of(
+            achievement("VERIFIED_MEMBER", user.isVerified() ? 1 : 0, 1),
+            achievement("FIRST_REPORT", Math.min(reportCount, 1), 1),
+            achievement("TEN_REPORTS", Math.min(reportCount, 10), 10),
+            achievement("COMMUNITY_CATALYST", Math.min(leadershipCount, 1), 1),
+            achievement("MULTI_COMMUNITY", Math.min(communityCount, 3), 3),
+            achievement("PROFILE_COMPLETE", Math.min(profileCompletion, 4), 4)
+        );
+    }
+
+    private ProfileAchievementResponse achievement(String key, int currentProgress, int targetProgress) {
+        return new ProfileAchievementResponse(key, currentProgress >= targetProgress, currentProgress, targetProgress);
+    }
+
+    private int profileCompletionScore(User user) {
+        int score = 0;
+        if (trimToNull(user.getDisplayName()) != null) {
+            score++;
+        }
+        if (trimToNull(user.getCivicRole()) != null) {
+            score++;
+        }
+        if (trimToNull(user.getBio()) != null) {
+            score++;
+        }
+        if (!user.getAffiliations().isEmpty()) {
+            score++;
+        }
+        return score;
     }
 
     private boolean canReveal(ProfileVisibility visibility, ViewerScope viewerScope) {
@@ -422,6 +484,15 @@ public class AuthController {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String sanitizeAvatarPreset(String avatarPreset) {
+        String normalized = trimToNull(avatarPreset);
+        if (normalized == null) {
+            return "civic-sunrise";
+        }
+        String slug = normalized.toLowerCase(Locale.ROOT);
+        return ALLOWED_AVATAR_PRESETS.contains(slug) ? slug : "civic-sunrise";
     }
 
     private enum ViewerScope {

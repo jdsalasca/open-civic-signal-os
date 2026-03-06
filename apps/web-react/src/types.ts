@@ -77,7 +77,16 @@ export type UserProfile = {
   profileVisibility: ProfileVisibility;
   affiliationVisibility: ProfileVisibility;
   interfaceMode: InterfaceMode;
+  avatarPreset: string;
+  achievements: ProfileAchievement[];
   viewerScope: ProfileVisibility;
+};
+
+export type ProfileAchievement = {
+  key: string;
+  earned: boolean;
+  currentProgress: number;
+  targetProgress: number;
 };
 
 export type AuthInfo = {

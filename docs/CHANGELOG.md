@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Civic Profile Recognition Layer**: Settings now supports ten selectable identity covers, backend-owned contribution milestones, and stronger profile recognition surfaces so belonging feels more lived-in and community-aware. (`story:OCS-P1-029` refinement)
 - **Community Geospatial Maps**: Added a backend-owned community issue map plus cross-community heat surface with real API filters, hotspot clusters, coverage counters, and a dedicated `/communities/map` route so each community can see its own territory while also comparing pressure across communities. (`story:OCS-P1-039`)
 - **Case Timeline and Assignment Trail**: Signal detail now exposes a typed case timeline, visible current owner, backend-owned assignment endpoint, richer lifecycle audit events, and a staff assignment surface so responsibility is clear from creation to resolution. (`story:OCS-P1-038`)
 - **Issue Tracker-Grade Report Intake**: Reporting now uses a 3-step wizard with guided validation, readable location capture, multi-evidence links, optional GPS, and backend-owned `locationLabel` plus `evidenceUrls` contract support for more actionable institutional intake. (`story:OCS-P1-037`)
@@ -43,6 +44,7 @@
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 
 ### Fixed
+- **Affiliations Tag Editing**: Identity affiliations are now edited and previewed as tags instead of fragile comma-text blobs, with community-derived quick suggestions and safer wrapping in ES/mobile layouts. (`community identity UX`)
 - **Card Layout Consistency**: Standardized `CivicCard` header/actions behavior, improved text wrapping and reusable surface blocks, and reduced manual one-off card layouts in blog, threads, and signal detail so cards align more predictably and long text stops spilling across surfaces. (`UI consistency`)
 - **UI Consistency Pass**: Hardened shared page headers and empty states against text overflow, improved chip wrapping, made map selection behavior explicit, and reduced geospatial label overlap so community surfaces stay legible across desktop and mobile. (`community UX consistency`)
 - **Docker Hot Reload Frontend Bootstrap**: Fixed Windows/Docker dev frontend bootstrap by isolating container `node_modules` from the host workspace and disabling unintended workspace-level `npm ci` during Vite startup. (`devex`)

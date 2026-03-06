@@ -720,9 +720,12 @@ const resources = {
         "civic_role_label": "Community role",
         "civic_role_help": "Describe your civic context in plain language.",
         "affiliations_label": "Affiliations",
-        "affiliations_help": "Comma-separated. Example: Central Campus, Building A, Neighborhood 7.",
+        "affiliations_help": "Press Enter or comma to turn each affiliation into a visible tag. Example: Central Campus, Building A, Neighborhood 7.",
+        "affiliations_suggested": "Suggested from your communities",
         "bio_label": "Short bio",
         "bio_help": "Optional. Add one sentence about how you participate.",
+        "avatar_preset_label": "Identity image",
+        "avatar_preset_help": "Choose one of ten visual identity covers for your community profile.",
         "profile_visibility_label": "Who can see your role and bio",
         "profile_visibility_help": "Choose whether your civic role and bio are public, limited to shared communities, or reserved for admins.",
         "affiliation_visibility_label": "Who can see your affiliations",
@@ -733,12 +736,18 @@ const resources = {
         "community_count_label": "Communities",
         "community_membership_title": "Community belonging",
         "community_active_label": "Active community path",
+        "community_role_here": "Your role here",
         "community_active_badge": "Active now",
         "community_none": "No active community yet",
         "community_membership_empty_desc": "You are not part of a community yet. Join one to participate with local context and visible community role.",
         "community_switch_action": "Make active",
         "community_manage_action": "Open communities hub",
         "community_join_action": "Join a community",
+        "achievements_title": "Community milestones",
+        "achievements_help": "Recognition should reflect useful civic contribution, not noisy gamification.",
+        "achievement_earned": "Earned",
+        "achievement_in_progress": "In progress",
+        "achievement_progress": "{{current}} / {{target}} completed",
         "save_profile": "Save public identity",
         "profile_saved": "Public identity updated.",
         "profile_save_error": "Could not update identity profile.",
@@ -789,6 +798,44 @@ const resources = {
           "NEIGHBOR": "Neighbor",
           "ADMINISTRATOR": "Administrator",
           "AUTHORITY": "Authority"
+        },
+        "avatar_presets": {
+          "civic_sunrise": "Civic Sunrise",
+          "neighborhood_garden": "Neighborhood Garden",
+          "library_window": "Library Window",
+          "bridge_night": "Bridge Night",
+          "river_route": "River Route",
+          "campus_sky": "Campus Sky",
+          "plaza_echo": "Plaza Echo",
+          "forest_circle": "Forest Circle",
+          "signal_lantern": "Signal Lantern",
+          "harbor_light": "Harbor Light"
+        },
+        "achievements": {
+          "verified_member": {
+            "title": "Verified member",
+            "description": "Confirm your identity to participate with institutional trust."
+          },
+          "first_report": {
+            "title": "First report sent",
+            "description": "Open your first civic issue so the community can see it and act."
+          },
+          "ten_reports": {
+            "title": "Ten incidents reported",
+            "description": "Keep reporting useful issues until you reach ten documented signals."
+          },
+          "community_catalyst": {
+            "title": "Community catalyst",
+            "description": "Hold a coordinating or moderation role in at least one community."
+          },
+          "multi_community": {
+            "title": "Multi-community connector",
+            "description": "Participate across three or more communities with visible context."
+          },
+          "profile_complete": {
+            "title": "Identity profile complete",
+            "description": "Complete display name, role, affiliations, and bio so others understand your context."
+          }
         }
       },
       "exceptions": {
@@ -1534,9 +1581,12 @@ const resources = {
         "civic_role_label": "Rol comunitario",
         "civic_role_help": "Describa su contexto civico en lenguaje claro.",
         "affiliations_label": "Afiliaciones",
-        "affiliations_help": "Separadas por comas. Ejemplo: Campus Central, Bloque A, Barrio 7.",
+        "affiliations_help": "Presione Enter o coma para convertir cada afiliacion en un tag visible. Ejemplo: Campus Central, Bloque A, Barrio 7.",
+        "affiliations_suggested": "Sugeridas desde sus comunidades",
         "bio_label": "Bio corta",
         "bio_help": "Opcional. Agregue una frase sobre como participa.",
+        "avatar_preset_label": "Imagen de identidad",
+        "avatar_preset_help": "Elija una de diez cubiertas visuales para su perfil comunitario.",
         "profile_visibility_label": "Quien puede ver su rol y bio",
         "profile_visibility_help": "Elija si su rol civico y bio son publicos, solo para comunidades compartidas o reservados para admins.",
         "affiliation_visibility_label": "Quien puede ver sus afiliaciones",
@@ -1547,12 +1597,18 @@ const resources = {
         "community_count_label": "Comunidades",
         "community_membership_title": "Pertenencia comunitaria",
         "community_active_label": "Ruta comunitaria activa",
+        "community_role_here": "Su rol aqui",
         "community_active_badge": "Activa ahora",
         "community_none": "Aun no hay comunidad activa",
         "community_membership_empty_desc": "Aun no hace parte de una comunidad. Unase a una para participar con contexto local y rango comunitario visible.",
         "community_switch_action": "Activar",
         "community_manage_action": "Abrir hub comunitario",
         "community_join_action": "Unirse a una comunidad",
+        "achievements_title": "Logros comunitarios",
+        "achievements_help": "El reconocimiento debe reflejar aporte civico util, no gamificacion ruidosa.",
+        "achievement_earned": "Ganado",
+        "achievement_in_progress": "En progreso",
+        "achievement_progress": "{{current}} / {{target}} completado",
         "save_profile": "Guardar identidad publica",
         "profile_saved": "Identidad publica actualizada.",
         "profile_save_error": "No se pudo actualizar el perfil de identidad.",
@@ -1603,6 +1659,44 @@ const resources = {
           "NEIGHBOR": "Vecino",
           "ADMINISTRATOR": "Administrador",
           "AUTHORITY": "Autoridad"
+        },
+        "avatar_presets": {
+          "civic_sunrise": "Amanecer civico",
+          "neighborhood_garden": "Jardin barrial",
+          "library_window": "Ventana biblioteca",
+          "bridge_night": "Puente nocturno",
+          "river_route": "Ruta del rio",
+          "campus_sky": "Cielo del campus",
+          "plaza_echo": "Eco de plaza",
+          "forest_circle": "Circulo del bosque",
+          "signal_lantern": "Farol civico",
+          "harbor_light": "Luz del puerto"
+        },
+        "achievements": {
+          "verified_member": {
+            "title": "Miembro verificado",
+            "description": "Confirme su identidad para participar con confianza institucional."
+          },
+          "first_report": {
+            "title": "Primer reporte enviado",
+            "description": "Abra su primera incidencia civica para que la comunidad pueda verla y actuar."
+          },
+          "ten_reports": {
+            "title": "Diez incidencias reportadas",
+            "description": "Mantenga reportes utiles hasta alcanzar diez senales documentadas."
+          },
+          "community_catalyst": {
+            "title": "Accionador comunitario",
+            "description": "Tenga un rol de coordinacion o moderacion en al menos una comunidad."
+          },
+          "multi_community": {
+            "title": "Conector multi comunidad",
+            "description": "Participe en tres o mas comunidades con contexto visible."
+          },
+          "profile_complete": {
+            "title": "Perfil completo",
+            "description": "Complete nombre visible, rol, afiliaciones y bio para que otros entiendan su contexto."
+          }
         }
       },
       "exceptions": {

@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.Community;
@@ -97,7 +98,8 @@ class UserProfileVisibilityIT {
                       "affiliations": ["Central Campus", "Library Committee"],
                       "profileVisibility": "COMMUNITY",
                       "affiliationVisibility": "ADMINS",
-                      "interfaceMode": "SIMPLE"
+                      "interfaceMode": "SIMPLE",
+                      "avatarPreset": "harbor-light"
                     }
                     """))
             .andExpect(status().isOk())
@@ -106,6 +108,9 @@ class UserProfileVisibilityIT {
             .andExpect(jsonPath("$.affiliations[0]").value("Central Campus"))
             .andExpect(jsonPath("$.affiliationVisibility").value("ADMINS"))
             .andExpect(jsonPath("$.interfaceMode").value("SIMPLE"))
+            .andExpect(jsonPath("$.avatarPreset").value("harbor-light"))
+            .andExpect(jsonPath("$.achievements", hasSize(6)))
+            .andExpect(jsonPath("$.achievements[0].key").value("VERIFIED_MEMBER"))
             .andExpect(jsonPath("$.viewerScope").value("ADMINS"))
             .andExpect(jsonPath("$.email").value("owner@example.com"));
     }
@@ -120,6 +125,7 @@ class UserProfileVisibilityIT {
             .andExpect(jsonPath("$.bio").value(nullValue()))
             .andExpect(jsonPath("$.affiliations").isArray())
             .andExpect(jsonPath("$.affiliations").isEmpty())
+            .andExpect(jsonPath("$.avatarPreset").value("civic-sunrise"))
             .andExpect(jsonPath("$.viewerScope").value("PUBLIC"));
     }
 
@@ -134,6 +140,8 @@ class UserProfileVisibilityIT {
             .andExpect(jsonPath("$.bio").value("Community organizer and student reporter."))
             .andExpect(jsonPath("$.affiliations").isArray())
             .andExpect(jsonPath("$.affiliations").isEmpty())
+            .andExpect(jsonPath("$.achievements[3].key").value("COMMUNITY_CATALYST"))
+            .andExpect(jsonPath("$.achievements[3].earned").value(false))
             .andExpect(jsonPath("$.viewerScope").value("COMMUNITY"));
     }
 
@@ -147,6 +155,8 @@ class UserProfileVisibilityIT {
             .andExpect(jsonPath("$.civicRole").value("STUDENT"))
             .andExpect(jsonPath("$.affiliations[0]").value("Central Campus"))
             .andExpect(jsonPath("$.email").value("owner@example.com"))
+            .andExpect(jsonPath("$.achievements[5].key").value("PROFILE_COMPLETE"))
+            .andExpect(jsonPath("$.achievements[5].earned").value(true))
             .andExpect(jsonPath("$.viewerScope").value("ADMINS"));
     }
 
