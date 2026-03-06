@@ -79,6 +79,7 @@ Progress: [██████████] 99%
 - 2026-03-05: Finished the cross-app stat-grid hardening pass by moving Communities and SignalDetail onto shared summary primitives, localizing remaining signal-detail chrome, and improving global badge/button wrapping for ES-heavy layouts.
 - 2026-03-05: Reduced Settings card density by separating identity, community belonging, and achievement surfaces, shortened community summary labels, and hardened stat-card/meta wrapping so Spanish copy stays stable under compact layouts.
 - 2026-03-05: Reduced dashboard and community-home control density by grouping secondary actions, introducing calmer action-bar layouts, and standardizing reusable list-card surfaces for official updates, threads, and top issues.
+- 2026-03-05: Added a global overflow-hardening pass for grid columns, card copy, badges, pills, PrimeReact button labels, dropdown labels, and datatable cells so longer strings wrap instead of overlapping surfaces across the app.
 
 ### Pending Todos
 

@@ -34,6 +34,10 @@ body {
   min-height: 100vh;
 }
 
+.grid > [class*="col"] {
+  min-width: 0;
+}
+
 a {
   color: var(--link-color);
 }
@@ -249,6 +253,20 @@ a:hover {
 .civic-empty-state-title,
 .civic-empty-state-description {
   overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.civic-card h1,
+.civic-card h2,
+.civic-card h3,
+.civic-card h4,
+.civic-card h5,
+.civic-card h6,
+.civic-card p,
+.civic-card small,
+.civic-card span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .civic-card-header {
@@ -294,6 +312,7 @@ a:hover {
 .u-card-title-wrap > * {
   min-width: 0;
   overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .u-card-title-xl {
@@ -308,6 +327,10 @@ a:hover {
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.u-card-meta-row > * {
   min-width: 0;
 }
 
@@ -339,6 +362,7 @@ a:hover {
   max-width: 100%;
   white-space: normal;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .civic-button-secondary,
@@ -352,6 +376,7 @@ a:hover {
   white-space: normal;
   text-align: center;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .community-map-filter-grid {
@@ -595,6 +620,8 @@ a:hover {
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.02em;
+  line-height: 1.25;
+  justify-content: center;
 }
 
 .u-pill-action,
@@ -903,6 +930,9 @@ a:hover {
   font-weight: 800;
   letter-spacing: 0.03em;
   transition: all 0.2s ease;
+  white-space: normal;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .u-filter-chip:hover {
@@ -1156,6 +1186,13 @@ select:focus-visible,
   overflow: hidden;
   position: relative;
 
+  .p-button-label {
+    white-space: normal !important;
+    line-height: 1.2 !important;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
   &.p-button-primary {
     background: var(--brand-primary) !important;
     color: var(--on-brand) !important;
@@ -1223,6 +1260,8 @@ select:focus-visible,
     color: var(--field-text) !important;
     font-weight: 700;
     font-size: 0.88rem;
+    white-space: normal !important;
+    line-height: 1.3;
   }
 
   .p-dropdown-label.p-placeholder,
@@ -1293,7 +1332,15 @@ select:focus-visible,
   .p-datatable-tbody > tr > td {
     color: var(--text-main) !important;
     background: transparent !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    vertical-align: top;
   }
+}
+
+.p-selectbutton .p-button,
+.p-selectbutton .p-button .p-button-label {
+  white-space: normal !important;
 }
 
 .p-paginator {
