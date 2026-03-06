@@ -243,6 +243,39 @@ export type CommunityProposal = {
   updatedAt: string;
 };
 
+export type CommunityProposalDeliberationType = "PRO" | "CON" | "QUESTION" | "EVIDENCE";
+
+export type CommunityProposalDeliberationEntry = {
+  id: string;
+  proposalId: string;
+  authorId: string;
+  authorUsername: string;
+  entryType: CommunityProposalDeliberationType;
+  content: string;
+  supportingLink?: string | null;
+  hidden: boolean;
+  moderationReason?: string | null;
+  hiddenByUsername?: string | null;
+  hiddenAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CommunityProposalDeliberationCounts = {
+  pros: number;
+  cons: number;
+  questions: number;
+  evidence: number;
+  visibleEntries: number;
+  hiddenEntries: number;
+};
+
+export type CommunityProposalDeliberation = {
+  proposalId: string;
+  counts: CommunityProposalDeliberationCounts;
+  entries: CommunityProposalDeliberationEntry[];
+};
+
 export type CommunityHomeSignal = {
   id: string;
   title: string;

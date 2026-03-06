@@ -321,12 +321,12 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - decisions can be debated with more signal and less noise
 - Acceptance criteria:
-  - [ ] arguments are typed and countable
-  - [ ] evidence can be marked and surfaced distinctly
-  - [ ] moderation can act on abuse without deleting the whole proposal context
+  - [x] arguments are typed and countable
+  - [x] evidence can be marked and surfaced distinctly
+  - [x] moderation can act on abuse without deleting the whole proposal context
 - Validation:
-  - [ ] backend deliberation tests
-  - [ ] Playwright pro/con evidence interactions
+  - [x] backend deliberation tests
+  - [x] Playwright pro/con evidence interactions
 
 ### `story:OCS-P1-042` Verifiable Community Voting
 

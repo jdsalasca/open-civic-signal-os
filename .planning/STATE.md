@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 20 of 5 in current phase  
+Plan: 21 of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-05 - Implemented structured proposal templates with backend-owned proposal contracts and community UI workflow
+Last activity: 2026-03-06 - Implemented structured proposal deliberation with backend-owned typed entries, evidence enforcement, moderation, and proposal-detail UI workflow
 
-Progress: [██████████] 99%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Progress: [██████████] 99%
 - 2026-03-05: Standardized shared typography and note/list surfaces across page headers, meta rows, dashboard signal tables, digest/alert sidebars, community blog, and threads so repeated content types now use one visual language instead of view-specific markup.
 - 2026-03-05: Extended the responsive hardening pass into MetricsGrid, Communities, CommunityMap, and Moderation so the remaining dense community hubs now share the same card, heading, and metadata standards with better wrapping under narrow layouts.
 - 2026-03-05: Implemented OCS-P1-040 with backend-owned structured proposals, the `CREATE_PROPOSAL` permission scope, linked-issue validation, a community proposal workspace route, OpenAPI schema coverage, and ADR-backed contract documentation.
+- 2026-03-06: Implemented OCS-P1-041 with backend-owned typed deliberation entries, evidence-link validation, moderation that preserves proposal context, OpenAPI contract coverage, and proposal-detail UI sections for pro/con/questions/evidence.
 
 ### Pending Todos
 
@@ -103,7 +104,7 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Finished `OCS-P1-040` structured proposal templates; next target is `OCS-P1-041` structured deliberation and evidence  
+Stopped at: Finished `OCS-P1-041` structured deliberation and evidence; next target is `OCS-P1-043` community project boards  
 Resume file: None
 
 

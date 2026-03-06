@@ -31,5 +31,7 @@ export const FORM_LIMITS = {
     beneficiariesMax: 2000,
     linksMax: 5,
     linkMax: 1200,
+    deliberationMin: 8,
+    deliberationMax: 2000,
   },
 } as const;

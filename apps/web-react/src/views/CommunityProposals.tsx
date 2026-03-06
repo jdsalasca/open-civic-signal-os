@@ -8,6 +8,7 @@ import { classNames } from "primereact/utils";
 import apiClient from "../api/axios";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
@@ -18,7 +19,14 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { useCommunityStore } from "../store/useCommunityStore";
-import type { CommunityProposal, PageResponse, Signal } from "../types";
+import type {
+  CommunityProposal,
+  CommunityProposalDeliberation,
+  CommunityProposalDeliberationEntry,
+  CommunityProposalDeliberationType,
+  PageResponse,
+  Signal,
+} from "../types";
 import { useTranslation } from "react-i18next";
 
 type ApiError = Error & { friendlyMessage?: string };
@@ -37,7 +45,13 @@ type ProposalForm = {
   supportingLinks: ProposalLink[];
 };
 
-const defaultValues: ProposalForm = {
+type DeliberationForm = {
+  type: CommunityProposalDeliberationType;
+  content: string;
+  supportingLink: string;
+};
+
+const defaultProposalValues: ProposalForm = {
   relatedSignalId: null,
   title: "",
   problemStatement: "",
@@ -45,6 +59,12 @@ const defaultValues: ProposalForm = {
   estimatedCost: "",
   beneficiariesSummary: "",
   supportingLinks: [{ url: "" }],
+};
+
+const defaultDeliberationValues: DeliberationForm = {
+  type: "PRO",
+  content: "",
+  supportingLink: "",
 };
 
 export function CommunityProposals() {
@@ -55,7 +75,10 @@ export function CommunityProposals() {
   const [proposals, setProposals] = useState<CommunityProposal[]>([]);
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null);
   const [signalOptions, setSignalOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [deliberation, setDeliberation] = useState<CommunityProposalDeliberation | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingDeliberation, setLoadingDeliberation] = useState(false);
+  const [moderatingEntryId, setModeratingEntryId] = useState<string | null>(null);
 
   const {
     control,
@@ -65,7 +88,18 @@ export function CommunityProposals() {
     formState: { errors, isSubmitting },
   } = useForm<ProposalForm>({
     mode: "onChange",
-    defaultValues,
+    defaultValues: defaultProposalValues,
+  });
+
+  const {
+    control: deliberationControl,
+    handleSubmit: handleDeliberationSubmit,
+    reset: resetDeliberation,
+    watch: watchDeliberation,
+    formState: { errors: deliberationErrors, isSubmitting: isSubmittingDeliberation },
+  } = useForm<DeliberationForm>({
+    mode: "onChange",
+    defaultValues: defaultDeliberationValues,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -78,13 +112,20 @@ export function CommunityProposals() {
   const watchedSolution = watch("proposedSolution") ?? "";
   const watchedCost = watch("estimatedCost") ?? "";
   const watchedBeneficiaries = watch("beneficiariesSummary") ?? "";
+  const watchedDeliberationType = watchDeliberation("type");
+  const watchedDeliberationContent = watchDeliberation("content") ?? "";
 
   const selectedProposal = useMemo(
     () => proposals.find((proposal) => proposal.id === selectedProposalId) ?? proposals[0] ?? null,
     [proposals, selectedProposalId]
   );
+  const canModerate = activeMembership?.role === "COORDINATOR" || activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
   const getStatusLabel = useCallback(
     (status: string) => t(`community_proposals.status.${status}`),
+    [t]
+  );
+  const getDeliberationTypeLabel = useCallback(
+    (type: CommunityProposalDeliberationType) => t(`community_proposals.deliberation_type.${type}`),
     [t]
   );
 
@@ -134,10 +175,32 @@ export function CommunityProposals() {
     }
   }, [activeCommunityId]);
 
+  const loadDeliberation = useCallback(async (proposalId: string | null) => {
+    if (!proposalId) {
+      setDeliberation(null);
+      return;
+    }
+    setLoadingDeliberation(true);
+    try {
+      const response = await apiClient.get<CommunityProposalDeliberation>(`community/proposals/${proposalId}/deliberation`);
+      setDeliberation(response.data);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_proposals.deliberation_load_error"));
+      setDeliberation(null);
+    } finally {
+      setLoadingDeliberation(false);
+    }
+  }, [t]);
+
   useEffect(() => {
     loadProposals();
     loadSignals();
   }, [loadProposals, loadSignals]);
+
+  useEffect(() => {
+    loadDeliberation(selectedProposal?.id ?? null);
+  }, [loadDeliberation, selectedProposal?.id]);
 
   const onSubmit = async (data: ProposalForm) => {
     if (!activeCommunityId) {
@@ -156,7 +219,7 @@ export function CommunityProposals() {
         supportingLinks: data.supportingLinks.map((item) => item.url.trim()).filter(Boolean),
       });
       toast.success(t("community_proposals.create_success"));
-      reset(defaultValues);
+      reset(defaultProposalValues);
       await loadProposals();
       setSelectedProposalId(response.data.id);
     } catch (err) {
@@ -164,6 +227,146 @@ export function CommunityProposals() {
       toast.error(apiErr.friendlyMessage || t("community_proposals.create_error"));
     }
   };
+
+  const onSubmitDeliberation = async (data: DeliberationForm) => {
+    if (!selectedProposal) {
+      return;
+    }
+    try {
+      const response = await apiClient.post<CommunityProposalDeliberation>(
+        `community/proposals/${selectedProposal.id}/deliberation`,
+        {
+          type: data.type,
+          content: data.content,
+          supportingLink: data.supportingLink.trim() || null,
+        }
+      );
+      setDeliberation(response.data);
+      resetDeliberation({
+        ...defaultDeliberationValues,
+        type: data.type,
+      });
+      toast.success(t("community_proposals.deliberation_create_success"));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_proposals.deliberation_create_error"));
+    }
+  };
+
+  const toggleModeration = async (entry: CommunityProposalDeliberationEntry) => {
+    if (!selectedProposal || !canModerate) {
+      return;
+    }
+    const reason = window.prompt(
+      entry.hidden
+        ? t("community_proposals.deliberation_restore_prompt")
+        : t("community_proposals.deliberation_hide_prompt"),
+      entry.moderationReason ?? ""
+    );
+    if (!reason || !reason.trim()) {
+      return;
+    }
+    setModeratingEntryId(entry.id);
+    try {
+      const response = await apiClient.patch<CommunityProposalDeliberation>(
+        `community/proposals/${selectedProposal.id}/deliberation/${entry.id}/moderate`,
+        {
+          hidden: !entry.hidden,
+          reason: reason.trim(),
+        }
+      );
+      setDeliberation(response.data);
+      toast.success(
+        entry.hidden
+          ? t("community_proposals.deliberation_restore_success")
+          : t("community_proposals.deliberation_hide_success")
+      );
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_proposals.deliberation_moderation_error"));
+    } finally {
+      setModeratingEntryId(null);
+    }
+  };
+
+  const deliberationTypeOptions = useMemo(
+    () => ([
+      { label: getDeliberationTypeLabel("PRO"), value: "PRO" },
+      { label: getDeliberationTypeLabel("CON"), value: "CON" },
+      { label: getDeliberationTypeLabel("QUESTION"), value: "QUESTION" },
+      { label: getDeliberationTypeLabel("EVIDENCE"), value: "EVIDENCE" },
+    ] as Array<{ label: string; value: CommunityProposalDeliberationType }>),
+    [getDeliberationTypeLabel]
+  );
+
+  const deliberationSections = useMemo(() => {
+    const entries = deliberation?.entries ?? [];
+    const counts = deliberation?.counts;
+    return [
+      { type: "PRO" as const, title: getDeliberationTypeLabel("PRO"), count: counts?.pros ?? 0, entries: entries.filter((entry) => entry.entryType === "PRO") },
+      { type: "CON" as const, title: getDeliberationTypeLabel("CON"), count: counts?.cons ?? 0, entries: entries.filter((entry) => entry.entryType === "CON") },
+      { type: "QUESTION" as const, title: getDeliberationTypeLabel("QUESTION"), count: counts?.questions ?? 0, entries: entries.filter((entry) => entry.entryType === "QUESTION") },
+      { type: "EVIDENCE" as const, title: getDeliberationTypeLabel("EVIDENCE"), count: counts?.evidence ?? 0, entries: entries.filter((entry) => entry.entryType === "EVIDENCE") },
+    ];
+  }, [deliberation, getDeliberationTypeLabel]);
+
+  const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleDateString() : "");
+
+  const renderDeliberationEntry = (entry: CommunityProposalDeliberationEntry) => (
+    <div
+      key={entry.id}
+      className={classNames("u-surface-note", { "opacity-70": entry.hidden })}
+      data-testid={`proposal-deliberation-entry-${entry.id}`}
+    >
+      <div className="flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+        <div className="u-meta-row">
+          <span>{entry.authorUsername}</span>
+          <span>{formatDate(entry.createdAt)}</span>
+        </div>
+        <div className="flex gap-2 align-items-center flex-wrap">
+          {entry.hidden && <CivicBadge label={t("community_proposals.deliberation_hidden_badge")} severity="neutral" />}
+          <CivicBadge
+            label={getDeliberationTypeLabel(entry.entryType)}
+            severity={entry.entryType === "PRO" ? "progress" : entry.entryType === "CON" ? "rejected" : "neutral"}
+          />
+        </div>
+      </div>
+      <p className="text-secondary m-0 line-height-3">{entry.content}</p>
+      {entry.supportingLink && (
+        <a
+          href={entry.supportingLink}
+          target="_blank"
+          rel="noreferrer"
+          className="text-brand-primary font-semibold break-all inline-block mt-3"
+          data-testid={`proposal-deliberation-link-${entry.id}`}
+        >
+          {entry.supportingLink}
+        </a>
+      )}
+      {entry.hidden && entry.moderationReason && (
+        <p className="text-sm text-muted mt-3 mb-0 line-height-3">
+          {t("community_proposals.deliberation_hidden_reason", {
+            by: entry.hiddenByUsername ?? t("community_proposals.deliberation_moderator_fallback"),
+            reason: entry.moderationReason,
+          })}
+        </p>
+      )}
+      {canModerate && (
+        <div className="mt-3">
+          <CivicButton
+            type="button"
+            size="small"
+            variant="ghost"
+            icon={entry.hidden ? "pi pi-eye" : "pi pi-eye-slash"}
+            label={entry.hidden ? t("community_proposals.deliberation_restore_action") : t("community_proposals.deliberation_hide_action")}
+            loading={moderatingEntryId === entry.id}
+            onClick={() => toggleModeration(entry)}
+            data-testid={`proposal-deliberation-moderate-${entry.id}`}
+          />
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <Layout>
@@ -552,6 +755,162 @@ export function CommunityProposals() {
                                 )}
                               </div>
                             </div>
+                          </CivicCard>
+
+                          <CivicCard title={t("community_proposals.deliberation_title")} data-testid="community-proposal-deliberation-card">
+                            <div className="civic-stat-grid civic-stat-grid-comfortable mb-4">
+                              <CivicStatCard compact label={getDeliberationTypeLabel("PRO")} value={deliberation?.counts.pros ?? 0} />
+                              <CivicStatCard compact label={getDeliberationTypeLabel("CON")} value={deliberation?.counts.cons ?? 0} />
+                              <CivicStatCard compact label={getDeliberationTypeLabel("QUESTION")} value={deliberation?.counts.questions ?? 0} />
+                              <CivicStatCard compact label={getDeliberationTypeLabel("EVIDENCE")} value={deliberation?.counts.evidence ?? 0} />
+                            </div>
+
+                            <CivicActionBar className="mb-4">
+                              <div className="community-home-action-copy">
+                                <div className="u-eyebrow">{t("community_proposals.deliberation_badge")}</div>
+                                <p className="u-section-copy text-sm m-0">{t("community_proposals.deliberation_desc")}</p>
+                              </div>
+                              <div className="flex gap-2 flex-wrap">
+                                <span className="u-pill">{t("community_proposals.deliberation_visible_count", { count: deliberation?.counts.visibleEntries ?? 0 })}</span>
+                                {(deliberation?.counts.hiddenEntries ?? 0) > 0 && (
+                                  <span className="u-pill">{t("community_proposals.deliberation_hidden_count", { count: deliberation?.counts.hiddenEntries ?? 0 })}</span>
+                                )}
+                              </div>
+                            </CivicActionBar>
+
+                            <form className="flex flex-column gap-3 mb-5" onSubmit={handleDeliberationSubmit(onSubmitDeliberation)}>
+                              <div className="grid">
+                                <div className="col-12 md:col-4">
+                                  <CivicField label={t("community_proposals.deliberation_type_label")} error={deliberationErrors.type?.message}>
+                                    <Controller
+                                      name="type"
+                                      control={deliberationControl}
+                                      rules={{ required: t("common.required") }}
+                                      render={({ field, fieldState }) => (
+                                        <CivicSelect
+                                          value={field.value}
+                                          onChange={(e) => field.onChange(e.value)}
+                                          options={deliberationTypeOptions}
+                                          className={classNames("w-full", { "p-invalid": fieldState.error })}
+                                          data-testid="proposal-deliberation-type-select"
+                                        />
+                                      )}
+                                    />
+                                  </CivicField>
+                                </div>
+                                <div className="col-12 md:col-8">
+                                  <CivicField
+                                    label={t("community_proposals.deliberation_link_label")}
+                                    error={deliberationErrors.supportingLink?.message}
+                                    helpText={
+                                      watchedDeliberationType === "EVIDENCE"
+                                        ? t("community_proposals.deliberation_link_required_help")
+                                        : t("community_proposals.deliberation_link_help")
+                                    }
+                                  >
+                                    <Controller
+                                      name="supportingLink"
+                                      control={deliberationControl}
+                                      rules={{
+                                        validate: (value) => {
+                                          const trimmed = (value ?? "").trim();
+                                          if (!trimmed) {
+                                            return watchedDeliberationType === "EVIDENCE"
+                                              ? t("community_proposals.deliberation_link_required")
+                                              : true;
+                                          }
+                                          if (trimmed.length > FORM_LIMITS.proposals.linkMax) {
+                                            return t("community_proposals.link_too_long");
+                                          }
+                                          return /^https?:\/\//.test(trimmed) || t("community_proposals.link_invalid");
+                                        },
+                                      }}
+                                      render={({ field, fieldState }) => (
+                                        <InputText
+                                          {...field}
+                                          onChange={(e) => field.onChange(e.target.value)}
+                                          className={classNames("w-full", { "p-invalid": fieldState.error })}
+                                          maxLength={FORM_LIMITS.proposals.linkMax}
+                                          data-testid="proposal-deliberation-link-input"
+                                          placeholder={t("community_proposals.deliberation_link_placeholder")}
+                                        />
+                                      )}
+                                    />
+                                  </CivicField>
+                                </div>
+                              </div>
+
+                              <CivicField
+                                label={t("community_proposals.deliberation_content_label")}
+                                error={deliberationErrors.content?.message}
+                                helpText={t("community_proposals.deliberation_content_help")}
+                              >
+                                <Controller
+                                  name="content"
+                                  control={deliberationControl}
+                                  rules={{
+                                    required: t("common.required"),
+                                    minLength: { value: FORM_LIMITS.proposals.deliberationMin, message: t("community_proposals.deliberation_too_short") },
+                                    maxLength: { value: FORM_LIMITS.proposals.deliberationMax, message: t("community_proposals.deliberation_too_long") },
+                                  }}
+                                  render={({ field, fieldState }) => (
+                                    <div className="flex flex-column gap-2">
+                                      <InputTextarea
+                                        {...field}
+                                        rows={4}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        className={classNames("w-full", { "p-invalid": fieldState.error })}
+                                        maxLength={FORM_LIMITS.proposals.deliberationMax}
+                                        data-testid="proposal-deliberation-content-input"
+                                        placeholder={t("community_proposals.deliberation_content_placeholder")}
+                                      />
+                                      <CivicCharacterCount
+                                        current={watchedDeliberationContent.length}
+                                        max={FORM_LIMITS.proposals.deliberationMax}
+                                        min={FORM_LIMITS.proposals.deliberationMin}
+                                      />
+                                    </div>
+                                  )}
+                                />
+                              </CivicField>
+
+                              <div className="flex justify-content-end">
+                                <CivicButton
+                                  type="submit"
+                                  icon="pi pi-comment"
+                                  label={t("community_proposals.deliberation_create_action")}
+                                  loading={isSubmittingDeliberation}
+                                  data-testid="proposal-deliberation-submit-button"
+                                />
+                              </div>
+                            </form>
+
+                            {loadingDeliberation ? (
+                              <p className="text-secondary m-0">{t("common.loading")}</p>
+                            ) : (
+                              <div className="grid">
+                                {deliberationSections.map((section) => (
+                                  <div className="col-12 md:col-6" key={section.type}>
+                                    <CivicCard title={section.title} className="h-full" data-testid={`proposal-deliberation-section-${section.type.toLowerCase()}`}>
+                                      <div className="u-meta-row mb-3">
+                                        <span>{t("community_proposals.deliberation_section_count", { count: section.count })}</span>
+                                      </div>
+                                      {section.entries.length > 0 ? (
+                                        <div className="flex flex-column gap-3">
+                                          {section.entries.map(renderDeliberationEntry)}
+                                        </div>
+                                      ) : (
+                                        <CivicEmptyState
+                                          icon="pi-comment"
+                                          title={t("community_proposals.deliberation_empty_title", { type: section.title })}
+                                          description={t("community_proposals.deliberation_empty_desc", { type: section.title })}
+                                        />
+                                      )}
+                                    </CivicCard>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </CivicCard>
                         </div>
                       ) : null}

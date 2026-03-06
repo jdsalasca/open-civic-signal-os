@@ -6,12 +6,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.service.CommunityCollaborationService;
+import org.opencivic.signalos.service.CommunityProposalDeliberationService;
 import org.opencivic.signalos.service.CommunityProposalService;
 import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityHomeResponse;
+import org.opencivic.signalos.web.dto.CommunityProposalDeliberationResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalResponse;
+import org.opencivic.signalos.web.dto.CreateCommunityProposalDeliberationRequest;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityBlogPostRequest;
@@ -19,6 +22,7 @@ import org.opencivic.signalos.web.dto.CreateCommunityProposalRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadMessageRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadRequest;
 import org.opencivic.signalos.web.dto.ModerateThreadMessageRequest;
+import org.opencivic.signalos.web.dto.ModerateCommunityProposalEntryRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityProposalRequest;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
@@ -45,15 +49,18 @@ import java.util.Map;
 public class CommunityCollaborationController {
     private final CommunityCollaborationService collaborationService;
     private final CommunityProposalService proposalService;
+    private final CommunityProposalDeliberationService proposalDeliberationService;
     private final CivicEngagementService engagementService;
 
     public CommunityCollaborationController(
         CommunityCollaborationService collaborationService,
         CommunityProposalService proposalService,
+        CommunityProposalDeliberationService proposalDeliberationService,
         CivicEngagementService engagementService
     ) {
         this.collaborationService = collaborationService;
         this.proposalService = proposalService;
+        this.proposalDeliberationService = proposalDeliberationService;
         this.engagementService = engagementService;
     }
 
@@ -267,5 +274,32 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return proposalService.updateProposal(proposalId, request, principal.getName());
+    }
+
+    @GetMapping("/proposals/{proposalId}/deliberation")
+    public CommunityProposalDeliberationResponse getProposalDeliberation(
+        @PathVariable UUID proposalId,
+        Principal principal
+    ) {
+        return proposalDeliberationService.getDeliberation(proposalId, principal.getName());
+    }
+
+    @PostMapping("/proposals/{proposalId}/deliberation")
+    public CommunityProposalDeliberationResponse createProposalDeliberationEntry(
+        @PathVariable UUID proposalId,
+        @Valid @RequestBody CreateCommunityProposalDeliberationRequest request,
+        Principal principal
+    ) {
+        return proposalDeliberationService.createEntry(proposalId, request, principal.getName());
+    }
+
+    @PatchMapping("/proposals/{proposalId}/deliberation/{entryId}/moderate")
+    public CommunityProposalDeliberationResponse moderateProposalDeliberationEntry(
+        @PathVariable UUID proposalId,
+        @PathVariable UUID entryId,
+        @Valid @RequestBody ModerateCommunityProposalEntryRequest request,
+        Principal principal
+    ) {
+        return proposalDeliberationService.moderateEntry(proposalId, entryId, request, principal.getName());
     }
 }

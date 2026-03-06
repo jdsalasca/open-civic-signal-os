@@ -1,11 +1,14 @@
 import { expect, test } from "@playwright/test";
+import type { CommunityProposalDeliberation } from "../types";
 
 const communityId = "11111111-1111-1111-1111-111111111111";
 const signalId = "22222222-2222-2222-2222-222222222222";
 
 test.describe("Community proposals", () => {
-  test("creates a structured proposal and renders comparable detail sections", async ({ page }) => {
+  test("creates a structured proposal and renders comparable detail sections with typed deliberation", async ({ page }) => {
     let savedPayload: Record<string, unknown> | null = null;
+    let deliberationPayload: Record<string, unknown> | null = null;
+    let moderatedPayload: Record<string, unknown> | null = null;
     const proposals = [
       {
         id: "33333333-3333-3333-3333-333333333333",
@@ -26,6 +29,49 @@ test.describe("Community proposals", () => {
         updatedAt: "2026-03-05T10:00:00",
       },
     ];
+    let deliberation: CommunityProposalDeliberation = {
+      proposalId: proposals[0].id,
+      counts: {
+        pros: 1,
+        cons: 0,
+        questions: 0,
+        evidence: 1,
+        visibleEntries: 2,
+        hiddenEntries: 0,
+      },
+      entries: [
+        {
+          id: "66666666-6666-6666-6666-666666666666",
+          proposalId: proposals[0].id,
+          authorId: "44444444-4444-4444-4444-444444444444",
+          authorUsername: "coordinator",
+          entryType: "PRO",
+          content: "Families already documented repeated close calls during school entry hours.",
+          supportingLink: null,
+          hidden: false,
+          moderationReason: null,
+          hiddenByUsername: null,
+          hiddenAt: null,
+          createdAt: "2026-03-05T10:10:00",
+          updatedAt: "2026-03-05T10:10:00",
+        },
+        {
+          id: "77777777-7777-7777-7777-777777777777",
+          proposalId: proposals[0].id,
+          authorId: "44444444-4444-4444-4444-444444444444",
+          authorUsername: "coordinator",
+          entryType: "EVIDENCE",
+          content: "Traffic memo with incident log from the school committee.",
+          supportingLink: "https://example.com/evidence/memo",
+          hidden: false,
+          moderationReason: null,
+          hiddenByUsername: null,
+          hiddenAt: null,
+          createdAt: "2026-03-05T10:20:00",
+          updatedAt: "2026-03-05T10:20:00",
+        },
+      ],
+    };
 
     await page.addInitScript(() => {
       window.localStorage.setItem(
@@ -132,6 +178,81 @@ test.describe("Community proposals", () => {
       });
     });
 
+    await page.route("**/api/community/proposals/*/deliberation", async (route) => {
+      const method = route.request().method();
+      if (method === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(deliberation),
+        });
+        return;
+      }
+
+      deliberationPayload = route.request().postDataJSON() as Record<string, unknown>;
+      const newEntry: CommunityProposalDeliberation["entries"][number] = {
+        id: "88888888-8888-8888-8888-888888888888",
+        proposalId: proposals[0].id,
+        authorId: "44444444-4444-4444-4444-444444444444",
+        authorUsername: "admin",
+        entryType: String(deliberationPayload.type) as CommunityProposalDeliberation["entries"][number]["entryType"],
+        content: String(deliberationPayload.content),
+        supportingLink: deliberationPayload.supportingLink ? String(deliberationPayload.supportingLink) : null,
+        hidden: false,
+        moderationReason: null,
+        hiddenByUsername: null,
+        hiddenAt: null,
+        createdAt: "2026-03-05T11:10:00",
+        updatedAt: "2026-03-05T11:10:00",
+      };
+      deliberation = {
+        proposalId: proposals[0].id,
+        counts: {
+          pros: deliberation.counts.pros,
+          cons: deliberation.counts.cons,
+          questions: deliberation.counts.questions,
+          evidence: deliberation.counts.evidence + (newEntry.entryType === "EVIDENCE" ? 1 : 0),
+          visibleEntries: deliberation.counts.visibleEntries + 1,
+          hiddenEntries: deliberation.counts.hiddenEntries,
+        },
+        entries: [...deliberation.entries, newEntry],
+      };
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(deliberation),
+      });
+    });
+
+    await page.route("**/api/community/proposals/*/deliberation/*/moderate", async (route) => {
+      moderatedPayload = route.request().postDataJSON() as Record<string, unknown>;
+      deliberation = {
+        ...deliberation,
+        counts: {
+          ...deliberation.counts,
+          visibleEntries: deliberation.counts.visibleEntries - 1,
+          hiddenEntries: deliberation.counts.hiddenEntries + 1,
+          evidence: deliberation.counts.evidence - 1,
+        },
+        entries: deliberation.entries.map((entry): CommunityProposalDeliberation["entries"][number] =>
+          entry.id === "88888888-8888-8888-8888-888888888888"
+            ? {
+                ...entry,
+                hidden: true,
+                moderationReason: String(moderatedPayload?.reason ?? ""),
+                hiddenByUsername: "admin",
+                hiddenAt: "2026-03-05T11:20:00",
+              }
+            : entry
+        ),
+      };
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(deliberation),
+      });
+    });
+
     await page.route("**/api/community/proposals", async (route) => {
       savedPayload = route.request().postDataJSON() as Record<string, unknown>;
       proposals.unshift({
@@ -184,5 +305,40 @@ test.describe("Community proposals", () => {
     await expect(detailCard).toContainText("Estimated cost or effort");
     await expect(detailCard).toContainText("Unsafe pedestrian crossing");
     await expect(page.getByTestId("community-proposal-link-0")).toHaveAttribute("href", "https://example.com/supporting-reference");
+
+    const deliberationCard = page.getByTestId("community-proposal-deliberation-card");
+    await expect(deliberationCard).toContainText("Structured deliberation");
+    await expect(deliberationCard).toContainText("Arguments and evidence");
+    await expect(deliberationCard).toContainText("Families already documented repeated close calls");
+
+    await page.getByTestId("proposal-deliberation-type-select").click();
+    await page.getByText("Evidence", { exact: true }).click();
+    await page.getByTestId("proposal-deliberation-link-input").fill("https://example.com/evidence/crossing-data");
+    await page
+      .getByTestId("proposal-deliberation-content-input")
+      .fill("Survey log with traffic counts and parent observations for the last two weeks.");
+    await page.getByTestId("proposal-deliberation-submit-button").click();
+
+    await expect.poll(() => deliberationPayload).not.toBeNull();
+    expect(deliberationPayload).toMatchObject({
+      type: "EVIDENCE",
+      supportingLink: "https://example.com/evidence/crossing-data",
+    });
+    await expect(deliberationCard).toContainText("Survey log with traffic counts and parent observations for the last two weeks.");
+    await expect(deliberationCard).toContainText("3 visible entries");
+
+    page.once("dialog", async (dialog) => {
+      expect(dialog.message()).toContain("Why should this entry be hidden");
+      await dialog.accept("Duplicate evidence, merged into the updated traffic count source.");
+    });
+    await page.getByTestId("proposal-deliberation-moderate-88888888-8888-8888-8888-888888888888").click();
+
+    await expect.poll(() => moderatedPayload).not.toBeNull();
+    expect(moderatedPayload).toMatchObject({
+      hidden: true,
+      reason: "Duplicate evidence, merged into the updated traffic count source.",
+    });
+    await expect(deliberationCard).toContainText("1 hidden by moderation");
+    await expect(deliberationCard).toContainText("Hidden");
   });
 });

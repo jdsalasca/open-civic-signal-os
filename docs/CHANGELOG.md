@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Structured Proposal Deliberation**: Proposal detail now supports backend-owned typed deliberation entries (`PRO`, `CON`, `QUESTION`, `EVIDENCE`), evidence-link enforcement, moderation that preserves proposal context, OpenAPI coverage, and a deliberation workflow for decision-supporting debate instead of flat comment noise. (`story:OCS-P1-041`)
 - **Structured Community Proposal Templates**: Added a backend-owned proposal domain, permission scope, migration, OpenAPI schemas, and a new `/communities/proposals` workflow so communities can compare proposals through one shared structure for problem, solution, cost, beneficiaries, linked issues, and supporting evidence. (`story:OCS-P1-040`)
 - **Cross-App CivicStatCard Primitive**: Added a reusable stat-card component and shared responsive metric-grid behavior so community summaries stop relying on view-specific mini-card markup. (`cross-app UI system`)
 - **Civic Profile Recognition Layer**: Settings now supports ten selectable identity covers, backend-owned contribution milestones, and stronger profile recognition surfaces so belonging feels more lived-in and community-aware. (`story:OCS-P1-029` refinement)

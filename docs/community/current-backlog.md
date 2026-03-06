@@ -218,6 +218,7 @@ Execution order:
 9. `story:OCS-P1-041` structured deliberation with pro/con evidence.
    - Measurable civic outcome: discussions move from flat comment noise to decision-supporting deliberation.
    - Validation commands: backend discussion tests + Playwright pro/con evidence interactions.
+   - 2026-03-06 completion note: proposal detail now supports typed `PRO|CON|QUESTION|EVIDENCE` entries, backend-owned counters, evidence-link enforcement, and moderation that hides abusive entries without erasing proposal context.
 10. `story:OCS-P1-043` community project boards.
    - Measurable civic outcome: approved decisions can be translated into visible execution work.
    - Validation commands: task lifecycle tests + Playwright kanban interactions.

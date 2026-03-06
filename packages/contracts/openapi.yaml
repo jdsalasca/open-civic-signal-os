@@ -1316,6 +1316,92 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/proposals/{proposalId}/deliberation:
+    get:
+      summary: Get typed deliberation entries for one proposal
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Proposal deliberation detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProposalDeliberation'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    post:
+      summary: Add one typed argument, question, or evidence entry to a proposal
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityProposalDeliberationRequest'
+      responses:
+        '200':
+          description: Updated proposal deliberation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProposalDeliberation'
+        '403':
+          description: Community policy denied deliberation contribution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/proposals/{proposalId}/deliberation/{entryId}/moderate:
+    patch:
+      summary: Hide or restore one deliberation entry without removing the proposal context
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: entryId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerateCommunityProposalEntryRequest'
+      responses:
+        '200':
+          description: Updated proposal deliberation after moderation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProposalDeliberation'
+        '403':
+          description: Community policy denied moderation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
 components:
   schemas:
     ApiError:
@@ -2316,6 +2402,88 @@ components:
         updatedAt:
           type: string
           format: date-time
+    CommunityProposalDeliberationType:
+      type: string
+      enum: [PRO, CON, QUESTION, EVIDENCE]
+    CommunityProposalDeliberationEntry:
+      type: object
+      required:
+        - id
+        - proposalId
+        - authorId
+        - authorUsername
+        - entryType
+        - content
+        - hidden
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        proposalId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorUsername:
+          type: string
+        entryType:
+          $ref: '#/components/schemas/CommunityProposalDeliberationType'
+        content:
+          type: string
+        supportingLink:
+          type: string
+          maxLength: 1200
+          nullable: true
+        hidden:
+          type: boolean
+        moderationReason:
+          type: string
+          nullable: true
+        hiddenByUsername:
+          type: string
+          nullable: true
+        hiddenAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CommunityProposalDeliberationCounts:
+      type: object
+      required: [pros, cons, questions, evidence, visibleEntries, hiddenEntries]
+      properties:
+        pros:
+          type: integer
+        cons:
+          type: integer
+        questions:
+          type: integer
+        evidence:
+          type: integer
+        visibleEntries:
+          type: integer
+        hiddenEntries:
+          type: integer
+    CommunityProposalDeliberation:
+      type: object
+      required: [proposalId, counts, entries]
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+        counts:
+          $ref: '#/components/schemas/CommunityProposalDeliberationCounts'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityProposalDeliberationEntry'
     CreateCommunityProposalRequest:
       type: object
       required:
@@ -2400,6 +2568,30 @@ components:
           items:
             type: string
             maxLength: 1200
+    CreateCommunityProposalDeliberationRequest:
+      type: object
+      required: [type, content]
+      properties:
+        type:
+          $ref: '#/components/schemas/CommunityProposalDeliberationType'
+        content:
+          type: string
+          minLength: 8
+          maxLength: 2000
+        supportingLink:
+          type: string
+          maxLength: 1200
+          nullable: true
+    ModerateCommunityProposalEntryRequest:
+      type: object
+      required: [reason]
+      properties:
+        hidden:
+          type: boolean
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
     ProfileVisibility:
       type: string
       enum: [PUBLIC, COMMUNITY, ADMINS]
