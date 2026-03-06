@@ -28,7 +28,7 @@ export function CivicStat({ label, value, icon, tone = "neutral", className }: C
         </div>
       )}
       <div>
-        <span className="block text-muted font-bold uppercase text-xs tracking-widest mb-1">{label}</span>
+        <span className="block text-muted font-bold uppercase text-xs tracking-wide mb-1">{label}</span>
         <span className="text-4xl font-black text-main">{value}</span>
       </div>
     </div>

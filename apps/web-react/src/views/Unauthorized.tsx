@@ -13,14 +13,14 @@ export function Unauthorized() {
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="w-full max-w-30rem text-center animate-fade-up" padding="lg" data-testid="unauthorized-card">
           <div className="mb-8">
-            <div className="inline-flex align-items-center justify-content-center p-4 bg-status-progress-alpha-10 border-round-3xl mb-6 border-1 border-status-progress-alpha-20">
+            <div className="inline-flex align-items-center justify-content-center p-4 bg-surface-soft border-round-3xl mb-6 border-1 border-subtle">
               <i className="pi pi-lock text-5xl text-status-progress"></i>
             </div>
             <h1 className="text-4xl font-black text-main m-0 tracking-tighter">{t('exceptions.403_subtitle')}</h1>
             <p className="text-secondary mt-4 mb-0 font-medium leading-relaxed">
               {t('exceptions.403_desc')}
             </p>
-            <p className="text-sm text-muted mt-3 mb-0" data-testid="unauthorized-guidance">
+            <p className="text-sm text-muted mt-3 mb-0 line-height-3" data-testid="unauthorized-guidance">
               {t('exceptions.403_guidance')}
             </p>
           </div>

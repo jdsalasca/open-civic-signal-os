@@ -13,6 +13,7 @@ import { CivicButton } from "../components/ui/CivicButton";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicStat } from "../components/ui/CivicStat";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 
 export function MySignals() {
   const { t } = useTranslation();
@@ -48,10 +49,7 @@ export function MySignals() {
     <Layout>
       <div className="animate-fade-up motion-page">
         <div className="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-8 gap-4">
-          <div>
-            <h1 className="text-5xl font-black m-0 text-main tracking-tighter">{t('my_contributions.title')}</h1>
-            <p className="text-secondary text-lg font-medium mt-2">{t('my_contributions.desc')}</p>
-          </div>
+          <CivicPageHeader title={t('my_contributions.title')} description={t('my_contributions.desc')} className="mb-0" />
           <CivicActionBar className="ml-auto">
             <CivicButton label={t('dashboard.new_issue')} icon="pi pi-plus" onClick={() => navigate("/report")} glow />
             <CivicButton label={t('nav.dialogues')} icon="pi pi-comments" variant="secondary" onClick={() => navigate("/communities/threads")} />
@@ -99,7 +97,7 @@ export function MySignals() {
               body={(s: Signal) => (
                 <div className="flex flex-column">
                   <span className="font-bold text-main group-hover:text-brand-primary transition-colors">{s.title}</span>
-                  <span className="text-xs text-muted font-bold mt-1 tracking-wide">{s.id.substring(0,8)}</span>
+                  <span className="text-xs text-muted font-semibold mt-1">{t('signals.protocol_id')}: {s.id.substring(0,8)}</span>
                 </div>
               )} 
             />

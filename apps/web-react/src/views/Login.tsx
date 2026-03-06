@@ -47,7 +47,7 @@ export function Login() {
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="w-full max-w-28rem animate-fade-up" padding="lg" data-testid="login-card">
           <div className="text-center mb-8">
-            <div className="inline-flex align-items-center justify-content-center p-3 bg-surface border-round-2xl mb-4 border-1 border-subtle">
+            <div className="inline-flex align-items-center justify-content-center p-3 bg-surface-soft border-round-2xl mb-4 border-1 border-subtle">
               <ShieldCheck size={48} className="text-brand-primary" />
             </div>
             <h1 className="text-4xl font-black text-main m-0 tracking-tighter">{t('auth.login_title')}</h1>
@@ -112,7 +112,7 @@ export function Login() {
               data-testid="login-submit-button"
             />
 
-            <div className="text-center mt-8 pt-6 border-top-1 border-subtle">
+            <div className="text-center mt-8 pt-6 border-top-1 border-surface-soft">
               <span className="text-secondary mr-2 font-medium">{t('auth.no_account')}</span>
               <Link to="/register" className="text-brand-primary font-bold no-underline hover:underline" data-testid="go-to-register">
                 {t('auth.create_one')}
