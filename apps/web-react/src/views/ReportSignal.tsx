@@ -706,12 +706,12 @@ export function ReportSignal() {
                         >
                           <div className={classNames("p-3 border-round-2xl border-1 h-full", {
                             "border-brand-primary bg-brand-primary-alpha-10": isActive,
-                            "border-subtle bg-white-alpha-5": !isActive,
+                            "border-surface-soft bg-surface-soft": !isActive,
                           })}>
                             <div className="flex align-items-center gap-2 mb-2">
                               <span className={classNames("flex align-items-center justify-content-center border-circle font-black", {
                                 "bg-brand-primary text-on-brand": isActive || isComplete,
-                                "bg-white-alpha-10 text-main": !isActive && !isComplete,
+                                "bg-surface-soft-strong text-main": !isActive && !isComplete,
                               })} style={{ width: "2rem", height: "2rem" }}>
                                 {index + 1}
                               </span>

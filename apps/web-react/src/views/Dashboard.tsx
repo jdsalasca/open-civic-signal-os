@@ -426,7 +426,7 @@ export function Dashboard() {
                 data-testid="dashboard-community-summary-memberships"
               />
             </div>
-            <div className="mt-5 pt-4 border-top-1 border-white-alpha-10">
+            <div className="mt-5 pt-4 border-top-1 border-surface-soft">
               <span className="text-xs font-black uppercase tracking-widest text-muted">
                 {t("dashboard.community_hub.next_actions_label")}
               </span>

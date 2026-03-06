@@ -691,6 +691,7 @@ a:hover {
   border: 1px solid var(--alpha-border-10);
   background: var(--alpha-surface-05);
   padding: 1rem;
+  transition: border-color 0.18s ease, background 0.18s ease;
 }
 
 .community-tree-card {
@@ -698,6 +699,13 @@ a:hover {
   border: 1px solid var(--alpha-border-10);
   background: var(--alpha-surface-05);
   padding: 0.95rem 1rem;
+}
+
+.community-membership-row:hover,
+.community-policy-row:hover,
+.community-tree-card:hover {
+  border-color: var(--surface-soft-border);
+  background: var(--surface-soft);
 }
 
 .u-pill {
@@ -1636,6 +1644,11 @@ select:focus-visible,
     background: transparent !important;
     padding: 1.75rem !important;
   }
+}
+
+.p-dialog .p-inputtext,
+.p-dialog .p-inputtextarea {
+  background: var(--field-bg) !important;
 }
 
 .p-sidebar {

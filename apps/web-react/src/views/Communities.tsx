@@ -416,7 +416,7 @@ export function Communities() {
                   {memberships.map((membership) => (
                     <div
                       key={`${membership.communityId}-${membership.userId}`}
-                      className="community-membership-row flex justify-content-between align-items-center hover:border-white-alpha-20 transition-colors gap-3 flex-wrap"
+                      className="community-membership-row flex justify-content-between align-items-center hover:border-surface-soft transition-colors gap-3 flex-wrap"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="u-list-item-title">{membership.communityName}</div>
@@ -610,7 +610,7 @@ export function Communities() {
           </div>
           <div className="flex flex-column gap-2">
             <label htmlFor="comm-slug" className="text-xs font-bold uppercase text-muted tracking-widest">{t('communities_hub.create_slug')}</label>
-            <InputText id="comm-slug" value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder={t('communities_hub.create_slug_placeholder')} className="w-full font-mono" />
+            <InputText id="comm-slug" value={newSlug} onChange={(e) => setNewSlug(e.target.value)} placeholder={t('communities_hub.create_slug_placeholder')} className="w-full text-sm font-bold" />
           </div>
           <div className="flex flex-column gap-2">
             <label htmlFor="comm-parent" className="text-xs font-bold uppercase text-muted tracking-widest">{t('communities_hub.create_parent')}</label>

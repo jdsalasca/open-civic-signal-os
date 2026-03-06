@@ -111,3 +111,5 @@ Resume file: None
 - 2026-03-05: Extended the light-theme contrast pass into Verify, Settings, SignalDetail, and PrimeReact password overlays so auth/help/timeline surfaces now inherit semantic soft-surface tokens instead of legacy alpha utility backgrounds.
 
 - 2026-03-05: Normalized another cross-app layer of light-theme surfaces by moving toolbars, action bars, empty states, digest/alerts, and datatable hover states onto the same semantic soft-surface system used by the broader UI refresh.
+
+- 2026-03-05: Removed another set of residual legacy alpha utilities from dashboard, report wizard, and communities so steppers, membership rows, and dialog inputs now inherit the same semantic surface/border system as the rest of the refreshed UI.
