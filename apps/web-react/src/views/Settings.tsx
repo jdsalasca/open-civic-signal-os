@@ -306,7 +306,7 @@ export function Settings() {
 
         <div className="grid">
           <div className="col-12 lg:col-5">
-            <CivicCard title={t('settings.identity_profile')} variant="brand" className="h-full">
+            <CivicCard title={t('settings.identity_profile')} variant="brand">
               <div className="flex flex-column gap-5 py-3">
                 <div className="flex flex-column align-items-center text-center">
                   <div className="relative mb-4">
@@ -370,73 +370,30 @@ export function Settings() {
                     </div>
                   </div>
                 </div>
-
-                <div className="flex flex-column gap-3" data-testid="profile-achievements-card">
-                  <div>
-                    <div className="text-xs font-bold uppercase tracking-widest text-muted">{t('settings.achievements_title')}</div>
-                    <p className="text-sm text-secondary mt-2 mb-0 line-height-3">{t('settings.achievements_help')}</p>
-                  </div>
-                  <div className="flex flex-column gap-3">
-                    {achievementList.map((achievement) => {
-                      const meta = ACHIEVEMENT_META[achievement.key];
-                      if (!meta) {
-                        return null;
-                      }
-                      const progress = Math.max(0, Math.min(100, (achievement.currentProgress / achievement.targetProgress) * 100));
-                      return (
-                        <div key={achievement.key} className={`achievement-card ${achievement.earned ? 'achievement-card-earned' : ''}`}>
-                          <div className="u-card-split-header">
-                            <div className="u-card-copy">
-                              <div className="u-card-meta-row">
-                                <span className="achievement-icon">
-                                  <i className={meta.icon} />
-                                </span>
-                                <div className="u-card-copy">
-                                  <div className="font-black text-main">{t(meta.titleKey)}</div>
-                                  <p className="text-sm text-secondary mt-1 mb-0 line-height-3">{t(meta.descriptionKey)}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <CivicBadge
-                              label={achievement.earned ? t('settings.achievement_earned') : t('settings.achievement_in_progress')}
-                              severity={achievement.earned ? 'resolved' : 'progress'}
-                            />
-                          </div>
-                          <div className="mt-3">
-                            <ProgressBar value={progress} showValue={false} style={{ height: '8px' }} />
-                            <div className="text-xs text-muted mt-2">
-                              {t('settings.achievement_progress', {
-                                current: achievement.currentProgress,
-                                target: achievement.targetProgress
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
               </div>
             </CivicCard>
 
             <CivicCard title={t('settings.community_membership_title')} className="mt-6" data-testid="settings-community-memberships-card">
               <div className="flex flex-column gap-4">
-                <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-4">
-                  <div className="text-xs font-bold uppercase text-muted tracking-widest mb-2">
-                    {t('settings.community_active_label')}
-                  </div>
-                  <div className="font-black text-main text-lg">
-                    {activeMembership?.communityName ?? t('settings.community_none')}
-                  </div>
-                  <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
-                    {activeCommunityPath}
-                  </p>
-                  {activeMembership && (
-                    <div className="mt-3 flex gap-2 flex-wrap">
-                      <CivicBadge label={toRoleLabel(activeMembership.role, t)} severity="progress" />
-                      <CivicBadge label={activeMembership.communitySlug} type="category" />
-                    </div>
-                  )}
+                <div className="civic-stat-grid" data-testid="settings-community-summary-grid">
+                  <CivicStatCard
+                    label={t('settings.community_active_label')}
+                    value={activeMembership?.communityName ?? t('settings.community_none')}
+                    supportingText={activeCommunityPath}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t('settings.community_role_here')}
+                    value={activeMembership ? toRoleLabel(activeMembership.role, t) : t('settings.identity_role_fallback')}
+                    supportingText={activeMembership?.communitySlug ? `/${activeMembership.communitySlug}` : null}
+                    compact
+                  />
+                  <CivicStatCard
+                    label={t('settings.community_count_label')}
+                    value={memberships.length}
+                    supportingText={t('settings.community_membership_title')}
+                    compact
+                  />
                 </div>
 
                 {memberships.length > 0 ? (
@@ -500,6 +457,51 @@ export function Settings() {
                     </div>
                   </div>
                 )}
+              </div>
+            </CivicCard>
+
+            <CivicCard title={t('settings.achievements_title')} className="mt-6" data-testid="profile-achievements-card">
+              <div className="flex flex-column gap-3">
+                <p className="text-sm text-secondary mt-0 mb-0 line-height-3">{t('settings.achievements_help')}</p>
+                <div className="flex flex-column gap-3">
+                  {achievementList.map((achievement) => {
+                    const meta = ACHIEVEMENT_META[achievement.key];
+                    if (!meta) {
+                      return null;
+                    }
+                    const progress = Math.max(0, Math.min(100, (achievement.currentProgress / achievement.targetProgress) * 100));
+                    return (
+                      <div key={achievement.key} className={`achievement-card ${achievement.earned ? 'achievement-card-earned' : ''}`}>
+                        <div className="u-card-split-header">
+                          <div className="u-card-copy">
+                            <div className="u-card-meta-row">
+                              <span className="achievement-icon">
+                                <i className={meta.icon} />
+                              </span>
+                              <div className="u-card-copy">
+                                <div className="font-black text-main">{t(meta.titleKey)}</div>
+                                <p className="text-sm text-secondary mt-1 mb-0 line-height-3">{t(meta.descriptionKey)}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <CivicBadge
+                            label={achievement.earned ? t('settings.achievement_earned') : t('settings.achievement_in_progress')}
+                            severity={achievement.earned ? 'resolved' : 'progress'}
+                          />
+                        </div>
+                        <div className="mt-3">
+                          <ProgressBar value={progress} showValue={false} style={{ height: '8px' }} />
+                          <div className="text-xs text-muted mt-2">
+                            {t('settings.achievement_progress', {
+                              current: achievement.currentProgress,
+                              target: achievement.targetProgress
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </CivicCard>
           </div>

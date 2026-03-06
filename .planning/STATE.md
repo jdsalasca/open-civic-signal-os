@@ -77,6 +77,7 @@ Progress: [██████████] 99%
 - 2026-03-05: Extended civic identity profiles with persisted avatar presets, backend-owned achievement milestones, tag-based affiliation editing, and a stronger recognition-oriented Settings experience.
 - 2026-03-05: Introduced reusable `CivicStatCard` and migrated the highest-risk summary grids in Settings, Dashboard, and CommunityFeed to shared responsive tokens instead of local metric blocks.
 - 2026-03-05: Finished the cross-app stat-grid hardening pass by moving Communities and SignalDetail onto shared summary primitives, localizing remaining signal-detail chrome, and improving global badge/button wrapping for ES-heavy layouts.
+- 2026-03-05: Reduced Settings card density by separating identity, community belonging, and achievement surfaces, shortened community summary labels, and hardened stat-card/meta wrapping so Spanish copy stays stable under compact layouts.
 
 ### Pending Todos
 
