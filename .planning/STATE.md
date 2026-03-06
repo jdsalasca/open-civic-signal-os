@@ -113,3 +113,5 @@ Resume file: None
 - 2026-03-05: Normalized another cross-app layer of light-theme surfaces by moving toolbars, action bars, empty states, digest/alerts, and datatable hover states onto the same semantic soft-surface system used by the broader UI refresh.
 
 - 2026-03-05: Removed another set of residual legacy alpha utilities from dashboard, report wizard, and communities so steppers, membership rows, and dialog inputs now inherit the same semantic surface/border system as the rest of the refreshed UI.
+
+- 2026-03-05: Polished another residual UX pass by aligning blog/thread metadata borders, calming thread meta tracking, and replacing remaining overly technical mono-style identifiers in user-facing contribution lists.

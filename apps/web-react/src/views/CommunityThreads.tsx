@@ -497,10 +497,10 @@ export function CommunityThreads() {
                             <div className="u-card-title-wrap">
                               <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2 u-card-title-xl">{thread.title}</h3>
                               <div className="u-card-meta-row">
-                                <span className="text-xs text-muted font-bold uppercase tracking-wider">
+                                <span className="text-xs text-muted font-bold uppercase tracking-widest">
                                   {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
                                 </span>
-                                <span className="text-xs text-muted font-bold uppercase tracking-wider" data-testid={`thread-score-${thread.id}`}>
+                                <span className="text-xs text-muted font-bold uppercase tracking-widest" data-testid={`thread-score-${thread.id}`}>
                                   {t("community_threads.relevance_score")}: {Math.round(thread.relevanceScore)}
                                 </span>
                               </div>
@@ -616,7 +616,7 @@ export function CommunityThreads() {
                       );
                     })}
                   </div>
-                  <div className="p-4 border-top-1 border-white-alpha-10">
+                  <div className="p-4 border-top-1 border-surface-soft">
                     <Paginator
                       first={threadPage * threadRows}
                       rows={threadRows}

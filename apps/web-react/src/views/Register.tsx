@@ -149,7 +149,7 @@ export function Register() {
 
             <div className="p-4 bg-surface border-round-xl text-xs text-secondary flex align-items-center gap-3 border-1 border-subtle mb-4">
               <i className="pi pi-shield text-brand-primary text-lg"></i>
-              <span className="font-bold uppercase tracking-wider leading-relaxed">{t('auth.clearance_level')}</span>
+              <span className="font-bold uppercase tracking-widest leading-relaxed">{t('auth.clearance_level')}</span>
             </div>
 
             <CivicButton

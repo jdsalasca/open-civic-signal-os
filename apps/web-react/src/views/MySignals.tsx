@@ -99,7 +99,7 @@ export function MySignals() {
               body={(s: Signal) => (
                 <div className="flex flex-column">
                   <span className="font-bold text-main group-hover:text-brand-primary transition-colors">{s.title}</span>
-                  <span className="text-xs text-muted font-mono mt-1">{s.id.substring(0,8)}</span>
+                  <span className="text-xs text-muted font-bold mt-1 tracking-wide">{s.id.substring(0,8)}</span>
                 </div>
               )} 
             />

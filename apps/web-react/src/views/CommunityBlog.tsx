@@ -255,7 +255,7 @@ export function CommunityBlog() {
             {renderContent(post.content)}
           </div>
 
-          <div className="u-card-meta-row text-xs text-muted border-top-1 border-white-alpha-10 pt-3 mt-auto">
+          <div className="u-card-meta-row text-xs text-muted border-top-1 border-surface-soft pt-3 mt-auto">
             <i className="pi pi-calendar" />
             <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
             <span>•</span>
