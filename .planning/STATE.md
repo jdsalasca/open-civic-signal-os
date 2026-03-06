@@ -119,3 +119,5 @@ Resume file: None
 - 2026-03-05: Aligned the remaining error-state and shell microcopy layer by localizing the 404 view and replacing harsher micro-label sizing in the shared layout with calmer, more legible text tokens.
 
 - 2026-03-05: Softened another residual typography layer by removing overly technical mono/min utility treatments from engagement comments, signal detail metadata, moderation refs, and settings role codes.
+
+- 2026-03-05: Removed another cross-app residue layer by moving shared card headers, skeleton loaders, sidebar chrome, signal table IDs, alert badges, and thread timestamps/reply counters onto semantic surface tokens and standard micro-typography.

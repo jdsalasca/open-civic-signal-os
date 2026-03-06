@@ -48,7 +48,7 @@ export function CivicCard({
       className
     )} {...rest}>
       {(title || headerActions) && (
-        <div className="px-5 py-4 border-bottom-1 border-subtle bg-white-alpha-5 civic-card-header">
+        <div className="px-5 py-4 border-bottom-1 border-subtle bg-surface-soft civic-card-header">
           <div className="civic-card-header-row">
             {title ? (
               <h3 className={classNames('m-0 text-xs u-section-title civic-card-title', titleClassName)}>

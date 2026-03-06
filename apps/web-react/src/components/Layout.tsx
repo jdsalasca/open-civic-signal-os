@@ -181,7 +181,7 @@ export function Layout({ children, authMode = false }: Props) {
         {t('nav.skip_to_content')}
       </a>
       {/* SIDEBAR */}
-      <aside className="app-sidebar hidden lg:flex flex-column w-21rem border-right-1 border-white-alpha-5 z-2">
+      <aside className="app-sidebar hidden lg:flex flex-column w-21rem border-right-1 border-subtle z-2">
         <div className="app-sidebar-brand">
           <div className="app-brand-panel motion-card">
             <div className="flex align-items-center gap-3 mb-4">

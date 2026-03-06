@@ -276,12 +276,12 @@ export function CommunityThreads() {
                 <span className="text-sm font-black text-main">
                   {t("community_threads.member_id", { id: message.authorId.slice(0, 4) })}
                 </span>
-                <span className="text-min text-muted">{new Date(message.createdAt).toLocaleString()}</span>
+                <span className="text-xs text-muted">{new Date(message.createdAt).toLocaleString()}</span>
               </div>
             </div>
             <div className="u-card-meta-row">
               {message.directReplyCount > 0 && (
-                <span className="text-min text-muted font-bold" data-testid={`thread-message-replies-${message.id}`}>
+                <span className="text-xs text-muted font-bold" data-testid={`thread-message-replies-${message.id}`}>
                   {t("community_threads.reply_count", { count: message.directReplyCount })}
                 </span>
               )}

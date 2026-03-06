@@ -115,7 +115,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
           {rowData.title}
         </span>
         <div className="u-card-meta-row">
-          <span className="text-min text-muted u-meta-value">SIG-ID: {rowData.id?.substring(0,8)}</span>
+          <span className="text-xs text-muted u-meta-value">SIG-ID: {rowData.id?.substring(0,8)}</span>
         </div>
         {previewText && (
           <span

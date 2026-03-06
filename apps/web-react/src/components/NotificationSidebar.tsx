@@ -31,7 +31,7 @@ export function NotificationSidebar({ notifications }: Props) {
               const [, category, title] = match;
               return (
                 <div key={idx} className="u-surface-note u-surface-note-compact flex align-items-center gap-2 text-sm">
-                  <span className="text-status-rejected text-min uppercase tracking-tighter bg-status-rejected-alpha-10 px-2 py-1 border-round-xl border-1 border-status-rejected-alpha-20">[{category}]</span>
+                  <CivicBadge label={category} severity="rejected" />
                   <span className="u-list-item-copy text-sm">{title}</span>
                 </div>
               );
