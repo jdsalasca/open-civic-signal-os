@@ -526,15 +526,15 @@ export function CommunityThreads() {
 
                           <div className="flex flex-column gap-3">
                             {roots.length === 0 ? (
-                              <div className="p-4 border-round-xl bg-white-alpha-5 text-muted text-sm">
-                                {t("community_threads.no_messages")}
-                              </div>
+                            <div className="u-surface-note text-muted text-sm">
+                              {t("community_threads.no_messages")}
+                            </div>
                             ) : (
                               roots.map((root) => renderMessageNode(thread, root, childrenByParent, 0))
                             )}
                           </div>
 
-                          <div className="p-4 border-round-2xl bg-black-alpha-20 border-1 border-white-alpha-10">
+                          <div className="u-surface-note bg-black-alpha-20 border-white-alpha-10">
                             {replyTarget && (
                               <div className="mb-3 flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">
                                 <span className="text-sm text-main">

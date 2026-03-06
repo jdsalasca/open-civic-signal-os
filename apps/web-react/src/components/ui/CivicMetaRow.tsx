@@ -5,9 +5,9 @@ interface CivicMetaRowProps {
 
 export function CivicMetaRow({ label, value }: CivicMetaRowProps) {
   return (
-    <div className="flex justify-content-between align-items-center mb-3">
-      <span className="text-xs font-bold text-muted uppercase tracking-widest">{label}</span>
-      <span className="text-xs font-mono text-main">{value}</span>
+    <div className="flex justify-content-between align-items-start gap-3 mb-3 civic-meta-stack">
+      <span className="u-meta-label civic-meta-label">{label}</span>
+      <span className="text-sm text-main u-meta-value">{value}</span>
     </div>
   );
 }

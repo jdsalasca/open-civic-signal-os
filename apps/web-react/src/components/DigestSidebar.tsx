@@ -24,13 +24,13 @@ export function DigestSidebar({ signals }: Props) {
           </div>
         ) : (
           top3.map((s, i) => (
-            <div key={s.id} className="flex gap-4 align-items-start group cursor-pointer" onClick={() => navigate(`/signal/${s.id}`)}>
-              <span className="text-3xl font-black text-brand-primary opacity-20 group-hover:opacity-100 transition-opacity">0{i + 1}</span>
-              <div className="flex flex-column gap-1 overflow-hidden">
-                <h4 className="text-sm font-black text-main m-0 leading-tight truncate group-hover:text-brand-primary transition-colors">
+            <div key={s.id} className="u-surface-note flex gap-4 align-items-start group cursor-pointer" onClick={() => navigate(`/signal/${s.id}`)}>
+              <span className="text-3xl font-black text-brand-primary opacity-20 group-hover:opacity-100 transition-opacity flex-shrink-0">0{i + 1}</span>
+              <div className="flex flex-column gap-2 overflow-hidden flex-1 min-w-0">
+                <h4 className="u-list-item-title m-0 group-hover:text-brand-primary transition-colors">
                   {s.title}
                 </h4>
-                <div className="flex align-items-center gap-2">
+                <div className="u-card-meta-row">
                   <span className="text-xs text-brand-primary font-black">{s.priorityScore.toFixed(0)} Pts</span>
                   <span className="text-muted font-bold">|</span>
                   <CivicBadge label={t(`categories.${s.category}`)} type="category" />

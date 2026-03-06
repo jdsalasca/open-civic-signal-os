@@ -81,6 +81,7 @@ Progress: [██████████] 99%
 - 2026-03-05: Reduced dashboard and community-home control density by grouping secondary actions, introducing calmer action-bar layouts, and standardizing reusable list-card surfaces for official updates, threads, and top issues.
 - 2026-03-05: Added a global overflow-hardening pass for grid columns, card copy, badges, pills, PrimeReact button labels, dropdown labels, and datatable cells so longer strings wrap instead of overlapping surfaces across the app.
 - 2026-03-05: Hardened light-theme contrast and responsive copy handling across shared selects, stat cards, mobile nav, topbar community context, Settings identity density, report summaries, and signal detail lifecycle controls to remove remaining cross-app breakpoints.
+- 2026-03-05: Standardized shared typography and note/list surfaces across page headers, meta rows, dashboard signal tables, digest/alert sidebars, community blog, and threads so repeated content types now use one visual language instead of view-specific markup.
 
 ### Pending Todos
 
@@ -100,6 +101,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-05  
-Stopped at: Finished the cross-app light-theme and responsive consistency hardening pass; next target is `OCS-P1-040` structured proposal templates  
+Stopped at: Finished the cross-app typography and surface standardization pass; next target is `OCS-P1-040` structured proposal templates  
 Resume file: None
 

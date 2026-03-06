@@ -110,16 +110,16 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
     }
 
     return (
-      <div className="flex flex-column py-2 overflow-hidden">
-        <span className="font-bold text-main text-sm mb-1 group-hover:text-brand-primary transition-colors truncate">
+      <div className="flex flex-column py-2 overflow-hidden min-w-0">
+        <span className="u-list-item-title text-sm mb-1 group-hover:text-brand-primary transition-colors">
           {rowData.title}
         </span>
-        <div className="flex align-items-center gap-2">
-          <span className="text-min text-muted font-mono font-bold uppercase tracking-tighter">SIG-ID: {rowData.id?.substring(0,8)}</span>
+        <div className="u-card-meta-row">
+          <span className="text-min text-muted u-meta-value">SIG-ID: {rowData.id?.substring(0,8)}</span>
         </div>
         {previewText && (
           <span
-            className="text-xs text-secondary mt-2 line-height-3"
+            className="u-list-item-copy text-xs mt-2 line-height-3"
             data-testid={`signal-explainability-${rowData.id}`}
           >
             {previewText}
@@ -136,7 +136,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
           <i className="pi pi-database text-on-brand font-bold text-xs"></i>
         </div>
         <div className="flex flex-column gap-1">
-          <h2 className="text-sm font-black m-0 text-main tracking-widest uppercase">{t('dashboard.feed_title')}</h2>
+          <h2 className="u-eyebrow m-0">{t('dashboard.feed_title')}</h2>
           <span className="text-xs text-muted">{t('dashboard.focus_subtitle')}</span>
         </div>
       </div>
@@ -171,7 +171,7 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
           }
         }}
         rowClassName={(d) => (loading || ('_skeleton' in (d as object))) ? '' : 'cursor-pointer group hover:bg-white-alpha-5 transition-colors'}
-        emptyMessage={loading ? null : <div className="p-8 text-center text-muted font-bold uppercase tracking-widest text-xs">{t('signals.no_results')}</div>}
+        emptyMessage={loading ? null : <div className="p-8 text-center u-eyebrow">{t('signals.no_results')}</div>}
         className="p-datatable-sm"
         sortField="priorityScore"
         sortOrder={-1}

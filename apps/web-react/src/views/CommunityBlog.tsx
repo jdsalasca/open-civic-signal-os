@@ -408,7 +408,7 @@ export function CommunityBlog() {
                     />
                   </CivicField>
 
-                  <div className="border-round-xl border-1 border-white-alpha-10 bg-white-alpha-5 p-3">
+                  <div className="u-surface-note">
                     <div className="flex align-items-start gap-3">
                       <Checkbox
                         inputId="blog-pinned-checkbox"
@@ -469,8 +469,8 @@ export function CommunityBlog() {
                 {pinnedPosts.length > 0 && (
                   <section className="flex flex-column gap-3" data-testid="pinned-announcements-section">
                     <div>
-                      <div className="text-xs font-bold uppercase tracking-widest text-muted">{t("community_blog.pinned_section_label")}</div>
-                      <h2 className="text-xl font-black text-main m-0 mt-2">{t("community_blog.pinned_section_title")}</h2>
+                      <div className="u-eyebrow">{t("community_blog.pinned_section_label")}</div>
+                      <h2 className="u-section-title-lg m-0 mt-2">{t("community_blog.pinned_section_title")}</h2>
                     </div>
                     {pinnedPosts.map((post) => renderPostCard(post))}
                   </section>
@@ -478,9 +478,9 @@ export function CommunityBlog() {
 
                 <section className="flex flex-column gap-3" data-testid="official-timeline-section">
                   <div>
-                    <div className="text-xs font-bold uppercase tracking-widest text-muted">{t("community_blog.timeline_section_label")}</div>
-                    <h2 className="text-xl font-black text-main m-0 mt-2">{t("community_blog.timeline_section_title")}</h2>
-                    <p className="text-sm text-secondary m-0 mt-2">{t("community_blog.timeline_section_desc")}</p>
+                    <div className="u-eyebrow">{t("community_blog.timeline_section_label")}</div>
+                    <h2 className="u-section-title-lg m-0 mt-2">{t("community_blog.timeline_section_title")}</h2>
+                    <p className="u-section-copy text-sm m-0 mt-2">{t("community_blog.timeline_section_desc")}</p>
                   </div>
                   {timelinePosts.map((post) => renderPostCard(post))}
                 </section>

@@ -20,7 +20,7 @@ export function NotificationSidebar({ notifications }: Props) {
 
     return (
       <div className="flex flex-column gap-2 mt-2">
-        <span className="text-xs font-bold text-main uppercase tracking-widest mb-1 flex align-items-center gap-2">
+        <span className="u-eyebrow mb-1 flex align-items-center gap-2">
           <span className="w-1rem h-1rem border-circle bg-status-rejected shadow-1" style={{ animation: 'pulse 2s infinite' }}></span>
           Top Unresolved Issues
         </span>
@@ -30,13 +30,13 @@ export function NotificationSidebar({ notifications }: Props) {
             if (match) {
               const [, category, title] = match;
               return (
-                <div key={idx} className="flex align-items-center gap-2 text-sm p-2 bg-surface border-round-lg border-1 border-subtle">
+                <div key={idx} className="u-surface-note flex align-items-center gap-2 text-sm">
                   <span className="text-status-rejected font-mono text-min uppercase tracking-tighter bg-status-rejected-alpha-10 px-1 border-round">[{category}]</span>
-                  <span className="text-main font-medium line-height-3 text-sm">{title}</span>
+                  <span className="u-list-item-copy text-sm">{title}</span>
                 </div>
               );
             }
-            return <div key={idx} className="text-sm text-secondary border-bottom-1 border-subtle pb-2">{issue}</div>;
+            return <div key={idx} className="u-list-item-copy text-sm border-bottom-1 border-subtle pb-2">{issue}</div>;
           })}
         </div>
       </div>
@@ -60,13 +60,13 @@ export function NotificationSidebar({ notifications }: Props) {
           </div>
         ) : (
           notifications.slice(0, 3).map((n) => (
-            <div key={n.id} className="p-4 bg-white-alpha-5 border-round-2xl border-1 border-white-alpha-10 hover:bg-white-alpha-10 transition-colors">
-              <div className="flex justify-content-between align-items-center mb-3">
+            <div key={n.id} className="u-surface-note hover:bg-white-alpha-10 transition-colors">
+              <div className="u-card-split-header mb-3">
                 <CivicBadge label={n.channel} severity="progress" />
-                <span className="text-xs font-mono text-muted">{new Date(n.sentAt).toLocaleTimeString()}</span>
+                <span className="text-xs text-muted u-meta-value">{new Date(n.sentAt).toLocaleTimeString()}</span>
               </div>
               {parseAlertMessage(n.message)}
-              <div className="mt-3 text-min font-black uppercase tracking-tighter text-muted flex align-items-center gap-2">
+              <div className="mt-3 u-eyebrow flex align-items-center gap-2">
                 <i className="pi pi-users text-muted"></i>
                 Target: {n.recipientGroup}
               </div>
