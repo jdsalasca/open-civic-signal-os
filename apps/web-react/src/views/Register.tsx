@@ -70,8 +70,8 @@ export function Register() {
     <Layout authMode>
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="w-full max-w-30rem animate-fade-up" padding="lg">
-          <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface" data-testid="onboarding-progress-register">
-            <div className="text-xs font-black uppercase tracking-widest text-main">{t('auth.onboarding_step_register_title')}</div>
+          <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface-soft" data-testid="onboarding-progress-register">
+            <div className="u-eyebrow">{t('auth.onboarding_step_register_title')}</div>
             <div className="text-xs text-muted mt-2">{t('auth.onboarding_step_register_next')}</div>
           </div>
           <div className="text-center mb-8">
@@ -147,9 +147,9 @@ export function Register() {
               />
             </CivicField>
 
-            <div className="p-4 bg-surface border-round-xl text-xs text-secondary flex align-items-center gap-3 border-1 border-subtle mb-4">
+            <div className="p-4 bg-surface-soft border-round-xl text-sm text-secondary flex align-items-center gap-3 border-1 border-subtle mb-4">
               <i className="pi pi-shield text-brand-primary text-lg"></i>
-              <span className="font-bold uppercase tracking-widest leading-relaxed">{t('auth.clearance_level')}</span>
+              <span className="font-bold leading-relaxed">{t('auth.clearance_level')}</span>
             </div>
 
             <CivicButton

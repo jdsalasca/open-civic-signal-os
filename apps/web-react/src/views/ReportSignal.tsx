@@ -521,7 +521,7 @@ export function ReportSignal() {
                       )}
                     />
                   </div>
-                  <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
+                  <div className="flex justify-content-between mt-4 text-xs font-bold opacity-60">
                     <span>{t("report.urgency_low")}</span>
                     <span>{t("report.urgency_critical")}</span>
                   </div>
@@ -547,7 +547,7 @@ export function ReportSignal() {
                       )}
                     />
                   </div>
-                  <div className="flex justify-content-between mt-4 text-min font-black uppercase tracking-tighter opacity-50">
+                  <div className="flex justify-content-between mt-4 text-xs font-bold opacity-60">
                     <span>{t("report.impact_minor")}</span>
                     <span>{t("report.impact_systemic")}</span>
                   </div>
@@ -811,7 +811,7 @@ export function ReportSignal() {
                       <i className="pi pi-shield text-brand-primary text-xl"></i>
                       <div className="flex flex-column">
                         <span className="text-xs font-bold text-main uppercase">{t("settings.encryption")}</span>
-                        <span className="text-min text-muted">{t("settings.encryption_value")}</span>
+                        <span className="text-xs text-muted">{t("settings.encryption_value")}</span>
                       </div>
                     </div>
                     <div className="p-4 border-round-xl border-1 border-subtle bg-surface">

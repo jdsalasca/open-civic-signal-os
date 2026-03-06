@@ -31,8 +31,7 @@ export function DigestSidebar({ signals }: Props) {
                   {s.title}
                 </h4>
                 <div className="u-card-meta-row">
-                  <span className="text-xs text-brand-primary font-black">{s.priorityScore.toFixed(0)} Pts</span>
-                  <span className="text-muted font-bold">|</span>
+                  <span className="text-xs text-brand-primary font-black">{s.priorityScore.toFixed(0)} {t('signals.score_short')}</span>
                   <CivicBadge label={t(`categories.${s.category}`)} type="category" />
                 </div>
               </div>

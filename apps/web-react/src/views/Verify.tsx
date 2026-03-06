@@ -100,8 +100,8 @@ export function Verify() {
     <Layout authMode>
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="w-full max-w-28rem animate-fade-up text-center" padding="lg">
-          <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface text-left" data-testid="onboarding-progress-verify">
-            <div className="text-xs font-black uppercase tracking-widest text-main">{t('auth.onboarding_step_verify_title')}</div>
+          <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface-soft text-left" data-testid="onboarding-progress-verify">
+            <div className="u-eyebrow">{t('auth.onboarding_step_verify_title')}</div>
             <div className="text-xs text-muted mt-2">{t('auth.onboarding_step_verify_next')}</div>
           </div>
           <div className="mb-8">
@@ -135,7 +135,7 @@ export function Verify() {
                     {...field} 
                     id="verify-code" 
                     placeholder="000000" 
-                    className="text-center text-4xl font-black tracking-widest py-3 w-full"
+                    className="text-center text-4xl font-black tracking-tight py-3 w-full"
                     autoFocus
                     maxLength={6}
                   />
@@ -153,7 +153,7 @@ export function Verify() {
             />
             
             <div className="mt-8 pt-6 border-top-1 border-surface-soft flex flex-column gap-3 text-center">
-              <p className="text-muted text-sm m-0">Didn't receive the code?</p>
+              <p className="text-muted text-sm m-0">{t('auth.resend_prompt')}</p>
               <CivicButton 
                 type="button" 
                 label={resendLabel}
