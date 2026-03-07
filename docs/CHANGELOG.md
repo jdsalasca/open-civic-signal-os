@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Top-20 Product Priority Backlog Pack**: Added a GSD-aligned backlog split with the 20 highest-value next tasks across frontend and backend, including execution waves, acceptance criteria, and validation expectations anchored to the current product state. (`planning`)
 - **Governance Library**: Added a backend-owned governance document repository with searchable type/visibility filters, version history, `MANAGE_GOVERNANCE_LIBRARY` scope, OpenAPI coverage, and a new `/communities/governance` workflow so communities can find statutes, minutes, budgets, reports, and agreements before conflicts escalate. (`story:OCS-P1-046`)
 - **Community Project Boards**: Added backend-owned execution boards with linked proposals, deterministic task stages, assignee and due-date support, task notes, OpenAPI coverage, and a new `/communities/projects` kanban workflow so communities can track delivery work instead of stopping at proposal intent. (`story:OCS-P1-043`)
 - **Structured Proposal Deliberation**: Proposal detail now supports backend-owned typed deliberation entries (`PRO`, `CON`, `QUESTION`, `EVIDENCE`), evidence-link enforcement, moderation that preserves proposal context, OpenAPI coverage, and a deliberation workflow for decision-supporting debate instead of flat comment noise. (`story:OCS-P1-041`)

@@ -2,6 +2,16 @@
 
 Operational backlog snapshot for immediate execution in Open Civic Signal OS.
 
+## Priority Pack (GSD 2026-03-07)
+
+- Detailed Top 20 split backlog for frontend and backend: `docs/community/frontend-backend-top20-priority-backlog.md`
+- Recommended next execution order:
+  1. `story:OCS-P1-047`
+  2. `story:OCS-P1-048`
+  3. `story:OCS-P1-042`
+  4. `story:OCS-P1-049`
+  5. `story:OCS-P1-050`
+
 ## Current State
 
 - Backend Java API is active with prioritization and score breakdown.

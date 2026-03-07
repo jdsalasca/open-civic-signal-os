@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 Phase: 5 of 5 (Community Operating System Expansion)  
 Plan: 21 of 5 in current phase  
 Status: In progress  
-Last activity: 2026-03-06 - Implemented governance library with backend-owned searchable documents, version history, and a community governance workspace
+Last activity: 2026-03-07 - Published a GSD top-20 frontend/backend priority backlog to sequence the highest-value next work after governance library delivery
 
 Progress: [██████████] 100%
 
@@ -86,6 +86,7 @@ Progress: [██████████] 100%
 - 2026-03-05: Implemented OCS-P1-040 with backend-owned structured proposals, the `CREATE_PROPOSAL` permission scope, linked-issue validation, a community proposal workspace route, OpenAPI schema coverage, and ADR-backed contract documentation.
 - 2026-03-06: Implemented OCS-P1-041 with backend-owned typed deliberation entries, evidence-link validation, moderation that preserves proposal context, OpenAPI contract coverage, and proposal-detail UI sections for pro/con/questions/evidence.
 - 2026-03-06: Implemented OCS-P1-046 with a backend-owned governance document library, version history, explicit visibility, `MANAGE_GOVERNANCE_LIBRARY` scope, `/communities/governance` workflow, OpenAPI coverage, and ADR-backed contract notes.
+- 2026-03-07: Published `docs/community/frontend-backend-top20-priority-backlog.md` to split the next 20 highest-value tasks into frontend and backend execution lanes with wave sequencing, acceptance criteria, and validation expectations.
 
 ### Pending Todos
 
@@ -105,7 +106,7 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-06  
-Stopped at: Finished `OCS-P1-046` governance library and searchable agreements; next target is `OCS-P1-047` community decision ledger  
+Stopped at: Published top-20 frontend/backend priority backlog pack; next target remains `OCS-P1-047` community decision ledger  
 Resume file: None
 
 - 2026-03-06: Completed `OCS-P1-043` by adding backend-owned community project boards with linked proposals, deterministic task statuses, assignee and due-date support, task execution notes, `/api/community/projects*` endpoints, a new `/communities/projects` kanban workflow, OpenAPI/ADR updates, and backend plus Playwright validation coverage.
