@@ -26,6 +26,7 @@ const CommunityProposals = lazy(() => import("./views/CommunityProposals").then(
 const CommunityDecisions = lazy(() => import("./views/CommunityDecisions").then(m => ({ default: m.CommunityDecisions })));
 const CommunityProjects = lazy(() => import("./views/CommunityProjects").then(m => ({ default: m.CommunityProjects })));
 const CommunityGovernance = lazy(() => import("./views/CommunityGovernance").then(m => ({ default: m.CommunityGovernance })));
+const CommunityTrustMetrics = lazy(() => import("./views/CommunityTrustMetrics").then(m => ({ default: m.CommunityTrustMetrics })));
 const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
 const Unauthorized = lazy(() => import("./views/Unauthorized").then(m => ({ default: m.Unauthorized })));
 
@@ -145,6 +146,7 @@ export function App() {
               <Route path="/communities/decisions" element={<CommunityDecisions />} />
               <Route path="/communities/projects" element={<CommunityProjects />} />
               <Route path="/communities/governance" element={<CommunityGovernance />} />
+              <Route path="/communities/trust" element={<CommunityTrustMetrics />} />
             </Route>
 
             <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>

@@ -366,6 +366,14 @@ export function Communities() {
           />
           <CivicButton
             type="button"
+            icon="pi pi-chart-line"
+            label={t("nav.community_trust")}
+            variant="ghost"
+            onClick={() => navigate("/communities/trust")}
+            data-testid="communities-open-trust-button"
+          />
+          <CivicButton
+            type="button"
             icon="pi pi-book"
             label={t("nav.community_governance")}
             variant="ghost"

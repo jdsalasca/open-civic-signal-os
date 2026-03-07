@@ -10,6 +10,7 @@ import org.opencivic.signalos.service.CommunityDecisionLedgerService;
 import org.opencivic.signalos.service.CommunityProjectBoardService;
 import org.opencivic.signalos.service.CommunityProposalDeliberationService;
 import org.opencivic.signalos.service.CommunityProposalService;
+import org.opencivic.signalos.service.CommunityTrustMetricsService;
 import org.opencivic.signalos.service.GovernanceLibraryService;
 import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
@@ -19,6 +20,7 @@ import org.opencivic.signalos.web.dto.CommunityDecisionResponse;
 import org.opencivic.signalos.web.dto.CommunityProjectBoardResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalDeliberationResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalResponse;
+import org.opencivic.signalos.web.dto.CommunityTrustMetricsResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityProjectBoardRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityDecisionRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskCommentRequest;
@@ -65,6 +67,7 @@ public class CommunityCollaborationController {
     private final CommunityProjectBoardService projectBoardService;
     private final CommunityProposalService proposalService;
     private final CommunityProposalDeliberationService proposalDeliberationService;
+    private final CommunityTrustMetricsService trustMetricsService;
     private final GovernanceLibraryService governanceLibraryService;
     private final CivicEngagementService engagementService;
 
@@ -74,6 +77,7 @@ public class CommunityCollaborationController {
         CommunityProjectBoardService projectBoardService,
         CommunityProposalService proposalService,
         CommunityProposalDeliberationService proposalDeliberationService,
+        CommunityTrustMetricsService trustMetricsService,
         GovernanceLibraryService governanceLibraryService,
         CivicEngagementService engagementService
     ) {
@@ -82,6 +86,7 @@ public class CommunityCollaborationController {
         this.projectBoardService = projectBoardService;
         this.proposalService = proposalService;
         this.proposalDeliberationService = proposalDeliberationService;
+        this.trustMetricsService = trustMetricsService;
         this.governanceLibraryService = governanceLibraryService;
         this.engagementService = engagementService;
     }
@@ -263,6 +268,15 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return collaborationService.getCommunityHome(communityId, principal.getName());
+    }
+
+    @GetMapping("/trust-metrics")
+    public CommunityTrustMetricsResponse getTrustMetrics(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false, defaultValue = "LAST_30_DAYS") String period,
+        Principal principal
+    ) {
+        return trustMetricsService.getTrustMetrics(communityId, period, principal.getName());
     }
 
     @GetMapping("/proposals")

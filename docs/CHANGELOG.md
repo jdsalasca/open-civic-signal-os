@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Community Trust Metrics Dashboard**: Added a backend-owned trust metrics endpoint with deterministic period filters, freshness metadata, low-data states, explainable metric cards, OpenAPI coverage, and a new `/communities/trust` workflow so communities can verify whether reporting, decisions, and execution are producing outcomes. (`story:OCS-P1-048`)
 - **Community Decision Ledger**: Added a backend-owned decision ledger with explicit approval-basis metadata, linked proposal/governance/project references, `MANAGE_DECISION_LEDGER` scope, OpenAPI coverage, and a new `/communities/decisions` workflow so communities can trace formal decisions into accountable execution ownership. (`story:OCS-P1-047`)
 - **Top-20 Product Priority Backlog Pack**: Added a GSD-aligned backlog split with the 20 highest-value next tasks across frontend and backend, including execution waves, acceptance criteria, and validation expectations anchored to the current product state. (`planning`)
 - **Governance Library**: Added a backend-owned governance document repository with searchable type/visibility filters, version history, `MANAGE_GOVERNANCE_LIBRARY` scope, OpenAPI coverage, and a new `/communities/governance` workflow so communities can find statutes, minutes, budgets, reports, and agreements before conflicts escalate. (`story:OCS-P1-046`)

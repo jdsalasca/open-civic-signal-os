@@ -32,6 +32,7 @@ const resources = {
         "settings": "Preferences",
         "communities": "Communities",
         "live_feed": "Shared Updates",
+        "community_trust": "Trust Metrics",
         "community_decisions": "Decision Ledger",
         "community_governance": "Governance Library",
         "community_projects": "Project Boards",
@@ -1097,6 +1098,64 @@ const resources = {
           "empty_desc": "This decision is still missing linked proposal, governance, or execution surfaces."
         }
       },
+      "community_trust": {
+        "title": "Public trust metrics",
+        "desc": "See whether {{community}} is turning reports, decisions, and execution work into visible outcomes.",
+        "kicker": "Trust dashboard",
+        "load_error": "Failed to load public trust metrics.",
+        "not_available": "Not available yet",
+        "formula_label": "How this is calculated",
+        "share_copy": "{{count}} records · {{share}}% share",
+        "overview_copy": "This view summarizes the period from {{start}} to {{end}} with backend-owned formulas and freshness metadata.",
+        "last_updated_label": "Latest source update",
+        "low_data_title": "Low-data period",
+        "low_data_fallback": "This period still has too little activity to support strong trust conclusions.",
+        "empty_title": "Trust metrics are not available yet",
+        "empty_desc": "Try another period or come back after the community records more reports, decisions, or execution updates.",
+        "no_context_title": "Choose an active community first",
+        "no_context_desc": "Trust metrics need one active community so the dashboard can stay specific, explainable, and auditable.",
+        "breakdown_empty_title": "Not enough data yet",
+        "breakdown_empty_desc": "This chart will populate once the selected period records more activity.",
+        "filters": {
+          "kicker": "Time window",
+          "desc": "Switch the reporting period without changing the metric formulas.",
+          "refresh": "Refresh metrics"
+        },
+        "periods": {
+          "LAST_7_DAYS": "Last 7 days",
+          "LAST_30_DAYS": "Last 30 days",
+          "LAST_90_DAYS": "Last 90 days"
+        }
+      },
+      "community_trust": {
+        "title": "Metricas publicas de confianza",
+        "desc": "Vea si {{community}} esta convirtiendo reportes, decisiones y trabajo de ejecucion en resultados visibles.",
+        "kicker": "Tablero de confianza",
+        "load_error": "No se pudieron cargar las metricas publicas de confianza.",
+        "not_available": "Aun no disponible",
+        "formula_label": "Como se calcula",
+        "share_copy": "{{count}} registros · {{share}}% del total",
+        "overview_copy": "Esta vista resume el periodo entre {{start}} y {{end}} con formulas definidas por backend y metadatos de frescura.",
+        "last_updated_label": "Ultima actualizacion fuente",
+        "low_data_title": "Periodo con pocos datos",
+        "low_data_fallback": "Este periodo aun tiene muy poca actividad para sostener conclusiones fuertes de confianza.",
+        "empty_title": "Las metricas de confianza aun no estan disponibles",
+        "empty_desc": "Pruebe otro periodo o vuelva cuando la comunidad registre mas reportes, decisiones o avances de ejecucion.",
+        "no_context_title": "Primero elija una comunidad activa",
+        "no_context_desc": "Las metricas de confianza necesitan una comunidad activa para que el tablero siga siendo especifico, explicable y auditable.",
+        "breakdown_empty_title": "Aun no hay datos suficientes",
+        "breakdown_empty_desc": "Este grafico se poblara cuando el periodo seleccionado tenga mas actividad.",
+        "filters": {
+          "kicker": "Ventana de tiempo",
+          "desc": "Cambie el periodo sin alterar las formulas de las metricas.",
+          "refresh": "Actualizar metricas"
+        },
+        "periods": {
+          "LAST_7_DAYS": "Ultimos 7 dias",
+          "LAST_30_DAYS": "Ultimos 30 dias",
+          "LAST_90_DAYS": "Ultimos 90 dias"
+        }
+      },
       "moderation": {
         "title": "Moderation Queue",
         "desc": "Review automatically flagged signals for potential abuse.",
@@ -1300,6 +1359,7 @@ const resources = {
         "settings": "Preferencias",
         "communities": "Comunidades",
         "live_feed": "Actualizaciones",
+        "community_trust": "Metricas de confianza",
         "community_decisions": "Bitacora de decisiones",
         "community_governance": "Biblioteca de normas",
         "community_projects": "Tableros",

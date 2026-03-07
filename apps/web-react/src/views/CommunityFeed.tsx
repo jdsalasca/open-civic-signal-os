@@ -76,6 +76,13 @@ export function CommunityFeed() {
               />
               <CivicButton
                 type="button"
+                icon="pi pi-chart-line"
+                label={t("nav.community_trust")}
+                variant="ghost"
+                onClick={() => navigate("/communities/trust")}
+              />
+              <CivicButton
+                type="button"
                 icon="pi pi-sitemap"
                 label={t("nav.community_decisions")}
                 variant="ghost"
@@ -178,6 +185,13 @@ export function CommunityFeed() {
                     icon="pi pi-file-edit"
                     variant="ghost"
                     onClick={() => navigate("/communities/proposals")}
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t("nav.community_trust")}
+                    icon="pi pi-chart-line"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/trust")}
                   />
                   <CivicButton
                     type="button"

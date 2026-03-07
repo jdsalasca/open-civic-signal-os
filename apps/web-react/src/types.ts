@@ -424,6 +424,47 @@ export type CommunityHome = {
   topSignals: CommunityHomeSignal[];
 };
 
+export type CommunityTrustMetricsPeriod = "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS";
+
+export type TrustMetricCard = {
+  key: string;
+  label: string;
+  value: string;
+  unit: string;
+  definition: string;
+  formula: string;
+  supportingText: string;
+};
+
+export type TrustMetricBreakdownItem = {
+  label: string;
+  value: number;
+  share: number;
+};
+
+export type TrustMetricBreakdown = {
+  key: string;
+  title: string;
+  description: string;
+  items: TrustMetricBreakdownItem[];
+};
+
+export type CommunityTrustMetrics = {
+  communityId: string;
+  communityName: string;
+  communitySlug: string;
+  period: CommunityTrustMetricsPeriod;
+  startDate: string;
+  endDate: string;
+  generatedAt: string;
+  lastUpdatedAt: string | null;
+  freshness: string;
+  lowData: boolean;
+  lowDataReason: string | null;
+  cards: TrustMetricCard[];
+  breakdowns: TrustMetricBreakdown[];
+};
+
 export type SignalMapFilters = {
   category?: string | null;
   statuses: string[];

@@ -454,11 +454,11 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - users can see whether the system is producing outcomes
 - Acceptance criteria:
-  - [ ] dashboard shows freshness and time period
-  - [ ] metrics are explainable and filterable
-  - [ ] low-data states remain understandable
+  - [x] dashboard shows freshness and time period
+  - [x] metrics are explainable and filterable
+  - [x] low-data states remain understandable
 - Validation:
-  - [ ] backend metrics tests
+  - [x] backend metrics tests
   - [ ] Playwright dashboard checks
 
 ### `story:OCS-P1-049` Moderation Queues and Sanctions

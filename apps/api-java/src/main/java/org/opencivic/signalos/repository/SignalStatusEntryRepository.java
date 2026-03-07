@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface SignalStatusEntryRepository extends JpaRepository<SignalStatusEntry, UUID> {
     List<SignalStatusEntry> findBySignalIdOrderByCreatedAtDesc(UUID signalId);
+    List<SignalStatusEntry> findBySignalIdInOrderByCreatedAtAsc(List<UUID> signalIds);
 }

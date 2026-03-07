@@ -27,64 +27,65 @@ Shipped Phase 5 foundations:
 - `OCS-P1-043` community project boards
 - `OCS-P1-046` governance library + searchable agreements
 - `OCS-P1-047` decision ledger linked to proposals, governance, and execution
+- `OCS-P1-048` public trust metrics dashboard
 
 ## Now (Next 7 Days)
 
 Recommended next execution order:
 
-1. `story:OCS-P1-048` public trust metrics dashboard
-2. `story:OCS-P1-042` verifiable community voting
-3. `story:OCS-P1-049` moderation queue and sanction policy engine
-4. `story:OCS-P1-050` privacy center and sensitive-data access logs
-5. `story:OCS-P1-051` civic onboarding, tours, and help center
+1. `story:OCS-P1-042` verifiable community voting
+2. `story:OCS-P1-049` moderation queue and sanction policy engine
+3. `story:OCS-P1-050` privacy center and sensitive-data access logs
+4. `story:OCS-P1-051` civic onboarding, tours, and help center
+5. `story:OCS-P1-052` open civic data exports and scoped API
 
 Execution note:
 
-- `story:OCS-P1-048` is now the immediate target because the decision ledger is in place and the next trust gap is public proof of outcomes and freshness.
+- `story:OCS-P1-042` is now the immediate target because the trust dashboard is in place and the next trust gap is verifiable community voting linked to decisions.
 
 ## Next (7-21 Days)
 
 1. Complete the trust loop sequence.
-   - `story:OCS-P1-048`
    - `story:OCS-P1-042`
-2. Expand governance safety rails.
    - `story:OCS-P1-049`
+2. Expand governance safety rails.
    - `story:OCS-P1-050`
-3. Prepare the next enablement layer.
    - `story:OCS-P1-051`
+3. Prepare the next enablement layer.
    - `story:OCS-P1-052`
+   - `story:OCS-P1-035`
 
 ## P0 Execution Queue (Agent Order)
 
 This section is preserved for repository compatibility. The active P0-equivalent execution order is:
 
-1. `story:OCS-P1-048`
-2. `story:OCS-P1-042`
-3. `story:OCS-P1-049`
-4. `story:OCS-P1-050`
-5. `story:OCS-P1-051`
+1. `story:OCS-P1-042`
+2. `story:OCS-P1-049`
+3. `story:OCS-P1-050`
+4. `story:OCS-P1-051`
+5. `story:OCS-P1-052`
 
 ## Wave Sequencing
 
 ### Wave 1: Trust Loop Completion
 
-1. `story:OCS-P1-048`
-2. `story:OCS-P1-042`
-3. `story:OCS-P1-049`
+1. `story:OCS-P1-042`
+2. `story:OCS-P1-049`
+3. `story:OCS-P1-050`
 
 ### Wave 2: Safety and Data Responsibility
 
-4. `story:OCS-P1-050`
-5. `story:OCS-P1-051`
-6. `story:OCS-P1-052`
-7. `story:OCS-P1-035`
+4. `story:OCS-P1-051`
+5. `story:OCS-P1-052`
+6. `story:OCS-P1-035`
+7. `story:OCS-P1-044`
 
 ### Wave 3: Operational Growth
 
-8. `story:OCS-P1-035`
-9. `story:OCS-P1-044`
-10. `story:OCS-P1-045`
-11. `story:OCS-P1-053`
+8. `story:OCS-P1-045`
+9. `story:OCS-P1-053`
+10. `story:OCS-P1-017`
+11. `story:OCS-P1-021`
 
 ### Wave 4: Cross-App Hardening
 
@@ -98,8 +99,8 @@ This section is preserved for repository compatibility. The active P0-equivalent
 ## Story Notes
 
 - `OCS-P1-047` shipped and now closes the proposal -> decision -> execution trust chain with explicit approval basis and execution ownership.
-- `OCS-P1-048` is now the current highest-value story because once decisions exist, the product needs visible public proof of performance and freshness.
-- `OCS-P1-042` remains behind the ledger and metrics because voting without a linked decision record would still leave the trust surface incomplete.
+- `OCS-P1-048` shipped and now exposes backend-owned public proof of freshness, participation, execution progress, and case throughput for each community.
+- `OCS-P1-042` is now the current highest-value story because voting is the remaining legitimacy gap in the proposal -> decision -> execution loop.
 - `OCS-P1-049` and `OCS-P1-050` stay in the top five because new governance and identity surfaces increase moderation and privacy risk.
 
 ## Definition of Ready for Any New Story

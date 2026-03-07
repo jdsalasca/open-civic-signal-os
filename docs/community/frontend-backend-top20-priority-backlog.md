@@ -1,6 +1,6 @@
 # Frontend + Backend Priority Backlog Top 20 (GSD 2026-03-07)
 
-Detailed execution backlog for the highest-value work remaining in Open Civic Signal OS after governance library delivery.
+Detailed execution backlog for the highest-value work remaining in Open Civic Signal OS, with the latest shipped anchor stories retained below as delivery references.
 
 ## Prioritization Method
 
@@ -13,28 +13,32 @@ This pack prioritizes work using four filters:
 
 ## Priority Order Summary
 
-1. `OCS-P1-047` decision ledger
-2. `OCS-P1-048` public trust metrics dashboard
-3. `OCS-P1-042` verifiable community voting
-4. `OCS-P1-049` moderation queue and sanction engine
-5. `OCS-P1-050` privacy center and access logs
-6. `OCS-P1-051` onboarding and help center
-7. `OCS-P1-052` open civic data exports and scoped API
-8. `OCS-P1-035` real-time rooms and mentions
-9. `OCS-P1-044` volunteering and activity slots
-10. `OCS-P1-045` shared resource booking
-11. `OCS-P1-017` public shareability growth surfaces
-12. `OCS-P1-021` notification preferences UX
-13. `OCS-P1-022` funnel analytics instrumentation
-14. `OCS-P1-016` low-bandwidth mode enforcement
-15. `OCS-P1-018` remaining copy parity hardening
-16. `OCS-P1-019` accessibility finish pass
-17. `P0 security` hardened compose/runtime secret policy
-18. `P1 developer-experience` make preflight deterministic on host + Docker
-19. `P1 trust-critical` align remaining active OpenAPI/examples
-20. `P1 scalability` final paging/filter consistency sweep
+1. `OCS-P1-042` verifiable community voting
+2. `OCS-P1-049` moderation queue and sanction engine
+3. `OCS-P1-050` privacy center and access logs
+4. `OCS-P1-051` onboarding and help center
+5. `OCS-P1-052` open civic data exports and scoped API
+6. `OCS-P1-035` real-time rooms and mentions
+7. `OCS-P1-044` volunteering and activity slots
+8. `OCS-P1-045` shared resource booking
+9. `OCS-P1-017` public shareability growth surfaces
+10. `OCS-P1-021` notification preferences UX
+11. `OCS-P1-022` funnel analytics instrumentation
+12. `OCS-P1-016` low-bandwidth mode enforcement
+13. `OCS-P1-018` remaining copy parity hardening
+14. `OCS-P1-019` accessibility finish pass
+15. `OCS-P1-053` decision-to-outcome public meeting pages
+16. `P0 security` hardened compose/runtime secret policy
+17. `P1 developer-experience` make preflight deterministic on host + Docker
+18. `P1 trust-critical` align remaining active OpenAPI/examples
+19. `P1 scalability` final paging/filter consistency sweep
+20. `P1 observability` publish civic metrics-history trend snapshots
 
 ## Frontend Top 10
+
+Reference note:
+
+- `FE-01` and `FE-02` are now shipped anchor stories retained for continuity; the next remaining frontend priority is `FE-03`.
 
 ### FE-01 `story:OCS-P1-047` Build decision-ledger UI
 - Rank: `F1`
@@ -63,10 +67,10 @@ This pack prioritizes work using four filters:
   - surface freshness, period filters, and drill-downs
   - standardize chart empty/error states for low-data communities
 - Acceptance criteria:
-  - [ ] freshness timestamp is always visible
-  - [ ] metric cards explain what each metric means in plain language
-  - [ ] charts degrade gracefully under sparse data
-  - [ ] metrics route is usable in simple mode and advanced mode
+  - [x] freshness timestamp is always visible
+  - [x] metric cards explain what each metric means in plain language
+  - [x] charts degrade gracefully under sparse data
+  - [x] metrics route is usable in simple mode and advanced mode
 - Validation:
   - [ ] Playwright metrics route checks
   - [ ] low-data snapshot evidence
@@ -194,6 +198,10 @@ This pack prioritizes work using four filters:
 
 ## Backend Top 10
 
+Reference note:
+
+- `BE-01` and `BE-02` are now shipped anchor stories retained for continuity; the next remaining backend priority is `BE-03`.
+
 ### BE-01 `story:OCS-P1-047` Decision ledger domain and contract
 - Rank: `B1`
 - Why now: it completes the trust chain and unlocks metrics.
@@ -220,12 +228,12 @@ This pack prioritizes work using four filters:
   - period filters and freshness semantics
   - deterministic definitions for each metric
 - Acceptance criteria:
-  - [ ] freshness is backend-owned
-  - [ ] metric formulas are deterministic and documented
-  - [ ] low-data communities return understandable payloads
+  - [x] freshness is backend-owned
+  - [x] metric formulas are deterministic and documented
+  - [x] low-data communities return understandable payloads
 - Validation:
-  - [ ] metrics contract tests
-  - [ ] reproducibility note in docs
+  - [x] metrics contract tests
+  - [x] reproducibility note in docs
 
 ### BE-03 `story:OCS-P1-042` Verifiable voting rules
 - Rank: `B3`

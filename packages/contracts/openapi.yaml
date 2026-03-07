@@ -1219,6 +1219,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityHome'
+  /api/community/trust-metrics:
+    get:
+      summary: Get backend-owned trust metrics for one community and time period
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: period
+          required: false
+          schema:
+            $ref: '#/components/schemas/CommunityTrustMetricsPeriod'
+      responses:
+        '200':
+          description: Community trust metrics dashboard payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityTrustMetrics'
+        '401':
+          description: User is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/proposals:
     get:
       summary: List structured proposals for one community
@@ -2690,6 +2718,119 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommunityHomeSignal'
+    CommunityTrustMetricsPeriod:
+      type: string
+      enum: [LAST_7_DAYS, LAST_30_DAYS, LAST_90_DAYS]
+    TrustMetricCard:
+      type: object
+      required:
+        - key
+        - label
+        - value
+        - unit
+        - definition
+        - formula
+        - supportingText
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        value:
+          type: string
+        unit:
+          type: string
+        definition:
+          type: string
+        formula:
+          type: string
+        supportingText:
+          type: string
+    TrustMetricBreakdownItem:
+      type: object
+      required:
+        - label
+        - value
+        - share
+      properties:
+        label:
+          type: string
+        value:
+          type: integer
+          format: int64
+        share:
+          type: number
+          format: double
+    TrustMetricBreakdown:
+      type: object
+      required:
+        - key
+        - title
+        - description
+        - items
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrustMetricBreakdownItem'
+    CommunityTrustMetrics:
+      type: object
+      required:
+        - communityId
+        - communityName
+        - communitySlug
+        - period
+        - startDate
+        - endDate
+        - generatedAt
+        - lastUpdatedAt
+        - freshness
+        - lowData
+        - cards
+        - breakdowns
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        communitySlug:
+          type: string
+        period:
+          $ref: '#/components/schemas/CommunityTrustMetricsPeriod'
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        generatedAt:
+          type: string
+          format: date-time
+        lastUpdatedAt:
+          type: string
+          format: date-time
+        freshness:
+          type: string
+        lowData:
+          type: boolean
+        lowDataReason:
+          type: string
+          nullable: true
+        cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrustMetricCard'
+        breakdowns:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrustMetricBreakdown'
     CommunityProposal:
       type: object
       required:

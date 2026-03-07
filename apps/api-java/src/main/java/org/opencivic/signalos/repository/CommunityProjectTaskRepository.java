@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CommunityProjectTaskRepository extends JpaRepository<CommunityProjectTask, UUID> {
     List<CommunityProjectTask> findByProjectBoardIdOrderBySortOrderAscCreatedAtAsc(UUID projectBoardId);
+    List<CommunityProjectTask> findByProjectBoardIdIn(List<UUID> projectBoardIds);
 }

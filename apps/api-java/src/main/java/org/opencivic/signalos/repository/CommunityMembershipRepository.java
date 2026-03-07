@@ -11,6 +11,7 @@ public interface CommunityMembershipRepository extends JpaRepository<CommunityMe
     List<CommunityMembership> findByUserId(UUID userId);
     List<CommunityMembership> findByCommunityId(UUID communityId);
     Optional<CommunityMembership> findByUserIdAndCommunityId(UUID userId, UUID communityId);
+    long countByCommunityId(UUID communityId);
     long countByUserId(UUID userId);
     long countByUserIdAndRoleIn(UUID userId, List<CommunityRole> roles);
 }
