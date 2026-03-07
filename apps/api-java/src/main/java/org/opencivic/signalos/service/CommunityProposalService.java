@@ -6,6 +6,9 @@ import java.util.UUID;
 import org.opencivic.signalos.domain.CommunityMembership;
 import org.opencivic.signalos.domain.CommunityPermissionScope;
 import org.opencivic.signalos.domain.CommunityProposal;
+import org.opencivic.signalos.domain.CommunityProposalVoteEligibility;
+import org.opencivic.signalos.domain.CommunityProposalVoteMode;
+import org.opencivic.signalos.domain.CommunityProposalVoteVisibility;
 import org.opencivic.signalos.domain.CommunityRole;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.User;
@@ -64,7 +67,20 @@ public class CommunityProposalService {
         proposal.setCommunityId(request.communityId());
         proposal.setAuthorId(user.getId());
         proposal.setRelatedSignalId(relatedSignal == null ? null : relatedSignal.getId());
-        applyFields(proposal, request.title(), request.problemStatement(), request.proposedSolution(), request.estimatedCost(), request.beneficiariesSummary(), request.supportingLinks());
+        applyFields(
+            proposal,
+            request.title(),
+            request.problemStatement(),
+            request.proposedSolution(),
+            request.estimatedCost(),
+            request.beneficiariesSummary(),
+            request.supportingLinks(),
+            request.voteMode(),
+            request.resultVisibility(),
+            request.eligibilityRule(),
+            request.votingOpensAt(),
+            request.votingClosesAt()
+        );
         proposal.setCreatedAt(LocalDateTime.now());
         proposal.setUpdatedAt(LocalDateTime.now());
         return toResponse(proposalRepository.save(proposal));
@@ -82,7 +98,20 @@ public class CommunityProposalService {
         }
         Signal relatedSignal = validateRelatedSignal(proposal.getCommunityId(), request.relatedSignalId());
         proposal.setRelatedSignalId(relatedSignal == null ? null : relatedSignal.getId());
-        applyFields(proposal, request.title(), request.problemStatement(), request.proposedSolution(), request.estimatedCost(), request.beneficiariesSummary(), request.supportingLinks());
+        applyFields(
+            proposal,
+            request.title(),
+            request.problemStatement(),
+            request.proposedSolution(),
+            request.estimatedCost(),
+            request.beneficiariesSummary(),
+            request.supportingLinks(),
+            request.voteMode(),
+            request.resultVisibility(),
+            request.eligibilityRule(),
+            request.votingOpensAt(),
+            request.votingClosesAt()
+        );
         proposal.setUpdatedAt(LocalDateTime.now());
         return toResponse(proposalRepository.save(proposal));
     }
@@ -94,7 +123,12 @@ public class CommunityProposalService {
         String proposedSolution,
         String estimatedCost,
         String beneficiariesSummary,
-        List<String> supportingLinks
+        List<String> supportingLinks,
+        String voteMode,
+        String resultVisibility,
+        String eligibilityRule,
+        LocalDateTime votingOpensAt,
+        LocalDateTime votingClosesAt
     ) {
         proposal.setTitle(title.trim());
         proposal.setProblemStatement(problemStatement.trim());
@@ -102,6 +136,35 @@ public class CommunityProposalService {
         proposal.setEstimatedCost(estimatedCost.trim());
         proposal.setBeneficiariesSummary(beneficiariesSummary.trim());
         proposal.setSupportingLinks(sanitizeLinks(supportingLinks));
+        proposal.setVoteMode(resolveVoteMode(voteMode));
+        proposal.setVoteVisibility(resolveVoteVisibility(resultVisibility));
+        proposal.setVoteEligibility(resolveVoteEligibility(eligibilityRule));
+        if (votingOpensAt != null && votingClosesAt != null && votingClosesAt.isBefore(votingOpensAt)) {
+            throw new IllegalArgumentException("Voting close time must be after the open time.");
+        }
+        proposal.setVotingOpensAt(votingOpensAt);
+        proposal.setVotingClosesAt(votingClosesAt);
+    }
+
+    private CommunityProposalVoteMode resolveVoteMode(String voteMode) {
+        if (voteMode == null || voteMode.isBlank()) {
+            return CommunityProposalVoteMode.YES_NO;
+        }
+        return CommunityProposalVoteMode.valueOf(voteMode.trim().toUpperCase());
+    }
+
+    private CommunityProposalVoteVisibility resolveVoteVisibility(String resultVisibility) {
+        if (resultVisibility == null || resultVisibility.isBlank()) {
+            return CommunityProposalVoteVisibility.COMMUNITY;
+        }
+        return CommunityProposalVoteVisibility.valueOf(resultVisibility.trim().toUpperCase());
+    }
+
+    private CommunityProposalVoteEligibility resolveVoteEligibility(String eligibilityRule) {
+        if (eligibilityRule == null || eligibilityRule.isBlank()) {
+            return CommunityProposalVoteEligibility.VERIFIED_MEMBERS;
+        }
+        return CommunityProposalVoteEligibility.valueOf(eligibilityRule.trim().toUpperCase());
     }
 
     private List<String> sanitizeLinks(List<String> links) {
@@ -152,6 +215,11 @@ public class CommunityProposalService {
             proposal.getEstimatedCost(),
             proposal.getBeneficiariesSummary(),
             proposal.getSupportingLinks(),
+            proposal.getVoteMode().name(),
+            proposal.getVoteVisibility().name(),
+            proposal.getVoteEligibility().name(),
+            proposal.getVotingOpensAt(),
+            proposal.getVotingClosesAt(),
             proposal.getCreatedAt(),
             proposal.getUpdatedAt()
         );

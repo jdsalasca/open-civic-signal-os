@@ -132,6 +132,7 @@ export type CommunityMembership = {
 };
 
 export type CommunityPermissionScope =
+  | "CAST_PROPOSAL_VOTE"
   | "CREATE_PROPOSAL"
   | "MANAGE_DECISION_LEDGER"
   | "MANAGE_GOVERNANCE_LIBRARY"
@@ -242,9 +243,19 @@ export type CommunityProposal = {
   estimatedCost: string;
   beneficiariesSummary: string;
   supportingLinks: string[];
+  voteMode: CommunityProposalVoteMode;
+  resultVisibility: CommunityProposalVoteVisibility;
+  eligibilityRule: CommunityProposalVoteEligibility;
+  votingOpensAt?: string | null;
+  votingClosesAt?: string | null;
   createdAt: string;
   updatedAt: string;
 };
+
+export type CommunityProposalVoteMode = "YES_NO" | "SCORE_1_5";
+export type CommunityProposalVoteVisibility = "COMMUNITY" | "AFTER_VOTE";
+export type CommunityProposalVoteEligibility = "ALL_MEMBERS" | "VERIFIED_MEMBERS";
+export type CommunityProposalVoteChoice = "FOR" | "AGAINST";
 
 export type CommunityProposalDeliberationType = "PRO" | "CON" | "QUESTION" | "EVIDENCE";
 
@@ -277,6 +288,59 @@ export type CommunityProposalDeliberation = {
   proposalId: string;
   counts: CommunityProposalDeliberationCounts;
   entries: CommunityProposalDeliberationEntry[];
+};
+
+export type CommunityProposalVoteConfig = {
+  voteMode: CommunityProposalVoteMode;
+  resultVisibility: CommunityProposalVoteVisibility;
+  eligibilityRule: CommunityProposalVoteEligibility;
+  votingOpensAt?: string | null;
+  votingClosesAt?: string | null;
+};
+
+export type CommunityProposalVoteRecord = {
+  voterId: string;
+  voterUsername: string;
+  membershipRole: string;
+  verifiedMember: boolean;
+  choice?: CommunityProposalVoteChoice | null;
+  scoreValue?: number | null;
+  castAt: string;
+};
+
+export type CommunityProposalVoteScoreBucket = {
+  score: number;
+  count: number;
+};
+
+export type CommunityProposalVoteTally = {
+  visible: boolean;
+  visibilityReason?: string | null;
+  totalBallots: number;
+  distinctVoters: number;
+  turnoutPercentage: number;
+  forVotes: number;
+  againstVotes: number;
+  averageScore?: number | null;
+  scoreDistribution: CommunityProposalVoteScoreBucket[];
+};
+
+export type CommunityProposalVoteAuditSummary = {
+  acceptedVotes: number;
+  duplicateBlockedAttempts: number;
+  eligibilityBlockedAttempts: number;
+  closedWindowBlockedAttempts: number;
+};
+
+export type CommunityProposalVoting = {
+  proposalId: string;
+  config: CommunityProposalVoteConfig;
+  openForVoting: boolean;
+  canCurrentUserVote: boolean;
+  blockedReason?: string | null;
+  currentUserVote?: CommunityProposalVoteRecord | null;
+  tally: CommunityProposalVoteTally;
+  auditSummary: CommunityProposalVoteAuditSummary;
 };
 
 export type CommunityProjectStatus = "TODO" | "IN_PROGRESS" | "DONE";

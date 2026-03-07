@@ -3,6 +3,12 @@ package org.opencivic.signalos.domain;
 import java.util.Set;
 
 public enum CommunityPermissionScope {
+    CAST_PROPOSAL_VOTE(Set.of(
+        CommunityRole.MEMBER,
+        CommunityRole.MODERATOR,
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
     CREATE_PROPOSAL(Set.of(
         CommunityRole.MEMBER,
         CommunityRole.MODERATOR,

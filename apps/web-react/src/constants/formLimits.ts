@@ -33,6 +33,7 @@ export const FORM_LIMITS = {
     linkMax: 1200,
     deliberationMin: 8,
     deliberationMax: 2000,
+    voteReasonMax: 240,
   },
   projects: {
     titleMin: 8,

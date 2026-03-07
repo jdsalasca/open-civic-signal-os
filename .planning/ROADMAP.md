@@ -84,7 +84,7 @@ Plans:
 1. Communities can model people, roles, spaces, and permissions without leaking sensitive data or creating opaque rules.
 2. The product supports the full loop from issue reporting and proposals to execution boards, decisions, and public metrics.
 3. Every new governance-sensitive feature maps to API, contract, and UI ownership with auditable validation evidence.
-**Plans**: Rolling execution plan set (28 tracked subplans so far under `.planning/phases/05-community-operating-system-expansion/`)
+**Plans**: Rolling execution plan set (31 tracked subplans so far under `.planning/phases/05-community-operating-system-expansion/`)
 
 Plan groups:
 - [x] 05-01: Convert community operating system redesign into executable GSD backlog, requirements, and wave sequencing.
@@ -94,7 +94,7 @@ Plan groups:
 - [ ] 05-05: Validate privacy, accessibility, onboarding, integrations, and pilot readiness.
 
 Operational note:
-- Detailed execution for Phase 5 moved into rolling subplans `05-04A` through `05-27` and the canonical queue in `docs/community/current-backlog.md`.
+- Detailed execution for Phase 5 moved into rolling subplans `05-04A` through `05-28` and the canonical queue in `docs/community/current-backlog.md`.
 
 ## Progress
 
@@ -104,4 +104,4 @@ Operational note:
 | 2. Quality Gate Hardening | 4/4 | Completed | 2026-03-04 |
 | 3. Community Workflow Scalability | 3/3 | Completed | 2026-03-04 |
 | 4. Frontend Audience and Usability Growth | 4/4 | Completed | 2026-03-05 |
-| 5. Community Operating System Expansion | Rolling (30 tracked subplans) | In progress | - |
+| 5. Community Operating System Expansion | Rolling (31 tracked subplans) | In progress | - |

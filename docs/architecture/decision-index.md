@@ -34,6 +34,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260306-governance-library-contract.md` (accepted)
 - `ADR-20260307-community-decision-ledger-contract.md` (accepted)
 - `ADR-20260307-community-trust-metrics-contract.md` (accepted)
+- `ADR-20260307-community-proposal-voting-contract.md` (accepted)
 
 ## Review Rule
 

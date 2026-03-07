@@ -340,11 +340,11 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - communities can make formal or semi-formal decisions with higher trust
 - Acceptance criteria:
-  - [ ] vote limits are enforced deterministically
-  - [ ] results are public at the configured level
-  - [ ] anti-abuse checks are auditable
+  - [x] vote limits are enforced deterministically
+  - [x] results are public at the configured level
+  - [x] anti-abuse checks are auditable
 - Validation:
-  - [ ] backend voting tests
+  - [x] backend voting tests
   - [ ] Playwright vote/tally flow
 
 ### `story:OCS-P1-043` Community Project Boards

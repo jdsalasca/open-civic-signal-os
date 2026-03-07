@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import type { CommunityProposalDeliberation } from "../types";
+import type { CommunityProposalDeliberation, CommunityProposalVoting } from "../types";
 
 const communityId = "11111111-1111-1111-1111-111111111111";
 const signalId = "22222222-2222-2222-2222-222222222222";
@@ -25,10 +25,46 @@ test.describe("Community proposals", () => {
         estimatedCost: "COP 18M for civil works and signage.",
         beneficiariesSummary: "Students, parents, nearby residents, and daily drivers.",
         supportingLinks: ["https://example.com/existing-proposal"],
+        voteMode: "YES_NO",
+        resultVisibility: "COMMUNITY",
+        eligibilityRule: "VERIFIED_MEMBERS",
+        votingOpensAt: "2026-03-05T10:00:00",
+        votingClosesAt: "2026-03-20T18:00:00",
         createdAt: "2026-03-05T10:00:00",
         updatedAt: "2026-03-05T10:00:00",
       },
     ];
+    let voting: CommunityProposalVoting = {
+      proposalId: proposals[0].id,
+      config: {
+        voteMode: "YES_NO",
+        resultVisibility: "COMMUNITY",
+        eligibilityRule: "VERIFIED_MEMBERS",
+        votingOpensAt: "2026-03-05T10:00:00",
+        votingClosesAt: "2026-03-20T18:00:00",
+      },
+      openForVoting: true,
+      canCurrentUserVote: true,
+      blockedReason: null,
+      currentUserVote: null,
+      tally: {
+        visible: true,
+        visibilityReason: null,
+        totalBallots: 0,
+        distinctVoters: 0,
+        turnoutPercentage: 0,
+        forVotes: 0,
+        againstVotes: 0,
+        averageScore: null,
+        scoreDistribution: [],
+      },
+      auditSummary: {
+        acceptedVotes: 0,
+        duplicateBlockedAttempts: 0,
+        eligibilityBlockedAttempts: 0,
+        closedWindowBlockedAttempts: 0,
+      },
+    };
     let deliberation: CommunityProposalDeliberation = {
       proposalId: proposals[0].id,
       counts: {
@@ -224,6 +260,61 @@ test.describe("Community proposals", () => {
       });
     });
 
+    await page.route("**/api/community/proposals/*/vote", async (route) => {
+      const method = route.request().method();
+      if (method === "GET") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(voting),
+        });
+        return;
+      }
+
+      const payload = route.request().postDataJSON() as Record<string, unknown>;
+      const choice = payload.choice ? String(payload.choice) : null;
+      const scoreValue = typeof payload.scoreValue === "number" ? payload.scoreValue : null;
+      voting = {
+        ...voting,
+        canCurrentUserVote: false,
+        blockedReason: "You already voted on this proposal.",
+        currentUserVote: {
+          voterId: "44444444-4444-4444-4444-444444444444",
+          voterUsername: "admin",
+          membershipRole: "COORDINATOR",
+          verifiedMember: true,
+          choice: choice === "FOR" || choice === "AGAINST" ? choice : null,
+          scoreValue,
+          castAt: "2026-03-05T11:30:00",
+        },
+        tally: {
+          ...voting.tally,
+          totalBallots: voting.tally.totalBallots + 1,
+          distinctVoters: voting.tally.distinctVoters + 1,
+          turnoutPercentage: 33.3,
+          forVotes: choice === "FOR" ? voting.tally.forVotes + 1 : voting.tally.forVotes,
+          againstVotes: choice === "AGAINST" ? voting.tally.againstVotes + 1 : voting.tally.againstVotes,
+          averageScore: scoreValue,
+          scoreDistribution:
+            scoreValue == null
+              ? voting.tally.scoreDistribution
+              : [1, 2, 3, 4, 5].map((score) => ({
+                  score,
+                  count: score === scoreValue ? 1 : 0,
+                })),
+        },
+        auditSummary: {
+          ...voting.auditSummary,
+          acceptedVotes: voting.auditSummary.acceptedVotes + 1,
+        },
+      };
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(voting),
+      });
+    });
+
     await page.route("**/api/community/proposals/*/deliberation/*/moderate", async (route) => {
       moderatedPayload = route.request().postDataJSON() as Record<string, unknown>;
       deliberation = {
@@ -270,6 +361,11 @@ test.describe("Community proposals", () => {
         estimatedCost: String(savedPayload.estimatedCost),
         beneficiariesSummary: String(savedPayload.beneficiariesSummary),
         supportingLinks: savedPayload.supportingLinks as string[],
+        voteMode: String(savedPayload.voteMode) as "YES_NO" | "SCORE_1_5",
+        resultVisibility: String(savedPayload.resultVisibility) as "COMMUNITY" | "AFTER_VOTE",
+        eligibilityRule: String(savedPayload.eligibilityRule) as "ALL_MEMBERS" | "VERIFIED_MEMBERS",
+        votingOpensAt: null,
+        votingClosesAt: savedPayload.votingClosesAt ? String(savedPayload.votingClosesAt) : null,
         createdAt: "2026-03-05T11:00:00",
         updatedAt: "2026-03-05T11:00:00",
       });

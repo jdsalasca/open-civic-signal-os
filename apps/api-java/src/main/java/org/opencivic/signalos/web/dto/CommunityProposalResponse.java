@@ -19,6 +19,11 @@ public record CommunityProposalResponse(
     String estimatedCost,
     String beneficiariesSummary,
     List<String> supportingLinks,
+    String voteMode,
+    String resultVisibility,
+    String eligibilityRule,
+    LocalDateTime votingOpensAt,
+    LocalDateTime votingClosesAt,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {}

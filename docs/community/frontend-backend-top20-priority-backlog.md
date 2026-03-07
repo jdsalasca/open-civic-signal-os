@@ -84,9 +84,9 @@ Reference note:
   - eligibility and verification state messaging
   - result tally surface with participation counts and status
 - Acceptance criteria:
-  - [ ] users understand if they can vote and why
-  - [ ] tally/result view is readable and auditable
-  - [ ] blocked-vote states explain next step
+  - [x] users understand if they can vote and why
+  - [x] tally/result view is readable and auditable
+  - [x] blocked-vote states explain next step
 - Validation:
   - [ ] Playwright vote and tally flow
 
@@ -245,12 +245,12 @@ Reference note:
   - eligibility/verification checks
   - tally endpoints with audit trail
 - Acceptance criteria:
-  - [ ] duplicate voting is blocked deterministically
-  - [ ] vote result and participation basis are exposed clearly
-  - [ ] audit metadata captures actor, time, rule set
+  - [x] duplicate voting is blocked deterministically
+  - [x] vote result and participation basis are exposed clearly
+  - [x] audit metadata captures actor, time, rule set
 - Validation:
-  - [ ] voting integration tests
-  - [ ] OpenAPI + ADR update
+  - [x] voting integration tests
+  - [x] OpenAPI + ADR update
 
 ### BE-04 `story:OCS-P1-049` Moderation queue and sanction engine
 - Rank: `B4`

@@ -24,6 +24,11 @@ import type {
   CommunityProposalDeliberation,
   CommunityProposalDeliberationEntry,
   CommunityProposalDeliberationType,
+  CommunityProposalVoteChoice,
+  CommunityProposalVoteEligibility,
+  CommunityProposalVoteMode,
+  CommunityProposalVoteVisibility,
+  CommunityProposalVoting,
   PageResponse,
   Signal,
 } from "../types";
@@ -43,6 +48,10 @@ type ProposalForm = {
   estimatedCost: string;
   beneficiariesSummary: string;
   supportingLinks: ProposalLink[];
+  voteMode: CommunityProposalVoteMode;
+  resultVisibility: CommunityProposalVoteVisibility;
+  eligibilityRule: CommunityProposalVoteEligibility;
+  votingClosesAt: string;
 };
 
 type DeliberationForm = {
@@ -59,6 +68,10 @@ const defaultProposalValues: ProposalForm = {
   estimatedCost: "",
   beneficiariesSummary: "",
   supportingLinks: [{ url: "" }],
+  voteMode: "YES_NO",
+  resultVisibility: "COMMUNITY",
+  eligibilityRule: "VERIFIED_MEMBERS",
+  votingClosesAt: "",
 };
 
 const defaultDeliberationValues: DeliberationForm = {
@@ -76,9 +89,13 @@ export function CommunityProposals() {
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null);
   const [signalOptions, setSignalOptions] = useState<Array<{ label: string; value: string }>>([]);
   const [deliberation, setDeliberation] = useState<CommunityProposalDeliberation | null>(null);
+  const [voting, setVoting] = useState<CommunityProposalVoting | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingDeliberation, setLoadingDeliberation] = useState(false);
+  const [loadingVoting, setLoadingVoting] = useState(false);
   const [moderatingEntryId, setModeratingEntryId] = useState<string | null>(null);
+  const [scoreVoteValue, setScoreVoteValue] = useState<number>(3);
+  const [castingChoice, setCastingChoice] = useState<string | null>(null);
 
   const {
     control,
@@ -112,6 +129,7 @@ export function CommunityProposals() {
   const watchedSolution = watch("proposedSolution") ?? "";
   const watchedCost = watch("estimatedCost") ?? "";
   const watchedBeneficiaries = watch("beneficiariesSummary") ?? "";
+  const watchedVoteMode = watch("voteMode");
   const watchedDeliberationType = watchDeliberation("type");
   const watchedDeliberationContent = watchDeliberation("content") ?? "";
 
@@ -193,6 +211,24 @@ export function CommunityProposals() {
     }
   }, [t]);
 
+  const loadVoting = useCallback(async (proposalId: string | null) => {
+    if (!proposalId) {
+      setVoting(null);
+      return;
+    }
+    setLoadingVoting(true);
+    try {
+      const response = await apiClient.get<CommunityProposalVoting>(`community/proposals/${proposalId}/vote`);
+      setVoting(response.data);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_proposals.vote_load_error"));
+      setVoting(null);
+    } finally {
+      setLoadingVoting(false);
+    }
+  }, [t]);
+
   useEffect(() => {
     loadProposals();
     loadSignals();
@@ -201,6 +237,10 @@ export function CommunityProposals() {
   useEffect(() => {
     loadDeliberation(selectedProposal?.id ?? null);
   }, [loadDeliberation, selectedProposal?.id]);
+
+  useEffect(() => {
+    loadVoting(selectedProposal?.id ?? null);
+  }, [loadVoting, selectedProposal?.id]);
 
   const onSubmit = async (data: ProposalForm) => {
     if (!activeCommunityId) {
@@ -217,6 +257,10 @@ export function CommunityProposals() {
         estimatedCost: data.estimatedCost,
         beneficiariesSummary: data.beneficiariesSummary,
         supportingLinks: data.supportingLinks.map((item) => item.url.trim()).filter(Boolean),
+        voteMode: data.voteMode,
+        resultVisibility: data.resultVisibility,
+        eligibilityRule: data.eligibilityRule,
+        votingClosesAt: data.votingClosesAt ? new Date(data.votingClosesAt).toISOString() : null,
       });
       toast.success(t("community_proposals.create_success"));
       reset(defaultProposalValues);
@@ -299,6 +343,30 @@ export function CommunityProposals() {
     [getDeliberationTypeLabel]
   );
 
+  const voteModeOptions = useMemo(
+    () => ([
+      { label: t("community_proposals.vote_mode.YES_NO"), value: "YES_NO" },
+      { label: t("community_proposals.vote_mode.SCORE_1_5"), value: "SCORE_1_5" },
+    ] as Array<{ label: string; value: CommunityProposalVoteMode }>),
+    [t]
+  );
+
+  const voteVisibilityOptions = useMemo(
+    () => ([
+      { label: t("community_proposals.vote_visibility.COMMUNITY"), value: "COMMUNITY" },
+      { label: t("community_proposals.vote_visibility.AFTER_VOTE"), value: "AFTER_VOTE" },
+    ] as Array<{ label: string; value: CommunityProposalVoteVisibility }>),
+    [t]
+  );
+
+  const voteEligibilityOptions = useMemo(
+    () => ([
+      { label: t("community_proposals.vote_eligibility.VERIFIED_MEMBERS"), value: "VERIFIED_MEMBERS" },
+      { label: t("community_proposals.vote_eligibility.ALL_MEMBERS"), value: "ALL_MEMBERS" },
+    ] as Array<{ label: string; value: CommunityProposalVoteEligibility }>),
+    [t]
+  );
+
   const deliberationSections = useMemo(() => {
     const entries = deliberation?.entries ?? [];
     const counts = deliberation?.counts;
@@ -311,6 +379,24 @@ export function CommunityProposals() {
   }, [deliberation, getDeliberationTypeLabel]);
 
   const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleDateString() : "");
+  const formatDateTime = (value?: string | null) => (value ? new Date(value).toLocaleString() : t("community_proposals.vote_not_scheduled"));
+
+  const submitVote = async (payload: { choice?: CommunityProposalVoteChoice; scoreValue?: number }) => {
+    if (!selectedProposal) {
+      return;
+    }
+    setCastingChoice(payload.choice ?? String(payload.scoreValue ?? ""));
+    try {
+      const response = await apiClient.post<CommunityProposalVoting>(`community/proposals/${selectedProposal.id}/vote`, payload);
+      setVoting(response.data);
+      toast.success(t("community_proposals.vote_create_success"));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_proposals.vote_create_error"));
+    } finally {
+      setCastingChoice(null);
+    }
+  };
 
   const renderDeliberationEntry = (entry: CommunityProposalDeliberationEntry) => (
     <div
@@ -572,6 +658,84 @@ export function CommunityProposals() {
                     />
                   </CivicField>
 
+                  <CivicCard title={t("community_proposals.vote_card_title")} className="mb-0" data-testid="community-proposal-vote-config-card">
+                    <div className="grid">
+                      <div className="col-12 md:col-4">
+                        <CivicField label={t("community_proposals.vote_mode_label")} helpText={t("community_proposals.vote_mode_help")}>
+                          <Controller
+                            name="voteMode"
+                            control={control}
+                            render={({ field }) => (
+                              <CivicSelect
+                                value={field.value}
+                                onChange={(e) => field.onChange(e.value)}
+                                options={voteModeOptions}
+                                data-testid="proposal-vote-mode-select"
+                              />
+                            )}
+                          />
+                        </CivicField>
+                      </div>
+                      <div className="col-12 md:col-4">
+                        <CivicField label={t("community_proposals.vote_visibility_label")} helpText={t("community_proposals.vote_visibility_help")}>
+                          <Controller
+                            name="resultVisibility"
+                            control={control}
+                            render={({ field }) => (
+                              <CivicSelect
+                                value={field.value}
+                                onChange={(e) => field.onChange(e.value)}
+                                options={voteVisibilityOptions}
+                                data-testid="proposal-vote-visibility-select"
+                              />
+                            )}
+                          />
+                        </CivicField>
+                      </div>
+                      <div className="col-12 md:col-4">
+                        <CivicField label={t("community_proposals.vote_eligibility_label")} helpText={t("community_proposals.vote_eligibility_help")}>
+                          <Controller
+                            name="eligibilityRule"
+                            control={control}
+                            render={({ field }) => (
+                              <CivicSelect
+                                value={field.value}
+                                onChange={(e) => field.onChange(e.value)}
+                                options={voteEligibilityOptions}
+                                data-testid="proposal-vote-eligibility-select"
+                              />
+                            )}
+                          />
+                        </CivicField>
+                      </div>
+                    </div>
+                    <CivicField label={t("community_proposals.vote_closes_at_label")} helpText={t("community_proposals.vote_closes_at_help")}>
+                      <Controller
+                        name="votingClosesAt"
+                        control={control}
+                        render={({ field }) => (
+                          <InputText
+                            {...field}
+                            type="datetime-local"
+                            onChange={(e) => field.onChange(e.target.value)}
+                            className="w-full"
+                            data-testid="proposal-vote-close-input"
+                          />
+                        )}
+                      />
+                    </CivicField>
+                    <div className="u-surface-note mt-3">
+                      <div className="u-eyebrow mb-2">{t("community_proposals.vote_preview_label")}</div>
+                      <p className="text-sm text-secondary m-0 line-height-3">
+                        {t("community_proposals.vote_preview_copy", {
+                          mode: t(`community_proposals.vote_mode.${watchedVoteMode}`),
+                          visibility: t(`community_proposals.vote_visibility.${watch("resultVisibility")}`),
+                          eligibility: t(`community_proposals.vote_eligibility.${watch("eligibilityRule")}`),
+                        })}
+                      </p>
+                    </div>
+                  </CivicCard>
+
                   <CivicCard title={t("community_proposals.links_title")} className="mb-0">
                     <div className="flex flex-column gap-4">
                       <p className="text-sm text-secondary m-0">{t("community_proposals.links_help")}</p>
@@ -702,6 +866,8 @@ export function CommunityProposals() {
                               <CivicStatCard compact label={t("community_proposals.detail_status")} value={getStatusLabel(selectedProposal.status)} />
                               <CivicStatCard compact label={t("community_proposals.detail_template")} value={t("community_proposals.template_short")} />
                               <CivicStatCard compact label={t("community_proposals.detail_links")} value={selectedProposal.supportingLinks.length} />
+                              <CivicStatCard compact label={t("community_proposals.vote_mode_label")} value={t(`community_proposals.vote_mode.${selectedProposal.voteMode}`)} />
+                              <CivicStatCard compact label={t("community_proposals.vote_visibility_label")} value={t(`community_proposals.vote_visibility.${selectedProposal.resultVisibility}`)} />
                             </div>
                             <div className="flex flex-column gap-4">
                               <div className="u-surface-note">
@@ -755,6 +921,157 @@ export function CommunityProposals() {
                                 )}
                               </div>
                             </div>
+                          </CivicCard>
+
+                          <CivicCard title={t("community_proposals.vote_live_title")} data-testid="community-proposal-vote-card">
+                            <CivicActionBar className="mb-4">
+                              <div className="community-home-action-copy">
+                                <div className="u-eyebrow">{t("community_proposals.vote_badge")}</div>
+                                <p className="u-section-copy text-sm m-0">
+                                  {t("community_proposals.vote_live_desc", {
+                                    mode: t(`community_proposals.vote_mode.${selectedProposal.voteMode}`),
+                                  })}
+                                </p>
+                              </div>
+                              <div className="flex gap-2 flex-wrap">
+                                <span className="u-pill">{t(`community_proposals.vote_visibility.${selectedProposal.resultVisibility}`)}</span>
+                                <span className="u-pill">{t(`community_proposals.vote_eligibility.${selectedProposal.eligibilityRule}`)}</span>
+                              </div>
+                            </CivicActionBar>
+
+                            <div className="civic-stat-grid civic-stat-grid-comfortable mb-4">
+                              <CivicStatCard compact label={t("community_proposals.vote_turnout_label")} value={`${voting ? voting.tally.turnoutPercentage.toFixed(1) : "0.0"}%`} />
+                              <CivicStatCard compact label={t("community_proposals.vote_total_ballots_label")} value={voting?.tally.totalBallots ?? 0} />
+                              <CivicStatCard compact label={t("community_proposals.vote_window_label")} value={voting?.openForVoting ? t("community_proposals.vote_open") : t("community_proposals.vote_closed")} />
+                              <CivicStatCard compact label={t("community_proposals.vote_audit_label")} value={voting?.auditSummary.acceptedVotes ?? 0} supportingText={t("community_proposals.vote_audit_support")} />
+                            </div>
+
+                            <div className="u-surface-note mb-4">
+                              <div className="u-eyebrow mb-2">{t("community_proposals.vote_schedule_label")}</div>
+                              <p className="text-sm text-secondary m-0 line-height-3">
+                                {t("community_proposals.vote_schedule_copy", {
+                                  opens: formatDateTime(selectedProposal.votingOpensAt),
+                                  closes: formatDateTime(selectedProposal.votingClosesAt),
+                                })}
+                              </p>
+                            </div>
+
+                            {loadingVoting ? (
+                              <p className="text-secondary m-0">{t("common.loading")}</p>
+                            ) : voting ? (
+                              <div className="flex flex-column gap-4">
+                                {voting.blockedReason && (
+                                  <div className="u-surface-note" data-testid="community-proposal-vote-blocked-note">
+                                    <div className="u-eyebrow mb-2">{t("community_proposals.vote_status_label")}</div>
+                                    <p className="text-sm text-secondary m-0 line-height-3">{voting.blockedReason}</p>
+                                  </div>
+                                )}
+
+                                {voting.currentUserVote && (
+                                  <div className="u-surface-note" data-testid="community-proposal-current-vote">
+                                    <div className="u-eyebrow mb-2">{t("community_proposals.vote_current_vote_label")}</div>
+                                    <p className="text-sm text-secondary m-0 line-height-3">
+                                      {selectedProposal.voteMode === "YES_NO"
+                                        ? t("community_proposals.vote_current_choice", { choice: t(`community_proposals.vote_choice.${voting.currentUserVote.choice}`) })
+                                        : t("community_proposals.vote_current_score", { score: voting.currentUserVote.scoreValue ?? 0 })}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {voting.canCurrentUserVote && (
+                                  <div className="u-surface-note" data-testid="community-proposal-vote-actions">
+                                    <div className="u-eyebrow mb-3">{t("community_proposals.vote_cast_label")}</div>
+                                    {selectedProposal.voteMode === "YES_NO" ? (
+                                      <div className="flex gap-3 flex-wrap">
+                                        <CivicButton
+                                          type="button"
+                                          icon="pi pi-thumbs-up"
+                                          label={t("community_proposals.vote_choice.FOR")}
+                                          loading={castingChoice === "FOR"}
+                                          onClick={() => submitVote({ choice: "FOR" })}
+                                          data-testid="proposal-vote-for-button"
+                                        />
+                                        <CivicButton
+                                          type="button"
+                                          icon="pi pi-thumbs-down"
+                                          label={t("community_proposals.vote_choice.AGAINST")}
+                                          variant="secondary"
+                                          loading={castingChoice === "AGAINST"}
+                                          onClick={() => submitVote({ choice: "AGAINST" })}
+                                          data-testid="proposal-vote-against-button"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <div className="flex flex-column gap-3">
+                                        <CivicSelect
+                                          value={scoreVoteValue}
+                                          onChange={(e) => setScoreVoteValue(Number(e.value))}
+                                          options={[1, 2, 3, 4, 5].map((score) => ({
+                                            label: t("community_proposals.vote_score_option", { score }),
+                                            value: score,
+                                          }))}
+                                          data-testid="proposal-vote-score-select"
+                                        />
+                                        <div className="flex justify-content-end">
+                                          <CivicButton
+                                            type="button"
+                                            icon="pi pi-check"
+                                            label={t("community_proposals.vote_submit_score")}
+                                            loading={castingChoice === String(scoreVoteValue)}
+                                            onClick={() => submitVote({ scoreValue: scoreVoteValue })}
+                                            data-testid="proposal-vote-score-submit-button"
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                <div className="grid">
+                                  <div className="col-12 lg:col-7">
+                                    <CivicCard title={t("community_proposals.vote_tally_title")} className="h-full">
+                                      {voting.tally.visible ? (
+                                        <div className="flex flex-column gap-3" data-testid="community-proposal-vote-tally">
+                                          {selectedProposal.voteMode === "YES_NO" ? (
+                                            <div className="civic-stat-grid civic-stat-grid-comfortable">
+                                              <CivicStatCard compact label={t("community_proposals.vote_choice.FOR")} value={voting.tally.forVotes} />
+                                              <CivicStatCard compact label={t("community_proposals.vote_choice.AGAINST")} value={voting.tally.againstVotes} />
+                                            </div>
+                                          ) : (
+                                            <div className="flex flex-column gap-3">
+                                              <CivicStatCard compact label={t("community_proposals.vote_average_label")} value={voting.tally.averageScore?.toFixed(1) ?? "0.0"} />
+                                              <div className="grid">
+                                                {voting.tally.scoreDistribution.map((bucket) => (
+                                                  <div className="col-6 md:col-4" key={bucket.score}>
+                                                    <CivicStatCard compact label={t("community_proposals.vote_score_option", { score: bucket.score })} value={bucket.count} />
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <CivicEmptyState
+                                          icon="pi pi-lock"
+                                          title={t("community_proposals.vote_hidden_title")}
+                                          description={voting.tally.visibilityReason ?? t("community_proposals.vote_hidden_desc")}
+                                        />
+                                      )}
+                                    </CivicCard>
+                                  </div>
+                                  <div className="col-12 lg:col-5">
+                                    <CivicCard title={t("community_proposals.vote_audit_detail_title")} className="h-full" data-testid="community-proposal-vote-audit">
+                                      <div className="civic-stat-grid civic-stat-grid-comfortable">
+                                        <CivicStatCard compact label={t("community_proposals.vote_audit_accepted")} value={voting.auditSummary.acceptedVotes} />
+                                        <CivicStatCard compact label={t("community_proposals.vote_audit_duplicates")} value={voting.auditSummary.duplicateBlockedAttempts} />
+                                        <CivicStatCard compact label={t("community_proposals.vote_audit_eligibility")} value={voting.auditSummary.eligibilityBlockedAttempts} />
+                                        <CivicStatCard compact label={t("community_proposals.vote_audit_closed")} value={voting.auditSummary.closedWindowBlockedAttempts} />
+                                      </div>
+                                    </CivicCard>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : null}
                           </CivicCard>
 
                           <CivicCard title={t("community_proposals.deliberation_title")} data-testid="community-proposal-deliberation-card">

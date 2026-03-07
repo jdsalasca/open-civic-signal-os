@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +60,22 @@ public class CommunityProposal {
     @Column(name = "url", nullable = false, length = 1200)
     private List<String> supportingLinks = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private CommunityProposalVoteMode voteMode = CommunityProposalVoteMode.YES_NO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private CommunityProposalVoteVisibility voteVisibility = CommunityProposalVoteVisibility.COMMUNITY;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private CommunityProposalVoteEligibility voteEligibility = CommunityProposalVoteEligibility.VERIFIED_MEMBERS;
+
+    private LocalDateTime votingOpensAt;
+
+    private LocalDateTime votingClosesAt;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -87,6 +105,16 @@ public class CommunityProposal {
     public void setBeneficiariesSummary(String beneficiariesSummary) { this.beneficiariesSummary = beneficiariesSummary; }
     public List<String> getSupportingLinks() { return supportingLinks; }
     public void setSupportingLinks(List<String> supportingLinks) { this.supportingLinks = new ArrayList<>(supportingLinks); }
+    public CommunityProposalVoteMode getVoteMode() { return voteMode; }
+    public void setVoteMode(CommunityProposalVoteMode voteMode) { this.voteMode = voteMode; }
+    public CommunityProposalVoteVisibility getVoteVisibility() { return voteVisibility; }
+    public void setVoteVisibility(CommunityProposalVoteVisibility voteVisibility) { this.voteVisibility = voteVisibility; }
+    public CommunityProposalVoteEligibility getVoteEligibility() { return voteEligibility; }
+    public void setVoteEligibility(CommunityProposalVoteEligibility voteEligibility) { this.voteEligibility = voteEligibility; }
+    public LocalDateTime getVotingOpensAt() { return votingOpensAt; }
+    public void setVotingOpensAt(LocalDateTime votingOpensAt) { this.votingOpensAt = votingOpensAt; }
+    public LocalDateTime getVotingClosesAt() { return votingClosesAt; }
+    public void setVotingClosesAt(LocalDateTime votingClosesAt) { this.votingClosesAt = votingClosesAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

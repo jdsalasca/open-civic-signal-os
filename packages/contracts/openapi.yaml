@@ -1344,6 +1344,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/proposals/{proposalId}/vote:
+    get:
+      summary: Get community voting state, current-user vote visibility, tally, and anti-abuse audit for one proposal
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Proposal voting state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProposalVoting'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    post:
+      summary: Cast one verifiable community vote for a proposal
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CastCommunityProposalVoteRequest'
+      responses:
+        '200':
+          description: Updated proposal voting state after recording the vote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityProposalVoting'
+        '403':
+          description: Community policy denied proposal voting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: Vote was blocked due to duplicate or closed-window conditions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/decisions:
     get:
       summary: List community decision ledger entries with optional status, type, and date filters
@@ -2846,6 +2903,9 @@ components:
         - estimatedCost
         - beneficiariesSummary
         - supportingLinks
+        - voteMode
+        - resultVisibility
+        - eligibilityRule
         - createdAt
         - updatedAt
       properties:
@@ -2888,12 +2948,187 @@ components:
           items:
             type: string
             format: uri
+        voteMode:
+          $ref: '#/components/schemas/CommunityProposalVoteMode'
+        resultVisibility:
+          $ref: '#/components/schemas/CommunityProposalVoteVisibility'
+        eligibilityRule:
+          $ref: '#/components/schemas/CommunityProposalVoteEligibility'
+        votingOpensAt:
+          type: string
+          format: date-time
+          nullable: true
+        votingClosesAt:
+          type: string
+          format: date-time
+          nullable: true
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
+    CommunityProposalVoteMode:
+      type: string
+      enum: [YES_NO, SCORE_1_5]
+    CommunityProposalVoteVisibility:
+      type: string
+      enum: [COMMUNITY, AFTER_VOTE]
+    CommunityProposalVoteEligibility:
+      type: string
+      enum: [ALL_MEMBERS, VERIFIED_MEMBERS]
+    CommunityProposalVoteChoice:
+      type: string
+      enum: [FOR, AGAINST]
+    CommunityProposalVoteConfig:
+      type: object
+      required:
+        - voteMode
+        - resultVisibility
+        - eligibilityRule
+      properties:
+        voteMode:
+          $ref: '#/components/schemas/CommunityProposalVoteMode'
+        resultVisibility:
+          $ref: '#/components/schemas/CommunityProposalVoteVisibility'
+        eligibilityRule:
+          $ref: '#/components/schemas/CommunityProposalVoteEligibility'
+        votingOpensAt:
+          type: string
+          format: date-time
+          nullable: true
+        votingClosesAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityProposalVoteRecord:
+      type: object
+      required:
+        - voterId
+        - voterUsername
+        - membershipRole
+        - verifiedMember
+        - castAt
+      properties:
+        voterId:
+          type: string
+          format: uuid
+        voterUsername:
+          type: string
+        membershipRole:
+          type: string
+        verifiedMember:
+          type: boolean
+        choice:
+          allOf:
+            - $ref: '#/components/schemas/CommunityProposalVoteChoice'
+          nullable: true
+        scoreValue:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        castAt:
+          type: string
+          format: date-time
+    CommunityProposalVoteScoreBucket:
+      type: object
+      required: [score, count]
+      properties:
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+        count:
+          type: integer
+          minimum: 0
+    CommunityProposalVoteTally:
+      type: object
+      required:
+        - visible
+        - totalBallots
+        - distinctVoters
+        - turnoutPercentage
+        - forVotes
+        - againstVotes
+        - scoreDistribution
+      properties:
+        visible:
+          type: boolean
+        visibilityReason:
+          type: string
+          nullable: true
+        totalBallots:
+          type: integer
+          minimum: 0
+        distinctVoters:
+          type: integer
+          minimum: 0
+        turnoutPercentage:
+          type: number
+        forVotes:
+          type: integer
+          minimum: 0
+        againstVotes:
+          type: integer
+          minimum: 0
+        averageScore:
+          type: number
+          nullable: true
+        scoreDistribution:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityProposalVoteScoreBucket'
+    CommunityProposalVoteAuditSummary:
+      type: object
+      required:
+        - acceptedVotes
+        - duplicateBlockedAttempts
+        - eligibilityBlockedAttempts
+        - closedWindowBlockedAttempts
+      properties:
+        acceptedVotes:
+          type: integer
+          minimum: 0
+        duplicateBlockedAttempts:
+          type: integer
+          minimum: 0
+        eligibilityBlockedAttempts:
+          type: integer
+          minimum: 0
+        closedWindowBlockedAttempts:
+          type: integer
+          minimum: 0
+    CommunityProposalVoting:
+      type: object
+      required:
+        - proposalId
+        - config
+        - openForVoting
+        - canCurrentUserVote
+        - tally
+        - auditSummary
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+        config:
+          $ref: '#/components/schemas/CommunityProposalVoteConfig'
+        openForVoting:
+          type: boolean
+        canCurrentUserVote:
+          type: boolean
+        blockedReason:
+          type: string
+          nullable: true
+        currentUserVote:
+          allOf:
+            - $ref: '#/components/schemas/CommunityProposalVoteRecord'
+          nullable: true
+        tally:
+          $ref: '#/components/schemas/CommunityProposalVoteTally'
+        auditSummary:
+          $ref: '#/components/schemas/CommunityProposalVoteAuditSummary'
     CommunityProposalDeliberationType:
       type: string
       enum: [PRO, CON, QUESTION, EVIDENCE]
@@ -3328,6 +3563,20 @@ components:
           items:
             type: string
             maxLength: 1200
+        voteMode:
+          $ref: '#/components/schemas/CommunityProposalVoteMode'
+        resultVisibility:
+          $ref: '#/components/schemas/CommunityProposalVoteVisibility'
+        eligibilityRule:
+          $ref: '#/components/schemas/CommunityProposalVoteEligibility'
+        votingOpensAt:
+          type: string
+          format: date-time
+          nullable: true
+        votingClosesAt:
+          type: string
+          format: date-time
+          nullable: true
     UpdateCommunityProposalRequest:
       type: object
       required:
@@ -3368,6 +3617,29 @@ components:
           items:
             type: string
             maxLength: 1200
+        voteMode:
+          $ref: '#/components/schemas/CommunityProposalVoteMode'
+        resultVisibility:
+          $ref: '#/components/schemas/CommunityProposalVoteVisibility'
+        eligibilityRule:
+          $ref: '#/components/schemas/CommunityProposalVoteEligibility'
+        votingOpensAt:
+          type: string
+          format: date-time
+          nullable: true
+        votingClosesAt:
+          type: string
+          format: date-time
+          nullable: true
+    CastCommunityProposalVoteRequest:
+      type: object
+      properties:
+        choice:
+          $ref: '#/components/schemas/CommunityProposalVoteChoice'
+        scoreValue:
+          type: integer
+          minimum: 1
+          maximum: 5
     CreateCommunityProposalDeliberationRequest:
       type: object
       required: [type, content]
@@ -3515,6 +3787,7 @@ components:
         scope:
           type: string
           enum:
+            - CAST_PROPOSAL_VOTE
             - CREATE_PROPOSAL
             - MANAGE_GOVERNANCE_LIBRARY
             - MANAGE_PROJECT_BOARDS
