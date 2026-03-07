@@ -1316,6 +1316,85 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/decisions:
+    get:
+      summary: List community decision ledger entries with optional status, type, and date filters
+      parameters:
+        - name: communityId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: decisionStatus
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/CommunityDecisionStatus'
+        - name: decisionType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/CommunityDecisionType'
+        - name: dateFrom
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: dateTo
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Community decision ledger entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityDecision'
+    post:
+      summary: Record one community decision linked to proposal, governance, and execution context
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityDecisionRequest'
+      responses:
+        '200':
+          description: Recorded decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityDecision'
+  /api/community/decisions/{decisionId}:
+    get:
+      summary: Get one community decision ledger entry by ID
+      parameters:
+        - in: path
+          name: decisionId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Community decision detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityDecision'
+        '404':
+          description: Decision not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/proposals/{proposalId}/deliberation:
     get:
       summary: Get typed deliberation entries for one proposal
@@ -2373,6 +2452,7 @@ components:
           type: string
           enum:
             - CREATE_PROPOSAL
+            - MANAGE_DECISION_LEDGER
             - MANAGE_GOVERNANCE_LIBRARY
             - MANAGE_PROJECT_BOARDS
             - CREATE_THREAD
@@ -2755,6 +2835,96 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommunityProposalDeliberationEntry'
+    CommunityDecisionType:
+      type: string
+      enum: [APPROVAL, REJECTION, PRIORITIZATION, DIRECTIVE, STATUS_UPDATE]
+    CommunityDecisionStatus:
+      type: string
+      enum: [RECORDED, IN_EXECUTION, COMPLETED, REJECTED, SUPERSEDED]
+    CommunityDecisionBasisType:
+      type: string
+      enum: [COMMUNITY_VOTE, COORDINATOR_REVIEW, GOVERNANCE_RECORD, STAFF_DIRECTIVE, MIXED_RECORD]
+    CommunityDecision:
+      type: object
+      required:
+        - id
+        - communityId
+        - decidedBy
+        - decidedByUsername
+        - decisionType
+        - decisionStatus
+        - approvalBasisType
+        - approvalBasisSummary
+        - title
+        - summary
+        - decidedAt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        linkedProposalId:
+          type: string
+          format: uuid
+          nullable: true
+        linkedProposalTitle:
+          type: string
+          nullable: true
+        governanceDocumentId:
+          type: string
+          format: uuid
+          nullable: true
+        governanceDocumentTitle:
+          type: string
+          nullable: true
+        projectBoardId:
+          type: string
+          format: uuid
+          nullable: true
+        projectBoardTitle:
+          type: string
+          nullable: true
+        decidedBy:
+          type: string
+          format: uuid
+        decidedByUsername:
+          type: string
+        executionOwnerId:
+          type: string
+          format: uuid
+          nullable: true
+        executionOwnerUsername:
+          type: string
+          nullable: true
+        decisionType:
+          $ref: '#/components/schemas/CommunityDecisionType'
+        decisionStatus:
+          $ref: '#/components/schemas/CommunityDecisionStatus'
+        approvalBasisType:
+          $ref: '#/components/schemas/CommunityDecisionBasisType'
+        approvalBasisSummary:
+          type: string
+        title:
+          type: string
+        summary:
+          type: string
+        decidedAt:
+          type: string
+          format: date-time
+        effectiveDate:
+          type: string
+          format: date
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     CommunityProjectStatus:
       type: string
       enum: [TODO, IN_PROGRESS, DONE]
@@ -3230,6 +3400,62 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/CommunityPermissionPolicyRuleRequest'
+    CreateCommunityDecisionRequest:
+      type: object
+      required:
+        - communityId
+        - title
+        - summary
+        - decisionType
+        - decisionStatus
+        - approvalBasisType
+        - approvalBasisSummary
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        linkedProposalId:
+          type: string
+          format: uuid
+          nullable: true
+        governanceDocumentId:
+          type: string
+          format: uuid
+          nullable: true
+        projectBoardId:
+          type: string
+          format: uuid
+          nullable: true
+        executionOwnerUsername:
+          type: string
+          maxLength: 120
+          nullable: true
+        title:
+          type: string
+          minLength: 8
+          maxLength: 180
+        summary:
+          type: string
+          minLength: 20
+          maxLength: 4000
+        decisionType:
+          $ref: '#/components/schemas/CommunityDecisionType'
+        decisionStatus:
+          $ref: '#/components/schemas/CommunityDecisionStatus'
+        approvalBasisType:
+          $ref: '#/components/schemas/CommunityDecisionBasisType'
+        approvalBasisSummary:
+          type: string
+          minLength: 8
+          maxLength: 2000
+        decidedAt:
+          type: string
+          format: date-time
+          nullable: true
+        effectiveDate:
+          type: string
+          format: date
+          nullable: true
     CreateCommunityProjectBoardRequest:
       type: object
       required: [communityId, title, summary]

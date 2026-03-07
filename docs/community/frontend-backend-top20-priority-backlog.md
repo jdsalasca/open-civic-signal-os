@@ -46,12 +46,12 @@ This pack prioritizes work using four filters:
   - expose filters for status, date, and decision type
   - add decision summary surface inside proposal and project detail views
 - Acceptance criteria:
-  - [ ] decision ledger route exists and is navigable from community surfaces
-  - [ ] each decision card links to proposal, vote basis, and execution owner when present
-  - [ ] timeline stays legible on mobile without horizontal overflow
-  - [ ] empty and partial-link states are explicit
+  - [x] decision ledger route exists and is navigable from community surfaces
+  - [x] each decision card links to proposal, vote basis, and execution owner when present
+  - [x] timeline stays legible on mobile without horizontal overflow
+  - [x] empty and partial-link states are explicit
 - Validation:
-  - [ ] Playwright decision-ledger browse flow
+  - [x] Playwright decision-ledger browse flow
   - [ ] responsive evidence desktop + mobile
 
 ### FE-02 `story:OCS-P1-048` Public trust metrics dashboard UX
@@ -204,12 +204,12 @@ This pack prioritizes work using four filters:
   - ledger list/detail endpoints
   - explicit lifecycle states for decisions
 - Acceptance criteria:
-  - [ ] each decision links to one authoritative basis
-  - [ ] execution owner is visible when assigned
-  - [ ] records are community-scoped and auditable
+  - [x] each decision links to one authoritative basis
+  - [x] execution owner is visible when assigned
+  - [x] records are community-scoped and auditable
 - Validation:
-  - [ ] integration tests for linked-record retrieval
-  - [ ] OpenAPI + ADR update
+  - [x] integration tests for linked-record retrieval
+  - [x] OpenAPI + ADR update
 
 ### BE-02 `story:OCS-P1-048` Trust metrics aggregation API
 - Rank: `B2`

@@ -10,21 +10,21 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Current execution plan: 05-25 (GSD Documentation Consistency Pass)  
-Tracked phase subplans: 28  
-Tracked project plans: 41  
+Current execution plan: 05-26 (Community Decision Ledger)  
+Tracked phase subplans: 29  
+Tracked project plans: 42  
 Status: In progress  
-Last activity: 2026-03-07 - Normalized `ROADMAP.md`, `STATE.md`, and `current-backlog.md` so Phase 5 uses one rolling execution model and one canonical next-story order
+Last activity: 2026-03-07 - Implemented `OCS-P1-047` community decision ledger across backend, contract, frontend, ADR, and GSD state
 
-Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next target is `OCS-P1-047`
+Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next target is `OCS-P1-048`
 
 ## Performance Metrics
 
 **Execution Snapshot:**
-- Total tracked plans across project: 41
-- Tracked Phase 5 subplans: 28
-- Shipped Phase 5 stories: 14 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `043`, `046`)
-- Immediate queue: `OCS-P1-047`, `OCS-P1-048`, `OCS-P1-042`, `OCS-P1-049`, `OCS-P1-050`
+- Total tracked plans across project: 42
+- Tracked Phase 5 subplans: 29
+- Shipped Phase 5 stories: 15 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `043`, `046`, `047`)
+- Immediate queue: `OCS-P1-048`, `OCS-P1-042`, `OCS-P1-049`, `OCS-P1-050`, `OCS-P1-051`
 
 ## Accumulated Context
 
@@ -77,6 +77,7 @@ Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next t
 - 2026-03-06: Implemented OCS-P1-046 with a backend-owned governance document library, version history, explicit visibility, `MANAGE_GOVERNANCE_LIBRARY` scope, `/communities/governance` workflow, OpenAPI coverage, and ADR-backed contract notes.
 - 2026-03-07: Published `docs/community/frontend-backend-top20-priority-backlog.md` to split the next 20 highest-value tasks into frontend and backend execution lanes with wave sequencing, acceptance criteria, and validation expectations.
 - 2026-03-07: Added `05-25-PLAN.md` and normalized GSD documentation so `ROADMAP.md`, `STATE.md`, and `current-backlog.md` all point to the same Phase 5 rolling execution model and next-story order.
+- 2026-03-07: Implemented `OCS-P1-047` with a backend-owned community decision ledger, explicit approval-basis metadata, execution-owner linkage, `MANAGE_DECISION_LEDGER` scope, `/communities/decisions` workflow, OpenAPI coverage, ADR update, and targeted backend integration tests.
 
 ### Pending Todos
 
@@ -96,5 +97,5 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-07  
-Stopped at: Normalized Phase 5 GSD state/backlog documentation after publishing the top-20 priority pack; next target remains `OCS-P1-047` community decision ledger  
+Stopped at: Shipped `OCS-P1-047` community decision ledger; next target is `OCS-P1-048` public trust metrics dashboard  
 Resume file: None

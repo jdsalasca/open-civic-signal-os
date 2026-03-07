@@ -23,6 +23,7 @@ const CommunityBlog = lazy(() => import("./views/CommunityBlog").then(m => ({ de
 const CommunityFeed = lazy(() => import("./views/CommunityFeed").then(m => ({ default: m.CommunityFeed })));
 const CommunityMap = lazy(() => import("./views/CommunityMap").then(m => ({ default: m.CommunityMap })));
 const CommunityProposals = lazy(() => import("./views/CommunityProposals").then(m => ({ default: m.CommunityProposals })));
+const CommunityDecisions = lazy(() => import("./views/CommunityDecisions").then(m => ({ default: m.CommunityDecisions })));
 const CommunityProjects = lazy(() => import("./views/CommunityProjects").then(m => ({ default: m.CommunityProjects })));
 const CommunityGovernance = lazy(() => import("./views/CommunityGovernance").then(m => ({ default: m.CommunityGovernance })));
 const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
@@ -141,6 +142,7 @@ export function App() {
               <Route path="/communities/feed" element={<CommunityFeed />} />
               <Route path="/communities/map" element={<CommunityMap />} />
               <Route path="/communities/proposals" element={<CommunityProposals />} />
+              <Route path="/communities/decisions" element={<CommunityDecisions />} />
               <Route path="/communities/projects" element={<CommunityProjects />} />
               <Route path="/communities/governance" element={<CommunityGovernance />} />
             </Route>

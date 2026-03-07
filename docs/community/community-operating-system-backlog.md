@@ -435,12 +435,12 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - communities can audit the path from debate to execution
 - Acceptance criteria:
-  - [ ] each decision links to source proposal or record
-  - [ ] vote or approval basis is visible
-  - [ ] execution owner is visible where applicable
+  - [x] each decision links to source proposal or record
+  - [x] vote or approval basis is visible
+  - [x] execution owner is visible where applicable
 - Validation:
-  - [ ] backend decision-link tests
-  - [ ] Playwright decision timeline audit
+  - [x] backend decision-link tests
+  - [x] Playwright decision timeline audit
 
 ### `story:OCS-P1-048` Public Trust Metrics Dashboard
 

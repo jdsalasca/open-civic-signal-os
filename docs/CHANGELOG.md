@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Community Decision Ledger**: Added a backend-owned decision ledger with explicit approval-basis metadata, linked proposal/governance/project references, `MANAGE_DECISION_LEDGER` scope, OpenAPI coverage, and a new `/communities/decisions` workflow so communities can trace formal decisions into accountable execution ownership. (`story:OCS-P1-047`)
 - **Top-20 Product Priority Backlog Pack**: Added a GSD-aligned backlog split with the 20 highest-value next tasks across frontend and backend, including execution waves, acceptance criteria, and validation expectations anchored to the current product state. (`planning`)
 - **Governance Library**: Added a backend-owned governance document repository with searchable type/visibility filters, version history, `MANAGE_GOVERNANCE_LIBRARY` scope, OpenAPI coverage, and a new `/communities/governance` workflow so communities can find statutes, minutes, budgets, reports, and agreements before conflicts escalate. (`story:OCS-P1-046`)
 - **Community Project Boards**: Added backend-owned execution boards with linked proposals, deterministic task stages, assignee and due-date support, task notes, OpenAPI coverage, and a new `/communities/projects` kanban workflow so communities can track delivery work instead of stopping at proposal intent. (`story:OCS-P1-043`)

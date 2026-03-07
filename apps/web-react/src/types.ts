@@ -133,6 +133,7 @@ export type CommunityMembership = {
 
 export type CommunityPermissionScope =
   | "CREATE_PROPOSAL"
+  | "MANAGE_DECISION_LEDGER"
   | "MANAGE_GOVERNANCE_LIBRARY"
   | "MANAGE_PROJECT_BOARDS"
   | "CREATE_THREAD"
@@ -356,6 +357,52 @@ export type GovernanceDocument = {
   currentVersionNumber: number;
   currentVersion: GovernanceDocumentVersion | null;
   versions: GovernanceDocumentVersion[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CommunityDecisionType =
+  | "APPROVAL"
+  | "REJECTION"
+  | "PRIORITIZATION"
+  | "DIRECTIVE"
+  | "STATUS_UPDATE";
+
+export type CommunityDecisionStatus =
+  | "RECORDED"
+  | "IN_EXECUTION"
+  | "COMPLETED"
+  | "REJECTED"
+  | "SUPERSEDED";
+
+export type CommunityDecisionBasisType =
+  | "COMMUNITY_VOTE"
+  | "COORDINATOR_REVIEW"
+  | "GOVERNANCE_RECORD"
+  | "STAFF_DIRECTIVE"
+  | "MIXED_RECORD";
+
+export type CommunityDecision = {
+  id: string;
+  communityId: string;
+  linkedProposalId?: string | null;
+  linkedProposalTitle?: string | null;
+  governanceDocumentId?: string | null;
+  governanceDocumentTitle?: string | null;
+  projectBoardId?: string | null;
+  projectBoardTitle?: string | null;
+  decidedBy: string;
+  decidedByUsername: string;
+  executionOwnerId?: string | null;
+  executionOwnerUsername?: string | null;
+  decisionType: CommunityDecisionType;
+  decisionStatus: CommunityDecisionStatus;
+  approvalBasisType: CommunityDecisionBasisType;
+  approvalBasisSummary: string;
+  title: string;
+  summary: string;
+  decidedAt: string;
+  effectiveDate?: string | null;
   createdAt: string;
   updatedAt: string;
 };

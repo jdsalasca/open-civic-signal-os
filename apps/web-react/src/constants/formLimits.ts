@@ -59,4 +59,13 @@ export const FORM_LIMITS = {
     changeSummaryMax: 500,
     sourceUrlMax: 1200,
   },
+  decisions: {
+    titleMin: 8,
+    titleMax: 180,
+    summaryMin: 20,
+    summaryMax: 4000,
+    approvalBasisMin: 8,
+    approvalBasisMax: 2000,
+    executionOwnerMax: 120,
+  },
 } as const;

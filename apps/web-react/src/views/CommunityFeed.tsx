@@ -76,6 +76,13 @@ export function CommunityFeed() {
               />
               <CivicButton
                 type="button"
+                icon="pi pi-sitemap"
+                label={t("nav.community_decisions")}
+                variant="ghost"
+                onClick={() => navigate("/communities/decisions")}
+              />
+              <CivicButton
+                type="button"
                 icon="pi pi-book"
                 label={t("nav.community_governance")}
                 variant="ghost"
@@ -171,6 +178,13 @@ export function CommunityFeed() {
                     icon="pi pi-file-edit"
                     variant="ghost"
                     onClick={() => navigate("/communities/proposals")}
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t("nav.community_decisions")}
+                    icon="pi pi-sitemap"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/decisions")}
                   />
                   <CivicButton
                     type="button"

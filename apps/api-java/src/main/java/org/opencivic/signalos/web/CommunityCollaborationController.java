@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.service.CommunityCollaborationService;
+import org.opencivic.signalos.service.CommunityDecisionLedgerService;
 import org.opencivic.signalos.service.CommunityProjectBoardService;
 import org.opencivic.signalos.service.CommunityProposalDeliberationService;
 import org.opencivic.signalos.service.CommunityProposalService;
@@ -14,10 +15,12 @@ import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityHomeResponse;
+import org.opencivic.signalos.web.dto.CommunityDecisionResponse;
 import org.opencivic.signalos.web.dto.CommunityProjectBoardResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalDeliberationResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityProjectBoardRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityDecisionRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskCommentRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProposalDeliberationRequest;
@@ -58,6 +61,7 @@ import java.util.Map;
 @RequestMapping("/api/community")
 public class CommunityCollaborationController {
     private final CommunityCollaborationService collaborationService;
+    private final CommunityDecisionLedgerService decisionLedgerService;
     private final CommunityProjectBoardService projectBoardService;
     private final CommunityProposalService proposalService;
     private final CommunityProposalDeliberationService proposalDeliberationService;
@@ -66,6 +70,7 @@ public class CommunityCollaborationController {
 
     public CommunityCollaborationController(
         CommunityCollaborationService collaborationService,
+        CommunityDecisionLedgerService decisionLedgerService,
         CommunityProjectBoardService projectBoardService,
         CommunityProposalService proposalService,
         CommunityProposalDeliberationService proposalDeliberationService,
@@ -73,6 +78,7 @@ public class CommunityCollaborationController {
         CivicEngagementService engagementService
     ) {
         this.collaborationService = collaborationService;
+        this.decisionLedgerService = decisionLedgerService;
         this.projectBoardService = projectBoardService;
         this.proposalService = proposalService;
         this.proposalDeliberationService = proposalDeliberationService;
@@ -290,6 +296,41 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return proposalService.updateProposal(proposalId, request, principal.getName());
+    }
+
+    @GetMapping("/decisions")
+    public List<CommunityDecisionResponse> getDecisions(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String decisionStatus,
+        @RequestParam(required = false) String decisionType,
+        @RequestParam(required = false) LocalDate dateFrom,
+        @RequestParam(required = false) LocalDate dateTo,
+        Principal principal
+    ) {
+        return decisionLedgerService.getDecisions(
+            communityId,
+            decisionStatus,
+            decisionType,
+            dateFrom,
+            dateTo,
+            principal.getName()
+        );
+    }
+
+    @GetMapping("/decisions/{decisionId}")
+    public CommunityDecisionResponse getDecision(
+        @PathVariable UUID decisionId,
+        Principal principal
+    ) {
+        return decisionLedgerService.getDecision(decisionId, principal.getName());
+    }
+
+    @PostMapping("/decisions")
+    public CommunityDecisionResponse createDecision(
+        @Valid @RequestBody CreateCommunityDecisionRequest request,
+        Principal principal
+    ) {
+        return decisionLedgerService.createDecision(request, principal.getName());
     }
 
     @GetMapping("/projects")
