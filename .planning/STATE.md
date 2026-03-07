@@ -10,32 +10,21 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Plan: 21 of 5 in current phase  
+Current execution plan: 05-25 (GSD Documentation Consistency Pass)  
+Tracked phase subplans: 28  
+Tracked project plans: 41  
 Status: In progress  
-Last activity: 2026-03-07 - Published a GSD top-20 frontend/backend priority backlog to sequence the highest-value next work after governance library delivery
+Last activity: 2026-03-07 - Normalized `ROADMAP.md`, `STATE.md`, and `current-backlog.md` so Phase 5 uses one rolling execution model and one canonical next-story order
 
-Progress: [██████████] 100%
+Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next target is `OCS-P1-047`
 
 ## Performance Metrics
 
-**Velocity:**
-- Total plans completed: 15
-- Average duration: ~28m
-- Total execution time: ~6.9 hours
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 1 | 3 | 85m | 28m |
-| 2 | 4 | 115m | 29m |
-| 3 | 3 | 113m | 38m |
-| 4 | 4 | 88m | 22m |
-| 5 | 4 | 122m | 31m |
-
-**Recent Trend:**
-- Last 5 plans: 21m, 24m, 28m, 30m, 34m
-- Trend: Stable
+**Execution Snapshot:**
+- Total tracked plans across project: 41
+- Tracked Phase 5 subplans: 28
+- Shipped Phase 5 stories: 14 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `043`, `046`)
+- Immediate queue: `OCS-P1-047`, `OCS-P1-048`, `OCS-P1-042`, `OCS-P1-049`, `OCS-P1-050`
 
 ## Accumulated Context
 
@@ -87,6 +76,7 @@ Progress: [██████████] 100%
 - 2026-03-06: Implemented OCS-P1-041 with backend-owned typed deliberation entries, evidence-link validation, moderation that preserves proposal context, OpenAPI contract coverage, and proposal-detail UI sections for pro/con/questions/evidence.
 - 2026-03-06: Implemented OCS-P1-046 with a backend-owned governance document library, version history, explicit visibility, `MANAGE_GOVERNANCE_LIBRARY` scope, `/communities/governance` workflow, OpenAPI coverage, and ADR-backed contract notes.
 - 2026-03-07: Published `docs/community/frontend-backend-top20-priority-backlog.md` to split the next 20 highest-value tasks into frontend and backend execution lanes with wave sequencing, acceptance criteria, and validation expectations.
+- 2026-03-07: Added `05-25-PLAN.md` and normalized GSD documentation so `ROADMAP.md`, `STATE.md`, and `current-backlog.md` all point to the same Phase 5 rolling execution model and next-story order.
 
 ### Pending Todos
 
@@ -105,31 +95,6 @@ See:
 
 ## Session Continuity
 
-Last session: 2026-03-06  
-Stopped at: Published top-20 frontend/backend priority backlog pack; next target remains `OCS-P1-047` community decision ledger  
+Last session: 2026-03-07  
+Stopped at: Normalized Phase 5 GSD state/backlog documentation after publishing the top-20 priority pack; next target remains `OCS-P1-047` community decision ledger  
 Resume file: None
-
-- 2026-03-06: Completed `OCS-P1-043` by adding backend-owned community project boards with linked proposals, deterministic task statuses, assignee and due-date support, task execution notes, `/api/community/projects*` endpoints, a new `/communities/projects` kanban workflow, OpenAPI/ADR updates, and backend plus Playwright validation coverage.
-
-
-- 2026-03-05: Hardened light-theme contrast semantics by introducing theme-aware neutral surface tokens, reworking shared ghost/button and neutral badge contrast, and replacing legacy overlay backgrounds in engagement and thread surfaces so text no longer falls into dark-on-dark failures across themes.
-
-- 2026-03-05: Extended the light-theme contrast pass into Verify, Settings, SignalDetail, and PrimeReact password overlays so auth/help/timeline surfaces now inherit semantic soft-surface tokens instead of legacy alpha utility backgrounds.
-
-- 2026-03-05: Normalized another cross-app layer of light-theme surfaces by moving toolbars, action bars, empty states, digest/alerts, and datatable hover states onto the same semantic soft-surface system used by the broader UI refresh.
-
-- 2026-03-05: Removed another set of residual legacy alpha utilities from dashboard, report wizard, and communities so steppers, membership rows, and dialog inputs now inherit the same semantic surface/border system as the rest of the refreshed UI.
-
-- 2026-03-05: Polished another residual UX pass by aligning blog/thread metadata borders, calming thread meta tracking, and replacing remaining overly technical mono-style identifiers in user-facing contribution lists.
-
-- 2026-03-05: Aligned the remaining error-state and shell microcopy layer by localizing the 404 view and replacing harsher micro-label sizing in the shared layout with calmer, more legible text tokens.
-
-- 2026-03-05: Softened another residual typography layer by removing overly technical mono/min utility treatments from engagement comments, signal detail metadata, moderation refs, and settings role codes.
-
-- 2026-03-05: Removed another cross-app residue layer by moving shared card headers, skeleton loaders, sidebar chrome, signal table IDs, alert badges, and thread timestamps/reply counters onto semantic surface tokens and standard micro-typography.
-
-- 2026-03-05: Softened another auth-and-intake layer by calming onboarding cards, verification-code tracking, report slider helper labels, digest score labels, and support blocks so small-screen readability improves without introducing new local patterns.
-
-- 2026-03-05: Standardized another shared readability layer by softening `CivicField` and `CivicStat` label tracking, moving login/unauthorized hero blocks onto semantic surfaces, and aligning My Contributions with the shared page-header/meta pattern.
-
-- 2026-03-05: Calmed another high-density label layer across Dashboard, Community Home, Signal Detail, and Settings by replacing the widest uppercase tracking treatment with the shared medium-spacing label standard.

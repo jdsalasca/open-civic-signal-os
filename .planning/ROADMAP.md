@@ -40,8 +40,8 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: Fix Playwright wrapper fallback behavior and add Windows path normalization checks.
-- [ ] 02-02: Raise and enforce release coverage minimum with updated reporting.
+- [x] 02-01: Fix Playwright wrapper fallback behavior and add Windows path normalization checks.
+- [x] 02-02: Raise and enforce release coverage minimum with updated reporting.
 - [x] 02-03: Expand auth/verify degraded-mode tests and UX evidence artifacts.
 - [x] 02-04: Make ingest pipeline deterministic and idempotent for reproducible replays.
 
@@ -84,14 +84,17 @@ Plans:
 1. Communities can model people, roles, spaces, and permissions without leaking sensitive data or creating opaque rules.
 2. The product supports the full loop from issue reporting and proposals to execution boards, decisions, and public metrics.
 3. Every new governance-sensitive feature maps to API, contract, and UI ownership with auditable validation evidence.
-**Plans**: 5 plans
+**Plans**: Rolling execution plan set (28 tracked subplans so far under `.planning/phases/05-community-operating-system-expansion/`)
 
-Plans:
+Plan groups:
 - [x] 05-01: Convert community operating system redesign into executable GSD backlog, requirements, and wave sequencing.
-- [ ] 05-02: Implement identity, hierarchy, and permissions foundations.
-- [ ] 05-03: Implement communication, issue workflow, and deliberation foundations.
-- [ ] 05-04: Implement execution, governance, and transparency foundations.
+- [x] 05-02: Implement identity, hierarchy, and permissions foundations.
+- [x] 05-03: Implement communication, issue workflow, and deliberation foundations.
+- [x] 05-04: Implement execution, governance, and transparency foundations through rolling subplans.
 - [ ] 05-05: Validate privacy, accessibility, onboarding, integrations, and pilot readiness.
+
+Operational note:
+- Detailed execution for Phase 5 moved into rolling subplans `05-04A` through `05-25` and the canonical queue in `docs/community/current-backlog.md`.
 
 ## Progress
 
@@ -101,4 +104,4 @@ Plans:
 | 2. Quality Gate Hardening | 4/4 | Completed | 2026-03-04 |
 | 3. Community Workflow Scalability | 3/3 | Completed | 2026-03-04 |
 | 4. Frontend Audience and Usability Growth | 4/4 | Completed | 2026-03-05 |
-| 5. Community Operating System Expansion | 1/5 | In progress | - |
+| 5. Community Operating System Expansion | Rolling (28 tracked subplans) | In progress | - |

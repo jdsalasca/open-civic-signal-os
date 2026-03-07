@@ -38,6 +38,9 @@
 - **Moderation Queue**: Dedicated view for Staff and SuperAdmins to approve or reject flagged signals with internal notes. (#30)
 - **Infrastructure Secrets Management**: Migrated sensitive credentials to a unified `.env` file, removing hardcoded values from Docker Compose. (#31)
 - **Login-First Policy**: Updated routing to force authentication before accessing the dashboard or reporting issues. (#29)
+
+### Changed
+- **GSD Documentation Consistency Pass**: Normalized `ROADMAP.md`, `STATE.md`, and `current-backlog.md` so Phase 5 now uses one explicit rolling execution model, one canonical next-story order, and no stale pre-Phase-5 execution queue mixed into the active backlog. (`planning`)
 - **Governance Insights UI**: Major dashboard enhancement with real-time category distribution charts and high-quality visual hierarchy. (#28)
 - **Citizen Voting System**: Users can now "Support" issues from the detail view. Each vote increases the community support factor and automatically recalculates the global priority score. (#27)
 - **Premium UI Overhaul**: Replaced custom CSS with a complete **PrimeReact** design system integration. (#26)
