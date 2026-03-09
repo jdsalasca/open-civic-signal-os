@@ -44,6 +44,10 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private ProfileVisibility activityVisibility = ProfileVisibility.COMMUNITY;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private InterfaceMode interfaceMode = InterfaceMode.SIMPLE;
 
     @Column(nullable = false)
@@ -93,6 +97,8 @@ public class User {
     public void setProfileVisibility(ProfileVisibility profileVisibility) { this.profileVisibility = profileVisibility; }
     public ProfileVisibility getAffiliationVisibility() { return affiliationVisibility; }
     public void setAffiliationVisibility(ProfileVisibility affiliationVisibility) { this.affiliationVisibility = affiliationVisibility; }
+    public ProfileVisibility getActivityVisibility() { return activityVisibility; }
+    public void setActivityVisibility(ProfileVisibility activityVisibility) { this.activityVisibility = activityVisibility; }
     public InterfaceMode getInterfaceMode() { return interfaceMode; }
     public void setInterfaceMode(InterfaceMode interfaceMode) { this.interfaceMode = interfaceMode; }
     public String getAvatarPreset() { return avatarPreset; }

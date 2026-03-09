@@ -75,7 +75,9 @@ public class CommunityAccessService {
     }
 
     private void enforceActiveSanction(UUID userId, UUID communityId, CommunityPermissionScope scope) {
-        if (scope == CommunityPermissionScope.MANAGE_MODERATION_QUEUE || scope == CommunityPermissionScope.VIEW_SENSITIVE_DATA) {
+        if (scope == CommunityPermissionScope.MANAGE_MODERATION_QUEUE
+            || scope == CommunityPermissionScope.VIEW_SENSITIVE_DATA
+            || scope == CommunityPermissionScope.MANAGE_PRIVACY_SETTINGS) {
             return;
         }
         CommunitySanction sanction = sanctionRepository.findActiveSanctions(

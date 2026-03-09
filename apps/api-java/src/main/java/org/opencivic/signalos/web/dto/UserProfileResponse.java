@@ -14,6 +14,7 @@ public record UserProfileResponse(
     List<String> affiliations,
     ProfileVisibility profileVisibility,
     ProfileVisibility affiliationVisibility,
+    ProfileVisibility activityVisibility,
     InterfaceMode interfaceMode,
     String avatarPreset,
     List<ProfileAchievementResponse> achievements,

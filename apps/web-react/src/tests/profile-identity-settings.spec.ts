@@ -30,6 +30,9 @@ test.describe('Profile Identity Settings', () => {
     await page.getByTestId('affiliation-visibility-select').locator('.p-dropdown').click();
     await page.getByText('Admins only', { exact: true }).click();
 
+    await page.getByTestId('activity-visibility-select').locator('.p-dropdown').click();
+    await page.getByText('Shared community only', { exact: true }).click();
+
     await page.getByTestId('save-profile-button').click();
     await expect(page.getByText('Public identity updated.')).toBeVisible();
 
@@ -41,6 +44,8 @@ test.describe('Profile Identity Settings', () => {
     await expect(page.getByTestId('profile-settings-card')).toContainText('Shared community only');
     await expect(page.getByTestId('profile-settings-card')).toContainText('Admins only');
     await expect(page.getByTestId('profile-settings-card')).toContainText('Authority');
+    await expect(page.getByTestId('privacy-center-card')).toContainText('Sensitive-data access log');
+    await expect(page.getByTestId('privacy-center-card')).toContainText('Shared community only');
     await expect(page.getByTestId('avatar-preset-harbor-light')).toHaveClass(/avatar-preset-option-selected/);
     await expect(page.getByTestId('profile-achievements-card')).toContainText('Ten incidents reported');
     await expect(page.getByTestId('settings-community-memberships-card')).toContainText('Community belonging');

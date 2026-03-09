@@ -23,8 +23,17 @@ import { CivicMetaRow } from "../components/ui/CivicMetaRow";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicIdentityAvatar } from "../components/ui/CivicIdentityAvatar";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { ACHIEVEMENT_META, AVATAR_PRESETS } from "../constants/profileIdentity";
-import { InterfaceMode, ProfileAchievement, ProfileVisibility, UserProfile } from "../types";
+import {
+  CommunityOpenDataPolicy,
+  CommunityPrivacyPolicy,
+  InterfaceMode,
+  ProfileAchievement,
+  ProfileVisibility,
+  SensitiveDataAccessLog,
+  UserProfile
+} from "../types";
 import { toRoleLabel } from "../constants/roleLabels";
 
 interface ThemeOption {
@@ -58,6 +67,7 @@ interface ProfileFormState {
   affiliationsInput: string;
   profileVisibility: ProfileVisibility;
   affiliationVisibility: ProfileVisibility;
+  activityVisibility: ProfileVisibility;
   interfaceMode: 'simple' | 'advanced';
   avatarPreset: string;
 }
@@ -70,6 +80,7 @@ const EMPTY_PROFILE_FORM: ProfileFormState = {
   affiliationsInput: '',
   profileVisibility: 'PUBLIC',
   affiliationVisibility: 'COMMUNITY',
+  activityVisibility: 'COMMUNITY',
   interfaceMode: 'simple',
   avatarPreset: AVATAR_PRESETS[0].id
 };
@@ -84,6 +95,11 @@ export function Settings() {
   const [profileForm, setProfileForm] = useState<ProfileFormState>(EMPTY_PROFILE_FORM);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [accessLogs, setAccessLogs] = useState<SensitiveDataAccessLog[]>([]);
+  const [accessLogsLoading, setAccessLogsLoading] = useState(true);
+  const [communityPrivacy, setCommunityPrivacy] = useState<CommunityPrivacyPolicy | null>(null);
+  const [communityPrivacyLoading, setCommunityPrivacyLoading] = useState(false);
+  const [communityPrivacySaving, setCommunityPrivacySaving] = useState(false);
 
   const languageOptions = [
     { label: t('settings.languages.en'), value: 'en' },
@@ -135,6 +151,7 @@ export function Settings() {
           affiliationsInput: '',
           profileVisibility: response.data.profileVisibility,
           affiliationVisibility: response.data.affiliationVisibility,
+          activityVisibility: response.data.activityVisibility,
           interfaceMode: response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple',
           avatarPreset: response.data.avatarPreset ?? AVATAR_PRESETS[0].id
         });
@@ -154,6 +171,72 @@ export function Settings() {
       mounted = false;
     };
   }, [setInterfaceMode, t]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadAccessLogs = async () => {
+      try {
+        setAccessLogsLoading(true);
+        const response = await apiClient.get<SensitiveDataAccessLog[]>('auth/privacy/access-logs');
+        if (!mounted) {
+          return;
+        }
+        setAccessLogs(response.data);
+      } catch {
+        if (mounted) {
+          toast.error(t('settings.privacy_access_logs_load_error'));
+        }
+      } finally {
+        if (mounted) {
+          setAccessLogsLoading(false);
+        }
+      }
+    };
+
+    loadAccessLogs();
+    return () => {
+      mounted = false;
+    };
+  }, [t]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCommunityPrivacy = async () => {
+      if (!activeCommunityId) {
+        setCommunityPrivacy(null);
+        return;
+      }
+
+      try {
+        setCommunityPrivacyLoading(true);
+        const response = await apiClient.get<CommunityPrivacyPolicy>(`communities/${activeCommunityId}/privacy`);
+        if (!mounted) {
+          return;
+        }
+        setCommunityPrivacy(response.data);
+      } catch (error) {
+        if (!mounted) {
+          return;
+        }
+        setCommunityPrivacy(null);
+        const status = (error as { response?: { status?: number } })?.response?.status;
+        if (status && status !== 403) {
+          toast.error(t('settings.community_privacy_load_error'));
+        }
+      } finally {
+        if (mounted) {
+          setCommunityPrivacyLoading(false);
+        }
+      }
+    };
+
+    loadCommunityPrivacy();
+    return () => {
+      mounted = false;
+    };
+  }, [activeCommunityId, t]);
 
   const handleLanguageChange = (e: SelectButtonChangeEvent) => {
     const lang = e.value as 'en' | 'es';
@@ -238,6 +321,7 @@ export function Settings() {
         affiliations: mergeAffiliationTags([...profileForm.affiliations, ...profileForm.affiliationsInput.split(',')]),
         profileVisibility: profileForm.profileVisibility,
         affiliationVisibility: profileForm.affiliationVisibility,
+        activityVisibility: profileForm.activityVisibility,
         interfaceMode: profileForm.interfaceMode.toUpperCase() as InterfaceMode,
         avatarPreset: profileForm.avatarPreset
       };
@@ -251,6 +335,7 @@ export function Settings() {
         affiliationsInput: '',
         profileVisibility: response.data.profileVisibility,
         affiliationVisibility: response.data.affiliationVisibility,
+        activityVisibility: response.data.activityVisibility,
         interfaceMode: response.data.interfaceMode === 'ADVANCED' ? 'advanced' : 'simple',
         avatarPreset: response.data.avatarPreset ?? AVATAR_PRESETS[0].id
       });
@@ -260,6 +345,25 @@ export function Settings() {
       toast.error(t('settings.profile_save_error'));
     } finally {
       setProfileSaving(false);
+    }
+  };
+
+  const handleCommunityPrivacyChange = async (openDataPolicy: CommunityOpenDataPolicy) => {
+    if (!activeCommunityId) {
+      return;
+    }
+
+    try {
+      setCommunityPrivacySaving(true);
+      const response = await apiClient.put<CommunityPrivacyPolicy>(`communities/${activeCommunityId}/privacy`, {
+        openDataPolicy
+      });
+      setCommunityPrivacy(response.data);
+      toast.success(t('settings.community_privacy_saved'));
+    } catch {
+      toast.error(t('settings.community_privacy_save_error'));
+    } finally {
+      setCommunityPrivacySaving(false);
     }
   };
 
@@ -283,6 +387,7 @@ export function Settings() {
   const identityRole = profile?.civicRole ? t(`settings.civic_roles.${profile.civicRole}`, { defaultValue: profile.civicRole }) : t('settings.identity_role_fallback');
   const profileVisibilityLabel = t(`settings.visibility.${profile?.profileVisibility ?? 'PUBLIC'}`);
   const affiliationVisibilityLabel = t(`settings.visibility.${profile?.affiliationVisibility ?? 'COMMUNITY'}`);
+  const activityVisibilityLabel = t(`settings.visibility.${profile?.activityVisibility ?? 'COMMUNITY'}`);
   const activeMembership = memberships.find((membership) => membership.communityId === activeCommunityId) ?? memberships[0] ?? null;
   const activeCommunityPath = activeMembership?.breadcrumb.map((item) => item.name).join(' / ') ?? t('settings.community_membership_empty_desc');
   const communitySuggestions = useMemo(
@@ -298,6 +403,19 @@ export function Settings() {
   const suggestedAffiliations = communitySuggestions.filter((item) => !profileForm.affiliations.includes(item)).slice(0, 6);
   const selectedAvatarPreset = AVATAR_PRESETS.find((item) => item.id === profileForm.avatarPreset) ?? AVATAR_PRESETS[0];
   const achievementList = (profile?.achievements ?? []) as ProfileAchievement[];
+  const openDataPolicyOptions: Option[] = [
+    { label: t('settings.open_data_policies.DISABLED'), value: 'DISABLED' },
+    { label: t('settings.open_data_policies.AGGREGATED_PUBLIC'), value: 'AGGREGATED_PUBLIC' },
+    { label: t('settings.open_data_policies.AGGREGATED_AND_DECISIONS'), value: 'AGGREGATED_AND_DECISIONS' }
+  ];
+
+  const formatAccessTime = (value?: string | null) =>
+    value
+      ? new Intl.DateTimeFormat(i18n.language, {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }).format(new Date(value))
+      : t('settings.access_logs_pending');
 
   return (
     <Layout>
@@ -357,6 +475,7 @@ export function Settings() {
                 <div className="w-full text-left">
                   <CivicMetaRow label={t('settings.profile_visibility_label')} value={profileVisibilityLabel} />
                   <CivicMetaRow label={t('settings.affiliation_visibility_label')} value={affiliationVisibilityLabel} />
+                  <CivicMetaRow label={t('settings.activity_visibility_label')} value={activityVisibilityLabel} />
                   <div className="civic-meta-stack">
                     <span className="civic-meta-label">{t('settings.affiliations_preview')}</span>
                     <div className="flex gap-2 flex-wrap justify-content-end">
@@ -651,6 +770,20 @@ export function Settings() {
                       />
                     </CivicField>
                   </div>
+                  <div className="col-12 md:col-6">
+                    <CivicField label={t('settings.activity_visibility_label')} helpText={t('settings.activity_visibility_help')}>
+                      <CivicSelect
+                        value={profileForm.activityVisibility}
+                        options={visibilityOptions}
+                        optionLabel="label"
+                        optionValue="value"
+                        onChange={(e) => handleProfileField('activityVisibility', e.value as ProfileVisibility)}
+                        className="w-full"
+                        disabled={profileLoading}
+                        data-testid="activity-visibility-select"
+                      />
+                    </CivicField>
+                  </div>
                 </div>
 
                 <CivicActionBar>
@@ -664,6 +797,179 @@ export function Settings() {
                     data-testid="save-profile-button"
                   />
                 </CivicActionBar>
+              </div>
+            </CivicCard>
+
+            <CivicCard title={t('settings.privacy_center_title')} className="mb-6" data-testid="privacy-center-card">
+              <div className="flex flex-column gap-5">
+                <p className="text-secondary text-sm m-0 leading-relaxed">{t('settings.privacy_center_help')}</p>
+
+                <div className="grid">
+                  <div className="col-12 md:col-4">
+                    <CivicStatCard
+                      label={t('settings.privacy_stat_profile')}
+                      value={profileVisibilityLabel}
+                      supportingText={t('settings.profile_visibility_help')}
+                      compact
+                    />
+                  </div>
+                  <div className="col-12 md:col-4">
+                    <CivicStatCard
+                      label={t('settings.privacy_stat_affiliations')}
+                      value={affiliationVisibilityLabel}
+                      supportingText={t('settings.affiliation_visibility_help')}
+                      compact
+                    />
+                  </div>
+                  <div className="col-12 md:col-4">
+                    <CivicStatCard
+                      label={t('settings.privacy_stat_activity')}
+                      value={activityVisibilityLabel}
+                      supportingText={t('settings.activity_visibility_help')}
+                      compact
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-column gap-3">
+                  <div className="flex justify-content-between gap-3 flex-wrap align-items-end">
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-wide text-muted">
+                        {t('settings.privacy_access_logs_title')}
+                      </div>
+                      <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                        {t('settings.privacy_access_logs_help')}
+                      </p>
+                    </div>
+                    <CivicBadge
+                      label={accessLogsLoading ? t('common.loading') : t('settings.privacy_access_logs_count', { count: accessLogs.length })}
+                      severity="neutral"
+                    />
+                  </div>
+
+                  {accessLogsLoading ? (
+                    <div className="border-round-xl border-1 border-surface-soft bg-surface-soft p-4">
+                      <p className="text-sm text-secondary m-0">{t('common.loading')}</p>
+                    </div>
+                  ) : accessLogs.length === 0 ? (
+                    <CivicEmptyState
+                      icon="pi pi-shield"
+                      title={t('settings.privacy_access_logs_empty_title')}
+                      description={t('settings.privacy_access_logs_empty_desc')}
+                    />
+                  ) : (
+                    <div className="flex flex-column gap-3" data-testid="privacy-access-log-list">
+                      {accessLogs.map((log) => (
+                        <div key={log.id} className="border-round-xl border-1 border-surface-soft bg-surface-soft p-4">
+                          <div className="u-card-split-header">
+                            <div className="u-card-copy">
+                              <div className="font-black text-main">
+                                {t(`settings.access_types.${log.accessType}`)}
+                              </div>
+                              <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                                {log.note}
+                              </p>
+                            </div>
+                            <CivicBadge label={formatAccessTime(log.createdAt)} severity="neutral" />
+                          </div>
+                          <div className="mt-3 grid">
+                            <div className="col-12 md:col-4">
+                              <CivicMetaRow label={t('settings.access_log_actor')} value={log.actorUsername} />
+                            </div>
+                            <div className="col-12 md:col-4">
+                              <CivicMetaRow label={t('settings.access_log_target')} value={log.targetUsername ?? t('settings.access_log_self')} />
+                            </div>
+                            <div className="col-12 md:col-4">
+                              <CivicMetaRow label={t('settings.access_log_scope')} value={log.communityName ?? t('settings.access_log_global')} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-column gap-3" data-testid="community-privacy-policy-card">
+                  <div>
+                    <div className="text-xs font-black uppercase tracking-wide text-muted">
+                      {t('settings.community_privacy_title')}
+                    </div>
+                    <p className="text-sm text-secondary mt-2 mb-0 line-height-3">
+                      {t('settings.community_privacy_help')}
+                    </p>
+                  </div>
+
+                  {communityPrivacyLoading ? (
+                    <div className="border-round-xl border-1 border-surface-soft bg-surface-soft p-4">
+                      <p className="text-sm text-secondary m-0">{t('common.loading')}</p>
+                    </div>
+                  ) : communityPrivacy ? (
+                    <div className="border-round-xl border-1 border-surface-soft bg-surface-soft p-4">
+                      <div className="grid">
+                        <div className="col-12 lg:col-7">
+                          <CivicField
+                            label={t('settings.community_privacy_policy_label')}
+                            helpText={t('settings.community_privacy_policy_help', {
+                              community: communityPrivacy.communityName
+                            })}
+                          >
+                            <CivicSelect
+                              value={communityPrivacy.openDataPolicy}
+                              options={openDataPolicyOptions}
+                              optionLabel="label"
+                              optionValue="value"
+                              disabled={communityPrivacySaving}
+                              onChange={(e) => handleCommunityPrivacyChange(e.value as CommunityOpenDataPolicy)}
+                              data-testid="community-open-data-policy-select"
+                            />
+                          </CivicField>
+                        </div>
+                        <div className="col-12 lg:col-5">
+                          <div className="flex flex-column gap-3">
+                            <CivicMetaRow
+                              label={t('settings.community_privacy_updated_by')}
+                              value={communityPrivacy.updatedByUsername ?? t('settings.community_privacy_not_updated')}
+                            />
+                            <CivicMetaRow
+                              label={t('settings.community_privacy_updated_at')}
+                              value={formatAccessTime(communityPrivacy.updatedAt)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <Divider className="my-4 opacity-10" />
+
+                      <div className="flex flex-column gap-3">
+                        <div className="text-sm font-black text-main">{t('settings.community_privacy_recent_access')}</div>
+                        {communityPrivacy.recentAccessLogs.length === 0 ? (
+                          <p className="text-sm text-secondary m-0">{t('settings.community_privacy_recent_access_empty')}</p>
+                        ) : (
+                          <div className="flex flex-column gap-3">
+                            {communityPrivacy.recentAccessLogs.slice(0, 5).map((log) => (
+                              <div key={log.id} className="border-round-xl border-1 border-surface-muted bg-surface-ground p-3">
+                                <div className="flex justify-content-between gap-3 flex-wrap">
+                                  <div className="text-sm text-main">
+                                    <span className="font-black">{log.actorUsername}</span>{" "}
+                                    <span className="text-secondary">{t(`settings.access_types.${log.accessType}`)}</span>
+                                  </div>
+                                  <span className="text-xs text-muted">{formatAccessTime(log.createdAt)}</span>
+                                </div>
+                                <p className="text-sm text-secondary mt-2 mb-0 line-height-3">{log.note}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <CivicEmptyState
+                      icon="pi pi-lock"
+                      title={t('settings.community_privacy_locked_title')}
+                      description={t('settings.community_privacy_locked_desc')}
+                    />
+                  )}
+                </div>
               </div>
             </CivicCard>
 

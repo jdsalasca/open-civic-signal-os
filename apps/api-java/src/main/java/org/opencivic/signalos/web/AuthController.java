@@ -21,6 +21,7 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.EmailService;
 import org.opencivic.signalos.service.EmailDeliveryResult;
 import org.opencivic.signalos.service.JwtService;
+import org.opencivic.signalos.service.PrivacyAccessLogService;
 import org.opencivic.signalos.web.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -54,6 +55,7 @@ public class AuthController {
     private final RateLimitService rateLimitService;
     private final CommunityMembershipRepository membershipRepository;
     private final SignalRepository signalRepository;
+    private final PrivacyAccessLogService privacyAccessLogService;
 
     private static final Set<String> ALLOWED_AVATAR_PRESETS = Set.of(
         "civic-sunrise",
@@ -80,7 +82,8 @@ public class AuthController {
                           UserDetailsService userDetailsService,
                           RateLimitService rateLimitService,
                           CommunityMembershipRepository membershipRepository,
-                          SignalRepository signalRepository) {
+                          SignalRepository signalRepository,
+                          PrivacyAccessLogService privacyAccessLogService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -90,6 +93,7 @@ public class AuthController {
         this.rateLimitService = rateLimitService;
         this.membershipRepository = membershipRepository;
         this.signalRepository = signalRepository;
+        this.privacyAccessLogService = privacyAccessLogService;
     }
 
     @PostMapping("/register")
@@ -291,6 +295,7 @@ public class AuthController {
             Map.entry("bio", user.getBio()),
             Map.entry("profileVisibility", user.getProfileVisibility().name()),
             Map.entry("affiliationVisibility", user.getAffiliationVisibility().name()),
+            Map.entry("activityVisibility", user.getActivityVisibility().name()),
             Map.entry("interfaceMode", user.getInterfaceMode().name()),
             Map.entry("avatarPreset", sanitizeAvatarPreset(user.getAvatarPreset()))
         );
@@ -316,10 +321,19 @@ public class AuthController {
         user.setAffiliationVisibility(
             request.affiliationVisibility() == null ? ProfileVisibility.COMMUNITY : request.affiliationVisibility()
         );
+        user.setActivityVisibility(
+            request.activityVisibility() == null ? ProfileVisibility.COMMUNITY : request.activityVisibility()
+        );
         user.setInterfaceMode(request.interfaceMode() == null ? InterfaceMode.SIMPLE : request.interfaceMode());
         user.setAvatarPreset(sanitizeAvatarPreset(request.avatarPreset()));
         userRepository.save(user);
         return toProfileResponse(user, ViewerScope.ADMINS, true);
+    }
+
+    @GetMapping("/privacy/access-logs")
+    public List<SensitiveDataAccessLogResponse> getMyPrivacyAccessLogs(Authentication authentication) {
+        User user = requireAuthenticatedUser(authentication);
+        return privacyAccessLogService.getLogsForUser(user.getId());
     }
 
     @GetMapping("/profile/{username}")
@@ -331,6 +345,7 @@ public class AuthController {
         User viewedUser = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResourceNotFoundException("Identity not found."));
         ViewerScope viewerScope = resolveViewerScope(authentication, viewedUser, communityId);
+        maybeAuditSensitiveProfileRead(authentication, viewedUser, viewerScope, communityId);
         return toProfileResponse(viewedUser, viewerScope, false);
     }
 
@@ -390,6 +405,7 @@ public class AuthController {
         String civicRole = revealProfile ? user.getCivicRole() : null;
         String bio = revealProfile ? user.getBio() : null;
         List<String> affiliations = canReveal(user.getAffiliationVisibility(), viewerScope) ? user.getAffiliations() : List.of();
+        boolean revealActivity = canReveal(user.getActivityVisibility(), viewerScope);
 
         return new UserProfileResponse(
             user.getUsername(),
@@ -401,10 +417,32 @@ public class AuthController {
             affiliations,
             user.getProfileVisibility(),
             user.getAffiliationVisibility(),
+            user.getActivityVisibility(),
             user.getInterfaceMode(),
             sanitizeAvatarPreset(user.getAvatarPreset()),
-            buildAchievements(user),
+            revealActivity ? buildAchievements(user) : List.of(),
             viewerScope.name()
+        );
+    }
+
+    private void maybeAuditSensitiveProfileRead(
+        Authentication authentication,
+        User viewedUser,
+        ViewerScope viewerScope,
+        UUID communityId
+    ) {
+        if (authentication == null || viewerScope != ViewerScope.ADMINS) {
+            return;
+        }
+        User actor = userRepository.findByUsername(authentication.getName()).orElse(null);
+        if (actor == null || actor.getId().equals(viewedUser.getId())) {
+            return;
+        }
+        privacyAccessLogService.recordProfileAdminView(
+            actor,
+            viewedUser,
+            communityId,
+            List.of("email", "affiliations", "activity")
         );
     }
 

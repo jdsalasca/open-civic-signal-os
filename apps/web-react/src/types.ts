@@ -76,6 +76,7 @@ export type UserProfile = {
   affiliations: string[];
   profileVisibility: ProfileVisibility;
   affiliationVisibility: ProfileVisibility;
+  activityVisibility: ProfileVisibility;
   interfaceMode: InterfaceMode;
   avatarPreset: string;
   achievements: ProfileAchievement[];
@@ -135,6 +136,7 @@ export type CommunityPermissionScope =
   | "CAST_PROPOSAL_VOTE"
   | "CREATE_PROPOSAL"
   | "MANAGE_MODERATION_QUEUE"
+  | "MANAGE_PRIVACY_SETTINGS"
   | "MANAGE_DECISION_LEDGER"
   | "MANAGE_GOVERNANCE_LIBRARY"
   | "MANAGE_PROJECT_BOARDS"
@@ -153,6 +155,37 @@ export type CommunityPermissionPolicy = {
   allowedRoles: CommunityMembership["role"][];
   updatedBy?: string | null;
   updatedAt?: string | null;
+};
+
+export type SensitiveDataAccessType =
+  | "PROFILE_ADMIN_VIEW"
+  | "SIGNAL_EXPORT";
+
+export type SensitiveDataAccessLog = {
+  id: string;
+  accessType: SensitiveDataAccessType;
+  actorUserId: string;
+  actorUsername: string;
+  targetUserId?: string | null;
+  targetUsername?: string | null;
+  communityId?: string | null;
+  communityName?: string | null;
+  note: string;
+  createdAt: string;
+};
+
+export type CommunityOpenDataPolicy =
+  | "DISABLED"
+  | "AGGREGATED_PUBLIC"
+  | "AGGREGATED_AND_DECISIONS";
+
+export type CommunityPrivacyPolicy = {
+  communityId: string;
+  communityName: string;
+  openDataPolicy: CommunityOpenDataPolicy;
+  updatedByUsername?: string | null;
+  updatedAt?: string | null;
+  recentAccessLogs: SensitiveDataAccessLog[];
 };
 
 export type CommunityThreadMessage = {

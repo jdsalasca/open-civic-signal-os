@@ -15,6 +15,7 @@ import org.opencivic.signalos.web.dto.JoinCommunityRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityPermissionPoliciesRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityRoleRequest;
 import org.opencivic.signalos.service.CommunityPermissionPolicyService;
+import org.opencivic.signalos.service.CommunityPrivacyService;
 import org.opencivic.signalos.service.CommunityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,13 +32,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommunityController {
     private final CommunityService communityService;
     private final CommunityPermissionPolicyService permissionPolicyService;
+    private final CommunityPrivacyService communityPrivacyService;
 
     public CommunityController(
         CommunityService communityService,
-        CommunityPermissionPolicyService permissionPolicyService
+        CommunityPermissionPolicyService permissionPolicyService,
+        CommunityPrivacyService communityPrivacyService
     ) {
         this.communityService = communityService;
         this.permissionPolicyService = permissionPolicyService;
+        this.communityPrivacyService = communityPrivacyService;
     }
 
     @GetMapping
@@ -108,6 +112,23 @@ public class CommunityController {
         Principal principal
     ) {
         return permissionPolicyService.updatePolicies(communityId, request, principal.getName());
+    }
+
+    @GetMapping("/{communityId}/privacy")
+    public org.opencivic.signalos.web.dto.CommunityPrivacyPolicyResponse getCommunityPrivacyPolicy(
+        @PathVariable UUID communityId,
+        Principal principal
+    ) {
+        return communityPrivacyService.getPolicy(communityId, principal.getName());
+    }
+
+    @PutMapping("/{communityId}/privacy")
+    public org.opencivic.signalos.web.dto.CommunityPrivacyPolicyResponse updateCommunityPrivacyPolicy(
+        @PathVariable UUID communityId,
+        @Valid @RequestBody org.opencivic.signalos.web.dto.UpdateCommunityPrivacyPolicyRequest request,
+        Principal principal
+    ) {
+        return communityPrivacyService.updatePolicy(communityId, request, principal.getName());
     }
 
     @PostMapping("/{communityId}/switch")

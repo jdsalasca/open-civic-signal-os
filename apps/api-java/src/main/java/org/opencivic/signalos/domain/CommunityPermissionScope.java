@@ -24,6 +24,10 @@ public enum CommunityPermissionScope {
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON
     )),
+    MANAGE_PRIVACY_SETTINGS(Set.of(
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
     MANAGE_DECISION_LEDGER(Set.of(
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON

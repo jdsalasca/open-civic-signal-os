@@ -56,6 +56,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/auth/privacy/access-logs:
+    get:
+      summary: List the authenticated user's recent sensitive-data access events
+      responses:
+        '200':
+          description: Recent sensitive-data access events for the authenticated user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SensitiveDataAccessLogResponse'
   /api/health:
     get:
       summary: Health check
@@ -780,6 +792,57 @@ paths:
                   $ref: '#/components/schemas/CommunityPermissionPolicy'
         '403':
           description: Community policy denied the action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/communities/{communityId}/privacy:
+    get:
+      summary: Get one community privacy and publication policy with recent sensitive access
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Community privacy policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPrivacyPolicyResponse'
+        '403':
+          description: Community policy denied privacy management access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+    put:
+      summary: Update one community privacy and publication policy
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommunityPrivacyPolicyRequest'
+      responses:
+        '200':
+          description: Updated community privacy policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPrivacyPolicyResponse'
+        '403':
+          description: Community policy denied privacy management access
           content:
             application/json:
               schema:
@@ -1955,6 +2018,11 @@ components:
               type: string
               enum:
                 - CREATE_PROPOSAL
+                - MANAGE_MODERATION_QUEUE
+                - MANAGE_PRIVACY_SETTINGS
+                - MANAGE_DECISION_LEDGER
+                - MANAGE_GOVERNANCE_LIBRARY
+                - MANAGE_PROJECT_BOARDS
                 - CREATE_THREAD
                 - ADD_THREAD_MESSAGE
                 - MODERATE_THREAD_MESSAGE
@@ -3974,6 +4042,8 @@ components:
           $ref: '#/components/schemas/ProfileVisibility'
         affiliationVisibility:
           $ref: '#/components/schemas/ProfileVisibility'
+        activityVisibility:
+          $ref: '#/components/schemas/ProfileVisibility'
         interfaceMode:
           $ref: '#/components/schemas/InterfaceMode'
         avatarPreset:
@@ -4003,7 +4073,7 @@ components:
           type: integer
     UserProfileResponse:
       type: object
-      required: [username, displayName, verified, affiliations, profileVisibility, affiliationVisibility, interfaceMode, avatarPreset, achievements, viewerScope]
+      required: [username, displayName, verified, affiliations, profileVisibility, affiliationVisibility, activityVisibility, interfaceMode, avatarPreset, achievements, viewerScope]
       properties:
         username:
           type: string
@@ -4028,6 +4098,8 @@ components:
           $ref: '#/components/schemas/ProfileVisibility'
         affiliationVisibility:
           $ref: '#/components/schemas/ProfileVisibility'
+        activityVisibility:
+          $ref: '#/components/schemas/ProfileVisibility'
         interfaceMode:
           $ref: '#/components/schemas/InterfaceMode'
         avatarPreset:
@@ -4038,6 +4110,73 @@ components:
             $ref: '#/components/schemas/ProfileAchievementResponse'
         viewerScope:
           $ref: '#/components/schemas/ProfileVisibility'
+    SensitiveDataAccessType:
+      type: string
+      enum: [PROFILE_ADMIN_VIEW, SIGNAL_EXPORT]
+    SensitiveDataAccessLogResponse:
+      type: object
+      required: [id, accessType, actorUserId, actorUsername, note, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        accessType:
+          $ref: '#/components/schemas/SensitiveDataAccessType'
+        actorUserId:
+          type: string
+          format: uuid
+        actorUsername:
+          type: string
+        targetUserId:
+          type: string
+          format: uuid
+          nullable: true
+        targetUsername:
+          type: string
+          nullable: true
+        communityId:
+          type: string
+          format: uuid
+          nullable: true
+        communityName:
+          type: string
+          nullable: true
+        note:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CommunityOpenDataPolicy:
+      type: string
+      enum: [DISABLED, AGGREGATED_PUBLIC, AGGREGATED_AND_DECISIONS]
+    UpdateCommunityPrivacyPolicyRequest:
+      type: object
+      required: [openDataPolicy]
+      properties:
+        openDataPolicy:
+          $ref: '#/components/schemas/CommunityOpenDataPolicy'
+    CommunityPrivacyPolicyResponse:
+      type: object
+      required: [communityId, communityName, openDataPolicy, recentAccessLogs]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        openDataPolicy:
+          $ref: '#/components/schemas/CommunityOpenDataPolicy'
+        updatedByUsername:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+        recentAccessLogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/SensitiveDataAccessLogResponse'
     CreateCommunityRequest:
       type: object
       required: [name, slug]

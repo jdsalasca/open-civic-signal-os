@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Privacy Center and Sensitive Access Logs**: Added backend-owned `activityVisibility`, sensitive-data access logging for protected profile reviews and signal exports, community publication policy management, OpenAPI coverage, ADR documentation, and a privacy-center workflow inside Settings so users and coordinators can audit who saw protected data and how community data is published. (`story:OCS-P1-050`)
 - **Community Moderation Queue and Sanction Engine**: Added backend-owned moderation reports, sanction ladder enforcement, sanction-aware participation guards, OpenAPI coverage, ADR documentation, and a new `/moderation` workflow plus in-context report actions from threads and proposal deliberation so communities can review harmful behavior without losing auditability. (`story:OCS-P1-049`)
 - **Verifiable Community Voting**: Added backend-owned proposal voting rules with configurable vote mode, tally visibility, eligibility gating, anti-abuse audit counters, OpenAPI coverage, and proposal detail UX so communities can formalize decisions before they enter the decision ledger. (`story:OCS-P1-042`)
 - **Community Trust Metrics Dashboard**: Added a backend-owned trust metrics endpoint with deterministic period filters, freshness metadata, low-data states, explainable metric cards, OpenAPI coverage, and a new `/communities/trust` workflow so communities can verify whether reporting, decisions, and execution are producing outcomes. (`story:OCS-P1-048`)
@@ -57,6 +58,7 @@
 - **Automated Visual Audit**: Integrated Playwright for end-to-end visual verification and regression testing. (#20)
 
 ### Fixed
+- **Privacy Validation Baseline**: Added H2-isolated integration coverage for the new privacy endpoints and documented the remaining broad-suite/container env leak so the shipped privacy story has explicit validation evidence even though the repo-wide Maven suite still needs shared harness normalization. (`story:OCS-P1-050` validation)
 - **Docker-Run Moderation Validation**: Stabilized the new moderation integration test inside the Docker runtime by forcing its datasource to an isolated H2 profile when container PostgreSQL env vars would otherwise poison Spring `test` profile startup. (`story:OCS-P1-049` validation)
 - **Community Summary Grid Drift**: Settings, dashboard, and community-home summary blocks now share the same responsive stat-card system instead of diverging local layouts that broke under Spanish copy and narrow widths. (`cross-app community UX`)
 - **Affiliations Tag Editing**: Identity affiliations are now edited and previewed as tags instead of fragile comma-text blobs, with community-derived quick suggestions and safer wrapping in ES/mobile layouts. (`community identity UX`)

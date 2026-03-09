@@ -27,6 +27,14 @@ public class Community {
 
     private UUID parentCommunityId;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(nullable = false)
+    private CommunityOpenDataPolicy openDataPolicy = CommunityOpenDataPolicy.DISABLED;
+
+    private UUID privacyUpdatedBy;
+
+    private LocalDateTime privacyUpdatedAt;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public UUID getId() {
@@ -71,5 +79,29 @@ public class Community {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public CommunityOpenDataPolicy getOpenDataPolicy() {
+        return openDataPolicy;
+    }
+
+    public void setOpenDataPolicy(CommunityOpenDataPolicy openDataPolicy) {
+        this.openDataPolicy = openDataPolicy;
+    }
+
+    public UUID getPrivacyUpdatedBy() {
+        return privacyUpdatedBy;
+    }
+
+    public void setPrivacyUpdatedBy(UUID privacyUpdatedBy) {
+        this.privacyUpdatedBy = privacyUpdatedBy;
+    }
+
+    public LocalDateTime getPrivacyUpdatedAt() {
+        return privacyUpdatedAt;
+    }
+
+    public void setPrivacyUpdatedAt(LocalDateTime privacyUpdatedAt) {
+        this.privacyUpdatedAt = privacyUpdatedAt;
     }
 }

@@ -22,6 +22,7 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.CommunityAccessService;
 import org.opencivic.signalos.service.ExportService;
 import org.opencivic.signalos.service.PrioritizationService;
+import org.opencivic.signalos.service.PrivacyAccessLogService;
 import org.opencivic.signalos.service.SignalGeoService;
 import org.opencivic.signalos.service.UserReactionService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
@@ -77,6 +78,7 @@ public class SignalController {
     private final MeterRegistry meterRegistry;
     private final CivicEngagementService engagementService;
     private final SignalGeoService signalGeoService;
+    private final PrivacyAccessLogService privacyAccessLogService;
 
     public SignalController(
         PrioritizationService prioritizationService,
@@ -87,7 +89,8 @@ public class SignalController {
         UserReactionService userReactionService,
         MeterRegistry meterRegistry,
         CivicEngagementService engagementService,
-        SignalGeoService signalGeoService
+        SignalGeoService signalGeoService,
+        PrivacyAccessLogService privacyAccessLogService
     ) {
         this.prioritizationService = prioritizationService;
         this.exportService = exportService;
@@ -98,6 +101,7 @@ public class SignalController {
         this.meterRegistry = meterRegistry;
         this.engagementService = engagementService;
         this.signalGeoService = signalGeoService;
+        this.privacyAccessLogService = privacyAccessLogService;
     }
 
     @GetMapping("/{id}/comments")
@@ -264,6 +268,10 @@ public class SignalController {
     @GetMapping("/export/csv")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Resource> exportCsv() {
+        Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            userRepository.findByUsername(authentication.getName()).ifPresent(privacyAccessLogService::recordSignalExport);
+        }
         String filename = "signalos_intelligence_export_" + LocalDateTime.now() + ".csv";
         InputStreamResource file = new InputStreamResource(exportService.exportSignalsToCsv());
 

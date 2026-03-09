@@ -30,57 +30,57 @@ Shipped Phase 5 foundations:
 - `OCS-P1-048` public trust metrics dashboard
 - `OCS-P1-042` verifiable community voting
 - `OCS-P1-049` moderation queue and sanction policy engine
+- `OCS-P1-050` privacy center and sensitive-data access logs
 
 ## Now (Next 7 Days)
 
 Recommended next execution order:
 
-1. `story:OCS-P1-050` privacy center and sensitive-data access logs
-2. `story:OCS-P1-051` civic onboarding, tours, and help center
-3. `story:OCS-P1-052` open civic data exports and scoped API
-4. `story:OCS-P1-035` real-time rooms and mentions
-5. `story:OCS-P1-044` transparent duplicate review and merge history
+1. `story:OCS-P1-051` civic onboarding, tours, and help center
+2. `story:OCS-P1-052` open civic data exports and scoped API
+3. `story:OCS-P1-035` real-time rooms and mentions
+4. `story:OCS-P1-044` transparent duplicate review and merge history
+5. `story:OCS-P1-045` multilingual moderation and official translation workflow
 
 Execution note:
 
-- `story:OCS-P1-050` is now the immediate target because moderation governance is shipped and the next highest trust risk is user-facing privacy controls plus sensitive-data access visibility.
+- `story:OCS-P1-051` is now the immediate target because the trust/privacy loop is shipped and the next highest-value gap is guided onboarding that helps communities discover the new governance, trust, and privacy surfaces without role confusion.
 
 ## Next (7-21 Days)
 
 1. Complete the trust loop sequence.
-   - `story:OCS-P1-050`
-   - `story:OCS-P1-051`
+  - `story:OCS-P1-051`
+  - `story:OCS-P1-052`
 2. Expand governance safety rails.
-   - `story:OCS-P1-052`
-   - `story:OCS-P1-035`
+  - `story:OCS-P1-035`
+  - `story:OCS-P1-044`
 3. Prepare the next enablement layer.
-   - `story:OCS-P1-044`
-   - `story:OCS-P1-045`
+  - `story:OCS-P1-045`
+  - `story:OCS-P1-053`
 
 ## P0 Execution Queue (Agent Order)
 
 This section is preserved for repository compatibility. The active P0-equivalent execution order is:
 
-1. `story:OCS-P1-050`
-2. `story:OCS-P1-051`
-3. `story:OCS-P1-052`
-4. `story:OCS-P1-035`
-5. `story:OCS-P1-044`
+1. `story:OCS-P1-051`
+2. `story:OCS-P1-052`
+3. `story:OCS-P1-035`
+4. `story:OCS-P1-044`
+5. `story:OCS-P1-045`
 
 ## Wave Sequencing
 
 ### Wave 1: Trust Loop Completion
 
-1. `story:OCS-P1-050`
-2. `story:OCS-P1-051`
-3. `story:OCS-P1-052`
+1. `story:OCS-P1-051`
+2. `story:OCS-P1-052`
+3. `story:OCS-P1-035`
 
 ### Wave 2: Safety and Data Responsibility
 
-4. `story:OCS-P1-035`
-5. `story:OCS-P1-044`
-6. `story:OCS-P1-045`
-7. `story:OCS-P1-053`
+4. `story:OCS-P1-044`
+5. `story:OCS-P1-045`
+6. `story:OCS-P1-053`
 
 ### Wave 3: Operational Growth
 
@@ -102,7 +102,7 @@ This section is preserved for repository compatibility. The active P0-equivalent
 - `OCS-P1-048` shipped and now exposes backend-owned public proof of freshness, participation, execution progress, and case throughput for each community.
 - `OCS-P1-042` shipped and now closes the proposal -> vote -> decision legitimacy gap with backend-owned eligibility rules, tally visibility, and anti-abuse counters.
 - `OCS-P1-049` shipped and now adds auditable moderation reports, queue-based review, and proportional sanctions without moving civic policy logic into the frontend.
-- `OCS-P1-050` remains the next trust-critical target because identity surfaces now need explicit privacy controls and sensitive-data access logs.
+- `OCS-P1-050` shipped and now adds user-facing privacy controls, sensitive-data access logs, and backend-owned community publication policy management without moving trust rules into the frontend.
 
 ## Definition of Ready for Any New Story
 

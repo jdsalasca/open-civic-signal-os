@@ -12,6 +12,7 @@ public record UpdateUserProfileRequest(
     List<@Size(max = 80) String> affiliations,
     ProfileVisibility profileVisibility,
     ProfileVisibility affiliationVisibility,
+    ProfileVisibility activityVisibility,
     InterfaceMode interfaceMode,
     @Size(max = 40) String avatarPreset
 ) {}

@@ -11,20 +11,20 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 
 Phase: 5 of 5 (Community Operating System Expansion)  
 Current execution plan: 05-30 (Privacy Center and Sensitive-Data Access Logs)
-Tracked phase subplans: 31
-Tracked project plans: 44
+Tracked phase subplans: 33
+Tracked project plans: 46
 Status: In progress  
-Last activity: 2026-03-09 - Completed `05-29` for `OCS-P1-049` with backend moderation reports/sanctions, moderator queue UX, contract/ADR updates, Docker validation, and backlog promotion to `OCS-P1-050`
+Last activity: 2026-03-09 - Completed `05-30` for `OCS-P1-050` with backend privacy controls/access logs, community publication policy UX, contract/ADR updates, Docker validation, and backlog promotion to `OCS-P1-051`
 
-Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next target is `OCS-P1-050`
+Progress: 4 of 5 roadmap phases complete; Phase 5 trust loop shipped through privacy controls and next target is `OCS-P1-051`
 
 ## Performance Metrics
 
 **Execution Snapshot:**
-- Total tracked plans across project: 44
-- Tracked Phase 5 subplans: 31
-- Shipped Phase 5 stories: 18 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`, `049`)
-- Immediate queue: `OCS-P1-050`, `OCS-P1-051`, `OCS-P1-052`, `OCS-P1-035`, `OCS-P1-044`
+- Total tracked plans across project: 46
+- Tracked Phase 5 subplans: 33
+- Shipped Phase 5 stories: 19 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`, `049`, `050`)
+- Immediate queue: `OCS-P1-051`, `OCS-P1-052`, `OCS-P1-035`, `OCS-P1-044`, `OCS-P1-045`
 
 ## Accumulated Context
 
@@ -81,6 +81,7 @@ Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next t
 - 2026-03-07: Implemented `OCS-P1-048` with a backend-owned community trust metrics service, deterministic period filters, freshness metadata, low-data semantics, `/communities/trust` workflow, OpenAPI coverage, ADR update, and targeted backend integration tests.
 - 2026-03-07: Implemented `OCS-P1-042` with backend-owned proposal voting rules, eligibility and tally visibility configuration, anti-abuse audit counters, proposal vote UX, OpenAPI coverage, ADR update, and targeted backend integration tests.
 - 2026-03-09: Implemented `OCS-P1-049` with backend-owned community moderation reports and sanctions, `MANAGE_MODERATION_QUEUE` enforcement, sanction-aware participation guardrails, `/community/moderation/*` APIs, moderator queue UX, OpenAPI coverage, ADR update, Docker-backed frontend evidence, and targeted backend integration tests.
+- 2026-03-09: Implemented `OCS-P1-050` with backend-owned activity visibility, sensitive-data access logs, community open-data publication policy management, Settings privacy-center UX, OpenAPI coverage, ADR update, Docker-backed frontend build validation, and targeted backend integration tests.
 
 ### Pending Todos
 
@@ -95,11 +96,13 @@ See:
 
 - Host `agent:preflight` still fails on this workstation because `build:web` expects host `tsc`; use the Docker runtime for integrated frontend validation until the host toolchain is normalized.
 - The Docker dev container injects PostgreSQL datasource environment into `@ActiveProfiles("test")` Spring tests, so broad backend test runs require explicit H2 JVM overrides until the shared test harness is normalized.
+- The repo Playwright wrapper still loses browser context between `open` and subsequent `snapshot`/`screenshot` commands in this environment, so wrapper evidence is partially blocked until that lifecycle issue is fixed.
 - Existing duplicate-email Playwright case is flaky/not deterministic in current environment and should be stabilized.
 - Local frontend E2E execution still depends on workspace dependencies living in Docker volumes; use Docker runtime or wrapper commands, not raw host `npx playwright`.
 
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: `OCS-P1-049` shipped; next recommended execution target is `OCS-P1-050` privacy center and sensitive-data access logs
+Stopped at: `OCS-P1-050` shipped; next recommended execution target is `OCS-P1-051` civic onboarding, tours, and help center
 Resume file: None
+
