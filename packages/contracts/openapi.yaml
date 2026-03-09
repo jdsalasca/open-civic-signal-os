@@ -1247,6 +1247,96 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/moderation/queue:
+    get:
+      summary: List community moderation reports and sanction counts for one active community
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/CommunityModerationReportStatus'
+        - in: query
+          name: targetType
+          required: false
+          schema:
+            $ref: '#/components/schemas/CommunityModerationTargetType'
+      responses:
+        '200':
+          description: Community moderation queue payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityModerationQueue'
+        '403':
+          description: Community policy denied moderation queue access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/moderation/reports:
+    post:
+      summary: Create one community moderation report against supported community content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityModerationReportRequest'
+      responses:
+        '200':
+          description: Created moderation report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityModerationReport'
+        '403':
+          description: User is not allowed to report the selected content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Duplicate open report from the same reporter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/moderation/reports/{reportId}:
+    patch:
+      summary: Dismiss or enforce one moderation report with optional sanction ladder action
+      parameters:
+        - in: path
+          name: reportId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerateCommunityReportRequest'
+      responses:
+        '200':
+          description: Updated moderation report after dismissal or enforcement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityModerationReport'
+        '403':
+          description: Community policy denied moderation enforcement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/proposals:
     get:
       summary: List structured proposals for one community
@@ -2537,6 +2627,7 @@ components:
           type: string
           enum:
             - CREATE_PROPOSAL
+            - MANAGE_MODERATION_QUEUE
             - MANAGE_DECISION_LEDGER
             - MANAGE_GOVERNANCE_LIBRARY
             - MANAGE_PROJECT_BOARDS
@@ -3664,6 +3755,201 @@ components:
           type: string
           minLength: 1
           maxLength: 500
+    CommunityModerationReasonCode:
+      type: string
+      enum: [ABUSE, HARASSMENT, SPAM, MISINFORMATION, OFF_TOPIC, OTHER]
+    CommunityModerationTargetType:
+      type: string
+      enum: [THREAD_MESSAGE, PROPOSAL_DELIBERATION]
+    CommunityModerationReportStatus:
+      type: string
+      enum: [OPEN, ACTIONED, DISMISSED]
+    CommunitySanctionType:
+      type: string
+      enum: [WARN, LIMIT_POSTING_7_DAYS, SUSPEND_7_DAYS, SUSPEND_30_DAYS]
+    CreateCommunityModerationReportRequest:
+      type: object
+      required: [communityId, targetType, targetId, reasonCode, details]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        targetType:
+          $ref: '#/components/schemas/CommunityModerationTargetType'
+        targetId:
+          type: string
+          format: uuid
+        reasonCode:
+          $ref: '#/components/schemas/CommunityModerationReasonCode'
+        details:
+          type: string
+          minLength: 8
+          maxLength: 2000
+    ModerateCommunityReportRequest:
+      type: object
+      required: [action, resolutionReason]
+      properties:
+        action:
+          type: string
+          enum: [DISMISS, ENFORCE]
+        hideContent:
+          type: boolean
+        sanctionType:
+          allOf:
+            - $ref: '#/components/schemas/CommunitySanctionType'
+          nullable: true
+        resolutionReason:
+          type: string
+          minLength: 8
+          maxLength: 2000
+    CommunityModerationAction:
+      type: object
+      required: [actionType, actorUsername, note, happenedAt]
+      properties:
+        actionType:
+          type: string
+        actorUsername:
+          type: string
+        note:
+          type: string
+        happenedAt:
+          type: string
+          format: date-time
+    CommunitySanction:
+      type: object
+      required:
+        - id
+        - sanctionType
+        - status
+        - reason
+        - targetUserId
+        - targetUsername
+        - issuedByUserId
+        - issuedByUsername
+        - startsAt
+        - appealAvailable
+      properties:
+        id:
+          type: string
+          format: uuid
+        sanctionType:
+          $ref: '#/components/schemas/CommunitySanctionType'
+        status:
+          type: string
+        reason:
+          type: string
+        targetUserId:
+          type: string
+          format: uuid
+        targetUsername:
+          type: string
+        issuedByUserId:
+          type: string
+          format: uuid
+        issuedByUsername:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+          nullable: true
+        appealAvailable:
+          type: boolean
+    CommunityModerationReport:
+      type: object
+      required:
+        - id
+        - communityId
+        - targetType
+        - targetId
+        - targetPreview
+        - reporterUserId
+        - reporterUsername
+        - reportedUserId
+        - reportedUsername
+        - reasonCode
+        - details
+        - status
+        - contentHidden
+        - falsePositiveReviewRecommended
+        - actionHistory
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        targetType:
+          $ref: '#/components/schemas/CommunityModerationTargetType'
+        targetId:
+          type: string
+          format: uuid
+        targetPreview:
+          type: string
+        reporterUserId:
+          type: string
+          format: uuid
+        reporterUsername:
+          type: string
+        reportedUserId:
+          type: string
+          format: uuid
+        reportedUsername:
+          type: string
+        reasonCode:
+          $ref: '#/components/schemas/CommunityModerationReasonCode'
+        details:
+          type: string
+        status:
+          $ref: '#/components/schemas/CommunityModerationReportStatus'
+        contentHidden:
+          type: boolean
+        falsePositiveReviewRecommended:
+          type: boolean
+        resolutionReason:
+          type: string
+          nullable: true
+        resolvedByUsername:
+          type: string
+          nullable: true
+        sanction:
+          allOf:
+            - $ref: '#/components/schemas/CommunitySanction'
+          nullable: true
+        actionHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityModerationAction'
+        createdAt:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityModerationQueue:
+      type: object
+      required: [communityId, openReports, actionedReports, dismissedReports, activeSanctions, reports]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        openReports:
+          type: integer
+        actionedReports:
+          type: integer
+        dismissedReports:
+          type: integer
+        activeSanctions:
+          type: integer
+        reports:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityModerationReport'
     ProfileVisibility:
       type: string
       enum: [PUBLIC, COMMUNITY, ADMINS]
@@ -3789,6 +4075,7 @@ components:
           enum:
             - CAST_PROPOSAL_VOTE
             - CREATE_PROPOSAL
+            - MANAGE_MODERATION_QUEUE
             - MANAGE_GOVERNANCE_LIBRARY
             - MANAGE_PROJECT_BOARDS
             - CREATE_THREAD

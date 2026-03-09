@@ -134,6 +134,7 @@ export type CommunityMembership = {
 export type CommunityPermissionScope =
   | "CAST_PROPOSAL_VOTE"
   | "CREATE_PROPOSAL"
+  | "MANAGE_MODERATION_QUEUE"
   | "MANAGE_DECISION_LEDGER"
   | "MANAGE_GOVERNANCE_LIBRARY"
   | "MANAGE_PROJECT_BOARDS"
@@ -527,6 +528,82 @@ export type CommunityTrustMetrics = {
   lowDataReason: string | null;
   cards: TrustMetricCard[];
   breakdowns: TrustMetricBreakdown[];
+};
+
+export type CommunityModerationReasonCode =
+  | "ABUSE"
+  | "HARASSMENT"
+  | "SPAM"
+  | "MISINFORMATION"
+  | "OFF_TOPIC"
+  | "OTHER";
+
+export type CommunityModerationTargetType =
+  | "THREAD_MESSAGE"
+  | "PROPOSAL_DELIBERATION";
+
+export type CommunityModerationReportStatus =
+  | "OPEN"
+  | "ACTIONED"
+  | "DISMISSED";
+
+export type CommunitySanctionType =
+  | "WARN"
+  | "LIMIT_POSTING_7_DAYS"
+  | "SUSPEND_7_DAYS"
+  | "SUSPEND_30_DAYS";
+
+export type CommunitySanction = {
+  id: string;
+  sanctionType: CommunitySanctionType;
+  status: string;
+  reason: string;
+  targetUserId: string;
+  targetUsername: string;
+  issuedByUserId: string;
+  issuedByUsername: string;
+  startsAt: string;
+  endsAt?: string | null;
+  appealAvailable: boolean;
+};
+
+export type CommunityModerationAction = {
+  actionType: string;
+  actorUsername: string;
+  note: string;
+  happenedAt: string;
+};
+
+export type CommunityModerationReport = {
+  id: string;
+  communityId: string;
+  targetType: CommunityModerationTargetType;
+  targetId: string;
+  targetPreview: string;
+  reporterUserId: string;
+  reporterUsername: string;
+  reportedUserId: string;
+  reportedUsername: string;
+  reasonCode: CommunityModerationReasonCode;
+  details: string;
+  status: CommunityModerationReportStatus;
+  contentHidden: boolean;
+  falsePositiveReviewRecommended: boolean;
+  resolutionReason?: string | null;
+  resolvedByUsername?: string | null;
+  sanction?: CommunitySanction | null;
+  actionHistory: CommunityModerationAction[];
+  createdAt: string;
+  resolvedAt?: string | null;
+};
+
+export type CommunityModerationQueue = {
+  communityId: string;
+  openReports: number;
+  actionedReports: number;
+  dismissedReports: number;
+  activeSanctions: number;
+  reports: CommunityModerationReport[];
 };
 
 export type SignalMapFilters = {

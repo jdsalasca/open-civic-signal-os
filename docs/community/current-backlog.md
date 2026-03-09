@@ -1,4 +1,4 @@
-# Current Backlog (2026-03-07)
+# Current Backlog (2026-03-09)
 
 Operational execution source for immediate work in Open Civic Signal OS.
 
@@ -29,64 +29,65 @@ Shipped Phase 5 foundations:
 - `OCS-P1-047` decision ledger linked to proposals, governance, and execution
 - `OCS-P1-048` public trust metrics dashboard
 - `OCS-P1-042` verifiable community voting
+- `OCS-P1-049` moderation queue and sanction policy engine
 
 ## Now (Next 7 Days)
 
 Recommended next execution order:
 
-1. `story:OCS-P1-049` moderation queue and sanction policy engine
-2. `story:OCS-P1-050` privacy center and sensitive-data access logs
-3. `story:OCS-P1-051` civic onboarding, tours, and help center
-4. `story:OCS-P1-052` open civic data exports and scoped API
-5. `story:OCS-P1-035` real-time rooms and mentions
+1. `story:OCS-P1-050` privacy center and sensitive-data access logs
+2. `story:OCS-P1-051` civic onboarding, tours, and help center
+3. `story:OCS-P1-052` open civic data exports and scoped API
+4. `story:OCS-P1-035` real-time rooms and mentions
+5. `story:OCS-P1-044` transparent duplicate review and merge history
 
 Execution note:
 
-- `story:OCS-P1-049` is now the immediate target because proposal voting closed the legitimacy gap and the next highest trust risk is moderation governance across the expanded community surfaces.
+- `story:OCS-P1-050` is now the immediate target because moderation governance is shipped and the next highest trust risk is user-facing privacy controls plus sensitive-data access visibility.
 
 ## Next (7-21 Days)
 
 1. Complete the trust loop sequence.
-   - `story:OCS-P1-049`
    - `story:OCS-P1-050`
-2. Expand governance safety rails.
    - `story:OCS-P1-051`
+2. Expand governance safety rails.
    - `story:OCS-P1-052`
-3. Prepare the next enablement layer.
    - `story:OCS-P1-035`
+3. Prepare the next enablement layer.
    - `story:OCS-P1-044`
+   - `story:OCS-P1-045`
 
 ## P0 Execution Queue (Agent Order)
 
 This section is preserved for repository compatibility. The active P0-equivalent execution order is:
 
-1. `story:OCS-P1-049`
-2. `story:OCS-P1-050`
-3. `story:OCS-P1-051`
-4. `story:OCS-P1-052`
-5. `story:OCS-P1-035`
+1. `story:OCS-P1-050`
+2. `story:OCS-P1-051`
+3. `story:OCS-P1-052`
+4. `story:OCS-P1-035`
+5. `story:OCS-P1-044`
 
 ## Wave Sequencing
 
 ### Wave 1: Trust Loop Completion
 
-1. `story:OCS-P1-049`
-2. `story:OCS-P1-050`
-3. `story:OCS-P1-051`
+1. `story:OCS-P1-050`
+2. `story:OCS-P1-051`
+3. `story:OCS-P1-052`
 
 ### Wave 2: Safety and Data Responsibility
 
-4. `story:OCS-P1-052`
-5. `story:OCS-P1-035`
-6. `story:OCS-P1-044`
-7. `story:OCS-P1-045`
+4. `story:OCS-P1-035`
+5. `story:OCS-P1-044`
+6. `story:OCS-P1-045`
+7. `story:OCS-P1-053`
 
 ### Wave 3: Operational Growth
 
-8. `story:OCS-P1-053`
-9. `story:OCS-P1-017`
-10. `story:OCS-P1-021`
-11. `story:OCS-P1-022`
+8. `story:OCS-P1-017`
+9. `story:OCS-P1-021`
+10. `story:OCS-P1-022`
+11. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ### Wave 4: Cross-App Hardening
 
@@ -100,7 +101,8 @@ This section is preserved for repository compatibility. The active P0-equivalent
 - `OCS-P1-047` shipped and now closes the proposal -> decision -> execution trust chain with explicit approval basis and execution ownership.
 - `OCS-P1-048` shipped and now exposes backend-owned public proof of freshness, participation, execution progress, and case throughput for each community.
 - `OCS-P1-042` shipped and now closes the proposal -> vote -> decision legitimacy gap with backend-owned eligibility rules, tally visibility, and anti-abuse counters.
-- `OCS-P1-049` and `OCS-P1-050` stay in the top five because new governance and identity surfaces increase moderation and privacy risk.
+- `OCS-P1-049` shipped and now adds auditable moderation reports, queue-based review, and proportional sanctions without moving civic policy logic into the frontend.
+- `OCS-P1-050` remains the next trust-critical target because identity surfaces now need explicit privacy controls and sensitive-data access logs.
 
 ## Definition of Ready for Any New Story
 

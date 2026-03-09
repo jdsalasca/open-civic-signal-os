@@ -10,21 +10,21 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Current execution plan: 05-28 (Verifiable Community Voting)
+Current execution plan: 05-30 (Privacy Center and Sensitive-Data Access Logs)
 Tracked phase subplans: 31
 Tracked project plans: 44
 Status: In progress  
-Last activity: 2026-03-07 - Implemented `OCS-P1-042` verifiable community voting across backend, contract, frontend, ADR, and GSD state
+Last activity: 2026-03-09 - Completed `05-29` for `OCS-P1-049` with backend moderation reports/sanctions, moderator queue UX, contract/ADR updates, Docker validation, and backlog promotion to `OCS-P1-050`
 
-Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next target is `OCS-P1-049`
+Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next target is `OCS-P1-050`
 
 ## Performance Metrics
 
 **Execution Snapshot:**
 - Total tracked plans across project: 44
 - Tracked Phase 5 subplans: 31
-- Shipped Phase 5 stories: 17 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`)
-- Immediate queue: `OCS-P1-049`, `OCS-P1-050`, `OCS-P1-051`, `OCS-P1-052`, `OCS-P1-035`
+- Shipped Phase 5 stories: 18 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`, `049`)
+- Immediate queue: `OCS-P1-050`, `OCS-P1-051`, `OCS-P1-052`, `OCS-P1-035`, `OCS-P1-044`
 
 ## Accumulated Context
 
@@ -80,6 +80,7 @@ Progress: 4 of 5 roadmap phases complete; Phase 5 foundations shipped and next t
 - 2026-03-07: Implemented `OCS-P1-047` with a backend-owned community decision ledger, explicit approval-basis metadata, execution-owner linkage, `MANAGE_DECISION_LEDGER` scope, `/communities/decisions` workflow, OpenAPI coverage, ADR update, and targeted backend integration tests.
 - 2026-03-07: Implemented `OCS-P1-048` with a backend-owned community trust metrics service, deterministic period filters, freshness metadata, low-data semantics, `/communities/trust` workflow, OpenAPI coverage, ADR update, and targeted backend integration tests.
 - 2026-03-07: Implemented `OCS-P1-042` with backend-owned proposal voting rules, eligibility and tally visibility configuration, anti-abuse audit counters, proposal vote UX, OpenAPI coverage, ADR update, and targeted backend integration tests.
+- 2026-03-09: Implemented `OCS-P1-049` with backend-owned community moderation reports and sanctions, `MANAGE_MODERATION_QUEUE` enforcement, sanction-aware participation guardrails, `/community/moderation/*` APIs, moderator queue UX, OpenAPI coverage, ADR update, Docker-backed frontend evidence, and targeted backend integration tests.
 
 ### Pending Todos
 
@@ -92,12 +93,13 @@ See:
 
 ### Blockers/Concerns
 
-- JAVA_HOME is not globally configured on this workstation; backend validation requires setting it per shell session.
+- Host `agent:preflight` still fails on this workstation because `build:web` expects host `tsc`; use the Docker runtime for integrated frontend validation until the host toolchain is normalized.
+- The Docker dev container injects PostgreSQL datasource environment into `@ActiveProfiles("test")` Spring tests, so broad backend test runs require explicit H2 JVM overrides until the shared test harness is normalized.
 - Existing duplicate-email Playwright case is flaky/not deterministic in current environment and should be stabilized.
 - Local frontend E2E execution still depends on workspace dependencies living in Docker volumes; use Docker runtime or wrapper commands, not raw host `npx playwright`.
 
 ## Session Continuity
 
-Last session: 2026-03-07  
-Stopped at: Shipped `OCS-P1-042` verifiable community voting; next target is `OCS-P1-049` moderation queue and sanction policy engine
+Last session: 2026-03-09
+Stopped at: `OCS-P1-049` shipped; next recommended execution target is `OCS-P1-050` privacy center and sensitive-data access logs
 Resume file: None

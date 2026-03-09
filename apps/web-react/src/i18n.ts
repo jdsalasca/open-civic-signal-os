@@ -698,6 +698,7 @@ const resources = {
         "permissions_scope": {
           "CAST_PROPOSAL_VOTE": "Who can vote on structured proposals",
           "CREATE_PROPOSAL": "Who can create structured proposals",
+          "MANAGE_MODERATION_QUEUE": "Who can review reports, hide content, and issue sanctions",
           "MANAGE_DECISION_LEDGER": "Who can record formal community decisions",
           "MANAGE_GOVERNANCE_LIBRARY": "Who can publish and version governance documents",
           "MANAGE_PROJECT_BOARDS": "Who can create and move project board work",
@@ -1187,45 +1188,113 @@ const resources = {
           "LAST_90_DAYS": "Last 90 days"
         }
       },
-      "community_trust": {
-        "title": "Metricas publicas de confianza",
-        "desc": "Vea si {{community}} esta convirtiendo reportes, decisiones y trabajo de ejecucion en resultados visibles.",
-        "kicker": "Tablero de confianza",
-        "load_error": "No se pudieron cargar las metricas publicas de confianza.",
-        "not_available": "Aun no disponible",
-        "formula_label": "Como se calcula",
-        "share_copy": "{{count}} registros · {{share}}% del total",
-        "overview_copy": "Esta vista resume el periodo entre {{start}} y {{end}} con formulas definidas por backend y metadatos de frescura.",
-        "last_updated_label": "Ultima actualizacion fuente",
-        "low_data_title": "Periodo con pocos datos",
-        "low_data_fallback": "Este periodo aun tiene muy poca actividad para sostener conclusiones fuertes de confianza.",
-        "empty_title": "Las metricas de confianza aun no estan disponibles",
-        "empty_desc": "Pruebe otro periodo o vuelva cuando la comunidad registre mas reportes, decisiones o avances de ejecucion.",
-        "no_context_title": "Primero elija una comunidad activa",
-        "no_context_desc": "Las metricas de confianza necesitan una comunidad activa para que el tablero siga siendo especifico, explicable y auditable.",
-        "breakdown_empty_title": "Aun no hay datos suficientes",
-        "breakdown_empty_desc": "Este grafico se poblara cuando el periodo seleccionado tenga mas actividad.",
-        "filters": {
-          "kicker": "Ventana de tiempo",
-          "desc": "Cambie el periodo sin alterar las formulas de las metricas.",
-          "refresh": "Actualizar metricas"
-        },
-        "periods": {
-          "LAST_7_DAYS": "Ultimos 7 dias",
-          "LAST_30_DAYS": "Ultimos 30 dias",
-          "LAST_90_DAYS": "Ultimos 90 dias"
-        }
-      },
       "moderation": {
-        "title": "Moderation Queue",
-        "desc": "Review automatically flagged signals for potential abuse.",
-        "suspect_title": "Suspect Title",
-        "approve": "Approve",
-        "reject": "Reject",
-        "empty": "No signals require attention.",
-        "success": "Signal {{action}} successfully.",
+        "title": "Community moderation queue",
+        "desc": "Review reports, preserve traceability, and apply proportionate sanctions inside {{community}}.",
+        "kicker": "Trust and safety",
+        "kicker_desc": "Keep reporting, proposals, and dialogue usable without hiding why action was taken.",
+        "refresh": "Refresh",
+        "report_action": "Report",
+        "report_success": "Report submitted to the moderation queue.",
+        "report_error": "Failed to submit the moderation report.",
+        "permissions_load_error": "Failed to load community moderation permissions.",
+        "no_context_title": "Open a community first",
+        "no_context_desc": "Moderation is scoped to one active community so sanctions and report history stay auditable.",
+        "queue_title": "Open reports",
+        "empty_title": "No moderation reports need action",
+        "empty_desc": "The current filters do not show any open moderation work.",
+        "empty_detail_title": "Select a report",
+        "empty_detail_desc": "Choose a report to review the context, history, and enforcement options.",
+        "detail_title": "Report detail",
+        "detail": {
+          "target": "Target type",
+          "reporter": "Reporter",
+          "reported": "Reported user",
+          "status": "Queue status",
+          "preview_label": "Reported content preview",
+          "report_note_label": "Reporter note"
+        },
+        "stats": {
+          "open": "Open reports",
+          "open_support": "Waiting for moderator review",
+          "actioned": "Actioned",
+          "actioned_support": "Reports that triggered enforcement",
+          "dismissed": "Dismissed",
+          "dismissed_support": "Closed without sanction",
+          "active_sanctions": "Active sanctions",
+          "active_sanctions_support": "Still limiting participation"
+        },
+        "filters": {
+          "status_all": "All statuses",
+          "target_all": "All content types"
+        },
+        "status": {
+          "OPEN": "Open",
+          "ACTIONED": "Actioned",
+          "DISMISSED": "Dismissed"
+        },
+        "target_types": {
+          "THREAD_MESSAGE": "Thread message",
+          "PROPOSAL_DELIBERATION": "Proposal deliberation"
+        },
+        "reason_codes": {
+          "ABUSE": "Abuse",
+          "HARASSMENT": "Harassment",
+          "SPAM": "Spam",
+          "MISINFORMATION": "Misinformation",
+          "OFF_TOPIC": "Off-topic",
+          "OTHER": "Other"
+        },
+        "actions": {
+          "ENFORCE": "Enforce policy",
+          "DISMISS": "Dismiss report"
+        },
+        "sanctions": {
+          "NONE": "No sanction",
+          "WARN": "Warning",
+          "LIMIT_POSTING_7_DAYS": "Limit posting for 7 days",
+          "SUSPEND_7_DAYS": "Suspend for 7 days",
+          "SUSPEND_30_DAYS": "Suspend for 30 days"
+        },
+        "action_title": "Resolve report",
+        "action_label": "Resolution action",
+        "sanction_label": "Sanction ladder",
+        "hide_content_label": "Hide the reported content while keeping its traceability record",
+        "resolution_reason_label": "Resolution reason",
+        "resolution_reason_help": "Explain the policy basis so members can understand why this report was dismissed or enforced.",
+        "resolution_reason_placeholder": "Describe the policy decision, proportionality, and what happens next.",
+        "resolution_too_short": "Resolution reason must contain at least 8 characters.",
+        "submit_action": "Apply moderation decision",
+        "action_success": "Moderation decision applied.",
         "load_error": "Failed to load moderation queue.",
-        "action_error": "Moderation action failed."
+        "action_error": "Moderation action failed.",
+        "already_resolved_title": "This report is already closed",
+        "already_resolved_desc": "Review the action history below instead of reapplying enforcement.",
+        "content_hidden": "Content hidden",
+        "false_positive_review": "False-positive review suggested",
+        "sanction_summary_title": "Linked sanction",
+        "no_end_date": "No automatic end date",
+        "history_title": "Action history",
+        "history_empty_title": "No action history yet",
+        "history_empty_desc": "History entries appear here once a moderator dismisses or enforces this report.",
+        "history": {
+          "REPORT_CREATED": "Report created",
+          "CONTENT_HIDDEN": "Content hidden",
+          "SANCTION_ISSUED": "Sanction issued",
+          "ACTIONED": "Report actioned",
+          "DISMISSED": "Report dismissed"
+        },
+        "report_dialog": {
+          "title": "Report content",
+          "target_label": "Content being reported",
+          "reason_label": "Reason",
+          "details_label": "What happened?",
+          "details_help": "Describe the issue in plain language so moderators can review it without guessing.",
+          "details_too_short": "Report details must contain at least 8 characters.",
+          "details_too_long": "Report details must not exceed 2000 characters.",
+          "details_placeholder": "Explain what rule was broken, what context matters, and why this needs review.",
+          "submit": "Send report"
+        }
       },
       "settings": {
         "title": "System Settings",
@@ -2085,6 +2154,7 @@ const resources = {
         "permissions_scope": {
           "CAST_PROPOSAL_VOTE": "Quien puede votar propuestas estructuradas",
           "CREATE_PROPOSAL": "Quien puede crear propuestas estructuradas",
+          "MANAGE_MODERATION_QUEUE": "Quien puede revisar reportes, ocultar contenido y aplicar sanciones",
           "MANAGE_DECISION_LEDGER": "Quien puede registrar decisiones formales de la comunidad",
           "MANAGE_GOVERNANCE_LIBRARY": "Quien puede publicar y versionar documentos de gobierno",
           "MANAGE_PROJECT_BOARDS": "Quien puede crear y mover trabajo en tableros de proyectos",
@@ -2545,16 +2615,142 @@ const resources = {
           "empty_desc": "A esta decision todavia le faltan enlaces hacia propuesta, gobierno o ejecucion."
         }
       },
+      "community_trust": {
+        "title": "Metricas publicas de confianza",
+        "desc": "Vea si {{community}} esta convirtiendo reportes, decisiones y trabajo de ejecucion en resultados visibles.",
+        "kicker": "Tablero de confianza",
+        "load_error": "No se pudieron cargar las metricas publicas de confianza.",
+        "not_available": "Aun no disponible",
+        "formula_label": "Como se calcula",
+        "share_copy": "{{count}} registros · {{share}}% del total",
+        "overview_copy": "Esta vista resume el periodo entre {{start}} y {{end}} con formulas definidas por backend y metadatos de frescura.",
+        "last_updated_label": "Ultima actualizacion fuente",
+        "low_data_title": "Periodo con pocos datos",
+        "low_data_fallback": "Este periodo aun tiene muy poca actividad para sostener conclusiones fuertes de confianza.",
+        "empty_title": "Las metricas de confianza aun no estan disponibles",
+        "empty_desc": "Pruebe otro periodo o vuelva cuando la comunidad registre mas reportes, decisiones o avances de ejecucion.",
+        "no_context_title": "Primero elija una comunidad activa",
+        "no_context_desc": "Las metricas de confianza necesitan una comunidad activa para que el tablero siga siendo especifico, explicable y auditable.",
+        "breakdown_empty_title": "Aun no hay datos suficientes",
+        "breakdown_empty_desc": "Este grafico se poblara cuando el periodo seleccionado tenga mas actividad.",
+        "filters": {
+          "kicker": "Ventana de tiempo",
+          "desc": "Cambie el periodo sin alterar las formulas de las metricas.",
+          "refresh": "Actualizar metricas"
+        },
+        "periods": {
+          "LAST_7_DAYS": "Ultimos 7 dias",
+          "LAST_30_DAYS": "Ultimos 30 dias",
+          "LAST_90_DAYS": "Ultimos 90 dias"
+        }
+      },
       "moderation": {
-        "title": "Cola de Moderación",
-        "desc": "Revise señales marcadas automáticamente por posible abuso.",
-        "suspect_title": "Título Sospechoso",
-        "approve": "Aprobar",
-        "reject": "Rechazar",
-        "empty": "No hay señales que requieran atención.",
-        "success": "Señal {{action}} con éxito.",
-        "load_error": "Error al cargar la cola de moderación.",
-        "action_error": "Acción de moderación fallida."
+        "title": "Cola de moderacion comunitaria",
+        "desc": "Revise reportes, preserve la trazabilidad y aplique sanciones proporcionales dentro de {{community}}.",
+        "kicker": "Confianza y seguridad",
+        "kicker_desc": "Mantenga utiles los reportes, propuestas y dialogos sin ocultar por que se tomo una accion.",
+        "refresh": "Actualizar",
+        "report_action": "Reportar",
+        "report_success": "El reporte entro a la cola de moderacion.",
+        "report_error": "No se pudo enviar el reporte de moderacion.",
+        "permissions_load_error": "No se pudo cargar la matriz comunitaria de moderacion.",
+        "no_context_title": "Primero abra una comunidad",
+        "no_context_desc": "La moderacion se aplica sobre una comunidad activa para que sanciones e historial sigan siendo auditables.",
+        "queue_title": "Reportes abiertos",
+        "empty_title": "No hay reportes que necesiten accion",
+        "empty_desc": "Los filtros actuales no muestran trabajo abierto de moderacion.",
+        "empty_detail_title": "Seleccione un reporte",
+        "empty_detail_desc": "Elija un reporte para revisar contexto, historial y opciones de aplicacion.",
+        "detail_title": "Detalle del reporte",
+        "detail": {
+          "target": "Tipo de contenido",
+          "reporter": "Reportante",
+          "reported": "Usuario reportado",
+          "status": "Estado de la cola",
+          "preview_label": "Vista previa del contenido reportado",
+          "report_note_label": "Nota del reportante"
+        },
+        "stats": {
+          "open": "Reportes abiertos",
+          "open_support": "Esperando revision",
+          "actioned": "Aplicados",
+          "actioned_support": "Reportes con sancion o accion",
+          "dismissed": "Descartados",
+          "dismissed_support": "Cerrados sin sancion",
+          "active_sanctions": "Sanciones activas",
+          "active_sanctions_support": "Aun limitan participacion"
+        },
+        "filters": {
+          "status_all": "Todos los estados",
+          "target_all": "Todos los tipos"
+        },
+        "status": {
+          "OPEN": "Abierto",
+          "ACTIONED": "Aplicado",
+          "DISMISSED": "Descartado"
+        },
+        "target_types": {
+          "THREAD_MESSAGE": "Mensaje de hilo",
+          "PROPOSAL_DELIBERATION": "Deliberacion de propuesta"
+        },
+        "reason_codes": {
+          "ABUSE": "Abuso",
+          "HARASSMENT": "Acoso",
+          "SPAM": "Spam",
+          "MISINFORMATION": "Desinformacion",
+          "OFF_TOPIC": "Fuera de tema",
+          "OTHER": "Otro"
+        },
+        "actions": {
+          "ENFORCE": "Aplicar politica",
+          "DISMISS": "Descartar reporte"
+        },
+        "sanctions": {
+          "NONE": "Sin sancion",
+          "WARN": "Advertencia",
+          "LIMIT_POSTING_7_DAYS": "Limitar publicaciones por 7 dias",
+          "SUSPEND_7_DAYS": "Suspender por 7 dias",
+          "SUSPEND_30_DAYS": "Suspender por 30 dias"
+        },
+        "action_title": "Resolver reporte",
+        "action_label": "Accion de resolucion",
+        "sanction_label": "Escalera de sanciones",
+        "hide_content_label": "Ocultar el contenido reportado sin borrar su registro trazable",
+        "resolution_reason_label": "Motivo de resolucion",
+        "resolution_reason_help": "Explique la base de la politica para que la comunidad entienda por que se descarto o aplico este reporte.",
+        "resolution_reason_placeholder": "Describa la decision de politica, su proporcionalidad y que sigue despues.",
+        "resolution_too_short": "El motivo de resolucion debe tener al menos 8 caracteres.",
+        "submit_action": "Aplicar decision de moderacion",
+        "action_success": "Decision de moderacion aplicada.",
+        "load_error": "Error al cargar la cola de moderacion.",
+        "action_error": "La accion de moderacion fallo.",
+        "already_resolved_title": "Este reporte ya esta cerrado",
+        "already_resolved_desc": "Revise abajo el historial de acciones en lugar de volver a aplicar la medida.",
+        "content_hidden": "Contenido oculto",
+        "false_positive_review": "Se sugiere revisar falso positivo",
+        "sanction_summary_title": "Sancion vinculada",
+        "no_end_date": "Sin fecha automatica de cierre",
+        "history_title": "Historial de acciones",
+        "history_empty_title": "Aun no hay historial",
+        "history_empty_desc": "Las acciones apareceran aqui cuando un moderador descarte o aplique este reporte.",
+        "history": {
+          "REPORT_CREATED": "Reporte creado",
+          "CONTENT_HIDDEN": "Contenido oculto",
+          "SANCTION_ISSUED": "Sancion emitida",
+          "ACTIONED": "Reporte aplicado",
+          "DISMISSED": "Reporte descartado"
+        },
+        "report_dialog": {
+          "title": "Reportar contenido",
+          "target_label": "Contenido reportado",
+          "reason_label": "Motivo",
+          "details_label": "Que paso?",
+          "details_help": "Explique el problema en lenguaje claro para que la moderacion pueda revisarlo sin adivinar.",
+          "details_too_short": "Los detalles del reporte deben tener al menos 8 caracteres.",
+          "details_too_long": "Los detalles del reporte no deben superar 2000 caracteres.",
+          "details_placeholder": "Explique que regla se rompio, que contexto importa y por que esto necesita revision.",
+          "submit": "Enviar reporte"
+        }
       },
       "settings": {
         "title": "Configuración del Sistema",

@@ -67,6 +67,18 @@ public class GlobalExceptionHandler {
                 "allowedRoles", permissionDeniedException.getAllowedRoles().stream().map(Enum::name).sorted().toList()
             ), HttpStatus.FORBIDDEN);
         }
+        if (ex instanceof CommunitySanctionActiveException sanctionActiveException) {
+            return new ResponseEntity<>(Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.FORBIDDEN.value(),
+                "error", HttpStatus.FORBIDDEN.getReasonPhrase(),
+                "message", sanctionActiveException.getMessage(),
+                "code", "COMMUNITY_SANCTION_ACTIVE",
+                "communityId", sanctionActiveException.getCommunityId(),
+                "sanctionType", sanctionActiveException.getSanctionType().name(),
+                "sanctionEndsAt", sanctionActiveException.getEndsAt()
+            ), HttpStatus.FORBIDDEN);
+        }
         return buildResponse(HttpStatus.FORBIDDEN, "Security clearance insufficient for this sector.");
     }
 

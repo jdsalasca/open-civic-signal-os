@@ -11,12 +11,15 @@ import org.opencivic.signalos.service.CommunityProjectBoardService;
 import org.opencivic.signalos.service.CommunityProposalDeliberationService;
 import org.opencivic.signalos.service.CommunityProposalService;
 import org.opencivic.signalos.service.CommunityProposalVotingService;
+import org.opencivic.signalos.service.CommunityModerationService;
 import org.opencivic.signalos.service.CommunityTrustMetricsService;
 import org.opencivic.signalos.service.GovernanceLibraryService;
 import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
 import org.opencivic.signalos.web.dto.CommunityHomeResponse;
+import org.opencivic.signalos.web.dto.CommunityModerationQueueResponse;
+import org.opencivic.signalos.web.dto.CommunityModerationReportResponse;
 import org.opencivic.signalos.web.dto.CommunityDecisionResponse;
 import org.opencivic.signalos.web.dto.CommunityProjectBoardResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalDeliberationResponse;
@@ -29,6 +32,7 @@ import org.opencivic.signalos.web.dto.CreateCommunityDecisionRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskCommentRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProposalDeliberationRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityModerationReportRequest;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
 import org.opencivic.signalos.web.dto.CreateGovernanceDocumentRequest;
@@ -40,6 +44,7 @@ import org.opencivic.signalos.web.dto.CreateCommunityThreadRequest;
 import org.opencivic.signalos.web.dto.GovernanceDocumentResponse;
 import org.opencivic.signalos.web.dto.ModerateThreadMessageRequest;
 import org.opencivic.signalos.web.dto.ModerateCommunityProposalEntryRequest;
+import org.opencivic.signalos.web.dto.ModerateCommunityReportRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityProjectTaskRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityProposalRequest;
@@ -68,6 +73,7 @@ public class CommunityCollaborationController {
     private final CommunityCollaborationService collaborationService;
     private final CommunityDecisionLedgerService decisionLedgerService;
     private final CommunityProjectBoardService projectBoardService;
+    private final CommunityModerationService moderationService;
     private final CommunityProposalService proposalService;
     private final CommunityProposalDeliberationService proposalDeliberationService;
     private final CommunityProposalVotingService proposalVotingService;
@@ -79,6 +85,7 @@ public class CommunityCollaborationController {
         CommunityCollaborationService collaborationService,
         CommunityDecisionLedgerService decisionLedgerService,
         CommunityProjectBoardService projectBoardService,
+        CommunityModerationService moderationService,
         CommunityProposalService proposalService,
         CommunityProposalDeliberationService proposalDeliberationService,
         CommunityProposalVotingService proposalVotingService,
@@ -89,6 +96,7 @@ public class CommunityCollaborationController {
         this.collaborationService = collaborationService;
         this.decisionLedgerService = decisionLedgerService;
         this.projectBoardService = projectBoardService;
+        this.moderationService = moderationService;
         this.proposalService = proposalService;
         this.proposalDeliberationService = proposalDeliberationService;
         this.proposalVotingService = proposalVotingService;
@@ -283,6 +291,33 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return trustMetricsService.getTrustMetrics(communityId, period, principal.getName());
+    }
+
+    @GetMapping("/moderation/queue")
+    public CommunityModerationQueueResponse getModerationQueue(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String targetType,
+        Principal principal
+    ) {
+        return moderationService.getQueue(communityId, status, targetType, principal.getName());
+    }
+
+    @PostMapping("/moderation/reports")
+    public CommunityModerationReportResponse createModerationReport(
+        @Valid @RequestBody CreateCommunityModerationReportRequest request,
+        Principal principal
+    ) {
+        return moderationService.createReport(request, principal.getName());
+    }
+
+    @PatchMapping("/moderation/reports/{reportId}")
+    public CommunityModerationReportResponse resolveModerationReport(
+        @PathVariable UUID reportId,
+        @Valid @RequestBody ModerateCommunityReportRequest request,
+        Principal principal
+    ) {
+        return moderationService.resolveReport(reportId, request, principal.getName());
     }
 
     @GetMapping("/proposals")

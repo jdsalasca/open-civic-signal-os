@@ -19,6 +19,7 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { useCommunityStore } from "../store/useCommunityStore";
+import { useAuthStore } from "../store/useAuthStore";
 import type {
   CommunityProposal,
   CommunityProposalDeliberation,
@@ -33,6 +34,7 @@ import type {
   Signal,
 } from "../types";
 import { useTranslation } from "react-i18next";
+import { ModerationReportDialog } from "../components/community/ModerationReportDialog";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -84,6 +86,7 @@ export function CommunityProposals() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeCommunityId, memberships } = useCommunityStore();
+  const userName = useAuthStore((state) => state.userName);
   const activeMembership = memberships.find((membership) => membership.communityId === activeCommunityId) ?? null;
   const [proposals, setProposals] = useState<CommunityProposal[]>([]);
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null);
@@ -94,6 +97,8 @@ export function CommunityProposals() {
   const [loadingDeliberation, setLoadingDeliberation] = useState(false);
   const [loadingVoting, setLoadingVoting] = useState(false);
   const [moderatingEntryId, setModeratingEntryId] = useState<string | null>(null);
+  const [reportingEntry, setReportingEntry] = useState<CommunityProposalDeliberationEntry | null>(null);
+  const [submittingReport, setSubmittingReport] = useState(false);
   const [scoreVoteValue, setScoreVoteValue] = useState<number>(3);
   const [castingChoice, setCastingChoice] = useState<string | null>(null);
 
@@ -448,6 +453,20 @@ export function CommunityProposals() {
             loading={moderatingEntryId === entry.id}
             onClick={() => toggleModeration(entry)}
             data-testid={`proposal-deliberation-moderate-${entry.id}`}
+          />
+        </div>
+      )}
+      {!entry.hidden && (
+        <div className="mt-3">
+          <CivicButton
+            type="button"
+            size="small"
+            variant="ghost"
+            icon="pi pi-flag"
+            label={t("moderation.report_action")}
+            onClick={() => setReportingEntry(entry)}
+            disabled={entry.authorUsername === userName}
+            data-testid={`proposal-deliberation-report-${entry.id}`}
           />
         </div>
       )}
@@ -1238,6 +1257,39 @@ export function CommunityProposals() {
             </div>
           </div>
         )}
+        <ModerationReportDialog
+          visible={Boolean(reportingEntry)}
+          submitting={submittingReport}
+          targetLabel={reportingEntry?.content ?? ""}
+          onHide={() => {
+            if (submittingReport) {
+              return;
+            }
+            setReportingEntry(null);
+          }}
+          onSubmit={async ({ reasonCode, details }) => {
+            if (!activeCommunityId || !reportingEntry) {
+              return;
+            }
+            setSubmittingReport(true);
+            try {
+              await apiClient.post("community/moderation/reports", {
+                communityId: activeCommunityId,
+                targetType: "PROPOSAL_DELIBERATION",
+                targetId: reportingEntry.id,
+                reasonCode,
+                details,
+              });
+              toast.success(t("moderation.report_success"));
+              setReportingEntry(null);
+            } catch (err) {
+              const apiErr = err as ApiError;
+              toast.error(apiErr.friendlyMessage || t("moderation.report_error"));
+            } finally {
+              setSubmittingReport(false);
+            }
+          }}
+        />
       </div>
     </Layout>
   );

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import type { CommunityProposalDeliberation, CommunityProposalVoting } from "../types";
+import type { CommunityProposal, CommunityProposalDeliberation, CommunityProposalVoting } from "../types";
 
 const communityId = "11111111-1111-1111-1111-111111111111";
 const signalId = "22222222-2222-2222-2222-222222222222";
@@ -9,7 +9,7 @@ test.describe("Community proposals", () => {
     let savedPayload: Record<string, unknown> | null = null;
     let deliberationPayload: Record<string, unknown> | null = null;
     let moderatedPayload: Record<string, unknown> | null = null;
-    const proposals = [
+    const proposals: CommunityProposal[] = [
       {
         id: "33333333-3333-3333-3333-333333333333",
         communityId,
@@ -364,8 +364,8 @@ test.describe("Community proposals", () => {
         voteMode: String(savedPayload.voteMode) as "YES_NO" | "SCORE_1_5",
         resultVisibility: String(savedPayload.resultVisibility) as "COMMUNITY" | "AFTER_VOTE",
         eligibilityRule: String(savedPayload.eligibilityRule) as "ALL_MEMBERS" | "VERIFIED_MEMBERS",
-        votingOpensAt: null,
-        votingClosesAt: savedPayload.votingClosesAt ? String(savedPayload.votingClosesAt) : null,
+        votingOpensAt: null as string | null,
+        votingClosesAt: savedPayload.votingClosesAt ? String(savedPayload.votingClosesAt) : (null as string | null),
         createdAt: "2026-03-05T11:00:00",
         updatedAt: "2026-03-05T11:00:00",
       });

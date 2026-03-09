@@ -102,30 +102,6 @@ export function Layout({ children, authMode = false }: Props) {
     }
   };
 
-  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
-
-  const primaryNav: NavItem[] = [
-    { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
-    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
-    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
-  ];
-
-  const collaborationNav: NavItem[] = [
-    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
-    { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn },
-    { label: t('nav.community_decisions'), to: '/communities/decisions', icon: 'pi pi-sitemap', visible: isLoggedIn },
-    { label: t('nav.community_projects'), to: '/communities/projects', icon: 'pi pi-briefcase', visible: isLoggedIn },
-    { label: t('nav.community_governance'), to: '/communities/governance', icon: 'pi pi-book', visible: isLoggedIn },
-    { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
-    { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
-  ];
-
-  const advancedNav: NavItem[] = [
-    { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && isStaff },
-    { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
-    { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
-  ];
-
   const communityOptions = memberships.map((m) => ({
     label: m.communityName,
     value: m.communityId,
@@ -135,6 +111,31 @@ export function Layout({ children, authMode = false }: Props) {
     memberships.find((membership) => membership.communityId === activeCommunityId) ??
     memberships[0] ??
     null;
+  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
+  const canAccessModeration =
+    isStaff ||
+    activeMembership?.role === "MODERATOR" ||
+    activeMembership?.role === "COORDINATOR" ||
+    activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
+  const primaryNav: NavItem[] = [
+    { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
+    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
+    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
+  ];
+  const collaborationNav: NavItem[] = [
+    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
+    { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn },
+    { label: t('nav.community_decisions'), to: '/communities/decisions', icon: 'pi pi-sitemap', visible: isLoggedIn },
+    { label: t('nav.community_projects'), to: '/communities/projects', icon: 'pi pi-briefcase', visible: isLoggedIn },
+    { label: t('nav.community_governance'), to: '/communities/governance', icon: 'pi pi-book', visible: isLoggedIn },
+    { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
+    { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
+  ];
+  const advancedNav: NavItem[] = [
+    { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && Boolean(canAccessModeration) },
+    { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
+    { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
+  ];
   const activeBreadcrumb = activeMembership?.breadcrumb ?? [];
   const activeSection =
     [...primaryNav, ...collaborationNav, ...advancedNav].find((item) => item.to === location.pathname)?.label ??

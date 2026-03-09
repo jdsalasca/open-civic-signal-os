@@ -149,7 +149,7 @@ export function App() {
               <Route path="/communities/trust" element={<CommunityTrustMetrics />} />
             </Route>
 
-            <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>
+            <Route element={<AuthGuard />}>
               <Route path="/moderation" element={<Moderation />} />
             </Route>
             

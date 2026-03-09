@@ -22,6 +22,7 @@ import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { extractFirstImageUrl, prependImageToContent, stripMarkdownImages, isValidImageUrl } from "../utils/communityContent";
 import { isSubmitShortcut } from "../utils/keyboard";
+import { ModerationReportDialog } from "../components/community/ModerationReportDialog";
 
 type ApiError = Error & {
   friendlyMessage?: string;
@@ -49,6 +50,9 @@ export function CommunityThreads() {
   const [sendingByThread, setSendingByThread] = useState<Record<string, boolean>>({});
   const [reactingByMessage, setReactingByMessage] = useState<Record<string, boolean>>({});
   const [threadCreatePermissionReason, setThreadCreatePermissionReason] = useState("");
+  const [reportingMessage, setReportingMessage] = useState<CommunityThreadMessage | null>(null);
+  const [reportingThreadTitle, setReportingThreadTitle] = useState("");
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   const threadTitleLength = newThreadTitle.trim().length;
 
@@ -301,6 +305,20 @@ export function CommunityThreads() {
                   icon={message.hidden ? "pi pi-eye" : "pi pi-eye-slash"}
                   label={message.hidden ? t("community_threads.restore") : t("community_threads.hide")}
                   onClick={() => moderateMessage(thread.id, message.id, !message.hidden)}
+                />
+              )}
+              {!message.hidden && (
+                <CivicButton
+                  type="button"
+                  variant="ghost"
+                  size="small"
+                  icon="pi pi-flag"
+                  label={t("moderation.report_action")}
+                  onClick={() => {
+                    setReportingMessage(message);
+                    setReportingThreadTitle(thread.title);
+                  }}
+                  data-testid={`thread-report-message-${message.id}`}
                 />
               )}
             </div>
@@ -633,6 +651,45 @@ export function CommunityThreads() {
             </CivicCard>
           </div>
         </div>
+        <ModerationReportDialog
+          visible={Boolean(reportingMessage)}
+          submitting={submittingReport}
+          targetLabel={
+            reportingMessage
+              ? `${reportingThreadTitle}: ${stripMarkdownImages(reportingMessage.content).trim() || t("community_threads.image_only_message")}`
+              : ""
+          }
+          onHide={() => {
+            if (submittingReport) {
+              return;
+            }
+            setReportingMessage(null);
+            setReportingThreadTitle("");
+          }}
+          onSubmit={async ({ reasonCode, details }) => {
+            if (!activeCommunityId || !reportingMessage) {
+              return;
+            }
+            setSubmittingReport(true);
+            try {
+              await apiClient.post("community/moderation/reports", {
+                communityId: activeCommunityId,
+                targetType: "THREAD_MESSAGE",
+                targetId: reportingMessage.id,
+                reasonCode,
+                details,
+              });
+              toast.success(t("moderation.report_success"));
+              setReportingMessage(null);
+              setReportingThreadTitle("");
+            } catch (err) {
+              const apiErr = err as ApiError;
+              toast.error(apiErr.friendlyMessage || t("moderation.report_error"));
+            } finally {
+              setSubmittingReport(false);
+            }
+          }}
+        />
       </div>
     </Layout>
   );

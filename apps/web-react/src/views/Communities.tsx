@@ -27,6 +27,7 @@ type ApiError = Error & { friendlyMessage?: string };
 
 const permissionScopeOrder: CommunityPermissionScope[] = [
   "CREATE_PROPOSAL",
+  "MANAGE_MODERATION_QUEUE",
   "MANAGE_DECISION_LEDGER",
   "MANAGE_GOVERNANCE_LIBRARY",
   "MANAGE_PROJECT_BOARDS",
