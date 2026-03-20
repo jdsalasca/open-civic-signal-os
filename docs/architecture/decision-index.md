@@ -37,6 +37,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260307-community-proposal-voting-contract.md` (accepted)
 - `ADR-20260308-community-moderation-contract.md` (accepted)
 - `ADR-20260308-privacy-center-contract.md` (accepted)
+- `ADR-20260309-civic-onboarding-help-center-contract.md` (accepted)
 
 ## Review Rule
 

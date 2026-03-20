@@ -21,6 +21,7 @@ import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useTranslation } from "react-i18next";
 
 type ApiError = Error & { friendlyMessage?: string };
@@ -341,6 +342,7 @@ export function Communities() {
     <Layout>
       <div className="animate-fade-up motion-page">
         <CivicPageHeader title={t('communities_hub.title')} description={t('communities_hub.desc')} />
+        <ContextualHelpPanel surface="COMMUNITIES" className="mb-6" dataTestId="communities-contextual-help" />
         <CivicActionBar className="mb-6" data-testid="communities-map-entrybar">
           <div className="flex-1 min-w-0">
             <div className="u-eyebrow mb-1">

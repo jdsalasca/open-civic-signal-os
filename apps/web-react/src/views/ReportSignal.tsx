@@ -18,6 +18,7 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicCharacterCount } from "../components/ui/CivicCharacterCount";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { FORM_LIMITS } from "../constants/formLimits";
 import { isSubmitShortcut } from "../utils/keyboard";
 import { Signal } from "../types";
@@ -683,6 +684,7 @@ export function ReportSignal() {
     <Layout>
       <div className="animate-fade-up max-w-70rem mx-auto pb-8">
         <CivicPageHeader title={t("report.title")} description={t("report.desc")} />
+        <ContextualHelpPanel surface="REPORT" className="mb-6" dataTestId="report-contextual-help" />
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid">

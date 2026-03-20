@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Civic Onboarding and Help Center**: Added backend-owned onboarding completion state, bilingual help-center APIs, contextual workflow help panels, OpenAPI coverage, ADR documentation, and a dedicated `/help` route so citizens, moderators, and representatives can learn product flows without frontend-owned role logic. (`story:OCS-P1-051`)
 - **Privacy Center and Sensitive Access Logs**: Added backend-owned `activityVisibility`, sensitive-data access logging for protected profile reviews and signal exports, community publication policy management, OpenAPI coverage, ADR documentation, and a privacy-center workflow inside Settings so users and coordinators can audit who saw protected data and how community data is published. (`story:OCS-P1-050`)
 - **Community Moderation Queue and Sanction Engine**: Added backend-owned moderation reports, sanction ladder enforcement, sanction-aware participation guards, OpenAPI coverage, ADR documentation, and a new `/moderation` workflow plus in-context report actions from threads and proposal deliberation so communities can review harmful behavior without losing auditability. (`story:OCS-P1-049`)
 - **Verifiable Community Voting**: Added backend-owned proposal voting rules with configurable vote mode, tally visibility, eligibility gating, anti-abuse audit counters, OpenAPI coverage, and proposal detail UX so communities can formalize decisions before they enter the decision ledger. (`story:OCS-P1-042`)

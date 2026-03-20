@@ -31,56 +31,57 @@ Shipped Phase 5 foundations:
 - `OCS-P1-042` verifiable community voting
 - `OCS-P1-049` moderation queue and sanction policy engine
 - `OCS-P1-050` privacy center and sensitive-data access logs
+- `OCS-P1-051` civic onboarding, tours, and help center
 
 ## Now (Next 7 Days)
 
 Recommended next execution order:
 
-1. `story:OCS-P1-051` civic onboarding, tours, and help center
-2. `story:OCS-P1-052` open civic data exports and scoped API
-3. `story:OCS-P1-035` real-time rooms and mentions
-4. `story:OCS-P1-044` transparent duplicate review and merge history
-5. `story:OCS-P1-045` multilingual moderation and official translation workflow
+1. `story:OCS-P1-052` open civic data exports and scoped API
+2. `story:OCS-P1-035` real-time rooms and mentions
+3. `story:OCS-P1-044` transparent duplicate review and merge history
+4. `story:OCS-P1-045` multilingual moderation and official translation workflow
+5. `story:OCS-P1-053` outbound integrations layer
 
 Execution note:
 
-- `story:OCS-P1-051` is now the immediate target because the trust/privacy loop is shipped and the next highest-value gap is guided onboarding that helps communities discover the new governance, trust, and privacy surfaces without role confusion.
+- `story:OCS-P1-052` is now the immediate target because guided onboarding is shipped and the next highest-value gap is controlled civic data exports plus scoped external API access for communities that need interoperable delivery.
 
 ## Next (7-21 Days)
 
 1. Complete the trust loop sequence.
-  - `story:OCS-P1-051`
   - `story:OCS-P1-052`
-2. Expand governance safety rails.
   - `story:OCS-P1-035`
+2. Expand governance safety rails.
   - `story:OCS-P1-044`
-3. Prepare the next enablement layer.
   - `story:OCS-P1-045`
+3. Prepare the next enablement layer.
   - `story:OCS-P1-053`
+  - platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ## P0 Execution Queue (Agent Order)
 
 This section is preserved for repository compatibility. The active P0-equivalent execution order is:
 
-1. `story:OCS-P1-051`
-2. `story:OCS-P1-052`
-3. `story:OCS-P1-035`
-4. `story:OCS-P1-044`
-5. `story:OCS-P1-045`
+1. `story:OCS-P1-052`
+2. `story:OCS-P1-035`
+3. `story:OCS-P1-044`
+4. `story:OCS-P1-045`
+5. `story:OCS-P1-053`
 
 ## Wave Sequencing
 
 ### Wave 1: Trust Loop Completion
 
-1. `story:OCS-P1-051`
-2. `story:OCS-P1-052`
-3. `story:OCS-P1-035`
+1. `story:OCS-P1-052`
+2. `story:OCS-P1-035`
+3. `story:OCS-P1-044`
 
 ### Wave 2: Safety and Data Responsibility
 
-4. `story:OCS-P1-044`
-5. `story:OCS-P1-045`
-6. `story:OCS-P1-053`
+4. `story:OCS-P1-045`
+5. `story:OCS-P1-053`
+6. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ### Wave 3: Operational Growth
 
@@ -103,6 +104,7 @@ This section is preserved for repository compatibility. The active P0-equivalent
 - `OCS-P1-042` shipped and now closes the proposal -> vote -> decision legitimacy gap with backend-owned eligibility rules, tally visibility, and anti-abuse counters.
 - `OCS-P1-049` shipped and now adds auditable moderation reports, queue-based review, and proportional sanctions without moving civic policy logic into the frontend.
 - `OCS-P1-050` shipped and now adds user-facing privacy controls, sensitive-data access logs, and backend-owned community publication policy management without moving trust rules into the frontend.
+- `OCS-P1-051` shipped and now adds backend-owned onboarding state, searchable bilingual help guides, and contextual workflow help panels without moving role/audience logic into the frontend.
 
 ## Definition of Ready for Any New Story
 

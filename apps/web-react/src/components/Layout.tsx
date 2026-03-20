@@ -134,6 +134,7 @@ export function Layout({ children, authMode = false }: Props) {
   const advancedNav: NavItem[] = [
     { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && Boolean(canAccessModeration) },
     { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
+    { label: t('nav.help_center'), to: '/help', icon: 'pi pi-question-circle', visible: isLoggedIn },
     { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
   ];
   const activeBreadcrumb = activeMembership?.breadcrumb ?? [];

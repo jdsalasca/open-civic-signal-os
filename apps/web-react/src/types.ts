@@ -188,6 +188,61 @@ export type CommunityPrivacyPolicy = {
   recentAccessLogs: SensitiveDataAccessLog[];
 };
 
+export type HelpAudience = "CITIZEN" | "MODERATOR" | "REPRESENTATIVE";
+export type HelpSurface =
+  | "GENERAL"
+  | "DASHBOARD"
+  | "REPORT"
+  | "COMMUNITIES"
+  | "PROPOSALS"
+  | "GOVERNANCE"
+  | "PROJECTS";
+
+export type HelpGuideKind = "ARTICLE" | "CONTEXTUAL";
+
+export type OnboardingStep = {
+  key: string;
+  audience: HelpAudience;
+  title: string;
+  description: string;
+  actionLabel: string;
+  actionRoute: string;
+  completed: boolean;
+  dismissed: boolean;
+};
+
+export type HelpGuide = {
+  id: string;
+  kind: HelpGuideKind;
+  surface: HelpSurface;
+  audience: HelpAudience;
+  title: string;
+  summary: string;
+  body: string;
+  tags: string[];
+  actionLabel?: string | null;
+  actionRoute?: string | null;
+  dismissible: boolean;
+  dismissed: boolean;
+};
+
+export type HelpCenterResponse = {
+  persona: HelpAudience;
+  language: "en" | "es";
+  surface?: HelpSurface | null;
+  query?: string | null;
+  generatedAt: string;
+  completedStepKeys: string[];
+  dismissedGuideKeys: string[];
+  onboardingSteps: OnboardingStep[];
+  guides: HelpGuide[];
+};
+
+export type HelpCenterStateResponse = {
+  completedStepKeys: string[];
+  dismissedGuideKeys: string[];
+};
+
 export type CommunityThreadMessage = {
   id: string;
   threadId: string;

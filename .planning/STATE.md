@@ -10,21 +10,21 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Current execution plan: 05-30 (Privacy Center and Sensitive-Data Access Logs)
-Tracked phase subplans: 33
+Current execution plan: 05-31 (Civic Onboarding and Help Center)
+Tracked phase subplans: 34
 Tracked project plans: 46
 Status: In progress  
-Last activity: 2026-03-09 - Completed `05-30` for `OCS-P1-050` with backend privacy controls/access logs, community publication policy UX, contract/ADR updates, Docker validation, and backlog promotion to `OCS-P1-051`
+Last activity: 2026-03-09 - Completed `05-31` for `OCS-P1-051` with backend-owned onboarding state, bilingual help-center APIs, contextual help UX, contract/ADR updates, Docker validation, and backlog promotion to `OCS-P1-052`
 
-Progress: 4 of 5 roadmap phases complete; Phase 5 trust loop shipped through privacy controls and next target is `OCS-P1-051`
+Progress: 4 of 5 roadmap phases complete; Phase 5 trust loop now includes guided onboarding/help and next target is `OCS-P1-052`
 
 ## Performance Metrics
 
 **Execution Snapshot:**
 - Total tracked plans across project: 46
-- Tracked Phase 5 subplans: 33
-- Shipped Phase 5 stories: 19 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`, `049`, `050`)
-- Immediate queue: `OCS-P1-051`, `OCS-P1-052`, `OCS-P1-035`, `OCS-P1-044`, `OCS-P1-045`
+- Tracked Phase 5 subplans: 34
+- Shipped Phase 5 stories: 20 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`, `049`, `050`, `051`)
+- Immediate queue: `OCS-P1-052`, `OCS-P1-035`, `OCS-P1-044`, `OCS-P1-045`, `OCS-P1-053`
 
 ## Accumulated Context
 
@@ -82,6 +82,7 @@ Progress: 4 of 5 roadmap phases complete; Phase 5 trust loop shipped through pri
 - 2026-03-07: Implemented `OCS-P1-042` with backend-owned proposal voting rules, eligibility and tally visibility configuration, anti-abuse audit counters, proposal vote UX, OpenAPI coverage, ADR update, and targeted backend integration tests.
 - 2026-03-09: Implemented `OCS-P1-049` with backend-owned community moderation reports and sanctions, `MANAGE_MODERATION_QUEUE` enforcement, sanction-aware participation guardrails, `/community/moderation/*` APIs, moderator queue UX, OpenAPI coverage, ADR update, Docker-backed frontend evidence, and targeted backend integration tests.
 - 2026-03-09: Implemented `OCS-P1-050` with backend-owned activity visibility, sensitive-data access logs, community open-data publication policy management, Settings privacy-center UX, OpenAPI coverage, ADR update, Docker-backed frontend build validation, and targeted backend integration tests.
+- 2026-03-09: Implemented `OCS-P1-051` with backend-owned onboarding state, bilingual help-center payloads, contextual workflow help panels, a dedicated `/help` route, OpenAPI coverage, ADR update, Docker-backed frontend build validation, and targeted backend integration tests.
 
 ### Pending Todos
 
@@ -103,6 +104,6 @@ See:
 ## Session Continuity
 
 Last session: 2026-03-09
-Stopped at: `OCS-P1-050` shipped; next recommended execution target is `OCS-P1-051` civic onboarding, tours, and help center
+Stopped at: `OCS-P1-051` shipped; next recommended execution target is `OCS-P1-052` open civic data exports and scoped API
 Resume file: None
 

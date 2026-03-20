@@ -34,6 +34,12 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String bio;
 
+    @Column(columnDefinition = "TEXT")
+    private String onboardingCompletedStepKeysCsv;
+
+    @Column(columnDefinition = "TEXT")
+    private String dismissedGuideKeysCsv;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProfileVisibility profileVisibility = ProfileVisibility.PUBLIC;
@@ -93,6 +99,12 @@ public class User {
     public void setAffiliationsCsv(String affiliationsCsv) { this.affiliationsCsv = affiliationsCsv; }
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
+    public String getOnboardingCompletedStepKeysCsv() { return onboardingCompletedStepKeysCsv; }
+    public void setOnboardingCompletedStepKeysCsv(String onboardingCompletedStepKeysCsv) {
+        this.onboardingCompletedStepKeysCsv = onboardingCompletedStepKeysCsv;
+    }
+    public String getDismissedGuideKeysCsv() { return dismissedGuideKeysCsv; }
+    public void setDismissedGuideKeysCsv(String dismissedGuideKeysCsv) { this.dismissedGuideKeysCsv = dismissedGuideKeysCsv; }
     public ProfileVisibility getProfileVisibility() { return profileVisibility; }
     public void setProfileVisibility(ProfileVisibility profileVisibility) { this.profileVisibility = profileVisibility; }
     public ProfileVisibility getAffiliationVisibility() { return affiliationVisibility; }
@@ -129,6 +141,46 @@ public class User {
         this.affiliationsCsv = affiliations.stream()
             .map(String::trim)
             .filter(value -> !value.isBlank())
+            .collect(Collectors.joining(","));
+    }
+
+    public List<String> getOnboardingCompletedStepKeys() {
+        return csvToList(onboardingCompletedStepKeysCsv);
+    }
+
+    public void setOnboardingCompletedStepKeys(List<String> keys) {
+        onboardingCompletedStepKeysCsv = listToCsv(keys);
+    }
+
+    public List<String> getDismissedGuideKeys() {
+        return csvToList(dismissedGuideKeysCsv);
+    }
+
+    public void setDismissedGuideKeys(List<String> keys) {
+        dismissedGuideKeysCsv = listToCsv(keys);
+    }
+
+    private List<String> csvToList(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(value.split(","))
+            .map(String::trim)
+            .filter(item -> !item.isBlank())
+            .distinct()
+            .sorted()
+            .toList();
+    }
+
+    private String listToCsv(List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+        return values.stream()
+            .map(String::trim)
+            .filter(item -> !item.isBlank())
+            .distinct()
+            .sorted()
             .collect(Collectors.joining(","));
     }
 }

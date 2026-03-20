@@ -68,6 +68,55 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SensitiveDataAccessLogResponse'
+  /api/help-center:
+    get:
+      summary: Get backend-owned onboarding steps and bilingual help guides for the authenticated user
+      parameters:
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: lang
+          in: query
+          required: false
+          schema:
+            type: string
+            example: en
+        - name: surface
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/HelpSurface'
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Onboarding state and help guides for the current audience
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpCenterResponse'
+  /api/help-center/state:
+    put:
+      summary: Update backend-owned onboarding completion and dismissed-guide state
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHelpCenterStateRequest'
+      responses:
+        '200':
+          description: Persisted onboarding and guide-dismissal state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpCenterStateResponse'
   /api/health:
     get:
       summary: Health check
@@ -4177,6 +4226,125 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SensitiveDataAccessLogResponse'
+    HelpAudience:
+      type: string
+      enum: [CITIZEN, MODERATOR, REPRESENTATIVE]
+    HelpGuideKind:
+      type: string
+      enum: [ARTICLE, CONTEXTUAL]
+    HelpSurface:
+      type: string
+      enum: [GENERAL, DASHBOARD, REPORT, COMMUNITIES, PROPOSALS, GOVERNANCE, PROJECTS]
+    OnboardingStepResponse:
+      type: object
+      required: [key, audience, title, description, actionLabel, actionRoute, completed, dismissed]
+      properties:
+        key:
+          type: string
+        audience:
+          $ref: '#/components/schemas/HelpAudience'
+        title:
+          type: string
+        description:
+          type: string
+        actionLabel:
+          type: string
+        actionRoute:
+          type: string
+        completed:
+          type: boolean
+        dismissed:
+          type: boolean
+    HelpGuideResponse:
+      type: object
+      required: [id, kind, surface, audience, title, summary, body, tags, dismissible, dismissed]
+      properties:
+        id:
+          type: string
+        kind:
+          $ref: '#/components/schemas/HelpGuideKind'
+        surface:
+          $ref: '#/components/schemas/HelpSurface'
+        audience:
+          $ref: '#/components/schemas/HelpAudience'
+        title:
+          type: string
+        summary:
+          type: string
+        body:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        actionLabel:
+          type: string
+          nullable: true
+        actionRoute:
+          type: string
+          nullable: true
+        dismissible:
+          type: boolean
+        dismissed:
+          type: boolean
+    HelpCenterResponse:
+      type: object
+      required: [persona, language, generatedAt, completedStepKeys, dismissedGuideKeys, onboardingSteps, guides]
+      properties:
+        persona:
+          $ref: '#/components/schemas/HelpAudience'
+        language:
+          type: string
+        surface:
+          allOf:
+            - $ref: '#/components/schemas/HelpSurface'
+          nullable: true
+        query:
+          type: string
+          nullable: true
+        generatedAt:
+          type: string
+          format: date-time
+        completedStepKeys:
+          type: array
+          items:
+            type: string
+        dismissedGuideKeys:
+          type: array
+          items:
+            type: string
+        onboardingSteps:
+          type: array
+          items:
+            $ref: '#/components/schemas/OnboardingStepResponse'
+        guides:
+          type: array
+          items:
+            $ref: '#/components/schemas/HelpGuideResponse'
+    UpdateHelpCenterStateRequest:
+      type: object
+      required: [completedStepKeys, dismissedGuideKeys]
+      properties:
+        completedStepKeys:
+          type: array
+          items:
+            type: string
+        dismissedGuideKeys:
+          type: array
+          items:
+            type: string
+    HelpCenterStateResponse:
+      type: object
+      required: [completedStepKeys, dismissedGuideKeys]
+      properties:
+        completedStepKeys:
+          type: array
+          items:
+            type: string
+        dismissedGuideKeys:
+          type: array
+          items:
+            type: string
     CreateCommunityRequest:
       type: object
       required: [name, slug]

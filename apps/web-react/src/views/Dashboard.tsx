@@ -17,6 +17,7 @@ import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 import { CivicToolbar } from "../components/ui/CivicToolbar";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { toRoleLabel } from "../constants/roleLabels";
@@ -493,6 +494,8 @@ export function Dashboard() {
             ))}
           </div>
         </CivicCard>
+
+        <ContextualHelpPanel surface="DASHBOARD" className="mb-6" dataTestId="dashboard-contextual-help" />
 
         {interfaceMode === "advanced" && (
           <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">

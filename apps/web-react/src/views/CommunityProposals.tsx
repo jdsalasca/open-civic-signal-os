@@ -18,6 +18,7 @@ import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { FORM_LIMITS } from "../constants/formLimits";
+import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useAuthStore } from "../store/useAuthStore";
 import type {
@@ -476,6 +477,7 @@ export function CommunityProposals() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
+        <ContextualHelpPanel surface="PROPOSALS" className="mb-6" dataTestId="proposals-contextual-help" />
         <div className="flex flex-column xl:flex-row justify-content-between align-items-start gap-4 mb-8">
           <CivicPageHeader
             title={t("community_proposals.title")}

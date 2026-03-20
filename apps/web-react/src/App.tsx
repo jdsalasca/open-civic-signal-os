@@ -13,6 +13,7 @@ const ReportSignal = lazy(() => import("./views/ReportSignal").then(m => ({ defa
 const SignalDetail = lazy(() => import("./views/SignalDetail").then(m => ({ default: m.SignalDetail })));
 const MySignals = lazy(() => import("./views/MySignals").then(m => ({ default: m.MySignals })));
 const Settings = lazy(() => import("./views/Settings").then(m => ({ default: m.Settings })));
+const HelpCenter = lazy(() => import("./views/HelpCenter").then(m => ({ default: m.HelpCenter })));
 const Register = lazy(() => import("./views/Register").then(m => ({ default: m.Register })));
 const Verify = lazy(() => import("./views/Verify").then(m => ({ default: m.Verify })));
 const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
@@ -137,6 +138,7 @@ export function App() {
               <Route path="/signal/:id" element={<SignalDetail />} />
               <Route path="/mine" element={<MySignals />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/help" element={<HelpCenter />} />
               <Route path="/communities" element={<Communities />} />
               <Route path="/communities/threads" element={<CommunityThreads />} />
               <Route path="/communities/blog" element={<CommunityBlog />} />
