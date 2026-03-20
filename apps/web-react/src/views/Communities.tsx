@@ -23,6 +23,7 @@ import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "../store/useAuthStore";
 
 type ApiError = Error & { friendlyMessage?: string };
 
@@ -30,6 +31,7 @@ const permissionScopeOrder: CommunityPermissionScope[] = [
   "CREATE_PROPOSAL",
   "MANAGE_MODERATION_QUEUE",
   "MANAGE_PRIVACY_SETTINGS",
+  "MANAGE_OPEN_DATA_EXPORTS",
   "MANAGE_DECISION_LEDGER",
   "MANAGE_GOVERNANCE_LIBRARY",
   "MANAGE_PROJECT_BOARDS",
@@ -115,6 +117,7 @@ function CommunityTreeBranch({
 export function Communities() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const activeRole = useAuthStore((state) => state.activeRole);
   const { memberships, setMemberships, setActiveCommunityId, activeCommunityId, getActiveMembership } = useCommunityStore();
   const [communities, setCommunities] = useState<Community[]>([]);
   const [communityTree, setCommunityTree] = useState<CommunityTreeNode[]>([]);
@@ -257,6 +260,11 @@ export function Communities() {
   );
   const activeRoleLabel = activeMembership ? roleLabels[activeMembership.role] ?? activeMembership.role : null;
   const isPolicyEditor = activeMembership?.role === "COORDINATOR";
+  const canOpenDataWorkspace =
+    activeRole === "PUBLIC_SERVANT" ||
+    activeRole === "SUPER_ADMIN" ||
+    activeMembership?.role === "COORDINATOR" ||
+    activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
   const activeCommunityPath =
     activeBreadcrumb.length > 0
       ? activeBreadcrumb.map((item) => item.name).join(" / ")
@@ -384,6 +392,16 @@ export function Communities() {
             onClick={() => navigate("/communities/governance")}
             data-testid="communities-open-governance-button"
           />
+          {canOpenDataWorkspace && (
+            <CivicButton
+              type="button"
+              icon="pi pi-database"
+              label={t("nav.community_open_data")}
+              variant="ghost"
+              onClick={() => navigate("/communities/open-data")}
+              data-testid="communities-open-open-data-button"
+            />
+          )}
           <CivicButton
             type="button"
             icon="pi pi-briefcase"

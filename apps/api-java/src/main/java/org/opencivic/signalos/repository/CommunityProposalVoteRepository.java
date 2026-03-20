@@ -10,4 +10,6 @@ public interface CommunityProposalVoteRepository extends JpaRepository<Community
     Optional<CommunityProposalVote> findByProposalIdAndVoterId(UUID proposalId, UUID voterId);
 
     List<CommunityProposalVote> findByProposalIdOrderByCreatedAtAsc(UUID proposalId);
+
+    List<CommunityProposalVote> findByCommunityIdOrderByCreatedAtDesc(UUID communityId);
 }

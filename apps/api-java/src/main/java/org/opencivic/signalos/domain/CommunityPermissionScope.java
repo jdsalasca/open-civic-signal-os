@@ -28,6 +28,10 @@ public enum CommunityPermissionScope {
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON
     )),
+    MANAGE_OPEN_DATA_EXPORTS(Set.of(
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
     MANAGE_DECISION_LEDGER(Set.of(
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON

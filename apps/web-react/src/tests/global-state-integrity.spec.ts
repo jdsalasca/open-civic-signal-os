@@ -58,6 +58,7 @@ test.describe('Global State Integrity (P0)', () => {
     await page.goto('/communities/threads');
     await page.goto('/communities/blog');
     await page.goto('/communities/feed');
+    await page.goto('/communities/open-data');
     await page.goto('/settings');
 
     await page.evaluate(() => {

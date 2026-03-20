@@ -1359,6 +1359,216 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/exports/center:
+    get:
+      summary: Get one community open-data export center payload
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Community open-data export center
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityOpenDataCenterResponse'
+        '403':
+          description: Community policy denied open-data export management access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/exports/tokens:
+    post:
+      summary: Create one scoped community open-data token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityOpenDataTokenRequest'
+      responses:
+        '200':
+          description: Created open-data token with one-time plain secret
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCommunityOpenDataTokenResponse'
+        '400':
+          description: Open-data token request failed validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied open-data token management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/exports/tokens/{tokenId}:
+    delete:
+      summary: Revoke one scoped community open-data token
+      parameters:
+        - in: path
+          name: tokenId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Revoked open-data token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityOpenDataTokenResponse'
+        '403':
+          description: Community policy denied open-data token revocation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Open-data token not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/exports/{exportType}:
+    get:
+      summary: Download one community-scoped export dataset as CSV or JSON
+      parameters:
+        - in: path
+          name: exportType
+          required: true
+          schema:
+            $ref: '#/components/schemas/CommunityOpenDataExportType'
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: format
+          required: false
+          schema:
+            $ref: '#/components/schemas/CommunityOpenDataFormat'
+      responses:
+        '200':
+          description: Open-data dataset download
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+            Content-Type:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataSignalRecordResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataProposalRecordResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataVoteRecordResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataDecisionRecordResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataMetricRecordResponse'
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Community policy denied open-data export download
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/open-data/{communityId}/{exportType}:
+    get:
+      summary: Read one community open-data dataset through a scoped external API token
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: exportType
+          required: true
+          schema:
+            $ref: '#/components/schemas/CommunityOpenDataExportType'
+        - in: header
+          name: X-Api-Token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Scoped open-data dataset payload
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+            X-RateLimit-Reset:
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataSignalRecordResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataProposalRecordResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataVoteRecordResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataDecisionRecordResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/OpenDataMetricRecordResponse'
+        '401':
+          description: Token missing, invalid, revoked, or missing the required scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '429':
+          description: Scoped token exceeded its rate limit window
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyRequestsResponse'
   /api/community/moderation/queue:
     get:
       summary: List community moderation reports and sanction counts for one active community
@@ -2745,6 +2955,7 @@ components:
           enum:
             - CREATE_PROPOSAL
             - MANAGE_MODERATION_QUEUE
+            - MANAGE_OPEN_DATA_EXPORTS
             - MANAGE_DECISION_LEDGER
             - MANAGE_GOVERNANCE_LIBRARY
             - MANAGE_PROJECT_BOARDS
@@ -4226,6 +4437,334 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SensitiveDataAccessLogResponse'
+    CommunityOpenDataAccessChannel:
+      type: string
+      enum: [USER_EXPORT, API_TOKEN]
+    CommunityOpenDataExportType:
+      type: string
+      enum: [SIGNALS, PROPOSALS, VOTES, DECISIONS, METRICS]
+    CommunityOpenDataFormat:
+      type: string
+      enum: [CSV, JSON]
+    CommunityOpenDataTokenScope:
+      type: string
+      enum: [EXPORT_SIGNALS, EXPORT_PROPOSALS, EXPORT_VOTES, EXPORT_DECISIONS, EXPORT_METRICS]
+    CommunityOpenDataDatasetResponse:
+      type: object
+      required: [resource, description, formats, externalPath]
+      properties:
+        resource:
+          $ref: '#/components/schemas/CommunityOpenDataExportType'
+        description:
+          type: string
+        formats:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityOpenDataFormat'
+        externalPath:
+          type: string
+    CommunityOpenDataTokenResponse:
+      type: object
+      required: [id, label, tokenPrefix, scopes, rateLimitPerHour, active, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+        tokenPrefix:
+          type: string
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityOpenDataTokenScope'
+        rateLimitPerHour:
+          type: integer
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        revokedAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityOpenDataAccessLogResponse:
+      type: object
+      required: [id, accessChannel, exportType, format, note, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        accessChannel:
+          $ref: '#/components/schemas/CommunityOpenDataAccessChannel'
+        exportType:
+          $ref: '#/components/schemas/CommunityOpenDataExportType'
+        format:
+          $ref: '#/components/schemas/CommunityOpenDataFormat'
+        actorUsername:
+          type: string
+          nullable: true
+        tokenLabel:
+          type: string
+          nullable: true
+        note:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    CommunityOpenDataCenterResponse:
+      type: object
+      required: [communityId, communityName, defaultRateLimitPerHour, datasets, tokens, recentAccessLogs]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        defaultRateLimitPerHour:
+          type: integer
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityOpenDataDatasetResponse'
+        tokens:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityOpenDataTokenResponse'
+        recentAccessLogs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityOpenDataAccessLogResponse'
+    CreateCommunityOpenDataTokenRequest:
+      type: object
+      required: [communityId, label, scopes, rateLimitPerHour]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        label:
+          type: string
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityOpenDataTokenScope'
+        rateLimitPerHour:
+          type: integer
+          minimum: 1
+          maximum: 1000
+    CreateCommunityOpenDataTokenResponse:
+      type: object
+      required: [token, plainToken]
+      properties:
+        token:
+          $ref: '#/components/schemas/CommunityOpenDataTokenResponse'
+        plainToken:
+          type: string
+    OpenDataSignalRecordResponse:
+      type: object
+      required: [id, communityId, title, category, status, priorityScore, urgency, impact, affectedPeople, communityVotes, locationLabel, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        priorityScore:
+          type: number
+          format: double
+        urgency:
+          type: integer
+        impact:
+          type: integer
+        affectedPeople:
+          type: integer
+        communityVotes:
+          type: integer
+        locationLabel:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    OpenDataProposalRecordResponse:
+      type: object
+      required: [id, communityId, title, status, problemStatement, proposedSolution, estimatedCost, beneficiariesSummary, supportingLinks, voteMode, voteVisibility, voteEligibility, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        relatedSignalId:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+        status:
+          type: string
+        problemStatement:
+          type: string
+        proposedSolution:
+          type: string
+        estimatedCost:
+          type: string
+        beneficiariesSummary:
+          type: string
+        supportingLinks:
+          type: array
+          items:
+            type: string
+        voteMode:
+          type: string
+        voteVisibility:
+          type: string
+        voteEligibility:
+          type: string
+        votingOpensAt:
+          type: string
+          format: date-time
+          nullable: true
+        votingClosesAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    OpenDataVoteRecordResponse:
+      type: object
+      required: [id, communityId, proposalId, proposalTitle, voteMode, membershipRole, verifiedMember, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        proposalId:
+          type: string
+          format: uuid
+        proposalTitle:
+          type: string
+        voteMode:
+          type: string
+        choice:
+          type: string
+          nullable: true
+        scoreValue:
+          type: integer
+          nullable: true
+        membershipRole:
+          type: string
+        verifiedMember:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    OpenDataDecisionRecordResponse:
+      type: object
+      required: [id, communityId, title, summary, decisionType, decisionStatus, approvalBasisType, approvalBasisSummary, decidedAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        linkedProposalId:
+          type: string
+          format: uuid
+          nullable: true
+        governanceDocumentId:
+          type: string
+          format: uuid
+          nullable: true
+        projectBoardId:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+        summary:
+          type: string
+        decisionType:
+          type: string
+        decisionStatus:
+          type: string
+        approvalBasisType:
+          type: string
+        approvalBasisSummary:
+          type: string
+        decidedAt:
+          type: string
+          format: date-time
+        effectiveDate:
+          type: string
+          format: date
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+    OpenDataMetricRecordResponse:
+      type: object
+      required: [communityId, period, key, label, value, unit, definition, formula, freshness, lowData, generatedAt]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        period:
+          type: string
+        key:
+          type: string
+        label:
+          type: string
+        value:
+          type: string
+        unit:
+          type: string
+        definition:
+          type: string
+        formula:
+          type: string
+        freshness:
+          type: string
+        lowData:
+          type: boolean
+        generatedAt:
+          type: string
+          format: date-time
+    TooManyRequestsResponse:
+      type: object
+      required: [timestamp, status, error, message, resetAt]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        resetAt:
+          type: string
+          format: date-time
     HelpAudience:
       type: string
       enum: [CITIZEN, MODERATOR, REPRESENTATIVE]

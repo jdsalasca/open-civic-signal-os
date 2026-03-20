@@ -46,6 +46,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health").permitAll()
+                .requestMatchers("/api/open-data/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/export/**").hasRole("SUPER_ADMIN")
                 
@@ -97,7 +98,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-Community-Id"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-Community-Id", "X-Api-Token"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

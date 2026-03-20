@@ -25,6 +25,7 @@ test.describe('Navigation clarity', () => {
     await page.getByTestId('desktop-more-toggle').click();
     await expect(page.getByTestId('desktop-more-panel')).toBeVisible();
     await expect(aside.getByRole('link', { name: 'Shared Updates' })).toBeVisible();
+    await expect(aside.getByRole('link', { name: 'Open Data' })).toBeVisible();
     await expect(aside.getByRole('link', { name: 'Official Updates' })).toBeVisible();
     await expect(aside.getByRole('link', { name: 'Community Talks' })).toBeVisible();
     await expect(aside.getByRole('link', { name: 'Preferences' })).toBeVisible();
@@ -46,6 +47,7 @@ test.describe('Navigation clarity', () => {
     await expect(drawer).toBeVisible();
     await expect(page.getByTestId('mobile-drawer-guidance')).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Shared Updates' })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'Open Data' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Official Updates' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Community Talks' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Preferences' })).toBeVisible();

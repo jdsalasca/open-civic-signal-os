@@ -117,6 +117,10 @@ export function Layout({ children, authMode = false }: Props) {
     activeMembership?.role === "MODERATOR" ||
     activeMembership?.role === "COORDINATOR" ||
     activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
+  const canAccessOpenData =
+    isStaff ||
+    activeMembership?.role === "COORDINATOR" ||
+    activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
   const primaryNav: NavItem[] = [
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
@@ -128,6 +132,7 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.community_decisions'), to: '/communities/decisions', icon: 'pi pi-sitemap', visible: isLoggedIn },
     { label: t('nav.community_projects'), to: '/communities/projects', icon: 'pi pi-briefcase', visible: isLoggedIn },
     { label: t('nav.community_governance'), to: '/communities/governance', icon: 'pi pi-book', visible: isLoggedIn },
+    { label: t('nav.community_open_data'), to: '/communities/open-data', icon: 'pi pi-database', visible: isLoggedIn && Boolean(canAccessOpenData) },
     { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
     { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
   ];

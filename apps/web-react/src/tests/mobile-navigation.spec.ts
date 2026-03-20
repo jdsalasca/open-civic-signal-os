@@ -33,6 +33,7 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
     // Verify Nav items are readable and present
     await expect(sidebar.getByText('Home')).toBeVisible();
     await expect(sidebar.getByText('Moderation')).toBeVisible();
+    await expect(sidebar.getByText('Open Data')).toBeVisible();
 
     // Verify backdrop mask presence
     const mask = page.locator('.p-sidebar-mask');

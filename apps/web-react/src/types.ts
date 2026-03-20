@@ -137,6 +137,7 @@ export type CommunityPermissionScope =
   | "CREATE_PROPOSAL"
   | "MANAGE_MODERATION_QUEUE"
   | "MANAGE_PRIVACY_SETTINGS"
+  | "MANAGE_OPEN_DATA_EXPORTS"
   | "MANAGE_DECISION_LEDGER"
   | "MANAGE_GOVERNANCE_LIBRARY"
   | "MANAGE_PROJECT_BOARDS"
@@ -186,6 +187,68 @@ export type CommunityPrivacyPolicy = {
   updatedByUsername?: string | null;
   updatedAt?: string | null;
   recentAccessLogs: SensitiveDataAccessLog[];
+};
+
+export type CommunityOpenDataAccessChannel = "USER_EXPORT" | "API_TOKEN";
+
+export type CommunityOpenDataExportType =
+  | "SIGNALS"
+  | "PROPOSALS"
+  | "VOTES"
+  | "DECISIONS"
+  | "METRICS";
+
+export type CommunityOpenDataFormat = "CSV" | "JSON";
+
+export type CommunityOpenDataTokenScope =
+  | "EXPORT_SIGNALS"
+  | "EXPORT_PROPOSALS"
+  | "EXPORT_VOTES"
+  | "EXPORT_DECISIONS"
+  | "EXPORT_METRICS";
+
+export type CommunityOpenDataDataset = {
+  resource: CommunityOpenDataExportType;
+  description: string;
+  formats: CommunityOpenDataFormat[];
+  externalPath: string;
+};
+
+export type CommunityOpenDataToken = {
+  id: string;
+  label: string;
+  tokenPrefix: string;
+  scopes: CommunityOpenDataTokenScope[];
+  rateLimitPerHour: number;
+  active: boolean;
+  createdAt: string;
+  lastUsedAt?: string | null;
+  revokedAt?: string | null;
+};
+
+export type CommunityOpenDataAccessLog = {
+  id: string;
+  accessChannel: CommunityOpenDataAccessChannel;
+  exportType: CommunityOpenDataExportType;
+  format: CommunityOpenDataFormat;
+  actorUsername?: string | null;
+  tokenLabel?: string | null;
+  note: string;
+  createdAt: string;
+};
+
+export type CommunityOpenDataCenter = {
+  communityId: string;
+  communityName: string;
+  defaultRateLimitPerHour: number;
+  datasets: CommunityOpenDataDataset[];
+  tokens: CommunityOpenDataToken[];
+  recentAccessLogs: CommunityOpenDataAccessLog[];
+};
+
+export type CreateCommunityOpenDataTokenResponse = {
+  token: CommunityOpenDataToken;
+  plainToken: string;
 };
 
 export type HelpAudience = "CITIZEN" | "MODERATOR" | "REPRESENTATIVE";

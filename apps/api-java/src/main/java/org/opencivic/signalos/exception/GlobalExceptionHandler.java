@@ -87,6 +87,17 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<?> handleTooManyRequests(TooManyRequestsException ex) {
+        return new ResponseEntity<>(Map.of(
+            "timestamp", LocalDateTime.now(),
+            "status", HttpStatus.TOO_MANY_REQUESTS.value(),
+            "error", HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
+            "message", ex.getMessage(),
+            "resetAt", ex.getResetAt()
+        ), HttpStatus.TOO_MANY_REQUESTS);
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String requiredType = ex.getRequiredType() == null ? "valid value" : ex.getRequiredType().getSimpleName();

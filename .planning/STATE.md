@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 
 Phase: 5 of 5 (Community Operating System Expansion)  
 Current execution plan: 05-32 (Open Civic Data Exports and Scoped API)
-Tracked phase subplans: 34
-Tracked project plans: 46
+Tracked phase subplans: 35
+Tracked project plans: 48
 Status: In progress  
 Last activity: 2026-03-19 - Completed `05-32` for `OCS-P1-052` with backend-owned community exports, scoped API tokens, rate limits, audit logs, export-workspace UX, contract/ADR updates, targeted backend validation, and backlog promotion to `OCS-P1-035`
 
@@ -21,8 +21,8 @@ Progress: 4 of 5 roadmap phases complete; Phase 5 trust loop now includes guided
 ## Performance Metrics
 
 **Execution Snapshot:**
-- Total tracked plans across project: 46
-- Tracked Phase 5 subplans: 34
+- Total tracked plans across project: 48
+- Tracked Phase 5 subplans: 35
 - Shipped Phase 5 stories: 21 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`, `049`, `050`, `051`, `052`)
 - Immediate queue: `OCS-P1-035`, `OCS-P1-044`, `OCS-P1-045`, `OCS-P1-053`
 

@@ -77,7 +77,14 @@ public class CommunityTrustMetricsService {
     public CommunityTrustMetricsResponse getTrustMetrics(UUID communityId, String periodKey, String username) {
         User user = communityAccessService.getCurrentUser(username);
         communityAccessService.requireMembership(user.getId(), communityId);
+        return buildTrustMetrics(communityId, periodKey);
+    }
 
+    public CommunityTrustMetricsResponse getTrustMetricsForExport(UUID communityId, String periodKey) {
+        return buildTrustMetrics(communityId, periodKey);
+    }
+
+    private CommunityTrustMetricsResponse buildTrustMetrics(UUID communityId, String periodKey) {
         Community community = communityRepository.findById(communityId)
             .orElseThrow(() -> new ResourceNotFoundException("Community not found for trust metrics: " + communityId));
         MetricsPeriod period = MetricsPeriod.from(periodKey);
