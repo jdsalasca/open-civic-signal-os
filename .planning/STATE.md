@@ -10,21 +10,21 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Position
 
 Phase: 5 of 5 (Community Operating System Expansion)  
-Current execution plan: 05-31 (Civic Onboarding and Help Center)
+Current execution plan: 05-32 (Open Civic Data Exports and Scoped API)
 Tracked phase subplans: 34
 Tracked project plans: 46
 Status: In progress  
-Last activity: 2026-03-09 - Completed `05-31` for `OCS-P1-051` with backend-owned onboarding state, bilingual help-center APIs, contextual help UX, contract/ADR updates, Docker validation, and backlog promotion to `OCS-P1-052`
+Last activity: 2026-03-19 - Completed `05-32` for `OCS-P1-052` with backend-owned community exports, scoped API tokens, rate limits, audit logs, export-workspace UX, contract/ADR updates, targeted backend validation, and backlog promotion to `OCS-P1-035`
 
-Progress: 4 of 5 roadmap phases complete; Phase 5 trust loop now includes guided onboarding/help and next target is `OCS-P1-052`
+Progress: 4 of 5 roadmap phases complete; Phase 5 trust loop now includes guided onboarding/help and open data exports, and the next target is `OCS-P1-035`
 
 ## Performance Metrics
 
 **Execution Snapshot:**
 - Total tracked plans across project: 46
 - Tracked Phase 5 subplans: 34
-- Shipped Phase 5 stories: 20 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`, `049`, `050`, `051`)
-- Immediate queue: `OCS-P1-052`, `OCS-P1-035`, `OCS-P1-044`, `OCS-P1-045`, `OCS-P1-053`
+- Shipped Phase 5 stories: 21 (`OCS-P1-029`, `030`, `031`, `032`, `033`, `034`, `036`, `037`, `038`, `039`, `040`, `041`, `042`, `043`, `046`, `047`, `048`, `049`, `050`, `051`, `052`)
+- Immediate queue: `OCS-P1-035`, `OCS-P1-044`, `OCS-P1-045`, `OCS-P1-053`
 
 ## Accumulated Context
 
@@ -83,6 +83,7 @@ Progress: 4 of 5 roadmap phases complete; Phase 5 trust loop now includes guided
 - 2026-03-09: Implemented `OCS-P1-049` with backend-owned community moderation reports and sanctions, `MANAGE_MODERATION_QUEUE` enforcement, sanction-aware participation guardrails, `/community/moderation/*` APIs, moderator queue UX, OpenAPI coverage, ADR update, Docker-backed frontend evidence, and targeted backend integration tests.
 - 2026-03-09: Implemented `OCS-P1-050` with backend-owned activity visibility, sensitive-data access logs, community open-data publication policy management, Settings privacy-center UX, OpenAPI coverage, ADR update, Docker-backed frontend build validation, and targeted backend integration tests.
 - 2026-03-09: Implemented `OCS-P1-051` with backend-owned onboarding state, bilingual help-center payloads, contextual workflow help panels, a dedicated `/help` route, OpenAPI coverage, ADR update, Docker-backed frontend build validation, and targeted backend integration tests.
+- 2026-03-19: Implemented `OCS-P1-052` with community-scoped CSV/JSON export delivery, scoped API tokens, backend rate limits, auditable access logs, an open-data workspace/nav surface, OpenAPI coverage, ADR update, and targeted backend integration tests.
 
 ### Pending Todos
 
@@ -97,13 +98,14 @@ See:
 
 - Host `agent:preflight` still fails on this workstation because `build:web` expects host `tsc`; use the Docker runtime for integrated frontend validation until the host toolchain is normalized.
 - The Docker dev container injects PostgreSQL datasource environment into `@ActiveProfiles("test")` Spring tests, so broad backend test runs require explicit H2 JVM overrides until the shared test harness is normalized.
+- The Docker dev runtime was unavailable in the final `OCS-P1-052` validation session, so the frontend Playwright evidence for the open-data workspace could not be rerun there.
 - The repo Playwright wrapper still loses browser context between `open` and subsequent `snapshot`/`screenshot` commands in this environment, so wrapper evidence is partially blocked until that lifecycle issue is fixed.
 - Existing duplicate-email Playwright case is flaky/not deterministic in current environment and should be stabilized.
 - Local frontend E2E execution still depends on workspace dependencies living in Docker volumes; use Docker runtime or wrapper commands, not raw host `npx playwright`.
 
 ## Session Continuity
 
-Last session: 2026-03-09
-Stopped at: `OCS-P1-051` shipped; next recommended execution target is `OCS-P1-052` open civic data exports and scoped API
+Last session: 2026-03-19
+Stopped at: `OCS-P1-052` shipped; next recommended execution target is `OCS-P1-035` real-time rooms and mentions
 Resume file: None
 

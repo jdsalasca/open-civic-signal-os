@@ -1,4 +1,4 @@
-# Current Backlog (2026-03-09)
+# Current Backlog (2026-03-19)
 
 Operational execution source for immediate work in Open Civic Signal OS.
 
@@ -32,56 +32,55 @@ Shipped Phase 5 foundations:
 - `OCS-P1-049` moderation queue and sanction policy engine
 - `OCS-P1-050` privacy center and sensitive-data access logs
 - `OCS-P1-051` civic onboarding, tours, and help center
+- `OCS-P1-052` open civic data exports and scoped API
 
 ## Now (Next 7 Days)
 
 Recommended next execution order:
 
-1. `story:OCS-P1-052` open civic data exports and scoped API
-2. `story:OCS-P1-035` real-time rooms and mentions
-3. `story:OCS-P1-044` transparent duplicate review and merge history
-4. `story:OCS-P1-045` multilingual moderation and official translation workflow
-5. `story:OCS-P1-053` outbound integrations layer
+1. `story:OCS-P1-035` real-time rooms and mentions
+2. `story:OCS-P1-044` transparent duplicate review and merge history
+3. `story:OCS-P1-045` multilingual moderation and official translation workflow
+4. `story:OCS-P1-053` outbound integrations layer
+5. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 Execution note:
 
-- `story:OCS-P1-052` is now the immediate target because guided onboarding is shipped and the next highest-value gap is controlled civic data exports plus scoped external API access for communities that need interoperable delivery.
+- `story:OCS-P1-052` is shipped with community-scoped CSV/JSON exports, scoped API tokens, rate limits, audit logs, and the open-data workspace; the next immediate target is `story:OCS-P1-035`.
 
 ## Next (7-21 Days)
 
 1. Complete the trust loop sequence.
-  - `story:OCS-P1-052`
   - `story:OCS-P1-035`
-2. Expand governance safety rails.
   - `story:OCS-P1-044`
+2. Expand governance safety rails.
   - `story:OCS-P1-045`
-3. Prepare the next enablement layer.
   - `story:OCS-P1-053`
+3. Prepare the next enablement layer.
   - platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ## P0 Execution Queue (Agent Order)
 
 This section is preserved for repository compatibility. The active P0-equivalent execution order is:
 
-1. `story:OCS-P1-052`
-2. `story:OCS-P1-035`
-3. `story:OCS-P1-044`
-4. `story:OCS-P1-045`
-5. `story:OCS-P1-053`
+1. `story:OCS-P1-035`
+2. `story:OCS-P1-044`
+3. `story:OCS-P1-045`
+4. `story:OCS-P1-053`
+5. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ## Wave Sequencing
 
 ### Wave 1: Trust Loop Completion
 
-1. `story:OCS-P1-052`
-2. `story:OCS-P1-035`
-3. `story:OCS-P1-044`
+1. `story:OCS-P1-035`
+2. `story:OCS-P1-044`
+3. `story:OCS-P1-045`
 
 ### Wave 2: Safety and Data Responsibility
 
-4. `story:OCS-P1-045`
-5. `story:OCS-P1-053`
-6. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+4. `story:OCS-P1-053`
+5. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ### Wave 3: Operational Growth
 
@@ -105,6 +104,7 @@ This section is preserved for repository compatibility. The active P0-equivalent
 - `OCS-P1-049` shipped and now adds auditable moderation reports, queue-based review, and proportional sanctions without moving civic policy logic into the frontend.
 - `OCS-P1-050` shipped and now adds user-facing privacy controls, sensitive-data access logs, and backend-owned community publication policy management without moving trust rules into the frontend.
 - `OCS-P1-051` shipped and now adds backend-owned onboarding state, searchable bilingual help guides, and contextual workflow help panels without moving role/audience logic into the frontend.
+- `OCS-P1-052` shipped and now adds community-scoped CSV/JSON exports, scoped API tokens, backend rate limits, and auditable access logs without moving export policy into the frontend.
 
 ## Definition of Ready for Any New Story
 
