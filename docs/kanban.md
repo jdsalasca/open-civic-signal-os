@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-02T23:01:53.024Z
+Last updated: 2026-10-02T23:02:04.571Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-25T23:01:50.827Z)
-- Throughput (issues closed): 69
+- Window: last 7 days (since 2026-09-25T23:02:02.104Z)
+- Throughput (issues closed): 74
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -79,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 44
+- TODO: 39
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 67
+- DONE: 72
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -100,10 +100,8 @@ Status labels used by this board:
 - #45 story:OCS-P1-001 add issue aging, trends, and SLA risk views
 - #44 story:OCS-P0-008 add reproducibility script for ranking outputs
 - #43 story:OCS-P0-007 implement weekly civic digest generation
-- #42 story:OCS-P0-006 add abuse detection pipeline and moderator queue
 - #41 story:OCS-P0-005 add full audit metadata from ingest to publish
 - #40 story:OCS-P0-004 ship public dashboard top problems and filters
-- #39 story:OCS-P0-003 expose prioritized backlog API with explainability fields
 - #38 story:OCS-P0-002 implement deterministic prioritization service with score breakdown
 - #37 story:OCS-P0-001 build ingest adapters for web/csv/chat exports
 - #36 ai: optional civic signal clustering with human approval
@@ -118,12 +116,9 @@ Status labels used by this board:
 - #27 community: add participatory assembly mode screen
 - #26 contracts: version prioritization formula metadata
 - #25 analytics: add neighborhood trend and surge detection
-- #24 execution: add institutional assignment and owner workflow
 - #23 dashboard: add issue aging and SLA risk panels
 - #22 messaging: add scheduled weekly bulletin generation
-- #21 ci: add backlog reproducibility quality gate
 - #20 alerts: weekly top-issues digest for community channels
-- #19 fairness: add duplicate and vote-abuse detection rules
 - #18 audit: attach source metadata and transformation version to ranked outputs
 - #13 ingest: add CSV import validator with row-level error report
 - #12 ingest: implement WhatsApp/Telegram export parser with schema validation
@@ -200,6 +195,11 @@ Status labels used by this board:
 - #58 Current Sprint Focus 2026-W09
 - #57 Agent Quality Review 2026-W09
 - #56 Agent Quality Review 2026-W08
+- #42 story:OCS-P0-006 add abuse detection pipeline and moderator queue
+- #39 story:OCS-P0-003 expose prioritized backlog API with explainability fields
+- #24 execution: add institutional assignment and owner workflow
+- #21 ci: add backlog reproducibility quality gate
+- #19 fairness: add duplicate and vote-abuse detection rules
 - #17 workflow: implement submit -> validate -> rank -> publish lifecycle
 - #16 dashboard: add why-ranked-here panel per civic signal
 - #15 scoring: add deterministic score regression dataset and tests
