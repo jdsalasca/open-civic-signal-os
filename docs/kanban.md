@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-02T23:02:04.571Z
+Last updated: 2026-10-02T23:43:12.192Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-25T23:02:02.104Z)
-- Throughput (issues closed): 74
+- Window: last 7 days (since 2026-09-25T23:43:08.887Z)
+- Throughput (issues closed): 77
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -79,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 39
+- TODO: 36
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 72
+- DONE: 75
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -96,11 +96,9 @@ Status labels used by this board:
 - #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
 - #48 story:OCS-P1-004 build transparency monthly report pipeline
 - #47 story:OCS-P1-003 version and expose formula metadata
-- #46 story:OCS-P1-002 implement municipal execution bridge and ownership
 - #45 story:OCS-P1-001 add issue aging, trends, and SLA risk views
 - #44 story:OCS-P0-008 add reproducibility script for ranking outputs
 - #43 story:OCS-P0-007 implement weekly civic digest generation
-- #41 story:OCS-P0-005 add full audit metadata from ingest to publish
 - #40 story:OCS-P0-004 ship public dashboard top problems and filters
 - #38 story:OCS-P0-002 implement deterministic prioritization service with score breakdown
 - #37 story:OCS-P0-001 build ingest adapters for web/csv/chat exports
@@ -119,7 +117,6 @@ Status labels used by this board:
 - #23 dashboard: add issue aging and SLA risk panels
 - #22 messaging: add scheduled weekly bulletin generation
 - #20 alerts: weekly top-issues digest for community channels
-- #18 audit: attach source metadata and transformation version to ranked outputs
 - #13 ingest: add CSV import validator with row-level error report
 - #12 ingest: implement WhatsApp/Telegram export parser with schema validation
 - #2 roadmap: publish auditable public backlog dashboard
@@ -195,11 +192,14 @@ Status labels used by this board:
 - #58 Current Sprint Focus 2026-W09
 - #57 Agent Quality Review 2026-W09
 - #56 Agent Quality Review 2026-W08
+- #46 story:OCS-P1-002 implement municipal execution bridge and ownership
 - #42 story:OCS-P0-006 add abuse detection pipeline and moderator queue
+- #41 story:OCS-P0-005 add full audit metadata from ingest to publish
 - #39 story:OCS-P0-003 expose prioritized backlog API with explainability fields
 - #24 execution: add institutional assignment and owner workflow
 - #21 ci: add backlog reproducibility quality gate
 - #19 fairness: add duplicate and vote-abuse detection rules
+- #18 audit: attach source metadata and transformation version to ranked outputs
 - #17 workflow: implement submit -> validate -> rank -> publish lifecycle
 - #16 dashboard: add why-ranked-here panel per civic signal
 - #15 scoring: add deterministic score regression dataset and tests
