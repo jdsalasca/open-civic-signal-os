@@ -144,6 +144,8 @@ export type CommunityPermissionScope =
   | "CREATE_THREAD"
   | "ADD_THREAD_MESSAGE"
   | "MODERATE_THREAD_MESSAGE"
+  | "POST_ROOM_MESSAGE"
+  | "MANAGE_ROOMS"
   | "CREATE_OFFICIAL_UPDATE"
   | "UPDATE_OFFICIAL_UPDATE"
   | "MANAGE_MEMBERSHIPS"
@@ -845,3 +847,79 @@ export type PageResponse<T> = {
 
 export type ThreadStatusFilter = "ALL" | "ACTIVE" | "STALE";
 export type ThreadSortBy = "RELEVANCE" | "RECENT";
+
+export type CommunityRoomSummary = {
+  id: string;
+  communityId: string;
+  projectBoardId?: string | null;
+  name: string;
+  topic: string;
+  createdBy: string;
+  createdAt: string;
+  archived: boolean;
+  messageCount: number;
+  unreadMentionCount: number;
+  muted: boolean;
+  lastActivityAt?: string | null;
+};
+
+export type CommunityRoomMessage = {
+  id: string;
+  roomId: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+  mentionedUserIds: string[];
+  mentionsCurrentUser: boolean;
+};
+
+export type CommunityRoomMention = {
+  id: string;
+  roomId: string;
+  roomName: string;
+  messageId: string;
+  messagePreview: string;
+  mentionedUserId: string;
+  mentionedBy?: string | null;
+  mentionedByName: string;
+  createdAt: string;
+  readAt?: string | null;
+};
+
+export type CommunityRoomMentionInbox = {
+  communityId: string;
+  unreadTotal: number;
+  items: CommunityRoomMention[];
+};
+
+export type CommunityRoomWorkspace = {
+  communityId: string;
+  communityName: string;
+  mentionableUsernames: string[];
+  rooms: CommunityRoomSummary[];
+  mentionInbox: CommunityRoomMentionInbox;
+};
+
+export type CommunityRoomDetail = {
+  id: string;
+  communityId: string;
+  projectBoardId?: string | null;
+  name: string;
+  topic: string;
+  createdBy: string;
+  createdAt: string;
+  archived: boolean;
+  muted: boolean;
+  mutedAt?: string | null;
+  messageCount: number;
+  unreadMentionCount: number;
+  messages: CommunityRoomMessage[];
+};
+
+export type CommunityRoomMuteState = {
+  roomId: string;
+  communityId: string;
+  muted: boolean;
+  mutedAt?: string | null;
+};

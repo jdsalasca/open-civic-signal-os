@@ -2247,6 +2247,176 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/rooms/workspace:
+    get:
+      summary: Get coordination rooms, mute state, and the caller mention inbox
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Coordination room workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityRoomWorkspace'
+        '401':
+          description: User is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/rooms:
+    post:
+      summary: Open a new coordination room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityRoomRequest'
+      responses:
+        '200':
+          description: Refreshed coordination room workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityRoomWorkspace'
+        '403':
+          description: Community policy denied room management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/rooms/{roomId}:
+    get:
+      summary: Get one coordination room with its messages
+      parameters:
+        - in: path
+          name: roomId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Coordination room detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityRoomDetail'
+        '401':
+          description: User is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/rooms/{roomId}/stream:
+    get:
+      summary: Server-sent event stream of coordination room events
+      parameters:
+        - in: path
+          name: roomId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Room event stream
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/CommunityRoomEvent'
+  /api/community/rooms/{roomId}/mute:
+    patch:
+      summary: Mute or unmute a coordination room for the caller
+      parameters:
+        - in: path
+          name: roomId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: muted
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Updated caller mute state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityRoomMuteState'
+  /api/community/rooms/messages:
+    post:
+      summary: Post a coordination room message and resolve @mentions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCommunityRoomMessageRequest'
+      responses:
+        '200':
+          description: Stored message with resolved mentions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityRoomMessage'
+        '403':
+          description: Community policy denied room posting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/rooms/mentions/read:
+    patch:
+      summary: Mark the caller mentions as read for the community or one room
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: roomId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Caller mention inbox after the update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityRoomMentionInbox'
 components:
   schemas:
     ApiError:
@@ -2285,6 +2455,8 @@ components:
                 - CREATE_THREAD
                 - ADD_THREAD_MESSAGE
                 - MODERATE_THREAD_MESSAGE
+                - POST_ROOM_MESSAGE
+                - MANAGE_ROOMS
                 - CREATE_OFFICIAL_UPDATE
                 - UPDATE_OFFICIAL_UPDATE
                 - MANAGE_MEMBERSHIPS
@@ -5212,4 +5384,250 @@ components:
       properties:
         archived:
           type: boolean
+    CreateCommunityRoomRequest:
+      type: object
+      required: [communityId, name, topic]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+        topic:
+          type: string
+          minLength: 3
+          maxLength: 280
+        projectBoardId:
+          type: string
+          format: uuid
+          nullable: true
+    PostCommunityRoomMessageRequest:
+      type: object
+      required: [communityId, roomId, body]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        body:
+          type: string
+          minLength: 1
+          maxLength: 2000
+    CommunityRoomSummary:
+      type: object
+      required: [id, communityId, name, topic, createdBy, createdAt, archived, messageCount, unreadMentionCount, muted]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        projectBoardId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+        topic:
+          type: string
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        archived:
+          type: boolean
+        messageCount:
+          type: integer
+          format: int64
+        unreadMentionCount:
+          type: integer
+          format: int64
+        muted:
+          type: boolean
+        lastActivityAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityRoomMessage:
+      type: object
+      required: [id, roomId, authorId, authorName, body, createdAt, mentionedUserIds, mentionsCurrentUser]
+      properties:
+        id:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        authorId:
+          type: string
+          format: uuid
+        authorName:
+          type: string
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        mentionedUserIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        mentionsCurrentUser:
+          type: boolean
+    CommunityRoomMention:
+      type: object
+      required: [id, roomId, roomName, messageId, messagePreview, mentionedUserId, mentionedByName, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        roomId:
+          type: string
+          format: uuid
+        roomName:
+          type: string
+        messageId:
+          type: string
+          format: uuid
+        messagePreview:
+          type: string
+        mentionedUserId:
+          type: string
+          format: uuid
+        mentionedBy:
+          type: string
+          format: uuid
+          nullable: true
+        mentionedByName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityRoomMentionInbox:
+      type: object
+      required: [communityId, unreadTotal, items]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        unreadTotal:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityRoomMention'
+    CommunityRoomWorkspace:
+      type: object
+      required: [communityId, communityName, mentionableUsernames, rooms, mentionInbox]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        mentionableUsernames:
+          type: array
+          items:
+            type: string
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityRoomSummary'
+        mentionInbox:
+          $ref: '#/components/schemas/CommunityRoomMentionInbox'
+    CommunityRoomDetail:
+      type: object
+      required: [id, communityId, name, topic, createdBy, createdAt, archived, muted, messageCount, unreadMentionCount, messages]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        projectBoardId:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+        topic:
+          type: string
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        archived:
+          type: boolean
+        muted:
+          type: boolean
+        mutedAt:
+          type: string
+          format: date-time
+          nullable: true
+        messageCount:
+          type: integer
+          format: int64
+        unreadMentionCount:
+          type: integer
+          format: int64
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityRoomMessage'
+    CommunityRoomMuteState:
+      type: object
+      required: [roomId, communityId, muted]
+      properties:
+        roomId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        muted:
+          type: boolean
+        mutedAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityRoomEvent:
+      type: object
+      required: [type, roomId, communityId, createdAt]
+      properties:
+        type:
+          type: string
+          enum: [room-created, room-message]
+        roomId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        messageId:
+          type: string
+          format: uuid
+          nullable: true
+        authorId:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
 

@@ -195,6 +195,7 @@ The current app already supports reporting, prioritization, community context, a
 
 ### `story:OCS-P1-035` Real-Time Community Rooms
 
+- Status: shipped (2026-03-21)
 - Problem: communities need lightweight coordination beyond async threads.
 - Backend/API change:
   - websocket-backed room events, direct message primitives, mention and mute state
@@ -205,12 +206,15 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - working groups can coordinate quickly during active issues or events
 - Acceptance criteria:
-  - [ ] rooms exist per community or project group
-  - [ ] users can mention others and mute noisy threads
-  - [ ] notification state is user-specific and auditable
+  - [x] rooms exist per community or project group
+  - [x] users can mention others and mute noisy threads
+  - [x] notification state is user-specific and auditable
 - Validation:
-  - [ ] websocket integration tests
-  - [ ] Playwright real-time smoke flow
+  - [x] backend room event and mention tests (`CommunityRoomsIT`)
+  - [x] Playwright real-time smoke flow (`community-rooms.spec.ts`)
+- Notes:
+  - real-time delivery ships as server-sent events instead of a WebSocket/STOMP broker; see `docs/architecture/ADR-20260321-community-rooms-contract.md`
+  - direct/private messaging is out of scope for this story
 
 ### `story:OCS-P1-036` Unified Community Home
 

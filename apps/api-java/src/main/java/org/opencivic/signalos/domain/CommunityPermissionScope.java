@@ -56,6 +56,16 @@ public enum CommunityPermissionScope {
         CommunityRole.MODERATOR,
         CommunityRole.COORDINATOR
     )),
+    POST_ROOM_MESSAGE(Set.of(
+        CommunityRole.MEMBER,
+        CommunityRole.MODERATOR,
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
+    MANAGE_ROOMS(Set.of(
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
     CREATE_OFFICIAL_UPDATE(Set.of(
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON
