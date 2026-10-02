@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-02T22:59:50.994Z
+Last updated: 2026-10-02T23:00:04.264Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-25T22:59:48.777Z)
-- Throughput (issues closed): 55
+- Window: last 7 days (since 2026-09-25T23:00:02.045Z)
+- Throughput (issues closed): 63
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -80,22 +80,14 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 56
+- TODO: 48
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 55
+- DONE: 63
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
 - #120 Agent Quality Review 2026-W40
-- #64 Agent Quality Review 2026-W12
-- #63 Current Sprint Focus 2026-W11
-- #62 Agent Quality Review 2026-W11
-- #60 Current Sprint Focus 2026-W10
-- #59 Agent Quality Review 2026-W10
-- #58 Current Sprint Focus 2026-W09
-- #57 Agent Quality Review 2026-W09
-- #56 Agent Quality Review 2026-W08
 - #55 story:OCS-P2-005 deliver low-bandwidth field dashboard mode
 - #54 story:OCS-P2-004 build policy simulation sandbox for scoring weights
 - #53 story:OCS-P1-008 ingest community trust pulse inputs and aggregates
@@ -205,3 +197,11 @@ Status labels used by this board:
 - #67 Current Sprint Focus 2026-W13
 - #66 Agent Quality Review 2026-W13
 - #65 Current Sprint Focus 2026-W12
+- #64 Agent Quality Review 2026-W12
+- #63 Current Sprint Focus 2026-W11
+- #62 Agent Quality Review 2026-W11
+- #60 Current Sprint Focus 2026-W10
+- #59 Agent Quality Review 2026-W10
+- #58 Current Sprint Focus 2026-W09
+- #57 Agent Quality Review 2026-W09
+- #56 Agent Quality Review 2026-W08
