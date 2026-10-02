@@ -57,6 +57,22 @@ export type SignalSourceChannel =
   | "PUBLIC_API"
   | "INSTITUTIONAL_UPDATE";
 
+export type FormulaWeight = {
+  factor: string;
+  input: string;
+  expression: string;
+  cap: number;
+};
+
+export type PrioritizationFormula = {
+  version: string;
+  formula: string;
+  effectiveFrom: string;
+  weights: FormulaWeight[];
+  cappedFactors: string[];
+  changeNote: string;
+};
+
 export type Notification = {
   id: string;
   channel: string;

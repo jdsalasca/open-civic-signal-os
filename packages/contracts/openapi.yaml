@@ -232,6 +232,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SignalMeta'
+  /api/signals/formula:
+    get:
+      summary: Get the published prioritization formula, its version, and per-factor weights
+      responses:
+        '200':
+          description: Published prioritization formula metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrioritizationFormula'
   /api/signals/map:
     get:
       summary: Get one community map with mapped issue points, clusters, and coverage counters
@@ -3086,6 +3096,46 @@ components:
       type: string
       description: Where the signal entered the system, so an audit can tell a citizen report from an institutional update
       enum: [WEB_FORM, CSV_IMPORT, CHAT_EXPORT, PUBLIC_API, INSTITUTIONAL_UPDATE]
+    FormulaWeight:
+      type: object
+      required: [factor, input, expression, cap]
+      properties:
+        factor:
+          type: string
+          enum: [urgency, impact, affectedPeople, communityVotes]
+        input:
+          type: string
+          description: The raw signal field this factor reads
+        expression:
+          type: string
+          description: The exact arithmetic the backend applies
+        cap:
+          type: number
+          description: Upper bound on this factor's contribution
+    PrioritizationFormula:
+      type: object
+      required: [version, formula, effectiveFrom, weights, cappedFactors, changeNote]
+      properties:
+        version:
+          type: string
+          description: Must match the transformationVersion stamped on signals
+        formula:
+          type: string
+        effectiveFrom:
+          type: string
+          format: date
+        weights:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormulaWeight'
+        cappedFactors:
+          type: array
+          description: Factors whose contribution saturates at the published cap
+          items:
+            type: string
+        changeNote:
+          type: string
+          description: Plain-language description of what this version changed
     SignalMapFilters:
       type: object
       properties:

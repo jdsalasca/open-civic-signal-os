@@ -39,7 +39,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
      * Bump this string whenever the weights in {@link #getBreakdown} change, and add a
      * regression note in docs/ per the reproducibility rule.
      */
-    static final String TRANSFORMATION_VERSION = Signal.TRANSFORMATION_VERSION_V1;
+    public static final String TRANSFORMATION_VERSION = Signal.TRANSFORMATION_VERSION_V1;
 
     private final SignalRepository signalRepository;
     private final VoteRepository voteRepository;

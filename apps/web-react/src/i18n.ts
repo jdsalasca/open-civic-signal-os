@@ -626,6 +626,18 @@ const resources = {
           "provenance_desc": "Every ranked issue records the channel it entered through and the scoring rule version that produced its rank, so the number can be traced back.",
           "provenance_channel_label": "Reported through",
           "provenance_version_label": "Scoring rule version",
+          "formula_title": "Scoring rule in force",
+          "formula_desc": "This is the exact weighting the backend applies. No hidden terms, no per-community overrides.",
+          "formula_effective_from": "In force since",
+          "formula_change_note": "What changed",
+          "formula_capped": "Capped at",
+          "formula_factors": {
+            "urgency": "Urgency",
+            "impact": "Social impact",
+            "affectedPeople": "People affected",
+            "communityVotes": "Community support"
+          },
+          "formula_error": "We could not load the scoring rule right now.",
           "provenance_unknown": "Not recorded",
           "provenance_channels": {
             "WEB_FORM": "Community web form",
@@ -634,14 +646,10 @@ const resources = {
             "PUBLIC_API": "Public API",
             "INSTITUTIONAL_UPDATE": "Institutional update"
           },
-        "why_ranked_desc": "The score is deterministic and calculated on backend-owned factors.",
-        "urgency_factor": "Urgency Factor",
         "urgency_formula": "Urgency score = urgency level x 30 (max 150).",
         "social_impact": "Social Impact",
         "impact_formula": "Impact score = impact level x 25 (max 125).",
         "community_trust": "Community Trust",
-        "affected_formula": "Affected score = estimated people / 10 (capped at 30).",
-        "votes_formula": "Trust score = community votes / 5 (capped at 15).",
         "why_ranked_preview": "{{primary}} and {{secondary}} are driving this ranking.",
         "why_ranked_preview_single": "{{primary}} is currently the strongest ranking factor.",
         "factor_keys": {
@@ -2546,6 +2554,18 @@ const resources = {
           "provenance_desc": "Cada caso priorizado registra el canal por el que ingreso y la version de la regla de puntuacion que produjo su posicion, para que el numero se pueda rastrear.",
           "provenance_channel_label": "Reportado por",
           "provenance_version_label": "Version de la regla",
+          "formula_title": "Regla de puntuacion vigente",
+          "formula_desc": "Este es el ponderamiento exacto que aplica el backend. No hay terminos ocultos ni ajustes por comunidad.",
+          "formula_effective_from": "Vigente desde",
+          "formula_change_note": "Que cambio",
+          "formula_capped": "Tope de",
+          "formula_factors": {
+            "urgency": "Urgencia",
+            "impact": "Impacto social",
+            "affectedPeople": "Personas afectadas",
+            "communityVotes": "Apoyo comunitario"
+          },
+          "formula_error": "No pudimos cargar la regla de puntuacion.",
           "provenance_unknown": "No registrado",
           "provenance_channels": {
             "WEB_FORM": "Formulario web comunitario",
@@ -2554,14 +2574,10 @@ const resources = {
             "PUBLIC_API": "API publica",
             "INSTITUTIONAL_UPDATE": "Actualizacion institucional"
           },
-        "why_ranked_desc": "El puntaje es determinista y se calcula con factores controlados por backend.",
-        "urgency_factor": "Factor de Urgencia",
         "urgency_formula": "Puntaje de urgencia = nivel de urgencia x 30 (max 150).",
         "social_impact": "Impacto Social",
         "impact_formula": "Puntaje de impacto = nivel de impacto x 25 (max 125).",
         "community_trust": "Confianza Comunitaria",
-        "affected_formula": "Puntaje de afectados = personas estimadas / 10 (tope 30).",
-        "votes_formula": "Puntaje de confianza = votos comunitarios / 5 (tope 15).",
         "why_ranked_preview": "{{primary}} y {{secondary}} impulsan esta prioridad.",
         "why_ranked_preview_single": "{{primary}} es actualmente el factor mas fuerte del ranking.",
         "factor_keys": {

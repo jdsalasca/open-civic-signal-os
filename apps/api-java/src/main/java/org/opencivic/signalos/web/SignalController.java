@@ -22,6 +22,7 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.CommunityAccessService;
 import org.opencivic.signalos.service.ExportService;
 import org.opencivic.signalos.service.PrioritizationService;
+import org.opencivic.signalos.service.PrioritizationFormulaService;
 import org.opencivic.signalos.service.PrivacyAccessLogService;
 import org.opencivic.signalos.service.SignalGeoService;
 import org.opencivic.signalos.service.UserReactionService;
@@ -29,6 +30,7 @@ import org.opencivic.signalos.web.dto.SignalCreateRequest;
 import org.opencivic.signalos.web.dto.ExplainabilityFactor;
 import org.opencivic.signalos.web.dto.ExplainabilitySummary;
 import org.opencivic.signalos.web.dto.AssignSignalRequest;
+import org.opencivic.signalos.web.dto.PrioritizationFormulaResponse;
 import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
 import org.opencivic.signalos.web.dto.SignalTimelineEntryResponse;
@@ -70,6 +72,7 @@ public class SignalController {
     private static final int MAX_PAGE_SIZE = 100;
     private static final Collection<String> RESOLVED_STATUSES = List.of("RESOLVED", "REJECTED");
     private final PrioritizationService prioritizationService;
+    private final PrioritizationFormulaService prioritizationFormulaService;
     private final ExportService exportService;
     private final UserRepository userRepository;
     private final SignalRepository signalRepository;
@@ -82,6 +85,7 @@ public class SignalController {
 
     public SignalController(
         PrioritizationService prioritizationService,
+        PrioritizationFormulaService prioritizationFormulaService,
         ExportService exportService,
         UserRepository userRepository,
         SignalRepository signalRepository,
@@ -93,6 +97,7 @@ public class SignalController {
         PrivacyAccessLogService privacyAccessLogService
     ) {
         this.prioritizationService = prioritizationService;
+        this.prioritizationFormulaService = prioritizationFormulaService;
         this.exportService = exportService;
         this.userRepository = userRepository;
         this.signalRepository = signalRepository;
@@ -291,6 +296,11 @@ public class SignalController {
         return prioritizationService.getTopUnresolved(10, communityId).stream()
             .map(signal -> mapToResponse(signal, viewerUsername))
             .collect(Collectors.toList());
+    }
+
+@GetMapping("/formula")
+    public PrioritizationFormulaResponse getPrioritizationFormula() {
+        return prioritizationFormulaService.getFormula();
     }
 
     @GetMapping("/meta")

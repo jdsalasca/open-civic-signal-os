@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { Signal, SignalStatusEntry } from "../types";
+import { PrioritizationFormula, Signal, SignalStatusEntry } from "../types";
 import { ProgressBar } from "primereact/progressbar";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -27,6 +27,7 @@ export function SignalDetail() {
   const navigate = useNavigate();
   const { activeRole } = useAuthStore();
   const [signal, setSignal] = useState<Signal | null>(null);
+  const [formula, setFormula] = useState<PrioritizationFormula | null>(null);
   const [history, setHistory] = useState<SignalStatusEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
@@ -36,17 +37,21 @@ export function SignalDetail() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [signalRes, historyRes] = await Promise.all([
+      const [signalRes, historyRes, formulaRes] = await Promise.all([
         apiClient.get(`signals/${id}`),
-        apiClient.get(`signals/${id}/history`)
+        apiClient.get(`signals/${id}/history`),
+        apiClient.get("signals/formula").catch(() => null)
       ]);
-      
+
       if (signalRes.status === 200) {
         setSignal(signalRes.data);
         setAssignmentUser(signalRes.data.assignedToUsername || "");
       }
       if (historyRes.status === 200) {
         setHistory(historyRes.data || []);
+      }
+      if (formulaRes?.status === 200) {
+        setFormula(formulaRes.data);
       }
     } catch (err) {
       const apiErr = err as ApiError;
@@ -356,24 +361,40 @@ export function SignalDetail() {
 
             <CivicCard title={t('signals.why_ranked_title')} className="mb-8" data-testid="signal-detail-why-ranked">
               <p className="text-sm text-secondary mt-0 mb-5 leading-relaxed">
-                {t('signals.why_ranked_desc')}
+                {t('signals.formula_desc')}
               </p>
-              <div className="flex flex-column gap-4">
-                {[
-                  { label: t("signals.urgency_factor"), formula: t("signals.urgency_formula") },
-                  { label: t("signals.social_impact"), formula: t("signals.impact_formula") },
-                  { label: t("signals.affected_estimation"), formula: t("signals.affected_formula") },
-                  { label: t("signals.community_trust"), formula: t("signals.votes_formula") }
-                ].map((item, idx) => (
-                  <div key={idx} className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm">
-                    <div className="text-xs font-black text-main uppercase tracking-wide mb-1">
-                      {item.label}
+<div className="flex flex-column gap-4" data-testid="signal-detail-formula-weights">
+                {(formula?.weights ?? []).map((weight) => {
+                  const capped = formula?.cappedFactors.includes(weight.factor);
+                  return (
+                    <div
+                      key={weight.factor}
+                      className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm"
+                    >
+                      <div className="text-xs font-black text-main uppercase tracking-wide mb-1">
+                        {t(`signals.formula_factors.${weight.factor}`, { defaultValue: weight.factor })}
+                      </div>
+                      <div className="text-xs text-muted leading-tight break-all">
+                        {weight.expression}
+                      </div>
+                      {capped && (
+                        <div className="text-xs text-secondary mt-2">
+                          {t("signals.formula_capped")}: {weight.cap}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-xs text-muted leading-tight">
-                      {item.formula}
+                  );
+                })}
+                {formula && (
+                  <div className="p-4 border-round-xl border-1 border-surface-soft" data-testid="signal-detail-formula-meta">
+                    <div className="text-xs text-muted">
+                      {t("signals.formula_effective_from")}: {formula.effectiveFrom}
+                    </div>
+                    <div className="text-xs text-muted mt-1">
+                      {t("signals.formula_change_note")}: {formula.changeNote}
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             </CivicCard>
 

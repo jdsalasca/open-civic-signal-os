@@ -47,7 +47,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health").permitAll()
                 .requestMatchers("/api/open-data/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta", "/api/signals/formula").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/export/**").hasRole("SUPER_ADMIN")
                 
                 .requestMatchers(HttpMethod.POST, "/api/signals/*/vote").hasRole("CITIZEN")
