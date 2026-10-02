@@ -60,6 +60,7 @@ test.describe('Global State Integrity (P0)', () => {
     await page.goto('/communities/feed');
     await page.goto('/communities/open-data');
     await page.goto('/communities/rooms');
+    await page.goto('/communities/activities');
     await page.goto('/settings');
 
     await page.evaluate(() => {

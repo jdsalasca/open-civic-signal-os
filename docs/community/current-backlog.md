@@ -34,50 +34,46 @@ Shipped Phase 5 foundations:
 - `OCS-P1-051` civic onboarding, tours, and help center
 - `OCS-P1-052` open civic data exports and scoped API
 - `OCS-P1-035` real-time coordination rooms, mentions, and mute controls
+- `OCS-P1-044` volunteering and activity slots
 
 ## Now (Next 7 Days)
 
 Recommended next execution order:
 
-1. `story:OCS-P1-044` transparent duplicate review and merge history
-2. `story:OCS-P1-045` multilingual moderation and official translation workflow
-3. `story:OCS-P1-053` outbound integrations layer
-4. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+1. `story:OCS-P1-045` shared resource booking
+2. `story:OCS-P1-053` outbound integrations layer
+3. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 Execution note:
 
-- `story:OCS-P1-035` is shipped with community-scoped rooms, server-resolved `@mentions`, per-user mute and mention-read state, and an SSE room event stream; the next immediate target is `story:OCS-P1-044`.
+- `story:OCS-P1-044` is shipped with capacity-enforced activity slots, published signup windows, releasable signups, and an organizer attendance trail; the next immediate target is `story:OCS-P1-045`.
 
 ## Next (7-21 Days)
 
-1. Complete the trust loop sequence.
-  - `story:OCS-P1-044`
-2. Expand governance safety rails.
+1. Expand governance safety rails.
   - `story:OCS-P1-045`
   - `story:OCS-P1-053`
-3. Prepare the next enablement layer.
+2. Prepare the next enablement layer.
   - platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ## P0 Execution Queue (Agent Order)
 
 This section is preserved for repository compatibility. The active P0-equivalent execution order is:
 
-1. `story:OCS-P1-044`
-2. `story:OCS-P1-045`
-3. `story:OCS-P1-053`
-4. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+1. `story:OCS-P1-045`
+2. `story:OCS-P1-053`
+3. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ## Wave Sequencing
 
 ### Wave 1: Trust Loop Completion
 
-1. `story:OCS-P1-044`
-2. `story:OCS-P1-045`
+1. `story:OCS-P1-045`
 
 ### Wave 2: Safety and Data Responsibility
 
-4. `story:OCS-P1-053`
-5. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+2. `story:OCS-P1-053`
+3. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ### Wave 3: Operational Growth
 
@@ -103,6 +99,7 @@ This section is preserved for repository compatibility. The active P0-equivalent
 - `OCS-P1-051` shipped and now adds backend-owned onboarding state, searchable bilingual help guides, and contextual workflow help panels without moving role/audience logic into the frontend.
 - `OCS-P1-052` shipped and now adds community-scoped CSV/JSON exports, scoped API tokens, backend rate limits, and auditable access logs without moving export policy into the frontend.
 - `OCS-P1-035` shipped and now adds community-scoped coordination rooms, server-resolved mentions, per-user mute and mention-read state, and a server-sent room event stream without moving notification policy into the frontend.
+- `OCS-P1-044` shipped and now adds capacity-enforced volunteer activities with published signup windows, releasable signups, and an organizer attendance trail without moving slot policy into the frontend.
 
 ## Definition of Ready for Any New Story
 

@@ -372,6 +372,7 @@ The current app already supports reporting, prioritization, community context, a
 
 ### `story:OCS-P1-044` Volunteering and Activity Slots
 
+- Status: shipped (2026-03-21)
 - Problem: many community actions require people and time slots, not only comments.
 - Backend/API change:
   - add activity signup slots, caps, reminders, and attendance records
@@ -382,12 +383,15 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - communities can organize real-world participation faster
 - Acceptance criteria:
-  - [ ] activities support slots and capacity
-  - [ ] users can join and leave within rule windows
-  - [ ] organizer sees roster and fill rate
+  - [x] activities support slots and capacity
+  - [x] users can join and leave within rule windows
+  - [x] organizer sees roster and fill rate
 - Validation:
-  - [ ] backend signup tests
-  - [ ] Playwright volunteer flow
+  - [x] backend signup tests (`CommunityActivityIT`)
+  - [x] Playwright volunteer flow (`community-activities.spec.ts`)
+- Notes:
+  - rule violations return HTTP 409 with an explicit reason; see `docs/architecture/ADR-20260321-community-activities-contract.md`
+  - reminders and waitlists are not part of this story
 
 ### `story:OCS-P1-045` Shared Resource Booking
 

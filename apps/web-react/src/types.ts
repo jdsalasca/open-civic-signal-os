@@ -146,6 +146,8 @@ export type CommunityPermissionScope =
   | "MODERATE_THREAD_MESSAGE"
   | "POST_ROOM_MESSAGE"
   | "MANAGE_ROOMS"
+  | "JOIN_ACTIVITIES"
+  | "MANAGE_ACTIVITIES"
   | "CREATE_OFFICIAL_UPDATE"
   | "UPDATE_OFFICIAL_UPDATE"
   | "MANAGE_MEMBERSHIPS"
@@ -922,4 +924,60 @@ export type CommunityRoomMuteState = {
   communityId: string;
   muted: boolean;
   mutedAt?: string | null;
+};
+
+export type CommunityActivitySignupStatus = "CONFIRMED" | "CANCELLED";
+export type CommunityActivityAttendanceStatus = "PENDING" | "ATTENDED" | "NO_SHOW";
+export type CommunityActivityWindowState = "UPCOMING" | "OPEN" | "FULL" | "CLOSED" | "CANCELLED";
+
+export type CommunityActivityVolunteer = {
+  signupId: string;
+  volunteerId: string;
+  volunteerName: string;
+  status: CommunityActivitySignupStatus;
+  attendanceStatus: CommunityActivityAttendanceStatus;
+  createdAt: string;
+  cancelledAt?: string | null;
+  attendedAt?: string | null;
+};
+
+export type CommunityActivity = {
+  id: string;
+  communityId: string;
+  title: string;
+  description: string;
+  locationLabel: string;
+  startsAt: string;
+  endsAt: string;
+  signupOpensAt: string;
+  signupClosesAt: string;
+  signupCapacity: number;
+  organizerId: string;
+  organizerName: string;
+  createdAt: string;
+  cancelled: boolean;
+  signupWindowState: CommunityActivityWindowState;
+  signupOpen: boolean;
+  fullReason?: string | null;
+  confirmedCount: number;
+  fillRatePercent: number;
+  currentVolunteerSignupId?: string | null;
+  currentVolunteerStatus?: CommunityActivitySignupStatus | null;
+  roster: CommunityActivityVolunteer[];
+};
+
+export type CommunityActivityBoard = {
+  communityId: string;
+  communityName: string;
+  openActivities: number;
+  myUpcomingSignups: number;
+  activities: CommunityActivity[];
+};
+
+export type CommunityActivitySignupResult = {
+  activityId: string;
+  communityId: string;
+  signupId?: string | null;
+  status: string;
+  message: string;
 };

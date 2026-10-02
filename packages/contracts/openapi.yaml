@@ -2417,6 +2417,155 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityRoomMentionInbox'
+  /api/community/activities/board:
+    get:
+      summary: Get volunteer activities with roster, fill rate, and signup window state
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Volunteer activity board
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityActivityBoard'
+        '401':
+          description: User is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/activities:
+    post:
+      summary: Publish a volunteer activity with capacity and signup window
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityActivityRequest'
+      responses:
+        '200':
+          description: Refreshed volunteer activity board
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityActivityBoard'
+        '400':
+          description: Activity schedule or capacity is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied activity management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/activities/{activityId}/signups:
+    post:
+      summary: Take a confirmed spot in a volunteer activity
+      parameters:
+        - in: path
+          name: activityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Confirmed signup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityActivitySignupResult'
+        '403':
+          description: Community policy denied activity signup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: Signup window closed, activity full, or duplicate signup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    delete:
+      summary: Release a confirmed spot within the signup window
+      parameters:
+        - in: path
+          name: activityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Released signup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityActivitySignupResult'
+        '409':
+          description: Signup window closed or no confirmed spot held
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/activities/{activityId}/attendance:
+    patch:
+      summary: Record attendance for a confirmed signup
+      parameters:
+        - in: path
+          name: activityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkCommunityActivityAttendanceRequest'
+      responses:
+        '200':
+          description: Recorded attendance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityActivitySignupResult'
+        '403':
+          description: Community policy denied attendance recording
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
 components:
   schemas:
     ApiError:
@@ -2457,6 +2606,8 @@ components:
                 - MODERATE_THREAD_MESSAGE
                 - POST_ROOM_MESSAGE
                 - MANAGE_ROOMS
+                - JOIN_ACTIVITIES
+                - MANAGE_ACTIVITIES
                 - CREATE_OFFICIAL_UPDATE
                 - UPDATE_OFFICIAL_UPDATE
                 - MANAGE_MEMBERSHIPS
@@ -5630,4 +5781,176 @@ components:
         createdAt:
           type: string
           format: date-time
+    CreateCommunityActivityRequest:
+      type: object
+      required: [communityId, title, description, locationLabel, startsAt, endsAt, signupOpensAt, signupClosesAt, signupCapacity]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 3
+        description:
+          type: string
+        locationLabel:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        signupOpensAt:
+          type: string
+          format: date-time
+        signupClosesAt:
+          type: string
+          format: date-time
+        signupCapacity:
+          type: integer
+          minimum: 1
+    MarkCommunityActivityAttendanceRequest:
+      type: object
+      required: [communityId, signupId, attendanceStatus]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        signupId:
+          type: string
+          format: uuid
+        attendanceStatus:
+          type: string
+          enum: [PENDING, ATTENDED, NO_SHOW]
+    CommunityActivityVolunteer:
+      type: object
+      required: [signupId, volunteerId, volunteerName, status, attendanceStatus, createdAt]
+      properties:
+        signupId:
+          type: string
+          format: uuid
+        volunteerId:
+          type: string
+          format: uuid
+        volunteerName:
+          type: string
+        status:
+          type: string
+          enum: [CONFIRMED, CANCELLED]
+        attendanceStatus:
+          type: string
+          enum: [PENDING, ATTENDED, NO_SHOW]
+        createdAt:
+          type: string
+          format: date-time
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+        attendedAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityActivity:
+      type: object
+      required: [id, communityId, title, description, locationLabel, startsAt, endsAt, signupOpensAt, signupClosesAt, signupCapacity, organizerId, organizerName, createdAt, cancelled, signupWindowState, signupOpen, confirmedCount, fillRatePercent, roster]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        locationLabel:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        signupOpensAt:
+          type: string
+          format: date-time
+        signupClosesAt:
+          type: string
+          format: date-time
+        signupCapacity:
+          type: integer
+        organizerId:
+          type: string
+          format: uuid
+        organizerName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        cancelled:
+          type: boolean
+        signupWindowState:
+          type: string
+          enum: [UPCOMING, OPEN, FULL, CLOSED, CANCELLED]
+        signupOpen:
+          type: boolean
+        fullReason:
+          type: string
+          nullable: true
+        confirmedCount:
+          type: integer
+          format: int64
+        fillRatePercent:
+          type: integer
+          format: int64
+        currentVolunteerSignupId:
+          type: string
+          format: uuid
+          nullable: true
+        currentVolunteerStatus:
+          type: string
+          enum: [CONFIRMED, CANCELLED]
+          nullable: true
+        roster:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityActivityVolunteer'
+    CommunityActivityBoard:
+      type: object
+      required: [communityId, communityName, openActivities, myUpcomingSignups, activities]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        openActivities:
+          type: integer
+        myUpcomingSignups:
+          type: integer
+        activities:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityActivity'
+    CommunityActivitySignupResult:
+      type: object
+      required: [activityId, communityId, status, message]
+      properties:
+        activityId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        signupId:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          type: string
+        message:
+          type: string
 
