@@ -150,6 +150,7 @@ export type CommunityPermissionScope =
   | "MANAGE_ACTIVITIES"
   | "BOOK_RESOURCES"
   | "MANAGE_RESOURCES"
+  | "MANAGE_INTEGRATIONS"
   | "CREATE_OFFICIAL_UPDATE"
   | "UPDATE_OFFICIAL_UPDATE"
   | "MANAGE_MEMBERSHIPS"
@@ -1034,4 +1035,55 @@ export type CommunityResourceBoard = {
   resources: CommunityResource[];
   myBookings: CommunityResourceBooking[];
   approvalsQueue: CommunityResourceBooking[];
+};
+
+export type CommunityIntegrationChannel =
+  | "WEBHOOK"
+  | "EMAIL_DIGEST"
+  | "CALENDAR_FEED"
+  | "MAP_LINK";
+
+export type CommunityIntegrationDeliveryStatus = "PENDING" | "DELIVERED" | "FAILED";
+
+export type CommunityIntegration = {
+  id: string;
+  communityId: string;
+  channel: CommunityIntegrationChannel;
+  name: string;
+  targetUri: string;
+  enabled: boolean;
+  autoRetry: boolean;
+  dispatchable: boolean;
+  createdBy: string;
+  createdAt: string;
+  lastAttemptAt?: string | null;
+  lastSuccessAt?: string | null;
+  consecutiveFailures: number;
+  pendingDeliveries: number;
+  failedDeliveries: number;
+};
+
+export type CommunityIntegrationDelivery = {
+  id: string;
+  integrationId: string;
+  integrationName: string;
+  channel: string;
+  eventType: string;
+  referenceId?: string | null;
+  status: CommunityIntegrationDeliveryStatus;
+  attempts: number;
+  lastError?: string | null;
+  createdAt: string;
+  completedAt?: string | null;
+};
+
+export type CommunityIntegrationCenter = {
+  communityId: string;
+  communityName: string;
+  supportedChannels: CommunityIntegrationChannel[];
+  integrationCount: number;
+  pendingDeliveries: number;
+  failedDeliveries: number;
+  integrations: CommunityIntegration[];
+  recentDeliveries: CommunityIntegrationDelivery[];
 };

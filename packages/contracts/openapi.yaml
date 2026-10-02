@@ -2736,6 +2736,154 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/integrations/center:
+    get:
+      summary: Get outbound integrations with delivery status and recent attempts
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Integration center
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityIntegrationCenter'
+        '403':
+          description: Community policy denied integration management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/integrations:
+    post:
+      summary: Connect an outbound channel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityIntegrationRequest'
+      responses:
+        '200':
+          description: Configured integration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityIntegration'
+        '400':
+          description: Channel, target URI, or signing secret is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied integration management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/integrations/{integrationId}:
+    patch:
+      summary: Enable or disable an integration
+      parameters:
+        - in: path
+          name: integrationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: enabled
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Updated integration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityIntegration'
+        '403':
+          description: Community policy denied integration management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/integrations/events:
+    post:
+      summary: Fan out a civic event to every enabled matching integration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishCommunityIntegrationEventRequest'
+      responses:
+        '200':
+          description: Fan-out result with one delivery record per target
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityIntegrationFanOut'
+        '400':
+          description: Event type or schedule is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied integration management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/integrations/deliveries/{deliveryId}/retry:
+    post:
+      summary: Retry a failed delivery
+      parameters:
+        - in: path
+          name: deliveryId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Delivery attempt after retry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityIntegrationDelivery'
+        '403':
+          description: Community policy denied integration management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: Delivery was not failed, or automatic retry is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
 components:
   schemas:
     ApiError:
@@ -2780,6 +2928,7 @@ components:
                 - MANAGE_ACTIVITIES
                 - BOOK_RESOURCES
                 - MANAGE_RESOURCES
+                - MANAGE_INTEGRATIONS
                 - CREATE_OFFICIAL_UPDATE
                 - UPDATE_OFFICIAL_UPDATE
                 - MANAGE_MEMBERSHIPS
@@ -6305,4 +6454,190 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommunityResourceBooking'
+    CreateCommunityIntegrationRequest:
+      type: object
+      required: [communityId, channel, name, targetUri, secret]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        channel:
+          type: string
+          enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK]
+        name:
+          type: string
+          minLength: 3
+        targetUri:
+          type: string
+          pattern: '^https?://'
+        secret:
+          type: string
+          minLength: 8
+        autoRetry:
+          type: boolean
+          default: true
+    PublishCommunityIntegrationEventRequest:
+      type: object
+      required: [communityId, eventType, title]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED]
+        referenceId:
+          type: string
+          format: uuid
+          nullable: true
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        locationLabel:
+          type: string
+          nullable: true
+        startsAt:
+          type: string
+          format: date-time
+          nullable: true
+        endsAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityIntegration:
+      type: object
+      required: [id, communityId, channel, name, targetUri, enabled, autoRetry, dispatchable, createdBy, createdAt, consecutiveFailures, pendingDeliveries, failedDeliveries]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        channel:
+          type: string
+          enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK]
+        name:
+          type: string
+        targetUri:
+          type: string
+        enabled:
+          type: boolean
+        autoRetry:
+          type: boolean
+        dispatchable:
+          type: boolean
+          description: False when no connector is registered for the channel yet
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        lastAttemptAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastSuccessAt:
+          type: string
+          format: date-time
+          nullable: true
+        consecutiveFailures:
+          type: integer
+        pendingDeliveries:
+          type: integer
+          format: int64
+        failedDeliveries:
+          type: integer
+          format: int64
+    CommunityIntegrationDelivery:
+      type: object
+      required: [id, integrationId, integrationName, channel, eventType, status, attempts, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        integrationId:
+          type: string
+          format: uuid
+        integrationName:
+          type: string
+        channel:
+          type: string
+        eventType:
+          type: string
+          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED]
+        referenceId:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          type: string
+          enum: [PENDING, DELIVERED, FAILED]
+        attempts:
+          type: integer
+        lastError:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityIntegrationCenter:
+      type: object
+      required: [communityId, communityName, supportedChannels, integrationCount, pendingDeliveries, failedDeliveries, integrations, recentDeliveries]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        supportedChannels:
+          type: array
+          items:
+            type: string
+            enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK]
+        integrationCount:
+          type: integer
+        pendingDeliveries:
+          type: integer
+          format: int64
+        failedDeliveries:
+          type: integer
+          format: int64
+        integrations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityIntegration'
+        recentDeliveries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityIntegrationDelivery'
+    CommunityIntegrationFanOut:
+      type: object
+      required: [communityId, eventType, targeted, delivered, failed, skippedNoConnector, deliveries]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED]
+        targeted:
+          type: integer
+        delivered:
+          type: integer
+        failed:
+          type: integer
+        skippedNoConnector:
+          type: integer
+        deliveries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityIntegrationDelivery'
 

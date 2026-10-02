@@ -551,6 +551,7 @@ The current app already supports reporting, prioritization, community context, a
 
 ### `story:OCS-P1-053` Outbound Integrations Layer
 
+- Status: shipped (2026-03-21)
 - Problem: community operations depend on calendars, messaging, email, and maps.
 - Backend/API change:
   - add webhook and connector abstraction for external delivery and sync jobs
@@ -561,12 +562,15 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - the system can meet communities where they already coordinate
 - Acceptance criteria:
-  - [ ] official announcements can fan out to configured channels
-  - [ ] activity/resource events can sync to calendar flows
-  - [ ] integration failures are visible and retryable
+  - [x] official announcements can fan out to configured channels
+  - [x] activity/resource events can sync to calendar flows
+  - [x] integration failures are visible and retryable
 - Validation:
-  - [ ] webhook/connector tests
-  - [ ] admin integration UX checks
+  - [x] webhook/connector tests against a real local HTTP server (`CommunityIntegrationIT`)
+  - [x] admin integration UX checks (`community-integrations.spec.ts`)
+- Notes:
+  - `EMAIL_DIGEST` and `MAP_LINK` are declared but fail loudly with `No connector is registered for this channel yet.` rather than reporting fake success
+  - synchronous delivery with a 5s timeout and no retry scheduler; see `docs/architecture/ADR-20260321-community-integrations-contract.md`
 
 ### `story:OCS-P2-006` Verified Identity Tiers
 

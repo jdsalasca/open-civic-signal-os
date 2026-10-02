@@ -138,6 +138,7 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.community_rooms'), to: '/communities/rooms', icon: 'pi pi-comments', visible: isLoggedIn },
     { label: t('nav.community_activities'), to: '/communities/activities', icon: 'pi pi-calendar', visible: isLoggedIn },
     { label: t('nav.community_resources'), to: '/communities/resources', icon: 'pi pi-building', visible: isLoggedIn },
+    { label: t('nav.community_integrations'), to: '/communities/integrations', icon: 'pi pi-send', visible: isLoggedIn && Boolean(canAccessOpenData) },
   ];
   const advancedNav: NavItem[] = [
     { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && Boolean(canAccessModeration) },
