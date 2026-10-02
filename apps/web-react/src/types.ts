@@ -148,6 +148,8 @@ export type CommunityPermissionScope =
   | "MANAGE_ROOMS"
   | "JOIN_ACTIVITIES"
   | "MANAGE_ACTIVITIES"
+  | "BOOK_RESOURCES"
+  | "MANAGE_RESOURCES"
   | "CREATE_OFFICIAL_UPDATE"
   | "UPDATE_OFFICIAL_UPDATE"
   | "MANAGE_MEMBERSHIPS"
@@ -980,4 +982,56 @@ export type CommunityActivitySignupResult = {
   signupId?: string | null;
   status: string;
   message: string;
+};
+
+export type CommunityResourceBookingStatus =
+  | "PENDING_APPROVAL"
+  | "APPROVED"
+  | "REJECTED"
+  | "CANCELLED";
+
+export type CommunityResourceBooking = {
+  id: string;
+  resourceId: string;
+  resourceName: string;
+  communityId: string;
+  requesterId: string;
+  requesterName: string;
+  purpose: string;
+  startsAt: string;
+  endsAt: string;
+  status: CommunityResourceBookingStatus;
+  decisionNote?: string | null;
+  requestedAt: string;
+  decidedAt?: string | null;
+  decidedByName?: string | null;
+  cancelledAt?: string | null;
+};
+
+export type CommunityResource = {
+  id: string;
+  communityId: string;
+  name: string;
+  description: string;
+  locationLabel: string;
+  requiresApproval: boolean;
+  minNoticeHours: number;
+  maxBookingHours: number;
+  archived: boolean;
+  createdBy: string;
+  createdAt: string;
+  upcomingBlockingCount: number;
+  currentRequesterBookingId?: string | null;
+  currentRequesterBookingStatus?: CommunityResourceBookingStatus | null;
+  upcomingBookings: CommunityResourceBooking[];
+};
+
+export type CommunityResourceBoard = {
+  communityId: string;
+  communityName: string;
+  resourceCount: number;
+  pendingApprovals: number;
+  resources: CommunityResource[];
+  myBookings: CommunityResourceBooking[];
+  approvalsQueue: CommunityResourceBooking[];
 };

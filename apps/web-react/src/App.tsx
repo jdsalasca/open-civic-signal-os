@@ -31,6 +31,7 @@ const CommunityTrustMetrics = lazy(() => import("./views/CommunityTrustMetrics")
 const CommunityOpenData = lazy(() => import("./views/CommunityOpenData").then(m => ({ default: m.CommunityOpenData })));
 const CommunityRooms = lazy(() => import("./views/CommunityRooms").then(m => ({ default: m.CommunityRooms })));
 const CommunityActivities = lazy(() => import("./views/CommunityActivities").then(m => ({ default: m.CommunityActivities })));
+const CommunityResources = lazy(() => import("./views/CommunityResources").then(m => ({ default: m.CommunityResources })));
 const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
 const Unauthorized = lazy(() => import("./views/Unauthorized").then(m => ({ default: m.Unauthorized })));
 
@@ -155,6 +156,7 @@ export function App() {
               <Route path="/communities/open-data" element={<CommunityOpenData />} />
   <Route path="/communities/rooms" element={<CommunityRooms />} />
   <Route path="/communities/activities" element={<CommunityActivities />} />
+  <Route path="/communities/resources" element={<CommunityResources />} />
             </Route>
 
             <Route element={<AuthGuard />}>

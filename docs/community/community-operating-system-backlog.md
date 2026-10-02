@@ -395,6 +395,7 @@ The current app already supports reporting, prioritization, community context, a
 
 ### `story:OCS-P1-045` Shared Resource Booking
 
+- Status: shipped (2026-03-21)
 - Problem: community spaces and equipment need fair coordination.
 - Backend/API change:
   - add reservable resources, approval state, and conflict rules
@@ -405,12 +406,15 @@ The current app already supports reporting, prioritization, community context, a
 - Civic outcome:
   - shared resources are allocated more transparently
 - Acceptance criteria:
-  - [ ] resources expose availability and booking policies
-  - [ ] conflicts are prevented or clearly escalated
-  - [ ] approval flow is visible to requester
+  - [x] resources expose availability and booking policies
+  - [x] conflicts are prevented or clearly escalated
+  - [x] approval flow is visible to requester
 - Validation:
-  - [ ] backend booking tests
-  - [ ] Playwright calendar booking flow
+  - [x] backend booking tests (`CommunityResourceIT`)
+  - [x] Playwright calendar booking flow (`community-resources.spec.ts`)
+- Notes:
+  - conflicts use half-open overlap semantics and are rejected with an explicit reason; see `docs/architecture/ADR-20260321-community-resources-contract.md`
+  - waitlists and recurring slots are not part of this story
 
 ### `story:OCS-P1-046` Governance Library
 

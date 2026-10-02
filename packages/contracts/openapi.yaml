@@ -2566,6 +2566,176 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/resources/board:
+    get:
+      summary: Get shared resources with availability, policies, and the approval queue
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Shared resource board
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityResourceBoard'
+        '401':
+          description: User is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/resources:
+    post:
+      summary: Publish a shared bookable resource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityResourceRequest'
+      responses:
+        '200':
+          description: Refreshed shared resource board
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityResourceBoard'
+        '400':
+          description: Resource policy values are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied resource management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/resources/bookings:
+    post:
+      summary: Request a booking window on a shared resource
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommunityResourceBookingRequest'
+      responses:
+        '200':
+          description: Booking recorded as APPROVED or PENDING_APPROVAL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityResourceBooking'
+        '400':
+          description: Booking purpose or window is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: Window conflicts with an existing booking or breaks the published policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    patch:
+      summary: Approve or reject a pending booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecideCommunityResourceBookingRequest'
+      responses:
+        '200':
+          description: Recorded booking decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityResourceBooking'
+        '403':
+          description: Community policy denied deciding bookings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: Booking was already decided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/resources/bookings/{bookingId}:
+    delete:
+      summary: Cancel a booking and free its window
+      parameters:
+        - in: path
+          name: bookingId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cancelled booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityResourceBooking'
+        '409':
+          description: Booking was already cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/resources/{resourceId}:
+    delete:
+      summary: Archive a shared resource
+      parameters:
+        - in: path
+          name: resourceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Refreshed shared resource board
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityResourceBoard'
+        '403':
+          description: Community policy denied archiving resources
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
 components:
   schemas:
     ApiError:
@@ -2608,6 +2778,8 @@ components:
                 - MANAGE_ROOMS
                 - JOIN_ACTIVITIES
                 - MANAGE_ACTIVITIES
+                - BOOK_RESOURCES
+                - MANAGE_RESOURCES
                 - CREATE_OFFICIAL_UPDATE
                 - UPDATE_OFFICIAL_UPDATE
                 - MANAGE_MEMBERSHIPS
@@ -5953,4 +6125,184 @@ components:
           type: string
         message:
           type: string
+    CreateCommunityResourceRequest:
+      type: object
+      required: [communityId, name, description, locationLabel]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 3
+        description:
+          type: string
+        locationLabel:
+          type: string
+        requiresApproval:
+          type: boolean
+          default: false
+        minNoticeHours:
+          type: integer
+          minimum: 0
+          default: 0
+        maxBookingHours:
+          type: integer
+          minimum: 1
+          default: 8
+    CreateCommunityResourceBookingRequest:
+      type: object
+      required: [communityId, resourceId, purpose, startsAt, endsAt]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        resourceId:
+          type: string
+          format: uuid
+        purpose:
+          type: string
+          minLength: 1
+          maxLength: 280
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+    DecideCommunityResourceBookingRequest:
+      type: object
+      required: [communityId, bookingId]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        bookingId:
+          type: string
+          format: uuid
+        approve:
+          type: boolean
+          default: true
+        decisionNote:
+          type: string
+          maxLength: 280
+          nullable: true
+    CommunityResourceBooking:
+      type: object
+      required: [id, resourceId, resourceName, communityId, requesterId, requesterName, purpose, startsAt, endsAt, status, requestedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        resourceId:
+          type: string
+          format: uuid
+        resourceName:
+          type: string
+        communityId:
+          type: string
+          format: uuid
+        requesterId:
+          type: string
+          format: uuid
+        requesterName:
+          type: string
+        purpose:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING_APPROVAL, APPROVED, REJECTED, CANCELLED]
+        decisionNote:
+          type: string
+          nullable: true
+        requestedAt:
+          type: string
+          format: date-time
+        decidedAt:
+          type: string
+          format: date-time
+          nullable: true
+        decidedByName:
+          type: string
+          nullable: true
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+    CommunityResource:
+      type: object
+      required: [id, communityId, name, description, locationLabel, requiresApproval, minNoticeHours, maxBookingHours, archived, createdBy, createdAt, upcomingBlockingCount, upcomingBookings]
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        locationLabel:
+          type: string
+        requiresApproval:
+          type: boolean
+        minNoticeHours:
+          type: integer
+        maxBookingHours:
+          type: integer
+        archived:
+          type: boolean
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        upcomingBlockingCount:
+          type: integer
+          format: int64
+        currentRequesterBookingId:
+          type: string
+          format: uuid
+          nullable: true
+        currentRequesterBookingStatus:
+          type: string
+          enum: [PENDING_APPROVAL, APPROVED, REJECTED, CANCELLED]
+          nullable: true
+        upcomingBookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityResourceBooking'
+    CommunityResourceBoard:
+      type: object
+      required: [communityId, communityName, resourceCount, pendingApprovals, resources, myBookings, approvalsQueue]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        resourceCount:
+          type: integer
+        pendingApprovals:
+          type: integer
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityResource'
+        myBookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityResourceBooking'
+        approvalsQueue:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommunityResourceBooking'
 

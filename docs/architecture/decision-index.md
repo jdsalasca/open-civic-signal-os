@@ -41,6 +41,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260319-community-open-data-contract.md` (accepted)
 - `ADR-20260321-community-rooms-contract.md` (accepted)
 - `ADR-20260321-community-activities-contract.md` (accepted)
+- `ADR-20260321-community-resources-contract.md` (accepted)
 
 ## Review Rule
 

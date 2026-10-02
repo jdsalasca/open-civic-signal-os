@@ -76,6 +76,16 @@ public enum CommunityPermissionScope {
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON
     )),
+    BOOK_RESOURCES(Set.of(
+        CommunityRole.MEMBER,
+        CommunityRole.MODERATOR,
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
+    MANAGE_RESOURCES(Set.of(
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
     CREATE_OFFICIAL_UPDATE(Set.of(
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON
