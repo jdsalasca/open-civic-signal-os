@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-02T23:43:12.192Z
+Last updated: 2026-10-02T23:59:15.363Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-25T23:43:08.887Z)
-- Throughput (issues closed): 77
+- Window: last 7 days (since 2026-09-25T23:59:13.072Z)
+- Throughput (issues closed): 79
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -79,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 36
+- TODO: 34
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 75
+- DONE: 77
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -95,7 +95,6 @@ Status labels used by this board:
 - #50 story:OCS-P2-002 implement trust-proof snapshot for backlog publish
 - #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
 - #48 story:OCS-P1-004 build transparency monthly report pipeline
-- #47 story:OCS-P1-003 version and expose formula metadata
 - #45 story:OCS-P1-001 add issue aging, trends, and SLA risk views
 - #44 story:OCS-P0-008 add reproducibility script for ranking outputs
 - #43 story:OCS-P0-007 implement weekly civic digest generation
@@ -112,7 +111,6 @@ Status labels used by this board:
 - #29 exports: municipal ticket export format adapter
 - #28 scripts: generate monthly transparency report
 - #27 community: add participatory assembly mode screen
-- #26 contracts: version prioritization formula metadata
 - #25 analytics: add neighborhood trend and surge detection
 - #23 dashboard: add issue aging and SLA risk panels
 - #22 messaging: add scheduled weekly bulletin generation
@@ -192,10 +190,12 @@ Status labels used by this board:
 - #58 Current Sprint Focus 2026-W09
 - #57 Agent Quality Review 2026-W09
 - #56 Agent Quality Review 2026-W08
+- #47 story:OCS-P1-003 version and expose formula metadata
 - #46 story:OCS-P1-002 implement municipal execution bridge and ownership
 - #42 story:OCS-P0-006 add abuse detection pipeline and moderator queue
 - #41 story:OCS-P0-005 add full audit metadata from ingest to publish
 - #39 story:OCS-P0-003 expose prioritized backlog API with explainability fields
+- #26 contracts: version prioritization formula metadata
 - #24 execution: add institutional assignment and owner workflow
 - #21 ci: add backlog reproducibility quality gate
 - #19 fairness: add duplicate and vote-abuse detection rules
