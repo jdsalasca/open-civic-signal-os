@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-02T23:00:04.264Z
+Last updated: 2026-10-02T23:01:53.024Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,21 +10,19 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-25T23:00:02.045Z)
-- Throughput (issues closed): 63
+- Window: last 7 days (since 2026-09-25T23:01:50.827Z)
+- Throughput (issues closed): 69
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
 ## 2026-Q2 Foundation
 
-- TODO: 3
+- TODO: 1
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 0
+- DONE: 2
 
 ### TODO
-- #5 P1: Public dashboard with filters and status lifecycle
-- #4 P0: Add explainable scoring breakdown in prioritized output
 - #3 P0: Build multi-channel ingest adapters (forms, CSV, chat exports)
 
 ### IN_PROGRESS
@@ -34,7 +32,8 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
-- _No issues_
+- #5 P1: Public dashboard with filters and status lifecycle
+- #4 P0: Add explainable scoring breakdown in prioritized output
 
 ## 2026-Q3 Expansion
 
@@ -80,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 48
+- TODO: 44
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 63
+- DONE: 67
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -126,10 +125,6 @@ Status labels used by this board:
 - #20 alerts: weekly top-issues digest for community channels
 - #19 fairness: add duplicate and vote-abuse detection rules
 - #18 audit: attach source metadata and transformation version to ranked outputs
-- #17 workflow: implement submit -> validate -> rank -> publish lifecycle
-- #16 dashboard: add why-ranked-here panel per civic signal
-- #15 scoring: add deterministic score regression dataset and tests
-- #14 scoring: publish explainable scoring breakdown API endpoint
 - #13 ingest: add CSV import validator with row-level error report
 - #12 ingest: implement WhatsApp/Telegram export parser with schema validation
 - #2 roadmap: publish auditable public backlog dashboard
@@ -205,3 +200,7 @@ Status labels used by this board:
 - #58 Current Sprint Focus 2026-W09
 - #57 Agent Quality Review 2026-W09
 - #56 Agent Quality Review 2026-W08
+- #17 workflow: implement submit -> validate -> rank -> publish lifecycle
+- #16 dashboard: add why-ranked-here panel per civic signal
+- #15 scoring: add deterministic score regression dataset and tests
+- #14 scoring: publish explainable scoring breakdown API endpoint
