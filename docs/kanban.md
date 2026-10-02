@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-02T22:59:15.586Z
+Last updated: 2026-10-02T22:59:27.890Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-25T22:59:13.569Z)
-- Throughput (issues closed): 31
+- Window: last 7 days (since 2026-09-25T22:59:25.829Z)
+- Throughput (issues closed): 39
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -80,22 +80,14 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 80
+- TODO: 72
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 31
+- DONE: 39
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
 - #120 Agent Quality Review 2026-W40
-- #88 Agent Quality Review 2026-W24
-- #87 Current Sprint Focus 2026-W23
-- #86 Agent Quality Review 2026-W23
-- #85 Current Sprint Focus 2026-W22
-- #84 Agent Quality Review 2026-W22
-- #83 Current Sprint Focus 2026-W21
-- #82 Agent Quality Review 2026-W21
-- #81 Current Sprint Focus 2026-W20
 - #80 Agent Quality Review 2026-W20
 - #79 Current Sprint Focus 2026-W19
 - #78 Agent Quality Review 2026-W19
@@ -205,3 +197,11 @@ Status labels used by this board:
 - #91 Current Sprint Focus 2026-W25
 - #90 Agent Quality Review 2026-W25
 - #89 Current Sprint Focus 2026-W24
+- #88 Agent Quality Review 2026-W24
+- #87 Current Sprint Focus 2026-W23
+- #86 Agent Quality Review 2026-W23
+- #85 Current Sprint Focus 2026-W22
+- #84 Agent Quality Review 2026-W22
+- #83 Current Sprint Focus 2026-W21
+- #82 Agent Quality Review 2026-W21
+- #81 Current Sprint Focus 2026-W20
