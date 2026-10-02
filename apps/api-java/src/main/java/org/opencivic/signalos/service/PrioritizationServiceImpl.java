@@ -1,6 +1,7 @@
 package org.opencivic.signalos.service;
 
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalSourceChannel;
 import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
@@ -32,6 +33,14 @@ import java.util.stream.Collectors;
 public class PrioritizationServiceImpl implements PrioritizationService {
 
     private static final Logger log = LoggerFactory.getLogger(PrioritizationServiceImpl.class);
+
+    /**
+     * Stamped on every signal so an auditor can tell which scoring rule produced a rank.
+     * Bump this string whenever the weights in {@link #getBreakdown} change, and add a
+     * regression note in docs/ per the reproducibility rule.
+     */
+    static final String TRANSFORMATION_VERSION = Signal.TRANSFORMATION_VERSION_V1;
+
     private final SignalRepository signalRepository;
     private final VoteRepository voteRepository;
     private final UserRepository userRepository;
@@ -98,6 +107,21 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         ));
 
         return saved;
+    }
+
+    /**
+     * Unknown channel strings are rejected rather than silently defaulted, so a bad ingest
+     * label shows up as a failed import instead of an unattributed civic signal.
+     */
+    private SignalSourceChannel resolveSourceChannel(String rawChannel) {
+        if (rawChannel == null || rawChannel.isBlank()) {
+            return SignalSourceChannel.WEB_FORM;
+        }
+        try {
+            return SignalSourceChannel.valueOf(rawChannel.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown signal sourceChannel: " + rawChannel);
+        }
     }
 
     private String generateHash(String input) {
@@ -349,9 +373,19 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         return createSignal(title, description, category, urgency, impact, affectedPeople, imageUrl, locationLabel, evidenceUrls, latitude, longitude, username, null);
     }
 
-    @Override
+@Override
     @Transactional
     public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String username, UUID communityId) {
+        return createSignal(
+            title, description, category, urgency, impact, affectedPeople,
+            imageUrl, locationLabel, evidenceUrls, latitude, longitude,
+            null, null, username, communityId
+        );
+    }
+
+    @Override
+    @Transactional
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String sourceChannel, String sourceRef, String username, UUID communityId) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Author user not found: " + username));
 
@@ -372,8 +406,11 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             UUID.randomUUID(), title, description, category,
             urgency, impact, affectedPeople,
             0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), java.time.LocalDateTime.now(), communityId);
-        signal.setLatitude(latitude);
+signal.setLatitude(latitude);
         signal.setLongitude(longitude);
+        signal.setSourceChannel(resolveSourceChannel(sourceChannel));
+        signal.setSourceRef(sourceRef == null || sourceRef.isBlank() ? null : sourceRef.trim());
+        signal.setTransformationVersion(TRANSFORMATION_VERSION);
         signal.setImageUrl(normalizedPrimaryEvidence);
         signal.setLocationLabel(locationLabel == null || locationLabel.isBlank() ? null : locationLabel.trim());
         signal.setEvidenceUrls(normalizedEvidence);

@@ -377,6 +377,37 @@ export function SignalDetail() {
               </div>
             </CivicCard>
 
+            <CivicCard title={t('signals.provenance_title')} className="mb-8" data-testid="signal-detail-provenance">
+              <p className="text-sm text-secondary mt-0 mb-4 leading-relaxed">
+                {t('signals.provenance_desc')}
+              </p>
+              <div className="flex flex-column gap-3">
+                <div className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm">
+                  <div className="text-xs font-black text-main uppercase tracking-wide mb-1">
+                    {t('signals.provenance_channel_label')}
+                  </div>
+                  <div className="text-sm text-secondary" data-testid="signal-detail-provenance-channel">
+                    {signal.sourceChannel
+                      ? t(`signals.provenance_channels.${signal.sourceChannel}`)
+                      : t('signals.provenance_unknown')}
+                  </div>
+                  {signal.sourceRef && (
+                    <div className="text-xs text-muted mt-2 break-all" data-testid="signal-detail-provenance-ref">
+                      {signal.sourceRef}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm">
+                  <div className="text-xs font-black text-main uppercase tracking-wide mb-1">
+                    {t('signals.provenance_version_label')}
+                  </div>
+                  <div className="text-sm text-secondary" data-testid="signal-detail-provenance-version">
+                    {signal.transformationVersion ?? t('signals.provenance_unknown')}
+                  </div>
+                </div>
+              </div>
+            </CivicCard>
+
             {isStaff && (
               <CivicCard title={t("signals.lifecycle_admin")} variant="brand" className="mb-8">
                 <div className="flex flex-column gap-3">

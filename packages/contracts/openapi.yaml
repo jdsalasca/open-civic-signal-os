@@ -3073,6 +3073,19 @@ components:
         longitude:
           type: number
           format: double
+        sourceChannel:
+          $ref: '#/components/schemas/SignalSourceChannel'
+        sourceRef:
+          type: string
+          nullable: true
+          description: Pointer back to the original record, e.g. a CSV row or a municipal ticket
+        transformationVersion:
+          type: string
+          description: Scoring rule version that produced this priority score
+    SignalSourceChannel:
+      type: string
+      description: Where the signal entered the system, so an audit can tell a citizen report from an institutional update
+      enum: [WEB_FORM, CSV_IMPORT, CHAT_EXPORT, PUBLIC_API, INSTITUTIONAL_UPDATE]
     SignalMapFilters:
       type: object
       properties:
@@ -3387,6 +3400,11 @@ components:
         longitude:
           type: number
           format: double
+        sourceChannel:
+          $ref: '#/components/schemas/SignalSourceChannel'
+        sourceRef:
+          type: string
+          maxLength: 180
     SignalStatusUpdateRequest:
       type: object
       required: [status]

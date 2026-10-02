@@ -50,6 +50,12 @@ public record SignalCreateRequest(
         String
     > evidenceUrls,
     
-    Double latitude,
-    Double longitude
+Double latitude,
+    Double longitude,
+
+    @Size(max = 30, message = "sourceChannel must be at most 30 characters")
+    String sourceChannel,
+
+    @Size(max = 180, message = "sourceRef must be at most 180 characters")
+    String sourceRef
 ) {}

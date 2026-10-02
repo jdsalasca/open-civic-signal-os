@@ -22,5 +22,8 @@ public record SignalResponse(
     String viewerReaction,
     ExplainabilitySummary explainabilitySummary,
     Double latitude,
-    Double longitude
+    Double longitude,
+    String sourceChannel,
+    String sourceRef,
+    String transformationVersion
 ) {}

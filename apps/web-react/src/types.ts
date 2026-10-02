@@ -45,7 +45,17 @@ export type Signal = {
   explainabilitySummary: ExplainabilitySummary;
   latitude?: number | null;
   longitude?: number | null;
+  sourceChannel?: SignalSourceChannel | null;
+  sourceRef?: string | null;
+  transformationVersion?: string | null;
 };
+
+export type SignalSourceChannel =
+  | "WEB_FORM"
+  | "CSV_IMPORT"
+  | "CHAT_EXPORT"
+  | "PUBLIC_API"
+  | "INSTITUTIONAL_UPDATE";
 
 export type Notification = {
   id: string;

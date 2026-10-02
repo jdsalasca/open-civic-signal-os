@@ -37,33 +37,37 @@ Shipped Phase 5 foundations:
 - `OCS-P1-044` volunteering and activity slots
 - `OCS-P1-045` shared resource booking and conflict rules
 - `OCS-P1-053` outbound integrations layer
+- `OCS-P0-005` full audit metadata from ingest to publish
 
 ## Now (Next 7 Days)
 
 Recommended next execution order:
 
-1. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+1. `story:OCS-P1-003` version and expose formula metadata
+2. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 Execution note:
 
-- `story:OCS-P1-053` is shipped with hashed-secret channels, JDK-only HTTP delivery, per-attempt delivery records, visible failures, and operator retry; connector-less channels fail loudly instead of reporting success. The queue remaining from the community operating-system wave is empty, so the next target is the platform hardening pack.
+- `story:OCS-P0-005` is shipped with `sourceChannel`, `sourceRef`, and `transformationVersion` on every signal, so a ranked number is traceable to its ingest channel and scoring rule. The same pass also fixed a broken quality gate: Surefire never matched the repo's `*IT` suites, so CI was running 6 of 107 backend tests.
 
 ## Next (7-21 Days)
 
 1. Prepare the next enablement layer.
+  - `story:OCS-P1-003`
   - platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ## P0 Execution Queue (Agent Order)
 
 This section is preserved for repository compatibility. The active P0-equivalent execution order is:
 
-1. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+1. `story:OCS-P1-003`
+2. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ## Wave Sequencing
 
 ### Wave 1: Trust Loop Completion
 
-1. `story:OCS-P1-053`
+1. `story:OCS-P1-003`
 
 ### Wave 2: Safety and Data Responsibility
 
@@ -96,6 +100,7 @@ This section is preserved for repository compatibility. The active P0-equivalent
 - `OCS-P1-044` shipped and now adds capacity-enforced volunteer activities with published signup windows, releasable signups, and an organizer attendance trail without moving slot policy into the frontend.
 - `OCS-P1-045` shipped and now adds policy-carrying shared resources, half-open conflict detection, a conflict-free approval queue, and requester-visible booking decisions without moving allocation rules into the frontend.
 - `OCS-P1-053` shipped and now adds hashed-secret outbound channels with JDK-only HTTP delivery, per-attempt delivery records, visible failures, and operator retry, so a broken channel is never silent.
+- `OCS-P0-005` shipped and now stamps every signal with its ingest channel, source reference, and scoring rule version, so a ranked number can be traced back to how it was produced.
 
 ## Definition of Ready for Any New Story
 

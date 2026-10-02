@@ -19,12 +19,22 @@ public class Signal {
     private String imageUrl;
     @Column(columnDefinition = "TEXT")
     private String locationLabel;
-    private String category;
+private String category;
     private int urgency;
     private int impact;
     private int affectedPeople;
     private int communityVotes;
     private double priorityScore;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private SignalSourceChannel sourceChannel = SignalSourceChannel.WEB_FORM;
+
+    @Column(length = 180)
+    private String sourceRef;
+
+    @Column(nullable = false, length = 120)
+    private String transformationVersion = Signal.TRANSFORMATION_VERSION_V1;
     
     @Embedded
     @AttributeOverrides({
@@ -76,6 +86,8 @@ public class Signal {
     public void setReactions(java.util.Map<String, Integer> reactions) {
         this.reactions = reactions;
     }
+
+    public static final String TRANSFORMATION_VERSION_V1 = "v1";
 
     public Signal() {}
 
@@ -144,6 +156,12 @@ public class Signal {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setStatus(String status) { this.status = status; }
     public void setPriorityScore(double priorityScore) { this.priorityScore = priorityScore; }
+    public SignalSourceChannel getSourceChannel() { return sourceChannel; }
+    public void setSourceChannel(SignalSourceChannel sourceChannel) { this.sourceChannel = sourceChannel; }
+    public String getSourceRef() { return sourceRef; }
+    public void setSourceRef(String sourceRef) { this.sourceRef = sourceRef; }
+    public String getTransformationVersion() { return transformationVersion; }
+    public void setTransformationVersion(String transformationVersion) { this.transformationVersion = transformationVersion; }
     public void setScoreBreakdown(ScoreBreakdown scoreBreakdown) { this.scoreBreakdown = scoreBreakdown; }
     public void setCommunityVotes(int communityVotes) { this.communityVotes = communityVotes; }
     public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }

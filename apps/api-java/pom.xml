@@ -108,6 +108,23 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--
+            Surefire's default includes are *Test / Test* / *Tests / *TestCase. This repo's
+            backend coverage lives in *IT classes (MockMvc + H2 + Flyway), so without this the
+            only thing `mvn test` and CI actually ran was 2 unit classes. Pin both patterns so
+            the integration suites are part of the gate.
+          -->
+          <includes>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+            <include>**/*IT.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>3.3.1</version>
         <configuration>

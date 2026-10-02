@@ -391,8 +391,10 @@ public class SignalController {
             request.imageUrl(),
             request.locationLabel(),
             request.evidenceUrls(),
-            request.latitude(),
+request.latitude(),
             request.longitude(),
+            request.sourceChannel(),
+            request.sourceRef(),
             authentication.getName(),
             communityId
         );
@@ -438,7 +440,10 @@ public class SignalController {
             userReactionService.getViewerReaction("SIGNAL", s.getId(), viewerId),
             buildExplainabilitySummary(s),
             s.getLatitude(),
-            s.getLongitude()
+            s.getLongitude(),
+            s.getSourceChannel() == null ? null : s.getSourceChannel().name(),
+            s.getSourceRef(),
+            s.getTransformationVersion()
         );
     }
 
