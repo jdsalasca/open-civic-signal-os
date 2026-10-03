@@ -200,6 +200,7 @@ export type CommunityMembership = {
 export type CommunityPermissionScope =
   | "CAST_PROPOSAL_VOTE"
   | "CREATE_PROPOSAL"
+  | "IMPORT_SIGNALS"
   | "MANAGE_MODERATION_QUEUE"
   | "MANAGE_PRIVACY_SETTINGS"
   | "MANAGE_OPEN_DATA_EXPORTS"

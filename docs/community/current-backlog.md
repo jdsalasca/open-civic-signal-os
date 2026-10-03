@@ -41,6 +41,10 @@ Shipped Phase 5 foundations:
 - `OCS-P1-003` versioned and published formula metadata
 - `OCS-P1-001` issue aging, trends, and SLA risk views
 
+Shipped ingest hardening:
+
+- `OCS-P1-037` bulk ingest validator with row-level error reports
+
 ## Now (Next 7 Days)
 
 Recommended next execution order:
@@ -51,6 +55,7 @@ Recommended next execution order:
 Execution note:
 
 - `story:OCS-P1-001` is shipped with a backend-owned `GET /api/signals/aging` returning SLA risk, age buckets, median age, and a created-versus-resolved trend read from the status audit trail, plus a staff dashboard panel carrying a freshness timestamp. The remaining hardening items are compose secret policy and OpenAPI parity.
+- Bulk ingest is shipped with `POST /api/ingest/validate` (dry run) and `POST /api/ingest/commit` (accepted rows only) over CSV, WhatsApp, and Telegram exports. One malformed row no longer discards an upload, every rejected row reports its column and reason, ragged rows are rejected rather than shifted into the wrong column, and each accepted signal keeps a `fileName#line` source reference plus a `transformationVersion`. See `docs/architecture/ADR-20260321-bulk-ingest-contract.md`.
 
 ## Next (7-21 Days)
 

@@ -90,6 +90,11 @@ public enum CommunityPermissionScope {
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON
     )),
+    IMPORT_SIGNALS(Set.of(
+        CommunityRole.MODERATOR,
+        CommunityRole.COORDINATOR,
+        CommunityRole.PUBLIC_SERVANT_LIAISON
+    )),
     CREATE_OFFICIAL_UPDATE(Set.of(
         CommunityRole.COORDINATOR,
         CommunityRole.PUBLIC_SERVANT_LIAISON

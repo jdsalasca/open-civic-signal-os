@@ -2948,6 +2948,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/ingest/validate:
+    post:
+      summary: Validate an exported report without persisting anything
+      description: >-
+        Dry run over a CSV export or a WhatsApp/Telegram chat export. Every row gets an
+        outcome and every rejected row gets row-level errors, so a community data steward
+        can fix the source file before anything is written.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+      responses:
+        '200':
+          description: Row-by-row validation report, nothing persisted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestReport'
+        '400':
+          description: Source is unknown, the file could not be parsed, or the payload is malformed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied signal import
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: Export exceeds the row ceiling and was rejected before parsing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/ingest/commit:
+    post:
+      summary: Import the valid rows of an export and return the same report shape
+      description: >-
+        Persists only the rows that passed validation. Rejected rows are reported, never
+        written, and every accepted signal keeps a sourceRef plus a transformationVersion
+        so a later score change can be replayed against the original input.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+      responses:
+        '200':
+          description: Import report with a signalId on every accepted row
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestReport'
+        '400':
+          description: Source is unknown, the file could not be parsed, or the payload is malformed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied signal import
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: Export exceeds the row ceiling and was rejected before parsing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/integrations/events:
     post:
       summary: Fan out a civic event to every enabled matching integration
@@ -3013,6 +3089,118 @@ paths:
                 $ref: '#/components/schemas/ApiError'
 components:
   schemas:
+    IngestSource:
+      type: string
+      enum: [CSV_EXPORT, WHATSAPP_EXPORT, TELEGRAM_EXPORT]
+      description: >-
+        Where the file came from. Each source has its own reader and its own set of
+        recognised columns; anything unrecognised fails loudly rather than guessing.
+    IngestRequest:
+      type: object
+      required: [communityId, source, fileName, content]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        source:
+          $ref: '#/components/schemas/IngestSource'
+        fileName:
+          type: string
+          description: Original name, preserved in sourceRef as file#line for audit.
+        content:
+          type: string
+          description: Raw file contents. Callers must not anonymise before ingest; redaction runs on publish.
+        commit:
+          type: boolean
+          default: false
+          description: >-
+            Ignored on both routes. /validate never persists; /commit always does.
+            Kept so a single client payload can drive both calls.
+    IngestFieldError:
+      type: object
+      properties:
+        rowIndex:
+          type: integer
+          description: 1-based row in the file, where row 1 is the header.
+        field:
+          type: string
+          description: Column name, or "*" when the problem is the row shape itself.
+        code:
+          type: string
+          enum: [REQUIRED, TOO_SHORT, TOO_LONG, NOT_A_NUMBER, OUT_OF_RANGE, UNKNOWN_CATEGORY, COLUMN_COUNT_MISMATCH]
+        message:
+          type: string
+          description: Plain-language explanation the steward can act on.
+        preview:
+          type: string
+          description: Truncated value preview, never the full row.
+    IngestRowOutcome:
+      type: object
+      properties:
+        rowIndex:
+          type: integer
+        valid:
+          type: boolean
+        sourceRef:
+          type: string
+          description: Present only when the row can be cited, as file#line.
+        signalId:
+          type: string
+          format: uuid
+          description: Present only after a successful commit.
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestFieldError'
+    IngestReport:
+      type: object
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        source:
+          $ref: '#/components/schemas/IngestSource'
+        committed:
+          type: boolean
+        totalRows:
+          type: integer
+        acceptedRows:
+          type: integer
+        rejectedRows:
+          type: integer
+        detectedColumns:
+          type: array
+          items:
+            type: string
+        contentSha256:
+          type: string
+          description: >-
+            Hash of the exact bytes submitted, so the same file can be shown to have
+            produced the same report.
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestRowOutcome'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/IngestFieldError'
+        errorsTruncated:
+          type: boolean
+          description: >-
+            True when the flat error list hit its display cap. Every row still keeps its
+            own full error list in outcomes, so nothing is lost.
+        formula:
+          $ref: '#/components/schemas/PrioritizationFormula'
+        formulaVersion:
+          type: string
+          description: Version of the scoring formula the report was scored with.
+        scoredAt:
+          type: string
+          format: date-time
+        error:
+          type: string
+          description: Set instead of row results when the file itself could not be parsed.
     ApiError:
       type: object
       properties:
@@ -3041,6 +3229,9 @@ components:
               type: string
               enum:
                 - CREATE_PROPOSAL
+
+                - IMPORT_SIGNALS
+                
                 - MANAGE_MODERATION_QUEUE
                 - MANAGE_PRIVACY_SETTINGS
                 - MANAGE_DECISION_LEDGER
@@ -3878,6 +4069,9 @@ components:
           type: string
           enum:
             - CREATE_PROPOSAL
+
+            - IMPORT_SIGNALS
+            
             - MANAGE_MODERATION_QUEUE
             - MANAGE_OPEN_DATA_EXPORTS
             - MANAGE_DECISION_LEDGER
@@ -5845,6 +6039,9 @@ components:
           enum:
             - CAST_PROPOSAL_VOTE
             - CREATE_PROPOSAL
+
+            - IMPORT_SIGNALS
+            
             - MANAGE_MODERATION_QUEUE
             - MANAGE_GOVERNANCE_LIBRARY
             - MANAGE_PROJECT_BOARDS

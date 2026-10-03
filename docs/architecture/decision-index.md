@@ -49,6 +49,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-runtime-secret-policy.md` (accepted)
 - `ADR-20260321-contract-parity-gate.md` (accepted)
 - `ADR-20260321-community-list-limits-contract.md` (partial)
+- `ADR-20260321-bulk-ingest-contract.md` (accepted)
 
 ## Review Rule
 
