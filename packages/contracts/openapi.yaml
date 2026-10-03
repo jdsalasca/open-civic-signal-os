@@ -2406,6 +2406,151 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/participatory-budgets:
+    post:
+      summary: Create a budget envelope and read every proposal cost
+      description: >-
+        The platform does not hold money. It records what a community decided to allocate and
+        reports whether the arithmetic closes. Every proposal in the community gets an allocation
+        row with its cost read once, so a proposal edited later cannot change a past simulation.
+        A cost that cannot be read as an amount is recorded as null rather than guessed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipatoryBudgetRequest'
+      responses:
+        '200':
+          description: The envelope with every allocation and its readable or unreadable cost
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipatoryBudget'
+        '400':
+          description: >-
+            Missing name, a non-positive envelope, an invalid currency code, or more proposals than
+            the envelope supports
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+    get:
+      summary: Every budget envelope for a community, newest first
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Envelopes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParticipatoryBudget'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/participatory-budgets/{budgetId}:
+    get:
+      summary: One envelope with its allocations and whether the selection fits
+      parameters:
+        - in: path
+          name: budgetId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The envelope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipatoryBudget'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Envelope not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/participatory-budgets/{budgetId}/selection:
+    post:
+      summary: Mark which proposals are funded and report whether the arithmetic closes
+      description: >-
+        Replaces the whole selection rather than toggling one at a time, so a caller cannot end up
+        with a half-applied change if something fails partway. The response does not choose: which
+        proposals to fund is the community decision, and the platform has no standing to make it.
+      parameters:
+        - in: path
+          name: budgetId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                proposalIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        '200':
+          description: The envelope with the new selection and its totals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipatoryBudget'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Envelope not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/institutional-handoffs:
     post:
       summary: Record that a report was handed to an institution
@@ -5995,6 +6140,107 @@ components:
             institution's system, and that an overdue handoff means the community's own target
             has passed rather than that the city has failed.
         generatedAt:
+          type: string
+          format: date-time
+
+    ParticipatoryBudgetRequest:
+      type: object
+      required: [communityId, name, totalBudgetMinor]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Required. An unnamed envelope is unfindable when a community runs more than one exercise.
+        totalBudgetMinor:
+          type: integer
+          format: int64
+          minimum: 1
+          description: >-
+            The envelope in minor units (cents). A long, never a double: money in floating point is
+            a rounding bug waiting for a council meeting to expose it.
+        currency:
+          type: string
+          default: USD
+          description: Three-letter ISO code. Rejected if it is not one.
+    ParticipatoryBudgetAllocation:
+      type: object
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        rawCostText:
+          type: string
+          description: >-
+            The original estimatedCost, kept so a reader can see what the parser was given when it
+            failed.
+        amountMinor:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Null when the text could not be read as an amount. Null rather than a guess: a budget
+            that silently invented a number would produce an allocation that looks decided and is not.
+        amountFormatted:
+          type: string
+          nullable: true
+        costReadable:
+          type: boolean
+        included:
+          type: boolean
+    ParticipatoryBudget:
+      type: object
+      properties:
+        budgetId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        totalBudgetMinor:
+          type: integer
+          format: int64
+        totalFormatted:
+          type: string
+        currency:
+          type: string
+        allocations:
+          type: integer
+        unreadableCosts:
+          type: integer
+          description: >-
+            How many proposals have a cost that could not be read. A selection that looks within
+            budget while this is non-zero is not within budget, it is unknown.
+        includedTotalMinor:
+          type: integer
+          format: int64
+        includedTotalFormatted:
+          type: string
+        remainingMinor:
+          type: integer
+          format: int64
+          description: Negative when the selection exceeds the envelope.
+        remainingFormatted:
+          type: string
+        withinBudget:
+          type: boolean
+        allocationViews:
+          type: array
+          description: Unreadable costs first, then the largest, so what needs attention is read first.
+          items:
+            $ref: '#/components/schemas/ParticipatoryBudgetAllocation'
+        interpretation:
+          type: string
+          description: >-
+            What the arithmetic means and what it does not. Says it does not choose which proposals
+            to fund, and that an unreadable cost makes whether the selection fits unknown rather
+            than confirmed.
+        createdAt:
           type: string
           format: date-time
 
