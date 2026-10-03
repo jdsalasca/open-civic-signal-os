@@ -48,6 +48,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health").permitAll()
                 .requestMatchers("/api/open-data/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta", "/api/signals/formula").permitAll()
+                // A published backlog is a claim a visitor checks. A check only its publisher can run
+                // is not one a visitor can trust, so both the claim and the comparison are public.
+                .requestMatchers(HttpMethod.GET, "/api/community/backlog-publications/current", "/api/community/backlog-publications/verify").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/export/**").hasRole("SUPER_ADMIN")
                 
                 .requestMatchers(HttpMethod.POST, "/api/signals/*/vote").hasRole("CITIZEN")

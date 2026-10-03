@@ -1987,6 +1987,110 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TooManyRequestsResponse'
+  /api/community/backlog-publications:
+    post:
+      summary: Publish the current backlog as a hash-anchored artifact
+      description: >-
+        Freezes the current ranked backlog into an explainability snapshot and records a hash of
+        the published set, so a visitor can later ask whether what they are looking at is still
+        what was published. Publishing declares what the public sees, so it is a moderation act.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BacklogPublicationRequest'
+      responses:
+        '200':
+          description: Publication with its ordering hash and the snapshot it froze
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BacklogPublication'
+        '400':
+          description: Label is blank, or limit is out of range. Both would make a publication unfindable or oversized.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+    get:
+      summary: Publication history for a community, newest first
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Publications, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BacklogPublication'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/backlog-publications/current:
+    get:
+      summary: The publication the public backlog is currently serving, with a live comparison
+      description: >-
+        Public. This is the claim a visitor checks, so it cannot require an account. Returns null
+        when nothing has been published.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The current publication, or null
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BacklogPublication'
+  /api/community/backlog-publications/verify:
+    get:
+      summary: Compare the live ranking against the published one
+      description: >-
+        Public, because a check only its publisher can run is not one a visitor can trust. Recomputes
+        the ordering hash over the live ranking and compares. The hash covers the set of signals and
+        their scores, not the order they appear in: rows with equal scores have no defined order, so
+        hashing their literal order would fail for a reason nobody can act on.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Both hashes and what the mismatch means
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BacklogPublicationVerification'
+        '404':
+          description: Nothing has been published for this community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/weekly-digest:
     get:
       summary: Generate the weekly digest for one closed ISO week
@@ -4749,6 +4853,81 @@ components:
           format: date-time
         body:
           type: string
+
+    BacklogPublicationRequest:
+      type: object
+      required: [communityId, label]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        label:
+          type: string
+          description: >-
+            Required. An unlabelled publication is unfindable when someone asks which version they
+            were looking at.
+          example: Assembly of 12 March
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 20
+    BacklogPublication:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        publicationId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        snapshotId:
+          type: string
+          format: uuid
+          description: The frozen explainability snapshot, so the ranking itself is recoverable.
+        label:
+          type: string
+        orderingHash:
+          type: string
+          description: >-
+            SHA-256 over the sorted id:score lines of the published set. Sorted because equal scores
+            have no defined order, and a check that failed on tie ordering would be noise.
+        formulaVersion:
+          type: string
+        itemCount:
+          type: integer
+        publishedBy:
+          type: string
+          format: uuid
+        publishedAt:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+        matchesLiveRanking:
+          type: boolean
+          nullable: true
+          description: Present on create and on the current read; null in history listings.
+        mismatchExplanation:
+          type: string
+          nullable: true
+    BacklogPublicationVerification:
+      type: object
+      properties:
+        matches:
+          type: boolean
+        publishedHash:
+          type: string
+        liveHash:
+          type: string
+        explanation:
+          type: string
+          description: >-
+            What a mismatch means. A new report or a vote legitimately changes a ranking, so the
+            text says what changed and explicitly avoids accusing anyone of tampering.
 
     ApiError:
       type: object
