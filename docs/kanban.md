@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T02:19:01.263Z
+Last updated: 2026-10-03T02:51:37.876Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T02:18:58.602Z)
-- Throughput (issues closed): 83
+- Window: last 7 days (since 2026-09-26T02:51:35.335Z)
+- Throughput (issues closed): 84
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -79,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 30
+- TODO: 29
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 81
+- DONE: 82
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -106,7 +106,6 @@ Status labels used by this board:
 - #33 federation: city-to-city open API compatibility layer
 - #32 budgeting: participatory budgeting simulation module
 - #31 ops: create triage protocol for trust-critical incidents
-- #30 security: add public data anonymization checklist enforcement
 - #29 exports: municipal ticket export format adapter
 - #28 scripts: generate monthly transparency report
 - #27 community: add participatory assembly mode screen
@@ -192,6 +191,7 @@ Status labels used by this board:
 - #42 story:OCS-P0-006 add abuse detection pipeline and moderator queue
 - #41 story:OCS-P0-005 add full audit metadata from ingest to publish
 - #39 story:OCS-P0-003 expose prioritized backlog API with explainability fields
+- #30 security: add public data anonymization checklist enforcement
 - #26 contracts: version prioritization formula metadata
 - #24 execution: add institutional assignment and owner workflow
 - #23 dashboard: add issue aging and SLA risk panels
