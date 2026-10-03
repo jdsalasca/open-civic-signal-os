@@ -63,6 +63,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-weekly-digest-snapshot.md` (accepted)
 - `ADR-20260321-public-backlog-view.md` (accepted)
 - `ADR-20260321-backlog-publication.md` (accepted)
+- `ADR-20260321-formula-change-proposals.md` (accepted)
 
 ## Review Rule
 

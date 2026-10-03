@@ -51,6 +51,13 @@ public class SecurityConfig {
                 // A published backlog is a claim a visitor checks. A check only its publisher can run
                 // is not one a visitor can trust, so both the claim and the comparison are public.
                 .requestMatchers(HttpMethod.GET, "/api/community/backlog-publications/current", "/api/community/backlog-publications/verify").permitAll()
+                // What would a set of weights do. A pure computation that stores nothing, so anyone can
+                // ask before a change is even proposed.
+                .requestMatchers(HttpMethod.POST, "/api/formula-change-proposals/preview").permitAll()
+                // The formula is platform-wide, so proposing and deciding a change is not a
+                // community-scoped act. Reading the governance record requires a session.
+                .requestMatchers(HttpMethod.POST, "/api/formula-change-proposals/**").hasRole("SUPER_ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/formula-change-proposals/**").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/signals/export/**").hasRole("SUPER_ADMIN")
                 
                 .requestMatchers(HttpMethod.POST, "/api/signals/*/vote").hasRole("CITIZEN")

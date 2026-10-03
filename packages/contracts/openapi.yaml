@@ -431,6 +431,213 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PrioritizationFormula'
+  /api/formula-change-proposals/preview:
+    post:
+      summary: What a set of scoring weights would do to the current backlog
+      description: >-
+        A pure computation over the backlog that exists now. Nothing is stored and nothing is
+        applied, so any set of weights can be considered safely. This is the evidence a scoring
+        change is judged against: how many signals move, and the largest movers. It does NOT
+        predict the future, because changing the formula changes what people report and vote on.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - urgencyMultiplier
+                - impactMultiplier
+                - affectedPeopleDivisor
+                - affectedPeopleCap
+                - communityVotesDivisor
+                - communityVotesCap
+              properties:
+                urgencyMultiplier:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                impactMultiplier:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                affectedPeopleDivisor:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                affectedPeopleCap:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                communityVotesDivisor:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                communityVotesCap:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 2000
+      responses:
+        '200':
+          description: The reordering this set of weights would produce
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormulaImpactPreview'
+        '400':
+          description: A weight is zero or negative, which would make every signal tie or score negatively
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/formula-change-proposals:
+    post:
+      summary: Record a proposal to change the scoring weights
+      description: >-
+        Stores the proposal with the impact preview computed at proposal time, so a decision is
+        judged against the evidence the decider was shown. Platform-wide scope, so restricted to
+        the platform owner. Recording an approval does not change the scoring.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, rationale]
+              properties:
+                title:
+                  type: string
+                rationale:
+                  type: string
+                  description: >-
+                    Required. A scoring change nobody explained cannot be judged after the fact.
+                urgencyMultiplier:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                impactMultiplier:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                affectedPeopleDivisor:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                affectedPeopleCap:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                communityVotesDivisor:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+                communityVotesCap:
+                  type: number
+                  minimum: 0
+                  exclusiveMinimum: true
+      responses:
+        '200':
+          description: The recorded proposal with its preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormulaChangeProposal'
+        '400':
+          description: Title or rationale missing, or a weight out of range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Scoring is platform-wide, so proposing requires the platform owner role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      summary: List formula change proposals, newest first
+      parameters:
+        - in: query
+          name: onlyUndecided
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Proposals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FormulaChangeProposal'
+  /api/formula-change-proposals/{proposalId}:
+    get:
+      summary: One proposal with the preview it was decided on
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The proposal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormulaChangeProposal'
+        '404':
+          description: Proposal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/formula-change-proposals/{proposalId}/decision:
+    post:
+      summary: Approve or reject a proposal
+      description: >-
+        Records the decision. A proposal can only be decided once, because reopening a decided one
+        would erase the record of the decision.
+      parameters:
+        - in: path
+          name: proposalId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [approve]
+              properties:
+                approve:
+                  type: boolean
+                note:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: The decided proposal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormulaChangeProposal'
+        '409':
+          description: Already decided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/signals/surges:
     get:
       summary: Surge and trend detection per community category
@@ -2091,6 +2298,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/backlog-publications/history:
+    get:
+      summary: Every publication for a community, newest first
+      description: >-
+        The record of what was published when. Gated on the open-data management scope, unlike the
+        current publication and its verification, because the history is bookkeeping rather than the
+        claim a visitor checks.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Publications, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BacklogPublication'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/weekly-digest:
     get:
       summary: Generate the weekly digest for one closed ISO week
@@ -4928,6 +5164,120 @@ components:
           description: >-
             What a mismatch means. A new report or a vote legitimately changes a ranking, so the
             text says what changed and explicitly avoids accusing anyone of tampering.
+
+    FormulaWeightSet:
+      type: object
+      description: A candidate set of weights. Distinct from the running formula, which is a constant a deploy changes.
+      properties:
+        urgencyMultiplier:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        impactMultiplier:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        affectedPeopleDivisor:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        affectedPeopleCap:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        communityVotesDivisor:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+        communityVotesCap:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+    FormulaMover:
+      type: object
+      properties:
+        signalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        currentPosition:
+          type: integer
+        proposedPosition:
+          type: integer
+        positionDelta:
+          type: integer
+    FormulaImpactPreview:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        currentExpression:
+          type: string
+        proposedExpression:
+          type: string
+        sampleSize:
+          type: integer
+          description: How many signals were reordered. A preview over three signals proves nothing.
+        positionsMoved:
+          type: integer
+        positionsUnchanged:
+          type: integer
+        movedShare:
+          type: number
+        biggestMovers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormulaMover'
+        interpretation:
+          type: string
+          description: >-
+            What this is and is not, on every response. Says it does not predict the future, does
+            not judge whether the change is right, that ties are ordered by id so a tie-driven move
+            is arbitrary, and that approving does not apply the change.
+        computedAt:
+          type: string
+          format: date-time
+    FormulaChangeProposal:
+      type: object
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        rationale:
+          type: string
+        currentWeights:
+          $ref: '#/components/schemas/FormulaWeightSet'
+        proposedWeights:
+          $ref: '#/components/schemas/FormulaWeightSet'
+        preview:
+          $ref: '#/components/schemas/FormulaImpactPreview'
+        status:
+          type: string
+          enum: [PROPOSED, APPROVED, REJECTED]
+        proposedBy:
+          type: string
+          format: uuid
+        proposedAt:
+          type: string
+          format: date-time
+        decidedBy:
+          type: string
+          format: uuid
+          nullable: true
+        decidedAt:
+          type: string
+          format: date-time
+          nullable: true
+        decisionNote:
+          type: string
+          nullable: true
+        applicationNote:
+          type: string
+          description: Restates that recording an approval does not change the scoring.
 
     ApiError:
       type: object
