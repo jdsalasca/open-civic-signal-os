@@ -51,6 +51,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-community-list-limits-contract.md` (partial)
 - `ADR-20260321-bulk-ingest-contract.md` (accepted)
 - `ADR-20260321-public-data-anonymization-gate.md` (accepted)
+- `ADR-20260321-transparency-report-pipeline.md` (accepted)
 
 ## Review Rule
 

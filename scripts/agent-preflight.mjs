@@ -65,6 +65,7 @@ console.log("Detected changed files:", files.length);
 run("npm run agent:context:check");
 run("npm run backlog:current:check");
 run("npm run security:runtime:check");
+run("node test/generate-transparency-report.test.mjs");
 
 const frontendChanged = hasPrefix(files, "apps/web-react/");
 const backendChanged = hasPrefix(files, "apps/api-java/");

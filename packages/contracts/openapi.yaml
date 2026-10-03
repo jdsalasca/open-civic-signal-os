@@ -1659,6 +1659,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TooManyRequestsResponse'
+  /api/community/transparency-report:
+    get:
+      summary: Monthly transparency report over a closed calendar month
+      description: >-
+        A report for a published month, with the previous month attached for comparison. Unlike
+        the trust-metrics dashboard, which uses a rolling window so a live view reflects now,
+        this is fixed to a closed month because published figures have to be reproducible. The
+        same month returns the same numbers however long afterwards it is requested.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: period
+          required: false
+          description: >-
+            Calendar month as YYYY-MM, or a full ISO date. Defaults to the previous calendar
+            month rather than the current one, because on the 3rd of April the current month is
+            three days of data and calling that "this month's report" would mislead.
+          schema:
+            type: string
+            example: 2026-03
+      responses:
+        '200':
+          description: Report for the requested closed month
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransparencyReport'
+        '400':
+          description: Period is not a recognisable calendar month
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Caller is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/moderation/queue:
     get:
       summary: List community moderation reports and sanction counts for one active community
@@ -3286,6 +3330,118 @@ components:
           description: The full set of patterns the redactor can detect.
           items:
             type: string
+    TransparencyMetric:
+      type: object
+      description: >-
+        One measured figure with its previous-period value attached. A number in a transparency
+        report only means something next to the number before it, so the delta travels with the
+        figure rather than being computed by whatever renders it.
+      properties:
+        key:
+          type: string
+          example: MEDIAN_RESOLUTION_DAYS
+        label:
+          type: string
+        value:
+          type: integer
+        unit:
+          type: string
+          enum: [count, days]
+        previousValue:
+          type: integer
+          description: Null only when no prior period exists to compare against.
+        delta:
+          type: integer
+        direction:
+          type: string
+          enum: [UP, DOWN, FLAT, BASELINE]
+    TransparencySignalOutcome:
+      type: object
+      description: A single signal named in the report, either actioned or still unaddressed.
+      properties:
+        signalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+        category:
+          type: string
+        priorityScore:
+          type: number
+        locationLabel:
+          type: string
+        daysOpen:
+          type: integer
+          description: >-
+            Measured to the end of the reported period for an unresolved signal, not to today.
+            Measuring to today would change the figure on every regeneration, which is the
+            non-determinism this report exists to avoid.
+        reportedAt:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+    TransparencyReport:
+      type: object
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        period:
+          type: object
+          properties:
+            key:
+              type: string
+              example: 2026-03
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+              description: Exclusive upper bound.
+            previous:
+              type: object
+              nullable: true
+              description: The comparison month, null only for the first report.
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransparencyMetric'
+        actioned:
+          type: array
+          description: Resolved during the period, fastest first.
+          items:
+            $ref: '#/components/schemas/TransparencySignalOutcome'
+        unaddressed:
+          type: array
+          description: >-
+            Reported in the period and still open at period end, highest priority first. Named
+            deliberately: a report that lists only wins is marketing, and this list is what a
+            resident uses to judge whether the institution is keeping up.
+          items:
+            $ref: '#/components/schemas/TransparencySignalOutcome'
+        narrative:
+          type: array
+          items:
+            type: string
+        formulaVersion:
+          type: string
+          description: Scoring formula the figures were produced under, for reproducibility.
+        generatedAt:
+          type: string
+          format: date-time
+          description: >-
+            When the report was generated. The only field that varies between two runs over the
+            same period.
+        complete:
+          type: boolean
     ApiError:
       type: object
       properties:

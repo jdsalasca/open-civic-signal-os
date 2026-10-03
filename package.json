@@ -34,7 +34,8 @@
     "backlog:current:check": "node scripts/check-current-backlog.mjs",
     "security:runtime:check": "node scripts/check-runtime-secrets.mjs",
     "contract:parity:check": "node scripts/check-openapi-parity.mjs",
-    "agent:ux:pw": "node scripts/playwright-cli.mjs"
+    "agent:ux:pw": "node scripts/playwright-cli.mjs",
+    "report:transparency": "node scripts/generate-transparency-report.mjs"
   },
   "releaseQuality": {
     "minimumCoverage": 20

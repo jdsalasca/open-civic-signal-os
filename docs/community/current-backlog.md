@@ -44,6 +44,7 @@ Shipped Phase 5 foundations:
 Shipped ingest hardening:
 
 - `OCS-P1-037` bulk ingest validator with row-level error reports
+- `OCS-P1-004` monthly transparency report pipeline over closed calendar months
 
 ## Now (Next 7 Days)
 
@@ -56,6 +57,7 @@ Execution note:
 
 - `story:OCS-P1-001` is shipped with a backend-owned `GET /api/signals/aging` returning SLA risk, age buckets, median age, and a created-versus-resolved trend read from the status audit trail, plus a staff dashboard panel carrying a freshness timestamp. The remaining hardening items are compose secret policy and OpenAPI parity.
 - Bulk ingest is shipped with `POST /api/ingest/validate` (dry run) and `POST /api/ingest/commit` (accepted rows only) over CSV, WhatsApp, and Telegram exports. One malformed row no longer discards an upload, every rejected row reports its column and reason, ragged rows are rejected rather than shifted into the wrong column, and each accepted signal keeps a `fileName#line` source reference plus a `transformationVersion`. See `docs/architecture/ADR-20260321-bulk-ingest-contract.md`.
+- `story:OCS-P1-004` is shipped with `GET /api/community/transparency-report` over a closed calendar month, carrying the previous month on every figure, and `npm run report:transparency` to render Markdown and JSON for publication. A published month is reproducible: days-open is measured to the period end rather than to today, so regenerating March in June returns March's numbers. Open items are always named, and the renderer refuses to frame an ambiguous metric as a win or a loss. See `docs/architecture/ADR-20260321-transparency-report-pipeline.md`.
 
 ## Next (7-21 Days)
 

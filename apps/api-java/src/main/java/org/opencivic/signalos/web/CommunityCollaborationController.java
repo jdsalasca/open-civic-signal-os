@@ -13,6 +13,7 @@ import org.opencivic.signalos.service.CommunityProposalService;
 import org.opencivic.signalos.service.CommunityProposalVotingService;
 import org.opencivic.signalos.service.CommunityModerationService;
 import org.opencivic.signalos.service.CommunityTrustMetricsService;
+import org.opencivic.signalos.service.TransparencyReportService;
 import org.opencivic.signalos.service.GovernanceLibraryService;
 import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
@@ -26,6 +27,7 @@ import org.opencivic.signalos.web.dto.CommunityProposalDeliberationResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalResponse;
 import org.opencivic.signalos.web.dto.CommunityProposalVotingResponse;
 import org.opencivic.signalos.web.dto.CommunityTrustMetricsResponse;
+import org.opencivic.signalos.web.dto.TransparencyReportResponse;
 import org.opencivic.signalos.web.dto.CastCommunityProposalVoteRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityProjectBoardRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityDecisionRequest;
@@ -80,6 +82,7 @@ public class CommunityCollaborationController {
     private final CommunityTrustMetricsService trustMetricsService;
     private final GovernanceLibraryService governanceLibraryService;
     private final CivicEngagementService engagementService;
+    private final TransparencyReportService transparencyReportService;
 
     public CommunityCollaborationController(
         CommunityCollaborationService collaborationService,
@@ -91,7 +94,8 @@ public class CommunityCollaborationController {
         CommunityProposalVotingService proposalVotingService,
         CommunityTrustMetricsService trustMetricsService,
         GovernanceLibraryService governanceLibraryService,
-        CivicEngagementService engagementService
+        CivicEngagementService engagementService,
+        TransparencyReportService transparencyReportService
     ) {
         this.collaborationService = collaborationService;
         this.decisionLedgerService = decisionLedgerService;
@@ -103,6 +107,7 @@ public class CommunityCollaborationController {
         this.trustMetricsService = trustMetricsService;
         this.governanceLibraryService = governanceLibraryService;
         this.engagementService = engagementService;
+        this.transparencyReportService = transparencyReportService;
     }
 
     @GetMapping("/blog/{id}/comments")
@@ -291,6 +296,15 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return trustMetricsService.getTrustMetrics(communityId, period, principal.getName());
+    }
+
+    @GetMapping("/transparency-report")
+    public TransparencyReportResponse getTransparencyReport(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String period,
+        Principal principal
+    ) {
+        return transparencyReportService.getReport(communityId, period, principal.getName());
     }
 
     @GetMapping("/moderation/queue")
