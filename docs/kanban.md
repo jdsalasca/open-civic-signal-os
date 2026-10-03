@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T21:48:03.828Z
+Last updated: 2026-10-03T22:00:16.294Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T21:48:01.422Z)
-- Throughput (issues closed): 112
+- Window: last 7 days (since 2026-09-26T22:00:13.303Z)
+- Throughput (issues closed): 113
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -78,15 +78,14 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 5
+- TODO: 4
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 106
+- DONE: 107
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
 - #120 Agent Quality Review 2026-W40
-- #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
 - #33 federation: city-to-city open API compatibility layer
 - #22 messaging: add scheduled weekly bulletin generation
 
@@ -166,6 +165,7 @@ Status labels used by this board:
 - #52 story:OCS-P1-007 add explainability export snapshots for assemblies
 - #51 story:OCS-P1-006 add data freshness monitoring and stale-source alerts
 - #50 story:OCS-P2-002 implement trust-proof snapshot for backlog publish
+- #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
 - #48 story:OCS-P1-004 build transparency monthly report pipeline
 - #47 story:OCS-P1-003 version and expose formula metadata
 - #46 story:OCS-P1-002 implement municipal execution bridge and ownership
