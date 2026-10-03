@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T15:33:20.742Z
+Last updated: 2026-10-03T15:56:11.629Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T15:33:18.119Z)
-- Throughput (issues closed): 94
+- Window: last 7 days (since 2026-09-26T15:56:09.138Z)
+- Throughput (issues closed): 95
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -80,10 +80,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 20
+- TODO: 19
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 91
+- DONE: 92
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -95,7 +95,6 @@ Status labels used by this board:
 - #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
 - #43 story:OCS-P0-007 implement weekly civic digest generation
 - #38 story:OCS-P0-002 implement deterministic prioritization service with score breakdown
-- #36 ai: optional civic signal clustering with human approval
 - #35 trust-proof: cryptographic snapshot for published backlog
 - #34 governance: public formula change proposal workflow
 - #33 federation: city-to-city open API compatibility layer
@@ -189,6 +188,7 @@ Status labels used by this board:
 - #40 story:OCS-P0-004 ship public dashboard top problems and filters
 - #39 story:OCS-P0-003 expose prioritized backlog API with explainability fields
 - #37 story:OCS-P0-001 build ingest adapters for web/csv/chat exports
+- #36 ai: optional civic signal clustering with human approval
 - #30 security: add public data anonymization checklist enforcement
 - #29 exports: municipal ticket export format adapter
 - #28 scripts: generate monthly transparency report
