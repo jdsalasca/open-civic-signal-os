@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T13:47:53.189Z
+Last updated: 2026-10-03T15:14:53.917Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T13:47:50.216Z)
-- Throughput (issues closed): 93
+- Window: last 7 days (since 2026-09-26T15:14:51.343Z)
+- Throughput (issues closed): 94
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -80,10 +80,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 21
+- TODO: 20
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 90
+- DONE: 91
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -94,7 +94,6 @@ Status labels used by this board:
 - #50 story:OCS-P2-002 implement trust-proof snapshot for backlog publish
 - #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
 - #43 story:OCS-P0-007 implement weekly civic digest generation
-- #40 story:OCS-P0-004 ship public dashboard top problems and filters
 - #38 story:OCS-P0-002 implement deterministic prioritization service with score breakdown
 - #36 ai: optional civic signal clustering with human approval
 - #35 trust-proof: cryptographic snapshot for published backlog
@@ -187,6 +186,7 @@ Status labels used by this board:
 - #44 story:OCS-P0-008 add reproducibility script for ranking outputs
 - #42 story:OCS-P0-006 add abuse detection pipeline and moderator queue
 - #41 story:OCS-P0-005 add full audit metadata from ingest to publish
+- #40 story:OCS-P0-004 ship public dashboard top problems and filters
 - #39 story:OCS-P0-003 expose prioritized backlog API with explainability fields
 - #37 story:OCS-P0-001 build ingest adapters for web/csv/chat exports
 - #30 security: add public data anonymization checklist enforcement
