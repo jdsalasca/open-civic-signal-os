@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T02:18:37.260Z
+Last updated: 2026-10-03T02:19:01.263Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T02:18:34.616Z)
-- Throughput (issues closed): 82
+- Window: last 7 days (since 2026-09-26T02:18:58.602Z)
+- Throughput (issues closed): 83
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -79,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 31
+- TODO: 30
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 80
+- DONE: 81
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -113,7 +113,6 @@ Status labels used by this board:
 - #25 analytics: add neighborhood trend and surge detection
 - #22 messaging: add scheduled weekly bulletin generation
 - #20 alerts: weekly top-issues digest for community channels
-- #13 ingest: add CSV import validator with row-level error report
 - #2 roadmap: publish auditable public backlog dashboard
 - #1 roadmap: add feedback collector API endpoint
 
@@ -203,4 +202,5 @@ Status labels used by this board:
 - #16 dashboard: add why-ranked-here panel per civic signal
 - #15 scoring: add deterministic score regression dataset and tests
 - #14 scoring: publish explainable scoring breakdown API endpoint
+- #13 ingest: add CSV import validator with row-level error report
 - #12 ingest: implement WhatsApp/Telegram export parser with schema validation
