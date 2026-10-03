@@ -2327,6 +2327,113 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/trust-pulse:
+    post:
+      summary: Answer the community trust pulse for a closed month
+      description: >-
+        One resident, one answer per month. Answering again replaces the previous one rather than
+        stacking a second, because a pulse that counts the loudest respondent twice is not a
+        measure of the community. Requires membership: someone outside a community has no standing
+        to answer for it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrustPulseSubmission'
+      responses:
+        '200':
+          description: Recorded, and whether it replaced a previous answer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustPulseSubmissionResult'
+        '400':
+          description: A score is outside 1-5, the period is not YYYY-MM, or the comment is too long
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Caller is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      summary: Aggregate the pulse for one closed month
+      description: >-
+        Reports a mean per dimension only once the sample reaches the minimum. Below it, the count
+        is returned and no average at all, because a mean over a handful of answers is noise and
+        publishing it as a community verdict invites a decision on that noise. The interpretation
+        states on every response that this measures perception from a self-selected sample, not
+        what the platform did.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: period
+          required: false
+          description: >-
+            Closed month as YYYY-MM. Defaults to the previous completed month, because on the 3rd
+            the current one is three days of answers.
+          schema:
+            type: string
+            example: 2026-03
+      responses:
+        '200':
+          description: Aggregate with its sample size and interpretation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustPulseAggregate'
+        '401':
+          description: Caller is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/trust-pulse/history:
+    get:
+      summary: Every month with responses, newest first
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Aggregates, newest month first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustPulseAggregate'
+        '401':
+          description: Caller is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/trust-pulse/minimum-sample:
+    get:
+      summary: The response count below which no average is reported
+      description: Published so a client can explain the floor before a resident answers, rather than after.
+      responses:
+        '200':
+          description: Minimum responses for an average
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 5
   /api/community/weekly-digest:
     get:
       summary: Generate the weekly digest for one closed ISO week
@@ -5284,6 +5391,100 @@ components:
         applicationNote:
           type: string
           description: Restates that recording an approval does not change the scoring.
+
+    TrustPulseSubmission:
+      type: object
+      required: [communityId, trustScore, responsivenessScore, transparencyScore]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        period:
+          type: string
+          nullable: true
+          description: Closed month as YYYY-MM. Defaults to the previous completed month.
+          example: 2026-03
+        trustScore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Deliberately coarse. A finer scale invites false precision from a small sample.
+        responsivenessScore:
+          type: integer
+          minimum: 1
+          maximum: 5
+        transparencyScore:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          nullable: true
+          description: >-
+            Optional free text, at most 1000 characters. Never published verbatim: it is a prompt
+            for a person to read, not a dataset row.
+    TrustPulseSubmissionResult:
+      type: object
+      properties:
+        responseId:
+          type: string
+          format: uuid
+        periodKey:
+          type: string
+        replacedPrevious:
+          type: boolean
+          description: True when this answer replaced an earlier one for the same month.
+        message:
+          type: string
+    TrustPulseDimension:
+      type: object
+      properties:
+        key:
+          type: string
+          enum: [trust, responsiveness, transparency]
+        label:
+          type: string
+        average:
+          type: number
+          nullable: true
+          description: Null below the minimum sample. Absent rather than caveated, so it cannot be quoted out of context.
+        responses:
+          type: integer
+        note:
+          type: string
+          nullable: true
+          description: Why no average is reported, when one is not.
+    TrustPulseAggregate:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        periodKey:
+          type: string
+        responses:
+          type: integer
+        enoughForAverage:
+          type: boolean
+        dimensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrustPulseDimension'
+        interpretation:
+          type: string
+          description: >-
+            What this is and is not, on every response. Says it measures perception from a
+            self-selected sample rather than what the platform did, that a low score may mean
+            dissatisfaction or may mean content residents did not reply, and that comments are
+            never published verbatim.
+        generatedAt:
+          type: string
+          format: date-time
 
     ApiError:
       type: object

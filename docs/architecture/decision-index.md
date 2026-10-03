@@ -65,6 +65,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-backlog-publication.md` (accepted)
 - `ADR-20260321-formula-change-proposals.md` (accepted)
 - `ADR-20260321-digest-delivery.md` (accepted)
+- `ADR-20260321-community-trust-pulse.md` (accepted)
 
 ## Review Rule
 
