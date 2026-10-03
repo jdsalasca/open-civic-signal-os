@@ -1987,6 +1987,128 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TooManyRequestsResponse'
+  /api/community/weekly-digest:
+    get:
+      summary: Generate the weekly digest for one closed ISO week
+      description: >-
+        Top unresolved problems and what was resolved, for a Monday-to-Sunday week addressed as
+        2026-W13. The week is closed and nothing in the content reads the wall clock, so
+        regenerating a past week reproduces it exactly. The top list is the open backlog as it
+        stood at the END of that week, read from the status audit trail rather than the mutable
+        status column, because a March digest must not absorb everything that happened since.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: week
+          required: false
+          description: >-
+            ISO week as YYYY-Www. Defaults to the previous completed week, because on Wednesday the
+            current week is three days of data and mailing that as this weeks digest would
+            misdescribe the community.
+          schema:
+            type: string
+            example: 2026-W13
+        - in: query
+          name: limit
+          required: false
+          description: How many unresolved items to list. 1-50, defaults to 10. Out-of-range values are rejected rather than clamped.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: Digest with its rendered body and content hash
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDigest'
+        '400':
+          description: Week is not a recognisable ISO week, or limit is out of range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/weekly-digest/publish:
+    post:
+      summary: Publish a weekly digest, once per week
+      description: >-
+        Records the digest and its sealed body. A second publish for the same community and week is
+        refused, because a weekly bulletin delivered twice is the kind of failure that costs trust
+        exactly when the platform is asking for it. Delivery to a channel is not wired here.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: week
+          required: false
+          schema:
+            type: string
+            example: 2026-W13
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Published digest with its publication timestamp
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDigest'
+        '409':
+          description: A digest for this week was already published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/weekly-digest/history:
+    get:
+      summary: Published digests, newest week first
+      description: >-
+        Each record keeps the rendered body it sealed, so a resident can verify the digest they
+        received matches what was recorded rather than a later edit.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Publication history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DigestPublication'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/explainability-snapshots:
     post:
       summary: Freeze the current ranked list as a verifiable snapshot
@@ -4515,6 +4637,118 @@ components:
             What this report is and is not, repeated on every response. A report titled "bias
             diagnostics" that stayed quiet about lacking equity data would invite a reader to
             conclude it measured fairness across populations.
+
+    DigestItem:
+      type: object
+      description: One ranked item, carrying the components the score is built from rather than a sentence about them.
+      properties:
+        signalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        locationLabel:
+          type: string
+          nullable: true
+        priorityScore:
+          type: number
+        daysOpen:
+          type: integer
+          description: Days open as of the start of the reported week.
+        whyRanked:
+          type: string
+          description: >-
+            The same four inputs the published formula uses (urgency, impact, people affected,
+            votes), so a reader can check the claim rather than take it on faith.
+    DigestWeek:
+      type: object
+      properties:
+        key:
+          type: string
+          example: 2026-W13
+        startDate:
+          type: string
+          format: date
+          description: Monday.
+        endDate:
+          type: string
+          format: date
+          description: Exclusive upper bound; the following Monday.
+        previousKey:
+          type: string
+          description: The week before, so a reader has the comparison without asking for it.
+    WeeklyDigest:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        week:
+          $ref: '#/components/schemas/DigestWeek'
+        topUnresolved:
+          type: array
+          items:
+            $ref: '#/components/schemas/DigestItem'
+        resolvedThisWeek:
+          type: integer
+        rejectedThisWeek:
+          type: integer
+          description: Counted separately. A rejection is a legitimate outcome but it is not a civic win.
+        reportedThisWeek:
+          type: integer
+        stillOpenTotal:
+          type: integer
+          description: Open backlog as of the end of the reported week.
+        body:
+          type: string
+          description: The rendered digest, suitable for an email or channel message.
+        contentHash:
+          type: string
+          description: SHA-256 of the body, so a recipient can verify what they received.
+        published:
+          type: boolean
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        generatedAt:
+          type: string
+          format: date-time
+          description: The only field that varies between two runs over the same week.
+    DigestPublication:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        weekKey:
+          type: string
+        contentHash:
+          type: string
+        itemCount:
+          type: integer
+        unresolvableItemCount:
+          type: integer
+        publishedBy:
+          type: string
+          format: uuid
+        publishedAt:
+          type: string
+          format: date-time
+        body:
+          type: string
 
     ApiError:
       type: object
