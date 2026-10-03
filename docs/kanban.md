@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T16:11:56.979Z
+Last updated: 2026-10-03T16:29:01.272Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T16:11:54.582Z)
-- Throughput (issues closed): 97
+- Window: last 7 days (since 2026-09-26T16:28:58.599Z)
+- Throughput (issues closed): 98
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -79,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 18
+- TODO: 17
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 93
+- DONE: 94
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -92,7 +92,6 @@ Status labels used by this board:
 - #53 story:OCS-P1-008 ingest community trust pulse inputs and aggregates
 - #50 story:OCS-P2-002 implement trust-proof snapshot for backlog publish
 - #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
-- #43 story:OCS-P0-007 implement weekly civic digest generation
 - #35 trust-proof: cryptographic snapshot for published backlog
 - #34 governance: public formula change proposal workflow
 - #33 federation: city-to-city open API compatibility layer
@@ -181,6 +180,7 @@ Status labels used by this board:
 - #46 story:OCS-P1-002 implement municipal execution bridge and ownership
 - #45 story:OCS-P1-001 add issue aging, trends, and SLA risk views
 - #44 story:OCS-P0-008 add reproducibility script for ranking outputs
+- #43 story:OCS-P0-007 implement weekly civic digest generation
 - #42 story:OCS-P0-006 add abuse detection pipeline and moderator queue
 - #41 story:OCS-P0-005 add full audit metadata from ingest to publish
 - #40 story:OCS-P0-004 ship public dashboard top problems and filters
