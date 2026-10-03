@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T04:31:45.487Z
+Last updated: 2026-10-03T04:32:49.871Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,20 +10,20 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T04:31:43.165Z)
-- Throughput (issues closed): 90
+- Window: last 7 days (since 2026-09-26T04:32:47.298Z)
+- Throughput (issues closed): 92
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
 ## 2026-Q2 Foundation
 
-- TODO: 1
+- TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 2
+- DONE: 3
 
 ### TODO
-- #3 P0: Build multi-channel ingest adapters (forms, CSV, chat exports)
+- _No issues_
 
 ### IN_PROGRESS
 - _No issues_
@@ -34,6 +34,7 @@ Status labels used by this board:
 ### DONE
 - #5 P1: Public dashboard with filters and status lifecycle
 - #4 P0: Add explainable scoring breakdown in prioritized output
+- #3 P0: Build multi-channel ingest adapters (forms, CSV, chat exports)
 
 ## 2026-Q3 Expansion
 
@@ -79,10 +80,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 23
+- TODO: 22
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 88
+- DONE: 89
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -96,7 +97,6 @@ Status labels used by this board:
 - #43 story:OCS-P0-007 implement weekly civic digest generation
 - #40 story:OCS-P0-004 ship public dashboard top problems and filters
 - #38 story:OCS-P0-002 implement deterministic prioritization service with score breakdown
-- #37 story:OCS-P0-001 build ingest adapters for web/csv/chat exports
 - #36 ai: optional civic signal clustering with human approval
 - #35 trust-proof: cryptographic snapshot for published backlog
 - #34 governance: public formula change proposal workflow
@@ -188,6 +188,7 @@ Status labels used by this board:
 - #42 story:OCS-P0-006 add abuse detection pipeline and moderator queue
 - #41 story:OCS-P0-005 add full audit metadata from ingest to publish
 - #39 story:OCS-P0-003 expose prioritized backlog API with explainability fields
+- #37 story:OCS-P0-001 build ingest adapters for web/csv/chat exports
 - #30 security: add public data anonymization checklist enforcement
 - #29 exports: municipal ticket export format adapter
 - #28 scripts: generate monthly transparency report
