@@ -45,6 +45,15 @@ public class InstitutionalActionBridgeController {
         return bridgeService.recordHandoff(request, principal.getName());
     }
 
+    @PostMapping("/batch")
+    public InstitutionalActionBridgeService.BatchHandoffResult recordBatchHandoff(
+        @RequestBody InstitutionalActionBridgeService.BatchHandoffRequest request,
+        Principal principal
+    ) {
+        requireScope(request.communityId(), principal);
+        return bridgeService.recordBatchHandoff(request, principal.getName());
+    }
+
     @PostMapping("/{handoffId}/outcome")
     public InstitutionalActionBridgeService.HandoffView recordOutcome(
         @PathVariable UUID handoffId,

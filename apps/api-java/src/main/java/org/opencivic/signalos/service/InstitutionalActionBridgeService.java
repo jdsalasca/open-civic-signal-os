@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.opencivic.signalos.domain.Community;
@@ -50,6 +51,8 @@ public class InstitutionalActionBridgeService {
 
     private static final int DEFAULT_SLA_TARGET_DAYS = 30;
     private static final int MAX_SLA_TARGET_DAYS = 365;
+    /** A larger batch should be split so a failure is attributable to a smaller set. */
+    private static final int MAX_BATCH_SIZE = 200;
     private static final Set<String> CLOSED_STATUSES = Set.of("RESOLVED", "CLOSED", "REJECTED");
 
     private final CommunityRepository communityRepository;
@@ -80,6 +83,33 @@ public class InstitutionalActionBridgeService {
         String externalTicketId,
         Integer slaTargetDays,
         String note
+    ) {}
+
+    /** A batch handoff: many signals, one category map, one SLA target. */
+    public record BatchHandoffRequest(
+        UUID communityId,
+        List<UUID> signalIds,
+        Map<String, String> categoryMap,
+        Integer slaTargetDays,
+        String note
+    ) {}
+
+    /** What happened to one signal in a batch. */
+    public record BatchHandoffOutcome(
+        UUID signalId,
+        String signalTitle,
+        String outcome,
+        String detail
+    ) {}
+
+    public record BatchHandoffResult(
+        String version,
+        UUID communityId,
+        int requested,
+        int recorded,
+        int skipped,
+        List<BatchHandoffOutcome> outcomes,
+        String interpretation
     ) {}
 
     /** One handoff with its derived SLA state and where that state came from. */
@@ -349,6 +379,130 @@ public class InstitutionalActionBridgeService {
             text.append(" ").append(overdue)
                 .append(" handoff(s) are past the community's target and worth a follow-up.");
         }
+        return text.toString();
+    }
+
+    /**
+     * Hands a whole batch over in one call.
+     *
+     * <p>The export from the municipal adapter is bulk, so recording handoffs one at a time meant a
+     * community sending fifty tickets recorded fifty handoffs by hand. That is the gap this closes.
+     *
+     * <p>Partial success is the expected outcome and is reported per signal rather than as one
+     * verdict. A batch where three of fifty were already handed off should record forty-seven and
+     * say which three were skipped, not fail entirely and leave the community to work out why.
+     *
+     * <p>The ticket reference is derived from the signal id, the same way the export derives it, so
+     * the reference a community quotes back to a city is the one the city received.
+     */
+    @Transactional
+    public BatchHandoffResult recordBatchHandoff(BatchHandoffRequest request, String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found: " + username));
+        Community community = communityRepository.findById(request.communityId())
+            .orElseThrow(() -> new ResourceNotFoundException("Community not found: " + request.communityId()));
+
+        if (request.signalIds() == null || request.signalIds().isEmpty()) {
+            throw new IllegalArgumentException("At least one signal is required.");
+        }
+        if (request.signalIds().size() > MAX_BATCH_SIZE) {
+            throw new IllegalArgumentException(
+                "At most " + MAX_BATCH_SIZE + " signals can be handed off at once, but got: "
+                    + request.signalIds().size() + ". A larger batch should be split so a failure is "
+                    + "attributable to a smaller set.");
+        }
+        if (request.categoryMap() == null || request.categoryMap().isEmpty()) {
+            throw new IllegalArgumentException(
+                "A category map is required. Without a service code per category the handoffs cannot be "
+                    + "checked against what the city actually filed them as.");
+        }
+
+        int slaTarget = request.slaTargetDays() == null ? DEFAULT_SLA_TARGET_DAYS : request.slaTargetDays();
+        if (slaTarget < 1 || slaTarget > MAX_SLA_TARGET_DAYS) {
+            throw new IllegalArgumentException(
+                "slaTargetDays must be between 1 and " + MAX_SLA_TARGET_DAYS + ", but was: " + slaTarget);
+        }
+
+        Map<String, String> normalisedMap = new java.util.LinkedHashMap<>();
+        request.categoryMap().forEach((key, value) -> {
+            if (key != null && !key.isBlank()) {
+                normalisedMap.put(key.trim().toLowerCase(Locale.ROOT), value == null ? "" : value.trim());
+            }
+        });
+
+        List<BatchHandoffOutcome> outcomes = new ArrayList<>();
+        int recorded = 0;
+        int skipped = 0;
+
+        for (UUID signalId : request.signalIds()) {
+            Signal signal = signalRepository.findById(signalId).orElse(null);
+            if (signal == null) {
+                outcomes.add(new BatchHandoffOutcome(signalId, null, "SKIPPED", "Signal not found."));
+                skipped++;
+                continue;
+            }
+            if (!community.getId().equals(signal.getCommunityId())) {
+                outcomes.add(new BatchHandoffOutcome(signalId, signal.getTitle(), "SKIPPED",
+                    "The signal belongs to another community."));
+                skipped++;
+                continue;
+            }
+
+            String category = signal.getCategory() == null || signal.getCategory().isBlank()
+                ? "unspecified"
+                : signal.getCategory().trim().toLowerCase(Locale.ROOT);
+            String code = normalisedMap.get(category);
+            if (code == null || code.isBlank()) {
+                // Excluded rather than defaulted, for the same reason the export excludes it: a
+                // handoff filed against the wrong service code reaches the wrong department.
+                outcomes.add(new BatchHandoffOutcome(signalId, signal.getTitle(), "SKIPPED",
+                    "No service code mapped for category '" + category + "'."));
+                skipped++;
+                continue;
+            }
+
+            String ticketRef = InstitutionalTicketReference.forSignal(signal.getId());
+            if (handoffRepository.findBySignalIdAndTicketRef(signal.getId(), ticketRef).isPresent()) {
+                outcomes.add(new BatchHandoffOutcome(signalId, signal.getTitle(), "SKIPPED",
+                    "Already handed off under " + ticketRef + "."));
+                skipped++;
+                continue;
+            }
+
+            InstitutionalTicketHandoff handoff = new InstitutionalTicketHandoff();
+            handoff.setId(UUID.randomUUID());
+            handoff.setCommunityId(community.getId());
+            handoff.setSignalId(signal.getId());
+            handoff.setTicketRef(ticketRef);
+            handoff.setExternalCategoryCode(code);
+            handoff.setHandedOffBy(user.getId());
+            handoff.setHandedOffAt(LocalDateTime.now());
+            handoff.setSlaTargetDays(slaTarget);
+            handoff.setNote(blankToNull(request.note()));
+            handoffRepository.save(handoff);
+
+            outcomes.add(new BatchHandoffOutcome(signalId, signal.getTitle(), "RECORDED", ticketRef));
+            recorded++;
+        }
+
+        return new BatchHandoffResult(
+            VERSION,
+            community.getId(),
+            request.signalIds().size(),
+            recorded,
+            skipped,
+            outcomes,
+            batchInterpretation(recorded, skipped)
+        );
+    }
+
+    private String batchInterpretation(int recorded, int skipped) {
+        StringBuilder text = new StringBuilder();
+        text.append(recorded).append(" handoff(s) recorded, ").append(skipped).append(" skipped. ");
+        text.append("A skip is not a failure: it means the signal was already handed off, belongs to ")
+            .append("another community, or has no service code mapped. Each outcome says which. ")
+            .append("The platform still cannot read the institution's system, so these are records of ")
+            .append("what was sent, not confirmations of receipt.");
         return text.toString();
     }
 

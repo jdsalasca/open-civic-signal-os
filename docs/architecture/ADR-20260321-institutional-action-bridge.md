@@ -87,8 +87,6 @@ Handing a resident's report to a city is an act with consequences for that resid
 - **No automatic sync.** Nothing polls a city system, because there is nothing to poll. Every status
   change is a person recording what they learned.
 - **No reminder when a handoff goes overdue.** The summary reports it; nothing tells anyone.
-- **No bulk handoff.** One signal at a time, even though the export from #29 is bulk. A community
-  sending fifty tickets would record fifty handoffs by hand, which is the obvious next gap.
 - **`externalTicketId` is optional and unverified.** The platform records what it is told and cannot
   check it against the city.
 - **No per-institution grouping.** Handoffs are per community; a community dealing with three
@@ -98,3 +96,42 @@ Handing a resident's report to a city is an act with consequences for that resid
 - **`DERIVED_FROM_SIGNAL_LIFECYCLE` can be wrong.** A community may resolve its own signal for its own
   reasons while the city ticket is still open. The source field is the mitigation: a reader can see
   the platform inferred it rather than being told.
+
+## Batch handoff
+
+Added after the single-signal version, because the export from #29 is bulk and recording handoffs one
+at a time meant a community sending fifty tickets recorded fifty handoffs by hand.
+
+`POST /api/community/institutional-handoffs/batch` takes a list of signals, one category map, and one
+SLA target.
+
+**Partial success is the expected outcome and is reported per signal.** A batch where three of fifty
+were already handed off records forty-seven and says which three were skipped, rather than failing
+entirely and leaving the community to work out why. Each outcome carries either the ticket reference
+or the reason it was skipped.
+
+**The ticket reference is derived from the signal id, the same way the export derives it.** Both now
+call `InstitutionalTicketReference.forSignal`. Before that they computed it separately, and a
+divergence would have meant a community handing over a ticket under one reference and then being
+unable to match anything the city said about it.
+
+**An unmapped category is skipped and named**, never defaulted, for the same reason the export
+excludes it: a handoff filed against the wrong service code reaches the wrong department.
+
+**At most 200 signals, rejected rather than truncated**, so a failure is attributable to a smaller
+set and nobody compares a partial batch believing it was complete.
+
+**Re-running the same batch skips rather than duplicates**, because the unique index on
+`(signal_id, ticket_ref)` already refuses a second clock for the same complaint. A retry is therefore
+safe, which is what makes a bulk operation usable.
+
+### Batch limits
+
+- **No per-signal SLA target.** One target for the whole batch. A community with different targets per
+  department would need to split the batch.
+- **No per-signal note.** One note for the batch, which is usually what a handoff run wants anyway.
+- **No progress reporting.** A 200-signal batch is one synchronous request. Fine at community scale;
+  a queue is the upgrade path the connector layer already names.
+- **The batch is not transactional per signal.** A failure partway through leaves the earlier
+  handoffs recorded, which is the intended behaviour — they were genuinely sent — but it means a
+  caller cannot assume all-or-nothing.

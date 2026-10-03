@@ -196,15 +196,14 @@ public class MunicipalTicketExportService {
      * Stable citation, derived from the signal id. Deterministic on purpose: regenerating an
      * export must not invent new ticket references, or the city loses their history.
      */
+    /**
+     * Stable citation, derived from the signal id.
+     *
+     * <p>Delegates to {@link InstitutionalTicketReference} so the export and the handoff record
+     * cannot disagree about the reference a community will quote back to a city.
+     */
     private String ticketRef(Signal signal) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(signal.getId().toString().getBytes(StandardCharsets.UTF_8));
-            return "OCS-" + HexFormat.of().formatHex(hash).substring(0, 16).toUpperCase(Locale.ROOT);
-        } catch (NoSuchAlgorithmException ex) {
-            // SHA-256 is guaranteed by the platform spec; if it is missing the JVM is broken.
-            throw new IllegalStateException("SHA-256 unavailable, cannot build a stable ticket reference", ex);
-        }
+        return InstitutionalTicketReference.forSignal(signal.getId());
     }
 
     private BigDecimal score(Signal signal) {

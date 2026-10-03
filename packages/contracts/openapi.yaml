@@ -2473,6 +2473,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/institutional-handoffs/batch:
+    post:
+      summary: Hand a batch of signals to an institution in one call
+      description: >-
+        The municipal export is bulk, so the handoff is too. A community sending fifty tickets should
+        not record fifty handoffs by hand. Partial success is the expected outcome and is reported per
+        signal rather than as one verdict: a batch where three of fifty were already handed off
+        records forty-seven and says which three were skipped, instead of failing entirely and leaving
+        the community to work out why. The ticket reference is derived from the signal id the same way
+        the export derives it, so the reference a community quotes back to a city is the one the city
+        received.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstitutionalBatchHandoffRequest'
+      responses:
+        '200':
+          description: Per-signal outcomes and the batch totals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionalBatchHandoffResult'
+        '400':
+          description: >-
+            No signals, more than 200, no category map, or an SLA target out of range. All rejected
+            rather than adjusted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/institutional-handoffs/{handoffId}/outcome:
     post:
       summary: Record that an institution acknowledged or resolved a ticket
@@ -5847,6 +5885,84 @@ components:
         note:
           type: string
           nullable: true
+    InstitutionalBatchHandoffRequest:
+      type: object
+      required: [communityId, signalIds, categoryMap]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        signalIds:
+          type: array
+          minItems: 1
+          maxItems: 200
+          description: >-
+            At most 200. A larger batch should be split so a failure is attributable to a smaller set,
+            and the limit is rejected rather than truncated.
+          items:
+            type: string
+            format: uuid
+        categoryMap:
+          type: object
+          description: >-
+            Required. Translation from platform categories to city service codes. A signal whose
+            category is not mapped is skipped and named, never defaulted, because a handoff filed
+            against the wrong service code reaches the wrong department.
+          additionalProperties:
+            type: string
+          example:
+            utilities: SRV-WATER-04
+            roads: SRV-ROADS-01
+        slaTargetDays:
+          type: integer
+          minimum: 1
+          maximum: 365
+          default: 30
+        note:
+          type: string
+          nullable: true
+    InstitutionalBatchHandoffOutcome:
+      type: object
+      properties:
+        signalId:
+          type: string
+          format: uuid
+        signalTitle:
+          type: string
+          nullable: true
+        outcome:
+          type: string
+          enum: [RECORDED, SKIPPED]
+        detail:
+          type: string
+          description: >-
+            The ticket reference when recorded, or why it was skipped. A skip is not a failure: it
+            means the signal was already handed off, belongs to another community, or has no service
+            code mapped.
+    InstitutionalBatchHandoffResult:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        communityId:
+          type: string
+          format: uuid
+        requested:
+          type: integer
+        recorded:
+          type: integer
+        skipped:
+          type: integer
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstitutionalBatchHandoffOutcome'
+        interpretation:
+          type: string
+          description: >-
+            Restates that the platform cannot read the institution's system, so these are records of
+            what was sent rather than confirmations of receipt.
     InstitutionalBridgeSummary:
       type: object
       properties:
