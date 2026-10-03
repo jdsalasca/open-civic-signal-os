@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
-import { Signal, Notification, SignalMeta } from "../types";
+import { Signal, Notification, SignalMeta, SignalAging } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
 import { SignalTable } from "../components/SignalTable";
 import { DigestSidebar } from "../components/DigestSidebar";
@@ -17,6 +17,7 @@ import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 import { CivicToolbar } from "../components/ui/CivicToolbar";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { CivicBadge } from "../components/ui/CivicBadge";
 import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -52,6 +53,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<SignalMeta | null>(null);
   const [duplicateClusters, setDuplicateClusters] = useState(0);
+  const [aging, setAging] = useState<SignalAging | null>(null);
   const [totalRecords, setTotalRecords] = useState(0);
   
   const [activeFilter, setActiveFilter] = useState<string>("ALL");
@@ -228,6 +230,26 @@ export function Dashboard() {
     activeBreadcrumb.length > 0
       ? activeBreadcrumb.map((item) => item.name).join(" / ")
       : t("dashboard.community_path_empty");
+
+  // Aging is fetched separately from the prioritized list so it does not widen or
+  // invalidate the dashboard cache, which is keyed on the signal page.
+  useEffect(() => {
+    if (!isStaff) {
+      return;
+    }
+    const controller = new AbortController();
+    apiClient
+      .get<SignalAging>("signals/aging", { signal: controller.signal })
+      .then((res) => {
+        if (res.status === 200) {
+          setAging(res.data);
+        }
+      })
+      .catch(() => {
+        // Aging is an additive panel; a failure must not break the dashboard.
+      });
+    return () => controller.abort();
+  }, [isStaff, activeCommunityId, totalRecords]);
 
   const guidedHome = useMemo(() => {
     if (isStaff) {
@@ -658,6 +680,86 @@ export function Dashboard() {
                     </CivicCard>
                   )}
                   <DigestSidebar signals={displayedSignals} />
+                  {isStaff && aging && (
+                    <CivicCard
+                      title={t("dashboard.aging_title")}
+                      data-testid="dashboard-aging-panel"
+                    >
+                      <div className="civic-stat-grid civic-stat-grid-comfortable mb-4">
+                        <CivicStatCard
+                          compact
+                          label={t("dashboard.aging_unresolved")}
+                          value={aging.unresolvedCount}
+                          supportingText={t("dashboard.aging_target", { days: aging.slaTargetDays })}
+                        />
+                        <CivicStatCard
+                          compact
+                          label={t("dashboard.aging_at_risk")}
+                          value={aging.atRiskCount}
+                          supportingText={t("dashboard.aging_at_risk_desc")}
+                        />
+                        <CivicStatCard
+                          compact
+                          label={t("dashboard.aging_breached")}
+                          value={aging.breachedCount}
+                          supportingText={t("dashboard.aging_breached_desc")}
+                        />
+                        <CivicStatCard
+                          compact
+                          label={t("dashboard.aging_median")}
+                          value={aging.medianAgeDays}
+                          supportingText={t("dashboard.aging_median_desc")}
+                        />
+                      </div>
+
+                      <div className="u-surface-note mb-4">
+                        <div className="u-eyebrow mb-2">{t("dashboard.aging_buckets")}</div>
+                        <div className="flex flex-wrap gap-3">
+                          {aging.ageBuckets.map((bucket) => (
+                            <span key={bucket.bucket} className="text-sm text-secondary">
+                              {t(`dashboard.aging_bucket_${bucket.bucket}`)}: {bucket.count}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {aging.atRiskSignals.length === 0 ? (
+                        <p className="text-secondary m-0" data-testid="dashboard-aging-empty">
+                          {t("dashboard.aging_all_on_track")}
+                        </p>
+                      ) : (
+                        <div className="flex flex-column gap-2" data-testid="dashboard-aging-list">
+                          {aging.atRiskSignals.slice(0, 5).map((item) => (
+                            <div
+                              key={item.id}
+                              className="border-round-xl border-1 border-surface-soft p-3 flex justify-content-between align-items-center gap-3 flex-wrap"
+                            >
+                              <span className="text-sm text-main">{item.title}</span>
+                              <span className="flex align-items-center gap-2 flex-wrap">
+                                <CivicBadge
+                                  label={t(`dashboard.aging_risk_${item.slaRisk}`)}
+                                  severity={
+                                    item.slaRisk === "BREACHED"
+                                      ? "rejected"
+                                      : item.slaRisk === "AT_RISK"
+                                        ? "progress"
+                                        : "neutral"
+                                  }
+                                />
+                                <span className="text-xs text-muted">
+                                  {t("dashboard.aging_age", { days: item.ageDays })}
+                                </span>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <small className="text-muted mt-3 block">
+                        {t("dashboard.aging_generated_at")}: {new Date(aging.generatedAt).toLocaleString()}
+                      </small>
+                    </CivicCard>
+                  )}
                   {isStaff && notifications.length > 0 && (
                     <NotificationSidebar notifications={notifications} />
                   )}

@@ -65,4 +65,5 @@ public class SignalStatusEntry {
     public String getAssignedToUsername() { return assignedToUsername; }
     public String getReason() { return reason; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

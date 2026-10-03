@@ -73,6 +73,45 @@ export type PrioritizationFormula = {
   changeNote: string;
 };
 
+export type SignalSlaRisk = "ON_TRACK" | "AT_RISK" | "BREACHED";
+
+export type SignalAgingBucket = {
+  bucket: "FRESH_0_7" | "AGING_7_14" | "STALE_14_PLUS" | "OVERDUE";
+  count: number;
+};
+
+export type SignalAgingItem = {
+  id: string;
+  title: string;
+  category: string;
+  status: string;
+  priorityScore: number;
+  ageDays: number;
+  slaTargetDays: number;
+  slaRisk: SignalSlaRisk;
+  daysOverTarget: number;
+  createdAt: string;
+};
+
+export type SignalAgingTrendPoint = {
+  date: string;
+  created: number;
+  resolved: number;
+};
+
+export type SignalAging = {
+  communityId?: string | null;
+  generatedAt: string;
+  slaTargetDays: number;
+  unresolvedCount: number;
+  atRiskCount: number;
+  breachedCount: number;
+  medianAgeDays: number;
+  ageBuckets: SignalAgingBucket[];
+  atRiskSignals: SignalAgingItem[];
+  trend: SignalAgingTrendPoint[];
+};
+
 export type Notification = {
   id: string;
   channel: string;

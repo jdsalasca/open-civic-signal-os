@@ -242,6 +242,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PrioritizationFormula'
+  /api/signals/aging:
+    get:
+      summary: Get backend-owned case aging buckets, SLA risk, and the created/resolved trend
+      parameters:
+        - in: query
+          name: communityId
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: slaTargetDays
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 30
+        - name: X-Community-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Case aging and SLA risk payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalAging'
+        '401':
+          description: User is not a member of the requested community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/signals/map:
     get:
       summary: Get one community map with mapped issue points, clusters, and coverage counters
@@ -3096,6 +3132,101 @@ components:
       type: string
       description: Where the signal entered the system, so an audit can tell a citizen report from an institutional update
       enum: [WEB_FORM, CSV_IMPORT, CHAT_EXPORT, PUBLIC_API, INSTITUTIONAL_UPDATE]
+    SignalSlaRisk:
+      type: string
+      enum: [ON_TRACK, AT_RISK, BREACHED]
+    SignalAgingBucket:
+      type: object
+      required: [bucket, count]
+      properties:
+        bucket:
+          type: string
+          enum: [FRESH_0_7, AGING_7_14, STALE_14_PLUS, OVERDUE]
+        count:
+          type: integer
+          format: int64
+    SignalAgingItem:
+      type: object
+      required: [id, title, category, status, priorityScore, ageDays, slaTargetDays, slaRisk, daysOverTarget, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        priorityScore:
+          type: number
+        ageDays:
+          type: integer
+          format: int64
+        slaTargetDays:
+          type: integer
+          format: int64
+        slaRisk:
+          $ref: '#/components/schemas/SignalSlaRisk'
+        daysOverTarget:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+    SignalAgingTrendPoint:
+      type: object
+      required: [date, created, resolved]
+      properties:
+        date:
+          type: string
+          format: date
+        created:
+          type: integer
+          format: int64
+        resolved:
+          type: integer
+          format: int64
+    SignalAging:
+      type: object
+      required: [generatedAt, slaTargetDays, unresolvedCount, atRiskCount, breachedCount, medianAgeDays, ageBuckets, atRiskSignals, trend]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+          nullable: true
+        generatedAt:
+          type: string
+          format: date-time
+          description: Freshness timestamp for the whole payload
+        slaTargetDays:
+          type: integer
+          format: int64
+        unresolvedCount:
+          type: integer
+          format: int64
+        atRiskCount:
+          type: integer
+          format: int64
+        breachedCount:
+          type: integer
+          format: int64
+        medianAgeDays:
+          type: integer
+          format: int64
+        ageBuckets:
+          type: array
+          items:
+            $ref: '#/components/schemas/SignalAgingBucket'
+        atRiskSignals:
+          type: array
+          description: Unresolved cases that are at risk or breached, worst first
+          items:
+            $ref: '#/components/schemas/SignalAgingItem'
+        trend:
+          type: array
+          items:
+            $ref: '#/components/schemas/SignalAgingTrendPoint'
     FormulaWeight:
       type: object
       required: [factor, input, expression, cap]

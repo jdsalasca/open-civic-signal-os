@@ -45,6 +45,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-community-integrations-contract.md` (accepted)
 - `ADR-20260321-signal-audit-metadata-contract.md` (accepted)
 - `ADR-20260321-prioritization-formula-metadata-contract.md` (accepted)
+- `ADR-20260321-case-aging-sla-contract.md` (accepted)
 
 ## Review Rule
 

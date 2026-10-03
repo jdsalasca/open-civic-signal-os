@@ -39,30 +39,31 @@ Shipped Phase 5 foundations:
 - `OCS-P1-053` outbound integrations layer
 - `OCS-P0-005` full audit metadata from ingest to publish
 - `OCS-P1-003` versioned and published formula metadata
+- `OCS-P1-001` issue aging, trends, and SLA risk views
 
 ## Now (Next 7 Days)
 
 Recommended next execution order:
 
-1. `story:OCS-P1-001` issue aging, trends, and SLA risk views
-2. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+1. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+2. `story:OCS-P1-004` transparency monthly report pipeline
 
 Execution note:
 
-- `story:OCS-P1-003` is shipped with a public `GET /api/signals/formula` that publishes the version, per-factor expressions, caps, effective date, and change note, and the "why ranked here" panel now renders that data instead of hardcoded copy. The next immediate target is `story:OCS-P1-001`.
+- `story:OCS-P1-001` is shipped with a backend-owned `GET /api/signals/aging` returning SLA risk, age buckets, median age, and a created-versus-resolved trend read from the status audit trail, plus a staff dashboard panel carrying a freshness timestamp. The remaining hardening items are compose secret policy and OpenAPI parity.
 
 ## Next (7-21 Days)
 
 1. Prepare the next enablement layer.
-  - `story:OCS-P1-001`
   - platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+  - `story:OCS-P1-004`
 
 ## P0 Execution Queue (Agent Order)
 
 This section is preserved for repository compatibility. The active P0-equivalent execution order is:
 
-1. `story:OCS-P1-001`
-2. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+1. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+2. `story:OCS-P1-004`
 
 ## Wave Sequencing
 
@@ -103,6 +104,7 @@ This section is preserved for repository compatibility. The active P0-equivalent
 - `OCS-P1-053` shipped and now adds hashed-secret outbound channels with JDK-only HTTP delivery, per-attempt delivery records, visible failures, and operator retry, so a broken channel is never silent.
 - `OCS-P0-005` shipped and now stamps every signal with its ingest channel, source reference, and scoring rule version, so a ranked number can be traced back to how it was produced.
 - `OCS-P1-003` shipped and now publishes the scoring formula as versioned data from one service, with the user-facing ranking explanation rendered from it instead of duplicated copy.
+- `OCS-P1-001` shipped and now derives SLA risk, age buckets, median age, and created-versus-resolved throughput server-side, with a staff dashboard panel that carries a freshness timestamp.
 
 ## Definition of Ready for Any New Story
 
