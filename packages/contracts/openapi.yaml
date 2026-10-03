@@ -431,6 +431,85 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PrioritizationFormula'
+  /api/policy-simulation:
+    post:
+      summary: Compare several scoring weight sets against the real backlog
+      description: >-
+        A sandbox, not a diff. The single-change preview says how many positions move; this says
+        which categories gain and which lose, because that is the policy consequence a decision
+        should be argued about. A change that moves forty percent of the backlog is not necessarily
+        a problem; a change that moves forty percent in one direction for one category is a policy
+        choice, and it should be visible as one before anyone votes on it.
+        It does NOT rank the scenarios: there is no best weight set, because best depends on what a
+        community wants to prioritise, which is a value judgement the platform has no standing to
+        make. Nothing is stored; a simulation is a question, not a decision.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scenarios]
+              properties:
+                scenarios:
+                  type: array
+                  minItems: 1
+                  maxItems: 5
+                  description: >-
+                    At most five. More than that is a spreadsheet, not a decision aid, and the
+                    limit is rejected rather than truncated so nobody compares a partial set.
+                  items:
+                    type: object
+                    required: [name]
+                    properties:
+                      name:
+                        type: string
+                        description: >-
+                          Required. An unnamed scenario cannot be referred to in the discussion it
+                          is meant to inform.
+                      urgencyMultiplier:
+                        type: number
+                        minimum: 0
+                        exclusiveMinimum: true
+                      impactMultiplier:
+                        type: number
+                        minimum: 0
+                        exclusiveMinimum: true
+                      affectedPeopleDivisor:
+                        type: number
+                        minimum: 0
+                        exclusiveMinimum: true
+                      affectedPeopleCap:
+                        type: number
+                        minimum: 0
+                        exclusiveMinimum: true
+                      communityVotesDivisor:
+                        type: number
+                        minimum: 0
+                        exclusiveMinimum: true
+                      communityVotesCap:
+                        type: number
+                        minimum: 0
+                        exclusiveMinimum: true
+                limit:
+                  type: integer
+                  minimum: 1
+                  maximum: 2000
+      responses:
+        '200':
+          description: Per-scenario category shifts and readings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySimulationReport'
+        '400':
+          description: >-
+            No scenarios, more than five, an unnamed scenario, or a weight that is zero or
+            negative. All rejected rather than adjusted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/formula-change-proposals/preview:
     post:
       summary: What a set of scoring weights would do to the current backlog
@@ -5483,6 +5562,80 @@ components:
             dissatisfaction or may mean content residents did not reply, and that comments are
             never published verbatim.
         generatedAt:
+          type: string
+          format: date-time
+
+    PolicyCategoryShift:
+      type: object
+      description: How one category fares under a scenario, in aggregate.
+      properties:
+        category:
+          type: string
+        signals:
+          type: integer
+        gained:
+          type: integer
+          description: Signals in this category that moved up.
+        lost:
+          type: integer
+          description: Signals in this category that moved down.
+        netPositionChange:
+          type: integer
+          description: Positive means the category moved up overall, negative means down.
+        averagePositionDelta:
+          type: number
+          description: >-
+            Average places gained per signal. The number a decision should be argued about,
+            because it says how much a category is affected rather than how many items moved.
+    PolicyScenarioResult:
+      type: object
+      properties:
+        name:
+          type: string
+        expression:
+          type: string
+        positionsMoved:
+          type: integer
+        movedShare:
+          type: number
+        categoryShifts:
+          type: array
+          description: Biggest absolute shift first, so the most affected category is read first.
+          items:
+            $ref: '#/components/schemas/PolicyCategoryShift'
+        biggestMovers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormulaMover'
+        reading:
+          type: string
+          description: >-
+            Names the category that gains most and the one that loses most. "38% of the backlog
+            moves" is a diff; "utilities gains four places while infrastructure loses three" is a
+            policy consequence.
+    PolicySimulationReport:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        sampleSize:
+          type: integer
+          description: >-
+            One snapshot of the backlog, reused for every scenario. Re-reading per scenario would
+            let a concurrent report change the sample between them, which nobody could see.
+        currentExpression:
+          type: string
+        scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyScenarioResult'
+        interpretation:
+          type: string
+          description: >-
+            What this is and is not, on every response. Says it does not rank the scenarios, does
+            not predict the future, and stores nothing.
+        computedAt:
           type: string
           format: date-time
 

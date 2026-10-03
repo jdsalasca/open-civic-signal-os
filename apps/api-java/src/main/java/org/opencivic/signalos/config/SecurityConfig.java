@@ -54,6 +54,9 @@ public class SecurityConfig {
                 // What would a set of weights do. A pure computation that stores nothing, so anyone can
                 // ask before a change is even proposed.
                 .requestMatchers(HttpMethod.POST, "/api/formula-change-proposals/preview").permitAll()
+                // A community arguing about weights should be able to run the comparison itself.
+                // Storing nothing, so there is nothing to protect.
+                .requestMatchers(HttpMethod.POST, "/api/policy-simulation").permitAll()
                 // The formula is platform-wide, so proposing and deciding a change is not a
                 // community-scoped act. Reading the governance record requires a session.
                 .requestMatchers(HttpMethod.POST, "/api/formula-change-proposals/**").hasRole("SUPER_ADMIN")
