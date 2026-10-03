@@ -92,9 +92,12 @@ so a dashboard can explain itself without fetching every zone.
 
 ## Known limits
 
-- One implementation bug was caught by tests, which means the formula deserves a property-based
-  test over synthetic series. Not written yet; `baselineWindowsShouldExcludeTheCurrentWindowAndNotOverlap`
-  covers the case found, not the class.
+- A property-based suite over seeded synthetic series now covers the formula, added after the
+  window bug described above: windows never overlap each other or the current window, the median
+  sits between its extremes and does not move for a single outlier, a surge requires both volume
+  and ratio, the ratio is monotone in current count for a fixed baseline, and no reason string
+  can leak `Infinity` or `NaN`. Still not exhaustive, but the class of mistake that slipped
+  through the examples is now covered.
 - No seasonality handling. A community with a reliably busy August will see summer surges every
   year. A year-over-year comparison would be the fix and is a different slice.
 - No per-zone baseline persistence, so a zone created last week has no meaningful baseline and
