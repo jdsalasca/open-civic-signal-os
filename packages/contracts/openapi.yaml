@@ -2319,6 +2319,15 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+          description: Maximum rooms to return. Values outside 1-200 are clamped, not rejected.
       responses:
         '200':
           description: Coordination room workspace
@@ -2489,6 +2498,15 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+          description: Maximum activities to return. Values outside 1-200 are clamped, not rejected.
       responses:
         '200':
           description: Volunteer activity board
@@ -2667,6 +2685,15 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+          description: Maximum resources to return. Values outside 1-200 are clamped, not rejected.
       responses:
         '200':
           description: Shared resource board
@@ -2837,6 +2864,15 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+          description: Maximum integrations to return. Values outside 1-200 are clamped, not rejected.
       responses:
         '200':
           description: Integration center

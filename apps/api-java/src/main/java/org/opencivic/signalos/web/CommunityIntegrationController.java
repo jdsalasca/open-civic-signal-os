@@ -30,9 +30,10 @@ public class CommunityIntegrationController {
     @GetMapping("/center")
     public CommunityIntegrationCenterResponse getCenter(
         @RequestParam UUID communityId,
+        @RequestParam(required = false) Integer limit,
         Principal principal
     ) {
-        return integrationService.getCenter(communityId, principal.getName());
+        return integrationService.getCenter(communityId, principal.getName(), limit);
     }
 
     @PostMapping

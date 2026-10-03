@@ -40,9 +40,10 @@ public class CommunityRoomController {
     @GetMapping("/workspace")
     public CommunityRoomWorkspaceResponse getWorkspace(
         @RequestParam UUID communityId,
+        @RequestParam(required = false) Integer limit,
         Principal principal
     ) {
-        return roomService.getWorkspace(communityId, principal.getName());
+        return roomService.getWorkspace(communityId, principal.getName(), limit);
     }
 
     @GetMapping("/{roomId}")
@@ -60,7 +61,7 @@ public class CommunityRoomController {
         Principal principal
     ) {
         roomService.createRoom(request, principal.getName());
-        return roomService.getWorkspace(request.communityId(), principal.getName());
+        return roomService.getWorkspace(request.communityId(), principal.getName(), null);
     }
 
     @PostMapping("/messages")

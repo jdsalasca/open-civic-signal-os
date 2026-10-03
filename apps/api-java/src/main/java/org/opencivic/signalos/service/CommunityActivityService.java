@@ -52,14 +52,16 @@ public class CommunityActivityService {
     }
 
     @Transactional(readOnly = true)
-    public CommunityActivityBoardResponse getBoard(UUID communityId, String username) {
+    public CommunityActivityBoardResponse getBoard(UUID communityId, String username, Integer limit) {
         User user = communityAccessService.getCurrentUser(username);
         communityAccessService.requireMembership(user.getId(), communityId);
         Community community = communityRepository.findById(communityId)
             .orElseThrow(() -> new ResourceNotFoundException("Community not found: " + communityId));
+        int max = CommunityListLimits.resolveLimit(limit);
 
         List<CommunityActivityResponse> activities = activityRepository
             .findByCommunityIdAndCancelledFalseOrderByStartsAtAsc(communityId).stream()
+            .limit(max)
             .map(activity -> toResponse(activity, user.getId()))
             .toList();
 
@@ -100,7 +102,7 @@ public class CommunityActivityService {
         activity.setOrganizerId(user.getId());
         activityRepository.save(activity);
 
-        return getBoard(request.communityId(), username);
+        return getBoard(request.communityId(), username, null);
     }
 
     @Transactional

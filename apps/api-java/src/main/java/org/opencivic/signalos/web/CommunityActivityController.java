@@ -29,9 +29,10 @@ public class CommunityActivityController {
     @GetMapping("/board")
     public CommunityActivityBoardResponse getBoard(
         @RequestParam UUID communityId,
+        @RequestParam(required = false) Integer limit,
         Principal principal
     ) {
-        return activityService.getBoard(communityId, principal.getName());
+        return activityService.getBoard(communityId, principal.getName(), limit);
     }
 
     @PostMapping

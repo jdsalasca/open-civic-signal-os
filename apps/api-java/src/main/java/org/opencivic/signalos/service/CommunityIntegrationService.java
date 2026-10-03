@@ -60,11 +60,12 @@ public class CommunityIntegrationService {
     }
 
     @Transactional(readOnly = true)
-    public CommunityIntegrationCenterResponse getCenter(UUID communityId, String username) {
+    public CommunityIntegrationCenterResponse getCenter(UUID communityId, String username, Integer limit) {
         User user = communityAccessService.getCurrentUser(username);
         communityAccessService.requireScope(user.getId(), communityId, CommunityPermissionScope.MANAGE_INTEGRATIONS);
         Community community = communityRepository.findById(communityId)
             .orElseThrow(() -> new ResourceNotFoundException("Community not found: " + communityId));
+        int max = CommunityListLimits.resolveLimit(limit);
 
         Map<UUID, CommunityIntegration> byId = new LinkedHashMap<>();
         List<CommunityIntegration> integrations =
@@ -82,6 +83,7 @@ public class CommunityIntegrationService {
             deliveryRepository.countByCommunityIdAndStatus(communityId, CommunityIntegrationDeliveryStatus.PENDING),
             deliveryRepository.countByCommunityIdAndStatus(communityId, CommunityIntegrationDeliveryStatus.FAILED),
             integrations.stream()
+                .limit(max)
                 .map(integration -> toResponse(integration, deliveries))
                 .toList(),
             deliveries.stream()

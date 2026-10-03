@@ -30,9 +30,10 @@ public class CommunityResourceController {
     @GetMapping("/board")
     public CommunityResourceBoardResponse getBoard(
         @RequestParam UUID communityId,
+        @RequestParam(required = false) Integer limit,
         Principal principal
     ) {
-        return resourceService.getBoard(communityId, principal.getName());
+        return resourceService.getBoard(communityId, principal.getName(), limit);
     }
 
     @PostMapping

@@ -81,15 +81,17 @@ public class CommunityRoomService {
     }
 
     @Transactional(readOnly = true)
-    public CommunityRoomWorkspaceResponse getWorkspace(UUID communityId, String username) {
+    public CommunityRoomWorkspaceResponse getWorkspace(UUID communityId, String username, Integer limit) {
         User user = communityAccessService.getCurrentUser(username);
         communityAccessService.requireMembership(user.getId(), communityId);
         Community community = getCommunity(communityId);
+        int max = CommunityListLimits.resolveLimit(limit);
 
         List<CommunityRoom> rooms = roomRepository.findByCommunityIdAndArchivedFalseOrderByCreatedAtDesc(communityId);
         Map<UUID, CommunityRoomMute> mutesByRoom = mutesFor(user.getId(), rooms.stream().map(CommunityRoom::getId).toList());
 
         List<CommunityRoomSummaryResponse> summaries = rooms.stream()
+            .limit(max)
             .map(room -> toSummary(room, user.getId(), mutesByRoom))
             .sorted(Comparator.comparing(CommunityRoomSummaryResponse::lastActivityAt,
                 Comparator.nullsLast(Comparator.reverseOrder())))

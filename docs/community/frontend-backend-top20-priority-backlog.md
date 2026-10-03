@@ -345,6 +345,7 @@ Reference note:
 
 ### BE-10 Platform hardening pack
 - Rank: `B10`
+- Status: partially shipped (2026-03-21)
 - Why now: scale and trust are now constrained more by operational reliability than missing tables.
 - Backend scope:
   - remove remaining compose/runtime security debt
@@ -352,14 +353,18 @@ Reference note:
   - make `agent:preflight` and host/Docker validation more deterministic
   - finish paging/filter consistency on remaining community endpoints
 - Acceptance criteria:
-  - [ ] compose runtime no longer depends on insecure defaults
-  - [ ] active API routes have aligned contract examples
-  - [ ] community endpoints share deterministic paging/filter semantics
-  - [ ] local verification path is documented and repeatable
+  - [x] compose runtime no longer depends on insecure defaults
+  - [x] active API routes have aligned contract examples
+  - [ ] community endpoints share deterministic paging/filter semantics (partial: bounded `limit` on the four workspaces added this cycle; ten older list endpoints remain unbounded)
+  - [x] local verification path is documented and repeatable
 - Validation:
-  - [ ] security/runtime checks
-  - [ ] OpenAPI parity checks
-  - [ ] CI/local validation docs
+  - [x] security/runtime checks (`npm run security:runtime:check`)
+  - [x] OpenAPI parity checks (`npm run contract:parity:check`)
+  - [x] CI/local validation docs (`docs/LOCAL_VERIFICATION.md`)
+- Shipped in:
+  - `ADR-20260321-runtime-secret-policy.md`
+  - `ADR-20260321-contract-parity-gate.md`
+  - `ADR-20260321-community-list-limits-contract.md`
 
 ## Recommended Execution Waves
 

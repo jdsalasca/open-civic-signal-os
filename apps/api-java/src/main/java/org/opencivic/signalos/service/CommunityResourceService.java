@@ -58,12 +58,13 @@ public class CommunityResourceService {
     }
 
     @Transactional(readOnly = true)
-    public CommunityResourceBoardResponse getBoard(UUID communityId, String username) {
+    public CommunityResourceBoardResponse getBoard(UUID communityId, String username, Integer limit) {
         User user = communityAccessService.getCurrentUser(username);
         CommunityMembership membership = communityAccessService.requireMembership(user.getId(), communityId);
         boolean canManage = canManage(membership, communityId);
         Community community = communityRepository.findById(communityId)
             .orElseThrow(() -> new ResourceNotFoundException("Community not found: " + communityId));
+        int max = CommunityListLimits.resolveLimit(limit);
 
         LocalDateTime now = LocalDateTime.now();
         List<CommunityResourceBookingResponse> allBookings = bookingRepository
@@ -73,6 +74,7 @@ public class CommunityResourceService {
 
         List<CommunityResourceResponse> resources = resourceRepository
             .findByCommunityIdAndArchivedFalseOrderByCreatedAtDesc(communityId).stream()
+            .limit(max)
             .map(resource -> toResourceResponse(resource, user.getId(), allBookings, now))
             .toList();
 
@@ -127,7 +129,7 @@ public class CommunityResourceService {
         resource.setCreatedBy(user.getId());
         resourceRepository.save(resource);
 
-        return getBoard(request.communityId(), username);
+        return getBoard(request.communityId(), username, null);
     }
 
     @Transactional
@@ -253,7 +255,7 @@ public class CommunityResourceService {
         resource.setArchived(true);
         resourceRepository.save(resource);
 
-        return getBoard(communityId, username);
+        return getBoard(communityId, username, null);
     }
 
     private boolean canManage(CommunityMembership membership, UUID communityId) {
