@@ -10,6 +10,7 @@ import org.opencivic.signalos.web.dto.CommunityOpenDataCenterResponse;
 import org.opencivic.signalos.web.dto.CommunityOpenDataTokenResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityOpenDataTokenRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityOpenDataTokenResponse;
+import org.opencivic.signalos.web.dto.PublicDataAnonymizationChecklist;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -38,6 +39,14 @@ public class CommunityOpenDataController {
         Principal principal
     ) {
         return openDataService.getCenter(communityId, principal.getName());
+    }
+
+    @GetMapping("/anonymization-check")
+    public PublicDataAnonymizationChecklist getAnonymizationCheck(
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        return openDataService.getAnonymizationChecklist(communityId, principal.getName());
     }
 
     @PostMapping("/tokens")

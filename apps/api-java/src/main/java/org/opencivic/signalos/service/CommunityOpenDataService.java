@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
@@ -50,6 +51,8 @@ import org.opencivic.signalos.web.dto.OpenDataMetricRecordResponse;
 import org.opencivic.signalos.web.dto.OpenDataProposalRecordResponse;
 import org.opencivic.signalos.web.dto.OpenDataSignalRecordResponse;
 import org.opencivic.signalos.web.dto.OpenDataVoteRecordResponse;
+import org.opencivic.signalos.web.dto.PublicDataAnonymizationChecklist;
+import org.opencivic.signalos.web.dto.PublicDataAnonymizationFieldCheck;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,6 +82,7 @@ public class CommunityOpenDataService {
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
     private final RateLimitService rateLimitService;
+    private final PublicDataAnonymizer anonymizer;
 
     public CommunityOpenDataService(
         CommunityAccessService communityAccessService,
@@ -93,7 +97,8 @@ public class CommunityOpenDataService {
         CommunityOpenDataAccessLogRepository accessLogRepository,
         PasswordEncoder passwordEncoder,
         ObjectMapper objectMapper,
-        RateLimitService rateLimitService
+        RateLimitService rateLimitService,
+        PublicDataAnonymizer anonymizer
     ) {
         this.communityAccessService = communityAccessService;
         this.communityRepository = communityRepository;
@@ -108,6 +113,7 @@ public class CommunityOpenDataService {
         this.passwordEncoder = passwordEncoder;
         this.objectMapper = objectMapper;
         this.rateLimitService = rateLimitService;
+        this.anonymizer = anonymizer;
     }
 
     public CommunityOpenDataCenterResponse getCenter(UUID communityId, String username) {
@@ -152,6 +158,20 @@ public class CommunityOpenDataService {
             throw new IllegalArgumentException("At least one open-data scope is required.");
         }
 
+        // Publishing gate. Redaction happens on the way out, but a data steward still needs to
+        // know a dataset carries contact details, because redaction loses information they may
+        // want to keep. Refusing to mint a token until the checklist is read, or the risk is
+        // acknowledged, is the difference between a documented step and a hoped-for one.
+        PublicDataAnonymizationChecklist checklist = buildAnonymizationChecklist(request.communityId());
+        if (!checklist.publishable() && !request.acknowledgeResidualRisk()) {
+            throw new IllegalArgumentException(
+                "Open-data publishing blocked: " + checklist.blockingFindings().size()
+                    + " field(s) still contain personal data. Run GET /api/community/exports/"
+                    + "anonymization-check for the list, then resend with "
+                    + "acknowledgeResidualRisk=true to publish anyway."
+            );
+        }
+
         CommunityOpenDataToken token = new CommunityOpenDataToken();
         token.setId(UUID.randomUUID());
         token.setCommunityId(request.communityId());
@@ -176,6 +196,92 @@ public class CommunityOpenDataService {
         token.setActive(false);
         token.setRevokedAt(LocalDateTime.now());
         return toTokenResponse(tokenRepository.save(token));
+    }
+
+    public PublicDataAnonymizationChecklist getAnonymizationChecklist(UUID communityId, String username) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireScope(user.getId(), communityId, CommunityPermissionScope.MANAGE_OPEN_DATA_EXPORTS);
+        getCommunity(communityId);
+        return buildAnonymizationChecklist(communityId);
+    }
+
+    /**
+     * Scans the free text that public exports would carry. Reads through the repositories
+     * rather than the redacted builders, because the whole point is to see what the redactor
+     * is about to touch.
+     */
+    private PublicDataAnonymizationChecklist buildAnonymizationChecklist(UUID communityId) {
+        List<Signal> signals = signalRepository.findByCommunityId(communityId);
+        List<CommunityProposal> proposals =
+            proposalRepository.findByCommunityIdOrderByUpdatedAtDescCreatedAtDesc(communityId);
+
+        List<PublicDataAnonymizationFieldCheck> fields = new ArrayList<>();
+        fields.add(check(CommunityOpenDataExportType.SIGNALS.name(), "title",
+            signals.stream().map(Signal::getTitle).toList()));
+        fields.add(check(CommunityOpenDataExportType.SIGNALS.name(), "locationLabel",
+            signals.stream().map(Signal::getLocationLabel).toList()));
+
+        for (String field : List.of("title", "problemStatement", "proposedSolution",
+            "estimatedCost", "beneficiariesSummary", "supportingLinks")) {
+            fields.add(check(CommunityOpenDataExportType.PROPOSALS.name(), field,
+                switch (field) {
+                    case "title" -> proposals.stream().map(CommunityProposal::getTitle).toList();
+                    case "problemStatement" -> proposals.stream().map(CommunityProposal::getProblemStatement).toList();
+                    case "proposedSolution" -> proposals.stream().map(CommunityProposal::getProposedSolution).toList();
+                    case "estimatedCost" -> proposals.stream().map(CommunityProposal::getEstimatedCost).toList();
+                    case "beneficiariesSummary" -> proposals.stream().map(CommunityProposal::getBeneficiariesSummary).toList();
+                    default -> proposals.stream().map(p -> String.join("\n", orEmpty(p.getSupportingLinks()))).toList();
+                }));
+        }
+
+        List<String> blocking = fields.stream()
+            .filter(field -> !field.clean())
+            .map(field -> field.exportType() + "." + field.field() + ": " + field.recordsWithFindings()
+                + " record(s) with " + String.join(", ", field.categories()))
+            .toList();
+
+        return new PublicDataAnonymizationChecklist(
+            communityId.toString(),
+            LocalDateTime.now(),
+            fields,
+            blocking,
+            blocking.isEmpty(),
+            anonymizer.categories()
+        );
+    }
+
+    private PublicDataAnonymizationFieldCheck check(String exportType, String field, List<String> values) {
+        List<String> categories = new ArrayList<>();
+        List<String> examples = new ArrayList<>();
+        long withFindings = 0;
+        for (String value : values) {
+            List<String> found = anonymizer.detect(value);
+            if (found.isEmpty()) {
+                continue;
+            }
+            withFindings++;
+            found.stream().filter(c -> !categories.contains(c)).forEach(categories::add);
+            if (examples.size() < 3) {
+                examples.add(summarise(value));
+            }
+        }
+        return new PublicDataAnonymizationFieldCheck(
+            exportType, field, values.size(), withFindings,
+            categories.stream().sorted().toList(), examples
+        );
+    }
+
+    /** Never echoes the full value: a checklist must not become the leak it is warning about. */
+    private String summarise(String value) {
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+        String collapsed = value.replaceAll("\\s+", " ").trim();
+        return collapsed.length() <= 80 ? collapsed : collapsed.substring(0, 77) + "...";
+    }
+
+    private List<String> orEmpty(List<String> values) {
+        return values == null ? List.of() : values;
     }
 
     @Transactional
@@ -261,13 +367,13 @@ public class CommunityOpenDataService {
         };
     }
 
-    private List<OpenDataSignalRecordResponse> buildSignals(UUID communityId) {
+    public List<OpenDataSignalRecordResponse> buildSignals(UUID communityId) {
         return signalRepository.findByCommunityId(communityId).stream()
             .sorted(Comparator.comparing(Signal::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
             .map(signal -> new OpenDataSignalRecordResponse(
                 signal.getId(),
                 signal.getCommunityId(),
-                signal.getTitle(),
+                anonymizer.redact(signal.getTitle()),
                 signal.getCategory(),
                 signal.getStatus(),
                 signal.getPriorityScore(),
@@ -275,7 +381,7 @@ public class CommunityOpenDataService {
                 signal.getImpact(),
                 signal.getAffectedPeople(),
                 signal.getCommunityVotes(),
-                signal.getLocationLabel(),
+                anonymizer.redact(signal.getLocationLabel()),
                 signal.getCreatedAt()
             ))
             .toList();
@@ -287,13 +393,17 @@ public class CommunityOpenDataService {
                 proposal.getId(),
                 proposal.getCommunityId(),
                 proposal.getRelatedSignalId(),
-                proposal.getTitle(),
+                anonymizer.redact(proposal.getTitle()),
                 proposal.getStatus(),
-                proposal.getProblemStatement(),
-                proposal.getProposedSolution(),
-                proposal.getEstimatedCost(),
-                proposal.getBeneficiariesSummary(),
-                proposal.getSupportingLinks(),
+                anonymizer.redact(proposal.getProblemStatement()),
+                anonymizer.redact(proposal.getProposedSolution()),
+                anonymizer.redact(proposal.getEstimatedCost()),
+                anonymizer.redact(proposal.getBeneficiariesSummary()),
+                proposal.getSupportingLinks() == null
+                    ? null
+                    : proposal.getSupportingLinks().stream()
+                        .map(anonymizer::redact)
+                        .collect(Collectors.toList()),
                 proposal.getVoteMode().name(),
                 proposal.getVoteVisibility().name(),
                 proposal.getVoteEligibility().name(),

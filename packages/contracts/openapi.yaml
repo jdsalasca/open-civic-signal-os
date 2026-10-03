@@ -1507,6 +1507,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/exports/anonymization-check:
+    get:
+      summary: Pre-publication anonymization checklist for public open data
+      description: >-
+        Scans the free text that a public export would carry and reports, per field, how many
+        records contain an email address, phone number, national id, or payment card. Personal
+        data is redacted on the way out, but redaction loses information a community may want
+        to keep, so the step is made visible rather than silently applied.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Checklist with a blocking-findings list and a publishable verdict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicDataAnonymizationChecklist'
+        '403':
+          description: Community policy denied open-data export management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/exports/{exportType}:
     get:
       summary: Download one community-scoped export dataset as CSV or JSON
@@ -3201,6 +3229,63 @@ components:
         error:
           type: string
           description: Set instead of row results when the file itself could not be parsed.
+    PublicDataAnonymizationFieldCheck:
+      type: object
+      description: One free-text field in a public dataset and whether it currently carries PII.
+      properties:
+        exportType:
+          type: string
+          description: Which dataset the field belongs to, so findings are attributable.
+        field:
+          type: string
+        clean:
+          type: boolean
+          description: True when no record in this field carries a detectable pattern.
+        recordsScanned:
+          type: integer
+        recordsWithFindings:
+          type: integer
+        categories:
+          type: array
+          description: Which patterns were detected, e.g. EMAIL, PHONE, NATIONAL_ID, PAYMENT_CARD.
+          items:
+            type: string
+        exampleFindings:
+          type: array
+          description: >-
+            Up to three truncated examples, so a steward knows what to look at without the
+            checklist itself becoming the leak it is warning about.
+          items:
+            type: string
+    PublicDataAnonymizationChecklist:
+      type: object
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        generatedAt:
+          type: string
+          format: date-time
+          description: Freshness marker, per the dashboard-freshness rule.
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicDataAnonymizationFieldCheck'
+        blockingFindings:
+          type: array
+          description: One human-readable line per field that is not clean.
+          items:
+            type: string
+        publishable:
+          type: boolean
+          description: >-
+            True when no field carries a detectable pattern. Minting an open-data token is
+            refused while this is false, unless the request sets acknowledgeResidualRisk.
+        categories:
+          type: array
+          description: The full set of patterns the redactor can detect.
+          items:
+            type: string
     ApiError:
       type: object
       properties:
@@ -5675,6 +5760,14 @@ components:
           type: integer
           minimum: 1
           maximum: 1000
+        acknowledgeResidualRisk:
+          type: boolean
+          default: false
+          description: >-
+            Required to mint a token while the anonymization checklist still reports findings.
+            Exists because a community may decide a specific contact address in a proposal is
+            the point of publishing it, and that decision should be recorded rather than
+            blocked by a tool that cannot read intent.
     CreateCommunityOpenDataTokenResponse:
       type: object
       required: [token, plainToken]
