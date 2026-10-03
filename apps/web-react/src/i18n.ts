@@ -5,6 +5,24 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   en: {
     translation: {
+      "public_backlog": {
+        "title": "Public backlog",
+        "subtitle": "The ranked problems this platform is tracking, readable without an account. The formula behind the order and the last update time are shown, because a ranking nobody can check is not accountability.",
+        "freshness": "Data last updated {{when}}",
+        "freshness_hint": "Every ranked list on this platform has to expose how current it is.",
+        "freshness_pending": "not reported yet",
+        "open_count": "{{count}} unresolved",
+        "formula_title": "How the order is decided",
+        "formula_version": "Formula version {{version}}",
+        "status": "Status: {{status}}",
+        "why": "score terms: urgency {{urgency}}, impact {{impact}}, people {{people}}, votes {{votes}}",
+        "score_label": "score",
+        "cta": "Sign in to report a problem, vote, or follow a case.",
+        "empty_title": "Nothing to show yet",
+        "empty_desc": "No problems have been reported publicly yet.",
+        "unavailable_title": "Backlog temporarily unavailable",
+        "unavailable_desc": "The platform could not be reached. Please try again shortly."
+      },
       "common": {
         "loading": "Loading...",
         "error": "Error",
@@ -1954,6 +1972,24 @@ const resources = {
   },
   es: {
     translation: {
+      "public_backlog": {
+        "title": "Lista pública",
+        "subtitle": "Los problemas priorizados que sigue esta plataforma, visibles sin cuenta. La fórmula del orden y la hora de la última actualización se muestran, porque una prioridad que nadie puede verificar no es rendición de cuentas.",
+        "freshness": "Datos actualizados {{when}}",
+        "freshness_hint": "Toda lista priorizada de esta plataforma debe mostrar cuán reciente es.",
+        "freshness_pending": "sin reportar todavía",
+        "open_count": "{{count}} sin resolver",
+        "formula_title": "Cómo se decide el orden",
+        "formula_version": "Versión de la fórmula {{version}}",
+        "status": "Estado: {{status}}",
+        "why": "términos del puntaje: urgencia {{urgency}}, impacto {{impact}}, personas {{people}}, votos {{votes}}",
+        "score_label": "puntaje",
+        "cta": "Iniciá sesión para reportar un problema, votar o seguir un caso.",
+        "empty_title": "Todavía no hay nada para mostrar",
+        "empty_desc": "Aún no se reportaron problemas públicamente.",
+        "unavailable_title": "Lista no disponible temporalmente",
+        "unavailable_desc": "No se pudo conectar con la plataforma. Probá de nuevo en unos minutos."
+      },
       "common": {
         "loading": "Cargando...",
         "error": "Error",

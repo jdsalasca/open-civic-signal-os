@@ -1,7 +1,11 @@
 import { CivicButton } from './CivicButton';
 import { classNames } from 'primereact/utils';
 
-interface CivicEmptyStateProps {
+/**
+ * Extra DOM attributes are forwarded to the root so callers can attach a stable `data-testid`
+ * without an extra wrapper node existing only to hold an attribute.
+ */
+interface CivicEmptyStateProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   icon: string;
   title: string;
   description: string;
@@ -10,9 +14,12 @@ interface CivicEmptyStateProps {
   className?: string;
 }
 
-export function CivicEmptyState({ icon, title, description, actionLabel, onAction, className }: CivicEmptyStateProps) {
+export function CivicEmptyState({ icon, title, description, actionLabel, onAction, className, ...rest }: CivicEmptyStateProps) {
   return (
-    <div className={classNames("flex flex-column align-items-center text-center py-8 px-4 animate-fade-up civic-empty-state", className)}>
+    <div
+      {...rest}
+      className={classNames("flex flex-column align-items-center text-center py-8 px-4 animate-fade-up civic-empty-state", className)}
+    >
       <div className="relative mb-6">
         <div className="absolute inset-0 bg-brand-primary blur-3xl opacity-10 border-circle"></div>
         <div className="relative w-6rem h-6rem bg-surface-soft border-round-3xl border-1 border-surface-soft flex align-items-center justify-content-center shadow-premium civic-empty-state-icon">

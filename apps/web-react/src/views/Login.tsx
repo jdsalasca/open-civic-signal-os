@@ -119,6 +119,20 @@ export function Login() {
               </Link>
             </div>
           </form>
+          {/*
+            A stranger should be able to see what the platform tracks before deciding whether to
+            register. The backlog is public at the API already, so hiding it behind this form only
+            added a reason to leave.
+          */}
+          <div className="text-center mt-4">
+            <Link
+              to="/backlog"
+              className="text-secondary text-sm no-underline hover:underline"
+              data-testid="go-to-public-backlog"
+            >
+              {t('public_backlog.title')}
+            </Link>
+          </div>
         </CivicCard>
       </div>
     </Layout>

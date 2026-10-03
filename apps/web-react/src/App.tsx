@@ -16,6 +16,7 @@ const Settings = lazy(() => import("./views/Settings").then(m => ({ default: m.S
 const HelpCenter = lazy(() => import("./views/HelpCenter").then(m => ({ default: m.HelpCenter })));
 const Register = lazy(() => import("./views/Register").then(m => ({ default: m.Register })));
 const Verify = lazy(() => import("./views/Verify").then(m => ({ default: m.Verify })));
+const PublicBacklog = lazy(() => import("./views/PublicBacklog").then(m => ({ default: m.PublicBacklog })));
 const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
 const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
 const Communities = lazy(() => import("./views/Communities").then(m => ({ default: m.Communities })));
@@ -136,6 +137,12 @@ export function App() {
             <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
             <Route path="/verify" element={<Verify />} />
+            {/*
+              The backlog is readable without an account. The API already serves it publicly, so
+              requiring a login to look at it asked people to register before they could see
+              whether registering was worth it. Outside the AuthGuard on purpose.
+            */}
+            <Route path="/backlog" element={<PublicBacklog />} />
             
             <Route element={<AuthGuard />}>
               <Route path="/" element={<Dashboard />} />
