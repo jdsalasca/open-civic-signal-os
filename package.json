@@ -36,7 +36,8 @@
     "contract:parity:check": "node scripts/check-openapi-parity.mjs",
     "agent:ux:pw": "node scripts/playwright-cli.mjs",
     "report:transparency": "node scripts/generate-transparency-report.mjs",
-    "ranking:check": "node scripts/check-ranking-reproducibility.mjs"
+    "ranking:check": "node scripts/check-ranking-reproducibility.mjs",
+    "incident:capture": "node scripts/capture-trust-incident.mjs"
   },
   "releaseQuality": {
     "minimumCoverage": 20

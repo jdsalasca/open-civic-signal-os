@@ -17,3 +17,7 @@ apps/api-java/target/
 !.env.example
 !infra/.env.example
 infra/secrets/
+
+# Incident evidence bundles are operational records, not source.
+# The protocol says capture before fixing; the file is referenced from the incident write-up.
+docs/incidents/
