@@ -38,7 +38,7 @@ public class CommunityIntegrationService {
     private final UserRepository userRepository;
     private final CommunityIntegrationRepository integrationRepository;
     private final CommunityIntegrationDeliveryRepository deliveryRepository;
-    private final WebhookCommunityIntegrationConnector connector;
+    private final List<CommunityIntegrationConnector> connectors;
     private final ObjectMapper objectMapper;
 
     public CommunityIntegrationService(
@@ -47,7 +47,7 @@ public class CommunityIntegrationService {
         UserRepository userRepository,
         CommunityIntegrationRepository integrationRepository,
         CommunityIntegrationDeliveryRepository deliveryRepository,
-        WebhookCommunityIntegrationConnector connector,
+        List<CommunityIntegrationConnector> connectors,
         ObjectMapper objectMapper
     ) {
         this.communityAccessService = communityAccessService;
@@ -55,7 +55,7 @@ public class CommunityIntegrationService {
         this.userRepository = userRepository;
         this.integrationRepository = integrationRepository;
         this.deliveryRepository = deliveryRepository;
-        this.connector = connector;
+        this.connectors = connectors;
         this.objectMapper = objectMapper;
     }
 
@@ -219,10 +219,7 @@ public class CommunityIntegrationService {
         }
 
         String body = delivery.getPayload();
-        WebhookCommunityIntegrationConnector.DeliveryResult result =
-            connector.supports(integration.getChannel())
-                ? connector.deliver(integration, body)
-                : new WebhookCommunityIntegrationConnector.DeliveryResult(false, NO_CONNECTOR, 0);
+        CommunityIntegrationConnector.DeliveryResult result = dispatchResult(integration, body);
 
         recordAttempt(integration, result);
         delivery.setStatus(result.delivered()
@@ -244,14 +241,91 @@ public class CommunityIntegrationService {
     }
 
     /**
-     * Calendar feeds only carry scheduled events; webhooks receive everything.
+     * Which events each channel carries.
+     *
+     * <p>Stated per channel rather than "everything except calendar". A default of yes meant that
+     * adding the email channel would have sent every official announcement to residents as a weekly
+     * bulletin, which is the kind of thing nobody notices until someone complains about the mail.
+     *
+     * @param channel   the configured transport
+     * @param eventType the event being published
+     * @return whether this channel should receive this event
      */
     static boolean acceptsEvent(CommunityIntegrationChannel channel, CommunityIntegrationEventType eventType) {
-        if (channel == CommunityIntegrationChannel.CALENDAR_FEED) {
-            return eventType == CommunityIntegrationEventType.ACTIVITY_SCHEDULED
+        return switch (channel) {
+            // A calendar feed carries scheduled events, and nothing else.
+            case CALENDAR_FEED -> eventType == CommunityIntegrationEventType.ACTIVITY_SCHEDULED
                 || eventType == CommunityIntegrationEventType.RESOURCE_BOOKED;
+            // An email digest carries the digest and nothing else. Announcements have their own
+            // channel and residents did not sign up for one to receive the other.
+            case EMAIL_DIGEST -> eventType == CommunityIntegrationEventType.WEEKLY_DIGEST;
+            // A webhook is the general-purpose transport and receives everything.
+            case WEBHOOK -> true;
+            // A map link has no connector. It is deliberately NOT filtered out here: filtering would
+            // make a configured-but-unservable integration look idle, and this layer's documented
+            // behaviour is that such a channel fails visibly with NO_CONNECTOR instead.
+            case MAP_LINK -> true;
+        };
+    }
+
+    /**
+     * Finds the connector for a channel, or reports the miss.
+     *
+     * <p>A channel nobody supports returns {@code NO_CONNECTOR} rather than silently doing nothing,
+     * which is the documented behaviour of this layer: an integration a community configured but the
+     * platform cannot serve must look broken, not look idle.
+     */
+    private CommunityIntegrationConnector.DeliveryResult dispatchResult(
+        CommunityIntegration integration,
+        String body
+    ) {
+        return connectors.stream()
+            .filter(candidate -> candidate.supports(integration.getChannel()))
+            .findFirst()
+            .map(connector -> connector.deliver(integration, body))
+            .orElseGet(() -> new CommunityIntegrationConnector.DeliveryResult(false, NO_CONNECTOR, 0));
+    }
+
+    /**
+     * Fans a rendered digest out to every enabled email integration for a community.
+     *
+     * <p>Called after a digest is published, not on a schedule. Idempotency comes from the digest
+     * publication itself: a week can only be published once, so a retry cannot reach this twice for
+     * the same week.
+     *
+     * <p>Partial failure is expected and recoverable: each delivery is recorded, and the existing
+     * retry endpoint re-sends a failed one without republishing the week.
+     */
+    @Transactional
+    public int fanOutDigest(UUID communityId, UUID publicationId, String body) {
+        List<CommunityIntegration> targets = resolveTargets(
+            communityId, CommunityIntegrationEventType.WEEKLY_DIGEST);
+        int delivered = 0;
+        for (CommunityIntegration target : targets) {
+            CommunityIntegrationDelivery delivery = new CommunityIntegrationDelivery();
+            delivery.setIntegrationId(target.getId());
+            delivery.setCommunityId(target.getCommunityId());
+            delivery.setEventType(CommunityIntegrationEventType.WEEKLY_DIGEST);
+            // The publication id, so a delivery can be traced back to the sealed digest it carried.
+            delivery.setReferenceId(publicationId);
+            delivery.setPayload(body);
+            delivery.setStatus(CommunityIntegrationDeliveryStatus.PENDING);
+            delivery = deliveryRepository.save(delivery);
+
+            CommunityIntegrationConnector.DeliveryResult result = dispatchResult(target, body);
+            recordAttempt(target, result);
+            delivery.setStatus(result.delivered()
+                ? CommunityIntegrationDeliveryStatus.DELIVERED
+                : CommunityIntegrationDeliveryStatus.FAILED);
+            delivery.setAttempts(delivery.getAttempts() + 1);
+            delivery.setLastError(result.error());
+            delivery.setCompletedAt(LocalDateTime.now());
+            deliveryRepository.save(delivery);
+            if (result.delivered()) {
+                delivered++;
+            }
         }
-        return true;
+        return delivered;
     }
 
     private CommunityIntegrationDeliveryResponse dispatch(
@@ -271,9 +345,7 @@ public class CommunityIntegrationService {
         String body = buildBody(integration, eventType, request);
         delivery.setPayload(body);
 
-        WebhookCommunityIntegrationConnector.DeliveryResult result = connector.supports(integration.getChannel())
-            ? connector.deliver(integration, body)
-            : new WebhookCommunityIntegrationConnector.DeliveryResult(false, NO_CONNECTOR, 0);
+        CommunityIntegrationConnector.DeliveryResult result = dispatchResult(integration, body);
 
         recordAttempt(integration, result);
         delivery.setStatus(result.delivered()
@@ -289,7 +361,7 @@ public class CommunityIntegrationService {
 
     private void recordAttempt(
         CommunityIntegration integration,
-        WebhookCommunityIntegrationConnector.DeliveryResult result
+        CommunityIntegrationConnector.DeliveryResult result
     ) {
         integration.setLastAttemptAt(LocalDateTime.now());
         if (result.delivered()) {
@@ -349,7 +421,7 @@ public class CommunityIntegrationService {
             integration.getTargetUri(),
             integration.isEnabled(),
             integration.isAutoRetry(),
-            connector.supports(integration.getChannel()),
+            connectors.stream().anyMatch(candidate -> candidate.supports(integration.getChannel())),
             integration.getCreatedBy(),
             integration.getCreatedAt(),
             integration.getLastAttemptAt(),

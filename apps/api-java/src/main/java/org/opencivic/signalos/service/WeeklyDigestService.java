@@ -69,19 +69,22 @@ public class WeeklyDigestService {
     private final SignalRepository signalRepository;
     private final SignalStatusEntryRepository statusEntryRepository;
     private final CommunityDigestPublicationRepository publicationRepository;
+    private final CommunityIntegrationService integrationService;
 
     public WeeklyDigestService(
         CommunityRepository communityRepository,
         UserRepository userRepository,
         SignalRepository signalRepository,
         SignalStatusEntryRepository statusEntryRepository,
-        CommunityDigestPublicationRepository publicationRepository
+        CommunityDigestPublicationRepository publicationRepository,
+        CommunityIntegrationService integrationService
     ) {
         this.communityRepository = communityRepository;
         this.userRepository = userRepository;
         this.signalRepository = signalRepository;
         this.statusEntryRepository = statusEntryRepository;
         this.publicationRepository = publicationRepository;
+        this.integrationService = integrationService;
     }
 
     /** One item in the digest, with the score and the reason it ranks where it does. */
@@ -117,7 +120,9 @@ public class WeeklyDigestService {
         String contentHash,
         boolean published,
         LocalDateTime publishedAt,
-        LocalDateTime generatedAt
+        LocalDateTime generatedAt,
+        /** How many configured channels accepted the digest. Zero is normal when none are configured. */
+        int deliveredToChannels
     ) {}
 
     /**
@@ -188,11 +193,17 @@ public class WeeklyDigestService {
         publication.setBody(digest.body());
         publicationRepository.save(publication);
 
+        // Delivery after publication, in the same transaction, so a week that says published has
+        // actually been handed to whatever channels the community configured. Idempotency comes from
+        // the unique index above: a second publish for the week is refused before it gets here, so a
+        // retry cannot deliver twice.
+        int delivered = integrationService.fanOutDigest(communityId, publication.getId(), digest.body());
+
         return new WeeklyDigest(
             digest.version(), digest.communityId(), digest.communityName(), digest.week(),
             digest.topUnresolved(), digest.resolvedThisWeek(), digest.rejectedThisWeek(),
             digest.reportedThisWeek(), digest.stillOpenTotal(), digest.body(), digest.contentHash(),
-            true, publication.getPublishedAt(), digest.generatedAt()
+            true, publication.getPublishedAt(), digest.generatedAt(), delivered
         );
     }
 
@@ -267,7 +278,7 @@ public class WeeklyDigestService {
         return new WeeklyDigest(
             VERSION, communityId, community.getName(), week, top,
             resolvedThisWeek, rejectedThisWeek, reportedThisWeek.size(), unresolved.size(),
-            body, hash, published, null, LocalDateTime.now()
+            body, hash, published, null, LocalDateTime.now(), 0
         );
     }
 

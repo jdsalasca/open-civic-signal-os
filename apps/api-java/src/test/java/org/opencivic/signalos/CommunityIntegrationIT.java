@@ -211,7 +211,10 @@ class CommunityIntegrationIT {
 
     @Test
     void channelWithoutConnectorShouldFailVisibly() throws Exception {
-        createIntegration("EMAIL_DIGEST", "Email digest", stubBaseUri + "/ok", 200);
+        // MAP_LINK is the channel that genuinely has no connector. This test used EMAIL_DIGEST until
+        // the digest delivery work gave that channel one, at which point the premise changed: the
+        // assertion is about a channel nobody serves, not about a specific channel name.
+        createIntegration("MAP_LINK", "Map link", stubBaseUri + "/ok", 200);
 
         mockMvc.perform(post("/api/community/integrations/events")
                 .with(user("int_coord").roles("CITIZEN"))

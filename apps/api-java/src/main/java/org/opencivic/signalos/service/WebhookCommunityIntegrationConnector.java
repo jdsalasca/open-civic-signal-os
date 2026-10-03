@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
  * are slower than {@link #REQUEST_TIMEOUT}.
  */
 @Component
-public class WebhookCommunityIntegrationConnector {
+public class WebhookCommunityIntegrationConnector implements CommunityIntegrationConnector {
     static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(5);
 
     private final HttpClient httpClient = HttpClient.newBuilder()
@@ -33,8 +33,7 @@ public class WebhookCommunityIntegrationConnector {
         .followRedirects(HttpClient.Redirect.NEVER)
         .build();
 
-    public record DeliveryResult(boolean delivered, String error, int statusCode) {}
-
+    @Override
     public boolean supports(CommunityIntegrationChannel channel) {
         return channel == CommunityIntegrationChannel.WEBHOOK
             || channel == CommunityIntegrationChannel.CALENDAR_FEED;
@@ -46,6 +45,7 @@ public class WebhookCommunityIntegrationConnector {
             : "application/json";
     }
 
+    @Override
     public DeliveryResult deliver(CommunityIntegration integration, String body) {
         try {
             HttpRequest.Builder request = HttpRequest.newBuilder()

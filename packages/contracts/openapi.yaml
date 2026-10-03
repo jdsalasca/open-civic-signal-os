@@ -5064,6 +5064,12 @@ components:
           type: string
           format: date-time
           description: The only field that varies between two runs over the same week.
+        deliveredToChannels:
+          type: integer
+          description: >-
+            How many configured channels accepted the digest. Zero is normal when a community has
+            configured none, and is not a failure. A channel that fails is recorded as a failed
+            delivery and can be retried without republishing the week.
     DigestPublication:
       type: object
       properties:
@@ -9055,7 +9061,7 @@ components:
           format: uuid
         eventType:
           type: string
-          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED]
+          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED, WEEKLY_DIGEST]
         referenceId:
           type: string
           format: uuid
@@ -9138,7 +9144,7 @@ components:
           type: string
         eventType:
           type: string
-          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED]
+          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED, WEEKLY_DIGEST]
         referenceId:
           type: string
           format: uuid
@@ -9197,7 +9203,7 @@ components:
           format: uuid
         eventType:
           type: string
-          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED]
+          enum: [OFFICIAL_ANNOUNCEMENT, ACTIVITY_SCHEDULED, RESOURCE_BOOKED, WEEKLY_DIGEST]
         targeted:
           type: integer
         delivered:

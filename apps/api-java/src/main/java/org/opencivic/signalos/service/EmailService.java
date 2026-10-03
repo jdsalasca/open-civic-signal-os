@@ -46,6 +46,21 @@ public class EmailService {
         return sendSimpleEmail(to, "Welcome to Signal OS", body, "WELCOME");
     }
 
+    /**
+     * Sends a rendered digest body, typically a weekly civic bulletin.
+     *
+     * <p>Deliberately on the same audited helper as the other two: whatever records failures and
+     * notifies on them must apply here too, because a bulletin that silently fails to send looks
+     * exactly like a week where nothing happened.
+     *
+     * <p>The body arrives already rendered. This method does not compose it, because the digest is
+     * the thing that has to be reproducible and its rendering belongs with the digest, not with the
+     * transport.
+     */
+    public EmailDeliveryResult sendDigest(String to, String subject, String body) {
+        return sendSimpleEmail(to, subject, body, "WEEKLY_DIGEST");
+    }
+
     private EmailDeliveryResult sendHtmlEmail(String to, String subject, String htmlBody, String flow) {
         try {
             if (fromEmail == null || fromEmail.isBlank()) {
