@@ -25,7 +25,7 @@ The parity checker:
 - allows an explicit `INTENTIONALLY_UNDOCUMENTED` map, so an omission needs a stated reason rather than being invisible
 - **guards against its own silent pass**: it fails if zero controllers are found or zero routes are extracted, because a broken path glob would otherwise report success while checking nothing
 
-It runs inside `agent:preflight` only when the contract changed, alongside the existing ADR gate.
+- the parity gate fires when the contract changed **or** when a controller file changed. A new endpoint that never touches the `.yaml` is exactly the case this gate exists to catch, so the trigger keys on `apps/api-java/src/main/java/org/opencivic/signalos/web/*.java`. DTOs, tests, services, and migrations are excluded.
 
 Nine routes are intentionally undocumented, all with reasons: the eight `/api/auth/**` handshake endpoints, and `/api/test/email`, a local-only probe.
 
@@ -46,7 +46,6 @@ Trade-offs:
 
 - route extraction is regex over source, not a Spring introspection dump. It reads mapping annotations only; a programmatically registered route would be invisible. Everything in this repository uses annotations, and the zero-route guard catches the case where the whole approach stops working.
 - `git ls-files` on the controller directory also returns the `dto/` subdirectory, so the reported controller count includes DTO records. Harmless, since a record carries no mapping annotation, but the number is not "10 controllers". Fixing it means globbing `web/*.java`, which I left alone to keep the checker's surface minimal.
-- the parity gate runs only when `packages/contracts/openapi.yaml` changed. A change to a controller alone does not trigger it, which is a real gap: adding an endpoint without touching the contract would pass preflight. The correct trigger is "controller files changed OR contract changed", which is a one-line change to `agent-preflight.mjs` and the honest next step.
 - path comparison ignores query parameters and request bodies, so a route can be documented with the wrong payload and pass.
 - the document is prose and drifts. It names the gate commands and the traps, which are stable; exact script output is not reproduced.
 
@@ -55,6 +54,8 @@ Trade-offs:
 - checker fails against the pre-change tree with 5 findings: the missed activity cancellation, the top-10 relay, and three auth routes
 - checker passes after documenting the two public routes and adding the auth reasons
 - checker correctly fails when a probe controller with an undocumented route is staged, naming file and line
+- trigger discrimination verified against five paths: a controller triggers, and a DTO, a test, a service, and a migration do not
+- `npm run agent:preflight` with a staged undocumented endpoint and **no contract change** fails on the parity gate, proving the controller trigger fires
 - `node scripts/check-openapi-parity.mjs` reports 123 routes across the controller package, 98 documented paths, 9 intentionally undocumented
 - `npm run agent:preflight` runs the new gate and passes
 - OpenAPI re-parsed with `js-yaml` after both additions
