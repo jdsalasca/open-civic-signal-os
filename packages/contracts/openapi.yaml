@@ -242,6 +242,89 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PrioritizationFormula'
+  /api/signals/surges:
+    get:
+      summary: Surge and trend detection per community category
+      description: >-
+        Compares the current window against a baseline median of the preceding windows and
+        reports a surge only when the ratio is at or above threshold AND the absolute volume is
+        meaningful. Every result carries the individual baseline windows and a plain-language
+        reason, because a surge badge a human cannot check is the black box this project exists
+        to avoid.
+      parameters:
+        - in: query
+          name: allowGlobal
+          description: Allow analytics across all communities when the caller has no membership.
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: windowDays
+          description: Length of the current and baseline windows, in days.
+          schema:
+            type: integer
+            default: 7
+        - in: query
+          name: baselineWindows
+          description: How many preceding windows form the baseline.
+          schema:
+            type: integer
+            default: 4
+        - in: query
+          name: minCurrentCount
+          description: >-
+            Absolute floor below which no percentage change is reported. Without it a quiet zone
+            going from one report to three is a 300% surge, and a dashboard full of those teaches
+            people to ignore the marker.
+          schema:
+            type: integer
+            default: 5
+        - in: query
+          name: surgeMultiplier
+          description: Ratio at or above which a zone is flagged.
+          schema:
+            type: number
+            default: 2.0
+        - in: query
+          name: windowEnd
+          description: >-
+            Exclusive end of the current window, ISO date. Defaults to today. Supplying it makes
+            the whole report reproducible.
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Surge report with per-zone arithmetic
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurgeReport'
+        '400':
+          description: A threshold is out of range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/signals/surges/formula:
+    get:
+      summary: Surge detection formula and default thresholds
+      description: >-
+        The versioned formula on its own, so a dashboard can show how a verdict was reached
+        without fetching every zone.
+      parameters:
+        - in: query
+          name: allowGlobal
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Formula version, default thresholds, and baseline window layout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurgeReport'
   /api/signals/aging:
     get:
       summary: Get backend-owned case aging buckets, SLA risk, and the created/resolved trend
@@ -3616,6 +3699,101 @@ components:
           type: object
           additionalProperties:
             type: string
+    SurgeWindow:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+          description: Exclusive.
+        count:
+          type: integer
+          format: int64
+    SurgeZone:
+      type: object
+      description: >-
+        One zone's assessment with every input the verdict came from. The unit is community plus
+        category: the platform has no validated neighbourhood geography, since locationLabel is
+        free text written by residents and does not group reliably.
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        category:
+          type: string
+        currentCount:
+          type: integer
+          format: int64
+        baselineMedian:
+          type: integer
+          format: int64
+          description: >-
+            Median, not mean, of the baseline windows. A median does not move for one outlier
+            window, which is exactly the spike being looked for.
+        ratio:
+          type: number
+          description: currentCount divided by baselineMedian. Rendered as no-baseline when zero.
+        verdict:
+          type: string
+          enum: [SURGE, STABLE, SUPPRESSED_LOW_VOLUME]
+        reason:
+          type: string
+          description: The comparison and the threshold crossed, in plain language.
+        baselineCounts:
+          type: array
+          description: >-
+            The individual windows, so a human can check the median rather than trusting it.
+          items:
+            $ref: '#/components/schemas/SurgeWindow'
+    SurgeReport:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        thresholds:
+          type: object
+          properties:
+            baselineWindows:
+              type: integer
+            minCurrentCount:
+              type: integer
+            surgeMultiplier:
+              type: number
+        windowEnd:
+          type: string
+          format: date
+        windowDays:
+          type: integer
+        baselinePeriods:
+          type: array
+          description: Baseline window layout. Counts are zero here; the per-zone figures carry them.
+          items:
+            $ref: '#/components/schemas/SurgeWindow'
+        surges:
+          type: array
+          description: Zones flagged as surging, highest ratio first.
+          items:
+            $ref: '#/components/schemas/SurgeZone'
+        zonesEvaluated:
+          type: array
+          items:
+            $ref: '#/components/schemas/SurgeZone'
+        zonesConsidered:
+          type: integer
+        zonesSuppressedByMinVolume:
+          type: integer
+          description: >-
+            How many zones were excluded by the absolute floor. Surfaced rather than hidden,
+            since a suppressed zone is still a zone someone might be waiting on.
+        generatedAt:
+          type: string
+          format: date-time
     ApiError:
       type: object
       properties:

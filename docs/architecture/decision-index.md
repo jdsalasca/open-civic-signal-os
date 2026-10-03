@@ -53,6 +53,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-public-data-anonymization-gate.md` (accepted)
 - `ADR-20260321-transparency-report-pipeline.md` (accepted)
 - `ADR-20260321-municipal-ticket-export.md` (accepted)
+- `ADR-20260321-surge-detection-formula.md` (accepted)
 
 ## Review Rule
 
