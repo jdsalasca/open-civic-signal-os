@@ -493,6 +493,7 @@ export function CommunityResources() {
                           rules={{ required: t("community_resources.schedule_error") }}
                           render={({ field }) => (
                             <Calendar
+                              appendTo={document.body}
                               value={field.value ?? null}
                               onChange={(e) => field.onChange(e.value ?? null)}
                               showIcon
@@ -512,6 +513,7 @@ export function CommunityResources() {
                           rules={{ required: t("community_resources.schedule_error") }}
                           render={({ field }) => (
                             <Calendar
+                              appendTo={document.body}
                               value={field.value ?? null}
                               onChange={(e) => field.onChange(e.value ?? null)}
                               showIcon

@@ -67,6 +67,7 @@ run("npm run backlog:current:check");
 run("npm run security:runtime:check");
 run("node test/generate-transparency-report.test.mjs");
 run("node test/check-ranking-reproducibility.test.mjs");
+run("node test/overlay-append-to.test.mjs");
 
 const frontendChanged = hasPrefix(files, "apps/web-react/");
 const backendChanged = hasPrefix(files, "apps/api-java/");

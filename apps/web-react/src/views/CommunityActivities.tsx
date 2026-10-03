@@ -466,6 +466,7 @@ export function CommunityActivities() {
                       rules={{ required: t("community_activities.schedule_error") }}
                       render={({ field }) => (
                         <Calendar
+                          appendTo={document.body}
                           value={field.value ?? null}
                           onChange={(e) => field.onChange(e.value ?? null)}
                           showIcon
@@ -485,6 +486,7 @@ export function CommunityActivities() {
                       rules={{ required: t("community_activities.schedule_error") }}
                       render={({ field }) => (
                         <Calendar
+                          appendTo={document.body}
                           value={field.value ?? null}
                           onChange={(e) => field.onChange(e.value ?? null)}
                           showIcon
@@ -504,6 +506,7 @@ export function CommunityActivities() {
                       rules={{ required: t("community_activities.schedule_error") }}
                       render={({ field }) => (
                         <Calendar
+                          appendTo={document.body}
                           value={field.value ?? null}
                           onChange={(e) => field.onChange(e.value ?? null)}
                           showIcon
@@ -523,6 +526,7 @@ export function CommunityActivities() {
                       rules={{ required: t("community_activities.schedule_error") }}
                       render={({ field }) => (
                         <Calendar
+                          appendTo={document.body}
                           value={field.value ?? null}
                           onChange={(e) => field.onChange(e.value ?? null)}
                           showIcon
