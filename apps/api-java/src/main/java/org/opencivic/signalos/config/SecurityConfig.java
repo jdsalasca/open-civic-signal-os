@@ -57,6 +57,9 @@ public class SecurityConfig {
                 // A community arguing about weights should be able to run the comparison itself.
                 // Storing nothing, so there is nothing to protect.
                 .requestMatchers(HttpMethod.POST, "/api/policy-simulation").permitAll()
+                // A peer has to read the contract before it can decide whether to ask for a token.
+                // The manifest carries no data, so there is nothing to protect.
+                .requestMatchers(HttpMethod.GET, "/api/federation/manifest", "/api/federation/compatibility").permitAll()
                 // The formula is platform-wide, so proposing and deciding a change is not a
                 // community-scoped act. Reading the governance record requires a session.
                 .requestMatchers(HttpMethod.POST, "/api/formula-change-proposals/**").hasRole("SUPER_ADMIN")

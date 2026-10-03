@@ -2208,6 +2208,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/federation/manifest:
+    get:
+      summary: What this instance can serve another instance, and in what shape
+      description: >-
+        Public and unauthenticated on purpose: a peer has to read the contract before it can decide
+        whether to ask for a token. The manifest carries no data, so there is nothing to protect.
+        It does NOT promise that another instance speaks the same contract: a consumer must read the
+        peer's own manifest and compare contractVersion before exchanging anything, because two
+        instances running different versions will each assume the other speaks their dialect and the
+        mismatch surfaces as a parse error rather than as a clear refusal.
+      responses:
+        '200':
+          description: The manifest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FederationManifest'
+  /api/federation/compatibility:
+    get:
+      summary: Whether this instance can read a peer contract version
+      description: >-
+        Exposed so a consumer can ask rather than infer. An unrecognised version is a refusal, not a
+        best-effort parse: parsing an unrecognised shape would produce data that looks valid and is
+        not.
+      parameters:
+        - in: query
+          name: peerContractVersion
+          required: true
+          schema:
+            type: string
+            example: v1
+      responses:
+        '200':
+          description: The compatibility verdict with its explanation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FederationCompatibility'
   /api/open-data/{communityId}/{exportType}:
     get:
       summary: Read one community open-data dataset through a scoped external API token
@@ -6840,6 +6878,72 @@ components:
           description: >-
             What this is and is not, on every response. Says the platform does not run the meeting,
             does not prevent overrunning, and does not reorder an agenda by score.
+
+    FederatedDataset:
+      type: object
+      properties:
+        exportType:
+          type: string
+          enum: [SIGNALS, PROPOSALS, VOTES, DECISIONS, METRICS]
+        scope:
+          type: string
+          description: The token scope a consumer needs to ask for.
+        description:
+          type: string
+        formats:
+          type: array
+          items:
+            type: string
+        contractVersion:
+          type: string
+    FederationManifest:
+      type: object
+      properties:
+        instanceName:
+          type: string
+        contractVersion:
+          type: string
+          description: >-
+            The contract version this instance speaks. Bumped when the shape of a federated export
+            changes in a way a consumer would notice.
+          example: v1
+        supportedContractVersions:
+          type: array
+          description: Versions this instance can still read, so an older peer is not cut off immediately.
+          items:
+            type: string
+        datasets:
+          type: array
+          items:
+            $ref: '#/components/schemas/FederatedDataset'
+        authentication:
+          type: string
+          description: How a consumer authenticates. Reading an export still requires a scoped token.
+        rateLimitHeader:
+          type: string
+        interpretation:
+          type: string
+          description: >-
+            What this manifest is and is not, on every response. Says it does not promise that
+            another instance speaks the same contract, that the manifest carries no data, and that
+            an unrecognised version should be refused rather than guessed.
+        generatedAt:
+          type: string
+          format: date-time
+    FederationCompatibility:
+      type: object
+      properties:
+        peerContractVersion:
+          type: string
+        localContractVersion:
+          type: string
+        readable:
+          type: boolean
+        explanation:
+          type: string
+          description: >-
+            Why the verdict is what it is. A refusal says a best-effort parse would produce data that
+            looks valid and is not.
 
     ApiError:
       type: object

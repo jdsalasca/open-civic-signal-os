@@ -116,6 +116,16 @@ public class CommunityOpenDataService {
         this.anonymizer = anonymizer;
     }
 
+    /**
+     * The datasets this instance serves, for the federation manifest.
+     *
+     * <p>Exposed rather than duplicated so a peer reading the manifest and a consumer reading the
+     * export centre cannot disagree about what exists.
+     */
+    public List<CommunityOpenDataExportDefinitionResponse> exportDefinitions() {
+        return EXPORT_DEFINITIONS;
+    }
+
     public CommunityOpenDataCenterResponse getCenter(UUID communityId, String username) {
         User user = communityAccessService.getCurrentUser(username);
         communityAccessService.requireScope(user.getId(), communityId, CommunityPermissionScope.MANAGE_OPEN_DATA_EXPORTS);
