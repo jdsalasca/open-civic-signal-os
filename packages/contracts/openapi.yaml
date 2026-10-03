@@ -1798,6 +1798,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TooManyRequestsResponse'
+  /api/community/freshness:
+    get:
+      summary: Data freshness monitoring per civic surface
+      description: >-
+        Every surface a community depends on, its age, and a verdict with the arithmetic behind
+        it. Silence is judged against the community's own median cadence rather than a global
+        threshold, and every verdict carries a cause. The cause matters: "no new reports" means
+        either intake broke or the community has nothing to report, and a monitor that cannot
+        distinguish them sends a responder to the wrong place. UNKNOWN is an explicit, honest
+        answer rather than a silent one.
+      parameters:
+        - in: query
+          name: allowGlobal
+          description: Allow monitoring across all communities when the caller has no membership.
+          schema:
+            type: boolean
+            default: false
+        - in: query
+          name: communityId
+          description: Restrict to one community. Must be visible to the caller.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: One freshness report per visible community
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataFreshnessReport'
+        '404':
+          description: Requested community is not visible to the caller
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/transparency-report:
     get:
       summary: Monthly transparency report over a closed calendar month
@@ -3794,6 +3832,75 @@ components:
         generatedAt:
           type: string
           format: date-time
+    SourceFreshness:
+      type: object
+      description: One monitored surface and how quiet it has been relative to its own history.
+      properties:
+        key:
+          type: string
+          enum: [REPORTS, PROPOSALS, DECISIONS, STATUS_CHANGES]
+        label:
+          type: string
+        lastEventOn:
+          type: string
+          format: date
+          nullable: true
+        daysSinceLast:
+          type: integer
+          format: int64
+          nullable: true
+        medianGapDays:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Median gap between consecutive events, not mean. One long gap caused by a holiday or
+            a freeze would otherwise become the normal gap and mask every future alert.
+        multipleOfMedianGap:
+          type: number
+          description: daysSinceLast divided by medianGapDays.
+        verdict:
+          type: string
+          enum: [FRESH, STALE, DORMANT, NO_BASELINE, NO_HISTORY]
+        cause:
+          type: string
+          enum: [ON_CADENCE, UNKNOWN]
+          description: >-
+            ON_CADENCE only when the surface is behaving normally. UNKNOWN whenever silence is
+            visible and its reason cannot be established from the data.
+        reason:
+          type: string
+          description: Plain-language explanation of the verdict and what it does not tell you.
+        totalEvents:
+          type: integer
+    DataFreshnessReport:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        generatedOn:
+          type: string
+          format: date
+        allHealthy:
+          type: boolean
+        staleCount:
+          type: integer
+          description: Sources at STALE or DORMANT.
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceFreshness'
+        guidance:
+          type: string
+          description: >-
+            What to do next. Names the intake path and municipal integrations as the things to
+            check before concluding a community stopped reporting.
     ApiError:
       type: object
       properties:
