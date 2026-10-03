@@ -1798,6 +1798,146 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TooManyRequestsResponse'
+  /api/community/explainability-snapshots:
+    post:
+      summary: Freeze the current ranked list as a verifiable snapshot
+      description: >-
+        Captures what a ranked list looked like at one moment, with the scoring formula version
+        and a SHA-256 over the canonical payload. A live trust packet is not enough for a
+        deliberation: one more vote changes the score, so the list an assembly actually voted on
+        would stop existing. The snapshot is immutable and there is no update or delete route,
+        because a snapshot that can be edited is not evidence.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExplainabilitySnapshotCreateRequest'
+      responses:
+        '200':
+          description: Frozen snapshot with its content hash
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExplainabilitySnapshot'
+        '400':
+          description: Label is blank, or limit is outside 1-200
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: Caller is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Community not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      summary: List snapshots for a community, newest first
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Snapshots, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExplainabilitySnapshot'
+        '401':
+          description: Caller is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/explainability-snapshots/{snapshotId}:
+    get:
+      summary: Retrieve one snapshot with its frozen payload
+      parameters:
+        - in: path
+          name: snapshotId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Snapshot with its canonical payload and hash
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExplainabilitySnapshot'
+        '401':
+          description: Caller is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Snapshot not found for this community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/explainability-snapshots/{snapshotId}/verification:
+    get:
+      summary: Independently verify that a snapshot's rows were not altered
+      description: >-
+        Recomputes the SHA-256 over the stored payload and compares it with the recorded hash.
+        This deliberately does NOT regenerate the ranking from current data: the question is
+        whether the stored rows were tampered with, not whether the backlog has since changed.
+        Both hashes are returned so a reader can compare them rather than accept a boolean from
+        the same party that produced the data.
+      parameters:
+        - in: path
+          name: snapshotId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Verification result with both hashes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExplainabilitySnapshotVerification'
+        '401':
+          description: Caller is not a member of the community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Snapshot not found for this community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/freshness:
     get:
       summary: Data freshness monitoring per civic surface
@@ -3901,6 +4041,87 @@ components:
           description: >-
             What to do next. Names the intake path and municipal integrations as the things to
             check before concluding a community stopped reporting.
+    ExplainabilitySnapshotCreateRequest:
+      type: object
+      required: [communityId, label]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        label:
+          type: string
+          description: >-
+            Required and free text, because a snapshot cited in meeting minutes has to say which
+            meeting it was for. An unlabelled snapshot is unfindable six months later.
+          example: Assembly of 12 March, agenda item 4
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 20
+          description: How many ranked signals to freeze. Out-of-range values are rejected, not clamped.
+    ExplainabilitySnapshot:
+      type: object
+      properties:
+        snapshotId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+          nullable: true
+        label:
+          type: string
+        createdBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        formulaVersion:
+          type: string
+          description: Scoring formula in force when the snapshot was taken.
+        entryCount:
+          type: integer
+        contentHash:
+          type: string
+          description: >-
+            SHA-256 over the canonical payload. Lets a later reader prove the rows were not
+            altered after the assembly saw them.
+          example: 9f2a1c4b7d3e5a60...
+        verified:
+          type: boolean
+          nullable: true
+          description: Present on single-snapshot reads, where the hash is recomputed on the way out.
+        verificationNote:
+          type: string
+          nullable: true
+        payload:
+          type: string
+          description: >-
+            Canonical JSON of the frozen ranked rows, object keys sorted at every level and entry
+            order preserved. Returned verbatim so a reader can recompute the hash themselves.
+    ExplainabilitySnapshotVerification:
+      type: object
+      properties:
+        snapshotId:
+          type: string
+          format: uuid
+        recordedHash:
+          type: string
+          description: The hash stored at creation.
+        recomputedHash:
+          type: string
+          description: >-
+            The hash computed now from the stored payload. A mismatch means the rows were
+            modified after creation.
+        valid:
+          type: boolean
+        explanation:
+          type: string
+          description: What the result means, including what it does NOT prove.
     ApiError:
       type: object
       properties:
