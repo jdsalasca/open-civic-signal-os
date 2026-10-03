@@ -58,6 +58,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-explainability-snapshots.md` (accepted)
 - `ADR-20260321-ranking-reproducibility.md` (accepted)
 - `ADR-20260321-dashboard-filter-queries.md` (accepted)
+- `ADR-20260321-duplicate-clustering-human-approval.md` (accepted)
 
 ## Review Rule
 

@@ -201,6 +201,127 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PrioritizedSignal'
+  /api/signals/merge-review/suggestions:
+    get:
+      summary: Duplicate clustering suggestions awaiting a human decision
+      description: >-
+        Groups reports the similarity algorithm believes describe the same problem. Nothing here
+        has been merged. Every candidate carries the score that justified proposing it, and a
+        target whose suggestion was already declined still appears, marked with that decision,
+        rather than vanishing and making the queue look permanently unfinished.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: threshold
+          required: false
+          description: Minimum similarity to propose. Defaults to 0.75. Must be greater than 0 and at most 1.
+          schema:
+            type: number
+            minimum: 0
+            maximum: 1
+            default: 0.75
+      responses:
+        '200':
+          description: Suggestions, strongest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SignalMergeSuggestion'
+        '400':
+          description: Threshold is out of range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the moderation queue scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/signals/merge-review/decisions:
+    post:
+      summary: Record a human decision about a proposed merge
+      description: >-
+        The algorithm never merges on its own. An APPROVED decision applies the merge it
+        authorises and records both in one transaction; REJECTED and SPLIT record the decision
+        without touching the signals. The suggestions sent here are stored verbatim rather than
+        recomputed, so a later change to the algorithm cannot rewrite what the reviewer was shown.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalMergeReviewRequest'
+      responses:
+        '200':
+          description: Recorded decision, with a merged signal id only when a merge was applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalMergeReview'
+        '400':
+          description: >-
+            Approval named no suggestions, or accepted one scoring below the stated threshold.
+            Both would produce an unauditable merge.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the moderation queue scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Target signal or community not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/signals/merge-review/history:
+    get:
+      summary: Every recorded merge decision, newest first
+      description: >-
+        Approvals and rejections alike. A log that only records approvals trains people to read
+        it as a changelog rather than a record, and then they stop reading it.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Decision history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SignalMergeReview'
+        '403':
+          description: Caller does not hold the moderation queue scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/signals/{id}:
     get:
       summary: Get one civic signal detail by ID
@@ -4143,6 +4264,117 @@ components:
         explanation:
           type: string
           description: What the result means, including what it does NOT prove.
+    SignalMergeCandidate:
+      type: object
+      description: One duplicate the algorithm proposes, with the score that justified proposing it.
+      properties:
+        signalId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        reportedAt:
+          type: string
+          format: date-time
+          nullable: true
+        similarity:
+          type: number
+          nullable: true
+          description: >-
+            0..1, on the same scale the merge decision uses, so the queue and the decision can
+            never disagree about what counted as similar.
+    SignalMergeSuggestion:
+      type: object
+      properties:
+        targetSignalId:
+          type: string
+          format: uuid
+        targetTitle:
+          type: string
+        targetCategory:
+          type: string
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/SignalMergeCandidate'
+        threshold:
+          type: number
+          description: The threshold this list was produced with.
+        latestDecision:
+          type: string
+          nullable: true
+          enum: [APPROVED, REJECTED, SPLIT]
+          description: >-
+            Most recent human decision for this target, so a reviewer sees what was already
+            answered instead of re-deciding it.
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+    SignalMergeReviewRequest:
+      type: object
+      required: [targetSignalId, decision, suggestedSimilarities]
+      properties:
+        targetSignalId:
+          type: string
+          format: uuid
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED, SPLIT]
+        suggestedSimilarities:
+          type: array
+          description: >-
+            What the reviewer was shown, supplied by the client and stored verbatim. Recomputing
+            server-side would store today's number and rewrite history if the algorithm changes.
+            Required non-empty for an approval, because an empty approval is unauditable.
+          items:
+            $ref: '#/components/schemas/SignalMergeCandidate'
+        threshold:
+          type: number
+          description: The threshold the reviewer says they were applying. An approval containing a candidate below it is refused.
+        note:
+          type: string
+          nullable: true
+          description: Why the reviewer decided as they did, for the audit trail.
+    SignalMergeReview:
+      type: object
+      description: A recorded human decision about a merge suggestion.
+      properties:
+        decisionId:
+          type: string
+          format: uuid
+        targetSignalId:
+          type: string
+          format: uuid
+        targetTitle:
+          type: string
+          nullable: true
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED, SPLIT]
+        suggestedCount:
+          type: integer
+        mergedTargetSignalId:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            Null for anything other than an approval, so a caller cannot mistake "we recorded
+            your rejection" for "we merged them".
+        mergedTitle:
+          type: string
+          nullable: true
+        decidedAt:
+          type: string
+          format: date-time
+        note:
+          type: string
+          nullable: true
+
     ApiError:
       type: object
       properties:

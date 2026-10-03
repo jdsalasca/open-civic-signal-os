@@ -45,6 +45,14 @@ public interface PrioritizationService {
     Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason);
     java.util.Map<UUID, java.util.List<Signal>> findDuplicates();
     java.util.Map<UUID, java.util.List<Signal>> findDuplicates(UUID communityId);
+
+    /**
+     * Similarity between two signals, on the same scale the boolean duplicate check uses.
+     *
+     * <p>Exposed so the human review queue and the merge decision share one definition, instead of
+     * the queue showing a score and the merge applying a different rule.
+     */
+    double similarityScore(Signal first, Signal second);
     Signal mergeSignals(UUID targetId, java.util.List<UUID> duplicateIds);
     
     // P1-B: Paginated access to moderation queue

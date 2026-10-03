@@ -288,6 +288,37 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         return duplicateMap;
     }
 
+    /**
+     * Similarity between two signals on the same scale the boolean check uses, so the review queue
+ * and the merge decision can never disagree about what counted as similar.
+ *
+ * <p>Shares its components with {@link #isSimilar}: identical and containment cases return 1.0,
+ * everything else returns the token overlap the boolean path already gates on. Returning the
+ * boolean twice would leave a reviewer unable to see how close a borderline case was.
+ */
+public double similarityScore(Signal s1, Signal s2) {
+    if (s1 == null || s2 == null) {
+        return 0.0;
+    }
+    if (s1.getCategory() == null || s2.getCategory() == null
+        || !s1.getCategory().equalsIgnoreCase(s2.getCategory())) {
+        return 0.0;
+    }
+    String t1 = normalizeTitle(s1.getTitle());
+    String t2 = normalizeTitle(s2.getTitle());
+    if (t1.isBlank() || t2.isBlank()) {
+        return 0.0;
+    }
+    if (t1.equals(t2)) {
+        return 1.0;
+    }
+    int minLen = Math.min(t1.length(), t2.length());
+    if (minLen >= 12 && (t1.contains(t2) || t2.contains(t1))) {
+        return 1.0;
+    }
+    return tokenOverlap(t1, t2);
+}
+
     private boolean isSimilar(Signal s1, Signal s2) {
         if (s1.getCategory() == null || s2.getCategory() == null || !s1.getCategory().equalsIgnoreCase(s2.getCategory())) {
             return false;
