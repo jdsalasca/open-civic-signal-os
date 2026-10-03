@@ -201,6 +201,53 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PrioritizedSignal'
+  /api/signals/bias-diagnostics:
+    get:
+      summary: Disparity diagnostics over how the platform treats comparable reports
+      description: >-
+        Reports, per category, whether a category is treated materially differently from the
+        best-treated category in the same community: slower resolution, a lower resolution rate,
+        or less attention. It does NOT measure fairness across populations, and no fairness
+        weighting is applied to any score. The platform holds no equity or demographic data, and a
+        weighting built on absent data would move real priorities invisibly. Every response
+        repeats that scope statement rather than leaving it implied.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Per-category measurements, flags, and the comparison standard used
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiasDiagnosticReport'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Community not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/signals/bias-diagnostics/formula:
+    get:
+      summary: Bias diagnostic thresholds and version
+      description: Published so a reviewer can see what counts as disparate instead of trusting the flag.
+      responses:
+        '200':
+          description: Version and thresholds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BiasDiagnosticThresholds'
   /api/signals/merge-review/suggestions:
     get:
       summary: Duplicate clustering suggestions awaiting a human decision
@@ -4374,6 +4421,100 @@ components:
         note:
           type: string
           nullable: true
+
+    BiasDiagnosticThresholds:
+      type: object
+      properties:
+        minCategoryReports:
+          type: integer
+          description: Below this, a category is marked NO_BASELINE instead of compared.
+        minCommunityReports:
+          type: integer
+        slowerResolutionMultiplier:
+          type: number
+          description: How much slower than the reference category before resolution time is flagged.
+        lowerResolutionRateMargin:
+          type: number
+          description: How far below the reference resolved share before a category is flagged.
+        lowerAttentionMultiplier:
+          type: number
+          description: How far below the reference attention rate before a category is flagged.
+    BiasCategoryDiagnostic:
+      type: object
+      description: One category's measured treatment, with every number the verdict came from.
+      properties:
+        category:
+          type: string
+        reports:
+          type: integer
+        resolved:
+          type: integer
+        medianDaysToResolve:
+          type: integer
+          format: int64
+        resolvedShare:
+          type: number
+        medianPriorityScore:
+          type: number
+        votesPerReport:
+          type: number
+        flags:
+          type: array
+          description: >-
+            NO_BASELINE when there are too few reports to compare; empty when the category matches
+            the standard; otherwise one or more of SLOWER_RESOLUTION, LOWER_RESOLUTION_RATE,
+            LOWER_ATTENTION.
+          items:
+            type: string
+            enum: [NO_BASELINE, SLOWER_RESOLUTION, LOWER_RESOLUTION_RATE, LOWER_ATTENTION]
+    BiasDiagnosticReport:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        communityId:
+          type: string
+          format: uuid
+        generatedAt:
+          type: string
+          format: date-time
+        thresholds:
+          $ref: '#/components/schemas/BiasDiagnosticThresholds'
+        totalReportsConsidered:
+          type: integer
+        communityMedianDaysToResolve:
+          type: integer
+          format: int64
+          description: Context only. Comparisons are drawn against referenceCategory, not this.
+        communityResolvedShare:
+          type: number
+        communityVotesPerReport:
+          type: number
+        referenceCategory:
+          type: string
+          nullable: true
+          description: >-
+            The best-treated category with enough reports, which every comparison is drawn against.
+            The average is the wrong yardstick: with half the categories at 2 days and half at 40,
+            the community median lands at 21 and a slow category reads as 1.9x rather than the 20x
+            it is.
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/BiasCategoryDiagnostic'
+        disparateCategories:
+          type: array
+          items:
+            type: string
+        categoriesWithoutBaseline:
+          type: integer
+        scopeStatement:
+          type: string
+          description: >-
+            What this report is and is not, repeated on every response. A report titled "bias
+            diagnostics" that stayed quiet about lacking equity data would invite a reader to
+            conclude it measured fairness across populations.
 
     ApiError:
       type: object
