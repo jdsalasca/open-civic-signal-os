@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T20:27:24.965Z
+Last updated: 2026-10-03T20:33:19.869Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T20:27:22.588Z)
-- Throughput (issues closed): 108
+- Window: last 7 days (since 2026-09-26T20:33:17.334Z)
+- Throughput (issues closed): 109
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -78,15 +78,14 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 8
+- TODO: 7
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 103
+- DONE: 104
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
 - #120 Agent Quality Review 2026-W40
-- #54 story:OCS-P2-004 build policy simulation sandbox for scoring weights
 - #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
 - #33 federation: city-to-city open API compatibility layer
 - #32 budgeting: participatory budgeting simulation module
@@ -164,6 +163,7 @@ Status labels used by this board:
 - #57 Agent Quality Review 2026-W09
 - #56 Agent Quality Review 2026-W08
 - #55 story:OCS-P2-005 deliver low-bandwidth field dashboard mode
+- #54 story:OCS-P2-004 build policy simulation sandbox for scoring weights
 - #53 story:OCS-P1-008 ingest community trust pulse inputs and aggregates
 - #52 story:OCS-P1-007 add explainability export snapshots for assemblies
 - #51 story:OCS-P1-006 add data freshness monitoring and stale-source alerts
