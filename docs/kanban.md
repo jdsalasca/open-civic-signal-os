@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T03:59:01.201Z
+Last updated: 2026-10-03T04:17:50.021Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T03:58:58.708Z)
-- Throughput (issues closed): 88
+- Window: last 7 days (since 2026-09-26T04:17:47.699Z)
+- Throughput (issues closed): 89
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -79,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 25
+- TODO: 24
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 86
+- DONE: 87
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -91,7 +91,6 @@ Status labels used by this board:
 - #54 story:OCS-P2-004 build policy simulation sandbox for scoring weights
 - #53 story:OCS-P1-008 ingest community trust pulse inputs and aggregates
 - #52 story:OCS-P1-007 add explainability export snapshots for assemblies
-- #51 story:OCS-P1-006 add data freshness monitoring and stale-source alerts
 - #50 story:OCS-P2-002 implement trust-proof snapshot for backlog publish
 - #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
 - #44 story:OCS-P0-008 add reproducibility script for ranking outputs
@@ -181,6 +180,7 @@ Status labels used by this board:
 - #58 Current Sprint Focus 2026-W09
 - #57 Agent Quality Review 2026-W09
 - #56 Agent Quality Review 2026-W08
+- #51 story:OCS-P1-006 add data freshness monitoring and stale-source alerts
 - #48 story:OCS-P1-004 build transparency monthly report pipeline
 - #47 story:OCS-P1-003 version and expose formula metadata
 - #46 story:OCS-P1-002 implement municipal execution bridge and ownership
