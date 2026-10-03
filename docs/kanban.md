@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T17:05:01.491Z
+Last updated: 2026-10-03T17:24:57.845Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T17:04:58.857Z)
-- Throughput (issues closed): 101
+- Window: last 7 days (since 2026-09-26T17:24:55.422Z)
+- Throughput (issues closed): 103
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -79,10 +79,10 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 14
+- TODO: 12
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 97
+- DONE: 99
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
@@ -90,9 +90,7 @@ Status labels used by this board:
 - #55 story:OCS-P2-005 deliver low-bandwidth field dashboard mode
 - #54 story:OCS-P2-004 build policy simulation sandbox for scoring weights
 - #53 story:OCS-P1-008 ingest community trust pulse inputs and aggregates
-- #50 story:OCS-P2-002 implement trust-proof snapshot for backlog publish
 - #49 story:OCS-P2-001 prototype assembly mode for townhall facilitation
-- #35 trust-proof: cryptographic snapshot for published backlog
 - #34 governance: public formula change proposal workflow
 - #33 federation: city-to-city open API compatibility layer
 - #32 budgeting: participatory budgeting simulation module
@@ -172,6 +170,7 @@ Status labels used by this board:
 - #56 Agent Quality Review 2026-W08
 - #52 story:OCS-P1-007 add explainability export snapshots for assemblies
 - #51 story:OCS-P1-006 add data freshness monitoring and stale-source alerts
+- #50 story:OCS-P2-002 implement trust-proof snapshot for backlog publish
 - #48 story:OCS-P1-004 build transparency monthly report pipeline
 - #47 story:OCS-P1-003 version and expose formula metadata
 - #46 story:OCS-P1-002 implement municipal execution bridge and ownership
@@ -185,6 +184,7 @@ Status labels used by this board:
 - #38 story:OCS-P0-002 implement deterministic prioritization service with score breakdown
 - #37 story:OCS-P0-001 build ingest adapters for web/csv/chat exports
 - #36 ai: optional civic signal clustering with human approval
+- #35 trust-proof: cryptographic snapshot for published backlog
 - #31 ops: create triage protocol for trust-critical incidents
 - #30 security: add public data anonymization checklist enforcement
 - #29 exports: municipal ticket export format adapter
