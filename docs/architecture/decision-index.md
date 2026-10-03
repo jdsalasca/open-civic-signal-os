@@ -72,6 +72,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-assembly-mode.md` (accepted)
 - `ADR-20260321-assembly-facilitation.md` (accepted)
 - `ADR-20260321-federation-manifest.md` (accepted)
+- `ADR-20260321-digest-scheduling.md` (accepted)
 
 ## Review Rule
 

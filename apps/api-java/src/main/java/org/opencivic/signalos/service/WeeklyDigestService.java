@@ -164,6 +164,19 @@ public class WeeklyDigestService {
         return compose(communityId, weekKey, limit);
     }
 
+    /**
+     * Composes a digest without a membership check, for the scheduler.
+     *
+     * <p>The scheduler has no user, so it cannot pass one. It is not a bypass of the permission
+     * model: the scheduler runs inside the platform and its runs are recorded in
+     * {@code digest_schedule_runs}, which is the audit trail instead of a username. Every
+     * user-facing route still goes through {@link #buildDigest} and its check.
+     */
+    @Transactional(readOnly = true)
+    public WeeklyDigest buildDigestForScheduler(UUID communityId, String weekKey, Integer limit) {
+        return compose(communityId, weekKey, limit);
+    }
+
     @Transactional
     public WeeklyDigest publishDigest(UUID communityId, String weekKey, Integer limit, String username) {
         User user = userRepository.findByUsername(username)

@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.opencivic.signalos.domain.CommunityDigestPublication;
 import org.opencivic.signalos.domain.CommunityPermissionScope;
 import org.opencivic.signalos.service.CommunityAccessService;
+import org.opencivic.signalos.service.DigestSchedulerService;
 import org.opencivic.signalos.service.WeeklyDigestService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,13 +29,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class WeeklyDigestController {
 
     private final WeeklyDigestService digestService;
+    private final DigestSchedulerService schedulerService;
     private final CommunityAccessService communityAccessService;
 
     public WeeklyDigestController(
         WeeklyDigestService digestService,
+        DigestSchedulerService schedulerService,
         CommunityAccessService communityAccessService
     ) {
         this.digestService = digestService;
+        this.schedulerService = schedulerService;
         this.communityAccessService = communityAccessService;
     }
 
@@ -67,6 +71,21 @@ public class WeeklyDigestController {
     ) {
         requireExportScope(communityId, principal);
         return digestService.history(communityId, principal.getName());
+    }
+
+    /**
+     * What the scheduler did, per week.
+     *
+     * <p>Readable so a community can see that a digest is waiting for someone to publish it, rather
+     * than discovering on Friday that no bulletin went out.
+     */
+    @GetMapping("/schedule-history")
+    public List<DigestSchedulerService.ScheduleRunView> scheduleHistory(
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        requireExportScope(communityId, principal);
+        return schedulerService.history(communityId);
     }
 
     private void requireExportScope(UUID communityId, Principal principal) {

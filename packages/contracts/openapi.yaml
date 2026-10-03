@@ -3333,6 +3333,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/weekly-digest/schedule-history:
+    get:
+      summary: What the weekly digest scheduler did, per week
+      description: >-
+        Readable so a community can see that a digest is waiting for someone to publish it, rather
+        than discovering on Friday that no bulletin went out. The scheduler PREPARES digests; it does
+        not publish them, because a scheduler that sent bulletins on its own would mean a wrong digest
+        reaches residents with nobody accountable for it.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Schedule runs, newest week first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DigestScheduleRun'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
   /api/community/explainability-snapshots:
     post:
       summary: Freeze the current ranked list as a verifiable snapshot
@@ -6945,6 +6975,34 @@ components:
             Why the verdict is what it is. A refusal says a best-effort parse would produce data that
             looks valid and is not.
 
+    DigestScheduleRun:
+      type: object
+      description: >-
+        What the scheduler did for one community in one week. There is deliberately no PUBLISHED
+        outcome: the scheduler prepares and a person publishes.
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+          nullable: true
+        weekKey:
+          type: string
+          example: 2026-W13
+        outcome:
+          type: string
+          enum: [PREPARED, SKIPPED, FAILED]
+          description: >-
+            PREPARED means the digest is ready and waiting for a person. SKIPPED means there was
+            nothing to do. FAILED means it could not be generated, and a community gets no bulletin
+            that week unless someone looks.
+        detail:
+          type: string
+          nullable: true
+        ranAt:
+          type: string
+          format: date-time
     ApiError:
       type: object
       properties:
