@@ -1507,6 +1507,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/exports/municipal-tickets/field-map:
+    get:
+      summary: Published column map for the municipal ticket export
+      description: >-
+        Every column in the municipal ticket shape with its type and meaning, readable before
+        ingesting anything. Municipalities pin importers to this, so the order and names are a
+        contract: adding a column is a breaking change and goes through an ADR.
+      responses:
+        '200':
+          description: Ordered field map, matching the ticket column order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MunicipalTicketField'
+  /api/community/exports/municipal-tickets:
+    post:
+      summary: Export signals as municipal tickets
+      description: >-
+        Translates community signals into the shape a city helpdesk ingests. Categories with no
+        city service code are reported and excluded rather than defaulted, because a report filed
+        against the wrong service code reaches the wrong department and then stops being chased.
+        Personal contact details are redacted, since the destination is a system this platform
+        does not control.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MunicipalTicketExportRequest'
+      responses:
+        '200':
+          description: Tickets plus the field map and any categories left out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MunicipalTicketExport'
+        '400':
+          description: Request body is missing communityId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Community policy denied open-data export management
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Community not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/exports/anonymization-check:
     get:
       summary: Pre-publication anonymization checklist for public open data
@@ -3442,6 +3498,124 @@ components:
             same period.
         complete:
           type: boolean
+    MunicipalTicketField:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          description: Column type as a city importer would declare it, e.g. decimal(5,2).
+        description:
+          type: string
+    MunicipalTicketRecord:
+      type: object
+      description: >-
+        One ticket. No author id, account, or contact details: a ticket export leaves the
+        platform, so the redacted view is the only one that leaves.
+      properties:
+        ticketRef:
+          type: string
+          description: >-
+            Stable citation derived from the signal id. Deterministic, so regenerating an export
+            does not invent new references and cost the city their ticket history.
+          example: OCS-9F2A1C4B7D3E5A60
+        externalCategoryCode:
+          type: string
+          description: City service code, or an UNMAPPED. prefix when the category is not mapped.
+        title:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+          description: >-
+            Free-text location label. Never coordinates: the precise location of a private home
+            is a safety risk, not a routing convenience.
+        status:
+          type: string
+        priorityScore:
+          type: number
+          description: >-
+            Platform prioritisation score, provided as context. Explicitly NOT the city's own
+            priority field.
+        reportedAt:
+          type: string
+          format: date-time
+        sourceChannel:
+          type: string
+          nullable: true
+          description: How the report entered the platform, for provenance.
+        sourceRef:
+          type: string
+          nullable: true
+          description: File and line for an imported report, for provenance.
+        platformUrl:
+          type: string
+          description: Link back to the public signal page.
+    MunicipalTicketUnmappedCategory:
+      type: object
+      properties:
+        category:
+          type: string
+        platformLabel:
+          type: string
+        affectedReports:
+          type: integer
+          description: How many reports this exclusion is currently costing.
+        guidance:
+          type: string
+    MunicipalTicketExportRequest:
+      type: object
+      required: [communityId]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        categoryMap:
+          type: object
+          description: >-
+            Translation from platform categories to city service codes, supplied per request
+            rather than stored. The codes belong to one city's helpdesk, and a stored mapping
+            would keep applying after the city renames a service.
+          additionalProperties:
+            type: string
+          example:
+            infrastructure: SRV-ROADS-01
+            utilities: SRV-WATER-04
+        includeUnmapped:
+          type: boolean
+          default: false
+          description: >-
+            Export unmapped categories under an UNMAPPED. prefix instead of excluding them. The
+            exclusions are still reported either way.
+    MunicipalTicketExport:
+      type: object
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        fieldMap:
+          type: array
+          description: Ships with every export so the columns are self-describing.
+          items:
+            $ref: '#/components/schemas/MunicipalTicketField'
+        tickets:
+          type: array
+          items:
+            $ref: '#/components/schemas/MunicipalTicketRecord'
+        unmappedCategories:
+          type: array
+          items:
+            $ref: '#/components/schemas/MunicipalTicketUnmappedCategory'
+        exportedCount:
+          type: integer
+        excludedCount:
+          type: integer
+        categoryMap:
+          type: object
+          additionalProperties:
+            type: string
     ApiError:
       type: object
       properties:
