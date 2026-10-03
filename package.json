@@ -9,7 +9,7 @@
     "packages/*"
   ],
   "scripts": {
-    "prioritize": "node src/prioritize.mjs examples/feedback.json examples/prioritized-backlog.json",
+    "prioritize": "node src/prioritize.mjs examples/feedback.json",
     "ingest": "node src/ingest.mjs",
     "dev:web": "npm --workspace apps/web-react run dev",
     "build:web": "npm --workspace apps/web-react run build",
@@ -35,7 +35,8 @@
     "security:runtime:check": "node scripts/check-runtime-secrets.mjs",
     "contract:parity:check": "node scripts/check-openapi-parity.mjs",
     "agent:ux:pw": "node scripts/playwright-cli.mjs",
-    "report:transparency": "node scripts/generate-transparency-report.mjs"
+    "report:transparency": "node scripts/generate-transparency-report.mjs",
+    "ranking:check": "node scripts/check-ranking-reproducibility.mjs"
   },
   "releaseQuality": {
     "minimumCoverage": 20

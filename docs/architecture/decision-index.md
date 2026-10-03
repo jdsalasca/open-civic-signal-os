@@ -56,6 +56,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-surge-detection-formula.md` (accepted)
 - `ADR-20260321-freshness-monitoring.md` (accepted)
 - `ADR-20260321-explainability-snapshots.md` (accepted)
+- `ADR-20260321-ranking-reproducibility.md` (accepted)
 
 ## Review Rule
 

@@ -12,7 +12,8 @@
 
 ### Root Environment
 - `npm install`: Install workspace dependencies.
-- `npm run prioritize`: Runs the MVP prioritization script using `examples/feedback.json`.
+- `npm run prioritize`: Validates the shape of `examples/feedback.json` (ids unique, required fields present, numeric inputs non-negative). It deliberately does **not** score anything.
+- `npm run ranking:check`: Calls the backend twice and fails if the two ranked orderings disagree. This is the ranking reproducibility check.
 - `npm run agent:gate`: Runs the agent quality gate script.
 
 ### Backend (apps/api-java)
@@ -64,7 +65,8 @@
 ## Quality Gates
 - Backend tests must run (no test skipping): `mvn -q test`.
 - Frontend must build: `npm run build:web`.
-- MVP script must work: `npm run prioritize`.
+- Dataset check must work: `npm run prioritize`.
+- Ranking reproducibility must hold: `npm run ranking:check` against a running backend.
 - Documentation must be updated for any behavior change.
 - Frontend-impacting changes must include Playwright CLI visual evidence (`output/playwright/*`).
 
