@@ -27,7 +27,15 @@ interface ApiError extends Error {
   friendlyMessage?: string;
 }
 
-const CRITICAL_SCORE_THRESHOLD = 220;
+/**
+ * Bootstrap value only.
+ *
+ * The platform publishes the real threshold at /api/signals/meta and it wins as soon as that
+ * response lands. The CRITICAL filter itself is applied by the backend through minScore, never
+ * here, so the number a resident reads is the true total rather than how many critical rows
+ * happened to fall inside one page.
+ */
+const CRITICAL_SCORE_THRESHOLD_FALLBACK = 220;
 const STATUS_FILTERS = new Set(["NEW", "IN_PROGRESS", "RESOLVED"]);
 const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
 
@@ -52,6 +60,9 @@ export function Dashboard() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<SignalMeta | null>(null);
+  // Server-published threshold, with a bootstrap fallback only for the first paint before /meta
+  // resolves. Once meta arrives this is the platform's number, not a local copy.
+  const criticalThreshold = meta?.criticalScoreThreshold ?? CRITICAL_SCORE_THRESHOLD_FALLBACK;
   const [duplicateClusters, setDuplicateClusters] = useState(0);
   const [aging, setAging] = useState<SignalAging | null>(null);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -88,9 +99,20 @@ export function Dashboard() {
 
     try {
       setLoading(true);
-      const prioritizedQuery = STATUS_FILTERS.has(activeFilter)
-        ? `signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}&status=${activeFilter}`
-        : `signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`;
+      // Every filter that changes the visible set must change the query, never just the
+      // highlight. CRITICAL becomes minScore so the backend filters and reports the real total.
+      const prioritizedParams = new URLSearchParams({
+        page: String(lazyState.page),
+        size: String(lazyState.rows),
+      });
+      if (STATUS_FILTERS.has(activeFilter)) {
+        prioritizedParams.set("status", activeFilter);
+      }
+      if (activeFilter === "CRITICAL") {
+        prioritizedParams.set("minScore", String(criticalThreshold));
+      }
+      const prioritizedQuery = `signals/prioritized?${prioritizedParams.toString()}`;
+
       const [signalsRes, metaRes, notificationsRes, duplicatesRes] = await Promise.all([
         apiClient.get(prioritizedQuery, { signal }),
         apiClient.get("signals/meta", { signal }),
@@ -141,7 +163,7 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [activeRole, t, lazyState, activeFilter, activeCommunityId]);
+  }, [activeRole, t, lazyState, activeFilter, activeCommunityId, criticalThreshold]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -158,17 +180,14 @@ export function Dashboard() {
     setLazyState((prev) => ({ ...prev, first: 0, page: 0 }));
   };
 
-  const displayedSignals = useMemo(() => {
-    if (activeFilter === "CRITICAL") {
-      return signals.filter((s) => (s.priorityScore ?? 0) >= CRITICAL_SCORE_THRESHOLD);
-    }
-    return signals;
-  }, [signals, activeFilter]);
+  const displayedSignals = signals;
 
-  const visibleRecords = activeFilter === "CRITICAL" ? displayedSignals.length : totalRecords;
+  // With the filter pushed into the query, the visible count is the backend total. Counting
+  // critical rows client-side would report "how many of this page" instead of "how many exist".
+  const visibleRecords = totalRecords;
   const criticalCount = useMemo(
-    () => signals.filter((s) => (s.priorityScore ?? 0) >= CRITICAL_SCORE_THRESHOLD).length,
-    [signals]
+    () => (activeFilter === "CRITICAL" ? totalRecords : signals.filter((s) => (s.priorityScore ?? 0) >= criticalThreshold).length),
+    [totalRecords, signals, activeFilter, criticalThreshold]
   );
   const newCount = useMemo(
     () => signals.filter((s) => s.status === "NEW").length,

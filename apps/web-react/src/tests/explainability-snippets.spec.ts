@@ -46,7 +46,8 @@ test.describe('Explainability snippets in dashboard list', () => {
         body: JSON.stringify({
           totalSignals: 1,
           unresolvedSignals: 1,
-          lastUpdatedAt: new Date().toISOString()
+          lastUpdatedAt: new Date().toISOString(),
+          criticalScoreThreshold: 220
         })
       });
     });

@@ -150,6 +150,7 @@ public class SignalController {
     public ApiPageResponse<SignalResponse> getPrioritizedSignals(
         @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
         @RequestParam(value = "status", required = false) String statusFilter,
+        @RequestParam(value = "minScore", required = false) Double minScore,
         Authentication authentication,
         @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -157,6 +158,7 @@ public class SignalController {
         Timer.Sample latencySample = Timer.start(meterRegistry);
         String status = "success";
         validateCommunityScope(authentication, communityId);
+        validateMinScore(minScore);
         List<String> statuses = normalizeStatusFilter(statusFilter);
         Pageable sanitized = PageRequest.of(
             pageable.getPageNumber(),
@@ -165,7 +167,7 @@ public class SignalController {
         );
         try {
             String viewerUsername = resolveUsername(authentication);
-            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses)
+            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses, minScore)
                 .map(signal -> mapToResponse(signal, viewerUsername));
 
             meterRegistry.counter("signalos.prioritized.requests.total", "scope", scope).increment();
@@ -289,16 +291,37 @@ public class SignalController {
     @GetMapping("/top-10")
     public List<SignalResponse> getTopUnresolved(
         @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        @RequestParam(value = "minScore", required = false) Double minScore,
         Authentication authentication
     ) {
         validateCommunityScope(authentication, communityId);
+        validateMinScore(minScore);
         String viewerUsername = resolveUsername(authentication);
-        return prioritizationService.getTopUnresolved(10, communityId).stream()
+        return prioritizationService.getTopUnresolved(10, communityId, minScore).stream()
             .map(signal -> mapToResponse(signal, viewerUsername))
             .collect(Collectors.toList());
     }
 
-@GetMapping("/formula")
+/**
+ * Rejects a nonsensical threshold instead of ignoring it.
+ *
+ * <p>A negative minimum would silently behave as "no filter", so a caller who asked for
+ * "everything above minus ten" would get the whole backlog and no indication of it. Failing
+ * loudly is the only honest response to a filter the platform cannot honour.
+ */
+private void validateMinScore(Double minScore) {
+    if (minScore == null) {
+        return;
+    }
+    if (minScore.isNaN() || minScore.isInfinite()) {
+        throw new IllegalArgumentException("minScore must be a finite number.");
+    }
+    if (minScore < 0) {
+        throw new IllegalArgumentException("minScore must be greater than or equal to 0, but was: " + minScore);
+    }
+}
+
+    @GetMapping("/formula")
     public PrioritizationFormulaResponse getPrioritizationFormula() {
         return prioritizationFormulaService.getFormula();
     }
@@ -323,8 +346,17 @@ public class SignalController {
                 .map(Signal::getCreatedAt)
                 .orElse(null);
 
-        return new SignalMetaResponse(totalSignals, unresolvedSignals, lastUpdatedAt);
+        return new SignalMetaResponse(totalSignals, unresolvedSignals, lastUpdatedAt, DEFAULT_CRITICAL_SCORE_THRESHOLD);
     }
+
+    /**
+     * Score at or above which a signal counts as critical.
+     *
+     * <p>Single source of truth for both the paginated ranking and the top-10 list, published on
+     * /api/signals/meta so the dashboard uses the same number instead of its own copy. Raising it
+     * changes what the platform calls critical everywhere at once.
+     */
+    public static final double DEFAULT_CRITICAL_SCORE_THRESHOLD = 220.0;
 
     @GetMapping("/map")
     public CommunitySignalMapResponse getCommunitySignalMap(

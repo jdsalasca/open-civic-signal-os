@@ -17,8 +17,25 @@ public interface PrioritizationService {
     Page<Signal> getPrioritizedSignals(Pageable pageable);
     Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId);
     Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId, Collection<String> statuses);
+
+    /**
+     * Adds a minimum-score filter pushed into the query.
+     *
+     * <p>Only the two-argument-plus-statuses variant exists. Optional arguments that only
+     * influence a null check in the body are one more combination to keep straight and to test,
+     * for no caller benefit.
+     */
+    Page<Signal> getPrioritizedSignals(
+        Pageable pageable,
+        UUID communityId,
+        Collection<String> statuses,
+        Double minScore
+    );
     List<Signal> getTopUnresolved(int limit);
     List<Signal> getTopUnresolved(int limit, UUID communityId);
+
+    /** Same threshold contract as the paginated ranking, so both agree on what "critical" means. */
+    List<Signal> getTopUnresolved(int limit, UUID communityId, Double minScore);
     Optional<Signal> getSignalById(UUID id);
     Optional<Signal> getSignalById(UUID id, UUID communityId);
     double calculateScore(Signal signal);

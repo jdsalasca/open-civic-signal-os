@@ -26,6 +26,22 @@ public interface SignalRepository extends JpaRepository<Signal, UUID> {
     Page<Signal> findByAuthorIdAndCommunityId(UUID authorId, UUID communityId, Pageable pageable);
     Page<Signal> findByStatusNotInAndCommunityId(Collection<String> statuses, UUID communityId, Pageable pageable);
     Page<Signal> findByStatusInAndCommunityId(Collection<String> statuses, UUID communityId, Pageable pageable);
+
+    // Score-threshold variants. The threshold goes into the query rather than being applied to an
+    // already-fetched page, so totalElements is the real number of matching signals and not the
+    // number that happened to land in the rows already loaded.
+    //
+    // The threshold-only variants keep the FLAGGED/REJECTED exclusion of the unfiltered path on
+    // purpose. Without that, switching a filter on would resurface moderated content, which is
+    // not something a threshold is allowed to undo.
+    Page<Signal> findByStatusNotInAndPriorityScoreGreaterThanEqual(
+        Collection<String> excludedStatuses, double minScore, Pageable pageable);
+    Page<Signal> findByStatusNotInAndCommunityIdAndPriorityScoreGreaterThanEqual(
+        Collection<String> excludedStatuses, UUID communityId, double minScore, Pageable pageable);
+    Page<Signal> findByStatusInAndPriorityScoreGreaterThanEqual(Collection<String> statuses, double minScore, Pageable pageable);
+    Page<Signal> findByStatusInAndCommunityIdAndPriorityScoreGreaterThanEqual(Collection<String> statuses, UUID communityId, double minScore, Pageable pageable);
+    Page<Signal> findByStatusAndPriorityScoreGreaterThanEqual(String status, double minScore, Pageable pageable);
+    Page<Signal> findByStatusAndCommunityIdAndPriorityScoreGreaterThanEqual(String status, UUID communityId, double minScore, Pageable pageable);
     @Query("SELECT s FROM Signal s WHERE s.status = :status AND s.communityId = :communityId ORDER BY s.priorityScore DESC")
     List<Signal> findTopSignalsByStatusAndCommunityId(
         @Param("status") String status,

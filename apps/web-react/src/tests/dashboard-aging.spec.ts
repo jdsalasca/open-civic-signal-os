@@ -24,6 +24,7 @@ test.describe("Dashboard case aging and SLA risk", () => {
       totalSignals: 4,
       unresolvedSignals: 4,
       lastUpdatedAt: "2026-04-01T10:00:00",
+      criticalScoreThreshold: 220,
     };
 
     const aging: SignalAging = {

@@ -124,6 +124,11 @@ export type SignalMeta = {
   totalSignals: number;
   unresolvedSignals: number;
   lastUpdatedAt: string | null;
+  /**
+   * Score at or above which the platform calls a signal critical. Published by the backend so the
+   * dashboard filter and the API filter cannot drift apart.
+   */
+  criticalScoreThreshold: number;
 };
 
 export type UserRole = "SUPER_ADMIN" | "PUBLIC_SERVANT" | "CITIZEN" | "GUEST";

@@ -20,6 +20,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,14 @@ public class PrioritizationServiceImpl implements PrioritizationService {
      * regression note in docs/ per the reproducibility rule.
      */
     public static final String TRANSFORMATION_VERSION = Signal.TRANSFORMATION_VERSION_V1;
+
+    /**
+     * Statuses hidden from the public ranking regardless of any filter.
+     *
+     * <p>A threshold is not allowed to bring back content moderation removed, so every path that
+     * does not name statuses explicitly still excludes these.
+     */
+    static final List<String> HIDDEN_STATUSES = List.of("FLAGGED", "REJECTED");
 
     private final SignalRepository signalRepository;
     private final VoteRepository voteRepository;
@@ -146,15 +155,39 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId, Collection<String> statuses) {
+        return getPrioritizedSignals(pageable, communityId, statuses, null);
+    }
+
+    @Override
+    public Page<Signal> getPrioritizedSignals(
+        Pageable pageable,
+        UUID communityId,
+        Collection<String> statuses,
+        Double minScore
+    ) {
+        boolean hasStatuses = statuses != null && !statuses.isEmpty();
+        boolean hasThreshold = minScore != null;
+
         Page<Signal> basePage;
-        if (statuses != null && !statuses.isEmpty()) {
-            basePage = communityId == null
-                ? signalRepository.findByStatusIn(statuses, pageable)
-                : signalRepository.findByStatusInAndCommunityId(statuses, communityId, pageable);
+        if (hasThreshold && hasStatuses && communityId == null) {
+            basePage = signalRepository.findByStatusInAndPriorityScoreGreaterThanEqual(statuses, minScore, pageable);
+        } else if (hasThreshold && hasStatuses) {
+            basePage = signalRepository.findByStatusInAndCommunityIdAndPriorityScoreGreaterThanEqual(statuses, communityId, minScore, pageable);
+        } else if (hasThreshold && communityId == null) {
+            // Keeps excluding FLAGGED and REJECTED, same as the unfiltered path.
+            basePage = signalRepository.findByStatusNotInAndPriorityScoreGreaterThanEqual(
+                HIDDEN_STATUSES, minScore, pageable);
+        } else if (hasThreshold) {
+            basePage = signalRepository.findByStatusNotInAndCommunityIdAndPriorityScoreGreaterThanEqual(
+                HIDDEN_STATUSES, communityId, minScore, pageable);
+        } else if (hasStatuses && communityId == null) {
+            basePage = signalRepository.findByStatusIn(statuses, pageable);
+        } else if (hasStatuses) {
+            basePage = signalRepository.findByStatusInAndCommunityId(statuses, communityId, pageable);
+        } else if (communityId == null) {
+            basePage = signalRepository.findByStatusNotIn(HIDDEN_STATUSES, pageable);
         } else {
-            basePage = communityId == null
-                ? signalRepository.findByStatusNotIn(List.of("FLAGGED", "REJECTED"), pageable)
-                : signalRepository.findByStatusNotInAndCommunityId(List.of("FLAGGED", "REJECTED"), communityId, pageable);
+            basePage = signalRepository.findByStatusNotInAndCommunityId(HIDDEN_STATUSES, communityId, pageable);
         }
         return basePage
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
@@ -167,9 +200,22 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public List<Signal> getTopUnresolved(int limit, UUID communityId) {
-        List<Signal> baseSignals = communityId == null
-            ? signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, limit))
-            : signalRepository.findTopSignalsByStatusAndCommunityId("NEW", communityId, PageRequest.of(0, limit));
+        return getTopUnresolved(limit, communityId, null);
+    }
+
+    @Override
+    public List<Signal> getTopUnresolved(int limit, UUID communityId, Double minScore) {
+        List<Signal> baseSignals;
+        if (minScore != null) {
+            PageRequest page = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "priorityScore"));
+            baseSignals = communityId == null
+                ? signalRepository.findByStatusAndPriorityScoreGreaterThanEqual("NEW", minScore, page).getContent()
+                : signalRepository.findByStatusAndCommunityIdAndPriorityScoreGreaterThanEqual("NEW", communityId, minScore, page).getContent();
+        } else {
+            baseSignals = communityId == null
+                ? signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, limit))
+                : signalRepository.findTopSignalsByStatusAndCommunityId("NEW", communityId, PageRequest.of(0, limit));
+        }
         return baseSignals
                 .stream()
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)))

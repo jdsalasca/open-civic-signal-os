@@ -148,6 +148,17 @@ paths:
           schema:
             type: string
             example: NEW
+        - in: query
+          name: minScore
+          required: false
+          description: >-
+            Only return signals scoring at or above this value. Applied in the database query, not
+            to an already-fetched page, so totalElements reflects the filter. Combines with status
+            so both conditions narrow together.
+          schema:
+            type: number
+            minimum: 0
+            example: 220
         - name: X-Community-Id
           in: header
           schema:
@@ -171,6 +182,16 @@ paths:
             type: string
             format: uuid
           required: false
+        - in: query
+          name: minScore
+          required: false
+          description: >-
+            Same threshold contract as the paginated ranking, so both endpoints agree on what
+            "critical" means.
+          schema:
+            type: number
+            minimum: 0
+            example: 220
       responses:
         '200':
           description: List of top signals
@@ -4907,6 +4928,13 @@ components:
         lastUpdatedAt:
           type: string
           format: date-time
+        criticalScoreThreshold:
+          type: number
+          description: >-
+            Default score at or above which a signal counts as critical. Published here so the
+            dashboard filter and the API filter cannot drift apart, and so a resident can see the
+            number being used instead of trusting a client constant.
+          example: 220
     Community:
       type: object
       required: [id, name, slug]
