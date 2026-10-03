@@ -128,7 +128,8 @@ export function Layout({ children, authMode = false }: Props) {
   ];
   const collaborationNav: NavItem[] = [
     { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
-    { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn },
+      { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn },
+      { label: t('nav.community_merge_review'), to: '/communities/merge-review', icon: 'pi pi-clone', visible: isLoggedIn },
     { label: t('nav.community_decisions'), to: '/communities/decisions', icon: 'pi pi-sitemap', visible: isLoggedIn },
     { label: t('nav.community_projects'), to: '/communities/projects', icon: 'pi pi-briefcase', visible: isLoggedIn },
     { label: t('nav.community_governance'), to: '/communities/governance', icon: 'pi pi-book', visible: isLoggedIn },
@@ -307,7 +308,12 @@ export function Layout({ children, authMode = false }: Props) {
               <span className="app-topbar-title">{activeSection}</span>
               {activeMembership && (
                 <span className="text-xs text-muted line-height-3">
-                  {activeMembership.breadcrumb.map((item) => item.name).join(' / ')} · {toRoleLabel(activeMembership.role, t)}
+                  {/*
+                    Defensive: a membership row without a breadcrumb used to throw here and take the
+                    whole app down on every page, because this renders in the shared layout. A stale
+                    or partial persisted membership is not a reason for a blank screen.
+                  */}
+                  {(activeMembership.breadcrumb ?? []).map((item) => item.name).join(' / ')} · {toRoleLabel(activeMembership.role, t)}
                 </span>
               )}
             </div>

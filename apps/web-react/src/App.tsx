@@ -17,6 +17,7 @@ const HelpCenter = lazy(() => import("./views/HelpCenter").then(m => ({ default:
 const Register = lazy(() => import("./views/Register").then(m => ({ default: m.Register })));
 const Verify = lazy(() => import("./views/Verify").then(m => ({ default: m.Verify })));
 const PublicBacklog = lazy(() => import("./views/PublicBacklog").then(m => ({ default: m.PublicBacklog })));
+const CommunityMergeReview = lazy(() => import("./views/CommunityMergeReview").then(m => ({ default: m.CommunityMergeReview })));
 const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
 const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
 const Communities = lazy(() => import("./views/Communities").then(m => ({ default: m.Communities })));
@@ -161,6 +162,7 @@ export function App() {
               <Route path="/communities/projects" element={<CommunityProjects />} />
               <Route path="/communities/governance" element={<CommunityGovernance />} />
               <Route path="/communities/trust" element={<CommunityTrustMetrics />} />
+              <Route path="/communities/merge-review" element={<CommunityMergeReview />} />
               <Route path="/communities/open-data" element={<CommunityOpenData />} />
   <Route path="/communities/rooms" element={<CommunityRooms />} />
   <Route path="/communities/activities" element={<CommunityActivities />} />

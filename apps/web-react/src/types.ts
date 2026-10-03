@@ -202,6 +202,39 @@ export type CommunityMembership = {
   createdAt: string;
 };
 
+export type SignalMergeCandidate = {
+  signalId: string;
+  title: string;
+  category: string;
+  status: string;
+  reportedAt: string | null;
+  /** 0..1. The same scale the merge decision uses, so the queue and the decision cannot disagree. */
+  similarity: number | null;
+};
+
+export type SignalMergeSuggestion = {
+  targetSignalId: string;
+  targetTitle: string;
+  targetCategory: string;
+  candidates: SignalMergeCandidate[];
+  threshold: number;
+  /** Most recent human decision for this target, so a reviewer does not re-decide it. */
+  latestDecision: "APPROVED" | "REJECTED" | "SPLIT" | null;
+  reviewedAt: string | null;
+};
+
+export type SignalMergeReview = {
+  decisionId: string;
+  targetSignalId: string;
+  targetTitle: string | null;
+  decision: "APPROVED" | "REJECTED" | "SPLIT";
+  suggestedCount: number;
+  /** Null unless the decision applied a merge, so a rejection cannot be read as one. */
+  mergedTargetSignalId: string | null;
+  mergedTitle: string | null;
+  decidedAt: string;
+  note: string | null;
+};
 export type CommunityPermissionScope =
   | "CAST_PROPOSAL_VOTE"
   | "CREATE_PROPOSAL"
