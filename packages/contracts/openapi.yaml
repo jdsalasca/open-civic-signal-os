@@ -2498,6 +2498,105 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
+  /api/community/assemblies/{assemblyId}/agenda:
+    post:
+      summary: Set the running order for an assembly
+      description: >-
+        Replaces the whole agenda rather than appending, so a facilitator editing the plan
+        mid-meeting cannot end up with two items at the same position. Refused once the assembly is
+        closed, because changing the agenda afterwards would change what the record says was planned.
+      parameters:
+        - in: path
+          name: assemblyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  maxItems: 50
+                  description: At most 50. A longer agenda is a schedule, not a meeting.
+                  items:
+                    $ref: '#/components/schemas/AssemblyAgendaItemRequest'
+      responses:
+        '200':
+          description: The facilitation view with the new running order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssemblyFacilitation'
+        '400':
+          description: An untitled item, an out-of-range duration, or too many items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: The assembly is closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/assemblies/{assemblyId}/facilitation:
+    get:
+      summary: The running order and how the room is tracking against it
+      description: >-
+        Reports elapsed time against planned time. The platform does NOT run the meeting: whether to
+        cut an item short is a judgement about the room, which the platform cannot make. Overrunning
+        is reported, not prevented, because a facilitator who gives an item twice its slot may be
+        making the right call. The order is the facilitator's; the platform does not reorder an
+        agenda by score, because that would be deciding what the community discusses.
+      parameters:
+        - in: path
+          name: assemblyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The agenda, cumulative timings, and the pacing verdict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssemblyFacilitation'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Assembly not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/assemblies/{assemblyId}/evidence:
     post:
       summary: Attach the frozen ranking the assembly will deliberate over
@@ -6629,6 +6728,118 @@ components:
             What this record is and is not, on every read. Says it is not the official minutes and
             that the platform records decisions rather than making them, and warns when no evidence
             snapshot is attached.
+
+    AssemblyAgendaItemRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          description: Required. An untitled item cannot be referred to in the room.
+        subjectId:
+          type: string
+          format: uuid
+          nullable: true
+        subjectType:
+          type: string
+          nullable: true
+        plannedMinutes:
+          type: integer
+          minimum: 1
+          maximum: 240
+          default: 10
+          description: >-
+            Required in spirit: a facilitator needs a number to pace against, and "we will discuss
+            it" is not a plan. Defaults to 10 when omitted.
+        notes:
+          type: string
+          nullable: true
+    AssemblyAgendaItem:
+      type: object
+      properties:
+        itemId:
+          type: string
+          format: uuid
+        position:
+          type: integer
+        title:
+          type: string
+        subjectId:
+          type: string
+          format: uuid
+          nullable: true
+        subjectType:
+          type: string
+          nullable: true
+        plannedMinutes:
+          type: integer
+        notes:
+          type: string
+          nullable: true
+    AssemblyAgendaProgress:
+      type: object
+      description: One item with the cumulative time to reach it, so a facilitator sees where they should be.
+      properties:
+        itemId:
+          type: string
+          format: uuid
+        position:
+          type: integer
+        title:
+          type: string
+        plannedMinutes:
+          type: integer
+        cumulativePlannedMinutes:
+          type: integer
+    AssemblyFacilitation:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        assemblyId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+          enum: [SCHEDULED, OPEN, CLOSED, CANCELLED]
+        openedAt:
+          type: string
+          format: date-time
+          nullable: true
+        elapsedMinutes:
+          type: integer
+          format: int64
+          nullable: true
+          description: Null until the assembly is opened.
+        totalPlannedMinutes:
+          type: integer
+        itemCount:
+          type: integer
+        agenda:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssemblyAgendaItem'
+        runningOrder:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssemblyAgendaProgress'
+        pacing:
+          type: string
+          enum: [NOT_STARTED, NO_PLAN, ON_PLAN, NEARING_END, OVERRUNNING]
+          description: >-
+            A fact rather than a verdict. OVERRUNNING is not a failure: a facilitator who gives an
+            item twice its slot may be making the right call about the room.
+        interpretation:
+          type: string
+          description: >-
+            What this is and is not, on every response. Says the platform does not run the meeting,
+            does not prevent overrunning, and does not reorder an agenda by score.
 
     ApiError:
       type: object

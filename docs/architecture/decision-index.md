@@ -70,6 +70,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-institutional-action-bridge.md` (accepted)
 - `ADR-20260321-participatory-budgeting.md` (accepted)
 - `ADR-20260321-assembly-mode.md` (accepted)
+- `ADR-20260321-assembly-facilitation.md` (accepted)
 
 ## Review Rule
 

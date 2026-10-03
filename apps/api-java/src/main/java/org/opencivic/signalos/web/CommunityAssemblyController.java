@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.domain.CommunityPermissionScope;
+import org.opencivic.signalos.service.AssemblyFacilitationService;
 import org.opencivic.signalos.service.CommunityAccessService;
 import org.opencivic.signalos.service.CommunityAssemblyService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,13 +28,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommunityAssemblyController {
 
     private final CommunityAssemblyService assemblyService;
+    private final AssemblyFacilitationService facilitationService;
     private final CommunityAccessService communityAccessService;
 
     public CommunityAssemblyController(
         CommunityAssemblyService assemblyService,
+        AssemblyFacilitationService facilitationService,
         CommunityAccessService communityAccessService
     ) {
         this.assemblyService = assemblyService;
+        this.facilitationService = facilitationService;
         this.communityAccessService = communityAccessService;
     }
 
@@ -45,6 +49,30 @@ public class CommunityAssemblyController {
     ) {}
 
     public record CloseRequest(String minutes) {}
+
+    public record AgendaRequest(List<AssemblyFacilitationService.AgendaItemRequest> items) {}
+
+    @PostMapping("/{assemblyId}/agenda")
+    public AssemblyFacilitationService.FacilitationView setAgenda(
+        @PathVariable UUID assemblyId,
+        @RequestParam UUID communityId,
+        @RequestBody AgendaRequest request,
+        Principal principal
+    ) {
+        requireScope(communityId, principal);
+        return facilitationService.setAgenda(
+            assemblyId, communityId, request == null ? null : request.items(), principal.getName());
+    }
+
+    @GetMapping("/{assemblyId}/facilitation")
+    public AssemblyFacilitationService.FacilitationView getFacilitation(
+        @PathVariable UUID assemblyId,
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        requireScope(communityId, principal);
+        return facilitationService.getFacilitation(assemblyId, communityId, principal.getName());
+    }
 
     @PostMapping
     public CommunityAssemblyService.AssemblyView create(
