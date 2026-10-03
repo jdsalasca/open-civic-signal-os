@@ -36,7 +36,8 @@ class PrioritizationFormulaIT {
         mockMvc.perform(get("/api/signals/formula"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.version").value("v1"))
-            .andExpect(jsonPath("$.formula").value(org.opencivic.signalos.web.dto.TrustPacket.CURRENT_FORMULA))
+            .andExpect(jsonPath("$.formula").value(
+                org.opencivic.signalos.domain.PrioritizationFormula.expression()))
             .andExpect(jsonPath("$.effectiveFrom").value("2026-02-19"))
             .andExpect(jsonPath("$.weights", hasSize(4)))
             .andExpect(jsonPath("$.cappedFactors", hasSize(2)))

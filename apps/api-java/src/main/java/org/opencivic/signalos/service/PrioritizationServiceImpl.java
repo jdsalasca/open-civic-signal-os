@@ -1,5 +1,6 @@
 package org.opencivic.signalos.service;
 
+import org.opencivic.signalos.domain.PrioritizationFormula;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.SignalSourceChannel;
 import org.opencivic.signalos.domain.ScoreBreakdown;
@@ -83,7 +84,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             signal.getCreatedAt(),
             score,
             breakdown,
-            TrustPacket.CURRENT_FORMULA,
+            PrioritizationFormula.expression(),
             hash
         );
     }
@@ -244,11 +245,14 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public ScoreBreakdown getBreakdown(Signal signal) {
+        // Every term comes from PrioritizationFormula, which is also what the published formula
+        // string is built from. The numbers used to live here and again as prose in two other
+        // classes; a divergence is no longer possible by construction.
         return new ScoreBreakdown(
-            signal.getUrgency() * 30.0,
-            signal.getImpact() * 25.0,
-            Math.min(signal.getAffectedPeople() / 10.0, 30.0),
-            Math.min(signal.getCommunityVotes() / 5.0, 15.0)
+            PrioritizationFormula.urgencyTerm(signal.getUrgency()),
+            PrioritizationFormula.impactTerm(signal.getImpact()),
+            PrioritizationFormula.affectedPeopleTerm(signal.getAffectedPeople()),
+            PrioritizationFormula.communityVotesTerm(signal.getCommunityVotes())
         );
     }
 
