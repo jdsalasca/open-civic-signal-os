@@ -2406,6 +2406,125 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/institutional-handoffs:
+    post:
+      summary: Record that a report was handed to an institution
+      description: >-
+        Starts the community's own SLA clock for that handoff. The platform cannot read a city
+        helpdesk, so this records what was sent and what the community later learns, never a live
+        view of the institution's queue. A second handoff for the same signal and reference is
+        refused, because two clocks for one complaint means nobody can say which one was late.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstitutionalHandoffRequest'
+      responses:
+        '200':
+          description: The recorded handoff with its derived SLA state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionalHandoff'
+        '400':
+          description: >-
+            Missing ticket reference or service code, an SLA target out of range, or a signal that
+            belongs to another community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '409':
+          description: This signal was already handed off under that reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      summary: Every handoff for a community, with its SLA state and where that state came from
+      description: >-
+        The interpretation states on every response that the platform does not read the
+        institution's system. An overdue handoff means the community's own target has passed, not
+        that the city has failed, because the platform cannot see the city's queue.
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Summary and handoffs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionalBridgeSummary'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/institutional-handoffs/{handoffId}/outcome:
+    post:
+      summary: Record that an institution acknowledged or resolved a ticket
+      description: >-
+        A declaration by a community member, not an observation. The response says so through
+        statusSource, because a community reading "resolved" needs to know whether the platform
+        observed that or was told it. Resolving implies acknowledging.
+      parameters:
+        - in: path
+          name: handoffId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resolved]
+              properties:
+                resolved:
+                  type: boolean
+                note:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: The updated handoff
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstitutionalHandoff'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Handoff not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/trust-pulse:
     post:
       summary: Answer the community trust pulse for a closed month
@@ -5636,6 +5755,130 @@ components:
             What this is and is not, on every response. Says it does not rank the scenarios, does
             not predict the future, and stores nothing.
         computedAt:
+          type: string
+          format: date-time
+
+    InstitutionalHandoffRequest:
+      type: object
+      required: [communityId, signalId, ticketRef, externalCategoryCode]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        signalId:
+          type: string
+          format: uuid
+        ticketRef:
+          type: string
+          description: >-
+            Required. Without it the handoff cannot be matched to anything the institution says
+            back.
+        externalCategoryCode:
+          type: string
+          description: >-
+            Required. A handoff with no service code cannot be checked against what the city
+            actually filed it as.
+        externalTicketId:
+          type: string
+          nullable: true
+          description: >-
+            The institution's own reference, when the community learns it. Recorded rather than
+            fetched, because the platform cannot read the city system.
+        slaTargetDays:
+          type: integer
+          minimum: 1
+          maximum: 365
+          default: 30
+          description: >-
+            Captured at handoff. A later change to the community target must not retroactively
+            turn a past on-time handoff into a late one.
+        note:
+          type: string
+          nullable: true
+    InstitutionalHandoff:
+      type: object
+      properties:
+        handoffId:
+          type: string
+          format: uuid
+        signalId:
+          type: string
+          format: uuid
+        signalTitle:
+          type: string
+        ticketRef:
+          type: string
+        externalCategoryCode:
+          type: string
+        externalTicketId:
+          type: string
+          nullable: true
+        slaTargetDays:
+          type: integer
+        daysSinceHandoff:
+          type: integer
+          format: int64
+        daysOverTarget:
+          type: integer
+          format: int64
+        slaState:
+          type: string
+          enum: [WITHIN_TARGET, DUE_SOON, OVERDUE, CLOSED_ON_TIME, CLOSED_LATE]
+          description: >-
+            Derived from the community's own clock. CLOSED_LATE is judged against the moment it
+            closed, not against today.
+        statusSource:
+          type: string
+          enum: [NO_INSTITUTIONAL_STATUS, DECLARED_BY_COMMUNITY, DERIVED_FROM_SIGNAL_LIFECYCLE]
+          description: >-
+            Where the status came from. Never an observation of the institution, because the
+            platform has no integration with a city helpdesk.
+        handedOffAt:
+          type: string
+          format: date-time
+        acknowledgedAt:
+          type: string
+          format: date-time
+          nullable: true
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+        note:
+          type: string
+          nullable: true
+    InstitutionalBridgeSummary:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        communityId:
+          type: string
+          format: uuid
+        communityName:
+          type: string
+        openHandoffs:
+          type: integer
+        acknowledged:
+          type: integer
+        resolved:
+          type: integer
+        overdue:
+          type: integer
+        dueSoon:
+          type: integer
+        handoffs:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstitutionalHandoff'
+        interpretation:
+          type: string
+          description: >-
+            What this is and is not, on every response. Says the platform does not read the
+            institution's system, and that an overdue handoff means the community's own target
+            has passed rather than that the city has failed.
+        generatedAt:
           type: string
           format: date-time
 
