@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-03T22:19:40.940Z
+Last updated: 2026-10-03T22:44:06.638Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-26T22:19:38.301Z)
-- Throughput (issues closed): 114
+- Window: last 7 days (since 2026-09-26T22:44:03.976Z)
+- Throughput (issues closed): 115
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -78,15 +78,14 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 3
+- TODO: 2
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 108
+- DONE: 109
 
 ### TODO
 - #121 Current Sprint Focus 2026-W40
 - #120 Agent Quality Review 2026-W40
-- #22 messaging: add scheduled weekly bulletin generation
 
 ### IN_PROGRESS
 - _No issues_
@@ -191,6 +190,7 @@ Status labels used by this board:
 - #25 analytics: add neighborhood trend and surge detection
 - #24 execution: add institutional assignment and owner workflow
 - #23 dashboard: add issue aging and SLA risk panels
+- #22 messaging: add scheduled weekly bulletin generation
 - #21 ci: add backlog reproducibility quality gate
 - #20 alerts: weekly top-issues digest for community channels
 - #19 fairness: add duplicate and vote-abuse detection rules
