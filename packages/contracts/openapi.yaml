@@ -2406,6 +2406,265 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/assemblies:
+    post:
+      summary: Convene an assembly
+      description: >-
+        Records what a community will deliberate over. The evidence snapshot is attached separately,
+        because it is usually captured closer to the meeting and forcing it at creation would make
+        people create a placeholder snapshot. A placeholder in an evidence chain is worse than an
+        honest gap.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAssemblyRequest'
+      responses:
+        '200':
+          description: The assembly, with evidenceCaptured false until a snapshot is attached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityAssembly'
+        '400':
+          description: Missing title or scheduled time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+    get:
+      summary: Every assembly for a community, newest scheduled first
+      parameters:
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Assemblies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommunityAssembly'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/assemblies/{assemblyId}:
+    get:
+      summary: One assembly with its evidence link and recorded decisions
+      parameters:
+        - in: path
+          name: assemblyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The assembly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityAssembly'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Assembly not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/assemblies/{assemblyId}/evidence:
+    post:
+      summary: Attach the frozen ranking the assembly will deliberate over
+      description: >-
+        Refused once the assembly is closed, because attaching evidence afterwards would change what
+        the record says was deliberated over.
+      parameters:
+        - in: path
+          name: assemblyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: snapshotId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The assembly with evidenceCaptured true and the snapshot content hash
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityAssembly'
+        '403':
+          description: Caller does not hold the open-data management scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+        '404':
+          description: Assembly or snapshot not found for this community
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: The assembly is closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/assemblies/{assemblyId}/open:
+    post:
+      summary: Open an assembly for deliberation
+      parameters:
+        - in: path
+          name: assemblyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The open assembly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityAssembly'
+        '409':
+          description: Already open or already closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/assemblies/{assemblyId}/close:
+    post:
+      summary: Close an assembly, optionally recording minutes
+      description: >-
+        Refused if already closed, because reopening would erase the record of when it ended. The
+        minutes are free text and are not the official record.
+      parameters:
+        - in: path
+          name: assemblyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                minutes:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: The closed assembly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityAssembly'
+        '409':
+          description: Already closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/community/assemblies/{assemblyId}/decisions:
+    post:
+      summary: Record a decision the assembly made
+      description: >-
+        The platform records decisions people made; it does not make them. A rationale is required,
+        because a decision nobody explained cannot be reviewed afterwards. Refused once the assembly
+        is closed, since a decision recorded afterwards would appear in the record as having been
+        made in the room.
+      parameters:
+        - in: path
+          name: assemblyId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordAssemblyDecisionRequest'
+      responses:
+        '200':
+          description: The assembly with the new decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityAssembly'
+        '400':
+          description: Missing decision type or rationale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: The assembly is closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/community/participatory-budgets:
     post:
       summary: Create a budget envelope and read every proposal cost
@@ -6243,6 +6502,133 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    CreateAssemblyRequest:
+      type: object
+      required: [communityId, title, scheduledFor]
+      properties:
+        communityId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          description: Required. An untitled assembly is unfindable when a community holds more than one.
+        scheduledFor:
+          type: string
+          format: date-time
+          description: Required. An assembly with no date cannot be planned around.
+        location:
+          type: string
+          nullable: true
+    RecordAssemblyDecisionRequest:
+      type: object
+      required: [decision, rationale]
+      properties:
+        subjectId:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            The proposal or signal the decision is about. Nullable because an assembly can decide
+            something not yet in the system, and forcing a link would make people create placeholder
+            records.
+        subjectType:
+          type: string
+          nullable: true
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED, DEFERRED, NOTED]
+        rationale:
+          type: string
+          description: Required. A decision nobody explained cannot be reviewed afterwards.
+    AssemblyDecision:
+      type: object
+      properties:
+        decisionId:
+          type: string
+          format: uuid
+        subjectId:
+          type: string
+          format: uuid
+          nullable: true
+        subjectType:
+          type: string
+          nullable: true
+        decision:
+          type: string
+          enum: [APPROVED, REJECTED, DEFERRED, NOTED]
+        rationale:
+          type: string
+        recordedBy:
+          type: string
+          format: uuid
+        recordedAt:
+          type: string
+          format: date-time
+    CommunityAssembly:
+      type: object
+      properties:
+        version:
+          type: string
+          example: v1
+        assemblyId:
+          type: string
+          format: uuid
+        communityId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        scheduledFor:
+          type: string
+          format: date-time
+        location:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [SCHEDULED, OPEN, CLOSED, CANCELLED]
+        snapshotId:
+          type: string
+          format: uuid
+          nullable: true
+        snapshotContentHash:
+          type: string
+          nullable: true
+          description: What makes the ranking deliberated over checkable afterwards.
+        evidenceCaptured:
+          type: boolean
+          description: >-
+            False means the ranking cannot be reproduced, which is reported rather than hidden: a
+            decision made over evidence nobody can produce is a decision nobody can review.
+        convenedBy:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        openedAt:
+          type: string
+          format: date-time
+          nullable: true
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+        minutes:
+          type: string
+          nullable: true
+          description: Free text. The platform does not treat it as the official record.
+        decisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssemblyDecision'
+        interpretation:
+          type: string
+          description: >-
+            What this record is and is not, on every read. Says it is not the official minutes and
+            that the platform records decisions rather than making them, and warns when no evidence
+            snapshot is attached.
 
     ApiError:
       type: object
