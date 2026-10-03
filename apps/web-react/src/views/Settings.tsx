@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
-import { useSettingsStore } from "../store/useSettingsStore";
+import { useSettingsStore, FIELD_MODE_SKIPS, type DataMode } from "../store/useSettingsStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { ProgressBar } from "primereact/progressbar";
@@ -59,6 +59,12 @@ interface InterfaceModeOption {
   icon: string;
 }
 
+interface DataModeOption {
+  label: string;
+  value: DataMode;
+  icon: string;
+}
+
 interface ProfileFormState {
   displayName: string;
   civicRole: string;
@@ -88,7 +94,7 @@ const EMPTY_PROFILE_FORM: ProfileFormState = {
 export function Settings() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { language, setLanguage, theme, setTheme, interfaceMode, setInterfaceMode } = useSettingsStore();
+  const { language, setLanguage, theme, setTheme, interfaceMode, setInterfaceMode, dataMode, setDataMode } = useSettingsStore();
   const { activeRole, rawRoles, switchRole, userName } = useAuthStore();
   const { memberships, activeCommunityId, setActiveCommunityId } = useCommunityStore();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -113,6 +119,11 @@ export function Settings() {
   const interfaceModeOptions: InterfaceModeOption[] = [
     { label: t('settings.interface_modes.simple'), value: 'simple', icon: 'pi pi-sparkles' },
     { label: t('settings.interface_modes.advanced'), value: 'advanced', icon: 'pi pi-sliders-h' }
+  ];
+
+  const dataModeOptions: DataModeOption[] = [
+    { label: t('settings.data_modes.full'), value: 'full', icon: 'pi pi-database' },
+    { label: t('settings.data_modes.field'), value: 'field', icon: 'pi pi-wifi' }
   ];
 
   const civicRoleOptions: Option[] = [
@@ -260,6 +271,13 @@ export function Settings() {
     if (nextMode) {
       setInterfaceMode(nextMode);
       handleProfileField('interfaceMode', nextMode);
+    }
+  };
+
+  const handleDataModeChange = (e: SelectButtonChangeEvent) => {
+    const nextMode = e.value as DataMode;
+    if (nextMode) {
+      setDataMode(nextMode);
     }
   };
 
@@ -1016,6 +1034,35 @@ export function Settings() {
                     )}
                   />
                 </CivicField>
+
+                <CivicField label={t('settings.data_mode')} helpText={t('settings.data_mode_help')}>
+                  <SelectButton
+                    value={dataMode}
+                    options={dataModeOptions}
+                    onChange={handleDataModeChange}
+                    className="w-full"
+                    data-testid="data-mode-select"
+                    itemTemplate={(option: DataModeOption) => (
+                      <div className="flex align-items-center justify-content-center gap-3 w-full py-1">
+                        <i className={option.icon}></i>
+                        <span className="font-bold">{option.label}</span>
+                      </div>
+                    )}
+                  />
+                </CivicField>
+
+                {/*
+                  Field mode is a promise about bytes, so it says exactly what it stops fetching.
+                  A mode that silently dropped panels would be a mystery rather than a setting.
+                */}
+                {dataMode === 'field' && (
+                  <div
+                    className="text-sm text-secondary"
+                    data-testid="data-mode-skips"
+                  >
+                    {t('settings.data_mode_skips', { items: FIELD_MODE_SKIPS.join(', ') })}
+                  </div>
+                )}
 
                 <CivicField label={t('settings.role')} helpText={t('settings.role_desc')}>
                   <div data-testid="role-switch-dropdown">

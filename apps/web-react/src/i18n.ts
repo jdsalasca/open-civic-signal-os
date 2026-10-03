@@ -1830,6 +1830,13 @@ const resources = {
         "theme_help": "Adjust the interface contrast for your current workspace.",
         "interface_mode": "Interface mode",
         "interface_mode_help": "Simple keeps the product calm and guided. Advanced reveals more monitoring and workspace controls.",
+        "data_mode": "Data mode",
+        "data_mode_help": "Full loads every panel. Field loads fewer rows and skips the optional panels, for a slow or metered connection.",
+        "data_mode_skips": "Field mode does not request: {{items}}. The panels are skipped rather than hidden, so the bytes are not spent.",
+        "data_modes": {
+          "full": "Full",
+          "field": "Field"
+        },
         "interface_modes": {
           "simple": "Simple Mode",
           "advanced": "Advanced Mode"
@@ -3831,6 +3838,13 @@ const resources = {
         "theme": "Tema de Interfaz",
         "theme_help": "Ajuste el contraste de la interfaz para su espacio de trabajo actual.",
         "interface_mode": "Modo de interfaz",
+        "data_mode": "Modo de datos",
+        "data_mode_help": "Completo carga todos los paneles. Campo carga menos filas y omite los paneles opcionales, para conexiones lentas o con datos limitados.",
+        "data_mode_skips": "El modo campo no solicita: {{items}}. Los paneles se omiten en vez de ocultarse, asi no se gastan los datos.",
+        "data_modes": {
+          "full": "Completo",
+          "field": "Campo"
+        },
         "interface_mode_help": "Simple mantiene el producto calmado y guiado. Avanzado muestra más monitoreo y controles del espacio.",
         "interface_modes": {
           "simple": "Modo Simple",

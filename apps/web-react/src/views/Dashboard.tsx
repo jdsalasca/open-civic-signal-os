@@ -20,7 +20,7 @@ import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useCommunityStore } from "../store/useCommunityStore";
-import { useSettingsStore } from "../store/useSettingsStore";
+import { useSettingsStore, PAGE_SIZE_BY_DATA_MODE } from "../store/useSettingsStore";
 import { toRoleLabel } from "../constants/roleLabels";
 
 interface ApiError extends Error {
@@ -54,6 +54,12 @@ export function Dashboard() {
   const navigate = useNavigate();
   const { activeRole, userName } = useAuthStore();
   const interfaceMode = useSettingsStore((state) => state.interfaceMode);
+  const dataMode = useSettingsStore((state) => state.dataMode);
+  // Field mode is about bytes, not chrome. On a slow connection the optional panels are the cost,
+  // so they are skipped rather than merely hidden.
+  const fieldMode = dataMode === "field";
+  // Declared here rather than beside the other role checks because the fetch effect above needs it.
+  const staffRole = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
   const { activeCommunityId, memberships } = useCommunityStore();
   
   const [signals, setSignals] = useState<Signal[]>([]);
@@ -70,9 +76,15 @@ export function Dashboard() {
   const [activeFilter, setActiveFilter] = useState<string>("ALL");
   const [lazyState, setLazyState] = useState({
     first: 0,
-    rows: 10,
+    rows: PAGE_SIZE_BY_DATA_MODE[dataMode],
     page: 0
   });
+
+  // Switching data mode changes how many rows are worth asking for. Applied on the next load rather
+  // than by mutating state here, so the change is one request rather than two.
+  useEffect(() => {
+    setLazyState((prev) => ({ ...prev, first: 0, page: 0, rows: PAGE_SIZE_BY_DATA_MODE[dataMode] }));
+  }, [dataMode]);
 
   const loadData = useCallback(async (signal?: AbortSignal, force = false) => {
     const cacheKey = [
@@ -116,10 +128,12 @@ export function Dashboard() {
       const [signalsRes, metaRes, notificationsRes, duplicatesRes] = await Promise.all([
         apiClient.get(prioritizedQuery, { signal }),
         apiClient.get("signals/meta", { signal }),
-        (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
+        // Field mode skips the optional panels entirely. Hiding them after fetching would still
+        // pay for the bytes, which is the whole cost being avoided.
+        (staffRole && !fieldMode)
           ? apiClient.get("notifications/recent", { signal })
           : Promise.resolve(null),
-        (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
+        (staffRole && !fieldMode)
           ? apiClient.get("signals/duplicates", { signal })
           : Promise.resolve(null)
       ]);
@@ -232,7 +246,7 @@ export function Dashboard() {
     }
   };
 
-  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
+  const isStaff = staffRole;
   const activeMembership = useMemo(
     () =>
       memberships.find((membership) => membership.communityId === activeCommunityId) ??
@@ -253,7 +267,9 @@ export function Dashboard() {
   // Aging is fetched separately from the prioritized list so it does not widen or
   // invalidate the dashboard cache, which is keyed on the signal page.
   useEffect(() => {
-    if (!isStaff) {
+    if (!isStaff || fieldMode) {
+      // Field mode does not fetch aging at all. The panel is additive, and on a slow connection the
+      // bytes are the cost, so skipping the request is the point rather than hiding the result.
       return;
     }
     const controller = new AbortController();
