@@ -259,6 +259,11 @@ public class CommunityIntegrationService {
             // An email digest carries the digest and nothing else. Announcements have their own
             // channel and residents did not sign up for one to receive the other.
             case EMAIL_DIGEST -> eventType == CommunityIntegrationEventType.WEEKLY_DIGEST;
+            // A messaging relay carries the digest and announcements, because those are the two
+            // things a community actually posts to a group. It does not carry scheduled events:
+            // a calendar entry in a chat thread is noise.
+            case WHATSAPP, TELEGRAM -> eventType == CommunityIntegrationEventType.WEEKLY_DIGEST
+                || eventType == CommunityIntegrationEventType.OFFICIAL_ANNOUNCEMENT;
             // A webhook is the general-purpose transport and receives everything.
             case WEBHOOK -> true;
             // A map link has no connector. It is deliberately NOT filtered out here: filtering would

@@ -10757,7 +10757,7 @@ components:
           format: uuid
         channel:
           type: string
-          enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK]
+          enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK, WHATSAPP, TELEGRAM]
         name:
           type: string
           minLength: 3
@@ -10812,7 +10812,7 @@ components:
           format: uuid
         channel:
           type: string
-          enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK]
+          enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK, WHATSAPP, TELEGRAM]
         name:
           type: string
         targetUri:
@@ -10895,7 +10895,7 @@ components:
           type: array
           items:
             type: string
-            enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK]
+            enum: [WEBHOOK, EMAIL_DIGEST, CALENDAR_FEED, MAP_LINK, WHATSAPP, TELEGRAM]
         integrationCount:
           type: integer
         pendingDeliveries:
