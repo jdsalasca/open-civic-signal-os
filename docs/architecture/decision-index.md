@@ -47,6 +47,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-prioritization-formula-metadata-contract.md` (accepted)
 - `ADR-20260321-case-aging-sla-contract.md` (accepted)
 - `ADR-20260321-runtime-secret-policy.md` (accepted)
+- `ADR-20260321-contract-parity-gate.md` (accepted)
 
 ## Review Rule
 

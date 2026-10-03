@@ -85,6 +85,7 @@ if (backendChanged) {
 
 if (contractChanged) {
   run("npm run agent:adr:check");
+  run("npm run contract:parity:check");
 }
 
 if (docsChanged) {

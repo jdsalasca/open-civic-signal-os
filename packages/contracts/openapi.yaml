@@ -708,6 +708,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Notification'
+  /api/notifications/relay/top-10:
+    post:
+      summary: Trigger the weekly top-10 unresolved problems relay to configured community channels
+      responses:
+        '200':
+          description: Relay accepted for delivery
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Caller is not permitted to trigger a relay
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /api/communities:
     get:
       summary: List available communities
@@ -2608,6 +2624,35 @@ paths:
                 $ref: '#/components/schemas/CommunityActivitySignupResult'
         '403':
           description: Community policy denied attendance recording
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/activities/{activityId}:
+    delete:
+      summary: Cancel a volunteer activity and stop accepting signups
+      parameters:
+        - in: path
+          name: activityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Activity cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityActivitySignupResult'
+        '403':
+          description: Community policy denied activity management
           content:
             application/json:
               schema:
