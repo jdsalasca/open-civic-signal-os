@@ -6,6 +6,14 @@ output/playwright-report/
 apps/web-react/test-results/
 .playwright-cli/
 apps/web-react/dashboard-audit.png
+apps/api-java/target/
 !coverage/coverage-summary.json
-!coverage/
-!coverage/coverage-summary.json
+!/coverage/
+!/coverage/coverage-summary.json
+
+# Real secrets never belong in git. The tracked *.example files stay; filled copies do not.
+.env
+.env.*
+!.env.example
+!infra/.env.example
+infra/secrets/

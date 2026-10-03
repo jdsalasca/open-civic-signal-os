@@ -32,6 +32,7 @@
     "agent:context:check": "node scripts/agent-context-check.mjs",
     "agent:adr:check": "node scripts/check-contract-adr.mjs",
     "backlog:current:check": "node scripts/check-current-backlog.mjs",
+    "security:runtime:check": "node scripts/check-runtime-secrets.mjs",
     "agent:ux:pw": "node scripts/playwright-cli.mjs"
   },
   "releaseQuality": {
