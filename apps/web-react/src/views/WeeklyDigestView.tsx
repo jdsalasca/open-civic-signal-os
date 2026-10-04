@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { InputText } from "primereact/inputtext";
 import { Layout } from "../components/Layout";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicButton } from "../components/ui/CivicButton";
@@ -105,10 +106,14 @@ export function WeeklyDigestView() {
         <CivicPageHeader
           title={t("weekly_digest.title")}
           description={t("weekly_digest.subtitle")}
+          // Not the default "what needs attention today": this screen is the record of a week that
+          // already closed, and an eyebrow promising something urgent misdescribes it.
+          eyebrow={t("weekly_digest.eyebrow")}
         />
 
         <CivicField label={t("weekly_digest.week_label")} helpText={t("weekly_digest.week_help")}>
-          <input
+          {/* InputText like every other field in the app. A raw <input> rendered as an unstyled box. */}
+          <InputText
             className="w-full"
             type="text"
             placeholder="2026-W13"
@@ -196,9 +201,11 @@ export function WeeklyDigestView() {
               className="mb-4"
               data-testid="weekly-digest-body-card"
             >
-              {/* The rendered body, exactly as a channel would receive it. */}
+              {/* The rendered body, exactly as a channel would receive it. Width capped: this is
+                  markdown meant to be read, and at full app width the measure runs past what a line
+                  of text can carry. */}
               <pre
-                className="text-sm white-space-pre-wrap m-0"
+                className="text-sm white-space-pre-wrap m-0 max-w-3xl"
                 data-testid="weekly-digest-body"
               >
                 {digest.body}

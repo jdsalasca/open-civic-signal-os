@@ -7,6 +7,7 @@ const resources = {
     translation: {
       "weekly_digest": {
         "title": "Weekly digest",
+        "eyebrow": "Weekly bulletin",
         "subtitle": "The bulletin for one closed week, exactly as a channel would receive it. Publishing reaches residents, so it stays a deliberate act.",
         "week_label": "Week",
         "week_help": "ISO week as YYYY-Www. Leave empty for the previous completed week.",
@@ -2038,7 +2039,8 @@ const resources = {
   es: {
     translation: {
       "weekly_digest": {
-        "title": "Boletín semanal",
+        "title": "Boletin semanal",
+        "eyebrow": "Boletin semanal",
         "subtitle": "El boletín de una semana cerrada, tal como lo recibiría un canal. Publicar llega a los residentes, así que sigue siendo un acto deliberado.",
         "week_label": "Semana",
         "week_help": "Semana ISO como YYYY-Www. Dejalo vacío para la semana anterior completa.",

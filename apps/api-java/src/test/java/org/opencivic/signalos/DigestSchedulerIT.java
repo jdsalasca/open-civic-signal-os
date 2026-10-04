@@ -147,14 +147,19 @@ class DigestSchedulerIT {
             "expected an ISO week key, got: " + report.weekKey());
         org.junit.jupiter.api.Assertions.assertEquals(1, report.runs().size());
 org.junit.jupiter.api.Assertions.assertEquals("PREPARED", report.runs().get(0).outcome());
+        // The detail states what was sealed. It must not restate the outcome: the UI renders the
+        // outcome next to it, and "waiting for a person to publish" appearing twice read as a stutter.
         org.junit.jupiter.api.Assertions.assertTrue(
-            report.runs().get(0).detail().contains("waiting for a person to publish"),
-            "expected the deliberate-publish note, got: " + report.runs().get(0).detail());
-        // The note states the thing a reader would otherwise have to assume: this exact artifact is
-        // what publishing will send.
+            report.runs().get(0).detail().contains("Sealed"),
+            "expected the sealed-artifact note, got: " + report.runs().get(0).detail());
+        // The thing a reader would otherwise have to assume: publishing sends this artifact, not a
+        // fresh recomposition.
         org.junit.jupiter.api.Assertions.assertTrue(
-            report.runs().get(0).detail().contains("not recomposed"),
+            report.runs().get(0).detail().contains("does not recompose"),
             "expected the artifact guarantee, got: " + report.runs().get(0).detail());
+        org.junit.jupiter.api.Assertions.assertTrue(
+            report.runs().get(0).detail().contains("item(s), hash"),
+            "expected the item count and hash, got: " + report.runs().get(0).detail());
     }
 
     @Test

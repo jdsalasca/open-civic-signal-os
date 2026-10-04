@@ -162,10 +162,9 @@ public class DigestSchedulerService {
                 var digest = digestService.prepare(community.getId(), weekKey, null);
                 run.setOutcome(DigestScheduleRun.Outcome.PREPARED);
                 run.setDetail(digest.isPresent()
-                    ? "Digest sealed and waiting for a person to publish: "
-                        + digest.get().getItemCount() + " item(s), hash "
+                    ? digest.get().getItemCount() + " item(s), hash "
                         + digest.get().getContentHash().substring(0, 12)
-                        + ". Publishing sends this exact artifact; it is not recomposed."
+                        + ". Sealed; publishing sends this exact artifact and does not recompose it."
                     : "Already prepared for this week; the existing artifact was kept.");
                 prepared++;
             } catch (RuntimeException ex) {

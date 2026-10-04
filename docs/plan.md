@@ -51,16 +51,22 @@ patron que mas caro sale:
 | 44 | Una sola definicion de "resuelto" para todos los rankings | 420 tests; 8 copias reducidas a 1; falla por mutacion | Hecho `e150e3b` |
 | 45 | Un mes cerrado se responde desde el historial, no desde el estado vivo | 423 tests; metrica y lista coinciden; falla por mutacion | Hecho `fb72451` |
 | 46 | El informe declara en su payload lo que no puede reproducir | 424 tests; dos afirmaciones falsas corregidas | Hecho este commit |
-| 47 | Ledger de scores: cuando un score se vuelve oficial | Decision de gobernanza mas esquema; no es una ronda de codigo | Siguiente |
+| 47 | Revision visual del digest semanal + build output sin trackear | 12 Playwright, 8 capturas, 424 tests | Hecho este commit |
+| 48 | Ledger de scores: cuando un score se vuelve oficial | Decision de gobernanza + esquema; no es una ronda de codigo | Siguiente |
 
 ## Proximas rondas candidatas
 
 1. **Auditar el mismo patron en otras piezas del mismo concepto.** Las rondas 43 a 46 lo encontraron
    cuatro veces en domains distintos. Quedan candidatos: el par lectura/escritura del handoff
    institucional, y las vistas publicas que recalculan en vez de servir lo almacenado.
-2. **Escribir siempre los archivos markdown con la herramienta de edicion, no con PowerShell.**
-   `Set-Content` sin `-Encoding utf8` rompio acentos y emojis en este archivo y dejo mojibake
-   committed-ready en dos filas. Se reparo reescribiendo en ASCII.
+2. **Nunca mas `git checkout -- apps/api-java/target`.** `target/` estaba trackeado (103 archivos,
+   incluidos `.class`), asi que el paso de limpieza habitual revertia el build a un estado de hace
+   meses. Tres "fallos fantasma" de la sesion salieron de ahi, y el riesgo real era que un `.class`
+   viejo hiciera pasar un test contra codigo antiguo.Sacado del indice en la ronda 47; `.gitignore` ya
+   lo listaba, se commiteo antes de que existiera la regla.
+3. **Una pantalla que se verifica con asserts todavia no fue vista.** La revision visual del digest
+   encontro un `<input>` crudo (el unico de la app), un eyebrow que describia mal la pantalla y una
+   frase duplicada que yo mismo introduje. Ningun assert los ve.
 3. **Firmas entre pares.** `docs/FEDERATION.md` lo declara como trabajo de gobernanza pendiente:
    decidir el algoritmo y la distribucion de claves es una decision, no una linea de codigo.
    No se implementa sin esa decision.
