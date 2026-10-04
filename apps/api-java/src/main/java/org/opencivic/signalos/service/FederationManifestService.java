@@ -2,7 +2,10 @@ package org.opencivic.signalos.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityOpenDataExportType;
+import org.opencivic.signalos.domain.CommunityOpenDataPolicy;
+import org.opencivic.signalos.repository.CommunityRepository;
 import org.springframework.stereotype.Service;
 
 /**
@@ -41,8 +44,14 @@ public class FederationManifestService {
 
     private final CommunityOpenDataService openDataService;
 
-    public FederationManifestService(CommunityOpenDataService openDataService) {
+    private final CommunityRepository communityRepository;
+
+    public FederationManifestService(
+        CommunityOpenDataService openDataService,
+        CommunityRepository communityRepository
+    ) {
         this.openDataService = openDataService;
+        this.communityRepository = communityRepository;
     }
 
     public record FederatedDataset(
@@ -53,11 +62,25 @@ public class FederationManifestService {
         String contractVersion
     ) {}
 
+    /**
+     * A city this instance federates, addressed by its stable key.
+     *
+     * <p>Only cities that have enabled open data are listed. The manifest is unauthenticated, so
+     * naming a community that has not opted in would publish its existence to anyone who asks.
+     */
+    public record FederatedCity(
+        String federationKey,
+        String name,
+        String openDataPolicy
+    ) {}
+
     public record FederationManifest(
         String instanceName,
         String contractVersion,
         List<String> supportedContractVersions,
         List<FederatedDataset> datasets,
+        List<FederatedCity> cities,
+        int citiesNotAdvertised,
         String authentication,
         String rateLimitHeader,
         String interpretation,
@@ -82,11 +105,23 @@ public class FederationManifestService {
             ))
             .toList();
 
+List<Community> all = communityRepository.findAll();
+        List<FederatedCity> cities = all.stream()
+            .filter(community -> community.getOpenDataPolicy() != CommunityOpenDataPolicy.DISABLED)
+            .map(community -> new FederatedCity(
+                community.getFederationKey(),
+                community.getName(),
+                community.getOpenDataPolicy().name()))
+            .toList();
+        int withheld = all.size() - cities.size();
+
         return new FederationManifest(
             instanceName == null || instanceName.isBlank() ? "open-civic-signal-os" : instanceName.trim(),
             CONTRACT_VERSION,
             SUPPORTED_CONTRACT_VERSIONS,
             datasets,
+            cities,
+            withheld,
             "X-Api-Token header carrying a scoped open-data token issued by the serving community.",
             "X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset",
             interpretation(),
@@ -102,14 +137,18 @@ public class FederationManifestService {
      * same one, and a consumer has to check.
      */
     private String interpretation() {
-        return "This describes what this instance can serve another instance, and in what shape. "
+return "This describes what this instance can serve another instance, and in what shape. "
+            + "Address a city by the federationKey listed here, not by an internal id: ids are local "
+            + "to one deployment and mean nothing to a peer. The key is stable for the life of the "
+            + "community, while a slug can be renamed under a peer. "
             + "It does NOT promise that another instance speaks the same contract: a consumer must read "
             + "the peer's own manifest and compare contractVersion before exchanging anything, because "
             + "two instances running different versions will each assume the other speaks their dialect "
             + "and the mismatch surfaces as a parse error rather than as a clear refusal. "
             + "The manifest carries no data; reading an export still requires a scoped token issued by "
-            + "the serving community. A consumer that does not recognise contractVersion should refuse "
-            + "rather than guess.";
+            + "the serving community. Communities that have not enabled open data are counted but not "
+            + "named, because this endpoint is unauthenticated. A consumer that does not recognise "
+            + "contractVersion should refuse rather than guess.";
     }
 
     /**

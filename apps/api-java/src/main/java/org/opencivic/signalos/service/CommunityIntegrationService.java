@@ -206,21 +206,24 @@ public class CommunityIntegrationService {
         CommunityIntegrationChannel channel,
         String secret
     ) {
-        if (channel == CommunityIntegrationChannel.WEBHOOK) {
-            integration.setSecretHash(WebhookCommunityIntegrationConnector.hashSecret(secret));
-            return;
-        }
-        if (channel == CommunityIntegrationChannel.EMAIL_DIGEST) {
+        switch (channel) {
+            case WEBHOOK -> integration.setSecretHash(WebhookCommunityIntegrationConnector.hashSecret(secret));
             // The digest goes out over the platform's own audited mail path, which holds its own
             // transport credentials. Nothing from the community is needed here.
-            return;
+            case EMAIL_DIGEST -> { }
+            case TELEGRAM, WHATSAPP -> {
+                if (!credentialCipher.isConfigured()) {
+                    throw new IllegalStateException(
+                        "Storing a bot token requires INTEGRATION_CREDENTIAL_KEY. Set it before creating "
+                            + channel.name() + " integrations; the platform will not store a bot token in the clear.");
+                }
+                integration.setCredentialCiphertext(credentialCipher.encrypt(secret));
+            }
+            // Channels with no connector yet. Refusing them a credential is right: there is nothing to
+            // authenticate with yet. An earlier version treated "not a webhook, not email" as
+            // "messaging", which made CALENDAR_FEED demand a bot token and refuse to be created.
+            default -> { }
         }
-        if (!credentialCipher.isConfigured()) {
-            throw new IllegalStateException(
-                "Storing a bot token requires INTEGRATION_CREDENTIAL_KEY. Set it before creating "
-                    + channel.name() + " integrations; the platform will not store a bot token in the clear.");
-        }
-        integration.setCredentialCiphertext(credentialCipher.encrypt(secret));
     }
 
     /**

@@ -5,7 +5,8 @@ public enum CommunityOpenDataTokenScope {
     EXPORT_PROPOSALS(CommunityOpenDataExportType.PROPOSALS),
     EXPORT_VOTES(CommunityOpenDataExportType.VOTES),
     EXPORT_DECISIONS(CommunityOpenDataExportType.DECISIONS),
-    EXPORT_METRICS(CommunityOpenDataExportType.METRICS);
+    EXPORT_METRICS(CommunityOpenDataExportType.METRICS),
+    EXPORT_PRIORITIZED_BACKLOG(CommunityOpenDataExportType.PRIORITIZED_BACKLOG);
 
     private final CommunityOpenDataExportType exportType;
 

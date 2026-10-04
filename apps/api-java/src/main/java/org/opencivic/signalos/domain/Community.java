@@ -22,6 +22,34 @@ public class Community {
     @Column(nullable = false, unique = true)
     private String slug;
 
+    /**
+     * A stable, public key for addressing this community from another instance.
+     *
+     * <p>Not the id, which is instance-local: a peer that had to learn a UUID minted by this
+     * deployment before it could ask for anything could not bootstrap itself. Not the slug either,
+     * which is mutable — a federation key that changes under a peer breaks it silently, with no error
+     * on either side.
+     */
+    @Column(nullable = false, unique = true, length = 64)
+    private String federationKey;
+
+    /**
+     * Mints a federation key for any community saved without one.
+     *
+     * <p>A lifecycle callback rather than a line in the creation service, because the key is an
+     * invariant of the entity: a community saved by a test, a seed or an admin path has to be
+     * addressable too. Leaving it to one service would mean a null column that only shows up when a
+     * peer tries to use it.
+     */
+    @jakarta.persistence.PrePersist
+    void assignFederationKey() {
+        if (federationKey == null || federationKey.isBlank()) {
+            byte[] bytes = new byte[12];
+            new java.security.SecureRandom().nextBytes(bytes);
+            federationKey = java.util.HexFormat.of().formatHex(bytes);
+        }
+    }
+
     @Column(columnDefinition = "TEXT")
     private String description;
 
@@ -55,6 +83,14 @@ public class Community {
 
     public void setSlug(String slug) {
         this.slug = slug;
+    }
+
+    public String getFederationKey() {
+        return federationKey;
+    }
+
+    public void setFederationKey(String federationKey) {
+        this.federationKey = federationKey;
     }
 
     public String getDescription() {

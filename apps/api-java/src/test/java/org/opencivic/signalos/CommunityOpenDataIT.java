@@ -24,6 +24,7 @@ import org.opencivic.signalos.domain.CommunityDecisionBasisType;
 import org.opencivic.signalos.domain.CommunityDecisionStatus;
 import org.opencivic.signalos.domain.CommunityDecisionType;
 import org.opencivic.signalos.domain.CommunityMembership;
+import org.opencivic.signalos.domain.CommunityOpenDataPolicy;
 import org.opencivic.signalos.domain.CommunityProposal;
 import org.opencivic.signalos.domain.CommunityProposalVote;
 import org.opencivic.signalos.domain.CommunityProposalVoteChoice;
@@ -84,6 +85,9 @@ class CommunityOpenDataIT {
         community.setName("Open Data District");
         community.setSlug("open-data-district");
         community.setDescription("Interoperable exports");
+        // The token feed now checks this policy. A community that never opted in does not serve data,
+        // which this fixture is about to exercise rather than work around.
+        community.setOpenDataPolicy(CommunityOpenDataPolicy.AGGREGATED_PUBLIC);
         community = communityRepository.save(community);
         communityId = community.getId();
 
@@ -165,7 +169,7 @@ class CommunityOpenDataIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.communityId").value(communityId.toString()))
             .andExpect(jsonPath("$.defaultRateLimitPerHour").value(120))
-            .andExpect(jsonPath("$.datasets", hasSize(5)))
+            .andExpect(jsonPath("$.datasets", hasSize(6)))
             .andExpect(jsonPath("$.datasets[?(@.resource=='SIGNALS')]").exists());
 
         mockMvc.perform(post("/api/community/exports/tokens")

@@ -2,11 +2,17 @@ package org.opencivic.signalos;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
+import org.opencivic.signalos.domain.Community;
+import org.opencivic.signalos.domain.CommunityOpenDataPolicy;
+import org.opencivic.signalos.repository.CommunityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,6 +39,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class FederationManifestIT {
 
     @Autowired private MockMvc mockMvc;
+    @Autowired private CommunityRepository communityRepository;
 
     @Test
     void theManifestShouldBeReadableWithoutAToken() throws Exception {
@@ -42,7 +49,7 @@ class FederationManifestIT {
             .andExpect(jsonPath("$.instanceName").value("Riverside Instance"))
             .andExpect(jsonPath("$.contractVersion").value("v1"))
             .andExpect(jsonPath("$.supportedContractVersions", hasSize(1)))
-            .andExpect(jsonPath("$.datasets", hasSize(5)))
+            .andExpect(jsonPath("$.datasets", hasSize(6)))
             .andExpect(jsonPath("$.datasets[0].exportType").value("SIGNALS"))
             .andExpect(jsonPath("$.datasets[0].contractVersion").value("v1"))
             .andExpect(jsonPath("$.authentication").value(
@@ -113,8 +120,87 @@ class FederationManifestIT {
             .andExpect(jsonPath("$.datasets[?(@.exportType=='DECISIONS')].scope").value(
                 org.hamcrest.Matchers.contains("EXPORT_DECISIONS")))
             .andExpect(jsonPath("$.datasets[?(@.exportType=='METRICS')].scope").value(
-                org.hamcrest.Matchers.contains("EXPORT_METRICS")));
+                org.hamcrest.Matchers.contains("EXPORT_METRICS")))
+            .andExpect(jsonPath("$.datasets[?(@.exportType=='PRIORITIZED_BACKLOG')].scope").value(
+                org.hamcrest.Matchers.contains("EXPORT_PRIORITIZED_BACKLOG")));
     }
+
+    @Test
+    void theManifestShouldAddressCitiesByAStableKeyAndWithholdTheOnesThatOptedOut() throws Exception {
+        Community federating = community("Riverside District", CommunityOpenDataPolicy.AGGREGATED_PUBLIC);
+        Community quiet = community("Quiet District", CommunityOpenDataPolicy.DISABLED);
+
+        var json = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+            mockMvc.perform(get("/api/federation/manifest"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString());
+
+        // Listed, addressed by the stable key.
+        assertTrue(
+            findCity(json.get("cities"), federating.getFederationKey()) != null,
+            "a community that enabled open data must be listed: " + json.get("cities"));
+        // Counted, not named: this endpoint is unauthenticated, so naming a community that has not
+        // enabled open data would publish its existence to anyone who asked.
+        assertTrue(
+            json.get("citiesNotAdvertised").asInt() >= 1,
+            "an opted-out community must be counted: " + json);
+        assertTrue(
+            findCity(json.get("cities"), quiet.getFederationKey()) == null,
+            "an opted-out community must not be named in an unauthenticated manifest: " + json);
+    }
+
+    private static com.fasterxml.jackson.databind.JsonNode findCity(
+        com.fasterxml.jackson.databind.JsonNode cities,
+        String federationKey
+    ) {
+        if (cities == null) {
+            return null;
+        }
+        for (var city : cities) {
+            if (federationKey.equals(city.path("federationKey").asText())) {
+                return city;
+            }
+        }
+        return null;
+    }
+
+    @Test
+    void twoCitiesShouldGetDistinctKeysSoNeitherCanShadowTheOther() {
+        Community first = community("Riverside District", CommunityOpenDataPolicy.AGGREGATED_PUBLIC);
+        Community second = community("Northgate", CommunityOpenDataPolicy.AGGREGATED_PUBLIC);
+
+        org.junit.jupiter.api.Assertions.assertNotEquals(
+            first.getFederationKey(), second.getFederationKey(),
+            "two federating cities must not share a key");
+        org.junit.jupiter.api.Assertions.assertNotNull(first.getFederationKey());
+        org.junit.jupiter.api.Assertions.assertEquals(24, first.getFederationKey().length());
+    }
+
+    @Test
+    void aRenamedSlugShouldNotChangeTheKeyAPeerHolds() {
+        Community city = community("Riverside District", CommunityOpenDataPolicy.AGGREGATED_PUBLIC);
+        String key = city.getFederationKey();
+
+        city.setSlug("riverside-renamed-" + System.nanoTime());
+        communityRepository.save(city);
+
+        org.junit.jupiter.api.Assertions.assertEquals(
+            key, city.getFederationKey(),
+            "a federation key that moves under a peer breaks it silently");
+    }
+
+    private Community community(String name, CommunityOpenDataPolicy policy) {
+        Community community = new Community();
+        community.setName(name);
+        // Unique per call: this class is not transactional, so its in-memory database keeps rows
+        // between methods and the slug column is unique.
+        community.setSlug(name.toLowerCase(Locale.ROOT).replace(' ', '-') + "-" + slugCounter.incrementAndGet());
+        community.setDescription("Federation namespace");
+        community.setOpenDataPolicy(policy);
+        return communityRepository.save(community);
+    }
+
+    private static final AtomicInteger slugCounter = new AtomicInteger();
 
     @Test
     void theManifestShouldNotExposeAnyData() throws Exception {

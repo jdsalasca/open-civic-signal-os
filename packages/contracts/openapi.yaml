@@ -6926,6 +6926,21 @@ components:
             type: string
         contractVersion:
           type: string
+    FederatedCity:
+      type: object
+      required: [federationKey, name, openDataPolicy]
+      properties:
+        federationKey:
+          type: string
+          description: >-
+            The city's stable cross-instance identifier. What a peer addresses. Not the community id,
+            which is local to one deployment, and not the slug, which can be renamed under a peer.
+          example: 90fd826dd37f9201d178bc18
+        name:
+          type: string
+        openDataPolicy:
+          type: string
+          enum: [AGGREGATED_PUBLIC, AGGREGATED_AND_DECISIONS]
     FederationManifest:
       type: object
       properties:
@@ -6946,6 +6961,20 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FederatedDataset'
+        cities:
+          type: array
+          description: >-
+            The cities this instance federates, addressed by a stable key. Only communities that have
+            enabled open data are listed, because the manifest is unauthenticated and naming a
+            community that has not opted in would publish its existence to anyone who asked.
+          items:
+            $ref: '#/components/schemas/FederatedCity'
+        citiesNotAdvertised:
+          type: integer
+          description: >-
+            How many communities exist here that are not listed, because they have not enabled open
+            data. Counted so a peer can tell "this instance serves nothing" from "this instance hides
+            some", without learning which ones.
         authentication:
           type: string
           description: How a consumer authenticates. Reading an export still requires a scoped token.

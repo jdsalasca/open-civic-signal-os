@@ -5,5 +5,13 @@ public enum CommunityOpenDataExportType {
     PROPOSALS,
     VOTES,
     DECISIONS,
-    METRICS
+    METRICS,
+    /**
+     * The prioritized, still-unresolved backlog for one community, as a peer would consume it.
+     *
+     * <p>Appended rather than inserted: {@code CommunityOpenDataTokenScope} pairs with this enum by
+     * ordinal, so inserting a value would silently repoint every later token scope at the wrong
+     * export.
+     */
+    PRIORITIZED_BACKLOG
 }

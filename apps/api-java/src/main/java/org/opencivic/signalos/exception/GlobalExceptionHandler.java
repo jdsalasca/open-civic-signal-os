@@ -13,10 +13,15 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -108,6 +113,11 @@ public class GlobalExceptionHandler {
     // P0-D: RuntimeException defaults to 500 for uncontrolled internal errors
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleInternalError(RuntimeException ex) {
+        // Logged, never returned. The generic message is right for the caller — an internal failure
+        // should not describe itself over the wire — but this handler used to discard the cause
+        // entirely, so every 500 became a guessing exercise with no way to tell a misconfiguration
+        // from a data problem. The stack stays in the log, where it belongs.
+        log.error("Unhandled internal error: {}", ex.getMessage(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected system synchronization error occurred.");
     }
 

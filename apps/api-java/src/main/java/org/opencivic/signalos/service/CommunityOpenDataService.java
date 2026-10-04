@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,12 +21,15 @@ import org.opencivic.signalos.domain.CommunityOpenDataAccessChannel;
 import org.opencivic.signalos.domain.CommunityOpenDataAccessLog;
 import org.opencivic.signalos.domain.CommunityOpenDataExportType;
 import org.opencivic.signalos.domain.CommunityOpenDataFormat;
+import org.opencivic.signalos.domain.CommunityOpenDataPolicy;
 import org.opencivic.signalos.domain.CommunityOpenDataToken;
 import org.opencivic.signalos.domain.CommunityOpenDataTokenScope;
 import org.opencivic.signalos.domain.CommunityPermissionScope;
 import org.opencivic.signalos.domain.CommunityProposal;
 import org.opencivic.signalos.domain.CommunityProposalVote;
+import org.opencivic.signalos.domain.PrioritizationFormula;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.exception.TooManyRequestsException;
@@ -40,6 +44,7 @@ import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.web.dto.CommunityOpenDataAccessLogResponse;
 import org.opencivic.signalos.web.dto.CommunityOpenDataCenterResponse;
+import org.opencivic.signalos.web.dto.OpenDataBacklogRecordResponse;
 import org.opencivic.signalos.web.dto.CommunityOpenDataDatasetResponse;
 import org.opencivic.signalos.web.dto.CommunityOpenDataExportDefinitionResponse;
 import org.opencivic.signalos.web.dto.CommunityOpenDataTokenResponse;
@@ -53,12 +58,19 @@ import org.opencivic.signalos.web.dto.OpenDataSignalRecordResponse;
 import org.opencivic.signalos.web.dto.OpenDataVoteRecordResponse;
 import org.opencivic.signalos.web.dto.PublicDataAnonymizationChecklist;
 import org.opencivic.signalos.web.dto.PublicDataAnonymizationFieldCheck;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CommunityOpenDataService {
+
+    /**
+     * How many rows a federated backlog carries. A peer wants the top of the list, not the whole
+     * dataset; the SIGNALS export remains the way to get everything.
+     */
+    private static final int BACKLOG_LIMIT = 50;
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final int DEFAULT_RATE_LIMIT_PER_HOUR = 120;
     private static final List<CommunityOpenDataExportDefinitionResponse> EXPORT_DEFINITIONS = List.of(
@@ -66,7 +78,8 @@ public class CommunityOpenDataService {
         new CommunityOpenDataExportDefinitionResponse("PROPOSALS", "EXPORT_PROPOSALS", "Structured community proposals with vote configuration and supporting links.", List.of("CSV", "JSON")),
         new CommunityOpenDataExportDefinitionResponse("VOTES", "EXPORT_VOTES", "Recorded proposal vote activity with mode, choice, and member verification context.", List.of("CSV", "JSON")),
         new CommunityOpenDataExportDefinitionResponse("DECISIONS", "EXPORT_DECISIONS", "Decision-ledger records linked to proposals, governance, and execution ownership.", List.of("CSV", "JSON")),
-        new CommunityOpenDataExportDefinitionResponse("METRICS", "EXPORT_METRICS", "Trust metrics cards exported across standard reporting periods.", List.of("CSV", "JSON"))
+        new CommunityOpenDataExportDefinitionResponse("METRICS", "EXPORT_METRICS", "Trust metrics cards exported across standard reporting periods.", List.of("CSV", "JSON")),
+        new CommunityOpenDataExportDefinitionResponse("PRIORITIZED_BACKLOG", "EXPORT_PRIORITIZED_BACKLOG", "Still-unresolved issues ranked for another instance, with the formula's inputs and published expression rather than a prose rationale.", List.of("CSV", "JSON"))
     );
 
     private final CommunityAccessService communityAccessService;
@@ -307,8 +320,18 @@ public class CommunityOpenDataService {
     }
 
     @Transactional
-    public TokenApiResult readWithToken(UUID communityId, CommunityOpenDataExportType exportType, String plainToken) {
-        TokenAccess tokenAccess = validateToken(communityId, exportType, plainToken);
+public TokenApiResult readWithToken(UUID communityId, CommunityOpenDataExportType exportType, String plainToken) {
+  // Checked before the token, because the policy is the stronger claim: a community that withdraws
+  // open data expects its data to stop crossing the instance boundary, whether or not a peer still
+  // holds a token it issued earlier. Validating only the token meant a consent withdrawal changed
+  // nothing for anyone already scraping.
+  Community community = getCommunity(communityId);
+  if (community.getOpenDataPolicy() == CommunityOpenDataPolicy.DISABLED) {
+  throw new AccessDeniedException(
+  "This community has withdrawn its open-data policy. Existing tokens no longer serve data. "
+  + "Ask the community to re-enable open data if your integration needs access again.");
+  }
+  TokenAccess tokenAccess = validateToken(communityId, exportType, plainToken);
         Object dataset = buildDataset(communityId, exportType);
         int remaining = Math.max(tokenAccess.token().getRateLimitPerHour() - tokenAccess.usedInWindow() - 1, 0);
         LocalDateTime resetAt = tokenAccess.resetAt();
@@ -374,7 +397,80 @@ public class CommunityOpenDataService {
             case VOTES -> buildVotes(communityId);
             case DECISIONS -> buildDecisions(communityId);
             case METRICS -> buildMetrics(communityId);
+            case PRIORITIZED_BACKLOG -> buildBacklog(communityId);
         };
+    }
+
+    /**
+     * The community's prioritized, still-unresolved backlog.
+     *
+     * <p>What a peer actually wants from another city: what is at the top and why, not every row.
+     * Unresolved means not closed and not rejected, so a ranked list does not present a decision the
+     * community already made as pending.
+     *
+     * <p>Rows carry the formula's inputs and its published expression instead of a sentence. A peer
+     * renders its own explanation, and this platform does not end up with two "why" strings to keep in
+     * step with the formula.
+     *
+     * <p>Titles and locations go through the anonymizer like every other export: this dataset crosses
+     * an instance boundary, which is exactly where a name or an address should not travel unredacted.
+     */
+    public List<OpenDataBacklogRecordResponse> buildBacklog(UUID communityId) {
+        Community community = getCommunity(communityId);
+        LocalDateTime generatedAt = LocalDateTime.now();
+        List<Signal> unresolved = signalRepository.findByCommunityId(communityId).stream()
+            .filter(this::isUnresolved)
+            .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed()
+                .thenComparing(Signal::getId))
+            .limit(BACKLOG_LIMIT)
+            .toList();
+
+        List<OpenDataBacklogRecordResponse> rows = new ArrayList<>();
+        int rank = 1;
+        for (Signal signal : unresolved) {
+            rows.add(new OpenDataBacklogRecordResponse(
+                community.getFederationKey(),
+                community.getName(),
+                signal.getId(),
+                rank++,
+                anonymizer.redact(signal.getTitle()),
+                signal.getCategory(),
+                signal.getStatus(),
+                signal.getPriorityScore(),
+                signal.getUrgency(),
+                signal.getImpact(),
+                signal.getAffectedPeople(),
+                signal.getCommunityVotes(),
+                anonymizer.redact(signal.getLocationLabel()),
+                PrioritizationFormulaService.VERSION,
+                PrioritizationFormula.expression(),
+                generatedAt
+            ));
+        }
+        return rows;
+    }
+
+    /**
+     * Whether a signal still counts as open.
+     *
+     * <p>Decided against {@code SignalStatus} rather than a set of status strings, because a second
+     * copy of that list is a second thing to keep in step — the failure this repository has already
+     * paid for once with the formula weights.
+     *
+     * <p>An unrecognised status counts as open. A public backlog should not quietly drop a resident's
+     * report because its status string is one this version has not heard of.
+     */
+    private boolean isUnresolved(Signal signal) {
+        String raw = signal.getStatus();
+        if (raw == null || raw.isBlank()) {
+            return true;
+        }
+        try {
+            SignalStatus status = SignalStatus.valueOf(raw.trim().toUpperCase(Locale.ROOT));
+            return status != SignalStatus.RESOLVED && status != SignalStatus.REJECTED;
+        } catch (IllegalArgumentException ex) {
+            return true;
+        }
     }
 
     public List<OpenDataSignalRecordResponse> buildSignals(UUID communityId) {
@@ -539,6 +635,12 @@ public class CommunityOpenDataService {
                         writer.println(csv(row.communityId(), row.period(), row.key(), row.label(), row.value(), row.unit(), row.definition(), row.formula(), row.freshness(), row.lowData(), row.generatedAt()));
                     }
                 }
+                case PRIORITIZED_BACKLOG -> {
+                    writer.println("cityKey,cityName,signalId,rank,title,category,status,priorityScore,urgency,impact,affectedPeople,communityVotes,locationLabel,formulaVersion,formulaExpression,generatedAt");
+                    for (OpenDataBacklogRecordResponse row : castBacklog(dataset)) {
+                        writer.println(csv(row.cityKey(), row.cityName(), row.signalId(), row.rank(), row.title(), row.category(), row.status(), row.priorityScore(), row.urgency(), row.impact(), row.affectedPeople(), row.communityVotes(), row.locationLabel(), row.formulaVersion(), row.formulaExpression(), row.generatedAt()));
+                    }
+                }
             }
             writer.flush();
         }
@@ -568,6 +670,11 @@ public class CommunityOpenDataService {
     @SuppressWarnings("unchecked")
     private List<OpenDataMetricRecordResponse> castMetrics(Object dataset) {
         return (List<OpenDataMetricRecordResponse>) dataset;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<OpenDataBacklogRecordResponse> castBacklog(Object dataset) {
+        return (List<OpenDataBacklogRecordResponse>) dataset;
     }
 
     private String csv(Object... values) {
