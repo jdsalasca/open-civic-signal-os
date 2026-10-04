@@ -18,12 +18,14 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import org.opencivic.signalos.domain.Community;
+import org.opencivic.signalos.domain.CommunityDigestPreparation;
 import org.opencivic.signalos.domain.CommunityDigestPublication;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.SignalStatusEntry;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
+import org.opencivic.signalos.repository.CommunityDigestPreparationRepository;
 import org.opencivic.signalos.repository.CommunityDigestPublicationRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
 import org.opencivic.signalos.repository.SignalRepository;
@@ -69,6 +71,8 @@ public class WeeklyDigestService {
     private final SignalRepository signalRepository;
     private final SignalStatusEntryRepository statusEntryRepository;
     private final CommunityDigestPublicationRepository publicationRepository;
+    private final CommunityDigestPreparationRepository preparationRepository;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
     private final CommunityIntegrationService integrationService;
 
     public WeeklyDigestService(
@@ -77,6 +81,8 @@ public class WeeklyDigestService {
         SignalRepository signalRepository,
         SignalStatusEntryRepository statusEntryRepository,
         CommunityDigestPublicationRepository publicationRepository,
+        CommunityDigestPreparationRepository preparationRepository,
+        com.fasterxml.jackson.databind.ObjectMapper objectMapper,
         CommunityIntegrationService integrationService
     ) {
         this.communityRepository = communityRepository;
@@ -84,6 +90,8 @@ public class WeeklyDigestService {
         this.signalRepository = signalRepository;
         this.statusEntryRepository = statusEntryRepository;
         this.publicationRepository = publicationRepository;
+        this.preparationRepository = preparationRepository;
+        this.objectMapper = objectMapper;
         this.integrationService = integrationService;
     }
 
@@ -161,7 +169,7 @@ public class WeeklyDigestService {
     public WeeklyDigest buildDigest(UUID communityId, String weekKey, Integer limit, String username) {
         userRepository.findByUsername(username)
             .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found: " + username));
-        return compose(communityId, weekKey, limit);
+        return digestForPreview(communityId, weekKey, limit);
     }
 
     /**
@@ -177,12 +185,33 @@ public class WeeklyDigestService {
         return compose(communityId, weekKey, limit);
     }
 
+    /**
+     * What a coordinator sees before deciding to publish.
+     *
+     * <p>Serves the prepared artifact when one exists. This is the same rule publish follows, and it
+     * has to be: a preview that recomposes while publishing uses the stored artifact would show one
+     * digest and send another, which is the defect this replaced.
+     */
+    @Transactional(readOnly = true)
+    public WeeklyDigest digestForPreview(UUID communityId, String weekKey, Integer limit) {
+        DigestWeek week = resolveWeek(weekKey);
+        return preparationRepository.findByCommunityIdAndWeekKey(communityId, week.key())
+            .map(preparation -> fromPreparation(communityId, preparation))
+            .orElseGet(() -> compose(communityId, weekKey, limit));
+    }
+
     @Transactional
     public WeeklyDigest publishDigest(UUID communityId, String weekKey, Integer limit, String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found: " + username));
 
-        WeeklyDigest digest = compose(communityId, weekKey, limit);
+        // The prepared artifact, when there is one. Recomposing here is what let a reviewed digest
+        // differ from the published one: a rescored signal between review and publish moved the score,
+        // the order and the body, and the resident's hash corresponded to nothing reviewed.
+        DigestWeek week = resolveWeek(weekKey);
+        WeeklyDigest digest = preparationRepository.findByCommunityIdAndWeekKey(communityId, week.key())
+            .map(preparation -> fromPreparation(communityId, preparation))
+            .orElseGet(() -> compose(communityId, weekKey, limit));
 
         publicationRepository.findByCommunityIdAndWeekKey(communityId, digest.week().key())
             .ifPresent(existing -> {
@@ -225,6 +254,101 @@ public class WeeklyDigestService {
         userRepository.findByUsername(username)
             .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found: " + username));
         return publicationRepository.findByCommunityIdOrderByWeekKeyDesc(communityId);
+    }
+
+    /**
+     * Saves the composed digest as the artifact for that week.
+     *
+     * <p>Called by the scheduler. Idempotent through a unique index on community and week: a second
+     * fire for the same week does not overwrite what somebody may already have reviewed, it is
+     * refused.
+     *
+     * @return the stored preparation, or empty when one already exists for the week
+     */
+    @Transactional
+    public java.util.Optional<CommunityDigestPreparation> prepare(
+        UUID communityId,
+        String weekKey,
+        Integer limit
+    ) {
+        DigestWeek week = resolveWeek(weekKey);
+        if (preparationRepository.findByCommunityIdAndWeekKey(communityId, week.key()).isPresent()) {
+            return java.util.Optional.empty();
+        }
+        WeeklyDigest digest = compose(communityId, weekKey, limit);
+
+        CommunityDigestPreparation preparation = new CommunityDigestPreparation();
+        preparation.setId(UUID.randomUUID());
+        preparation.setCommunityId(communityId);
+        preparation.setWeekKey(digest.week().key());
+        preparation.setWeekStartDate(digest.week().startDate());
+        preparation.setWeekEndDate(digest.week().endDate());
+        preparation.setPreviousWeekKey(digest.week().previousKey());
+        preparation.setBody(digest.body());
+        preparation.setContentHash(digest.contentHash());
+        preparation.setItemCount(digest.topUnresolved().size());
+        preparation.setResolvedThisWeek(digest.resolvedThisWeek());
+        preparation.setRejectedThisWeek(digest.rejectedThisWeek());
+        preparation.setReportedThisWeek(digest.reportedThisWeek());
+        preparation.setStillOpenTotal(digest.stillOpenTotal());
+        preparation.setGeneratedAt(digest.generatedAt());
+        try {
+            preparation.setItemsJson(objectMapper.writeValueAsString(digest.topUnresolved()));
+        } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
+            // The body and the counts are the artifact. Without the item list a preview shows the same
+            // numbers and no rows, which is a worse failure than recording the preparation without it.
+            preparation.setItemsJson(null);
+        }
+        return java.util.Optional.of(preparationRepository.save(preparation));
+    }
+
+    /**
+     * Rebuilds the digest a coordinator reviewed, from what was stored rather than from live data.
+     *
+     * <p>{@code published} is read live from the publication record rather than stored, because that
+     * is the one thing that is supposed to change after preparation.
+     */
+    private WeeklyDigest fromPreparation(UUID communityId, CommunityDigestPreparation preparation) {
+        Community community = communityRepository.findById(communityId)
+            .orElseThrow(() -> new ResourceNotFoundException("Community not found: " + communityId));
+
+        List<DigestItem> items = List.of();
+        if (preparation.getItemsJson() != null && !preparation.getItemsJson().isBlank()) {
+            try {
+                items = objectMapper.readValue(
+                    preparation.getItemsJson(),
+                    new com.fasterxml.jackson.core.type.TypeReference<List<DigestItem>>() {});
+            } catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
+                // Same reasoning as writing: counts and body still describe the prepared week.
+                items = List.of();
+            }
+        }
+
+        boolean published = publicationRepository
+            .findByCommunityIdAndWeekKey(communityId, preparation.getWeekKey())
+            .isPresent();
+
+        return new WeeklyDigest(
+            VERSION,
+            communityId,
+            community.getName(),
+            new DigestWeek(
+                preparation.getWeekKey(),
+                preparation.getWeekStartDate(),
+                preparation.getWeekEndDate(),
+                preparation.getPreviousWeekKey()),
+            items,
+            preparation.getResolvedThisWeek(),
+            preparation.getRejectedThisWeek(),
+            preparation.getReportedThisWeek(),
+            preparation.getStillOpenTotal(),
+            preparation.getBody(),
+            preparation.getContentHash(),
+            published,
+            null,
+            preparation.getGeneratedAt(),
+            0
+        );
     }
 
     private WeeklyDigest compose(UUID communityId, String weekKey, Integer limit) {

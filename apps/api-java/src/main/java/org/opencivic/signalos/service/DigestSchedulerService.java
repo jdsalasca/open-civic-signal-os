@@ -55,6 +55,16 @@ public class DigestSchedulerService {
         this.runRepository = runRepository;
     }
 
+    /**
+     * Whether the weekly job is enabled.
+     *
+     * <p>Exposed so a test can assert on the value the application actually resolved, rather than on
+     * a property read from a fresh environment that has none of the application's sources.
+     */
+    public boolean isSchedulerEnabled() {
+        return schedulerEnabled;
+    }
+
     public record ScheduleRunView(
         UUID communityId,
         String communityName,
@@ -133,12 +143,18 @@ public class DigestSchedulerService {
             run.setRanAt(LocalDateTime.now());
 
             try {
-                // Generating is the whole job. Publishing is a person's decision, and the digest
-                // service already refuses a second publish for the same week.
-                var digest = digestService.buildDigestForScheduler(community.getId(), weekKey, null);
+                // Generating is the whole job, and the generated digest is kept. It used to be
+                // discarded here and recomposed at publish time, which meant a coordinator could
+                // review one digest and residents received another: a rescored signal between the two
+                // moved the score, the order and the body. "Prepared" has to mean the artifact exists.
+                var digest = digestService.prepare(community.getId(), weekKey, null);
                 run.setOutcome(DigestScheduleRun.Outcome.PREPARED);
-                run.setDetail("Digest ready with " + digest.topUnresolved().size()
-                    + " item(s). Publish it deliberately; the scheduler does not send.");
+                run.setDetail(digest.isPresent()
+                    ? "Digest sealed and waiting for a person to publish: "
+                        + digest.get().getItemCount() + " item(s), hash "
+                        + digest.get().getContentHash().substring(0, 12)
+                        + ". Publishing sends this exact artifact; it is not recomposed."
+                    : "Already prepared for this week; the existing artifact was kept.");
                 prepared++;
             } catch (RuntimeException ex) {
                 run.setOutcome(DigestScheduleRun.Outcome.FAILED);

@@ -18,12 +18,14 @@ import org.opencivic.signalos.domain.CommunityRole;
 import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.repository.CommunityDigestPreparationRepository;
 import org.opencivic.signalos.repository.CommunityDigestPublicationRepository;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
 import org.opencivic.signalos.repository.DigestScheduleRunRepository;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
+import org.opencivic.signalos.service.WeeklyDigestService;
 import org.opencivic.signalos.service.DigestSchedulerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -59,6 +61,8 @@ class DigestSchedulerIT {
     @Autowired private SignalRepository signalRepository;
     @Autowired private DigestScheduleRunRepository runRepository;
     @Autowired private CommunityDigestPublicationRepository publicationRepository;
+    @Autowired private CommunityDigestPreparationRepository preparationRepository;
+    @Autowired private WeeklyDigestService weeklyDigestService;
 
     private UUID communityId;
     private UUID coordinatorId;
@@ -142,10 +146,15 @@ class DigestSchedulerIT {
             report.weekKey().matches("\\d{4}-W\\d{2}"),
             "expected an ISO week key, got: " + report.weekKey());
         org.junit.jupiter.api.Assertions.assertEquals(1, report.runs().size());
-        org.junit.jupiter.api.Assertions.assertEquals("PREPARED", report.runs().get(0).outcome());
+org.junit.jupiter.api.Assertions.assertEquals("PREPARED", report.runs().get(0).outcome());
         org.junit.jupiter.api.Assertions.assertTrue(
-            report.runs().get(0).detail().contains("Publish it deliberately"),
+            report.runs().get(0).detail().contains("waiting for a person to publish"),
             "expected the deliberate-publish note, got: " + report.runs().get(0).detail());
+        // The note states the thing a reader would otherwise have to assume: this exact artifact is
+        // what publishing will send.
+        org.junit.jupiter.api.Assertions.assertTrue(
+            report.runs().get(0).detail().contains("not recomposed"),
+            "expected the artifact guarantee, got: " + report.runs().get(0).detail());
     }
 
     @Test
@@ -173,13 +182,116 @@ class DigestSchedulerIT {
 
     @Test
     void theSchedulerShouldBeDisabledByDefault() {
-        // A job that started generating digests the moment it was deployed would surprise a community
-        // that has not decided to run a weekly bulletin yet. The default is asserted through the
-        // property, since the cron method itself is a no-op when disabled.
+        // Asserted on the real bean, not on a fresh StandardEnvironment. A new StandardEnvironment has
+        // none of the application's property sources, so a property read from one returns its default
+        // whatever the application is configured to do. That test could not have failed.
         org.junit.jupiter.api.Assertions.assertFalse(
-            new org.springframework.core.env.StandardEnvironment()
-                .getProperty("app.digest.scheduler.enabled", Boolean.class, false),
+            schedulerService.isSchedulerEnabled(),
             "the scheduler must default to disabled");
+    }
+
+    @Test
+    void thePreparedDigestShouldBeStoredRatherThanDiscarded() {
+        signal("Water main break", "utilities", 313.0);
+
+        schedulerService.prepareForAllCommunities(communityId);
+
+        var preparation = preparationRepository.findByCommunityIdAndWeekKey(
+            communityId, weeklyDigestService.resolveWeek(null).key()).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertFalse(preparation.getBody().isBlank());
+        org.junit.jupiter.api.Assertions.assertTrue(
+            preparation.getContentHash().matches("[0-9a-f]{64}"),
+            "expected a sha-256 hex digest, got: " + preparation.getContentHash());
+        org.junit.jupiter.api.Assertions.assertEquals(1, preparation.getItemCount());
+        // The item list travels with the artifact, so a preview shows the rows that will be sent.
+        org.junit.jupiter.api.Assertions.assertTrue(preparation.getItemsJson().contains("Water main break"));
+    }
+
+    @Test
+    void publishingShouldSendTheArtifactThatWasPreparedAfterTheWorldChanges() {
+        // Two signals so that changing their scores changes the order, which changes the body.
+        signal("Water main break", "utilities", 313.0);
+        signal("Streetlight out", "utilities", 120.0);
+
+        schedulerService.prepareForAllCommunities(communityId);
+        var prepared = weeklyDigestService.digestForPreview(communityId, null, null);
+
+        // The world moves after preparation: the scores swap, as they would if a coordinator rescored
+        // or a formula change was applied.
+        rescore("Water main break", 90.0);
+        rescore("Streetlight out", 400.0);
+
+        var published = weeklyDigestService.publishDigest(communityId, null, null, "sched_coord");
+
+        org.junit.jupiter.api.Assertions.assertEquals(
+            prepared.body(), published.body(),
+            "residents must receive the artifact somebody reviewed, not a recomposition of it");
+        org.junit.jupiter.api.Assertions.assertEquals(prepared.contentHash(), published.contentHash());
+
+        // And the counterfactual, so the assertion above is not vacuous: recomposing now would differ.
+        var recomposed = weeklyDigestService.buildDigestForScheduler(
+            communityId, prepared.week().key(), null);
+        org.junit.jupiter.api.Assertions.assertNotEquals(
+            prepared.body(), recomposed.body(),
+            "the world did not actually change the digest; this test is proving nothing");
+    }
+
+    @Test
+    void aPreviewShouldShowExactlyWhatPublishingWillSend() {
+        signal("Water main break", "utilities", 313.0);
+        signal("Streetlight out", "utilities", 120.0);
+
+        schedulerService.prepareForAllCommunities(communityId);
+        var preview = weeklyDigestService.digestForPreview(communityId, null, null);
+
+        rescore("Water main break", 90.0);
+        rescore("Streetlight out", 400.0);
+
+        // A preview that recomposes while publishing uses the stored artifact would show one digest
+        // and send another.
+        org.junit.jupiter.api.Assertions.assertEquals(
+            preview.body(),
+            weeklyDigestService.digestForPreview(communityId, null, null).body());
+        org.junit.jupiter.api.Assertions.assertEquals(
+            preview.contentHash(),
+            weeklyDigestService.digestForPreview(communityId, null, null).contentHash());
+    }
+
+    @Test
+    void aWeekWithNoPreparationShouldStillCompose() {
+        // No scheduler involved: a coordinator running the digest by hand still gets one.
+        signal("Water main break", "utilities", 313.0);
+
+        var preview = weeklyDigestService.digestForPreview(communityId, null, null);
+        var published = weeklyDigestService.publishDigest(communityId, null, null, "sched_coord");
+
+        org.junit.jupiter.api.Assertions.assertEquals(preview.body(), published.body());
+        org.junit.jupiter.api.Assertions.assertEquals(1, publicationRepository.count());
+    }
+
+    @Test
+    void aSecondPreparationShouldKeepTheArtifactAlreadyUnderReview() {
+        signal("Water main break", "utilities", 313.0);
+
+        schedulerService.prepareForAllCommunities(communityId);
+        rescore("Water main break", 999.0);
+        var second = schedulerService.prepareForAllCommunities(communityId);
+
+        // The week already ran, so this is SKIPPED, not a fresh artifact over the reviewed one.
+        org.junit.jupiter.api.Assertions.assertEquals(0, second.prepared());
+        org.junit.jupiter.api.Assertions.assertEquals(1, second.skipped());
+        org.junit.jupiter.api.Assertions.assertEquals(
+            1, preparationRepository.findByCommunityIdAndWeekKey(
+                communityId, weeklyDigestService.resolveWeek(null).key()).orElseThrow().getItemCount());
+    }
+
+    private void rescore(String title, double score) {
+        Signal signal = signalRepository.findAll().stream()
+            .filter(candidate -> title.equals(candidate.getTitle()))
+            .findFirst()
+            .orElseThrow();
+        signal.setPriorityScore(score);
+        signalRepository.save(signal);
     }
 
     private void signal(String title, String category, double score) {

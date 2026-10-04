@@ -31,6 +31,39 @@ only three, and the interpretation says on every report that "nothing has reache
 Pinned by `aRunShouldPrepareADigestAndPublishNothing`, which asserts the publication table is still
 empty after a run.
 
+### The prepared digest is kept, not recomposed
+
+"Prepared" has to mean the artifact exists. The first implementation composed a digest, read its item
+count for the run detail, and discarded the rest; publishing then recomposed from live data.
+
+The gap was small and real. `priorityScore` is mutable, and rescoring exists as a feature, so a
+coordinator could review a digest on Monday and residents could receive a different one on Wednesday:
+the score moved, the order moved, the body moved, and the content hash a resident got corresponded to
+nothing anybody had looked at. The digest's reason for carrying a hash is that a recipient can verify
+what they received, and a hash of an artifact nobody reviewed verifies nothing.
+
+So `community_digest_preparations` stores the body, the hash, the counts and the rendered items, and
+**the prepared artifact wins everywhere**: the preview a coordinator reads and the body that gets
+delivered come from the same row. Recomposition happens only for a week with no preparation, which is
+the case where a coordinator runs the digest by hand with no scheduler involved.
+
+The counts are columns rather than recomputed values because they appear in the rendered body, and the
+body is what residents receive. Anything not stored cannot be reproduced from a review.
+
+One consequence worth stating: when a preparation exists, the `limit` argument at publish time no
+longer changes anything. Passing a different limit would produce a digest different from the one
+reviewed, which is the defect, so the argument is ignored rather than honoured.
+
+Pinned by `publishingShouldSendTheArtifactThatWasPreparedAfterTheWorldChanges`, which also asserts the
+counterfactual — that recomposing after the change really does differ — so the test cannot pass
+vacuously.
+
+### A second preparation keeps what is under review
+
+`prepare` returns empty when a preparation exists for the week, so a repeated fire cannot overwrite
+an artifact somebody may already have looked at. Combined with the run-level skip, a week is prepared
+exactly once.
+
 ### Monday morning, for the week that just ended
 
 `0 0 6 * * MON`. Monday rather than Sunday night because a digest generated at 23:59 on Sunday would
