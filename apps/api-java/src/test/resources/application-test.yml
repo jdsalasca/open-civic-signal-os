@@ -12,3 +12,5 @@ application:
   security:
     jwt:
       secret-key: "test-secret-key-at-least-32-characters-long-for-hmac-sha"
+  # Fixed so encrypted bot tokens are readable in tests. Never a real key, never in production.
+  integration-credential-key: "test-integration-credential-key-not-a-real-secret"

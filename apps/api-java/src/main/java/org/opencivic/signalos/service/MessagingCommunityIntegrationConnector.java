@@ -14,10 +14,11 @@ import org.springframework.stereotype.Component;
 /**
  * Delivers a message to a WhatsApp or Telegram group through a bot the community owns.
  *
- * <p>The bot token is the integration's {@code secretHash} field, which for these channels holds the
- * token itself rather than a hash. That is a deliberate departure from the webhook channel, where the
- * secret signs a payload and never leaves the platform. Here the token has to be sent to the
- * provider, so it cannot be hashed, and the field name is a lie for these two channels.
+ * <p>The bot token is read from the integration's encrypted credential, not from {@code secretHash}.
+ * That field is a webhook secret: the secret signs a payload and never leaves the platform, so it is
+ * hashed. A bot token has to be presented to the provider on every send, so it is encrypted at rest
+ * and decrypted here. An earlier version read the hashed field and sent a digest to Telegram, which
+ * answered 401.
  *
  * <p>Two things this does not do:
  *
@@ -45,12 +46,14 @@ public class MessagingCommunityIntegrationConnector implements CommunityIntegrat
 
     private final String telegramApi;
     private final String whatsappApi;
+    private final IntegrationCredentialCipher credentialCipher;
 
     public MessagingCommunityIntegrationConnector(
-        @org.springframework.beans.factory.annotation.Value("${app.messaging.telegram-api:}")
+        @org.springframework.beans.factory.annotation.Value("${application.messaging.telegram-api:}")
         String telegramApiOverride,
-        @org.springframework.beans.factory.annotation.Value("${app.messaging.whatsapp-api:}")
-        String whatsappApiOverride
+        @org.springframework.beans.factory.annotation.Value("${application.messaging.whatsapp-api:}")
+        String whatsappApiOverride,
+        IntegrationCredentialCipher credentialCipher
     ) {
         // Overridable so the connector can be exercised against a stub. Without this the only way to
         // test it is to call the real providers, which a test must never do.
@@ -58,6 +61,7 @@ public class MessagingCommunityIntegrationConnector implements CommunityIntegrat
             ? DEFAULT_TELEGRAM_API : telegramApiOverride;
         this.whatsappApi = whatsappApiOverride == null || whatsappApiOverride.isBlank()
             ? DEFAULT_WHATSAPP_API : whatsappApiOverride;
+        this.credentialCipher = credentialCipher;
     }
 
     @Override
@@ -68,17 +72,17 @@ public class MessagingCommunityIntegrationConnector implements CommunityIntegrat
 
     @Override
     public DeliveryResult deliver(CommunityIntegration integration, String body) {
-        String token = integration.getSecretHash();
-        if (token == null || token.isBlank()) {
+        String token = readToken(integration);
+        if (token == null) {
             return new DeliveryResult(false,
                 "No bot token configured for this " + integration.getChannel().name()
                     + " integration. The community must supply its own bot so replies reach someone "
                     + "who can act.", 0);
         }
-        String chatId = integration.getTargetUri() == null ? "" : integration.getTargetUri().trim();
-        if (chatId.isBlank()) {
+        String recipient = integration.getTargetUri() == null ? "" : integration.getTargetUri().trim();
+        if (recipient.isBlank()) {
             return new DeliveryResult(false,
-                "No chat or group id configured for this " + integration.getChannel().name()
+                "No chat, group or recipient configured for this " + integration.getChannel().name()
                     + " integration.", 0);
         }
         if (body == null || body.isBlank()) {
@@ -91,8 +95,27 @@ public class MessagingCommunityIntegrationConnector implements CommunityIntegrat
             : body;
 
         return integration.getChannel() == CommunityIntegrationChannel.TELEGRAM
-            ? deliverTelegram(token, chatId, message)
-            : deliverWhatsApp(token, chatId, message);
+            ? deliverTelegram(token, recipient, message)
+            : deliverWhatsApp(token, integration.getProviderResourceId(), recipient, message);
+    }
+
+    /**
+     * Reads the bot token from the encrypted credential.
+     *
+     * <p>Not from {@code secretHash}, which is the webhook field: a hash of a token is not a token,
+     * and sending one gets a 401. The column is now encrypted at rest, so an unreadable value is a
+     * configuration problem worth naming rather than a blank to swallow.
+     */
+    private String readToken(CommunityIntegration integration) {
+        String ciphertext = integration.getCredentialCiphertext();
+        if (ciphertext == null || ciphertext.isBlank()) {
+            return null;
+        }
+        try {
+            return credentialCipher.decrypt(ciphertext);
+        } catch (IllegalStateException ex) {
+            return null;
+        }
     }
 
     /**
@@ -113,18 +136,33 @@ public class MessagingCommunityIntegrationConnector implements CommunityIntegrat
     }
 
     /**
-     * WhatsApp Cloud API: a form POST to {@code /<phoneNumberId>/messages}.
+     * WhatsApp Cloud API: a form POST to {@code /<phone-number-id>/messages}.
      *
-     * <p>The token goes in the Authorization header rather than the path, which is better, and the
-     * chat id is the recipient number.
+     * <p>Two identifiers, and they are not interchangeable. The path carries the business
+     * phone-number id, which is who is speaking; the form's {@code to} carries the resident or group
+     * that receives it. An earlier version used the recipient for both, which would have 404'd on
+     * every send while looking correct in the code.
+     *
+     * <p>The token goes in the Authorization header rather than the path, which is better than
+     * Telegram's arrangement.
      */
-    private DeliveryResult deliverWhatsApp(String token, String chatId, String message) {
+    private DeliveryResult deliverWhatsApp(
+        String token,
+        String phoneNumberId,
+        String recipient,
+        String message
+    ) {
+        if (phoneNumberId == null || phoneNumberId.isBlank()) {
+            return new DeliveryResult(false,
+                "This WhatsApp integration has no phone-number id, so there is no way to address the "
+                    + "business number. Set providerResourceId on the integration.", 0);
+        }
         String form = "messaging_product=whatsapp"
-            + "&to=" + URLEncoder.encode(chatId, StandardCharsets.UTF_8)
+            + "&to=" + URLEncoder.encode(recipient, StandardCharsets.UTF_8)
             + "&type=text"
             + "&text[body]=" + URLEncoder.encode(message, StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(whatsappApi + "/" + chatId + "/messages"))
+            .uri(URI.create(whatsappApi + "/" + phoneNumberId + "/messages"))
             .timeout(REQUEST_TIMEOUT)
             .header("Content-Type", "application/x-www-form-urlencoded")
             .header("Authorization", "Bearer " + token)

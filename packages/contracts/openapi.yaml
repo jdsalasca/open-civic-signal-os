@@ -10763,10 +10763,28 @@ components:
           minLength: 3
         targetUri:
           type: string
-          pattern: '^https?://'
+          description: >-
+            The destination, and its meaning depends on the channel. WEBHOOK and CALENDAR_FEED take
+            an absolute http(s) URL, EMAIL_DIGEST an email address, TELEGRAM a numeric chat id or an
+            @channelusername, and WHATSAPP the recipient number in international format.
+          oneOf:
+            - pattern: '^https?://'
+            - pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+            - pattern: '^-?\d{5,20}$'
+            - pattern: '^@[A-Za-z0-9_]+$'
         secret:
           type: string
           minLength: 8
+          description: >-
+            A webhook signing secret for WEBHOOK, or a bot token for TELEGRAM and WHATSAPP. Stored
+            according to the channel: hashed for a webhook, AES-GCM encrypted for a bot token. Never
+            returned by the API.
+        providerResourceId:
+          type: string
+          description: >-
+            Required for WHATSAPP and rejected for the other channels. The phone-number id of the
+            business number the community posts from, which is the sending identity in the Cloud API
+            path and is not the same thing as the recipient in targetUri.
         autoRetry:
           type: boolean
           default: true
@@ -10817,6 +10835,13 @@ components:
           type: string
         targetUri:
           type: string
+        providerResourceId:
+          type: string
+          nullable: true
+          description: >-
+            The sending identity a provider needs in its path, currently the WhatsApp phone-number
+            id. Present for WHATSAPP and null otherwise. Neither the secret hash nor the encrypted bot
+            token is ever exposed.
         enabled:
           type: boolean
         autoRetry:

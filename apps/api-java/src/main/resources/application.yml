@@ -42,6 +42,15 @@ application:
       secret-key: ${JWT_SECRET}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3002}
+  # Bot tokens for the messaging relay are stored encrypted. No default on purpose: the platform
+  # refuses to store a token in the clear, and a missing key surfaces as a clear error when someone
+  # sets the integration up rather than as a failed bulletin when it is sent.
+  integration-credential-key: ${INTEGRATION_CREDENTIAL_KEY:}
+  messaging:
+    # Blank means the real provider endpoints. Tests point these at a local stub, because a test must
+    # never reach Telegram or WhatsApp.
+    telegram-api: ${TELEGRAM_API:}
+    whatsapp-api: ${WHATSAPP_API:}
 
 management:
   endpoints:

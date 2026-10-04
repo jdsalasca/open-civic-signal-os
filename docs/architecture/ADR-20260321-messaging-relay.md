@@ -84,12 +84,23 @@ Not scheduled events: a calendar entry in a chat thread is noise. Pinned by the 
   report filed in a WhatsApp thread still has to be entered by hand or imported.
 - **No media.** Text only. A photo attached to a report is not relayed.
 - **No message threading or replies.** Each digest is a standalone message.
-- **`secretHash` is a misleading name for these channels**, documented rather than fixed.
-- **No token rotation.** Changing a bot token means editing the integration.
+- **No token rotation.** Changing a bot token means editing the integration. The stored value is sealed
+  under `v1`, so rotating `INTEGRATION_CREDENTIAL_KEY` needs a re-encryption pass that does not exist
+  yet.
 - **No delivery receipt.** The provider accepting the message is not the same as a resident reading
   it, and the platform cannot tell the difference.
 - **No rate-limit handling.** A provider returning 429 is recorded as a failure and retried by the
   existing retry endpoint, which may hit the same limit.
 - **No per-platform formatting.** The same body goes to both, so neither gets its native formatting.
-- **The token is stored in a column named for a hash**, so a future reader auditing secret storage
-  will find a plaintext token where they expect a hash.
+
+## Superseded in part
+
+This ADR originally recorded two defects as accepted limitations, on the reasoning that naming a
+hazard is better than hiding it. Both have since been fixed, because a documented hazard is still a
+hazard:
+
+- **`secretHash` held the token in the clear.** Now sealed in `credential_ciphertext` with AES-GCM.
+  See `ADR-20260321-integration-credential-storage.md`.
+- **`targetUri` was validated as an http(s) URL for every channel**, so a Telegram chat id could not
+  pass validation and the integration could not be created. Now validated per channel, and WhatsApp
+  carries its phone-number id separately from the recipient.

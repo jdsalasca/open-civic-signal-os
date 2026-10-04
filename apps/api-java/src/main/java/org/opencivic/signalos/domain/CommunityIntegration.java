@@ -31,8 +31,25 @@ public class CommunityIntegration {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String targetUri;
 
-    @Column(nullable = false, length = 255)
+    /**
+     * Hash of a webhook signing secret. Null for channels whose credential has to be sent to a
+     * provider, because a hash of a token is not the token.
+     */
+    @Column(length = 255)
     private String secretHash;
+
+    /** AES-GCM ciphertext of a bot token. Never exposed through the API. */
+    @Column(columnDefinition = "TEXT")
+    private String credentialCiphertext;
+
+    /**
+     * The sending identity a provider needs in the path, currently the WhatsApp phone-number id.
+     *
+     * <p>Not a destination: the recipient stays in {@code targetUri}. WhatsApp's Cloud API puts the
+     * business number in the URL and the resident's number in the body, so one field cannot be both.
+     */
+    @Column(length = 64)
+    private String providerResourceId;
 
     @Column(nullable = false)
     private boolean enabled = true;
@@ -64,6 +81,10 @@ public class CommunityIntegration {
     public void setTargetUri(String targetUri) { this.targetUri = targetUri; }
     public String getSecretHash() { return secretHash; }
     public void setSecretHash(String secretHash) { this.secretHash = secretHash; }
+    public String getCredentialCiphertext() { return credentialCiphertext; }
+    public void setCredentialCiphertext(String credentialCiphertext) { this.credentialCiphertext = credentialCiphertext; }
+    public String getProviderResourceId() { return providerResourceId; }
+    public void setProviderResourceId(String providerResourceId) { this.providerResourceId = providerResourceId; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public UUID getCreatedBy() { return createdBy; }

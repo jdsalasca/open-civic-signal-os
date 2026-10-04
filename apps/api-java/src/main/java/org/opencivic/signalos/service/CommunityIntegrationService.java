@@ -40,6 +40,7 @@ public class CommunityIntegrationService {
     private final CommunityIntegrationDeliveryRepository deliveryRepository;
     private final List<CommunityIntegrationConnector> connectors;
     private final ObjectMapper objectMapper;
+    private final IntegrationCredentialCipher credentialCipher;
 
     public CommunityIntegrationService(
         CommunityAccessService communityAccessService,
@@ -48,7 +49,8 @@ public class CommunityIntegrationService {
         CommunityIntegrationRepository integrationRepository,
         CommunityIntegrationDeliveryRepository deliveryRepository,
         List<CommunityIntegrationConnector> connectors,
-        ObjectMapper objectMapper
+        ObjectMapper objectMapper,
+        IntegrationCredentialCipher credentialCipher
     ) {
         this.communityAccessService = communityAccessService;
         this.communityRepository = communityRepository;
@@ -57,6 +59,7 @@ public class CommunityIntegrationService {
         this.deliveryRepository = deliveryRepository;
         this.connectors = connectors;
         this.objectMapper = objectMapper;
+        this.credentialCipher = credentialCipher;
     }
 
     @Transactional(readOnly = true)
@@ -109,12 +112,6 @@ public class CommunityIntegrationService {
         if (isBlank(request.name()) || request.name().trim().length() < 3) {
             throw new IllegalArgumentException("Integration name must be at least 3 characters.");
         }
-        if (isBlank(request.targetUri()) || !isHttpUri(request.targetUri().trim())) {
-            throw new IllegalArgumentException("targetUri must be an absolute http or https URL.");
-        }
-        if (isBlank(request.secret()) || request.secret().trim().length() < 8) {
-            throw new IllegalArgumentException("A signing secret of at least 8 characters is required.");
-        }
 
         CommunityIntegrationChannel channel;
         try {
@@ -123,17 +120,135 @@ public class CommunityIntegrationService {
             throw new IllegalArgumentException("Unknown integration channel: " + request.channel());
         }
 
+        // Validated per channel because "targetUri" means four different things across this enum.
+        // A single http(s) rule made TELEGRAM and WHATSAPP impossible to create at all: their targets
+        // are chat ids and phone numbers, not URLs.
+        String target = isBlank(request.targetUri()) ? "" : request.targetUri().trim();
+        if (target.isEmpty()) {
+            throw new IllegalArgumentException("targetUri is required and its meaning depends on the channel.");
+        }
+        switch (channel) {
+            case WEBHOOK -> {
+                if (!isHttpUri(target)) {
+                    throw new IllegalArgumentException("A webhook targetUri must be an absolute http or https URL.");
+                }
+            }
+            case EMAIL_DIGEST -> {
+                if (!target.contains("@")) {
+                    throw new IllegalArgumentException("An EMAIL_DIGEST targetUri must be an email address.");
+                }
+            }
+            case TELEGRAM -> {
+                if (!isTelegramChatId(target)) {
+                    throw new IllegalArgumentException(
+                        "A TELEGRAM targetUri must be a numeric chat id or an @channelusername.");
+                }
+            }
+            case WHATSAPP -> {
+                if (!isPhoneNumber(target)) {
+                    throw new IllegalArgumentException(
+                        "A WHATSAPP targetUri must be the recipient number in international format, "
+                            + "for example 5215551234567.");
+                }
+            }
+        }
+
+        if (isBlank(request.secret()) || request.secret().trim().length() < 8) {
+            throw new IllegalArgumentException(
+                channel == CommunityIntegrationChannel.WEBHOOK
+                    ? "A signing secret of at least 8 characters is required."
+                    : "A bot token of at least 8 characters is required.");
+        }
+
+        String providerResourceId =
+            isBlank(request.providerResourceId()) ? null : request.providerResourceId().trim();
+        if (channel == CommunityIntegrationChannel.WHATSAPP) {
+            // The Cloud API path is the business phone-number id. Without it every request 404s, and
+            // using the recipient there instead was the bug this column fixes.
+            if (providerResourceId == null) {
+                throw new IllegalArgumentException(
+                    "A WHATSAPP integration needs providerResourceId: the phone-number id of the "
+                        + "business number the community posts from.");
+            }
+            if (!isPhoneNumber(providerResourceId)) {
+                throw new IllegalArgumentException(
+                    "providerResourceId must be a numeric WhatsApp phone-number id.");
+            }
+        } else if (providerResourceId != null) {
+            throw new IllegalArgumentException(
+                "providerResourceId only applies to WHATSAPP; " + channel.name() + " has no sending identity in its path.");
+        }
+
         CommunityIntegration integration = new CommunityIntegration();
         integration.setCommunityId(request.communityId());
         integration.setChannel(channel);
         integration.setName(request.name().trim());
-        integration.setTargetUri(request.targetUri().trim());
-        integration.setSecretHash(WebhookCommunityIntegrationConnector.hashSecret(request.secret().trim()));
+        integration.setTargetUri(target);
+        integration.setProviderResourceId(providerResourceId);
+        storeCredential(integration, channel, request.secret().trim());
         integration.setAutoRetry(request.autoRetry() == null || request.autoRetry());
         integration.setCreatedBy(user.getId());
         integration = integrationRepository.save(integration);
 
         return toResponse(integration, List.of());
+    }
+
+    /**
+     * Stores the secret the way the channel actually uses it.
+     *
+     * <p>A webhook secret signs a payload and never leaves the platform, so a hash is the whole point
+     * of storing it. A bot token has to be presented to Telegram or WhatsApp on every send, so it is
+     * encrypted instead: hashing it produced a digest that the provider answered with a 401, which
+     * is how the relay shipped broken.
+     */
+    private void storeCredential(
+        CommunityIntegration integration,
+        CommunityIntegrationChannel channel,
+        String secret
+    ) {
+        if (channel == CommunityIntegrationChannel.WEBHOOK) {
+            integration.setSecretHash(WebhookCommunityIntegrationConnector.hashSecret(secret));
+            return;
+        }
+        if (channel == CommunityIntegrationChannel.EMAIL_DIGEST) {
+            // The digest goes out over the platform's own audited mail path, which holds its own
+            // transport credentials. Nothing from the community is needed here.
+            return;
+        }
+        if (!credentialCipher.isConfigured()) {
+            throw new IllegalStateException(
+                "Storing a bot token requires INTEGRATION_CREDENTIAL_KEY. Set it before creating "
+                    + channel.name() + " integrations; the platform will not store a bot token in the clear.");
+        }
+        integration.setCredentialCiphertext(credentialCipher.encrypt(secret));
+    }
+
+    /**
+     * Telegram chats are numeric ids; channels and public groups can be {@code @username}.
+     *
+     * <p>Supergroup and channel ids carry a leading minus, so a digits-only rule would reject exactly
+     * the large groups a community bulletin is meant for.
+     */
+    private boolean isTelegramChatId(String value) {
+        if (value.startsWith("@")) {
+            String handle = value.substring(1);
+            return handle.length() >= 4 && handle.matches("[A-Za-z0-9_]+");
+        }
+        String digits = value.startsWith("-") ? value.substring(1) : value;
+        // Ids are Snowflake values, so the range is wider than a phone number's.
+        return digits.length() >= 5 && digits.length() <= 20 && digits.chars().allMatch(Character::isDigit);
+    }
+
+    /**
+     * International format, digits only.
+     *
+     * <p>Deliberately not a full E.164 validator: the provider is the authority on whether a number
+     * exists, and a stricter rule here would reject valid numbers without improving anything. This
+     * only catches a value that is obviously not a number, which is the mistake that actually
+     * happened.
+     */
+    private boolean isPhoneNumber(String value) {
+        return value.length() >= 7 && value.length() <= 15 && value.chars().allMatch(Character::isDigit);
     }
 
     @Transactional
@@ -424,6 +539,7 @@ public class CommunityIntegrationService {
             integration.getChannel().name(),
             integration.getName(),
             integration.getTargetUri(),
+            integration.getProviderResourceId(),
             integration.isEnabled(),
             integration.isAutoRetry(),
             connectors.stream().anyMatch(candidate -> candidate.supports(integration.getChannel())),

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.CommunityIntegration;
 import org.opencivic.signalos.domain.CommunityIntegrationChannel;
 import org.opencivic.signalos.service.CommunityIntegrationConnector;
+import org.opencivic.signalos.service.IntegrationCredentialCipher;
 import org.opencivic.signalos.service.MessagingCommunityIntegrationConnector;
 
 /**
@@ -23,6 +24,10 @@ import org.opencivic.signalos.service.MessagingCommunityIntegrationConnector;
  * A missing token is therefore a clear refusal, not a silent no-op.
  */
 class MessagingConnectorTest {
+
+    private static final String PHONE_NUMBER_ID = "15550001111";
+    private final IntegrationCredentialCipher cipher =
+        new IntegrationCredentialCipher("a-test-key-that-is-not-a-real-secret");
 
     private HttpServer server;
     private String baseUri;
@@ -48,7 +53,7 @@ class MessagingConnectorTest {
         baseUri = "http://127.0.0.1:" + server.getAddress().getPort();
         // Point both providers at the stub. Without this the only way to exercise the connector is to
         // call the real providers, which a test must never do.
-        connector = new MessagingCommunityIntegrationConnector(baseUri, baseUri);
+        connector = new MessagingCommunityIntegrationConnector(baseUri, baseUri, cipher);
     }
 
     @AfterEach
@@ -83,7 +88,7 @@ class MessagingConnectorTest {
         CommunityIntegrationConnector.DeliveryResult result = connector.deliver(integration, "Hello");
 
         assertThat(result.delivered()).isFalse();
-        assertThat(result.error()).contains("No chat or group id");
+        assertThat(result.error()).contains("No chat, group or recipient");
     }
 
     @Test
@@ -158,7 +163,7 @@ class MessagingConnectorTest {
         // A connector pointed at a port nothing is listening on, which is what a provider outage
         // looks like from here.
         MessagingCommunityIntegrationConnector deadConnector =
-            new MessagingCommunityIntegrationConnector("http://127.0.0.1:1", "http://127.0.0.1:1");
+            new MessagingCommunityIntegrationConnector("http://127.0.0.1:1", "http://127.0.0.1:1", cipher);
         CommunityIntegration integration = integration(CommunityIntegrationChannel.TELEGRAM, "chat-1", "token");
 
         CommunityIntegrationConnector.DeliveryResult result = deadConnector.deliver(integration, "Hello");
@@ -174,7 +179,12 @@ class MessagingConnectorTest {
         integration.setChannel(channel);
         integration.setName("Test relay");
         integration.setTargetUri(chatId);
-        integration.setSecretHash(token);
+        // The token goes in the encrypted credential. Setting secretHash here is what made this test
+        // file unable to catch the shipped bug: it handed the connector a plaintext token that the
+        // service never produced.
+        integration.setCredentialCiphertext(token == null ? null : cipher.encrypt(token));
+        integration.setProviderResourceId(
+            channel == CommunityIntegrationChannel.WHATSAPP ? PHONE_NUMBER_ID : null);
         integration.setEnabled(true);
         return integration;
     }

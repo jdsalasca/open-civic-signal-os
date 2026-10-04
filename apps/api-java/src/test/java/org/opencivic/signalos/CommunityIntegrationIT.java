@@ -18,9 +18,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.Community;
+import org.opencivic.signalos.domain.CommunityIntegration;
 import org.opencivic.signalos.domain.CommunityMembership;
 import org.opencivic.signalos.domain.CommunityRole;
 import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.repository.CommunityIntegrationRepository;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
 import org.opencivic.signalos.repository.UserRepository;
@@ -29,6 +31,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,10 +48,54 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class CommunityIntegrationIT {
 
+    /**
+     * A provider stub for the messaging channels, started before the context so its port can be
+     * handed to the connector as a property.
+     *
+     * <p>Static because {@code @DynamicPropertySource} suppliers run while the Spring context is being
+     * built, which is before any instance field exists. Its port is therefore real and fixed for the
+     * class, rather than the per-test random port the webhook stub uses.
+     */
+    private static final HttpServer MESSAGING_STUB = startMessagingStub();
+    private static final String MESSAGING_STUB_BASE =
+        "http://127.0.0.1:" + MESSAGING_STUB.getAddress().getPort();
+
+    private static final AtomicReference<String> lastMessagingPath = new AtomicReference<>("");
+    private static final AtomicReference<String> lastMessagingBody = new AtomicReference<>("");
+    private static final AtomicReference<String> lastMessagingAuthorization = new AtomicReference<>("");
+
+    private static HttpServer startMessagingStub() {
+        try {
+            HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+            server.createContext("/", exchange -> {
+                lastMessagingPath.set(exchange.getRequestURI().getPath());
+                lastMessagingBody.set(
+                    new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+                lastMessagingAuthorization.set(
+                    String.valueOf(exchange.getRequestHeaders().getFirst("Authorization")));
+                byte[] body = "{\"ok\":true}".getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(200, body.length);
+                exchange.getResponseBody().write(body);
+                exchange.close();
+            });
+            server.start();
+            return server;
+        } catch (java.io.IOException ex) {
+            throw new IllegalStateException("Could not start the messaging stub.", ex);
+        }
+    }
+
+    @DynamicPropertySource
+    static void messagingEndpoints(DynamicPropertyRegistry registry) {
+        registry.add("application.messaging.telegram-api", () -> MESSAGING_STUB_BASE);
+        registry.add("application.messaging.whatsapp-api", () -> MESSAGING_STUB_BASE);
+    }
+
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
     @Autowired private CommunityRepository communityRepository;
     @Autowired private CommunityMembershipRepository membershipRepository;
+    @Autowired private CommunityIntegrationRepository integrationRepository;
 
     private HttpServer stub;
     private String stubBaseUri;
@@ -291,6 +339,142 @@ class CommunityIntegrationIT {
               "endsAt": "%s"
             }
             """.formatted(communityId, eventType, UUID.randomUUID(), startsAt, startsAt.plusHours(2));
+    }
+
+    @Test
+    void aTelegramTokenCreatedThroughTheApiReachesTheProviderIntact() throws Exception {
+        // The relay shipped unable to authenticate: create hashed the token through the webhook
+        // path, so what went out to Telegram was a SHA-256 digest and the provider answered 401. The
+        // connector's own tests could not see it because they built the entity directly. This test
+        // goes through the API, so the token has to survive storage.
+        String botToken = "1234567890:AAF-real-token-for-the-relay";
+        String integrationId = createMessagingIntegration(
+            "TELEGRAM", "Neighbourhood Telegram", "-1001234567890", botToken, null, 200);
+
+        mockMvc.perform(post("/api/community/integrations/events")
+                .with(user("int_coord").roles("CITIZEN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(eventBody("OFFICIAL_ANNOUNCEMENT")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.delivered").value(1))
+            .andExpect(jsonPath("$.deliveries[0].status").value("DELIVERED"));
+
+        // Telegram's API takes the token in the path, so the path is where the proof lives.
+        org.junit.jupiter.api.Assertions.assertEquals(
+            "/bot" + botToken + "/sendMessage", lastMessagingPath.get());
+        org.junit.jupiter.api.Assertions.assertTrue(lastMessagingBody.get().contains("-1001234567890"));
+
+        // And the row must hold ciphertext, not a hash of the token and not the token itself.
+        CommunityIntegration stored = integrationRepository
+            .findById(UUID.fromString(integrationId)).orElseThrow();
+        org.junit.jupiter.api.Assertions.assertNull(stored.getSecretHash());
+        org.junit.jupiter.api.Assertions.assertNotNull(stored.getCredentialCiphertext());
+        org.junit.jupiter.api.Assertions.assertFalse(
+            stored.getCredentialCiphertext().contains(botToken));
+        org.junit.jupiter.api.Assertions.assertTrue(stored.getCredentialCiphertext().startsWith("v1:"));
+    }
+
+    @Test
+    void neitherTheTokenNorItsCiphertextIsExposedThroughTheApi() throws Exception {
+        String botToken = "1234567890:AAF-secret-that-must-not-leak";
+        String integrationId = createMessagingIntegration(
+            "TELEGRAM", "Quiet Telegram", "-1009999999999", botToken, null, 200);
+
+        String center = mockMvc.perform(get("/api/community/integrations/center")
+                .with(user("int_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        org.junit.jupiter.api.Assertions.assertFalse(center.contains(botToken));
+        org.junit.jupiter.api.Assertions.assertFalse(center.contains("credentialCiphertext"));
+        org.junit.jupiter.api.Assertions.assertFalse(center.contains("v1:"));
+        org.junit.jupiter.api.Assertions.assertTrue(center.contains(integrationId));
+    }
+
+    @Test
+    void aWhatsAppIntegrationNeedsItsSendingIdentityNotJustTheRecipient() throws Exception {
+        // The Cloud API path is the business phone-number id and the form's "to" is the recipient.
+        // Reusing the recipient for both would 404 on every send while looking right in the code.
+        createMessagingIntegration(
+            "WHATSAPP", "WhatsApp without an id", "5215551234567", "a-token-long-enough", null, 400);
+
+        String id = createMessagingIntegration(
+            "WHATSAPP", "Riverside WhatsApp", "5215551234567", "a-token-long-enough", "15550001111", 200);
+        org.junit.jupiter.api.Assertions.assertFalse(id.isEmpty());
+
+        mockMvc.perform(post("/api/community/integrations/events")
+                .with(user("int_coord").roles("CITIZEN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(eventBody("OFFICIAL_ANNOUNCEMENT")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.delivered").value(1));
+
+        org.junit.jupiter.api.Assertions.assertEquals("/15550001111/messages", lastMessagingPath.get());
+        org.junit.jupiter.api.Assertions.assertTrue(
+            lastMessagingBody.get().contains("to=5215551234567"));
+        // The token belongs in the header for WhatsApp, not the path.
+        org.junit.jupiter.api.Assertions.assertEquals("Bearer a-token-long-enough",
+            lastMessagingAuthorization.get());
+
+        // Visible to the coordinator, because an integration missing its sending identity otherwise
+        // fails only at delivery time.
+        mockMvc.perform(get("/api/community/integrations/center")
+                .with(user("int_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.integrations[0].providerResourceId").value("15550001111"));
+    }
+
+    @Test
+    void aChannelThatDoesNotNeedASendingIdentityRefusesOne() throws Exception {
+        createMessagingIntegration(
+            "TELEGRAM", "Telegram with a stray id", "-1001234567890", "a-token-long-enough", "15550001111", 400);
+    }
+
+    @Test
+    void aChatIdIsNotAWebhookUrlAndViceVersa() throws Exception {
+        // One http(s) rule across the enum made TELEGRAM impossible to create at all.
+        createMessagingIntegration("TELEGRAM", "Telegram by URL", "https://t.me/example", "a-token-long-enough", null, 400);
+
+        boolean webhookCreated = createIntegrationAs(
+            "int_coord", "WEBHOOK", "Feed by chat id", "-1001234567890", 400).isEmpty();
+        org.junit.jupiter.api.Assertions.assertTrue(webhookCreated);
+    }
+
+    private String createMessagingIntegration(
+        String channel,
+        String name,
+        String targetUri,
+        String secret,
+        String providerResourceId,
+        int expectedStatus
+    ) throws Exception {
+        String resourceField = providerResourceId == null
+            ? ""
+            : ",\n      \"providerResourceId\": \"" + providerResourceId + "\"";
+        String body = """
+            {
+              "communityId": "%s",
+              "channel": "%s",
+              "name": "%s",
+              "targetUri": "%s",
+              "secret": "%s"%s
+            }
+            """.formatted(communityId, channel, name, targetUri, secret, resourceField);
+
+        var result = mockMvc.perform(post("/api/community/integrations")
+                .with(user("int_coord").roles("CITIZEN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
+            .andExpect(status().is(expectedStatus))
+            .andReturn();
+
+        if (expectedStatus != 200) {
+            return "";
+        }
+        return new com.fasterxml.jackson.databind.ObjectMapper()
+            .readTree(result.getResponse().getContentAsString()).get("id").asText();
     }
 
     private String createIntegration(String channel, String name, String targetUri, int expectedStatus)
