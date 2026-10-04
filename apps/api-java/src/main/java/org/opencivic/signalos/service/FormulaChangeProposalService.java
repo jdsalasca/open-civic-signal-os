@@ -12,6 +12,7 @@ import org.opencivic.signalos.domain.FormulaChangeProposal;
 import org.opencivic.signalos.domain.PrioritizationFormula;
 import org.opencivic.signalos.domain.ProposedWeights;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
@@ -49,7 +50,6 @@ public class FormulaChangeProposalService {
 
     private static final int MAX_MOVERS = 10;
     private static final int MAX_PREVIEW_SIGNALS = 2000;
-    private static final Set<String> CLOSED_STATUSES = Set.of("RESOLVED", "CLOSED", "REJECTED");
 
     private final SignalRepository signalRepository;
     private final UserRepository userRepository;
@@ -290,7 +290,7 @@ public class FormulaChangeProposalService {
         }
         return signalRepository.findAll().stream()
             .filter(signal -> signal.getStatus() == null
-                || !CLOSED_STATUSES.contains(signal.getStatus().toUpperCase(Locale.ROOT)))
+                || !SignalStatus.isSettled(signal.getStatus()))
             .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed()
                 .thenComparing(Signal::getId))
             .limit(effective)

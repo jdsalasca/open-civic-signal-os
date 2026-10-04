@@ -29,7 +29,11 @@ patrón que más caro sale:
    service y el controller llamaba a otro método. El test que lo cazó tiene que pasar por el
    controller.
 3. **Verificar que un test falla cuando el código se rompe.** Un test que pasa con y sin el fix no
-   está probando el fix. La ronda 43 se comprobó por mutación.
+   está probando el fix. Las rondas 43 y 44 se comprobaron por mutación.
+4. **Una copia por servicio es la misma clase de defecto que una fórmula duplicada.** La ronda 44
+   encontró ocho definiciones de "resuelto". Dos copias comparadas por un test siguen siendo dos copias:
+   es la lección de `PrioritizationFormula`, con un filtro en vez de aritmética. Cuando un concepto de
+   dominio aparece en varios servicios, su dueño es el tipo de dominio, no el servicio.
 
 ## Rondas
 
@@ -39,8 +43,9 @@ patrón que más caro sale:
 | 40 | Sellado de tokens de bot (AES-GCM) | 397 tests; el token llega intacto al proveedor vía API | ✅ `f058c45` |
 | 41 | El digest preparado se guarda y se publica | 402 tests; publicar envía el artefacto sellado | ✅ `52126b1` |
 | 42 | Namespace de ciudad y backlog federado | 412 tests; dos ciudades sin mezcla; revocar consentimiento corta el feed | ✅ `f035b5b` |
-| 43 | El preview por API es el artefacto que se publica | 413 tests; falla por mutación del controller | ✅ este commit |
-| 44 | Verificar que ningún otro endpoint de lectura recompone lo que su par de escritura sella | Test por endpoint que сравнивает GET y POST tras mutar el mundo | ➡️ siguiente |
+| 43 | El preview por API es el artefacto que se publica | 413 tests; falla por mutación del controller | ✅ `3ea5408` |
+| 44 | Una sola definición de "resuelto" para todos los rankings | 420 tests; 8 copias → 1; falla por mutación | ✅ este commit |
+| 45 | Auditar el par lectura/escritura de trust pulse y handoff institucional | Test por endpoint que compare GET y POST tras mutar el mundo | ➡️ siguiente |
 
 ## Próximas rondas candidatas
 

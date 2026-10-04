@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.InstitutionalTicketHandoff;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.SignalStatusEntry;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ConflictException;
@@ -53,7 +54,6 @@ public class InstitutionalActionBridgeService {
     private static final int MAX_SLA_TARGET_DAYS = 365;
     /** A larger batch should be split so a failure is attributable to a smaller set. */
     private static final int MAX_BATCH_SIZE = 200;
-    private static final Set<String> CLOSED_STATUSES = Set.of("RESOLVED", "CLOSED", "REJECTED");
 
     private final CommunityRepository communityRepository;
     private final UserRepository userRepository;
@@ -305,7 +305,7 @@ public class InstitutionalActionBridgeService {
         if (resolvedAt != null) {
             statusSource = "DECLARED_BY_COMMUNITY";
         } else if (signal.getStatus() != null
-            && CLOSED_STATUSES.contains(signal.getStatus().toUpperCase(Locale.ROOT))) {
+            && SignalStatus.isSettled(signal.getStatus())) {
             resolvedAt = latestClosure(signal.getId());
             statusSource = "DERIVED_FROM_SIGNAL_LIFECYCLE";
         } else {
@@ -352,7 +352,7 @@ public class InstitutionalActionBridgeService {
     private LocalDateTime latestClosure(UUID signalId) {
         return statusEntryRepository.findBySignalIdOrderByCreatedAtDesc(signalId).stream()
             .filter(entry -> entry.getStatusTo() != null
-                && CLOSED_STATUSES.contains(entry.getStatusTo().toUpperCase(Locale.ROOT)))
+                && SignalStatus.isSettled(entry.getStatusTo()))
             .map(SignalStatusEntry::getCreatedAt)
             .filter(java.util.Objects::nonNull)
             .max(Comparator.naturalOrder())

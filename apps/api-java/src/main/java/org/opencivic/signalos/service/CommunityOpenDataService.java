@@ -451,26 +451,15 @@ public TokenApiResult readWithToken(UUID communityId, CommunityOpenDataExportTyp
     }
 
     /**
-     * Whether a signal still counts as open.
+ * Whether a signal still counts as open.
      *
-     * <p>Decided against {@code SignalStatus} rather than a set of status strings, because a second
-     * copy of that list is a second thing to keep in step — the failure this repository has already
-     * paid for once with the formula weights.
-     *
-     * <p>An unrecognised status counts as open. A public backlog should not quietly drop a resident's
-     * report because its status string is one this version has not heard of.
+     * <p>Delegates to {@link SignalStatus#isSettled(String)} rather than keeping a list here. This
+     * method began as an eighth private definition and disagreed with the other seven about the legacy
+     * {@code CLOSED} string, so a settled issue appeared in the federated backlog while six views showed
+     * it resolved.
      */
     private boolean isUnresolved(Signal signal) {
-        String raw = signal.getStatus();
-        if (raw == null || raw.isBlank()) {
-            return true;
-        }
-        try {
-            SignalStatus status = SignalStatus.valueOf(raw.trim().toUpperCase(Locale.ROOT));
-            return status != SignalStatus.RESOLVED && status != SignalStatus.REJECTED;
-        } catch (IllegalArgumentException ex) {
-            return true;
-        }
+        return !SignalStatus.isSettled(signal.getStatus());
     }
 
     public List<OpenDataSignalRecordResponse> buildSignals(UUID communityId) {

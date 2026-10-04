@@ -15,6 +15,7 @@ import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityDecision;
 import org.opencivic.signalos.domain.CommunityProposal;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.SignalStatusEntry;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
@@ -44,7 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class TransparencyReportService {
-    private static final Set<String> CLOSED_STATUSES = Set.of("RESOLVED", "CLOSED", "REJECTED");
     private static final int UNADDRESSED_LIST_LIMIT = 10;
     private static final int ACTIONED_LIST_LIMIT = 10;
 
@@ -183,7 +183,7 @@ public class TransparencyReportService {
                 if (!period.contains(entry.getCreatedAt())) {
                     continue;
                 }
-                if (CLOSED_STATUSES.contains(entry.getStatusTo())) {
+                if (SignalStatus.isSettled(entry.getStatusTo())) {
                     if (signal.getCreatedAt() != null) {
                         resolutionDays.add(ChronoUnit.DAYS.between(
                             signal.getCreatedAt().toLocalDate(),
@@ -212,7 +212,7 @@ public class TransparencyReportService {
         // today, otherwise a March report regenerated in June would show different figures.
         int stillOpen = (int) reportedInPeriod.stream()
             .filter(signal -> statusHistory.getOrDefault(signal.getId(), List.of()).stream()
-                .noneMatch(entry -> CLOSED_STATUSES.contains(entry.getStatusTo())
+                .noneMatch(entry -> SignalStatus.isSettled(entry.getStatusTo())
                     && entry.getCreatedAt() != null
                     && !entry.getCreatedAt().isAfter(period.endDate().atStartOfDay().minusNanos(1))))
             .count();
@@ -259,7 +259,7 @@ public class TransparencyReportService {
             }
             for (SignalStatusEntry entry : statusHistory.getOrDefault(signal.getId(), List.of())) {
                 if (period.contains(entry.getCreatedAt())
-                    && CLOSED_STATUSES.contains(entry.getStatusTo())
+                    && SignalStatus.isSettled(entry.getStatusTo())
                     && !"REJECTED".equals(entry.getStatusTo())) {
                     rows.add(toOutcome(signal, entry.getCreatedAt()));
                 }
@@ -277,7 +277,7 @@ public class TransparencyReportService {
         LocalDateTime periodEnd = period.endDate().atStartOfDay().minusNanos(1);
         return allSignals.stream()
             .filter(signal -> period.contains(signal.getCreatedAt()))
-            .filter(signal -> !CLOSED_STATUSES.contains(signal.getStatus()))
+            .filter(signal -> !SignalStatus.isSettled(signal.getStatus()))
             .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed()
                 .thenComparing(Signal::getId))
             .limit(UNADDRESSED_LIST_LIMIT)

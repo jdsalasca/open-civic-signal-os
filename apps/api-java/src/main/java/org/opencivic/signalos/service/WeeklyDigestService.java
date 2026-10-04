@@ -21,6 +21,7 @@ import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityDigestPreparation;
 import org.opencivic.signalos.domain.CommunityDigestPublication;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.SignalStatusEntry;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ConflictException;
@@ -62,7 +63,6 @@ public class WeeklyDigestService {
 
     private static final int DEFAULT_ITEM_LIMIT = 10;
     private static final int MAX_ITEM_LIMIT = 50;
-    private static final Set<String> CLOSED_STATUSES = Set.of("RESOLVED", "CLOSED", "REJECTED");
     private static final DateTimeFormatter WEEK_FORMAT =
         DateTimeFormatter.ofPattern("YYYY-'W'ww", Locale.ROOT);
 
@@ -379,7 +379,7 @@ public class WeeklyDigestService {
                 String to = entry.getStatusTo().toUpperCase(Locale.ROOT);
                 if ("REJECTED".equals(to)) {
                     rejectedThisWeek++;
-                } else if (CLOSED_STATUSES.contains(to)) {
+                } else if (SignalStatus.isSettled(to)) {
                     resolvedThisWeek++;
                 }
             }
@@ -526,7 +526,7 @@ public class WeeklyDigestService {
             .noneMatch(entry -> entry.getCreatedAt() != null
                 && entry.getCreatedAt().isBefore(weekEnd)
                 && entry.getStatusTo() != null
-                && CLOSED_STATUSES.contains(entry.getStatusTo().toUpperCase(Locale.ROOT)));
+                && SignalStatus.isSettled(entry.getStatusTo()));
     }
 
     private boolean inWeek(LocalDateTime timestamp, DigestWeek week) {

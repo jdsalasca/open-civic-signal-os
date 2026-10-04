@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.opencivic.signalos.domain.ProposedWeights;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,6 @@ public class PolicySimulationService {
     private static final int MAX_SCENARIOS = 5;
     private static final int MAX_SIGNALS = 2000;
     private static final int MAX_MOVERS_PER_SCENARIO = 5;
-    private static final Set<String> CLOSED_STATUSES = Set.of("RESOLVED", "CLOSED", "REJECTED");
 
     private final SignalRepository signalRepository;
 
@@ -273,7 +273,7 @@ public class PolicySimulationService {
         }
         return signalRepository.findAll().stream()
             .filter(signal -> signal.getStatus() == null
-                || !CLOSED_STATUSES.contains(signal.getStatus().toUpperCase(Locale.ROOT)))
+                || !SignalStatus.isSettled(signal.getStatus()))
             .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed()
                 .thenComparing(Signal::getId))
             .limit(effective)

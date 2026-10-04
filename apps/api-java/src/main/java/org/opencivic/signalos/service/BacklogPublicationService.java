@@ -15,6 +15,7 @@ import java.util.UUID;
 import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityBacklogPublication;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.repository.CommunityBacklogPublicationRepository;
@@ -48,7 +49,6 @@ public class BacklogPublicationService {
 
     private static final int DEFAULT_LIMIT = 20;
     private static final int MAX_LIMIT = 200;
-    private static final Set<String> CLOSED_STATUSES = Set.of("RESOLVED", "CLOSED", "REJECTED");
 
     private final CommunityRepository communityRepository;
     private final UserRepository userRepository;
@@ -201,7 +201,7 @@ public class BacklogPublicationService {
     private List<Signal> liveRanking(UUID communityId, int limit) {
         return signalRepository.findByCommunityId(communityId).stream()
             .filter(signal -> signal.getStatus() == null
-                || !CLOSED_STATUSES.contains(signal.getStatus().toUpperCase(Locale.ROOT)))
+                || !SignalStatus.isSettled(signal.getStatus()))
             .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed()
                 .thenComparing(Signal::getId))
             .limit(limit)

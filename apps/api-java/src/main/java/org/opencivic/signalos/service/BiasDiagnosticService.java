@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.SignalStatusEntry;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
@@ -61,8 +62,6 @@ public class BiasDiagnosticService {
     private static final double LOWER_RESOLUTION_RATE_MARGIN = 0.30;
     /** How far below the community attention rate before a category is called under-attended. */
     private static final double LOWER_ATTENTION_MULTIPLIER = 0.5;
-
-    private static final Set<String> CLOSED_STATUSES = Set.of("RESOLVED", "CLOSED", "REJECTED");
     private static final Set<String> EXCLUDED_STATUSES = Set.of("FLAGGED");
 
     public record Thresholds(
@@ -340,8 +339,7 @@ public class BiasDiagnosticService {
             }
             history.getOrDefault(signal.getId(), List.of()).stream()
                 .filter(entry -> entry.getCreatedAt() != null
-                    && CLOSED_STATUSES.contains(entry.getStatusTo() == null
-                        ? "" : entry.getStatusTo().toUpperCase(Locale.ROOT)))
+                    && SignalStatus.isSettled(entry.getStatusTo()))
                 .findFirst()
                 .ifPresent(entry -> durations.add(Math.max(
                     ChronoUnit.DAYS.between(
@@ -387,7 +385,7 @@ public class BiasDiagnosticService {
 
     private boolean isResolved(Signal signal) {
         return signal.getStatus() != null
-            && CLOSED_STATUSES.contains(signal.getStatus().toUpperCase(Locale.ROOT));
+            && SignalStatus.isSettled(signal.getStatus());
     }
 
     private double round2(double value) {

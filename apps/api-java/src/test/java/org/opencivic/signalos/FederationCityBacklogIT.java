@@ -222,6 +222,41 @@ class FederationCityBacklogIT {
             .andExpect(status().isForbidden());
     }
 
+    @Test
+    void aLegacyClosedIssueLeavesEveryRankingIncludingTheFederatedOne() throws Exception {
+        // "CLOSED" predates the SignalStatus enum and still exists in stored rows. Seven services
+        // excluded it from their rankings; the federated backlog, written against the enum, included
+        // it. Same platform, two answers, nothing crashed. This pins them to one.
+        signal(riversideId, "Legacy closed water leak", 500.0, "CLOSED", "Riverside");
+        signal(riversideId, "Riverside water main break", 313.0, "NEW", "Riverside");
+
+        String body = mockMvc.perform(get("/api/open-data/{communityId}/prioritized_backlog", riversideId)
+                .header("X-Api-Token", token(riversideId)))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        // Highest score in the city, and still excluded: the community settled it.
+        org.junit.jupiter.api.Assertions.assertFalse(
+            body.contains("Legacy closed water leak"),
+            "a settled issue must not reappear in one ranking while others exclude it: " + body);
+        org.junit.jupiter.api.Assertions.assertTrue(body.contains("Riverside water main break"));
+    }
+
+    @Test
+    void anUnknownStatusCountsAsOpenSoAReportIsNeverSilentlyDropped() throws Exception {
+        signal(riversideId, "Municipal archive mystery", 10.0, "ARCHIVED_BY_MUNICIPALITY", "Riverside");
+
+        String body = mockMvc.perform(get("/api/open-data/{communityId}/prioritized_backlog", riversideId)
+                .header("X-Api-Token", token(riversideId)))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        // A status this version has not heard of is not evidence that anyone settled the issue.
+        org.junit.jupiter.api.Assertions.assertTrue(
+            body.contains("Municipal archive mystery"),
+            "an unrecognised status must not quietly remove a resident's report: " + body);
+    }
+
     private String token(UUID communityId, String... scopes) throws Exception {
         String scopeList = scopes.length == 0 ? "[\"EXPORT_PRIORITIZED_BACKLOG\"]"
             : "[\"" + String.join("\", \"", scopes) + "\"]";
