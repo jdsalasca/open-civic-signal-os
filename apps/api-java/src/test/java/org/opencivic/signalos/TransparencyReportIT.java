@@ -121,6 +121,24 @@ class TransparencyReportIT {
     }
 
     @Test
+    void theReportMustSayThatScoresAreNotReproducible() throws Exception {
+        // The record's own javadoc claimed "regenerating the same month later yields the same
+        // figures". That is true of the counts and false of the scores: priorityScore is mutable and
+        // has no history, so a past period shows today's score. A contract that promises
+        // reproducibility it cannot deliver is worse than one that names its gap.
+        signal("Playground fence", "2026-02-06T09:00:00", "OPEN", 90.0);
+
+        mockMvc.perform(get("/api/community/transparency-report")
+                .with(user("report_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString())
+                .queryParam("period", "2026-02"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.reproducibilityLimits", org.hamcrest.Matchers.hasSize(org.hamcrest.Matchers.greaterThan(0))))
+            .andExpect(jsonPath("$.reproducibilityLimits[0]").value(
+                org.hamcrest.Matchers.containsString("score")));
+    }
+
+    @Test
     void regeneratingTheSameMonthShouldProduceIdenticalFigures() throws Exception {
         signal("Streetlight out", "2026-02-03T09:00:00", "OPEN", 70.0);
         UUID resolved = signal("Pothole on school route", "2026-02-05T09:00:00", "RESOLVED", 82.0);

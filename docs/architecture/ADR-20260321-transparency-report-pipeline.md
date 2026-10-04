@@ -119,12 +119,17 @@ inconsistency rather than on a fixture, so it cannot be satisfied by getting one
 
 **Priority scores have no history.** `priorityScore` is mutable and there is no ledger of its past
 values, so the score shown for a past period is today's score. An item could appear in February's
-unaddressed list at a score it did not hold in February. The status and the membership of the list are
-correct; the score is not, and there is nothing in the response that says so.
+unaddressed list at a score it did not hold in February.
 
-Fixing it means recording score history, which is a schema and a decision about when a score becomes
-official. Disclosing it in the response is the cheaper half and is still outstanding — this ADR records
-the gap rather than closing it.
+Stating that in the javadoc was not enough. The record previously claimed flatly that "everything is
+derived from the stored period bounds, so regenerating the same month later yields the same figures",
+and a consumer told a report is reproducible will reasonably rely on that. So the gap travels in the
+payload as `reproducibilityLimits`, where the dashboard, the municipality or the journalist integrating
+against the JSON will actually meet it. The OpenAPI description of `generatedAt` said it was "the only
+field that varies"; that was false for the same reason and now names the scores.
+
+Recording the gap is the cheap half. The other half is a score ledger, which means deciding when a
+score becomes official — not a decision to make while chasing a reproducibility bug.
 
 ## Known limits
 

@@ -5316,12 +5316,23 @@ components:
         formulaVersion:
           type: string
           description: Scoring formula the figures were produced under, for reproducibility.
+        reproducibilityLimits:
+          type: array
+          description: >-
+            What in this report a consumer must not treat as reproducible. Present in the payload
+            rather than only in documentation, because the reader who needs it is whoever consumes
+            the JSON. Currently always non-empty: priority scores have no history, so the score
+            shown for a past period is the current score. Counts, statuses and list positions come
+            from the audit trail and are reproducible.
+          items:
+            type: string
         generatedAt:
           type: string
           format: date-time
           description: >-
-            When the report was generated. The only field that varies between two runs over the
-            same period.
+            When the report was generated. Two runs over the same period produce identical counts,
+            statuses and list positions; this timestamp and the scores in the lists are what can
+            differ. See reproducibilityLimits.
         complete:
           type: boolean
     MunicipalTicketField:

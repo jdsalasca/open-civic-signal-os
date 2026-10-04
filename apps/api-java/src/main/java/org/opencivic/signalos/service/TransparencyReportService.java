@@ -109,7 +109,28 @@ public class TransparencyReportService {
             unaddressedSignals(period, allSignals, statusHistory),
             narrative(community, period, current, prior),
             formulaService.getFormula().version(),
+            reproducibilityLimits(),
             LocalDateTime.now()
+        );
+    }
+
+    /**
+     * What in this report a reader must not treat as reproducible.
+     *
+     * <p>Returned as data rather than buried in documentation, because the person who needs it is
+     * whoever consumes the JSON — a dashboard, a municipality, a journalist — and they will never read
+     * this service's javadoc.
+     *
+     * <p>Recording the gap is the cheap half of fixing it. The other half is a score ledger, which means
+     * deciding when a score becomes official, and that is not a decision to make while chasing a
+     * reproducibility bug.
+     */
+    private List<String> reproducibilityLimits() {
+        return List.of(
+            "Priority scores have no history in this platform. The score shown for this period is the "
+                + "score the item carries now, which may differ from the value it held when the period "
+                + "closed. Every count, status and list position in this report is taken from the audit "
+                + "trail and is reproducible; the score is not."
         );
     }
 

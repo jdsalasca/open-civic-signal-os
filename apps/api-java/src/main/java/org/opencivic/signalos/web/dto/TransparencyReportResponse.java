@@ -5,11 +5,18 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Monthly transparency report for one community over one closed calendar month.
+ * One month's transparency figures.
  *
- * <p>Deterministic by construction: everything is derived from the stored period bounds, so
- * regenerating the same month later yields the same figures. Nothing here reads "now" except
- * {@code generatedAt}, which is metadata about the run rather than about the community.
+ * <p><b>Reproducible in its counts, not in its scores.</b> Every count, status and list membership is
+ * derived from the audit trail bounded by the period end, so regenerating the same month later yields
+ * the same figures. {@code priorityScore} is the exception: it is mutable and has no history, so the
+ * score attached to a past period is today's score.
+ *
+ * <p>This record used to claim flatly that "everything is derived from the stored period bounds, so
+ * regenerating the same month later yields the same figures". That was false for the scores, and a
+ * consumer told a report is reproducible will reasonably rely on it. So the gap is stated in the payload
+ * as {@code reproducibilityLimits} rather than only here in the javadoc, where a consumer integrating
+ * against the JSON would never read it.
  */
 public record TransparencyReportResponse(
     UUID communityId,
@@ -20,6 +27,8 @@ public record TransparencyReportResponse(
     List<TransparencySignalOutcomeResponse> unaddressed,
     List<String> narrative,
     String formulaVersion,
+    /** What in this report cannot be reproduced from stored history. Never empty while scores have no ledger. */
+    List<String> reproducibilityLimits,
     LocalDateTime generatedAt
 ) {
     public boolean complete() {
