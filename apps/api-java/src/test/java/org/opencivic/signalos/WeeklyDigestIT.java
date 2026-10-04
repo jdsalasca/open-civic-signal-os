@@ -1,5 +1,6 @@
 package org.opencivic.signalos;
 
+import com.jayway.jsonpath.JsonPath;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
@@ -24,6 +25,7 @@ import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.repository.CommunityDigestPublicationRepository;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
+import org.opencivic.signalos.service.DigestSchedulerService;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.SignalStatusEntryRepository;
 import org.opencivic.signalos.repository.UserRepository;
@@ -65,6 +67,8 @@ class WeeklyDigestIT {
     @Autowired private SignalRepository signalRepository;
     @Autowired private SignalStatusEntryRepository statusEntryRepository;
     @Autowired private CommunityDigestPublicationRepository publicationRepository;
+    @Autowired private DigestSchedulerService schedulerService;
+    @Autowired private org.opencivic.signalos.repository.CommunityDigestPreparationRepository preparationRepository;
 
     private UUID communityId;
     private UUID editorId;
@@ -259,6 +263,83 @@ class WeeklyDigestIT {
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
         return com.jayway.jsonpath.JsonPath.read(json, "$.body").toString();
+    }
+
+    @Test
+    void theApiPreviewMustBeTheArtifactPublishingWillSend() throws Exception {
+        // The scheduler sealed an artifact for this week.
+        signal("Water main break", "utilities", 313.0, MONDAY.plusDays(1));
+        signal("Streetlight out", "infrastructure", 120.0, MONDAY.plusDays(2));
+        var run = schedulerService.prepareForAllCommunities(communityId, WEEK);
+        // Pinned explicitly: without it, a preparation that silently failed to happen makes every
+        // assertion below recompose and agree with itself.
+        org.junit.jupiter.api.Assertions.assertEquals(1, run.prepared(),
+            "the artifact must exist for this test to mean anything; runs: " + run.runs());
+        org.junit.jupiter.api.Assertions.assertEquals(0, run.failed(),
+            "the scheduler run failed, so there is no artifact: " + run.runs());
+        var storedPreparation = preparationRepository.findByCommunityIdAndWeekKey(communityId, WEEK);
+        org.junit.jupiter.api.Assertions.assertTrue(storedPreparation.isPresent(),
+            "no preparation stored under the requested week; found: "
+                + preparationRepository.findAll().stream()
+                    .map(row -> row.getWeekKey() + "@" + row.getCommunityId())
+                    .toList());
+        org.junit.jupiter.api.Assertions.assertTrue(
+            storedPreparation.orElseThrow().getBody().contains("1. Water main break"),
+            "the sealed artifact should hold the pre-rescore order, got: "
+                + storedPreparation.orElseThrow().getBody());
+
+        // The world moves after preparation: the scores swap, as rescoring would. This happens
+        // BEFORE the preview on purpose. A preview taken before the change would recompose to the
+        // same bytes as the artifact, so the defect would be invisible: the test has to catch the
+        // moment a coordinator looks at the screen after the world already moved.
+        rescore("Water main break", 90.0);
+        rescore("Streetlight out", 400.0);
+
+        String previewed = mockMvc.perform(get("/api/community/weekly-digest")
+                .with(user("digest_editor").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString())
+                .queryParam("week", WEEK))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        String published = mockMvc.perform(post("/api/community/weekly-digest/publish")
+                .with(user("digest_editor").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString())
+                .queryParam("week", WEEK))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        // This goes through the controller, which is where the preview actually lived: routed to
+        // buildDigest it recomposed while publish used the stored preparation, so the screen and the
+        // sent bulletin disagreed while every service-level test still passed.
+        org.junit.jupiter.api.Assertions.assertEquals(
+            JsonPath.<String>read(previewed, "$.body"),
+            JsonPath.<String>read(published, "$.body"),
+            "the digest a coordinator reviewed must be the digest residents receive");
+        org.junit.jupiter.api.Assertions.assertEquals(
+            JsonPath.<String>read(previewed, "$.contentHash"),
+            JsonPath.<String>read(published, "$.contentHash"),
+            "the hash a coordinator saw must be the hash residents can verify");
+
+        // And the prepared order is what ships, rather than merely agreeing with itself. Live scores now
+        // put Streetlight first; the sealed artifact still ranks Water main break first.
+        String shipped = JsonPath.<String>read(published, "$.body");
+        org.junit.jupiter.api.Assertions.assertTrue(
+            shipped.contains("1. Water main break (utilities)")
+                && shipped.contains("2. Streetlight out (infrastructure)"),
+            "publishing must send the sealed artifact, not a fresh recomposition: " + shipped);
+        org.junit.jupiter.api.Assertions.assertFalse(
+            shipped.contains("1. Streetlight out"),
+            "a recomposition ranked by the live scores; the artifact should not: " + shipped);
+    }
+
+    private void rescore(String title, double score) {
+        Signal target = signalRepository.findByCommunityId(communityId).stream()
+            .filter(candidate -> title.equals(candidate.getTitle()))
+            .findFirst()
+            .orElseThrow();
+        target.setPriorityScore(score);
+        signalRepository.save(target);
     }
 
     private UUID signal(String title, String category, double score, LocalDate createdAt) {

@@ -116,7 +116,19 @@ public class DigestSchedulerService {
      */
     @Transactional
     public ScheduleReport prepareForAllCommunities(UUID onlyCommunityId) {
-        String weekKey = digestService.resolveWeek(null).key();
+        return prepareForAllCommunities(onlyCommunityId, null);
+    }
+
+    /**
+     * Prepares an explicit week, or the previous completed one when the week is null.
+     *
+     * <p>The explicit week exists because "the week that just ended" is only right for a weekly cron.
+     * A community that closes its books late, or an operator preparing a week by hand, needs to name
+     * the week rather than be given whatever the calendar currently says.
+     */
+    @Transactional
+    public ScheduleReport prepareForAllCommunities(UUID onlyCommunityId, String requestedWeekKey) {
+        String weekKey = digestService.resolveWeek(requestedWeekKey).key();
         List<Community> communities = onlyCommunityId == null
             ? communityRepository.findAll()
             : communityRepository.findById(onlyCommunityId).map(List::of).orElse(List.of());

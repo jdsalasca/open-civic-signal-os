@@ -214,7 +214,7 @@ org.junit.jupiter.api.Assertions.assertEquals("PREPARED", report.runs().get(0).o
         signal("Streetlight out", "utilities", 120.0);
 
         schedulerService.prepareForAllCommunities(communityId);
-        var prepared = weeklyDigestService.digestForPreview(communityId, null, null);
+        var prepared = weeklyDigestService.digestForPreview(communityId, null, null, "sched_coord");
 
         // The world moves after preparation: the scores swap, as they would if a coordinator rescored
         // or a formula change was applied.
@@ -242,7 +242,7 @@ org.junit.jupiter.api.Assertions.assertEquals("PREPARED", report.runs().get(0).o
         signal("Streetlight out", "utilities", 120.0);
 
         schedulerService.prepareForAllCommunities(communityId);
-        var preview = weeklyDigestService.digestForPreview(communityId, null, null);
+        var preview = weeklyDigestService.digestForPreview(communityId, null, null, "sched_coord");
 
         rescore("Water main break", 90.0);
         rescore("Streetlight out", 400.0);
@@ -251,10 +251,10 @@ org.junit.jupiter.api.Assertions.assertEquals("PREPARED", report.runs().get(0).o
         // and send another.
         org.junit.jupiter.api.Assertions.assertEquals(
             preview.body(),
-            weeklyDigestService.digestForPreview(communityId, null, null).body());
+            weeklyDigestService.digestForPreview(communityId, null, null, "sched_coord").body());
         org.junit.jupiter.api.Assertions.assertEquals(
             preview.contentHash(),
-            weeklyDigestService.digestForPreview(communityId, null, null).contentHash());
+            weeklyDigestService.digestForPreview(communityId, null, null, "sched_coord").contentHash());
     }
 
     @Test
@@ -262,7 +262,7 @@ org.junit.jupiter.api.Assertions.assertEquals("PREPARED", report.runs().get(0).o
         // No scheduler involved: a coordinator running the digest by hand still gets one.
         signal("Water main break", "utilities", 313.0);
 
-        var preview = weeklyDigestService.digestForPreview(communityId, null, null);
+        var preview = weeklyDigestService.digestForPreview(communityId, null, null, "sched_coord");
         var published = weeklyDigestService.publishDigest(communityId, null, null, "sched_coord");
 
         org.junit.jupiter.api.Assertions.assertEquals(preview.body(), published.body());

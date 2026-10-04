@@ -165,20 +165,13 @@ public class WeeklyDigestService {
         );
     }
 
-    @Transactional(readOnly = true)
-    public WeeklyDigest buildDigest(UUID communityId, String weekKey, Integer limit, String username) {
-        userRepository.findByUsername(username)
-            .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found: " + username));
-        return digestForPreview(communityId, weekKey, limit);
-    }
-
     /**
      * Composes a digest without a membership check, for the scheduler.
      *
      * <p>The scheduler has no user, so it cannot pass one. It is not a bypass of the permission
      * model: the scheduler runs inside the platform and its runs are recorded in
      * {@code digest_schedule_runs}, which is the audit trail instead of a username. Every
-     * user-facing route still goes through {@link #buildDigest} and its check.
+     * user-facing route still goes through {@link #digestForPreview} and its check.
      */
     @Transactional(readOnly = true)
     public WeeklyDigest buildDigestForScheduler(UUID communityId, String weekKey, Integer limit) {
@@ -193,7 +186,9 @@ public class WeeklyDigestService {
      * digest and send another, which is the defect this replaced.
      */
     @Transactional(readOnly = true)
-    public WeeklyDigest digestForPreview(UUID communityId, String weekKey, Integer limit) {
+    public WeeklyDigest digestForPreview(UUID communityId, String weekKey, Integer limit, String username) {
+        userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found: " + username));
         DigestWeek week = resolveWeek(weekKey);
         return preparationRepository.findByCommunityIdAndWeekKey(communityId, week.key())
             .map(preparation -> fromPreparation(communityId, preparation))

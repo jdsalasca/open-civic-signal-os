@@ -50,7 +50,15 @@ public class WeeklyDigestController {
         Principal principal
     ) {
         requireExportScope(communityId, principal);
-        return digestService.buildDigest(communityId, week, limit, principal.getName());
+        // digestForPreview, not buildDigest: the preview must be the artifact publishing will send.
+        // Routing this to buildDigest recomposed the digest here while publish used the stored
+        // preparation, so a coordinator could review one digest and residents receive another.
+        // digestForPreview, not buildDigest: the preview must be the artifact publishing will send.
+        // Routing this to buildDigest recomposed the digest here while publish used the stored
+        // preparation, so a coordinator could review one digest and residents receive another. The
+        // service-level tests could not see it; this goes through the controller, which is where the
+        // preview actually lived.
+        return digestService.digestForPreview(communityId, week, limit, principal.getName());
     }
 
     @PostMapping("/publish")
