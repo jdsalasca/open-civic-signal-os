@@ -202,6 +202,54 @@ export type CommunityMembership = {
   createdAt: string;
 };
 
+export type DigestItem = {
+  signalId: string;
+  title: string;
+  category: string;
+  status: string;
+  locationLabel: string | null;
+  priorityScore: number;
+  daysOpen: number;
+  /** The formula's own terms, so a reader can check the claim rather than take it on faith. */
+  whyRanked: string;
+};
+
+export type DigestWeek = {
+  key: string;
+  startDate: string;
+  endDate: string;
+  previousKey: string;
+};
+
+export type WeeklyDigest = {
+  version: string;
+  communityId: string;
+  communityName: string;
+  week: DigestWeek;
+  topUnresolved: DigestItem[];
+  resolvedThisWeek: number;
+  rejectedThisWeek: number;
+  reportedThisWeek: number;
+  stillOpenTotal: number;
+  /** The rendered digest, suitable for an email or channel message. */
+  body: string;
+  contentHash: string;
+  published: boolean;
+  publishedAt: string | null;
+  generatedAt: string;
+  /** How many configured channels accepted it. Zero is normal when none are configured. */
+  deliveredToChannels: number;
+};
+
+export type DigestScheduleRun = {
+  communityId: string;
+  communityName: string | null;
+  weekKey: string;
+  outcome: "PREPARED" | "SKIPPED" | "FAILED";
+  detail: string | null;
+  ranAt: string;
+};
+
 export type SignalMergeCandidate = {
   signalId: string;
   title: string;
