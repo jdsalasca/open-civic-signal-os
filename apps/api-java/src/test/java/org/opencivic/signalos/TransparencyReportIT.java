@@ -149,6 +149,76 @@ class TransparencyReportIT {
     }
 
     @Test
+    void aClosedMonthShouldNotRewriteItselfWhenIssuesAreSettledAfterItEnded() throws Exception {
+        // Two issues reported in February. One is resolved on 20 February, inside the period. The other
+        // is resolved in April, after the period closed.
+        UUID resolvedInFebruary = signal("Pothole cluster", "2026-02-05T09:00:00", "OPEN", 120.0);
+        UUID resolvedInApril = signal("Playground fence", "2026-02-06T09:00:00", "RESOLVED", 90.0);
+        addStatus(resolvedInFebruary, "OPEN", "RESOLVED", LocalDateTime.parse("2026-02-20T09:00:00"));
+        addStatus(resolvedInApril, "OPEN", "RESOLVED", LocalDateTime.parse("2026-04-02T09:00:00"));
+
+        String report = getReport("2026-02");
+
+        // February's unaddressed list is a claim about February. The fence was unaddressed in
+        // February, so it belongs there even though April has since fixed it.
+        org.junit.jupiter.api.Assertions.assertTrue(
+            report.contains("Playground fence"),
+            "an issue settled after the period ended must still appear in that period's unaddressed "
+                + "list; otherwise the record of what a community failed to address in February "
+                + "rewrites itself every time it does the work later: " + report);
+        // And the one resolved inside the period does not.
+        org.junit.jupiter.api.Assertions.assertFalse(
+            unaddressedSection(report).contains("Pothole cluster"),
+            "an issue resolved inside the period is not unaddressed: " + unaddressedSection(report));
+    }
+
+    @Test
+    void anIssueSettledBeforeThePeriodShouldNotAppearAsUnaddressedInIt() throws Exception {
+        UUID resolvedInJanuary = signal("Streetlight out", "2026-01-20T09:00:00", "RESOLVED", 70.0);
+        addStatus(resolvedInJanuary, "OPEN", "RESOLVED", LocalDateTime.parse("2026-01-25T09:00:00"));
+
+        org.junit.jupiter.api.Assertions.assertFalse(
+            unaddressedSection(getReport("2026-02")).contains("Streetlight out"),
+            "an issue settled before the period started was never unaddressed during it");
+    }
+
+    /** The unaddressed list only, so an assertion cannot be satisfied by the actioned list instead. */
+    /**
+ * The count and the list in one report must answer the same question.
+ *
+ * <p>They used not to. {@code SIGNALS_STILL_OPEN} counted from the audit trail, bounded by the period
+ * end, while the {@code unaddressed} list filtered on the live status column. So February's report said
+ * "1 still open" in its metrics and listed zero unaddressed issues — a report disagreeing with itself,
+ * with the number and the detail published side by side.
+ */
+@Test
+void theStillOpenCountAndTheUnaddressedListMustAgree() throws Exception {
+    UUID resolvedInside = signal("Pothole cluster", "2026-02-05T09:00:00", "OPEN", 120.0);
+    signal("Playground fence", "2026-02-06T09:00:00", "OPEN", 90.0);
+    signal("Streetlight out", "2026-02-07T09:00:00", "OPEN", 60.0);
+    addStatus(resolvedInside, "OPEN", "RESOLVED", LocalDateTime.parse("2026-02-20T09:00:00"));
+
+    String report = getReport("2026-02");
+
+    int metric = Integer.parseInt(report.replaceAll("(?s).*SIGNALS_STILL_OPEN.*?\"value\":(\\d+).*", "$1"));
+    int listed = unaddressedSection(report).split("\"signalId\"").length - 1;
+
+    org.junit.jupiter.api.Assertions.assertEquals(2, metric,
+        "two issues were reported in February and settled after it ended: " + report);
+    org.junit.jupiter.api.Assertions.assertEquals(metric, listed,
+        "the metric and the list in the same report must not disagree: " + report);
+}
+
+private String unaddressedSection(String report) {
+        int start = report.indexOf("\"unaddressed\"");
+        if (start < 0) {
+            return "";
+        }
+        int end = report.indexOf("]", start);
+        return end < 0 ? report.substring(start) : report.substring(start, end);
+    }
+
+    @Test
     void rejectedSignalsShouldBeCountedSeparatelyAndStayReviewable() throws Exception {
         UUID rejected = signal("Duplicate of an existing report", "2026-02-06T09:00:00", "REJECTED", 12.0);
         addStatus(rejected, "OPEN", "REJECTED", LocalDateTime.parse("2026-02-09T09:00:00"));

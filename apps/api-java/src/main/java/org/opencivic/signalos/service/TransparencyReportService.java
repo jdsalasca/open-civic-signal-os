@@ -106,7 +106,7 @@ public class TransparencyReportService {
             period,
             buildMetrics(current, prior),
             actionedSignals(period, allSignals, statusHistory),
-            unaddressedSignals(period, allSignals),
+            unaddressedSignals(period, allSignals, statusHistory),
             narrative(community, period, current, prior),
             formulaService.getFormula().version(),
             LocalDateTime.now()
@@ -270,21 +270,69 @@ public class TransparencyReportService {
         return rows.stream().limit(ACTIONED_LIST_LIMIT).toList();
     }
 
+    /**
+     * Whether the community had settled this issue by the time the period ended.
+     *
+     * <p>Reads the audit trail rather than the status column. Settled states are terminal —
+     * {@code SignalStatus.canTransitionTo} refuses to leave RESOLVED or REJECTED — so "was it settled by
+     * then" does not change afterwards, which is what makes a closed period safe to regenerate.
+     */
+    private boolean settledBy(List<SignalStatusEntry> entries, LocalDateTime periodEnd) {
+        for (SignalStatusEntry entry : entries) {
+            if (entry.getCreatedAt() != null
+                && !entry.getCreatedAt().isAfter(periodEnd)
+                && SignalStatus.isSettled(entry.getStatusTo())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * The status to show for a past period: the last one recorded by the period end.
+     *
+     * <p>Falls back to the stored status only when the trail says nothing, which happens for a signal
+     * that has never had a status entry. Showing today's value there is the least-wrong option and the
+     * one place where a past figure can still drift.
+     */
+    private String statusAt(List<SignalStatusEntry> entries, LocalDateTime periodEnd, Signal signal) {
+        String status = null;
+        LocalDateTime latest = null;
+        for (SignalStatusEntry entry : entries) {
+            if (entry.getCreatedAt() != null
+                && !entry.getCreatedAt().isAfter(periodEnd)
+                && (latest == null || entry.getCreatedAt().isAfter(latest))) {
+                latest = entry.getCreatedAt();
+                status = entry.getStatusTo();
+            }
+        }
+        return status == null ? signal.getStatus() : status;
+    }
+
     private List<TransparencySignalOutcomeResponse> unaddressedSignals(
         TransparencyPeriod period,
-        List<Signal> allSignals
+        List<Signal> allSignals,
+        Map<UUID, List<SignalStatusEntry>> statusHistory
     ) {
         LocalDateTime periodEnd = period.endDate().atStartOfDay().minusNanos(1);
         return allSignals.stream()
             .filter(signal -> period.contains(signal.getCreatedAt()))
-            .filter(signal -> !SignalStatus.isSettled(signal.getStatus()))
+            // Unaddressed **as of the period end**, from the audit trail rather than the mutable status
+            // column. Reading the live status made February's record of what the community failed to
+            // address shrink every time it did the work later: a fence fixed in April vanished from
+            // February's unaddressed list, with no trace that the record had changed.
+            //
+            // The same reasoning the digest applies to a closed week, and the sibling method below
+            // already did it this way: a past period has to describe the past.
+            .filter(signal -> !settledBy(statusHistory.getOrDefault(signal.getId(), List.of()), periodEnd))
             .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed()
                 .thenComparing(Signal::getId))
             .limit(UNADDRESSED_LIST_LIMIT)
             .map(signal -> new TransparencySignalOutcomeResponse(
                 signal.getId(),
                 signal.getTitle(),
-                signal.getStatus(),
+                // The status as it stood at the period end, not today's.
+                statusAt(statusHistory.getOrDefault(signal.getId(), List.of()), periodEnd, signal),
                 signal.getCategory(),
                 signal.getPriorityScore(),
                 signal.getLocationLabel(),

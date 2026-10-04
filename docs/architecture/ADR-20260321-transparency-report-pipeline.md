@@ -90,6 +90,42 @@ plausible is worse than no report.
 - The report requires community membership. A published artifact for a community a caller does
   not belong to is not currently reachable; a public share link is a future slice.
 
+## A past period is answered from the audit trail, never from live state
+
+The `unaddressed` list filtered on `signal.status`, the mutable column. The `SIGNALS_STILL_OPEN` metric
+and the `actioned` list already read the audit trail bounded by the period end, so the two disagreed:
+February's report published "1 still open" in its metrics beside an unaddressed list that omitted the
+same issue.
+
+That is the worst kind of wrong for this product. A closed month's record of what a community failed to
+address **shrank every time the community did the work later** — a fence fixed in April silently vanished
+from February's list, with no trace that the published figure had changed. Nothing errored, and every
+individual number was defensible on its own.
+
+So the list is now computed the same way as its own metric: reported in the period, and no settled
+status entry at or before the period end. `statusAt` shows the status as it stood then, rather than
+today's, for the same reason.
+
+This is safe because settled states are terminal — `SignalStatus.canTransitionTo` refuses to leave
+`RESOLVED` or `REJECTED` — so "was it settled by then" cannot change after the fact. The digest made the
+same call for a closed week, and the weekly digest's preparation now stores the artifact for the same
+reason.
+
+Pinned by `theStillOpenCountAndTheUnaddressedListMustAgree`, which asserts the metric and the list in
+one report answer the same question. It is the strongest form of the test: it fails on internal
+inconsistency rather than on a fixture, so it cannot be satisfied by getting one side right.
+
+### What is still not reproducible
+
+**Priority scores have no history.** `priorityScore` is mutable and there is no ledger of its past
+values, so the score shown for a past period is today's score. An item could appear in February's
+unaddressed list at a score it did not hold in February. The status and the membership of the list are
+correct; the score is not, and there is nothing in the response that says so.
+
+Fixing it means recording score history, which is a schema and a decision about when a score becomes
+official. Disclosing it in the response is the cheaper half and is still outstanding — this ADR records
+the gap rather than closing it.
+
 ## Known limits
 
 - `actioned` and `unaddressed` are capped at 10 each. A community with more needs pagination

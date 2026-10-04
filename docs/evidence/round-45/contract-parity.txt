@@ -1,0 +1,2 @@
+
+OpenAPI parity check passed: 178 routes across 194 controller sources, 147 documented paths, 9 intentionally undocumented.

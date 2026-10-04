@@ -6,7 +6,7 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 413 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 423 en `apps/api-java`, todos en verde con `mvn clean test`.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -34,6 +34,11 @@ patrón que más caro sale:
    encontró ocho definiciones de "resuelto". Dos copias comparadas por un test siguen siendo dos copias:
    es la lección de `PrioritizationFormula`, con un filtro en vez de aritmética. Cuando un concepto de
    dominio aparece en varios servicios, su dueño es el tipo de dominio, no el servicio.
+5. **Un camino de lectura que contesta desde el estado vivo lo que su hermano contesta desde el
+   historia.** Tres en tres rondas (43, 44, 45). La forma de encontrarlo es siempre la misma: dos
+   piezas del mismo concepto, una correcta y otra no. El test que más rinde no comprueba el valor
+   esperado sino la **coherencia interna** — que la métrica y la lista del mismo informe no se
+   contradigan — porque así no puede pasar por acertar una de las dos.
 
 ## Rondas
 
@@ -45,7 +50,8 @@ patrón que más caro sale:
 | 42 | Namespace de ciudad y backlog federado | 412 tests; dos ciudades sin mezcla; revocar consentimiento corta el feed | ✅ `f035b5b` |
 | 43 | El preview por API es el artefacto que se publica | 413 tests; falla por mutación del controller | ✅ `3ea5408` |
 | 44 | Una sola definición de "resuelto" para todos los rankings | 420 tests; 8 copias → 1; falla por mutación | ✅ este commit |
-| 45 | Auditar el par lectura/escritura de trust pulse y handoff institucional | Test por endpoint que compare GET y POST tras mutar el mundo | ➡️ siguiente |
+| 45 | Un mes cerrado se responde desde el historial, no desde el estado vivo | 423 tests; métrica y lista coinciden; falla por mutación | ✅ este commit |
+| 46 | Divulgar que el score de un periodo pasado es el score de hoy | Campo o nota en la respuesta del informe + test | ➡️ siguiente |
 
 ## Próximas rondas candidatas
 
