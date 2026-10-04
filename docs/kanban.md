@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-04T16:17:22.785Z
+Last updated: 2026-10-04T16:50:20.117Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-27T16:17:20.322Z)
-- Throughput (issues closed): 117
+- Window: last 7 days (since 2026-09-27T16:50:17.320Z)
+- Throughput (issues closed): 118
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -59,13 +59,13 @@ Status labels used by this board:
 
 ## 2026-Q4 Scale
 
-- TODO: 1
+- TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 2
+- DONE: 3
 
 ### TODO
-- #11 P2: Federation API for multi-city civic deployments
+- _No issues_
 
 ### IN_PROGRESS
 - _No issues_
@@ -74,6 +74,7 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #11 P2: Federation API for multi-city civic deployments
 - #10 P2: Institutional action bridge (ticket export + SLA sync)
 - #9 P2: Fairness weighting and bias diagnostics module
 
