@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-04T11:38:42.227Z
+Last updated: 2026-10-04T15:06:28.554Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-27T11:38:39.731Z)
-- Throughput (issues closed): 116
+- Window: last 7 days (since 2026-09-27T15:06:25.487Z)
+- Throughput (issues closed): 117
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -38,13 +38,13 @@ Status labels used by this board:
 
 ## 2026-Q3 Expansion
 
-- TODO: 1
+- TODO: 0
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 2
+- DONE: 3
 
 ### TODO
-- #6 P1: Weekly Top-10 unresolved civic problems digest
+- _No issues_
 
 ### IN_PROGRESS
 - _No issues_
@@ -55,6 +55,7 @@ Status labels used by this board:
 ### DONE
 - #8 P1: Duplicate signal detection and merge workflow
 - #7 P1: Messaging relay for WhatsApp/Telegram weekly updates
+- #6 P1: Weekly Top-10 unresolved civic problems digest
 
 ## 2026-Q4 Scale
 
