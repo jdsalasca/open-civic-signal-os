@@ -23,6 +23,7 @@ import org.opencivic.signalos.repository.CommunityDecisionRepository;
 import org.opencivic.signalos.repository.CommunityProposalRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
 import org.opencivic.signalos.repository.SignalRepository;
+import org.opencivic.signalos.repository.SignalScoreEntryRepository;
 import org.opencivic.signalos.repository.SignalStatusEntryRepository;
 import org.opencivic.signalos.web.dto.TransparencyMetricResponse;
 import org.opencivic.signalos.web.dto.TransparencyPeriod;
@@ -50,6 +51,7 @@ public class TransparencyReportService {
 
     private final CommunityAccessService communityAccessService;
     private final CommunityRepository communityRepository;
+  private final SignalScoreEntryRepository scoreEntryRepository;
     private final SignalRepository signalRepository;
     private final SignalStatusEntryRepository signalStatusEntryRepository;
     private final CommunityProposalRepository proposalRepository;
@@ -63,7 +65,8 @@ public class TransparencyReportService {
         SignalStatusEntryRepository signalStatusEntryRepository,
         CommunityProposalRepository proposalRepository,
         CommunityDecisionRepository decisionRepository,
-        PrioritizationFormulaService formulaService
+        PrioritizationFormulaService formulaService,
+        SignalScoreEntryRepository scoreEntryRepository
     ) {
         this.communityAccessService = communityAccessService;
         this.communityRepository = communityRepository;
@@ -72,6 +75,7 @@ public class TransparencyReportService {
         this.proposalRepository = proposalRepository;
         this.decisionRepository = decisionRepository;
         this.formulaService = formulaService;
+        this.scoreEntryRepository = scoreEntryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -127,10 +131,10 @@ public class TransparencyReportService {
      */
     private List<String> reproducibilityLimits() {
         return List.of(
-            "Priority scores have no history in this platform. The score shown for this period is the "
-                + "score the item carries now, which may differ from the value it held when the period "
-                + "closed. Every count, status and list position in this report is taken from the audit "
-                + "trail and is reproducible; the score is not."
+            "Scores come from the score ledger where one exists: the score shown is the score the item "
+                + "held when this period closed. Signals recorded before score history existed have no "
+                + "ledger entry, and for those the score shown is the current one. Every count, status "
+                + "and list position in this report comes from the audit trail and is reproducible."
         );
     }
 
@@ -282,7 +286,7 @@ public class TransparencyReportService {
                 if (period.contains(entry.getCreatedAt())
                     && SignalStatus.isSettled(entry.getStatusTo())
                     && !"REJECTED".equals(entry.getStatusTo())) {
-                    rows.add(toOutcome(signal, entry.getCreatedAt()));
+                    rows.add(toOutcome(signal, entry.getStatusTo(), entry.getCreatedAt()));
                 }
             }
         }
@@ -298,6 +302,25 @@ public class TransparencyReportService {
      * {@code SignalStatus.canTransitionTo} refuses to leave RESOLVED or REJECTED — so "was it settled by
      * then" does not change afterwards, which is what makes a closed period safe to regenerate.
      */
+    /**
+     * The score a signal held when the period ended.
+ *
+ * <p>Read from score history rather than off the mutable column. The ledger records what happened at
+ * each of the three operations that move a score — recorded, supported, merged — so this is a fact
+ * rather than a policy about which score counts, and it applies the same "as of the period end" rule
+ * the statuses in this report already use.
+ *
+ * <p>Falls back to the current score when a signal has no recorded history, which is every signal
+ * predating the ledger. {@code reproducibilityLimits} says so, because a reader who cannot tell
+ * "unrecorded" from "known" is being asked to trust a figure nobody looked up.
+ */
+    private double scoreAtPeriodEnd(Signal signal, LocalDateTime periodEnd) {
+        return scoreEntryRepository
+            .findLatestAtOrBefore(signal.getId(), periodEnd)
+            .map(org.opencivic.signalos.domain.SignalScoreEntry::getPriorityScore)
+            .orElseGet(signal::getPriorityScore);
+    }
+
     private boolean settledBy(List<SignalStatusEntry> entries, LocalDateTime periodEnd) {
         for (SignalStatusEntry entry : entries) {
             if (entry.getCreatedAt() != null
@@ -346,7 +369,7 @@ public class TransparencyReportService {
             // The same reasoning the digest applies to a closed week, and the sibling method below
             // already did it this way: a past period has to describe the past.
             .filter(signal -> !settledBy(statusHistory.getOrDefault(signal.getId(), List.of()), periodEnd))
-            .sorted(Comparator.comparingDouble(Signal::getPriorityScore).reversed()
+            .sorted(Comparator.comparingDouble((Signal signal) -> scoreAtPeriodEnd(signal, periodEnd)).reversed()
                 .thenComparing(Signal::getId))
             .limit(UNADDRESSED_LIST_LIMIT)
             .map(signal -> new TransparencySignalOutcomeResponse(
@@ -355,7 +378,8 @@ public class TransparencyReportService {
                 // The status as it stood at the period end, not today's.
                 statusAt(statusHistory.getOrDefault(signal.getId(), List.of()), periodEnd, signal),
                 signal.getCategory(),
-                signal.getPriorityScore(),
+                // And the score as it stood then, from the ledger, for the same reason.
+                scoreAtPeriodEnd(signal, periodEnd),
                 signal.getLocationLabel(),
                 daysBetween(signal.getCreatedAt(), periodEnd),
                 signal.getCreatedAt(),
@@ -364,13 +388,24 @@ public class TransparencyReportService {
             .toList();
     }
 
-    private TransparencySignalOutcomeResponse toOutcome(Signal signal, LocalDateTime resolvedAt) {
+    /**
+     * One actioned signal, described as it was at the moment it was settled.
+     *
+     * <p>The status comes from the entry rather than the signal: "actioned" means this transition
+     * happened, so quoting the signal's current status would misreport what the community did. The
+     * score comes from the ledger at that moment for the same reason.
+     */
+    private TransparencySignalOutcomeResponse toOutcome(
+        Signal signal,
+        String statusAtResolution,
+        LocalDateTime resolvedAt
+    ) {
         return new TransparencySignalOutcomeResponse(
             signal.getId(),
             signal.getTitle(),
-            signal.getStatus(),
+            statusAtResolution,
             signal.getCategory(),
-            signal.getPriorityScore(),
+            scoreAtPeriodEnd(signal, resolvedAt),
             signal.getLocationLabel(),
             daysBetween(signal.getCreatedAt(), resolvedAt),
             signal.getCreatedAt(),

@@ -5321,9 +5321,9 @@ components:
           description: >-
             What in this report a consumer must not treat as reproducible. Present in the payload
             rather than only in documentation, because the reader who needs it is whoever consumes
-            the JSON. Currently always non-empty: priority scores have no history, so the score
-            shown for a past period is the current score. Counts, statuses and list positions come
-            from the audit trail and are reproducible.
+            the JSON. Always non-empty: scores come from the score ledger, but signals recorded
+            before score history existed have no ledger entry and show their current score.
+            Counts, statuses and list positions come from the audit trail and are reproducible.
           items:
             type: string
         generatedAt:

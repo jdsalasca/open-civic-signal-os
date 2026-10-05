@@ -6,7 +6,7 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 424 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 429 en `apps/api-java`, todos en verde con `mvn clean test`.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -51,8 +51,9 @@ patron que mas caro sale:
 | 44 | Una sola definicion de "resuelto" para todos los rankings | 420 tests; 8 copias reducidas a 1; falla por mutacion | Hecho `e150e3b` |
 | 45 | Un mes cerrado se responde desde el historial, no desde el estado vivo | 423 tests; metrica y lista coinciden; falla por mutacion | Hecho `fb72451` |
 | 46 | El informe declara en su payload lo que no puede reproducir | 424 tests; dos afirmaciones falsas corregidas | Hecho este commit |
-| 47 | Revision visual del digest semanal + build output sin trackear | 12 Playwright, 8 capturas, 424 tests | Hecho este commit |
-| 48 | Ledger de scores: cuando un score se vuelve oficial | Decision de gobernanza + esquema; no es una ronda de codigo | Siguiente |
+| 47 | Revision visual del digest semanal + build output sin trackear | 12 Playwright, 8 capturas, 424 tests | Hecho `7a33213` |
+| 48 | Ledger de scores + orden determinista del timeline | 429 tests; falla por mutacion; 2 preflights seguidos | Hecho este commit |
+| 49 | Auditar el patron restante: ensambles, salas, propuestas | Un test de coherencia interna por par | Siguiente |
 
 ## Proximas rondas candidatas
 
@@ -79,7 +80,7 @@ patron que mas caro sale:
 - **Federacion sin autenticacion mutua ni respuesta sobre residencia de datos.** Documentado en
   `docs/FEDERATION.md` y en el ADR; requiere decision de gobernanza antes de un despliegue real
   transfronterizo.
-- **Scores historicos.** El informe de transparencia declara la limitacion en su payload
-  (`reproducibilityLimits`) en vez de ocultarla. El arreglo completo depende de la ronda 47.
+- **Scores historicos solo desde la ronda 48.** El ledger existe; las senales anteriores a el no tienen
+  entrada y su score pasado es incunable. El informe lo declara en `reproducibilityLimits`.
 - **`%TEMP%/get-shit-done/` sin trackear en el arbol de trabajo.** Instalacion del framework de
   agentes con la variable sin expandir; no pertenece al repositorio y no se commitea.

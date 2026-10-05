@@ -350,7 +350,7 @@ public class InstitutionalActionBridgeService {
     }
 
     private LocalDateTime latestClosure(UUID signalId) {
-        return statusEntryRepository.findBySignalIdOrderByCreatedAtDesc(signalId).stream()
+        return statusEntryRepository.findTimeline(signalId).stream()
             .filter(entry -> entry.getStatusTo() != null
                 && SignalStatus.isSettled(entry.getStatusTo()))
             .map(SignalStatusEntry::getCreatedAt)

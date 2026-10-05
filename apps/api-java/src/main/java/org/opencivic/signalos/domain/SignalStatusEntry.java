@@ -32,6 +32,22 @@ public class SignalStatusEntry {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    /**
+     * Insertion order, when the engine records one.
+     *
+     * <p>The timeline used to be ordered by {@code createdAt} alone, which ties on any engine whose
+     * timestamps have no fractional seconds. A tie means the database may return either event first,
+     * so the same two requests render in a different order from one run to the next. Populated by the
+     * database; {@code null} when it does not support it, in which case the order falls back to
+     * {@code createdAt}.
+     */
+    @Column(insertable = false, updatable = false)
+    private Long seq;
+
+    public Long getSeq() {
+        return seq;
+    }
+
     public SignalStatusEntry() {}
 
     public SignalStatusEntry(UUID signalId, String statusFrom, String statusTo, String changedBy, String reason) {

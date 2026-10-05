@@ -52,6 +52,8 @@ class TransparencyReportIT {
     @Autowired private CommunityMembershipRepository membershipRepository;
     @Autowired private SignalRepository signalRepository;
     @Autowired private SignalStatusEntryRepository statusEntryRepository;
+    @Autowired private org.opencivic.signalos.repository.SignalScoreEntryRepository scoreEntryRepository;
+    @Autowired private org.opencivic.signalos.service.DigestSchedulerService schedulerService;
 
     private UUID communityId;
     private UUID authorId;
@@ -122,11 +124,11 @@ class TransparencyReportIT {
 
     @Test
     void theReportMustSayThatScoresAreNotReproducible() throws Exception {
-        // The record's own javadoc claimed "regenerating the same month later yields the same
-        // figures". That is true of the counts and false of the scores: priorityScore is mutable and
-        // has no history, so a past period shows today's score. A contract that promises
-        // reproducibility it cannot deliver is worse than one that names its gap.
-        signal("Playground fence", "2026-02-06T09:00:00", "OPEN", 90.0);
+        // Round 46 disclosed the gap because the record's javadoc claimed "regenerating the same month
+        // later yields the same figures", which was false for scores. Round 48 added the ledger, so the
+        // disclosure now has to describe the narrower remaining case rather than the old one: signals
+        // recorded before score history existed.
+        signal("Playground fence", "2026-02-06T09:00:00", "OPEN", 40.0);
 
         mockMvc.perform(get("/api/community/transparency-report")
                 .with(user("report_coord").roles("CITIZEN"))
@@ -135,7 +137,9 @@ class TransparencyReportIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.reproducibilityLimits", org.hamcrest.Matchers.hasSize(org.hamcrest.Matchers.greaterThan(0))))
             .andExpect(jsonPath("$.reproducibilityLimits[0]").value(
-                org.hamcrest.Matchers.containsString("score")));
+                org.hamcrest.Matchers.containsString("ledger")))
+            .andExpect(jsonPath("$.reproducibilityLimits[0]").value(
+                org.hamcrest.Matchers.containsString("before score history existed")));
     }
 
     @Test
@@ -234,6 +238,44 @@ private String unaddressedSection(String report) {
         }
         int end = report.indexOf("]", start);
         return end < 0 ? report.substring(start) : report.substring(start, end);
+    }
+
+    @Test
+    void aClosedMonthShouldShowTheScoreItHeldNotTheScoreTheIssueReachedLater() throws Exception {
+        // This is the gap round 46 disclosed in the payload rather than hid. The report used to show
+        // today's score for a past period, because priorityScore is mutable and had no history.
+        // The live score is 320 because support has since driven it up. February's ledger says 40. If the
+        // two are the same value the test cannot tell a correct read from a mutated one, so they differ.
+        UUID fenceId = signal("Playground fence", "2026-02-06T09:00:00", "OPEN", 320.0);
+
+        scoreEntry(fenceId, 40.0, LocalDateTime.parse("2026-02-06T10:00:00"));
+        scoreEntry(fenceId, 320.0, LocalDateTime.parse("2026-04-02T10:00:00"));
+
+        String report = getReport("2026-02");
+
+        org.junit.jupiter.api.Assertions.assertTrue(
+            unaddressedSection(report).contains("\"priorityScore\":40.0"),
+            "February must show February's score, not the one the issue reached in April: "
+                + unaddressedSection(report));
+        org.junit.jupiter.api.Assertions.assertFalse(
+            unaddressedSection(report).contains("\"priorityScore\":320.0"),
+            "a later score leaked into a closed period: " + unaddressedSection(report));
+    }
+
+    private void scoreEntry(UUID signalId, double score, LocalDateTime at) {
+        org.opencivic.signalos.domain.SignalScoreEntry entry =
+            new org.opencivic.signalos.domain.SignalScoreEntry();
+        entry.setId(UUID.randomUUID());
+        entry.setSignalId(signalId);
+        entry.setPriorityScore(score);
+        entry.setUrgency(4);
+        entry.setImpact(4);
+        entry.setAffectedPeople(120);
+        entry.setCommunityVotes(8);
+        entry.setFormulaVersion("v1");
+        entry.setCause(org.opencivic.signalos.domain.SignalScoreEntry.Cause.SUPPORT_VOTE);
+        entry.setRecordedAt(at);
+        scoreEntryRepository.save(entry);
     }
 
     @Test

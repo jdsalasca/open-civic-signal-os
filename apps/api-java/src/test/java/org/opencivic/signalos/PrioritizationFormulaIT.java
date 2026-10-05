@@ -53,7 +53,7 @@ class PrioritizationFormulaIT {
         var formula = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
         var weights = formula.get("weights");
 
-        var priorityService = new PrioritizationServiceImpl(null, null, null, null);
+        var priorityService = new PrioritizationServiceImpl(null, null, null, null, null);
 
         // Inputs chosen so both terms actually saturate their published cap:
         // min(3000 / 10, 30) = 30 and min(75 / 5, 15) = 15.

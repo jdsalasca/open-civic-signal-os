@@ -3,6 +3,7 @@ package org.opencivic.signalos.service;
 import org.opencivic.signalos.domain.PrioritizationFormula;
 import org.opencivic.signalos.domain.Signal;
 import org.opencivic.signalos.domain.SignalSourceChannel;
+import org.opencivic.signalos.domain.SignalScoreEntry;
 import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
@@ -11,6 +12,7 @@ import org.opencivic.signalos.domain.SignalStatusEntry;
 import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.repository.SignalRepository;
+import org.opencivic.signalos.repository.SignalScoreEntryRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.repository.VoteRepository;
 import org.opencivic.signalos.repository.SignalStatusEntryRepository;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,16 +58,47 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     private final VoteRepository voteRepository;
     private final UserRepository userRepository;
     private final SignalStatusEntryRepository statusHistoryRepository;
+  private final SignalScoreEntryRepository scoreEntryRepository;
 
-    public PrioritizationServiceImpl(SignalRepository signalRepository, 
-                                  VoteRepository voteRepository, 
-                                  UserRepository userRepository,
-                                  SignalStatusEntryRepository statusHistoryRepository) {
-        this.signalRepository = signalRepository;
-        this.voteRepository = voteRepository;
-        this.userRepository = userRepository;
-        this.statusHistoryRepository = statusHistoryRepository;
-    }
+public PrioritizationServiceImpl(SignalRepository signalRepository,
+    VoteRepository voteRepository,
+    UserRepository userRepository,
+    SignalStatusEntryRepository statusHistoryRepository,
+    SignalScoreEntryRepository scoreEntryRepository) {
+  this.signalRepository = signalRepository;
+  this.voteRepository = voteRepository;
+  this.userRepository = userRepository;
+  this.statusHistoryRepository = statusHistoryRepository;
+  this.scoreEntryRepository = scoreEntryRepository;
+  }
+
+  /**
+   * Records what a signal's score is right now, and why it moved.
+   *
+   * <p>Called at the only three places a score changes at runtime: a signal being recorded, a resident
+   * supporting it, and a duplicate merge summing votes. Approving a formula change does not rescore
+   * anything here, so there is no fourth caller to remember.
+   *
+   * <p>The raw inputs travel with the score, read off the signal rather than off
+   * {@link ScoreBreakdown}, which holds the weighted terms: an audit record wants the numbers a person
+   * declared, not the arithmetic applied to them. {@code cause} is what makes this an audit trail
+   * rather than a column of numbers, because a score that rose because a resident supported the issue
+   * is a different fact from one that rose because two duplicates were merged.
+   */
+  private void recordScore(Signal signal, SignalScoreEntry.Cause cause) {
+    SignalScoreEntry entry = new SignalScoreEntry();
+    entry.setId(UUID.randomUUID());
+    entry.setSignalId(signal.getId());
+    entry.setPriorityScore(signal.getPriorityScore());
+    entry.setUrgency(signal.getUrgency());
+    entry.setImpact(signal.getImpact());
+    entry.setAffectedPeople(signal.getAffectedPeople());
+    entry.setCommunityVotes(signal.getCommunityVotes());
+    entry.setFormulaVersion(PrioritizationFormulaService.VERSION);
+    entry.setCause(cause);
+    entry.setRecordedAt(LocalDateTime.now());
+    scoreEntryRepository.save(entry);
+  }
 
     @Override
     public TrustPacket getTrustPacket(UUID signalId) {
@@ -91,7 +125,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public List<SignalStatusEntry> getStatusHistory(UUID signalId) {
-        return statusHistoryRepository.findBySignalIdOrderByCreatedAtDesc(signalId);
+        return statusHistoryRepository.findTimeline(signalId);
     }
 
     @Override
@@ -416,7 +450,9 @@ public double similarityScore(Signal s1, Signal s2) {
         }
         
         target.setPriorityScore(calculateScore(target));
-        return signalRepository.save(target);
+        Signal merged = signalRepository.save(target);
+        recordScore(merged, SignalScoreEntry.Cause.DUPLICATE_MERGE);
+        return merged;
     }
 
     @Override
@@ -504,10 +540,10 @@ signal.setLatitude(latitude);
         
         Signal saved = saveSignal(signal);
         
-        statusHistoryRepository.save(new SignalStatusEntry(
+statusHistoryRepository.save(new SignalStatusEntry(
             saved.getId(), "NONE", "NEW", "CREATED", username, "Initial report submission", null
         ));
-
+        recordScore(saved, SignalScoreEntry.Cause.INGEST);
         return saved;
     }
 
@@ -597,7 +633,9 @@ signal.setLatitude(latitude);
             voteRepository.save(new Vote(user.getId(), signalId));
             signal.setCommunityVotes(signal.getCommunityVotes() + 1);
             signal.setPriorityScore(calculateScore(signal));
-            return signalRepository.save(signal);
+            Signal rescored = signalRepository.save(signal);
+            recordScore(rescored, SignalScoreEntry.Cause.SUPPORT_VOTE);
+            return rescored;
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Concurrent support attempt detected and rejected.");
         }

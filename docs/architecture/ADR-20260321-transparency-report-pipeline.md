@@ -128,8 +128,54 @@ payload as `reproducibilityLimits`, where the dashboard, the municipality or the
 against the JSON will actually meet it. The OpenAPI description of `generatedAt` said it was "the only
 field that varies"; that was false for the same reason and now names the scores.
 
-Recording the gap is the cheap half. The other half is a score ledger, which means deciding when a
-score becomes official — not a decision to make while chasing a reproducibility bug.
+**Superseded by the score ledger below.** The disclosure now describes the narrower remaining case:
+signals recorded before score history existed.
+
+### Score history, recorded as fact rather than as policy
+
+`priorityScore` is mutable and had no ledger, so a past period showed the score the item carries now.
+Round 46 disclosed that in the payload. This is the other half.
+
+`signal_score_entries` records the score, its four inputs, the formula version and the **cause** at
+each of the three operations that move a score:
+
+| Cause | What moved it |
+| --- | --- |
+| `INGEST` | The signal was recorded and scored for the first time. |
+| `SUPPORT_VOTE` | A resident supported the issue, raising its votes. |
+| `DUPLICATE_MERGE` | Duplicates were merged in, summing their votes. |
+
+There is no fourth. Approving a formula change does **not** rescore anything at runtime — it records a
+decision and requires a change to `PrioritizationFormula` plus a version bump, so the ledger cannot
+silently miss a mass retroactive rescoring.
+
+**Why recording a cause matters:** a score that rose because a resident supported an issue is a
+different fact from one that rose because two duplicates were merged. A trail that cannot tell them
+apart is not much of a trail.
+
+**Why this was not blocked on a governance decision.** The obvious question is "when does a score
+become official". That question is not needed here: the ledger records what happened at each operation,
+which is a fact, and the read side applies the "as of the period end" rule this report already applies
+to statuses. Any future policy about which score counts can be applied at read time, where it can be
+stated, rather than being baked into the storage.
+
+The raw inputs travel with the score, read off the signal rather than off `ScoreBreakdown`, which
+holds the weighted terms. An audit record wants the numbers a person declared, not the arithmetic
+applied to them.
+
+### What remains unreproducible
+
+Signals recorded **before** this ledger existed have no entry, so their past score is unknowable. The
+read falls back to the current score and `reproducibilityLimits` says exactly that, rather than
+claiming the whole report is reproducible. Backfilling is not possible: the history was never kept.
+
+A signal with no entry answers **empty** at the repository, never a guess, so a caller can tell
+"unrecorded" from "known".
+
+Pinned by mutation: reverting `scoreAtPeriodEnd` to the live score makes
+`aClosedMonthShouldShowTheScoreItHeldNotTheScoreTheIssueReachedLater` fail — after the fixture was
+corrected so the live score and the period-end score **differ**, since identical values let a mutated
+implementation pass.
 
 ## Known limits
 
