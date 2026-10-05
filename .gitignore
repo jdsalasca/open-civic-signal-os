@@ -21,3 +21,7 @@ infra/secrets/
 # Incident evidence bundles are operational records, not source.
 # The protocol says capture before fixing; the file is referenced from the incident write-up.
 docs/incidents/
+
+# Agent scratch: handoff notes and tool caches written during a session. Transient by nature, and
+# every round's real output belongs in docs/evidence/round-<n>/ where it is versioned on purpose.
+.tmp/
