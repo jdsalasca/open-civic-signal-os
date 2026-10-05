@@ -6,7 +6,7 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 433 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 436 en `apps/api-java`, todos en verde con `mvn clean test`.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -53,6 +53,15 @@ patron que mas caro sale:
    `em.clear()` antes de medir, o la cache de primer nivel responde y el test pasa por la razon
    equivocada. Un test verde que no puede fallar es peor que no tener test: enacta el defecto como
    correcto.
+8. **Un N+1 detras de una cache sigue siendo N+1, y solo aparece con datos realistas.** El nombre del
+   autor se resolvia dentro del `.map()` que renderiza cada mensaje; con un solo autor las busquedas
+   siguientes las respondia la cache de primer nivel y el test pasaba con el defecto puesto. Con un
+   autor por mensaje salio (58 vs 13). "Realista" aqui quiere decir "una conversacion con mas de una
+   persona", que es justo el caso que la plataforma existe para.
+   Y la metrica importa tanto como el dato: `getQueryExecutionCount` no cuenta un `findById`, asi que
+   un test que lo use no puede cazar un N+1 de carga-por-id - el de membresias solo se detecto al
+   cambiar a `getEntityLoadCount`. Antes de dar por buena una medicion, mutar el codigo y ver que el
+   test se pone rojo; un test que no se pone rojo no esta probando el fix.
 
 ## Rondas
 
@@ -72,7 +81,8 @@ patron que mas caro sale:
 | 50 | Una sala no descarga su historia entera al abrirse | 432 tests; falla por mutacion | Hecho `387095f` |
 | 51 | Un historial de sala truncado se ve truncado, y se pagina a pedido | 6 Playwright (2 mutaciones); 8 capturas; 432 tests | Hecho este commit |
 | 52 | Contar los mensajes de una sala ya no los lee | 433 tests; el test mide I/O y falla por mutacion | Hecho este commit |
-| 53 | Auditar el patron "cargar para contar" en el resto del dominio | Una pantalla por concepto con la misma forma | Siguiente |
+| 53 | Las pantallas de sala dejan de consultar una vez por fila | 436 tests; 58->8 queries y 61->5 entity loads; 2 mutaciones | Hecho este commit |
+| 54 | La bandeja de menciones resuelve un nombre por fila (N+1 acotado a 20) | Test diferencial sobre la bandeja | Siguiente |
 
 ## Proximas rondas candidatas
 

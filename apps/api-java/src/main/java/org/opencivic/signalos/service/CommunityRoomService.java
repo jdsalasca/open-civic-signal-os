@@ -3,6 +3,7 @@ package org.opencivic.signalos.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -122,11 +123,14 @@ public class CommunityRoomService {
         // messages the caller asked for.
         int effectiveLimit = CommunityListLimits.resolveLimit(limit);
         List<CommunityRoomMessage> messages = messageRepository
-            .findByRoomIdOrderByCreatedAtDescIdDesc(roomId, PageRequest.of(0, effectiveLimit))
-            .getContent();
+            .findByRoomIdOrderByCreatedAtDescIdDesc(roomId, PageRequest.of(0, effectiveLimit));
         long totalMessages = messageRepository.countByRoomId(roomId);
         List<UUID> messageIds = messages.stream().map(CommunityRoomMessage::getId).toList();
         Map<UUID, List<CommunityRoomMention>> mentionsByMessage = mentionsByMessage(messageIds);
+        // Resolved once for the page, not once per message inside the render loop. Every message on a
+        // page has an author, so this used to be a user query per row.
+        Map<UUID, String> authorNames = displayNamesOf(
+            messages.stream().map(CommunityRoomMessage::getAuthorId).distinct().toList());
 
         List<CommunityRoomMessageResponse> payload = messages.stream()
             .map(message -> {
@@ -135,7 +139,7 @@ public class CommunityRoomService {
                     message.getId(),
                     roomId,
                     message.getAuthorId(),
-                    displayNameOf(message.getAuthorId()),
+                    authorNames.getOrDefault(message.getAuthorId(), "unknown"),
                     message.getBody(),
                     message.getCreatedAt(),
                     mentions.stream().map(CommunityRoomMention::getMentionedUserId).distinct().toList(),
@@ -352,20 +356,27 @@ public class CommunityRoomService {
 
     private Map<String, UUID> memberIdsByUsername(UUID communityId) {
         Map<String, UUID> result = new LinkedHashMap<>();
-        for (CommunityMembership membership : membershipRepository.findByCommunityId(communityId)) {
-            userRepository.findById(membership.getUserId()).ifPresent(user -> {
-                if (user.getUsername() != null && !user.getUsername().isBlank()) {
-                    result.put(user.getUsername().toLowerCase(Locale.ROOT), user.getId());
-                }
-            });
+        // One query, two columns, no membership rows and no User entities: the workspace open used to
+        // cost one lookup per member, so a community of 500 cost 500 queries on the screen that lists
+        // its rooms.
+        for (UserRepository.DisplayName user
+            : userRepository.findDisplayNamesByIdIn(membershipRepository.findUserIdsByCommunityId(communityId))) {
+            if (user.getUsername() != null && !user.getUsername().isBlank()) {
+                result.put(user.getUsername().toLowerCase(Locale.ROOT), user.getId());
+            }
         }
         return result;
     }
 
     private Map<UUID, List<CommunityRoomMention>> mentionsByMessage(List<UUID> messageIds) {
-        Map<UUID, List<CommunityRoomMention>> result = new LinkedHashMap<>();
-        for (UUID messageId : messageIds) {
-            result.put(messageId, mentionRepository.findByMessageId(messageId));
+        Map<UUID, List<CommunityRoomMention>> result = new HashMap<>();
+        if (messageIds.isEmpty()) {
+            return result;
+        }
+        // One query for the whole page, then group in memory. This used to ask per message id, so the
+        // cost of opening a room grew with the size of the page it showed.
+        for (CommunityRoomMention mention : mentionRepository.findByMessageIdIn(messageIds)) {
+            result.computeIfAbsent(mention.getMessageId(), key -> new ArrayList<>()).add(mention);
         }
         return result;
     }
@@ -388,8 +399,7 @@ public class CommunityRoomService {
         // of twenty rows. A count and the single newest row answer both questions.
         long messageCount = messageRepository.countByRoomId(room.getId());
         List<CommunityRoomMessage> newest = messageRepository
-            .findByRoomIdOrderByCreatedAtDescIdDesc(room.getId(), PageRequest.of(0, 1))
-            .getContent();
+            .findByRoomIdOrderByCreatedAtDescIdDesc(room.getId(), PageRequest.of(0, 1));
         CommunityRoomMute mute = mutesByRoom.get(room.getId());
         return new CommunityRoomSummaryResponse(
             room.getId(),
@@ -407,12 +417,24 @@ public class CommunityRoomService {
         );
     }
 
-    private String displayNameOf(UUID userId) {
-        return userRepository.findById(userId)
-            .map(user -> user.getDisplayName() != null && !user.getDisplayName().isBlank()
+    private Map<UUID, String> displayNamesOf(List<UUID> userIds) {
+        Map<UUID, String> names = new HashMap<>();
+        if (userIds.isEmpty()) {
+            // A room that has just been created has no messages, so this runs with nothing to look up.
+            return names;
+        }
+        for (UserRepository.DisplayName user : userRepository.findDisplayNamesByIdIn(userIds)) {
+            String displayName = user.getDisplayName() != null && !user.getDisplayName().isBlank()
                 ? user.getDisplayName()
-                : user.getUsername())
-            .orElse("unknown");
+                : user.getUsername();
+            names.put(user.getId(), displayName != null ? displayName : "unknown");
+        }
+        return names;
+    }
+
+    /** Single-name convenience for the callers that resolve one author, not a page of them. */
+    private String displayNameOf(UUID userId) {
+        return displayNamesOf(List.of(userId)).getOrDefault(userId, "unknown");
     }
 
     private CommunityRoom requireRoom(UUID communityId, UUID roomId) {

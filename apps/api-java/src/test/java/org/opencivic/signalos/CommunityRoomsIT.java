@@ -10,6 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
@@ -18,9 +21,11 @@ import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityMembership;
 import org.opencivic.signalos.domain.CommunityRole;
+import org.opencivic.signalos.domain.CommunityRoomMessage;
 import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
+import org.opencivic.signalos.repository.CommunityRoomMessageRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -48,6 +53,7 @@ class CommunityRoomsIT {
     @Autowired private UserRepository userRepository;
     @Autowired private CommunityRepository communityRepository;
     @Autowired private CommunityMembershipRepository membershipRepository;
+    @Autowired private CommunityRoomMessageRepository messageRepository;
     @Autowired private EntityManager entityManager;
     @Autowired private EntityManagerFactory entityManagerFactory;
 
@@ -348,6 +354,127 @@ class CommunityRoomsIT {
         org.junit.jupiter.api.Assertions.assertEquals(1, json.get("rooms").size());
         org.junit.jupiter.api.Assertions.assertTrue(json.get("rooms").get(0).get("messageCount").asInt() >= 5,
             "the summary must still count messages, not the page it happened to load");
+
+        return statistics.getEntityLoadCount();
+    }
+
+@Test
+    void openingABusyRoomShouldNotQueryOncePerMessageOrAuthor() throws Exception {
+        String roomId = createRoomAsCoordinator();
+        List<UUID> authors = saveUsers("note_author_", 50);
+        seedMessages(roomId, authors, 0, 5);
+
+        long withFiveMessages = roomDetailQueries(roomId);
+
+        seedMessages(roomId, authors, 5, 50);
+
+        long withFiftyMessages = roomDetailQueries(roomId);
+
+        // Two N+1s lived on this screen. Mentions were fetched per message id, and the author's display
+        // name was resolved inside the loop that renders each message, so a page of 50 cost 50 mention
+        // queries plus one user lookup per message - up to 400 queries at the 200 cap round 52 set.
+        //
+        // Every message has a different author on purpose. With one author the user lookups hit the
+        // first-level cache and the second one onwards cost nothing, which hid the defect from the
+        // first version of this test: it saw the mention queries and not the author ones.
+        //
+        // Differential on purpose: a fixed threshold would rot the first time an unrelated query is
+        // added to this screen. What must hold is that the query count does not depend on how many
+        // messages the page holds.
+        org.junit.jupiter.api.Assertions.assertEquals(withFiveMessages, withFiftyMessages,
+            "opening a room ran " + withFiftyMessages + " queries for 50 messages and " + withFiveMessages
+                + " for 5: reads scale with the page, so it is querying per message instead of per screen");
+    }
+
+    @Test
+    void openingAJustCreatedRoomShouldWorkWithNothingToLookUp() throws Exception {
+        // The default state of every new room: no messages, so no author ids and no mention ids. Both
+        // "fetch the page's related rows" queries would otherwise be asked to match an empty list.
+        String roomId = createRoomAsCoordinator();
+
+        mockMvc.perform(get("/api/community/rooms/{roomId}", roomId)
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.messages", hasSize(0)))
+            .andExpect(jsonPath("$.messageCount").value(0))
+            .andExpect(jsonPath("$.hasMoreMessages").value(false));
+    }
+
+    /** Messages posted straight through the repository so each can have its own author. */
+    private void seedMessages(String roomId, List<UUID> authors, int from, int to) {
+        for (int i = from; i < to; i++) {
+            CommunityRoomMessage message = new CommunityRoomMessage();
+            message.setRoomId(UUID.fromString(roomId));
+            message.setCommunityId(communityId);
+            message.setAuthorId(authors.get(i));
+            message.setBody("Field note " + i);
+            message.setCreatedAt(LocalDateTime.now().minusMinutes(to - i));
+            messageRepository.save(message);
+        }
+    }
+
+    private List<UUID> saveUsers(String prefix, int count) {
+        List<UUID> ids = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            ids.add(saveUser(prefix + i, "Author " + i));
+            addMembership(ids.get(i), CommunityRole.MEMBER);
+        }
+        return ids;
+    }
+
+    /** Queries executed by one room detail open, with nothing left in the persistence context to serve from cache. */
+    private long roomDetailQueries(String roomId) throws Exception {
+        entityManager.flush();
+        entityManager.clear();
+        Statistics statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+        statistics.clear();
+
+        mockMvc.perform(get("/api/community/rooms/{roomId}", roomId)
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk());
+
+        return statistics.getQueryExecutionCount();
+    }
+
+    @Test
+    void openingTheWorkspaceShouldNotQueryOncePerMember() throws Exception {
+        long withTwoMembers = workspaceQueries();
+
+        for (int i = 0; i < 28; i++) {
+            addMembership(saveUser("bulk_member_" + i, "Bulk Member " + i), CommunityRole.MEMBER);
+        }
+
+        long withThirtyMembers = workspaceQueries();
+
+        // Every membership triggered its own user lookup to build the mentionable-username list, so a
+        // community of 500 members cost 500 queries on the screen that lists its rooms - which is also
+        // the screen that tells a coordinator whether anyone is active.
+        org.junit.jupiter.api.Assertions.assertEquals(withTwoMembers, withThirtyMembers,
+            "opening the workspace ran " + withThirtyMembers + " queries with 30 members and "
+                + withTwoMembers + " with 2: reads scale with membership, so it is querying per member");
+    }
+
+    /** Queries executed by one workspace open, with nothing left in the persistence context to serve from cache. */
+    /**
+     * Entities loaded by one workspace open.
+     *
+     * <p>Entity loads and not query executions on purpose: a per-member {@code findById} is an entity
+     * load, and {@code getQueryExecutionCount} does not count those. Measured the other way, this test
+     * passed with the N+1 still in place - which is the failure mode worth avoiding, a green test that
+     * cannot fail.
+     */
+    private long workspaceQueries() throws Exception {
+        entityManager.flush();
+        entityManager.clear();
+        Statistics statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+        statistics.clear();
+
+        mockMvc.perform(get("/api/community/rooms/workspace")
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk());
 
         return statistics.getEntityLoadCount();
     }
