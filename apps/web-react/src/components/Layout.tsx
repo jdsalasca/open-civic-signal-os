@@ -24,6 +24,15 @@ type NavItem = {
   testId?: string;
 };
 
+/**
+ * Routes that are a destination rather than a navigation item, mapped to the label the topbar should
+ * announce for them. Kept as data so adding a detail screen is one line instead of another branch in
+ * the component.
+ */
+const SECTION_FOR_DETAIL_ROUTES: Record<string, string> = {
+  "/signal/": "nav.case_detail",
+};
+
 export function Layout({ children, authMode = false }: Props) {
   const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
   const mainContentId = "main-content";
@@ -149,13 +158,34 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
   ];
   const activeBreadcrumb = activeMembership?.breadcrumb ?? [];
+  const navItems = [...primaryNav, ...collaborationNav, ...advancedNav];
+  const matchedNavItem = navItems.find((item) => item.to === location.pathname);
+  /*
+   * Detail routes are not navigation destinations, so an exact match can never find them and the
+   * old fallback rendered nav.insights, whose value is literally "Home", on every case screen.
+   * Longest-prefix keeps a nested route under the section that contains it, and the explicit map
+   * covers routes with no nav ancestor at all.
+   */
+  const sectionFromPrefix = navItems
+    .filter((item) => item.to !== "/" && location.pathname.startsWith(`${item.to}/`))
+    .sort((a, b) => b.to.length - a.to.length)[0];
+  const detailRoute = Object.keys(SECTION_FOR_DETAIL_ROUTES).find((prefix) =>
+    location.pathname.startsWith(prefix),
+  );
   const activeSection =
-    [...primaryNav, ...collaborationNav, ...advancedNav].find((item) => item.to === location.pathname)?.label ??
-    t("nav.insights");
-  const topbarEyebrow =
-    activeMembership && location.pathname === "/"
+    matchedNavItem?.label ??
+    sectionFromPrefix?.label ??
+    (detailRoute ? t(SECTION_FOR_DETAIL_ROUTES[detailRoute]) : t("nav.insights"));
+  const isSectionRoute = Boolean(matchedNavItem);
+  /*
+   * "What needs attention today" is a dashboard framing. Showing it above a single case described
+   * nothing, so the framing line is rendered only where it actually frames something.
+   */
+  const topbarEyebrow = isSectionRoute
+    ? activeMembership && location.pathname === "/"
       ? t("nav.community_home_label")
-      : t("dashboard.focus_today");
+      : t("dashboard.focus_today")
+    : null;
 
   const visibleMoreCount = [...collaborationNav, ...advancedNav].filter((item) => item.visible).length;
   const mobileNav = primaryNav.filter((item) => item.visible);
@@ -305,8 +335,14 @@ export function Layout({ children, authMode = false }: Props) {
               data-testid="mobile-menu-toggle"
             />
             <div className="app-topbar-intro">
-              <span className="app-topbar-label">{topbarEyebrow}</span>
-              <span className="app-topbar-title">{activeSection}</span>
+              {topbarEyebrow && (
+                <span className="app-topbar-label" data-testid="app-topbar-label">
+                  {topbarEyebrow}
+                </span>
+              )}
+              <span className="app-topbar-title" data-testid="app-topbar-title">
+                {activeSection}
+              </span>
               {activeMembership && (
                 <span className="text-xs text-muted line-height-3">
                   {/*

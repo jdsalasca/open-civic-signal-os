@@ -168,12 +168,16 @@ export function SignalDetail() {
                   {t("signals.protocol_id")}: {signal.id.substring(0,8)}
                 </span>
               </div>
-              <CivicPageHeader
-                title={signal.title}
-                description={t("signals.context_header")}
-                className="mb-0"
-                eyebrow={t("signals.priority_rank")}
-              />
+<CivicPageHeader
+                  title={signal.title}
+                  className="mb-0"
+                  /* The eyebrow cannot be "Priority Rank": that is the title of the card below which
+                     shows the number. The category is what kind of case this is, and nothing else up
+                     here says it. No subtitle at all, because "Intelligence Context" is the title of
+                     the first card underneath and every fact one could carry is already in a labelled
+                     card or a badge. */
+                  eyebrow={t(`categories.${signal.category}`)}
+                />
             </div>
           </div>
           <CivicButton 

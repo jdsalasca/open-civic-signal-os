@@ -206,7 +206,8 @@ patron que mas caro sale:
 | 63 | El backlog publico habla lenguaje claro y su sello de frescura no depende del navegador | 14 Playwright; sin `IN_PROGRESS` ni `1/4/2026, 10:00:00 a. m.` ni `313.00`; igual bajo locale `de-DE` | Hecho este commit |
 | 64 | `SignalDetail` deja de mostrar el enum crudo y su bitacora no depende del locale | Primitivas compartidas `formatStamp` y `useSignalStatusLabel`; 6 Playwright; sin `IN_PROGRESS` ni `1.4.2026, 10:00:00` | Hecho este commit |
 | 65 | Ninguna vista renderiza un timestamp por el locale del navegador | 25 sitios en 16 archivos; guardia `no-locale-timestamps` con mutacion verificada; 26/10 fallos igual que en baseline | Hecho este commit |
-| 66 | El detalle de caso describe mal su propia pantalla | Eyebrow `PRIORITY RANK` y subtitulo `Intelligence Context` repiten una tarjeta de abajo; el `Layout` muestra `Home` en una ruta de detalle | Siguiente |
+| 66 | El detalle de caso describe mal su propia pantalla | Eyebrow `Priority Rank` y subtitulo `Intelligence Context` repetian tarjetas; el topbar decia `Home` porque `activeSection` comparaba rutas exactas | Hecho este commit |
+| 67 | El fallback del topbar sigue diciendo `Home` en rutas desconocidas | `nav.insights` vale "Home" y es tambien la etiqueta legitima del item Home; renombrarla toca todos los labels de nav | Siguiente |
 
 ## Proximas rondas candidatas
 

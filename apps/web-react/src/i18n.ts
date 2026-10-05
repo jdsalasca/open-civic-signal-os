@@ -100,6 +100,7 @@ const resources = {
       },
       "nav": {
         "insights": "Home",
+        "case_detail": "Case detail",
         "report": "Report",
         "my_contributions": "My Contributions",
         "my_contributions_short": "My Activity",
@@ -2140,6 +2141,7 @@ const resources = {
       },
       "nav": {
         "insights": "Inicio",
+        "case_detail": "Detalle del caso",
         "report": "Reportar",
         "my_contributions": "Mis Contribuciones",
         "my_contributions_short": "Mi Actividad",
