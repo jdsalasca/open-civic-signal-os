@@ -12,6 +12,27 @@ permissions:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    # The API image needs PostgreSQL to boot: Flyway runs on startup and ddl-auto is validate, so
+    # without a database the container exits with "Connection refused" and the health endpoint never
+    # answers. The smoke test was waiting for a server that could not exist, and had been failing on
+    # every run since it was written.
+    #
+    # Giving it a database also makes the check stronger than "the container starts": the image now
+    # proves it can migrate a fresh database and serve traffic.
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: signalos
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U admin -d signalos"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,15 +72,31 @@ jobs:
 
       - name: Smoke test API container
         run: |
-          docker run -d --name api-smoke -p 18080:8080 local/${{ github.event.repository.name }}-api:smoke
-          for i in {1..30}; do
+          # --add-host so the container can reach the runner's service container. GitHub runs service
+          # containers on the VM's network, so localhost inside the job is the database, but a
+          # `docker run` container needs the host gateway named explicitly.
+          docker run -d --name api-smoke -p 18080:8080 \
+            --add-host=host.docker.internal:host-gateway \
+            -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/signalos \
+            -e SPRING_DATASOURCE_USERNAME=admin \
+            -e SPRING_DATASOURCE_PASSWORD=password \
+            local/${{ github.event.repository.name }}-api:smoke
+          for i in {1..45}; do
             if curl -fsS http://localhost:18080/actuator/health > /dev/null; then
               echo "API smoke test passed"
               break
             fi
+            if [ "$(docker inspect -f '{{.State.Running}}' api-smoke)" != "true" ]; then
+              echo "The API container exited. Its logs:"
+              docker logs api-smoke
+              exit 1
+            fi
             sleep 2
           done
-          curl -fsS http://localhost:18080/actuator/health
+          # Container logs on failure. The previous version failed with nothing but "Failed to connect",
+          # which is not enough to tell a timeout apart from a crash apart from a wrong port - this is
+          # why diagnosing it meant reproducing it locally instead of reading the CI output.
+          curl -fsS http://localhost:18080/actuator/health || { docker logs api-smoke; exit 1; }
           docker rm -f api-smoke
 
       - name: Build Web image for smoke test
