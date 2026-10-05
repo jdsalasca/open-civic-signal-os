@@ -69,65 +69,68 @@ jobs:
           file: ./apps/api-java/Dockerfile
           load: true
           tags: local/${{ github.event.repository.name }}-api:smoke
-
-      - name: Smoke test API container
+# nginx resolves proxy_pass upstreams at startup, not per request, so an unresolvable
+      # "civic-api" does not degrade the proxy - it stops the container from booting at all:
+      # [emerg] host not found in upstream "civic-api". Reproduced against nginx:1.27-alpine locally.
+      # So both containers go on one network with that alias, which is also the deployment topology:
+      # nginx in front, API behind.
+      - name: Start both containers on a shared network
         run: |
-          # --add-host so the container can reach the runner's service container. GitHub runs service
-          # containers on the VM's network, so localhost inside the job is the database, but a
-          # `docker run` container needs the host gateway named explicitly.
-          # JWT_SECRET has no default on purpose, so the container refuses to boot without one. Generated
-          # here rather than hardcoded: this is a throwaway value whose only job is to prove the image
-          # starts, and a literal secret in a workflow file is a literal secret that eventually ships.
-          # Worth knowing why this was not caught locally: a developer's shell often already has one
-          # exported, so the image boots on a laptop and fails in a clean runner.
+          docker network create smoke-net
           JWT_SECRET=$(head -c 48 /dev/urandom | base64)
-          docker run -d --name api-smoke -p 18080:8080 \
-            --add-host=host.docker.internal:host-gateway \
+          echo "::add-mask::$JWT_SECRET"
+
+          docker run -d --name api-smoke --network smoke-net --network-alias civic-api \
+            -p 18080:8080 \
             -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/signalos \
             -e SPRING_DATASOURCE_USERNAME=admin \
             -e SPRING_DATASOURCE_PASSWORD=password \
             -e JWT_SECRET="$JWT_SECRET" \
             local/${{ github.event.repository.name }}-api:smoke
+
+          docker run -d --name web-smoke --network smoke-net -p 13000:80 \
+            local/${{ github.event.repository.name }}-web:smoke
+
+      - name: Smoke test API container
+        run: |
           for i in {1..45}; do
             if curl -fsS http://localhost:18080/actuator/health > /dev/null; then
-              echo "API smoke test passed"
+              echo "API container is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "The API container never became healthy. Its logs:"
+          docker logs api-smoke
+          exit 1
+
+      - name: Smoke test Web container
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://localhost:13000/ > /dev/null; then
+              echo "Web container is serving"
               break
             fi
-            if [ "$(docker inspect -f '{{.State.Running}}' api-smoke)" != "true" ]; then
-              echo "The API container exited. Its logs:"
-              docker logs api-smoke
+            if [ "$(docker inspect -f '{{.State.Running}}' web-smoke)" != "true" ]; then
+              echo "The web container exited. Its logs:"
+              docker logs web-smoke
               exit 1
             fi
             sleep 2
           done
-          # Container logs on failure. The previous version failed with nothing but "Failed to connect",
-          # which is not enough to tell a timeout apart from a crash apart from a wrong port - this is
-          # why diagnosing it meant reproducing it locally instead of reading the CI output.
-          curl -fsS http://localhost:18080/actuator/health || { docker logs api-smoke; exit 1; }
-          docker rm -f api-smoke
+          curl -fsS http://localhost:13000/ > /dev/null || { docker logs web-smoke; exit 1; }
 
-      - name: Build Web image for smoke test
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/web-react
-          file: ./apps/web-react/Dockerfile
-          load: true
-          build-args: |
-            VITE_API_BASE_URL=/api
-          tags: local/${{ github.event.repository.name }}-web:smoke
+          # The proxied API, through nginx, to the API, to the database. This is the path a resident
+          # actually takes, and it is the one a check limited to "/" cannot see.
+          curl -fsS http://localhost:13000/api/health | grep -q '"status":"UP"' \
+            || { echo "The proxied API did not answer through nginx:"; docker logs web-smoke; exit 1; }
+          echo "Web serves the app and proxies the API"
 
-      - name: Smoke test Web container
+      - name: Remove smoke test containers
+        if: always()
         run: |
-          docker run -d --name web-smoke -p 13000:80 local/${{ github.event.repository.name }}-web:smoke
-          for i in {1..20}; do
-            if curl -fsS http://localhost:13000/ > /dev/null; then
-              echo "Web smoke test passed"
-              break
-            fi
-            sleep 2
-          done
-          curl -fsS http://localhost:13000/ > /dev/null
-          docker rm -f web-smoke
+          docker rm -f web-smoke api-smoke 2>/dev/null || true
+          docker network rm smoke-net 2>/dev/null || true
 
       - name: Log in to GHCR
         if: github.event_name != 'pull_request'
