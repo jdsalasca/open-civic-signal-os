@@ -6,11 +6,11 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 444 en `apps/api-java`, todos en verde con `mvn clean test` (3 saltados: la paridad con
+- **Tests:** 446 en `apps/api-java`, todos en verde con `mvn clean test` (5 saltados: la paridad con
   PostgreSQL, que necesita Docker).
 - **Esquema:** las 49 migraciones corren en H2 (la suite) y en PostgreSQL 15, y `npm run
-  schema:pg:verify` compara ambos: 62 tablas y 582 columnas, con nombres **y tipos** identicos.
-  Rondas 57 a 59.
+  schema:pg:verify` compara ambos: 62 tablas y 582 columnas, con nombres, tipos, nulabilidad y
+  largo de cadena identicos. Rondas 57 a 60.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -132,6 +132,20 @@ patron que mas caro sale:
    cualquier resultado, grep del archivo para confirmar que el cambio esta, y rehacerlo con la
    herramienta de edicion. Regla general: **reemplazos multilinea hechos con script sobre archivos que
    ya existen, se verifican con grep o se rehacen con la herramienta de edicion.**
+   Y yo la violiameSAMO round: un `.Replace` con script en `docs/plan.md` se comio los backticks de
+   ``varchar(64)`` y ``act``, dejandolos como `archar(64)` y `ct`, en la misma ronda que escribe la
+   regla. Backticks en un string de PowerShell son caracteres de escape: el patron de la regla tiene
+   que cumplirse en laPráctica, no solo estar escrita.
+18. **Un valor "obvio" en la normalizacion es una suposicion hasta que se mide.** Escribi
+   `Integer.MAX_VALUE` como la marca de "sin limite" de H2 porque es lo que parece; el test fallo en las
+   63 columnas con `1000000000 vs unbounded`. H2 usa su propio marcador de mil millones. Y un
+   `(Integer) rows.getObject(5)` funcionaba con H2 y lanzaba con PostgreSQL, que devuelve `Long` para
+   `character_maximum_length` - un fallo que solo aparece en un motor y se lee como problema de esquema
+   cuando es un cast.
+19. **Una mutacion tautologica no demuestra nada, pero una real si.** Reemplazar el valor comparado por
+   `"bounded"` en ambos lados paso: es la tautologia de dejar de comparar. La mutacion que si demuestra
+   es `alter table users alter column username type varchar(64)` sobre PostgreSQL ya migrado, que es lo
+   que haria una migracion descuidada y lo que el test caza nombrando la columna.
 
 ## Rondas
 
@@ -158,7 +172,8 @@ patron que mas caro sale:
 | 57 | Las migraciones corren tambien contra PostgreSQL y se comparan con H2 | 49 migraciones en PG15; 62 tablas y 582 columnas identicas; falla con PG sin migrar | Hecho este commit |
 | 58 | schema:pg:verify corre en cada PR, y el script ya funciona en Linux | Workflow con paths acotados; red Docker en vez de host.docker.internal | Hecho este commit |
 | 59 | La paridad compara tambien los TIPOS de columna | 582 columnas; 162 difieren en 2 pares de deletreo; falla nombrando 99 columnas | Hecho este commit |
-| 60 | La paridad compara tambien nulabilidad y largo maximo | is_nullable y character_maximum_length entre motores | Siguiente |
+| 60 | La paridad compara nulabilidad y largo de columna | 441/141 nulos en ambos; 136 varchar con 24 largos iguales; detecta un varchar(64) real | Hecho este commit |
+| 61 | Cerrar el workflow: la paridad nunca se ha ejecutado en GitHub | Un PR de prueba que demuestre el pipeline | Siguiente |
 
 ## Proximas rondas candidatas
 
