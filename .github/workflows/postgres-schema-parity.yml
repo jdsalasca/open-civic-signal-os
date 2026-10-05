@@ -19,7 +19,10 @@ on:
       - ".github/workflows/postgres-schema-parity.yml"
       - "package.json"
   push:
-    branches: [main]
+    # develop, not just main. Every change in this repository lands on develop first, so a gate that only
+    # watched main would never have run on the branch the work actually happens on - it would have gone
+    # green by never firing, which is the worst way for a gate to be useless.
+    branches: [main, develop]
     paths:
       - "apps/api-java/src/main/resources/db/migration/**"
       - "apps/api-java/src/main/java/**"
@@ -31,6 +34,12 @@ on:
 
 permissions:
   contents: read
+
+# This job boots a database and runs 49 migrations. Three pushes in a row should not leave three of
+# them running against each other; only the newest result matters.
+concurrency:
+  group: postgres-schema-parity-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   schema-parity:
