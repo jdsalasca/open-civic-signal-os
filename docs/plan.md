@@ -11,6 +11,10 @@ es el plan de trabajo con criterios verificables.
 - **Esquema:** las 49 migraciones corren en H2 (la suite) y en PostgreSQL 15, y `npm run
   schema:pg:verify` compara ambos: 62 tablas y 582 columnas, con nombres, tipos, nulabilidad y
   largo de cadena identicos. Rondas 57 a 60.
+- **CI:** `postgres-schema-parity.yml` **ya se ejecuto en GitHub** (PR #122): verde en 2m23s, y el
+  `push` a develop tambien. Su primer run fallo ylvaron un bug real. Ronda 61.
+- **CI roto (preexistente):** `docker-images.yml` falla en develop desde al menos 09:29 de hoy; el
+  smoke test del contenedor API no levanta en el 18080. Ronda 62.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -146,6 +150,16 @@ patron que mas caro sale:
    `"bounded"` en ambos lados paso: es la tautologia de dejar de comparar. La mutacion que si demuestra
    es `alter table users alter column username type varchar(64)` sobre PostgreSQL ya migrado, que es lo
    que haria una migracion descuidada y lo que el test caza nombrando la columna.
+20. **Ejecutar el gate es una ronda de trabajo, no un detalle.** Tres rondas documentaron que el
+   workflow de paridad nunca se habia ejecutado en GitHub; abrir el PR #122 lo ejecuto y encontro en 20
+   segundos lo que tres rondas de inspeccion no vieron: `mvn -o` hardcodeado, que funciona con un
+   `~/.m2` tibio y hace imposible resolver hasta el parent POM en un runner limpio. **"Verificado en mi
+   maquina" nunca es "verificado en CI", y la diferencia no es academica: es un flag.**
+   El mismo run confirmo lo contrario: el refactor de red Docker de la ronda 58 funciono en un Linux
+   real, que era justo lo que no se podia comprobar desde Windows.
+21. **Un gate de CI que nunca se dispara es peor que no tenerlo**, porque aparenta cobertura. El workflow
+   escuchaba pushes a `main` cuando todo el trabajo de este repo pasa por `develop`: iba a quedar en
+   verde sin ejecutarse nunca. Por eso el PR #122 no fue vacio - llevo la correccion que lo hace real.
 
 ## Rondas
 
@@ -159,8 +173,6 @@ patron que mas caro sale:
 | 44 | Una sola definicion de "resuelto" para todos los rankings | 420 tests; 8 copias reducidas a 1; falla por mutacion | Hecho `e150e3b` |
 | 45 | Un mes cerrado se responde desde el historial, no desde el estado vivo | 423 tests; metrica y lista coinciden; falla por mutacion | Hecho `fb72451` |
 | 46 | El informe declara en su payload lo que no puede reproducir | 424 tests; dos afirmaciones falsas corregidas | Hecho este commit |
-| 47 | Revision visual del digest semanal + build output sin trackear | 12 Playwright, 8 capturas, 424 tests | Hecho `7a33213` |
-| 48 | Ledger de scores + orden determinista del timeline | 429 tests; falla por mutacion; 2 preflights seguidos | Hecho este commit |
 | 49 | Una asamblea cerrada reporta el tiempo que duro | 430 tests; falla por mutacion | Hecho este commit |
 | 50 | Una sala no descarga su historia entera al abrirse | 432 tests; falla por mutacion | Hecho `387095f` |
 | 51 | Un historial de sala truncado se ve truncado, y se pagina a pedido | 6 Playwright (2 mutaciones); 8 capturas; 432 tests | Hecho este commit |
@@ -173,7 +185,8 @@ patron que mas caro sale:
 | 58 | schema:pg:verify corre en cada PR, y el script ya funciona en Linux | Workflow con paths acotados; red Docker en vez de host.docker.internal | Hecho este commit |
 | 59 | La paridad compara tambien los TIPOS de columna | 582 columnas; 162 difieren en 2 pares de deletreo; falla nombrando 99 columnas | Hecho este commit |
 | 60 | La paridad compara nulabilidad y largo de columna | 441/141 nulos en ambos; 136 varchar con 24 largos iguales; detecta un varchar(64) real | Hecho este commit |
-| 61 | Cerrar el workflow: la paridad nunca se ha ejecutado en GitHub | Un PR de prueba que demuestre el pipeline | Siguiente |
+| 61 | El workflow de paridad ya corrio en GitHub | PR #122: 1o run fallo por `-o`, 2o verde en 2m23s, y `push` a develop en verde | Hecho este commit |
+| 62 | `docker-images.yml` falla en develop: el smoke test del contenedor API no levanta en el 18080 | 5 corridas rojas antes de esta ronda | Siguiente |
 
 ## Proximas rondas candidatas
 
