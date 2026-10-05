@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { mockSignalDetail, seedSession, signalId } from './helpers/signalDetailFixture';
+import { mockSignalDetail, signalId } from './helpers/signalDetailFixture';
 
 /**
  * The signal detail screen is where a resident follows one case over time, so it is the screen
@@ -11,7 +11,6 @@ import { mockSignalDetail, seedSession, signalId } from './helpers/signalDetailF
  */
 test.describe('Signal detail speaks plain language', () => {
   test.beforeEach(async ({ page }) => {
-    await seedSession(page);
     await mockSignalDetail(page);
   });
 
@@ -41,7 +40,6 @@ test.describe('Signal detail timestamps do not depend on the reader browser loca
   test.use({ locale: 'de-DE' });
 
   test('renders the audit trail the same way under a non-English locale', async ({ page }) => {
-    await seedSession(page);
     await mockSignalDetail(page);
 
     await page.goto(`/signal/${signalId}`);

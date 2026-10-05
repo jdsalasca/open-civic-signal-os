@@ -1,27 +1,6 @@
-import { expect, test, type Page } from '@playwright/test';
-
-/**
- * Seeds a logged-in session so the spec runs without a live backend. Same pattern the other
- * dashboard specs use, because asserting on outgoing requests does not need a real API.
- */
-async function seedSession(page: Page) {
-  await page.addInitScript(() => {
-    window.localStorage.setItem(
-      'auth-storage',
-      JSON.stringify({
-        state: {
-          accessToken: 'test-token',
-          userName: 'liaison',
-          activeRole: 'PUBLIC_SERVANT',
-          rawRoles: ['PUBLIC_SERVANT', 'CITIZEN'],
-          isLoggedIn: true,
-          isHydrated: true,
-        },
-        version: 0,
-      }),
-    );
-  });
-}
+import { expect, test } from '@playwright/test';
+import { seedAuthenticatedApp } from './helpers/session';
+import { mockDashboardRoutes } from './helpers/dashboard';
 
 /**
  * A dashboard filter that only changes the highlight is a filter that lies.
@@ -31,16 +10,20 @@ async function seedSession(page: Page) {
  * than "how many critical signals exist". These tests assert on the requests the page actually
  * makes, because that is the only thing that distinguishes a real filter from a decoration.
  */
+const json = (body: unknown) => ({
+  status: 200,
+  contentType: 'application/json',
+  body: JSON.stringify(body),
+});
+
 test.describe('Dashboard filters change the query', () => {
   test('CRITICAL filter must reach the API as minScore, not just repaint rows', async ({ page }) => {
     const prioritizedQueries: string[] = [];
 
     await page.route('**/api/signals/prioritized*', async (route) => {
       prioritizedQueries.push(new URL(route.request().url()).search);
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
+      await route.fulfill(
+        json({
           content: [
             {
               id: 'sig-critical-1',
@@ -72,31 +55,22 @@ test.describe('Dashboard filters change the query', () => {
           first: true,
           last: false,
         }),
-      });
+      );
     });
 
     await page.route('**/api/signals/meta', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          totalSignals: 210,
-          unresolvedSignals: 140,
-          lastUpdatedAt: '2026-04-01T10:00:00',
-          criticalScoreThreshold: 220,
-        }),
-      });
+      await route.fulfill(
+        json({ totalSignals: 210, unresolvedSignals: 140, lastUpdatedAt: '2026-04-01T10:00:00', criticalScoreThreshold: 220 }),
+      );
     });
 
-    await page.route('**/api/notifications/recent', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
-    });
+    await page.route('**/api/notifications/recent', async (route) => route.fulfill(json([])));
 
-        await page.route('**/api/signals/duplicates', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
-    });
+    // The dashboard fetches this whenever the active role is staff.
+    await page.route('**/api/signals/duplicates', async (route) => route.fulfill(json([])));
 
-    await seedSession(page);
+    await seedAuthenticatedApp(page);
+    await mockDashboardRoutes(page);
     await page.goto('/');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
 
@@ -106,13 +80,9 @@ test.describe('Dashboard filters change the query', () => {
       `first request was "${prioritizedQueries[0]}" of ${JSON.stringify(prioritizedQueries)}`,
     ).not.toContain('minScore');
 
-    // The chip only renders once the initial fetch settles, and React keeps re-rendering the row for a
-// moment after it appears. Clicking the instant toBeVisible() passes lands on a node that is about
-// to be swapped, so wait for the row to hold still: the chip must report the same position twice
-// running. A settled position is the condition; a fixed sleep would only be a tuned guess at it.
-// The chip only renders once the initial fetch settles, and the dashboard keeps re-rendering for a
-// short while after. Let it settle, then click; Playwright auto-waits for the click to be actionable.
-await page.waitForTimeout(2500);
+    // Let the chip settle before clicking: the row re-renders for a short while after the first
+    // fetch lands, and Playwright auto-waits for the click to become actionable anyway.
+    await page.waitForTimeout(2500);
     await page.getByTestId('dashboard-filter-critical').click();
 
     // Wait for a request that actually carries the threshold, rather than sleeping and hoping.
@@ -135,39 +105,24 @@ await page.waitForTimeout(2500);
 
     await page.route('**/api/signals/prioritized*', async (route) => {
       queries.push(new URL(route.request().url()).search);
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          content: [],
-          totalElements: 0,
-          totalPages: 0,
-          size: 20,
-          number: 0,
-          first: true,
-          last: true,
-        }),
-      });
+      await route.fulfill(
+        json({ content: [], totalElements: 0, totalPages: 0, size: 20, number: 0, first: true, last: true }),
+      );
     });
 
     await page.route('**/api/signals/meta', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          totalSignals: 210,
-          unresolvedSignals: 140,
-          lastUpdatedAt: '2026-04-01T10:00:00',
-          criticalScoreThreshold: 220,
-        }),
-      });
+      await route.fulfill(
+        json({ totalSignals: 210, unresolvedSignals: 140, lastUpdatedAt: '2026-04-01T10:00:00', criticalScoreThreshold: 220 }),
+      );
     });
 
-    await page.route('**/api/notifications/recent', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
-    });
+    await page.route('**/api/notifications/recent', async (route) => route.fulfill(json([])));
 
-        await seedSession(page);
+    // The dashboard fetches this whenever the active role is staff, same as in the first test.
+    await page.route('**/api/signals/duplicates', async (route) => route.fulfill(json([])));
+
+    await seedAuthenticatedApp(page);
+    await mockDashboardRoutes(page);
     await page.goto('/');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
 

@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { seedAuthenticatedApp } from './session';
 
 /**
  * Shared fixture for the signal detail screen.
@@ -18,37 +19,10 @@ export const signalId = '22222222-2222-2222-2222-222222222222';
 // The wire sends a Java LocalDateTime, i.e. no offset and no seconds.
 export const createdAt = '2026-04-01T10:00:00';
 
-export async function seedSession(page: Page, role = 'PUBLIC_SERVANT') {
-  await page.addInitScript((activeRole) => {
-    window.localStorage.setItem(
-      'auth-storage',
-      JSON.stringify({
-        state: {
-          accessToken: 'test-token',
-          userName: 'liaison',
-          activeRole,
-          rawRoles: [activeRole],
-          isLoggedIn: true,
-          isHydrated: true,
-        },
-        version: 0,
-      }),
-    );
-  }, role);
-}
-
 export async function mockSignalDetail(page: Page, status = 'IN_PROGRESS') {
-  await page.route('**/api/auth/me', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ username: 'liaison', role: 'PUBLIC_SERVANT', interfaceMode: 'ADVANCED' }),
-      }));
+  await seedAuthenticatedApp(page);
 
-    await page.route('**/api/communities/my', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }));
-
-    await page.route(`**/api/signals/${signalId}/comments`, (route) =>
+  await page.route(`**/api/signals/${signalId}/comments`, (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }));
 
     await page.route(`**/api/signals/${signalId}/history`, (route) =>

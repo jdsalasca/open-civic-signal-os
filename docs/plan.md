@@ -207,7 +207,8 @@ patron que mas caro sale:
 | 64 | `SignalDetail` deja de mostrar el enum crudo y su bitacora no depende del locale | Primitivas compartidas `formatStamp` y `useSignalStatusLabel`; 6 Playwright; sin `IN_PROGRESS` ni `1.4.2026, 10:00:00` | Hecho este commit |
 | 65 | Ninguna vista renderiza un timestamp por el locale del navegador | 25 sitios en 16 archivos; guardia `no-locale-timestamps` con mutacion verificada; 26/10 fallos igual que en baseline | Hecho este commit |
 | 66 | El detalle de caso describe mal su propia pantalla | Eyebrow `Priority Rank` y subtitulo `Intelligence Context` repetian tarjetas; el topbar decia `Home` porque `activeSection` comparaba rutas exactas | Hecho este commit |
-| 67 | El fallback del topbar sigue diciendo `Home` en rutas desconocidas | `nav.insights` vale "Home" y es tambien la etiqueta legitima del item Home; renombrarla toca todos los labels de nav | Siguiente |
+| 67 | Tres specs muertas del dashboard vuelven a correr | `signals/aging` y `help-center` sin mockear causaban `logout()`; 3 tests en verde y 18 con las specs del detalle | Hecho este commit |
+| 68 | Convertir las specs que si usan login real y el resto de `community-*` | `dashboard-guided-home`, `weekly-digest`, `merge-review`, `field-data-mode` y `community-rooms-history` ya tienen su propia copia de `seedSession`; el helper esta listo | Siguiente |
 
 ## Proximas rondas candidatas
 
@@ -231,12 +232,19 @@ patron que mas caro sale:
 ## Bloqueos
 
 - **Sin bloqueos de comandos.** Suite y preflight en verde.
-- **26 tests Playwright siguen en rojo y no por codigo (ronda 65).** Las specs de `community-*`,
-  `dashboard-*` y `weekly-digest` hacen login real como `admin` / `admin12345` contra el backend, y
-  esta base de datos no tiene esa cuenta. Medido dos veces con y sin los cambios de la ronda 65:
-  `26 failed / 10 passed` en ambos casos, identico. `weekly-digest` es la prueba de que no son
-  nuestros: prueba una vista que esa ronda no toco. Corregirlo exige sembrar la cuenta en el
-  arranque local, que es trabajo propio.
+- **Correccion de la ronda 67: los tests Playwright no necesitan backend sembrado.** Las rondas 65 y
+  66 registraron que 26 specs fallaban porque "hacen login real contra el backend y esta base de
+  datos no tiene esa cuenta". **Eso era incorrecto para un subconjunto.** Ningun workflow corre esta
+  suite (`frontend-ux-evidence-gate.yml` solo valida el cuerpo del PR), asi que nadie lo noto. La causa
+  real es que a esos specs les faltan dos rutas que el dashboard dispara y nadie recuerda mockear,
+  `signals/aging` y `help-center`: la peticion llega al backend real, responde 401, el refresh responde
+  403, y `axios.ts` llama `logout()`, que borra la sesion sembrada. El sintoma -aterrizar en `/login`-
+  apunta a la vista y no al hueco. Un subconjunto mas pequeño si usa login real y si necesita backend.
+- **Un fixture invalido puede entrar en bucle de crash.** Si `signals/aging` responde sin
+  `atRiskSignals`, el dashboard revienta en `aging.atRiskSignals.length`, React desmonta el arbol, el
+  boundary reintenta y vuelve a reventar: ~12 peticiones por segundo en vez de una pantalla en blanco.
+  Los dos arrays requeridos estan ahora en el helper compartido. Sigue siendo cierto que un crash de
+  render deberia verse como error y no como consumo de red.
 - **Federacion sin autenticacion mutua ni respuesta sobre residencia de datos.** Documentado en
   `docs/FEDERATION.md` y en el ADR; requiere decision de gobernanza antes de un despliegue real
   transfronterizo.

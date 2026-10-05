@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { mockSignalDetail, seedSession, signalId } from './helpers/signalDetailFixture';
+import { mockSignalDetail, signalId } from './helpers/signalDetailFixture';
+import { seedAuthenticatedApp } from './helpers/session';
+import { mockDashboardRoutes } from './helpers/dashboard';
 
 /**
  * A screen has to say what it is.
@@ -18,7 +20,6 @@ import { mockSignalDetail, seedSession, signalId } from './helpers/signalDetailF
  */
 test.describe('The case screen describes itself', () => {
   test.beforeEach(async ({ page }) => {
-    await seedSession(page);
     await mockSignalDetail(page);
   });
 
@@ -63,9 +64,10 @@ test.describe('The case screen describes itself', () => {
 test.describe('The topbar still frames the pages it is meant to frame', () => {
   // The fix must not flatten every screen. This is the dashboard, the one route whose framing line
   // the change could plausibly have swallowed.
-  test('the dashboard keeps its "what needs attention today" framing', async ({ page }) => {
-    await seedSession(page, 'CITIZEN');
-    await mockSignalDetail(page);
+test('the dashboard keeps its "what needs attention today" framing', async ({ page }) => {
+    // The signal-detail fixture is not the right one for a dashboard route: it seeds a staff
+    // session and answers signal endpoints. A citizen dashboard is what this asserts.
+    await seedAuthenticatedApp(page, 'CITIZEN');
     // Every route the dashboard fires. One unmocked request is not a harmless gap: it 401s against
     // the live backend and axios logs the session out before the topbar ever renders.
     for (const path of ['notifications/recent', 'notifications/relay/top-10', 'signals/duplicates']) {
@@ -84,6 +86,9 @@ test.describe('The topbar still frames the pages it is meant to frame', () => {
         contentType: 'application/json',
         body: JSON.stringify({ content: [], totalPages: 0, totalElements: 0, number: 0, size: 20, first: true, last: true }),
       }));
+    // aging and help-center are the two nobody remembers; a stale aging payload crashes the
+    // dashboard in a remount loop, so this is load-bearing rather than tidy.
+    await mockDashboardRoutes(page);
 
     await page.goto('/');
     await expect(page.getByTestId('app-topbar-label')).toBeVisible({ timeout: 30000 });
