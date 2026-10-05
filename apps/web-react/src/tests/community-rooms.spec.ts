@@ -103,6 +103,7 @@ test.describe("Community coordination rooms", () => {
       muted: false,
       mutedAt: null,
       messageCount: 0,
+      hasMoreMessages: false,
       unreadMentionCount: 0,
       messages: [],
     };

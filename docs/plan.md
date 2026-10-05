@@ -38,6 +38,14 @@ patron que mas caro sale:
    piezas del mismo concepto, una correcta y otra no. El test que mas rinde no comprueba el valor
    esperado sino la **coherencia interna** - que la metrica y la lista del mismo informe no se
    contradigan - porque asi no puede pasar por acertar una de las dos.
+6. **Un teto puesto por el servidor y un array truncado es una mentira si nadie la declara.** La ronda
+   50 acoto la respuesta de una sala y devolvio `hasMoreMessages` + el total real. La ronda 51 encontro
+   que la pantalla renderizaba esa pagina como si fuera la sala: 50 filas al lado de 1.204 mensajes,
+   sin ninguna senal de que faltan 1.154. El campo que hace detectable la truncacion existe para ser
+   usado por el consumidor; si el consumidor no lo usa, la propiedad es decorativa. Y truncar en
+   silencio no es "optimizar": es decidir que a la persona que coordina le alcanza con los 50 mas
+   recientes. El hermano mayor: acotar la carga sin acotar la **consulta** tampoco esta hecho
+   (ronda 52).
 
 ## Rondas
 
@@ -54,8 +62,9 @@ patron que mas caro sale:
 | 47 | Revision visual del digest semanal + build output sin trackear | 12 Playwright, 8 capturas, 424 tests | Hecho `7a33213` |
 | 48 | Ledger de scores + orden determinista del timeline | 429 tests; falla por mutacion; 2 preflights seguidos | Hecho este commit |
 | 49 | Una asamblea cerrada reporta el tiempo que duro | 430 tests; falla por mutacion | Hecho este commit |
-| 50 | Una sala no descarga su historia entera al abrirse | 432 tests; falla por mutacion | Hecho este commit |
-| 51 | Auditoria final del patron + 2 issues de proceso abiertos (#120, #121) | Uno por par; revisar si el gate cubre lo nuevo | Siguiente |
+| 50 | Una sala no descarga su historia entera al abrirse | 432 tests; falla por mutacion | Hecho `387095f` |
+| 51 | Un historial de sala truncado se ve truncado, y se pagina a pedido | 6 Playwright (2 mutaciones); 8 capturas; 432 tests | Hecho este commit |
+| 52 | El query de mensajes de sala sigue trayendo la historia entera | Test de integracion que falle al leer el limite en el repositorio | Siguiente |
 
 ## Proximas rondas candidatas
 

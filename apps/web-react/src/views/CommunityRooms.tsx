@@ -27,6 +27,13 @@ import type {
 type ApiError = Error & { friendlyMessage?: string };
 
 const MESSAGE_MAX = 2000;
+/**
+ * Matches the API's own default so the first request asks for exactly what it would have sent
+ * anyway, and older messages are loaded in steps rather than all at once.
+ */
+const ROOM_PAGE_SIZE = 50;
+const ROOM_PAGE_STEP = 50;
+const ROOM_PAGE_MAX = 200;
 
 type MessageForm = { body: string };
 type RoomForm = { name: string; topic: string };
@@ -120,6 +127,8 @@ export function CommunityRooms() {
     }
   }, [activeCommunityId, t]);
 
+  const [messageLimit, setMessageLimit] = useState(ROOM_PAGE_SIZE);
+
   const loadRoom = useCallback(async () => {
     if (!activeCommunityId || !activeRoomId) {
       setRoom(null);
@@ -127,8 +136,10 @@ export function CommunityRooms() {
     }
     setLoadingRoom(true);
     try {
+      // The limit is raised when a reader asks for older messages, so the screen is bounded on a
+      // phone without being a dead end for anyone who wants the rest of the conversation.
       const response = await apiClient.get<CommunityRoomDetail>(
-        `community/rooms/${activeRoomId}?communityId=${activeCommunityId}`
+        `community/rooms/${activeRoomId}?communityId=${activeCommunityId}&limit=${messageLimit}`,
       );
       setRoom(response.data);
     } catch (err) {
@@ -138,7 +149,7 @@ export function CommunityRooms() {
     } finally {
       setLoadingRoom(false);
     }
-  }, [activeCommunityId, activeRoomId, t]);
+  }, [activeCommunityId, activeRoomId, messageLimit, t]);
 
   useEffect(() => {
     loadPolicies();
@@ -493,26 +504,57 @@ export function CommunityRooms() {
                       description={t("community_rooms.room_messages_empty_desc")}
                     />
                   ) : (
-                    <div className="flex flex-column gap-3" data-testid="community-rooms-message-list">
-                      {room.messages.map((message) => (
+                    <>
+                      {/*
+                        The API bounds a room read and says so. Rendering the page as though it were
+                        the room would leave a coordinator deciding whether a group is still active
+                        with the wrong answer: "nothing since March" and "we fetched the last 50" are
+                        different facts.
+                      */}
+                      {room.hasMoreMessages && (
                         <div
-                          key={message.id}
-                          className={`border-round-xl border-1 p-3 ${
-                            message.mentionsCurrentUser ? "border-brand-primary" : "border-surface-soft"
-                          }`}
-                          data-testid={`community-rooms-message-${message.id}`}
+                          className="flex align-items-center justify-content-between gap-3 flex-wrap text-sm text-secondary"
+                          data-testid="community-rooms-history-note"
                         >
-                          <div className="flex align-items-center gap-2 flex-wrap">
-                            <span className="font-black text-main">{message.authorName}</span>
-                            <span className="text-xs text-muted">{formatDateTime(message.createdAt)}</span>
-                            {message.mentionsCurrentUser && (
-                              <CivicBadge label={t("community_rooms.unread_mentions")} severity="new" />
-                            )}
-                          </div>
-                          <p className="text-sm text-secondary mt-2 mb-0 line-height-3">{message.body}</p>
+                          <span>
+                            {t("community_rooms.history_truncated", {
+                              shown: room.messages.length,
+                              total: room.messageCount,
+                            })}
+                          </span>
+                          {messageLimit < ROOM_PAGE_MAX && (
+                            <CivicButton
+                              type="button"
+                              variant="ghost"
+                              onClick={() => setMessageLimit((limit) => Math.min(limit + ROOM_PAGE_STEP, ROOM_PAGE_MAX))}
+                              data-testid="community-rooms-load-older"
+                            >
+                              {t("community_rooms.load_older")}
+                            </CivicButton>
+                          )}
                         </div>
-                      ))}
-                    </div>
+                      )}
+                      <div className="flex flex-column gap-3" data-testid="community-rooms-message-list">
+                        {room.messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`border-round-xl border-1 p-3 ${
+                              message.mentionsCurrentUser ? "border-brand-primary" : "border-surface-soft"
+                            }`}
+                            data-testid={`community-rooms-message-${message.id}`}
+                          >
+                            <div className="flex align-items-center gap-2 flex-wrap">
+                              <span className="font-black text-main">{message.authorName}</span>
+                              <span className="text-xs text-muted">{formatDateTime(message.createdAt)}</span>
+                              {message.mentionsCurrentUser && (
+                                <CivicBadge label={t("community_rooms.unread_mentions")} severity="new" />
+                              )}
+                            </div>
+                            <p className="text-sm text-secondary mt-2 mb-0 line-height-3">{message.body}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   )}
 
                   {canPost && (

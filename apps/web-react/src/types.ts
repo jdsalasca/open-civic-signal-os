@@ -1069,7 +1069,10 @@ export type CommunityRoomDetail = {
   archived: boolean;
   muted: boolean;
   mutedAt?: string | null;
+  /** Total messages in the room, not the size of the returned page. */
   messageCount: number;
+  /** True when `messages` is a page of a longer history rather than the whole room. */
+  hasMoreMessages: boolean;
   unreadMentionCount: number;
   messages: CommunityRoomMessage[];
 };
