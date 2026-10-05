@@ -69,7 +69,17 @@ jobs:
           file: ./apps/api-java/Dockerfile
           load: true
           tags: local/${{ github.event.repository.name }}-api:smoke
-# nginx resolves proxy_pass upstreams at startup, not per request, so an unresolvable
+      - name: Build Web image for smoke test
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/web-react
+          file: ./apps/web-react/Dockerfile
+          load: true
+          build-args: |
+            VITE_API_BASE_URL=/api
+          tags: local/${{ github.event.repository.name }}-web:smoke
+
+      # nginx resolves proxy_pass upstreams at startup, not per request, so an unresolvable
       # "civic-api" does not degrade the proxy - it stops the container from booting at all:
       # [emerg] host not found in upstream "civic-api". Reproduced against nginx:1.27-alpine locally.
       # So both containers go on one network with that alias, which is also the deployment topology:
