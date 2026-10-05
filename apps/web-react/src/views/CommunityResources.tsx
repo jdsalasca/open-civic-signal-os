@@ -9,6 +9,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Checkbox, type CheckboxChangeEvent } from "primereact/checkbox";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -138,7 +139,7 @@ export function CommunityResources() {
     loadBoard();
   }, [loadBoard]);
 
-  const formatDateTime = (value?: string | null) => (value ? new Date(value).toLocaleString() : "-");
+  const formatDateTime = (value?: string | null) => formatStamp(value) ?? "-";
 
   const selectedResource = board?.resources.find((item) => item.id === selectedResourceId) ?? null;
 
@@ -690,7 +691,7 @@ function BookingRow({
       </div>
       <p className="text-sm text-secondary mt-2 mb-0">{booking.purpose}</p>
       <small className="text-muted">
-        {new Date(booking.startsAt).toLocaleString()} → {new Date(booking.endsAt).toLocaleString()}
+        {formatStamp(booking.startsAt) ?? "-"} → {formatStamp(booking.endsAt) ?? "-"}
       </small>
       {booking.decisionNote && (
         <p className="text-sm text-secondary mt-2 mb-0">

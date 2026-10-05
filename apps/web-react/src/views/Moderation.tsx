@@ -6,6 +6,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { classNames } from "primereact/utils";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatDate, formatStamp } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -283,7 +284,7 @@ export function Moderation() {
                         </div>
                         <div className="u-meta-row mt-3">
                           <span>{report.reporterUsername}</span>
-                          <span>{new Date(report.createdAt).toLocaleString()}</span>
+                          <span>{formatStamp(report.createdAt) ?? "-"}</span>
                         </div>
                       </button>
                     ))}
@@ -330,8 +331,8 @@ export function Moderation() {
                         </p>
                         <div className="u-meta-row mt-3">
                           <span>{selectedReport.sanction.issuedByUsername}</span>
-                          <span>{new Date(selectedReport.sanction.startsAt).toLocaleString()}</span>
-                          <span>{selectedReport.sanction.endsAt ? new Date(selectedReport.sanction.endsAt).toLocaleDateString() : t("moderation.no_end_date")}</span>
+                          <span>{formatStamp(selectedReport.sanction.startsAt) ?? "-"}</span>
+                          <span>{selectedReport.sanction.endsAt ? (formatDate(selectedReport.sanction.endsAt) ?? t("moderation.no_end_date")) : t("moderation.no_end_date")}</span>
                         </div>
                       </div>
                     )}
@@ -422,7 +423,7 @@ export function Moderation() {
                           <div className="u-surface-note" key={`${selectedReport.id}-${event.actionType}-${index}`}>
                             <div className="flex justify-content-between align-items-start gap-3 flex-wrap mb-2">
                               <div className="u-eyebrow">{t(`moderation.history.${event.actionType}`)}</div>
-                              <span className="text-xs text-muted">{new Date(event.happenedAt).toLocaleString()}</span>
+                              <span className="text-xs text-muted">{formatStamp(event.happenedAt) ?? "-"}</span>
                             </div>
                             <p className="text-secondary m-0 line-height-3">{event.note}</p>
                             <div className="u-meta-row mt-3">

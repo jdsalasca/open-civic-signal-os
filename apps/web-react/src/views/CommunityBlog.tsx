@@ -10,6 +10,7 @@ import { CommunityBlogPost } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
 import apiClient from "../api/axios";
+import { formatDate, formatTime } from "../utils/formatStamp";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -257,13 +258,13 @@ export function CommunityBlog() {
 
           <div className="u-card-meta-row text-xs text-muted border-top-1 border-surface-soft pt-3 mt-auto">
             <i className="pi pi-calendar" />
-            <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+            <span>{formatDate(post.publishedAt) ?? "-"}</span>
             <span>•</span>
-            <span>{new Date(post.publishedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            <span>{formatTime(post.publishedAt) ?? "-"}</span>
             {archived && post.archivedAt && (
               <>
                 <span>•</span>
-                <span>{t("community_blog.archived_on", { date: new Date(post.archivedAt).toLocaleDateString() })}</span>
+                <span>{t("community_blog.archived_on", { date: formatDate(post.archivedAt) ?? "-" })}</span>
               </>
             )}
           </div>

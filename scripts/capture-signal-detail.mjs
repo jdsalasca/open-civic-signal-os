@@ -128,10 +128,24 @@ for (const shot of shots) {
   });
 
   const json = (body) => ({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+  // A seeded comment so the engagement panel shows its own timestamp. The comment list is the
+  // densest place a resident reads someone else's timestamp, so it is worth looking at.
+  const comments = [
+    {
+      id: '66666666-6666-6666-6666-666666666666',
+      parentId: signalId,
+      parentType: 'SIGNAL',
+      authorId: '77777777-7777-7777-7777-777777777777',
+      authorUsername: 'vecino',
+      authorRole: 'CITIZEN',
+      content: 'I walk past this bridge every morning to take my kids to school. Please treat it as urgent.',
+      createdAt,
+    },
+  ];
   await page.route('**/api/auth/me', (route) =>
     route.fulfill(json({ username: 'liaison', role: 'PUBLIC_SERVANT', interfaceMode: 'ADVANCED' })));
   await page.route('**/api/communities/my', (route) => route.fulfill(json([])));
-  await page.route(`**/api/signals/${signalId}/comments`, (route) => route.fulfill(json([])));
+  await page.route(`**/api/signals/${signalId}/comments`, (route) => route.fulfill(json(comments)));
   await page.route(`**/api/signals/${signalId}/history`, (route) => route.fulfill(json(history)));
   await page.route(`**/api/signals/${signalId}`, (route) => route.fulfill(json(detail(shot.status))));
   await page.route('**/api/signals/formula', (route) => route.fulfill(json(formula)));
@@ -150,9 +164,15 @@ for (const shot of shots) {
   await page.screenshot({ path: `${outDir}/${shot.name}.png`, fullPage: true });
 
   // fullPage does not reach below the fold here: the app scrolls an inner container, not the page.
-  // Scroll the timeline into view rather than to the very bottom: this screen is tall enough that
-  // the bottom frame skips the audit trail, which is the part these captures exist to review.
+  // Two framed views rather than a single "bottom" frame: this screen is tall enough that scrolling
+  // to scrollHeight frames the footer and skips the audit trail, which is the part under review.
   await page.locator('[data-testid="signal-detail-timeline"]').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${outDir}/${shot.name}-timeline.png` });
+
+  // Anchored on the seeded comment rather than a selector: CivicEngagement carries no testid, and
+  // the fixture text is the most stable handle available without adding one for tooling's sake.
+  await page.getByText('Please treat it as urgent').scrollIntoViewIfNeeded();
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${outDir}/${shot.name}-lower.png` });
 

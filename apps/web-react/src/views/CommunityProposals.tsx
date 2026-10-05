@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { classNames } from "primereact/utils";
 import apiClient from "../api/axios";
+import { formatDate as formatDay, formatStamp } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -384,8 +385,8 @@ export function CommunityProposals() {
     ];
   }, [deliberation, getDeliberationTypeLabel]);
 
-  const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleDateString() : "");
-  const formatDateTime = (value?: string | null) => (value ? new Date(value).toLocaleString() : t("community_proposals.vote_not_scheduled"));
+  const formatDate = (value?: string | null) => formatDay(value) ?? "";
+  const formatDateTime = (value?: string | null) => formatStamp(value) ?? t("community_proposals.vote_not_scheduled");
 
   const submitVote = async (payload: { choice?: CommunityProposalVoteChoice; scoreValue?: number }) => {
     if (!selectedProposal) {
@@ -870,7 +871,7 @@ export function CommunityProposals() {
                               <p className="text-sm text-secondary m-0 line-height-3">{proposal.problemStatement}</p>
                               <div className="u-meta-row">
                                 <span>{proposal.authorUsername}</span>
-                                <span>{new Date(proposal.updatedAt).toLocaleDateString()}</span>
+                                <span>{formatDate(proposal.updatedAt) ?? "-"}</span>
                               </div>
                             </div>
                           </button>

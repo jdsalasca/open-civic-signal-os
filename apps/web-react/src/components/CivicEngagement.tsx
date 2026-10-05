@@ -4,6 +4,7 @@ import { Avatar } from 'primereact/avatar';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { useTranslation } from "react-i18next";
 import { CivicComment } from '../types';
+import { formatStamp } from "../utils/formatStamp";
 import apiClient from '../api/axios';
 import { CivicButton } from './ui/CivicButton';
 import { CivicCard } from './ui/CivicCard';
@@ -176,7 +177,7 @@ export function CivicEngagement({
                       <span className="text-sm font-black text-main">{comment.authorUsername}</span>
                       <span className="text-xs font-bold text-muted uppercase tracking-widest">{toRoleListLabel(comment.authorRole, t)}</span>
                     </div>
-                    <span className="text-xs text-muted ml-auto">{new Date(comment.createdAt).toLocaleString()}</span>
+                    <span className="text-xs text-muted ml-auto">{formatStamp(comment.createdAt) ?? "-"}</span>
                   </div>
                   <p className="m-0 text-secondary text-base line-height-3 font-medium">{comment.content}</p>
                   <div className="mt-3 flex justify-content-end">

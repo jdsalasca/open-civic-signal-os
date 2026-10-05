@@ -1,4 +1,5 @@
 import { Notification } from "../types";
+import { formatTime } from "../utils/formatStamp";
 import { CivicCard } from "./ui/CivicCard";
 import { CivicBadge } from "./ui/CivicBadge";
 
@@ -63,7 +64,7 @@ export function NotificationSidebar({ notifications }: Props) {
             <div key={n.id} className="u-surface-note hover:bg-surface-soft transition-colors">
               <div className="u-card-split-header mb-3">
                 <CivicBadge label={n.channel} severity="progress" />
-                <span className="text-xs text-muted u-meta-value">{new Date(n.sentAt).toLocaleTimeString()}</span>
+                <span className="text-xs text-muted u-meta-value">{formatTime(n.sentAt) ?? "-"}</span>
               </div>
               {parseAlertMessage(n.message)}
               <div className="mt-3 u-eyebrow flex align-items-center gap-2">

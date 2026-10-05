@@ -11,6 +11,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicSkeleton } from "../components/ui/CivicSkeleton";
@@ -791,7 +792,7 @@ export function Dashboard() {
                       )}
 
                       <small className="text-muted mt-3 block">
-                        {t("dashboard.aging_generated_at")}: {new Date(aging.generatedAt).toLocaleString()}
+                        {t("dashboard.aging_generated_at")}: {formatStamp(aging.generatedAt) ?? "-"}
                       </small>
                     </CivicCard>
                   )}

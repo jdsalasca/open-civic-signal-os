@@ -7,6 +7,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { classNames } from "primereact/utils";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatDate } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicButton } from "../components/ui/CivicButton";
@@ -587,7 +588,7 @@ export function CommunityProjects() {
                                         <div key={comment.id} className="u-surface-chip">
                                           <div className="u-meta-row mb-1">
                                             <span>{comment.authorUsername}</span>
-                                            <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
+                                            <span>{formatDate(comment.createdAt) ?? "-"}</span>
                                           </div>
                                           <p className="text-sm text-secondary m-0 line-height-3">{comment.content}</p>
                                         </div>

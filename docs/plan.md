@@ -205,7 +205,7 @@ patron que mas caro sale:
 | 62 | `docker-images.yml` en verde: la imagen API arranca con BD y nginx resuelve su upstream | 23 pasos en verde e imagenes publicadas; 2 defectos (sin BD, upstream sin resolver) | Hecho este commit |
 | 63 | El backlog publico habla lenguaje claro y su sello de frescura no depende del navegador | 14 Playwright; sin `IN_PROGRESS` ni `1/4/2026, 10:00:00 a. m.` ni `313.00`; igual bajo locale `de-DE` | Hecho este commit |
 | 64 | `SignalDetail` deja de mostrar el enum crudo y su bitacora no depende del locale | Primitivas compartidas `formatStamp` y `useSignalStatusLabel`; 6 Playwright; sin `IN_PROGRESS` ni `1.4.2026, 10:00:00` | Hecho este commit |
-| 65 | Barrer los otros 22 `toLocaleString` del frontend | `formatStamp` ya existe; quedan 15 archivos, empezando por `CivicEngagement` y `CommunityThreads` | Siguiente |
+| 65 | Ninguna vista renderiza un timestamp por el locale del navegador | 25 sitios en 16 archivos; guardia `no-locale-timestamps` con mutacion verificada; 26/10 fallos igual que en baseline | Hecho este commit |
 | 66 | El detalle de caso describe mal su propia pantalla | Eyebrow `PRIORITY RANK` y subtitulo `Intelligence Context` repiten una tarjeta de abajo; el `Layout` muestra `Home` en una ruta de detalle | Siguiente |
 
 ## Proximas rondas candidatas
@@ -230,6 +230,12 @@ patron que mas caro sale:
 ## Bloqueos
 
 - **Sin bloqueos de comandos.** Suite y preflight en verde.
+- **26 tests Playwright siguen en rojo y no por codigo (ronda 65).** Las specs de `community-*`,
+  `dashboard-*` y `weekly-digest` hacen login real como `admin` / `admin12345` contra el backend, y
+  esta base de datos no tiene esa cuenta. Medido dos veces con y sin los cambios de la ronda 65:
+  `26 failed / 10 passed` en ambos casos, identico. `weekly-digest` es la prueba de que no son
+  nuestros: prueba una vista que esa ronda no toco. Corregirlo exige sembrar la cuenta en el
+  arranque local, que es trabajo propio.
 - **Federacion sin autenticacion mutua ni respuesta sobre residencia de datos.** Documentado en
   `docs/FEDERATION.md` y en el ADR; requiere decision de gobernanza antes de un despliegue real
   transfronterizo.

@@ -6,6 +6,7 @@ import { Checkbox, type CheckboxChangeEvent } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -122,7 +123,7 @@ export function CommunityIntegrations() {
   }, [loadCenter]);
 
   const formatDateTime = (value?: string | null) =>
-    value ? new Date(value).toLocaleString() : t("community_integrations.never");
+    formatStamp(value) ?? t("community_integrations.never");
 
   const onSubmit = async (values: IntegrationForm) => {
     if (!activeCommunityId) return;

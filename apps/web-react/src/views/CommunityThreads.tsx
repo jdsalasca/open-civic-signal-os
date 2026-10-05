@@ -10,6 +10,7 @@ import { CommunityMembership, CommunityThread, CommunityThreadMessage, PageRespo
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -280,7 +281,7 @@ export function CommunityThreads() {
                 <span className="text-sm font-black text-main">
                   {t("community_threads.member_id", { id: message.authorId.slice(0, 4) })}
                 </span>
-                <span className="text-xs text-muted">{new Date(message.createdAt).toLocaleString()}</span>
+                <span className="text-xs text-muted">{formatStamp(message.createdAt) ?? "-"}</span>
               </div>
             </div>
             <div className="u-card-meta-row">

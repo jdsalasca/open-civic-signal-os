@@ -7,6 +7,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { classNames } from "primereact/utils";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatDate } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -232,7 +233,7 @@ export function CommunityGovernance() {
 
   const currentTagPreview = normalizeTags(watch("tagsInput") ?? "");
   const versionMeta = (version: GovernanceDocumentVersion) =>
-    [version.effectiveDate, version.meetingDate, new Date(version.createdAt).toLocaleDateString()].filter(Boolean).join(" · ");
+    [version.effectiveDate, version.meetingDate, formatDate(version.createdAt)].filter(Boolean).join(" · ");
 
   return (
     <Layout>

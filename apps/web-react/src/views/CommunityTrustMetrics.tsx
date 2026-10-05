@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicButton } from "../components/ui/CivicButton";
@@ -105,7 +106,7 @@ export function CommunityTrustMetrics() {
     if (!value) {
       return t("community_trust.not_available");
     }
-    return new Date(value).toLocaleString();
+    return formatStamp(value) ?? "-";
   };
 
   return (

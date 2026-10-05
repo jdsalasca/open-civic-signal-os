@@ -8,6 +8,7 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -133,7 +134,7 @@ export function CommunityActivities() {
     loadBoard();
   }, [loadBoard]);
 
-  const formatDateTime = (value?: string | null) => (value ? new Date(value).toLocaleString() : "-");
+  const formatDateTime = (value?: string | null) => formatStamp(value) ?? "-";
 
   const windowBadgeSeverity = (state: CommunityActivity["signupWindowState"]) => {
     if (state === "OPEN") return "resolved" as const;

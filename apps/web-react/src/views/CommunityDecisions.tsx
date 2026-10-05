@@ -7,6 +7,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { classNames } from "primereact/utils";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatDate as formatDay, formatStamp } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -257,8 +258,8 @@ export function CommunityDecisions() {
     }
   };
 
-  const formatDate = (value?: string | null) => (value ? new Date(value).toLocaleDateString() : t("community_decisions.not_set"));
-  const formatDateTime = (value?: string | null) => (value ? new Date(value).toLocaleString() : t("community_decisions.not_set"));
+const formatDate = (value?: string | null) => formatDay(value) ?? t("community_decisions.not_set");
+  const formatDateTime = (value?: string | null) => formatStamp(value) ?? t("community_decisions.not_set");
 
   const stats = useMemo(
     () => ({

@@ -6,6 +6,7 @@ import { Checkbox, type CheckboxChangeEvent } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { Layout } from "../components/Layout";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -138,7 +139,7 @@ export function CommunityOpenData() {
     if (!value) {
       return t("community_open_data.not_available");
     }
-    return new Date(value).toLocaleString();
+    return formatStamp(value) ?? "-";
   };
 
   const buildDownloadUrl = (resource: CommunityOpenDataDataset["resource"], format: CommunityOpenDataFormat) =>
