@@ -6,10 +6,11 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 443 en `apps/api-java`, todos en verde con `mvn clean test` (2 saltados: la paridad con
+- **Tests:** 444 en `apps/api-java`, todos en verde con `mvn clean test` (3 saltados: la paridad con
   PostgreSQL, que necesita Docker).
 - **Esquema:** las 49 migraciones corren en H2 (la suite) y en PostgreSQL 15, y `npm run
-  schema:pg:verify` compara ambos: 62 tablas y 582 columnas, identicas. Ronda 57.
+  schema:pg:verify` compara ambos: 62 tablas y 582 columnas, con nombres **y tipos** identicos.
+  Rondas 57 a 59.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -124,6 +125,13 @@ patron que mas caro sale:
    eran enteramente redundantes: el fix ya estaba en develop. Integrarlas a ciegas habria sido ruido, y
    borrarlas por "parecen superadas" es como desaparece el trabajo de otra persona. Se documentan y se
    dejan; `git branch -d` las habria rechazado igual por no estar mergeadas.
+17. **Una mutacion que no se aplica es peor que no hacerla.** Al quitar una regla de normalizacion para
+   comprobar que el test de tipos falla, el reemplazo de varias lineas no coincidio: el archivo tiene
+   CRLF y el patron tenia LF. La corrida "mutada" paso, y ese verde no probaba nada - era el codigo sin
+   mutar. Un falso negativo en una mutacion teaches a confiar en un test que no compara. Antes de creer
+   cualquier resultado, grep del archivo para confirmar que el cambio esta, y rehacerlo con la
+   herramienta de edicion. Regla general: **reemplazos multilinea hechos con script sobre archivos que
+   ya existen, se verifican con grep o se rehacen con la herramienta de edicion.**
 
 ## Rondas
 
@@ -149,7 +157,8 @@ patron que mas caro sale:
 | 56 | Las 49 migraciones se ejecutan en la suite | 441 tests; 2 bugs de produccion (supersede, agenda) y 10 tests que escribian datos imposibles | Hecho este commit |
 | 57 | Las migraciones corren tambien contra PostgreSQL y se comparan con H2 | 49 migraciones en PG15; 62 tablas y 582 columnas identicas; falla con PG sin migrar | Hecho este commit |
 | 58 | schema:pg:verify corre en cada PR, y el script ya funciona en Linux | Workflow con paths acotados; red Docker en vez de host.docker.internal | Hecho este commit |
-| 59 | Comparar tambien los TIPOS de columna entre H2 y PostgreSQL, no solo los nombres | Una tabla de normalizacion por motor y un test | Siguiente |
+| 59 | La paridad compara tambien los TIPOS de columna | 582 columnas; 162 difieren en 2 pares de deletreo; falla nombrando 99 columnas | Hecho este commit |
+| 60 | La paridad compara tambien nulabilidad y largo maximo | is_nullable y character_maximum_length entre motores | Siguiente |
 
 ## Proximas rondas candidatas
 

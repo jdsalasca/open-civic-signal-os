@@ -6,7 +6,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Assumptions;
@@ -43,6 +45,7 @@ class PostgresSchemaParityIT {
     private JdbcTemplate h2;
 
     private Set<String> postgres;
+    private Map<String, String> postgresTypes;
 
     @BeforeEach
     void requirePostgres() {
@@ -51,18 +54,22 @@ class PostgresSchemaParityIT {
             "no POSTGRES_VERIFY_URL set; run npm run verify:pg-schema to exercise this");
 
         Set<String> columns = new LinkedHashSet<>();
+        Map<String, String> types = new LinkedHashMap<>();
         try (Connection connection = DriverManager.getConnection(url, "verify", "verify_only_not_a_secret");
              Statement statement = connection.createStatement();
              ResultSet rows = statement.executeQuery(
-                 "select table_name, column_name from information_schema.columns "
+                 "select table_name, column_name, data_type from information_schema.columns "
                      + "where table_schema = 'public' order by table_name, column_name")) {
             while (rows.next()) {
-                columns.add(rows.getString(1).toUpperCase() + "|" + rows.getString(2).toUpperCase());
+                String key = rows.getString(1).toUpperCase() + "|" + rows.getString(2).toUpperCase();
+                columns.add(key);
+                types.put(key, rows.getString(3));
             }
         } catch (Exception e) {
             throw new IllegalStateException("could not read the PostgreSQL schema at " + url, e);
         }
         this.postgres = columns;
+        this.postgresTypes = types;
     }
 
     @Test
@@ -92,6 +99,69 @@ class PostgresSchemaParityIT {
             .as("these exist in PostgreSQL but not in the suite's H2 schema, so the suite is not testing "
                 + "what production runs")
             .isEmpty();
+    }
+
+    @Test
+    void everyColumnShouldAlsoHaveTheSameTypeOnBothEngines() {
+        Set<String> suiteSchema = new TreeSet<>();
+        Map<String, String> suiteTypes = new LinkedHashMap<>();
+        for (java.util.Map<String, Object> row : h2.queryForList(
+            "select table_name, column_name, data_type from information_schema.columns "
+                + "where table_schema = 'PUBLIC' order by table_name, column_name")) {
+            String key = row.get("TABLE_NAME").toString().toUpperCase()
+                + "|" + row.get("COLUMN_NAME").toString().toUpperCase();
+            suiteSchema.add(key);
+            suiteTypes.put(key, row.get("DATA_TYPE").toString());
+        }
+
+        Map<String, String> divergence = new LinkedHashMap<>();
+        for (var entry : postgresTypes.entrySet()) {
+            String suiteType = suiteTypes.get(entry.getKey());
+            if (suiteType == null) {
+                continue; // Already reported by the name comparison.
+            }
+            String left = canonical("h2", suiteType);
+            String right = canonical("pg", entry.getValue());
+            if (!left.equals(right)) {
+                divergence.put(entry.getKey(), suiteType + " vs " + entry.getValue());
+            }
+        }
+
+        assertThat(divergence)
+            .as("these columns have the same name on both engines but a different type, so a migration "
+                + "means one thing in the suite and another in production")
+            .isEmpty();
+    }
+
+    /**
+     * The two spellings that differ, and only those.
+     *
+     * <p>Measured across all 582 columns: 162 differ raw, in exactly two pairs - H2 reports TEXT columns
+     * as {@code CHARACTER VARYING} (63 columns) and calls {@code TIMESTAMP} what PostgreSQL spells
+     * {@code TIMESTAMP WITHOUT TIME ZONE} (99). The other 420 already agree exactly, including the
+     * integer/bigint split, which is kept distinct on purpose.
+     *
+     * <p>What this cannot see: H2's information_schema does not report {@code text} separately from
+     * {@code varchar}, so a column that is {@code VARCHAR(255)} in PostgreSQL and {@code TEXT} in the
+     * suite passes here. Catching that needs {@code character_maximum_length} compared across engines,
+     * which is a separate piece of work rather than a claim this makes.
+     */
+    private static String canonical(String engine, String rawType) {
+        String type = rawType.toUpperCase(java.util.Locale.ROOT);
+        boolean isSuite = engine.equals("h2");
+        if (isSuite && type.equals("CHARACTER VARYING")) {
+            return "string";
+        }
+        if (!isSuite && (type.equals("CHARACTER VARYING") || type.equals("TEXT"))) {
+            return "string";
+        }
+        if (isSuite && type.equals("TIMESTAMP")) {
+            return "timestamp";
+        }
+        if (!isSuite && type.equals("TIMESTAMP WITHOUT TIME ZONE")) {
+            return "timestamp";
+        }
+        return type;
     }
 
     @Test
