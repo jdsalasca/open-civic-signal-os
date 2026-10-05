@@ -203,7 +203,8 @@ patron que mas caro sale:
 | 60 | La paridad compara nulabilidad y largo de columna | 441/141 nulos en ambos; 136 varchar con 24 largos iguales; detecta un varchar(64) real | Hecho este commit |
 | 61 | El workflow de paridad ya corrio en GitHub | PR #122: 1o run fallo por `-o`, 2o verde en 2m23s, y `push` a develop en verde | Hecho este commit |
 | 62 | `docker-images.yml` en verde: la imagen API arranca con BD y nginx resuelve su upstream | 23 pasos en verde e imagenes publicadas; 2 defectos (sin BD, upstream sin resolver) | Hecho este commit |
-| 63 | Correr las 49 migraciones tambien en el smoke test de la imagen | Hoy corren en el workflow de paridad, no en el de Docker | Siguiente |
+| 63 | El backlog publico habla lenguaje claro y su sello de frescura no depende del navegador | 14 Playwright; sin `IN_PROGRESS` ni `1/4/2026, 10:00:00 a. m.` ni `313.00`; igual bajo locale `de-DE` | Hecho este commit |
+| 64 | `SignalDetail` sigue mostrando el enum crudo en su badge y en el timeline | Extraer el mapa de etiquetas de `PublicBacklog` a un modulo compartido y aplicarlo alli; no duplicarlo | Siguiente |
 
 ## Proximas rondas candidatas
 

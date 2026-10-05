@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page, type Route } from '@playwright/test';
 
 /**
  * The backlog must be readable without an account.
@@ -63,46 +63,59 @@ const prioritizedPayload = {
   last: true,
 };
 
+// LocalDateTime on the wire, i.e. no offset. The reader's browser locale must not decide how it
+// is rendered, so the tests pin the exact string rather than a locale-dependent shape.
+const metaPayload = {
+  totalSignals: 210,
+  unresolvedSignals: 140,
+  lastUpdatedAt: '2026-04-01T10:00:00',
+  criticalScoreThreshold: 220,
+};
+
+const formulaPayload = {
+  version: 'v1',
+  formula: '(Urgency * 30) + (Impact * 25) + min(People/10, 30) + min(Votes/5, 15)',
+  effectiveFrom: '2026-03-21',
+  weights: [],
+  cappedFactors: ['affectedPeople', 'communityVotes'],
+  changeNote: 'Initial published formula.',
+};
+
+/**
+ * Routes the three public reads the page makes. Returns the headers seen on the prioritized read so
+ * callers can assert no credential was sent.
+ */
+async function mockBacklog(
+  page: Page,
+  opts: { abort?: boolean; meta?: Record<string, unknown> } = {},
+): Promise<Record<string, string>[]> {
+  const prioritizedHeaders: Record<string, string>[] = [];
+
+  const respond = async (route: Route, body: unknown) => {
+    if (opts.abort) {
+      await route.abort('failed');
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(body),
+    });
+  };
+
+  await page.route('**/api/signals/prioritized*', async (route) => {
+    prioritizedHeaders.push(route.request().headers());
+    await respond(route, prioritizedPayload);
+  });
+  await page.route('**/api/signals/meta', (route) => respond(route, opts.meta ?? metaPayload));
+  await page.route('**/api/signals/formula', (route) => respond(route, formulaPayload));
+
+  return prioritizedHeaders;
+}
+
 test.describe('Public backlog without an account', () => {
   test('renders the ranked backlog, the formula, and the freshness stamp', async ({ page }) => {
-    const requestHeaders: Record<string, string>[] = [];
-
-    await page.route('**/api/signals/prioritized*', async (route) => {
-      requestHeaders.push(route.request().headers());
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(prioritizedPayload),
-      });
-    });
-
-    await page.route('**/api/signals/meta', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          totalSignals: 210,
-          unresolvedSignals: 140,
-          lastUpdatedAt: '2026-04-01T10:00:00',
-          criticalScoreThreshold: 220,
-        }),
-      });
-    });
-
-    await page.route('**/api/signals/formula', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          version: 'v1',
-          formula: '(Urgency * 30) + (Impact * 25) + min(People/10, 30) + min(Votes/5, 15)',
-          effectiveFrom: '2026-03-21',
-          weights: [],
-          cappedFactors: ['affectedPeople', 'communityVotes'],
-          changeNote: 'Initial published formula.',
-        }),
-      });
-    });
+    const requestHeaders = await mockBacklog(page);
 
     // No stored session at all: a stranger arriving at the URL.
     await page.goto('/backlog');
@@ -134,51 +147,72 @@ test.describe('Public backlog without an account', () => {
   });
 
   test('shows a sign-in path rather than a dead end', async ({ page }) => {
-    await page.route('**/api/signals/prioritized*', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(prioritizedPayload),
-      });
-    });
-    await page.route('**/api/signals/meta', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          totalSignals: 1,
-          unresolvedSignals: 1,
-          lastUpdatedAt: '2026-04-01T10:00:00',
-          criticalScoreThreshold: 220,
-        }),
-      });
-    });
-    await page.route('**/api/signals/formula', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          version: 'v1',
-          formula: 'x',
-          effectiveFrom: '2026-03-21',
-          weights: [],
-          cappedFactors: [],
-          changeNote: '',
-        }),
-      });
-    });
+    await mockBacklog(page, { meta: { ...metaPayload, totalSignals: 1, unresolvedSignals: 1 } });
 
     await page.goto('/backlog');
     await expect(page.getByTestId('public-backlog-cta')).toBeVisible({ timeout: 30000 });
   });
 
   test('an unreachable API shows an unavailable state, not a login prompt', async ({ page }) => {
-    await page.route('**/api/signals/prioritized*', async (route) => route.abort('failed'));
-    await page.route('**/api/signals/meta', async (route) => route.abort('failed'));
-    await page.route('**/api/signals/formula', async (route) => route.abort('failed'));
+    await mockBacklog(page, { abort: true });
 
     await page.goto('/backlog');
     await expect(page.getByTestId('public-backlog-unavailable')).toBeVisible({ timeout: 30000 });
     expect(page.url()).toContain('/backlog');
+  });
+});
+
+/**
+ * A backlog is read by residents, not by the database it came from. These are the three places
+ * where machine vocabulary leaked onto that public screen.
+ */
+test.describe('Public backlog reads as plain language', () => {
+  test.beforeEach(async ({ page }) => {
+    await mockBacklog(page);
+  });
+
+  test('lifecycle is spelled out instead of exposing the raw enum', async ({ page }) => {
+    await page.goto('/backlog');
+    await expect(page.getByTestId('public-backlog-list')).toBeVisible({ timeout: 30000 });
+
+    await expect(page.getByTestId('public-backlog-item-1')).toContainText('Status: New');
+    await expect(page.getByTestId('public-backlog-item-2')).toContainText('Status: In progress');
+
+    // IN_PROGRESS is an identifier for the API, not something a resident can act on.
+    await expect(page.getByTestId('public-backlog-item-2')).not.toContainText('IN_PROGRESS');
+  });
+
+  test('the freshness stamp is unambiguous and free of clock noise', async ({ page }) => {
+    await page.goto('/backlog');
+    await expect(page.getByTestId('public-backlog-freshness')).toBeVisible({ timeout: 30000 });
+
+    // 1/4/2026 is January 4th to one reader and April 1st to another, and "10:00:00 a. m." is
+    // precision the source timestamp does not carry.
+    await expect(page.getByTestId('public-backlog-freshness')).toContainText('2026-04-01 10:00');
+    await expect(page.getByTestId('public-backlog-freshness')).not.toContainText('a. m.');
+  });
+
+  test('a score does not claim precision the formula cannot produce', async ({ page }) => {
+    await page.goto('/backlog');
+    await expect(page.getByTestId('public-backlog-list')).toBeVisible({ timeout: 30000 });
+
+    const score = page.getByTestId('public-backlog-score-1');
+    await expect(score).toHaveText(/^313/);
+    await expect(score).not.toContainText('313.00');
+  });
+});
+
+test.describe('Freshness does not depend on the reader browser locale', () => {
+  // The stamp is the page's accountability claim. If a German browser renders it as
+  // "01.04.2026, 10:00:00" while an English one renders "4/1/2026, 10:00:00 AM", two readers are
+  // comparing two different-looking claims about the same data.
+  test.use({ locale: 'de-DE' });
+
+  test('renders the same stamp under a non-English locale', async ({ page }) => {
+    await mockBacklog(page);
+    await page.goto('/backlog');
+    await expect(page.getByTestId('public-backlog-freshness')).toBeVisible({ timeout: 30000 });
+
+    await expect(page.getByTestId('public-backlog-freshness')).toContainText('2026-04-01 10:00');
   });
 });

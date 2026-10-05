@@ -10,6 +10,32 @@ import apiClient from "../api/axios";
 import type { PrioritizationFormula, Signal, SignalMeta } from "../types";
 
 /**
+ * Lifecycle values are identifiers for the API. AGENTS.md forbids showing raw enums when a plain
+ * label exists, and this screen is the one most likely to be read by someone who never logs in.
+ */
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  NEW: "public_backlog.status_new",
+  IN_PROGRESS: "public_backlog.status_in_progress",
+  RESOLVED: "public_backlog.status_resolved",
+  REJECTED: "public_backlog.status_rejected",
+};
+
+/**
+ * The freshness stamp is the page's accountability claim, so it must not change shape with the
+ * reader's browser: `toLocaleString` renders 1/4/2026 for a US browser and 1.4.2026 for a German
+ * one, and "10:00:00 a. m." implies precision the source LocalDateTime does not carry. Fixed
+ * YYYY-MM-DD HH:mm is unambiguous in both languages and sorts correctly.
+ */
+function formatStamp(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+  const pad = (part: number) => String(part).padStart(2, "0");
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return `${day} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/**
  * The backlog, readable without an account.
  *
  * AGENTS.md says inclusion is a default and dashboards must be readable in low-bandwidth
@@ -64,9 +90,7 @@ export function PublicBacklog() {
     return () => controller.abort();
   }, []);
 
-  const lastUpdated = meta?.lastUpdatedAt
-    ? new Date(meta.lastUpdatedAt).toLocaleString()
-    : t('public_backlog.freshness_pending');
+  const lastUpdated = formatStamp(meta?.lastUpdatedAt) ?? t('public_backlog.freshness_pending');
 
   return (
     <Layout authMode>
@@ -138,7 +162,13 @@ export function PublicBacklog() {
                       <div className="flex flex-wrap gap-2 text-xs text-secondary mb-2">
                         <span>{signal.category}</span>
                         {signal.locationLabel && <span>{signal.locationLabel}</span>}
-                        <span>{t('public_backlog.status', { status: signal.status })}</span>
+                        <span>
+                          {t("public_backlog.status", {
+                            status: t(
+                              STATUS_LABEL_KEYS[signal.status] ?? "public_backlog.status_unknown"
+                            ),
+                          })}
+                        </span>
                       </div>
                       {/*
                         AGENTS.md: every list exposes why an item is ranked where it is. The terms
@@ -165,7 +195,12 @@ export function PublicBacklog() {
                       )}
                     </div>
                     <div className="text-right">
-                      <div className="font-bold">{signal.priorityScore?.toFixed?.(2) ?? signal.priorityScore}</div>
+                      <div
+                        className="font-bold"
+                        data-testid={`public-backlog-score-${index + 1}`}
+                      >
+                        {signal.priorityScore}
+                      </div>
                       <div className="text-xs text-secondary">
                         {t('public_backlog.score_label')}
                       </div>
