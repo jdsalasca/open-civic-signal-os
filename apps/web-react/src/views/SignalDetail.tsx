@@ -16,6 +16,8 @@ import { CivicEngagement } from "../components/CivicEngagement";
 import { PriorityRadar } from "../components/PriorityRadar";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { formatStamp } from "../utils/formatStamp";
+import { useSignalStatusLabel } from "../utils/signalStatus";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -23,6 +25,7 @@ interface ApiError extends Error {
 
 export function SignalDetail() {
   const { t } = useTranslation();
+  const statusLabel = useSignalStatusLabel();
   const { id } = useParams();
   const navigate = useNavigate();
   const { activeRole } = useAuthStore();
@@ -156,7 +159,11 @@ export function SignalDetail() {
             />
             <div className="min-w-0">
               <div className="u-card-meta-row mb-2">
-                <CivicBadge label={signal.status} severity={severity} />
+                <CivicBadge
+                  label={statusLabel(signal.status)}
+                  severity={severity}
+                  data-testid="signal-detail-status-badge"
+                />
                 <span className="text-xs text-muted font-bold uppercase tracking-wide">
                   {t("signals.protocol_id")}: {signal.id.substring(0,8)}
                 </span>
@@ -265,16 +272,17 @@ export function SignalDetail() {
                       <div className="flex justify-content-between align-items-start mb-2">
                         <div className="flex align-items-center gap-2">
                           <CivicBadge
-                            label={entry.eventType === "ASSIGNED" ? (entry.assignedToUsername || t("signals.timeline_unassigned")) : entry.statusTo}
+                            label={entry.eventType === "ASSIGNED" ? (entry.assignedToUsername || t("signals.timeline_unassigned")) : statusLabel(entry.statusTo)}
                             severity={entry.statusTo === 'RESOLVED' ? 'resolved' : 'progress'}
+                            data-testid={`signal-timeline-status-badge-${idx}`}
                           />
                           <span className="text-xs font-bold text-muted">{renderTimelineLabel(entry)}</span>
                         </div>
-                        <span className="text-xs text-muted">{new Date(entry.createdAt).toLocaleString()}</span>
+                        <span className="text-xs text-muted">{formatStamp(entry.createdAt) ?? entry.createdAt}</span>
                       </div>
                       {entry.eventType === "STATUS_CHANGED" && (
                         <div className="text-xs font-bold text-muted mb-2">
-                          {t("signals.timeline_transition", { from: entry.statusFrom, to: entry.statusTo })}
+                          {t("signals.timeline_transition", { from: statusLabel(entry.statusFrom), to: statusLabel(entry.statusTo) })}
                         </div>
                       )}
                       {entry.eventType === "ASSIGNED" && entry.assignedToUsername && (

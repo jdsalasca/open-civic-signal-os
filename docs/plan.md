@@ -204,7 +204,9 @@ patron que mas caro sale:
 | 61 | El workflow de paridad ya corrio en GitHub | PR #122: 1o run fallo por `-o`, 2o verde en 2m23s, y `push` a develop en verde | Hecho este commit |
 | 62 | `docker-images.yml` en verde: la imagen API arranca con BD y nginx resuelve su upstream | 23 pasos en verde e imagenes publicadas; 2 defectos (sin BD, upstream sin resolver) | Hecho este commit |
 | 63 | El backlog publico habla lenguaje claro y su sello de frescura no depende del navegador | 14 Playwright; sin `IN_PROGRESS` ni `1/4/2026, 10:00:00 a. m.` ni `313.00`; igual bajo locale `de-DE` | Hecho este commit |
-| 64 | `SignalDetail` sigue mostrando el enum crudo en su badge y en el timeline | Extraer el mapa de etiquetas de `PublicBacklog` a un modulo compartido y aplicarlo alli; no duplicarlo | Siguiente |
+| 64 | `SignalDetail` deja de mostrar el enum crudo y su bitacora no depende del locale | Primitivas compartidas `formatStamp` y `useSignalStatusLabel`; 6 Playwright; sin `IN_PROGRESS` ni `1.4.2026, 10:00:00` | Hecho este commit |
+| 65 | Barrer los otros 22 `toLocaleString` del frontend | `formatStamp` ya existe; quedan 15 archivos, empezando por `CivicEngagement` y `CommunityThreads` | Siguiente |
+| 66 | El detalle de caso describe mal su propia pantalla | Eyebrow `PRIORITY RANK` y subtitulo `Intelligence Context` repiten una tarjeta de abajo; el `Layout` muestra `Home` en una ruta de detalle | Siguiente |
 
 ## Proximas rondas candidatas
 
