@@ -39,6 +39,24 @@ see where they should be at any point rather than doing arithmetic in their head
 right call about the room, and the platform has no standing to call it wrong. It reports, it does not
 prevent.
 
+### Elapsed time freezes when the assembly closes
+
+`elapsedMinutes` is measured against `now()` only while an assembly is **open**. Once it has closed,
+the figure is the span between `openedAt` and `closedAt`, and it stops moving.
+
+Read live throughout, a closed assembly kept counting for ever. "This meeting ran for forty minutes" is
+a fact about the meeting; a record that reads 4000 minutes next month is not a record of anything, and
+this is the same failure as a past transparency report recomputing its figures — a record that does not
+hold still.
+
+An assembly still open legitimately reads live. That is the whole point of a facilitation view: a
+facilitator needs the current figure to pace against.
+
+Pinned by `aClosedAssemblyShouldReportTheTimeItActuallyRanRatherThanKeepCounting`, which backdates
+**both** timestamps by different amounts so "when it closed" and "when this is read" cannot be
+confused. A test that closes the assembly and immediately reads it proves nothing, because at that moment
+`now()` and `closedAt` agree to the minute.
+
 ### It does not reorder by score
 
 The order is the facilitator's. A platform that reordered a townhall agenda by priority score would

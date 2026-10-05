@@ -48,6 +48,7 @@ class AssemblyFacilitationIT {
     @Autowired private UserRepository userRepository;
     @Autowired private CommunityRepository communityRepository;
     @Autowired private CommunityMembershipRepository membershipRepository;
+    @Autowired private org.opencivic.signalos.repository.CommunityAssemblyRepository assemblyRepository;
 
     private UUID communityId;
     private UUID coordinatorId;
@@ -137,6 +138,41 @@ class AssemblyFacilitationIT {
             .andExpect(status().isConflict())
             .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
                 .content().string(containsString("change what the record says was planned")));
+    }
+
+    @Test
+    void aClosedAssemblyShouldReportTheTimeItActuallyRanRatherThanKeepCounting() throws Exception {
+        String assemblyId = createAssemblyId();
+        openAssembly(assemblyId);
+        closeAssembly(assemblyId);
+
+        // Both timestamps backdated, and by different amounts, because the whole point is to separate
+        // "when it closed" from "when this is being read". Measuring against now() instead would add
+        // the 10 days since closing to a 30 day meeting and report 40.
+        var assembly = assemblyRepository.findById(UUID.fromString(assemblyId)).orElseThrow();
+        assembly.setOpenedAt(java.time.LocalDateTime.now().minusDays(40));
+        assembly.setClosedAt(java.time.LocalDateTime.now().minusDays(30));
+        assemblyRepository.save(assembly);
+
+        long elapsed = elapsedMinutes(facilitation(assemblyId));
+
+        // A meeting that ran 30 days ago for ten days: ~14400 minutes. Reading the clock instead of
+        // the record would report ~57600, because forty days have passed since it opened.
+        org.junit.jupiter.api.Assertions.assertTrue(elapsed > 14000 && elapsed < 14800,
+            "a closed assembly must report the span between openedAt and closedAt, not between "
+                + "openedAt and now; expected about 14400 minutes for a ten day meeting, got " + elapsed);
+    }
+
+    private String facilitation(String assemblyId) throws Exception {
+        return mockMvc.perform(get("/api/community/assemblies/{id}/facilitation", assemblyId)
+                .with(user("facil_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+    }
+
+    private long elapsedMinutes(String payload) {
+        return com.jayway.jsonpath.JsonPath.<Integer>read(payload, "$.elapsedMinutes");
     }
 
     @Test

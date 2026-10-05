@@ -6,7 +6,7 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 429 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 430 en `apps/api-java`, todos en verde con `mvn clean test`.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -53,7 +53,8 @@ patron que mas caro sale:
 | 46 | El informe declara en su payload lo que no puede reproducir | 424 tests; dos afirmaciones falsas corregidas | Hecho este commit |
 | 47 | Revision visual del digest semanal + build output sin trackear | 12 Playwright, 8 capturas, 424 tests | Hecho `7a33213` |
 | 48 | Ledger de scores + orden determinista del timeline | 429 tests; falla por mutacion; 2 preflights seguidos | Hecho este commit |
-| 49 | Auditar el patron restante: ensambles, salas, propuestas | Un test de coherencia interna por par | Siguiente |
+| 49 | Una asamblea cerrada reporta el tiempo que duro | 430 tests; falla por mutacion | Hecho este commit |
+| 50 | Auditar el patron restante: salas y propuestas | Un test por par, con datos que distingan el camino correcto | Siguiente |
 
 ## Proximas rondas candidatas
 

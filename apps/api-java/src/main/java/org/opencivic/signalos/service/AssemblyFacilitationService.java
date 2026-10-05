@@ -188,9 +188,17 @@ public class AssemblyFacilitationService {
                 item.getPlannedMinutes(), cumulative));
         }
 
+        // Measured against closedAt once the meeting has ended. Against now(), a closed assembly kept
+        // counting for ever: "this meeting ran for 40 minutes" is a fact about the meeting, and a
+        // record that reads 4000 minutes next month is not a record of anything. An assembly still
+        // open legitimately reads live, which is the whole point of a facilitation view.
         Long elapsed = assembly.getOpenedAt() == null
             ? null
-            : Math.max(ChronoUnit.MINUTES.between(assembly.getOpenedAt(), LocalDateTime.now()), 0);
+            : Math.max(
+                ChronoUnit.MINUTES.between(
+                    assembly.getOpenedAt(),
+                    assembly.getClosedAt() == null ? LocalDateTime.now() : assembly.getClosedAt()),
+                0);
 
         return new FacilitationView(
             VERSION,
