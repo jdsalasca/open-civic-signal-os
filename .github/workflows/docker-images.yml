@@ -92,6 +92,7 @@ jobs:
 
           docker run -d --name api-smoke --network smoke-net --network-alias civic-api \
             -p 18080:8080 \
+            --add-host=host.docker.internal:host-gateway \
             -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/signalos \
             -e SPRING_DATASOURCE_USERNAME=admin \
             -e SPRING_DATASOURCE_PASSWORD=password \
