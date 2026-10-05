@@ -6,7 +6,7 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 436 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 437 en `apps/api-java`, todos en verde con `mvn clean test`.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -62,6 +62,17 @@ patron que mas caro sale:
    un test que lo use no puede cazar un N+1 de carga-por-id - el de membresias solo se detecto al
    cambiar a `getEntityLoadCount`. Antes de dar por buena una medicion, mutar el codigo y ver que el
    test se pone rojo; un test que no se pone rojo no esta probando el fix.
+9. **Un test que afirma una garantia que el sistema no hace es un fallo intermitente esperando su
+   turno.** Las actas de asamblea se ordenaban solo por `created_at`; H2 no guarda fracciones de segundo,
+   asi que dos actas caidas en el mismo segundo empatan y la base puede devolver cualquiera primero. El
+   test afirmaba "April primero" y pasaba en casi todas las corridas: no era un test, era una moneda al
+   aire. La estabilidad tampoco se puede verificar de caja negra - H2 es consistente consigo mismo para
+   un plan y unos datos dados, asi que dos consultas identicas devuelven el mismo orden por suerte, con
+   desempate o sin el. Ese test se borro en vez de subirse. Y al escribir el fix correcto (una posicion
+   monotona como la de V50) aparecio algo mas grande: **`ddl-auto: create-drop` borra lo que Flyway
+   construyo**, asi que en la suite ninguna columna `seq` se rellena y el fix de la ronda 48 nunca se ha
+   ejercitado. El orden que importa para un resident que audita una respuesta municipal esta verificado
+   en produccion y sin verificar en las pruebas.
 
 ## Rondas
 
@@ -82,7 +93,8 @@ patron que mas caro sale:
 | 51 | Un historial de sala truncado se ve truncado, y se pagina a pedido | 6 Playwright (2 mutaciones); 8 capturas; 432 tests | Hecho este commit |
 | 52 | Contar los mensajes de una sala ya no los lee | 433 tests; el test mide I/O y falla por mutacion | Hecho este commit |
 | 53 | Las pantallas de sala dejan de consultar una vez por fila | 436 tests; 58->8 queries y 61->5 entity loads; 2 mutaciones | Hecho este commit |
-| 54 | La bandeja de menciones resuelve un nombre por fila (N+1 acotado a 20) | Test diferencial sobre la bandeja | Siguiente |
+| 54 | La bandeja de menciones deja de consultar 3 veces por fila | 437 tests; 30->15 queries; y el orden de evidencia de asamblea, que hacia fallar el preflight | Hecho este commit |
+| 55 | La suite nunca rellena las columnas `seq`: el fix de V50 no esta ejercitado | Un test que falle si `seq` es NULL, o una decision sobre create-drop vs Flyway | Siguiente |
 
 ## Proximas rondas candidatas
 
@@ -111,5 +123,9 @@ patron que mas caro sale:
   transfronterizo.
 - **Scores historicos solo desde la ronda 48.** El ledger existe; las senales anteriores a el no tienen
   entrada y su score pasado es incunable. El informe lo declara en `reproducibilityLimits`.
+- **La garantia de orden del timeline de auditoria no esta verificada por la suite.** `ddl-auto:
+  create-drop` reemplaza el esquema que Flyway construye, y `SignalStatusEntry.seq` esta mapeada como
+  `insertable = false`, asi que en las pruebas la columna queda NULL y `ORDER BY seq` no ordena nada.
+  En produccion (`validate` + Flyway) si funciona. Ronda 55.
 - **`%TEMP%/get-shit-done/` sin trackear en el arbol de trabajo.** Instalacion del framework de
   agentes con la variable sin expandir; no pertenece al repositorio y no se commitea.

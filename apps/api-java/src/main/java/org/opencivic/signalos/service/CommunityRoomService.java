@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityMembership;
 import org.opencivic.signalos.domain.CommunityPermissionScope;
@@ -296,9 +297,25 @@ public class CommunityRoomService {
         Map<UUID, CommunityRoomMention> dedupedByMessage = new LinkedHashMap<>();
         pending.forEach(mention -> dedupedByMessage.putIfAbsent(mention.getMessageId(), mention));
 
-        List<CommunityRoomMentionResponse> items = dedupedByMessage.values().stream().limit(20).map(mention -> {
-            CommunityRoom room = roomRepository.findById(mention.getRoomId()).orElse(null);
-            CommunityRoomMessage message = messageRepository.findById(mention.getMessageId()).orElse(null);
+        List<CommunityRoomMention> rows = dedupedByMessage.values().stream().limit(20).toList();
+        // Three lookups per row used to make this screen cost three queries per mention: the room, the
+        // message and the author's name. Read each of the three once for the whole inbox instead.
+        Map<UUID, CommunityRoom> roomsById = roomRepository.findAllById(
+            rows.stream().map(CommunityRoomMention::getRoomId).distinct().toList()).stream()
+            .collect(Collectors.toMap(CommunityRoom::getId, room -> room));
+        Map<UUID, CommunityRoomMessage> messagesById = messageRepository.findAllById(
+            rows.stream().map(CommunityRoomMention::getMessageId).distinct().toList()).stream()
+            .collect(Collectors.toMap(CommunityRoomMessage::getId, message -> message));
+        Map<UUID, String> authorNames = displayNamesOf(messagesById.values().stream()
+            .map(CommunityRoomMessage::getAuthorId)
+            .filter(authorId -> authorId != null)
+            .distinct()
+            .toList());
+
+        List<CommunityRoomMentionResponse> items = rows.stream().map(mention -> {
+            CommunityRoom room = roomsById.get(mention.getRoomId());
+            CommunityRoomMessage message = messagesById.get(mention.getMessageId());
+            UUID authorId = message == null ? null : message.getAuthorId();
             return new CommunityRoomMentionResponse(
                 mention.getId(),
                 mention.getRoomId(),
@@ -306,8 +323,8 @@ public class CommunityRoomService {
                 mention.getMessageId(),
                 message == null ? "" : message.getBody(),
                 mention.getMentionedUserId(),
-                message == null ? null : message.getAuthorId(),
-                message == null ? "" : displayNameOf(message.getAuthorId()),
+                authorId,
+                authorId == null ? "" : authorNames.getOrDefault(authorId, "unknown"),
                 mention.getCreatedAt(),
                 mention.getReadAt()
             );

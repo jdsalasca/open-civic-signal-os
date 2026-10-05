@@ -401,6 +401,76 @@ class CommunityRoomsIT {
             .andExpect(jsonPath("$.hasMoreMessages").value(false));
     }
 
+    @Test
+    void openingTheMentionInboxShouldNotQueryOncePerMention() throws Exception {
+        String roomId = createRoomAsCoordinator();
+        List<UUID> authors = saveUsers("mention_author_", 20);
+        for (int i = 0; i < 5; i++) {
+            postMentionMentioning(roomId, authors.get(i), i);
+        }
+
+        long withFiveMentions = inboxQueries(5);
+
+        for (int i = 5; i < 20; i++) {
+            postMentionMentioning(roomId, authors.get(i), i);
+        }
+
+        long withTwentyMentions = inboxQueries(20);
+
+        // Every inbox row resolved three things by id: the room, the message, and the author's name.
+        // A 20-row inbox therefore cost 60 queries to draw a list capped at 20 - on the screen that
+        // tells a resident they have been mentioned.
+        //
+        // A different author per mention on purpose, for the reason round 53 found: with one author the
+        // name lookups are answered by the first-level cache and the defect disappears from the count.
+        //
+        // Query executions, not entity loads: the room and message lookups are load-by-id, which
+        // getQueryExecutionCount does not see, and entity loads legitimately grow with the rows because
+        // each row shows a different message body. The name lookups are real queries, and they are what
+        // this counter catches. The room and message batching is covered by mutation, recorded in
+        // docs/evidence/round-54, not by a counter that would have to lie to measure it.
+        org.junit.jupiter.api.Assertions.assertEquals(withFiveMentions, withTwentyMentions,
+            "the mention inbox ran " + withTwentyMentions + " queries with 20 pending mentions and "
+                + withFiveMentions + " with 5: reads scale with the inbox, so it is querying per row");
+    }
+
+    private void postMentionMentioning(String roomId, UUID authorUsernameSeed, int index) throws Exception {
+        // The handle must resolve to a community member, so every author needs a membership.
+        org.junit.jupiter.api.Assertions.assertNotNull(authorUsernameSeed);
+        String username = usernameOf(authorUsernameSeed);
+        mockMvc.perform(post("/api/community/rooms/messages")
+                .with(user(username).roles("CITIZEN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "communityId": "%s",
+                      "roomId": "%s",
+                      "body": "@rooms_member field note %d"
+                    }
+                    """.formatted(communityId, roomId, index)))
+            .andExpect(status().isOk());
+    }
+
+    private String usernameOf(UUID userId) {
+        return userRepository.findById(userId).orElseThrow().getUsername();
+    }
+
+    /** Queries executed while building the mention inbox inside one workspace open. */
+    private long inboxQueries(int expectedItems) throws Exception {
+        entityManager.flush();
+        entityManager.clear();
+        Statistics statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+        statistics.clear();
+
+        mockMvc.perform(get("/api/community/rooms/workspace")
+                .with(user("rooms_member").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.mentionInbox.items", hasSize(expectedItems)));
+
+        return statistics.getQueryExecutionCount();
+    }
+
     /** Messages posted straight through the repository so each can have its own author. */
     private void seedMessages(String roomId, List<UUID> authors, int from, int to) {
         for (int i = from; i < to; i++) {

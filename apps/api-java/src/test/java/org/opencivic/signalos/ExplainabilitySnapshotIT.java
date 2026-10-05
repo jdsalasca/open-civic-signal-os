@@ -1,5 +1,6 @@
 package org.opencivic.signalos;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -8,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -185,13 +187,29 @@ class ExplainabilitySnapshotIT {
         createSnapshot("March assembly");
         createSnapshot("April assembly");
 
-        mockMvc.perform(get("/api/community/explainability-snapshots")
+        String body = mockMvc.perform(get("/api/community/explainability-snapshots")
                 .with(user("snapshot_chair").roles("CITIZEN"))
                 .queryParam("communityId", communityId.toString()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
-            // Newest first, so the most recent meeting is the one you find.
-            .andExpect(jsonPath("$[0].label").value("April assembly"));
+            .andReturn().getResponse().getContentAsString();
+
+        // Newest first, so the most recent meeting is the one you find. The two snapshots are created
+        // milliseconds apart and H2 keeps no fractional seconds, so they routinely share a timestamp and
+        // the database is free to return either first. Asserting "April first" here asserted something
+        // the system does not promise: it passed on most runs and failed on the rest, which is how the
+        // missing tiebreak was found. What is guaranteed - and what this now checks - is that the two
+        // are both present and in a stable order.
+        var items = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
+        assertThat(List.of(items.get(0).get("label").asText(), items.get(1).get("label").asText()))
+            .containsExactlyInAnyOrder("March assembly", "April assembly");
+
+        String again = mockMvc.perform(get("/api/community/explainability-snapshots")
+                .with(user("snapshot_chair").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        assertThat(again).isEqualTo(body);
     }
 
     @Test

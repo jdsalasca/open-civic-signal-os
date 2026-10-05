@@ -151,7 +151,7 @@ public class ExplainabilitySnapshotService {
             throw new ResourceNotFoundException("Community not found: " + communityId);
         }
         requireMembership(user, communityId);
-        return snapshotRepository.findByCommunityIdOrderByCreatedAtDesc(communityId).stream()
+        return snapshotRepository.findByCommunityIdOrderByCreatedAtDescIdDesc(communityId).stream()
             .map(snapshot -> toResponse(snapshot, null, null, null))
             .toList();
     }
