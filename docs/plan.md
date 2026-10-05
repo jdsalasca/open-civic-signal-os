@@ -160,6 +160,22 @@ patron que mas caro sale:
 21. **Un gate de CI que nunca se dispara es peor que no tenerlo**, porque aparenta cobertura. El workflow
    escuchaba pushes a `main` cuando todo el trabajo de este repo pasa por `develop`: iba a quedar en
    verde sin ejecutarse nunca. Por eso el PR #122 no fue vacio - llevo la correccion que lo hace real.
+22. **Un mismo error puede tener dos causas apiladas, y tapar la primera esconde la segunda.** El CI de
+   Docker reportaba `Failed to connect to localhost port 18080` en cinco corridas seguidas. Arregle que
+   la imagen no arranca sin base de datos - y entonces aparecio el mismo error en **otro** contenedor:
+   nginx resuelve `proxy_pass` al arrancar, asi que sin un host `civic-api` no degrada la ruta, no
+   arranca. Un error repetido cinco veces no es un error, son dos errores con el mismo sintoma.
+23. **Un shell de desarrollo puede esconder lo que un runner limpio no.** El API no arranca sin
+   `JWT_SECRET` porque no tiene default a proposito; mi maquina si lo tenia exportado (88 chars), asi que
+   la reproduccion local paso en parte por suerte. Es la segunda vez en esa ronda que una maquina que
+   funciona escondia un runner roto. Antes de creer una reproduccion local: **mirar las variables de
+   entorno que el contenedor no tendra.**
+24. **Validar un workflow por sus claves no dice si sus pasos estan bien ordenados.** Al reordenar los
+   pasos por numero de linea perdi `Build Web image` completo: el YAML parseaba, todas las claves que
+   miraba estaban, y CI fallo con `pull access denied` en un segundo. Lo que lo cazó fue **leer la lista
+   de nombres de los pasos**, no un chequeo de claves. Y despues de tres iteraciones de descubrir flags
+   perdidos de uno en uno por ciclo de CI, el ciclo que funciono fue verificar **todos** los flags de
+   ambos contenedores de una pasada antes de pushear.
 
 ## Rondas
 
@@ -186,7 +202,8 @@ patron que mas caro sale:
 | 59 | La paridad compara tambien los TIPOS de columna | 582 columnas; 162 difieren en 2 pares de deletreo; falla nombrando 99 columnas | Hecho este commit |
 | 60 | La paridad compara nulabilidad y largo de columna | 441/141 nulos en ambos; 136 varchar con 24 largos iguales; detecta un varchar(64) real | Hecho este commit |
 | 61 | El workflow de paridad ya corrio en GitHub | PR #122: 1o run fallo por `-o`, 2o verde en 2m23s, y `push` a develop en verde | Hecho este commit |
-| 62 | `docker-images.yml` falla en develop: el smoke test del contenedor API no levanta en el 18080 | 5 corridas rojas antes de esta ronda | Siguiente |
+| 62 | `docker-images.yml` en verde: la imagen API arranca con BD y nginx resuelve su upstream | 23 pasos en verde e imagenes publicadas; 2 defectos (sin BD, upstream sin resolver) | Hecho este commit |
+| 63 | Correr las 49 migraciones tambien en el smoke test de la imagen | Hoy corren en el workflow de paridad, no en el de Docker | Siguiente |
 
 ## Proximas rondas candidatas
 

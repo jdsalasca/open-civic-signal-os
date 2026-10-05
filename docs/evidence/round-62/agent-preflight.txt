@@ -1,0 +1,134 @@
+
+> open-civic-signal-os@0.2.0 agent:preflight
+> node scripts/agent-preflight.mjs
+
+Detected changed files: 64
+
+> npm run agent:context:check
+
+> open-civic-signal-os@0.2.0 agent:context:check
+> node scripts/agent-context-check.mjs
+
+Agent context check passed.
+
+> npm run backlog:current:check
+
+> open-civic-signal-os@0.2.0 backlog:current:check
+> node scripts/check-current-backlog.mjs
+
+Current backlog check passed.
+
+> npm run security:runtime:check
+
+> open-civic-signal-os@0.2.0 security:runtime:check
+> node scripts/check-runtime-secrets.mjs
+
+Runtime secret policy check passed.
+
+> node test/generate-transparency-report.test.mjs
+generate-transparency-report
+  ok  renders a valid report
+  ok  reports both artifacts
+  ok  includes the unaddressed section
+  ok  produces byte-identical output across runs
+  ok  reports unchanged files on a rerun into the same directory
+  ok  rejects a report with no previous period
+  ok  rejects a malformed period key
+  ok  rejects a metric with no comparison
+  ok  rejects a report with no formula version
+  ok  fails fast on a missing input file
+  ok  states the closed period
+  ok  names the unaddressed item
+  ok  names the actioned item
+  ok  reads a falling resolution time as improved
+  ok  leaves an ambiguous intake metric unframed
+  ok  does not claim rising intake is a win
+  ok  cites the scoring formula
+  ok  claims reproducibility
+
+all checks passed
+
+> node test/check-ranking-reproducibility.test.mjs
+check-ranking-reproducibility
+  ok  accepts a capture that matches its own hash
+  ok  reports the formula version it verified
+  ok  reports the ordering hash
+  ok  rejects a reordered capture
+  ok  names the recorded and recomputed hashes
+  ok  says the file was edited
+  ok  rejects a capture with no recorded hash
+  ok  fails loudly on a missing capture
+  ok  distinguishes could-not-check from not-reproducible
+  ok  never passes when the API is unreachable
+  ok  explains that the API could not be reached
+  ok  rejects a non-numeric size before calling the API
+  ok  documents the exit codes
+
+all checks passed
+
+> node test/overlay-append-to.test.mjs
+floating panels mount outside their container
+  ok  Communities.tsx
+  ok  CommunityActivities.tsx
+  ok  CommunityBlog.tsx
+  ok  CommunityDecisions.tsx
+  ok  CommunityFeed.tsx
+  ok  CommunityGovernance.tsx
+  ok  CommunityIntegrations.tsx
+  ok  CommunityMap.tsx
+  ok  CommunityMergeReview.tsx
+  ok  CommunityOpenData.tsx
+  ok  CommunityProjects.tsx
+  ok  CommunityProposals.tsx
+  ok  CommunityResources.tsx
+  ok  CommunityRooms.tsx
+  ok  CommunityThreads.tsx
+  ok  CommunityTrustMetrics.tsx
+  ok  Dashboard.tsx
+  ok  HelpCenter.tsx
+  ok  Login.tsx
+  ok  Moderation.tsx
+  ok  MySignals.tsx
+  ok  NotFound.tsx
+  ok  PublicBacklog.tsx
+  ok  Register.tsx
+  ok  ReportSignal.tsx
+  ok  Settings.tsx
+  ok  SignalDetail.tsx
+  ok  Unauthorized.tsx
+  ok  Verify.tsx
+  ok  WeeklyDigestView.tsx
+
+all views mount their floating panels on document.body
+
+> node test/capture-trust-incident.test.mjs
+capture-trust-incident
+  ok  refuses to write an unlabelled bundle
+  ok  says why the label is required
+  ok  wrote nothing when it refused
+  ok  writes a bundle even when the API is unreachable
+  ok  produced exactly one file
+  ok  records the label
+  ok  records a capture timestamp
+  ok  has a schema version
+  ok  attempted every probe
+  ok  marks unreachable probes as failed rather than omitting them
+  ok  explains what an incomplete bundle means
+  ok  tells the operator the bundle is incomplete
+  ok  rejects a flag with no value
+  ok  names the file after the label
+  ok  documents both exit codes
+  ok  captures against a reachable API
+  ok  reports no failed probes
+  ok  captured the formula version
+  ok  captured the counts
+  ok  captured a real ordering hash
+  ok  captured the top titles
+  ok  captured which surfaces are stale
+  ok  did not report a healthy surface as stale
+
+all checks passed
+
+Docs changed: ensure links and examples remain valid.
+
+Agent preflight passed.
