@@ -34,6 +34,7 @@
     "backlog:current:check": "node scripts/check-current-backlog.mjs",
     "security:runtime:check": "node scripts/check-runtime-secrets.mjs",
     "contract:parity:check": "node scripts/check-openapi-parity.mjs",
+    "schema:pg:verify": "node scripts/verify-postgres-schema.mjs",
     "agent:ux:pw": "node scripts/playwright-cli.mjs",
     "report:transparency": "node scripts/generate-transparency-report.mjs",
     "ranking:check": "node scripts/check-ranking-reproducibility.mjs",

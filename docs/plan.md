@@ -6,7 +6,10 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 441 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 443 en `apps/api-java`, todos en verde con `mvn clean test` (2 saltados: la paridad con
+  PostgreSQL, que necesita Docker).
+- **Esquema:** las 49 migraciones corren en H2 (la suite) y en PostgreSQL 15, y `npm run
+  schema:pg:verify` compara ambos: 62 tablas y 582 columnas, identicas. Ronda 57.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -95,6 +98,20 @@ patron que mas caro sale:
    peligro de `target/` trackeado que el plan ya registraba, con otra forma: no un `.class` viejo que
    hace pasar un test contra codigo antiguo, sino un recurso viejo que hace correr un test contra
    configuracion antigua. Toda evidencia de migraciones viene de `mvn -o clean test`.
+13. **Un fallo que no dice nada del dominio es un fallo peligroso.** Al verificar el esquema contra
+   PostgreSQL, el script reporto `FAILED` dos veces sin una linea de Maven, por `spawnSync mvn ENOENT`
+   (Maven no esta en el PATH de un proceso Node en Windows aunque PowerShell lo encuentre) y
+   `spawnSync mvn.cmd EINVAL` (no se puede ejecutar un `.cmd` con `execFileSync`). Ninguno de los dos
+   tinha que ver con esquemas, y los dos se leen como "las schemas no coinciden". Un error que no nombra
+   la capa donde fallo invita a "arreglarlo" aflojando una asercion: hay que imprimir lo que la
+   herramienta dijo de verdad antes de tocar la prueba.
+14. **No reinicies el estado de trabajo de otra persona para hacer tu medicion.** El primer intento
+   apunto al `civic-db` de la infra y fallo por autenticacion: el volumen se inicializo con una contrasena
+   antigua. Se podia recrear el volumen o dejarlo; recreate destruye datos locales que no son mios y,
+   peor, hace que la verificacion dependa del estado de una base en la que alguien trabaja. Traerse su
+   propio PostgreSQL, en su puerto, con una contrasena desechable. **Pendiente para el humano:** el
+   volumen `civic-db` tiene una contrasena que no coincide con `infra/.env`, asi que `docker compose up`
+   no autentica hasta que alguien lo recree o corrija el archivo.
 
 ## Rondas
 
@@ -118,7 +135,8 @@ patron que mas caro sale:
 | 54 | La bandeja de menciones deja de consultar 3 veces por fila | 437 tests; 30->15 queries; y el orden de evidencia de asamblea, que hacia fallar el preflight | Hecho este commit |
 | 55 | La secuencia del timeline de auditoria ya se puebla y se testea | 438 tests; falla por mutacion sin el `columnDefinition` | Hecho este commit |
 | 56 | Las 49 migraciones se ejecutan en la suite | 441 tests; 2 bugs de produccion (supersede, agenda) y 10 tests que escribian datos imposibles | Hecho este commit |
-| 57 | Correr las migraciones tambien contra PostgreSQL, no solo H2 | Un perfil o job que migre el motor de produccion | Siguiente |
+| 57 | Las migraciones corren tambien contra PostgreSQL y se comparan con H2 | 49 migraciones en PG15; 62 tablas y 582 columnas identicas; falla con PG sin migrar | Hecho este commit |
+| 58 | Ejecutar schema:pg:verify en CI, no solo a mano | Un workflow que lo corra en cada push | Siguiente |
 
 ## Proximas rondas candidatas
 
