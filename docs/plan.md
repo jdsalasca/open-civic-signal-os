@@ -6,7 +6,7 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 432 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 433 en `apps/api-java`, todos en verde con `mvn clean test`.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -46,6 +46,13 @@ patron que mas caro sale:
    silencio no es "optimizar": es decidir que a la persona que coordina le alcanza con los 50 mas
    recientes. El hermano mayor: acotar la carga sin acotar la **consulta** tampoco esta hecho
    (ronda 52).
+7. **Un valor correcto tambien puede salir de leerlo todo.** El conteo de mensajes de una sala era
+   correcto y salia de `findAll().size()` sobre la historia entera, una vez por sala en cada apertura
+   del workspace. La prueba que lo caza no puede assertar `messageCount` -el codigo roto tambien
+   devolvia 60- sino medir I/O: la misma consulta con 5 y con 60 mensajes tiene que leer lo mismo. Y
+   `em.clear()` antes de medir, o la cache de primer nivel responde y el test pasa por la razon
+   equivocada. Un test verde que no puede fallar es peor que no tener test: enacta el defecto como
+   correcto.
 
 ## Rondas
 
@@ -64,7 +71,8 @@ patron que mas caro sale:
 | 49 | Una asamblea cerrada reporta el tiempo que duro | 430 tests; falla por mutacion | Hecho este commit |
 | 50 | Una sala no descarga su historia entera al abrirse | 432 tests; falla por mutacion | Hecho `387095f` |
 | 51 | Un historial de sala truncado se ve truncado, y se pagina a pedido | 6 Playwright (2 mutaciones); 8 capturas; 432 tests | Hecho este commit |
-| 52 | El query de mensajes de sala sigue trayendo la historia entera | Test de integracion que falle al leer el limite en el repositorio | Siguiente |
+| 52 | Contar los mensajes de una sala ya no los lee | 433 tests; el test mide I/O y falla por mutacion | Hecho este commit |
+| 53 | Auditar el patron "cargar para contar" en el resto del dominio | Una pantalla por concepto con la misma forma | Siguiente |
 
 ## Proximas rondas candidatas
 

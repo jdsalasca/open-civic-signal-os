@@ -8,7 +8,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import java.util.UUID;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.Community;
@@ -31,7 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
     "spring.datasource.driver-class-name=org.h2.Driver",
     "spring.datasource.username=sa",
     "spring.datasource.password=",
-    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect"
+    "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+    // Lets one test assert how many rows a screen actually read, not just what it returned.
+    "spring.jpa.properties.hibernate.generate_statistics=true"
 })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -42,6 +48,8 @@ class CommunityRoomsIT {
     @Autowired private UserRepository userRepository;
     @Autowired private CommunityRepository communityRepository;
     @Autowired private CommunityMembershipRepository membershipRepository;
+    @Autowired private EntityManager entityManager;
+    @Autowired private EntityManagerFactory entityManagerFactory;
 
     private UUID communityId;
     private UUID coordinatorId;
@@ -290,6 +298,58 @@ class CommunityRoomsIT {
             mapper.readTree(wider).get("messages").size()
                 <= org.opencivic.signalos.service.CommunityListLimits.MAX_LIMIT,
             "a requested limit must never exceed the shared maximum");
+    }
+
+    @Test
+    void openingTheWorkspaceShouldNotReadEveryMessageOfEveryRoom() throws Exception {
+        String roomId = createRoomAsCoordinator();
+        for (int i = 0; i < 5; i++) {
+            postMessage(roomId, "Field note " + i);
+        }
+
+        long withFiveMessages = workspaceEntityLoads();
+
+        for (int i = 5; i < 60; i++) {
+            postMessage(roomId, "Field note " + i);
+        }
+
+        long withSixtyMessages = workspaceEntityLoads();
+
+        // The counts are right either way, so asserting messageCount proves nothing about I/O: the
+        // defect was reading 60 rows to produce the number 60. Hibernate 7 dropped per-entity
+        // statistics, so measure the thing that actually matters instead - whether the reads grow when
+        // the history grows. Same room, same caller, same screen; only the history size differs.
+        //
+        // One room here, so the N is small and easy to read. With 20 busy rooms it was 20 full
+        // histories on every workspace open, which is the screen a coordinator loads precisely to find
+        // out which room is busy.
+        org.junit.jupiter.api.Assertions.assertEquals(withFiveMessages, withSixtyMessages,
+            "opening the workspace read " + withSixtyMessages + " entities for a 60-message room and "
+                + withFiveMessages + " for a 5-message one: the reads scale with history, so it is "
+                + "loading messages instead of counting them");
+    }
+
+    /** Entity loads for one workspace open, with nothing left in the persistence context to serve from cache. */
+    private long workspaceEntityLoads() throws Exception {
+        // Without em.clear() the messages are still in the first-level cache from the posts above and
+        // the workspace is served from memory, reporting 0 loads for entirely the wrong reason.
+        entityManager.flush();
+        entityManager.clear();
+        Statistics statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+        statistics.clear();
+
+        String body = mockMvc.perform(get("/api/community/rooms/workspace")
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        var json = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
+        org.junit.jupiter.api.Assertions.assertEquals(1, json.get("rooms").size());
+        org.junit.jupiter.api.Assertions.assertTrue(json.get("rooms").get(0).get("messageCount").asInt() >= 5,
+            "the summary must still count messages, not the page it happened to load");
+
+        return statistics.getEntityLoadCount();
     }
 
     private void postMessage(String roomId, String body) throws Exception {

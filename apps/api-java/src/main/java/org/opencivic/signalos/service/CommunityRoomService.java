@@ -38,6 +38,7 @@ import org.opencivic.signalos.web.dto.CommunityRoomSummaryResponse;
 import org.opencivic.signalos.web.dto.CommunityRoomWorkspaceResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityRoomRequest;
 import org.opencivic.signalos.web.dto.PostCommunityRoomMessageRequest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,9 +116,15 @@ public class CommunityRoomService {
         // Bounded, because this platform is used in the field on a phone with little bandwidth and a
         // room that has been running for a year would otherwise be downloaded whole on every open. The
         // workspace endpoint beside this one already took a limit; this one took none.
+        //
+        // The limit reaches the database. Capping a list that was already fully read bounds the
+        // response and nothing else: the row count a busy room costs stays the same no matter how few
+        // messages the caller asked for.
         int effectiveLimit = CommunityListLimits.resolveLimit(limit);
-        List<CommunityRoomMessage> allMessages = messageRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
-        List<CommunityRoomMessage> messages = allMessages.stream().limit(effectiveLimit).toList();
+        List<CommunityRoomMessage> messages = messageRepository
+            .findByRoomIdOrderByCreatedAtDescIdDesc(roomId, PageRequest.of(0, effectiveLimit))
+            .getContent();
+        long totalMessages = messageRepository.countByRoomId(roomId);
         List<UUID> messageIds = messages.stream().map(CommunityRoomMessage::getId).toList();
         Map<UUID, List<CommunityRoomMention>> mentionsByMessage = mentionsByMessage(messageIds);
 
@@ -151,8 +158,8 @@ public class CommunityRoomService {
             mute == null ? null : mute.getMutedAt(),
             // The true total, not the capped page size, so a reader can tell a quiet room from a
             // truncated one.
-            allMessages.size(),
-            allMessages.size() > messages.size(),
+            totalMessages,
+            totalMessages > messages.size(),
             mentionRepository.countByRoomIdAndMentionedUserIdAndReadAtIsNull(roomId, user.getId()),
             payload
         );
@@ -375,7 +382,14 @@ public class CommunityRoomService {
     }
 
     private CommunityRoomSummaryResponse toSummary(CommunityRoom room, UUID userId, Map<UUID, CommunityRoomMute> mutesByRoom) {
-        List<CommunityRoomMessage> messages = messageRepository.findByRoomIdOrderByCreatedAtDesc(room.getId());
+        // This runs once per room on every workspace open, which is the screen a coordinator loads to
+        // find out which room is busy. It used to load each room's entire history to call .size() on it
+        // and read the newest timestamp: twenty busy rooms meant twenty full histories to draw a list
+        // of twenty rows. A count and the single newest row answer both questions.
+        long messageCount = messageRepository.countByRoomId(room.getId());
+        List<CommunityRoomMessage> newest = messageRepository
+            .findByRoomIdOrderByCreatedAtDescIdDesc(room.getId(), PageRequest.of(0, 1))
+            .getContent();
         CommunityRoomMute mute = mutesByRoom.get(room.getId());
         return new CommunityRoomSummaryResponse(
             room.getId(),
@@ -386,10 +400,10 @@ public class CommunityRoomService {
             room.getCreatedBy(),
             room.getCreatedAt(),
             room.isArchived(),
-            messages.size(),
+            messageCount,
             mentionRepository.countByRoomIdAndMentionedUserIdAndReadAtIsNull(room.getId(), userId),
             mute != null,
-            messages.isEmpty() ? room.getCreatedAt() : messages.get(0).getCreatedAt()
+            newest.isEmpty() ? room.getCreatedAt() : newest.get(0).getCreatedAt()
         );
     }
 
