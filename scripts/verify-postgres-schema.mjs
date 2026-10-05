@@ -128,8 +128,13 @@ try {
   // directly either, so it goes through cmd.exe. The symptom of getting this wrong is a bare EINVAL or
   // ENOENT that reads like "the schema does not match" when nothing was ever compared.
   const maven = mavenCommand();
-  run(maven.command, [...maven.prefix,
-    '-o', 'clean', 'test', '-Dtest=PostgresSchemaParityIT', '-DfailIfNoSpecifiedTests=false'], {
+  // Offline is opt-in, not the default. It worked on a developer machine because ~/.m2 was already
+  // warm, and failed on the first GitHub runner with "Non-resolvable parent POM" - a fresh runner has
+  // an empty Maven repository, so offline mode cannot resolve even the Spring Boot parent. The failure
+  // read as a schema problem for about as long as it took to notice it was a build flag.
+  const offline = process.env.MAVEN_OFFLINE === '1' ? ['-o'] : [];
+  run(maven.command, [...maven.prefix, ...offline,
+    'clean', 'test', '-Dtest=PostgresSchemaParityIT', '-DfailIfNoSpecifiedTests=false'], {
     cwd: resolve(repoRoot, 'apps/api-java'),
     stdio: ['ignore', 'pipe', 'pipe'],
     // 127.0.0.1 rather than localhost: the published port is bound to the IPv4 loopback only, and on a
