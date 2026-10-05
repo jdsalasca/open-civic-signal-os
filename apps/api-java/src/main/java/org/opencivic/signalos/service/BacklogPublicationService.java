@@ -125,7 +125,12 @@ public class BacklogPublicationService {
         publicationRepository.findByCommunityIdAndCurrentSlotIsNotNull(community.getId())
             .ifPresent(previous -> {
                 previous.setCurrent(false);
-                publicationRepository.save(previous);
+                // Flushed, not just saved. Hibernate orders inserts before updates within a flush, so
+                // saving the previous publication and then inserting the new one put both rows on
+                // current_slot = 1 at the same instant, and the unique index on
+                // (community_id, current_slot) rejected the second publication. Publishing twice has
+                // always been meant to supersede the first.
+                publicationRepository.saveAndFlush(previous);
             });
 
         CommunityBacklogPublication publication = new CommunityBacklogPublication();

@@ -6,7 +6,7 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 438 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 441 en `apps/api-java`, todos en verde con `mvn clean test`.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -82,7 +82,19 @@ patron que mas caro sale:
    tapando el que si ocurre.
    Y `create-drop` no es un detalle de tests: significa que **las 49 migraciones llegan a produccion sin
    que la suite las haya ejecutado nunca**. Una columna que solo existe en un `.sql` no existe para las
-   pruebas.
+   pruebas. Ya corregido en la ronda 56.
+11. **Hibernate vacia inserts antes que updates y deletes.** "Libera la fila actual y luego inserta la
+   nueva" choca contra el indice unico si ambas cosas van en el mismo flush: la nueva entra con el slot
+   que la vieja todavia tiene. Dos bugs de produccion estaban vivos por esto - publicar de nuevo el
+   backlog y reemplazar la agenda de una asamblea - y ambos tests que lo afirmaban llevaba rondas
+   pasando, porque el esquema de los tests no tenia los indices. Cuando falte una restriccion, la
+   pregunta no es solo "que dato falta" sino "que invariante nunca se pudo comprobar".
+12. **Un `target/` stale tambien miente sobre la configuracion, no solo sobre el codigo.** Sin `clean`,
+   Maven puede usar un `target/test-classes/application-test.yml` viejo: dos tests "fallaban" por una
+   config que yo creia activa, y el diagnostico mostraba 7 FKs donde deberian ser 139. Es el mismo
+   peligro de `target/` trackeado que el plan ya registraba, con otra forma: no un `.class` viejo que
+   hace pasar un test contra codigo antiguo, sino un recurso viejo que hace correr un test contra
+   configuracion antigua. Toda evidencia de migraciones viene de `mvn -o clean test`.
 
 ## Rondas
 
@@ -105,7 +117,8 @@ patron que mas caro sale:
 | 53 | Las pantallas de sala dejan de consultar una vez por fila | 436 tests; 58->8 queries y 61->5 entity loads; 2 mutaciones | Hecho este commit |
 | 54 | La bandeja de menciones deja de consultar 3 veces por fila | 437 tests; 30->15 queries; y el orden de evidencia de asamblea, que hacia fallar el preflight | Hecho este commit |
 | 55 | La secuencia del timeline de auditoria ya se puebla y se testea | 438 tests; falla por mutacion sin el `columnDefinition` | Hecho este commit |
-| 56 | Las 49 migraciones nunca llegan a ejecutarse en la suite (`create-drop`) | Decision sobre que schema construyen los tests de integracion | Siguiente |
+| 56 | Las 49 migraciones se ejecutan en la suite | 441 tests; 2 bugs de produccion (supersede, agenda) y 10 tests que escribian datos imposibles | Hecho este commit |
+| 57 | Correr las migraciones tambien contra PostgreSQL, no solo H2 | Un perfil o job que migre el motor de produccion | Siguiente |
 
 ## Proximas rondas candidatas
 

@@ -9,10 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.repository.SignalRepository;
+import org.opencivic.signalos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,6 +31,20 @@ class DuplicateDetectionIT {
 
     @Autowired
     private SignalRepository signalRepository;
+
+    /** Signals carry a foreign key to their author, so a random id is not a signal - it is an orphan. */
+    @Autowired
+    private UserRepository userRepository;
+
+    private UUID authorId;
+
+    @BeforeEach
+    void createAuthor() {
+        User author = new User("dup_author", "{noop}pw", "dup-author@test.dev", "ROLE_CITIZEN");
+        author.setEnabled(true);
+        author.setVerified(true);
+        authorId = userRepository.save(author).getId();
+    }
 
     @Test
     void shouldDetectNearDuplicateTitlesInSameCategory() {
@@ -65,7 +82,7 @@ class DuplicateDetectionIT {
             new ScoreBreakdown(120, 100, 4.5, 0),
             "NEW",
             new ArrayList<>(),
-            UUID.randomUUID(),
+            authorId,
             LocalDateTime.now().minusMinutes(5)
         ));
     }

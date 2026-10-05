@@ -25,11 +25,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 class UserProfileVisibilityIT {
 
     @Autowired
@@ -48,10 +50,6 @@ class UserProfileVisibilityIT {
 
     @BeforeEach
     void setUp() {
-        membershipRepository.deleteAll();
-        communityRepository.deleteAll();
-        userRepository.deleteAll();
-
         Community community = new Community();
         community.setName("Central Campus");
         community.setSlug("central-campus");

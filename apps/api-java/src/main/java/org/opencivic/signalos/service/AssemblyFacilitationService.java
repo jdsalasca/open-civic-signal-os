@@ -130,6 +130,10 @@ public class AssemblyFacilitationService {
         }
 
         agendaRepository.deleteByAssemblyId(assemblyId);
+        // Flushed before the replacements go in. Hibernate orders inserts before deletes within a flush,
+        // so the new items landed on the same (assembly_id, position) as the ones being removed and the
+        // unique index rejected them. Replacing an agenda is a supported action, not a conflict.
+        agendaRepository.flush();
         int position = 1;
         for (AgendaItemRequest item : requested) {
             if (item.title() == null || item.title().isBlank()) {
