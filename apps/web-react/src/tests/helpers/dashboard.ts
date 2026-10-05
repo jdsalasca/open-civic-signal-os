@@ -15,13 +15,39 @@ import type { Page } from '@playwright/test';
  * Specs that assert on aging or help content should register their own route for it. Playwright
  * checks the most recently added route first, so a later registration wins over these.
  */
-export async function mockDashboardRoutes(page: Page) {
-  const json = (body: unknown) => ({
-    status: 200,
-    contentType: 'application/json',
-    body: JSON.stringify(body),
-  });
+const json = (body: unknown) => ({
+  status: 200,
+  contentType: 'application/json',
+  body: JSON.stringify(body),
+});
 
+/**
+ * Answer the contextual help panel.
+ *
+ * Split out from `mockDashboardRoutes` because of a registration-order trap: Playwright checks the
+ * most recently added route first, so calling the combined helper after a spec registered its own
+ * aging payload would silently override it. A spec that asserts on aging content needs this one
+ * alone and keeps its own route.
+ */
+export async function mockHelpCenter(page: Page) {
+  await page.route('**/api/help-center*', (route) =>
+    route.fulfill(
+      json({
+        persona: 'citizen',
+        language: 'en',
+        surface: 'DASHBOARD',
+        query: null,
+        generatedAt: '2026-04-01T12:00:00',
+        completedStepKeys: [],
+        dismissedGuideKeys: [],
+        onboardingSteps: [],
+        guides: [],
+      }),
+    ));
+}
+
+/** The two routes the dashboard fires that no spec remembers to mock. */
+export async function mockDashboardRoutes(page: Page) {
   // The aging payload has to satisfy SignalAging exactly. A missing `atRiskSignals` crashes the
   // dashboard at `aging.atRiskSignals.length`, and the crash is not a blank screen: React unmounts
   // the tree, the boundary retries, it crashes again, and the dashboard re-requests aging about
@@ -42,18 +68,5 @@ export async function mockDashboardRoutes(page: Page) {
       }),
     ));
 
-  await page.route('**/api/help-center*', (route) =>
-    route.fulfill(
-      json({
-        persona: 'citizen',
-        language: 'en',
-        surface: 'DASHBOARD',
-        query: null,
-        generatedAt: '2026-04-01T12:00:00',
-        completedStepKeys: [],
-        dismissedGuideKeys: [],
-        onboardingSteps: [],
-        guides: [],
-      }),
-    ));
+  await mockHelpCenter(page);
 }

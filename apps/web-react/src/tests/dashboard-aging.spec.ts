@@ -1,25 +1,11 @@
 import { expect, test } from "@playwright/test";
+
+import { seedAuthenticatedApp } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 import type { SignalAging, SignalMeta } from "../types";
 
 test.describe("Dashboard case aging and SLA risk", () => {
   test("shows SLA counters, buckets, and the worst breaching case to staff", async ({ page }) => {
-    await page.addInitScript(() => {
-      window.localStorage.setItem(
-        "auth-storage",
-        JSON.stringify({
-          state: {
-            accessToken: "test-token",
-            userName: "liaison",
-            activeRole: "PUBLIC_SERVANT",
-            rawRoles: ["PUBLIC_SERVANT", "CITIZEN"],
-            isLoggedIn: true,
-            isHydrated: true,
-          },
-          version: 0,
-        })
-      );
-    });
-
     const meta: SignalMeta = {
       totalSignals: 4,
       unresolvedSignals: 4,
@@ -69,6 +55,11 @@ test.describe("Dashboard case aging and SLA risk", () => {
       ],
       trend: [],
     };
+
+    await seedAuthenticatedApp(page);
+
+    await mockHelpCenter(page);
+
 
     await page.route("**/api/signals/meta*", async (route) => {
       await route.fulfill({
@@ -135,24 +126,10 @@ test.describe("Dashboard case aging and SLA risk", () => {
   });
 
   test("hides the aging panel from citizens", async ({ page }) => {
-    await page.addInitScript(() => {
-      window.localStorage.setItem(
-        "auth-storage",
-        JSON.stringify({
-          state: {
-            accessToken: "test-token",
-            userName: "citizen",
-            activeRole: "CITIZEN",
-            rawRoles: ["CITIZEN"],
-            isLoggedIn: true,
-            isHydrated: true,
-          },
-          version: 0,
-        })
-      );
-    });
-
     let agingCalls = 0;
+    await seedAuthenticatedApp(page, "CITIZEN");
+    await mockHelpCenter(page);
+
     await page.route("**/api/signals/meta*", async (route) => {
       await route.fulfill({
         status: 200,

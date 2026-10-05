@@ -208,7 +208,9 @@ patron que mas caro sale:
 | 65 | Ninguna vista renderiza un timestamp por el locale del navegador | 25 sitios en 16 archivos; guardia `no-locale-timestamps` con mutacion verificada; 26/10 fallos igual que en baseline | Hecho este commit |
 | 66 | El detalle de caso describe mal su propia pantalla | Eyebrow `Priority Rank` y subtitulo `Intelligence Context` repetian tarjetas; el topbar decia `Home` porque `activeSection` comparaba rutas exactas | Hecho este commit |
 | 67 | Tres specs muertas del dashboard vuelven a correr | `signals/aging` y `help-center` sin mockear causaban `logout()`; 3 tests en verde y 18 con las specs del detalle | Hecho este commit |
-| 68 | Convertir las specs que si usan login real y el resto de `community-*` | `dashboard-guided-home`, `weekly-digest`, `merge-review`, `field-data-mode` y `community-rooms-history` ya tienen su propia copia de `seedSession`; el helper esta listo | Siguiente |
+| 68 | `dashboard-aging` vuelve a correr y el helper de sesion queda completo | Le faltaban `auth/me` y `help-center`; 2 tests en verde y 20 con todo lo de las rondas 64-68 | Hecho este commit |
+| 69 | Convertir las specs de comunidad y digest que siguen fuera | `weekly-digest`, `merge-review`, `field-data-mode` y `community-rooms-history` necesitan **membresia activa** en `communities/my`, no solo rutas | Siguiente |
+| 70 | El script `dev` fija `--port 3002` en el npm script | `npm run dev -- --port X` emite el flag duplicado; el default pertenece a `vite.config.ts` | Siguiente |
 
 ## Proximas rondas candidatas
 
