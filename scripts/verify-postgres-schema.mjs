@@ -12,10 +12,10 @@
 // this check should not depend on either.
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 
 const CONTAINER = 'signalos-pg-verify';
+const NETWORK = 'signalos-pg-verify-net';
 const PORT = '55432';
 const DB = 'signalos_verify';
 const USER = 'verify';
@@ -52,6 +52,11 @@ function stopContainer() {
   } catch {
     // Already gone. Nothing to clean up.
   }
+  try {
+    docker('network', 'rm', NETWORK);
+  } catch {
+    // Already gone.
+  }
 }
 
 async function waitForPostgres() {
@@ -71,8 +76,15 @@ let failed = false;
 try {
   stopContainer();
 
+  // A dedicated network rather than host.docker.internal. That name is a Docker Desktop convenience
+  // and does not resolve on a Linux runner, so a script that used it would pass on a developer's
+  // Windows machine and fail in CI - the worst place to find out. Container name over a user-defined
+  // network works identically on both.
+  docker('network', 'create', NETWORK);
+
   console.log(`Starting a throwaway PostgreSQL on 127.0.0.1:${PORT}...`);
   docker('run', '-d', '--rm', '--name', CONTAINER,
+    '--network', NETWORK,
     '-p', `127.0.0.1:${PORT}:5432`,
     '-e', `POSTGRES_DB=${DB}`,
     '-e', `POSTGRES_USER=${USER}`,
@@ -82,10 +94,10 @@ try {
   await waitForPostgres();
 
   console.log('Applying every migration with the real migration files...');
-  const migrated = docker('run', '--rm',
+  const migrated = docker('run', '--rm', '--network', NETWORK,
     '-v', `${migrations}:/flyway/sql`,
     FLYWAY_IMAGE, 'migrate',
-    `-url=jdbc:postgresql://host.docker.internal:${PORT}/${DB}`,
+    `-url=jdbc:postgresql://${CONTAINER}:5432/${DB}`,
     `-user=${USER}`,
     `-password=${PASSWORD}`,
     '-locations=filesystem:/flyway/sql');
@@ -95,10 +107,10 @@ try {
   // Validate after migrate: catches a migration whose checksum no longer matches what ran, which is the
   // failure that only shows up on a database that already has history.
   console.log('Validating...');
-  docker('run', '--rm',
+  docker('run', '--rm', '--network', NETWORK,
     '-v', `${migrations}:/flyway/sql`,
     FLYWAY_IMAGE, 'validate',
-    `-url=jdbc:postgresql://host.docker.internal:${PORT}/${DB}`,
+    `-url=jdbc:postgresql://${CONTAINER}:5432/${DB}`,
     `-user=${USER}`,
     `-password=${PASSWORD}`,
     '-locations=filesystem:/flyway/sql');
@@ -120,7 +132,9 @@ try {
     '-o', 'clean', 'test', '-Dtest=PostgresSchemaParityIT', '-DfailIfNoSpecifiedTests=false'], {
     cwd: resolve(repoRoot, 'apps/api-java'),
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env, POSTGRES_VERIFY_URL: `jdbc:postgresql://localhost:${PORT}/${DB}` },
+    // 127.0.0.1 rather than localhost: the published port is bound to the IPv4 loopback only, and on a
+    // Linux runner "localhost" can resolve to ::1 first, which would fail to connect.
+    env: { ...process.env, POSTGRES_VERIFY_URL: `jdbc:postgresql://127.0.0.1:${PORT}/${DB}` },
   });
   console.log('Schemas agree.');
 } catch (error) {

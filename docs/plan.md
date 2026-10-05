@@ -112,6 +112,18 @@ patron que mas caro sale:
    propio PostgreSQL, en su puerto, con una contrasena desechable. **Pendiente para el humano:** el
    volumen `civic-db` tiene una contrasena que no coincide con `infra/.env`, asi que `docker compose up`
    no autentica hasta que alguien lo recree o corrija el archivo.
+15. **Un workflow no se prueba en la maquina donde lo escribiste.** El script de la ronda 57 llegaba a
+   PostgreSQL por `host.docker.internal`, que es una comodidad de Docker Desktop y **no resuelve en un
+   runner Linux**: habria pasado en Windows y fallado en el primer PR, con un mensaje que se lee como
+   "los esquemas no coinciden" - la unica conclusion que ese script no debe equivocar. Red de Docker y
+   nombre de contenedor en su lugar, y `127.0.0.1` en vez de `localhost` porque el puerto publicado es
+   IPv4. Hallado leyendo el script contra el runner, no ejecutandolo: **el workflow sigue sin haberse
+   corrido en GitHub**, y eso queda escrito.
+16. **Antes de integrar una rama ajena, comprobar si ya esta superseded.** Las dos ramas `codex/*`
+   seguian sin mergear y `git branch --no-merged develop` las listaba como trabajo pendiente. Las dos
+   eran enteramente redundantes: el fix ya estaba en develop. Integrarlas a ciegas habria sido ruido, y
+   borrarlas por "parecen superadas" es como desaparece el trabajo de otra persona. Se documentan y se
+   dejan; `git branch -d` las habria rechazado igual por no estar mergeadas.
 
 ## Rondas
 
@@ -136,7 +148,8 @@ patron que mas caro sale:
 | 55 | La secuencia del timeline de auditoria ya se puebla y se testea | 438 tests; falla por mutacion sin el `columnDefinition` | Hecho este commit |
 | 56 | Las 49 migraciones se ejecutan en la suite | 441 tests; 2 bugs de produccion (supersede, agenda) y 10 tests que escribian datos imposibles | Hecho este commit |
 | 57 | Las migraciones corren tambien contra PostgreSQL y se comparan con H2 | 49 migraciones en PG15; 62 tablas y 582 columnas identicas; falla con PG sin migrar | Hecho este commit |
-| 58 | Ejecutar schema:pg:verify en CI, no solo a mano | Un workflow que lo corra en cada push | Siguiente |
+| 58 | schema:pg:verify corre en cada PR, y el script ya funciona en Linux | Workflow con paths acotados; red Docker en vez de host.docker.internal | Hecho este commit |
+| 59 | Comparar tambien los TIPOS de columna entre H2 y PostgreSQL, no solo los nombres | Una tabla de normalizacion por motor y un test | Siguiente |
 
 ## Proximas rondas candidatas
 

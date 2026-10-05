@@ -39,8 +39,6 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class PostgresSchemaParityIT {
 
-    private static final String URL = "jdbc:postgresql://localhost:55432/signalos_verify";
-
     @Autowired
     private JdbcTemplate h2;
 

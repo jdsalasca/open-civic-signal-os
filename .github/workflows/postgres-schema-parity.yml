@@ -1,0 +1,61 @@
+name: PostgreSQL Schema Parity
+
+# Round 56 made the integration tests build their schema with Flyway on H2, which means the suite
+# stands in for production. Round 57 checked that the same migrations produce the same tables and
+# columns on PostgreSQL. This runs that check on every pull request instead of leaving it to whoever
+# remembers.
+#
+# Without this, a migration that quietly did the right thing on only one engine would pass the whole
+# suite and fail on deploy - which is exactly how V50's `seq` column spent its life: correct in the
+# migration, correct in production, absent everywhere the tests could see it.
+
+on:
+  pull_request:
+    paths:
+      - "apps/api-java/src/main/resources/db/migration/**"
+      - "apps/api-java/src/main/java/**"
+      - "apps/api-java/src/test/java/org/opencivic/signalos/PostgresSchemaParityIT.java"
+      - "scripts/verify-postgres-schema.mjs"
+      - ".github/workflows/postgres-schema-parity.yml"
+      - "package.json"
+  push:
+    branches: [main]
+    paths:
+      - "apps/api-java/src/main/resources/db/migration/**"
+      - "apps/api-java/src/main/java/**"
+      - "apps/api-java/src/test/java/org/opencivic/signalos/PostgresSchemaParityIT.java"
+      - "scripts/verify-postgres-schema.mjs"
+      - ".github/workflows/postgres-schema-parity.yml"
+      - "package.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schema-parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # The script needs no dependencies of its own, but npm resolves the workspace scripts it calls.
+      - run: npm install --ignore-scripts
+
+      - name: Verify the migrations against PostgreSQL
+        run: npm run schema:pg:verify
+
+      - name: Upload surefire reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: open-civic-postgres-parity-reports
+          path: apps/api-java/target/surefire-reports
