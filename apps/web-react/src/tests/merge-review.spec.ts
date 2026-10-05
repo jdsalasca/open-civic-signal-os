@@ -1,4 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 
 /**
  * The duplicate review screen has two jobs, and the second one is easy to get wrong.
@@ -74,6 +76,8 @@ const suggestion = {
 test.describe('Duplicate review', () => {
   test('shows the suggestion with the score that justified it', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
 
     await page.route('**/api/signals/merge-review/suggestions*', async (route) => {
       await route.fulfill({
@@ -97,6 +101,8 @@ test.describe('Duplicate review', () => {
 
   test('approving sends back exactly the candidates it displayed', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
 
     let decisionBody: Record<string, unknown> | null = null;
     await page.route('**/api/signals/merge-review/decisions*', async (route) => {
@@ -150,6 +156,8 @@ test.describe('Duplicate review', () => {
 
   test('rejecting records a decision without claiming a merge', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
 
     let decisionBody: Record<string, unknown> | null = null;
     await page.route('**/api/signals/merge-review/decisions*', async (route) => {
@@ -192,6 +200,8 @@ test.describe('Duplicate review', () => {
 
   test('a suggestion already decided stays visible carrying its decision', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
 
     await page.route('**/api/signals/merge-review/suggestions*', async (route) => {
       await route.fulfill({
@@ -214,6 +224,8 @@ test.describe('Duplicate review', () => {
 
   test('an empty queue says so rather than showing a broken list', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
 
     await page.route('**/api/signals/merge-review/suggestions*', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
@@ -228,6 +240,8 @@ test.describe('Duplicate review', () => {
 
   test('the history records what was decided', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
 
     await page.route('**/api/signals/merge-review/suggestions*', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
@@ -260,6 +274,8 @@ test.describe('Duplicate review', () => {
 
   test('an unreachable queue shows an unavailable state, not a broken list', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
 
     await page.route('**/api/signals/merge-review/suggestions*', async (route) => route.abort('failed'));
     await page.route('**/api/signals/merge-review/history*', async (route) => route.abort('failed'));

@@ -1,4 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 
 /**
  * The digest view exists because the dashboard sidebar of the same name is not the digest.
@@ -115,6 +117,8 @@ async function stubDigest(page: Page, overrides: Record<string, unknown> = {}) {
 test.describe('Weekly digest view', () => {
   test('shows the bulletin body and the counts', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
     await stubDigest(page);
 
     await page.goto('/communities/weekly-digest');
@@ -132,6 +136,8 @@ test.describe('Weekly digest view', () => {
 
   test('an unpublished week says so and offers a publish control', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
     await stubDigest(page, { published: false });
 
     await page.goto('/communities/weekly-digest');
@@ -143,6 +149,8 @@ test.describe('Weekly digest view', () => {
 
   test('a published week says so and does not offer to publish again', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
     await stubDigest(page, { published: true, deliveredToChannels: 2 });
 
     await page.goto('/communities/weekly-digest');
@@ -155,6 +163,8 @@ test.describe('Weekly digest view', () => {
 
   test('the scheduler history shows what happened and why', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
     await stubDigest(page);
 
     await page.goto('/communities/weekly-digest');
@@ -167,6 +177,8 @@ test.describe('Weekly digest view', () => {
 
   test('publishing sends the week and reloads', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
     await stubDigest(page, { published: false });
 
     let publishedUrl = '';
@@ -190,6 +202,8 @@ test.describe('Weekly digest view', () => {
 
   test('an unreachable API shows an unavailable state', async ({ page }) => {
     await seedSession(page);
+    await mockAppBootstrap(page, "11111111-2222-3333-4444-555555555555");
+    await mockHelpCenter(page);
     await page.route('**/api/community/weekly-digest?*', async (route) => route.abort('failed'));
     await page.route('**/api/community/weekly-digest/schedule-history*', async (route) => route.abort('failed'));
 

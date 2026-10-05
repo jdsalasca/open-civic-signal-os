@@ -1,4 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
+import { seedAuthenticatedApp } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 
 /**
  * Field mode is a promise about bytes, so the test asserts on the network, not on the DOM.
@@ -6,31 +8,7 @@ import { expect, test, type Page } from '@playwright/test';
  * Hiding a panel after fetching it still pays for the bytes, which is the entire cost being
  * avoided. A test that only checked the panel was absent would pass for an implementation that
  * fetched everything and then hid it.
- */
-async function seedSession(page: Page, dataMode: 'full' | 'field') {
-  await page.addInitScript((mode) => {
-    window.localStorage.setItem(
-      'auth-storage',
-      JSON.stringify({
-        state: {
-          accessToken: 'test-token',
-          userName: 'liaison',
-          activeRole: 'PUBLIC_SERVANT',
-          rawRoles: ['PUBLIC_SERVANT', 'CITIZEN'],
-          isLoggedIn: true,
-          isHydrated: true,
-        },
-        version: 0,
-      }),
-    );
-    window.localStorage.setItem(
-      'settings-storage',
-      JSON.stringify({ state: { language: 'en', theme: 'dark', interfaceMode: 'advanced', dataMode: mode }, version: 0 }),
-    );
-  }, dataMode);
-}
-
-const prioritizedPayload = {
+ */const prioritizedPayload = {
   content: [
     {
       id: 'sig-1',
@@ -112,7 +90,12 @@ async function stubDashboard(page: Page, requested: string[]) {
 test.describe('Field data mode', () => {
   test('full mode requests every panel', async ({ page }) => {
     const requested: string[] = [];
-    await seedSession(page, 'full');
+    await seedAuthenticatedApp(page, 'PUBLIC_SERVANT', { dataMode: 'full' });
+    await mockHelpCenter(page);
+    await page.route("**/api/signals/export/csv*", (route) => route.fulfill({ status: 200, contentType: "text/csv", body: "id,title" }));
+    await page.route("**/api/auth/profile/me*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ username: "liaison", email: "liaison@example.com", displayName: "liaison", bio: "" }) }));
+    await page.route("**/api/auth/privacy/access-logs*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+    await page.route("**/api/communities/*/privacy*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ communityId: "11111111-2222-3333-4444-555555555555", openDataPolicy: "RESTRICTED" }) }));
     await stubDashboard(page, requested);
 
     await page.goto('/');
@@ -126,7 +109,12 @@ test.describe('Field data mode', () => {
 
   test('field mode does not request the optional panels at all', async ({ page }) => {
     const requested: string[] = [];
-    await seedSession(page, 'field');
+    await seedAuthenticatedApp(page, 'PUBLIC_SERVANT', { dataMode: 'field' });
+    await mockHelpCenter(page);
+    await page.route("**/api/signals/export/csv*", (route) => route.fulfill({ status: 200, contentType: "text/csv", body: "id,title" }));
+    await page.route("**/api/auth/profile/me*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ username: "liaison", email: "liaison@example.com", displayName: "liaison", bio: "" }) }));
+    await page.route("**/api/auth/privacy/access-logs*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+    await page.route("**/api/communities/*/privacy*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ communityId: "11111111-2222-3333-4444-555555555555", openDataPolicy: "RESTRICTED" }) }));
     await stubDashboard(page, requested);
 
     await page.goto('/');
@@ -146,7 +134,12 @@ test.describe('Field data mode', () => {
 
   test('field mode asks for fewer rows', async ({ page }) => {
     const sizes: string[] = [];
-    await seedSession(page, 'field');
+    await seedAuthenticatedApp(page, 'PUBLIC_SERVANT', { dataMode: 'field' });
+    await mockHelpCenter(page);
+    await page.route("**/api/signals/export/csv*", (route) => route.fulfill({ status: 200, contentType: "text/csv", body: "id,title" }));
+    await page.route("**/api/auth/profile/me*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ username: "liaison", email: "liaison@example.com", displayName: "liaison", bio: "" }) }));
+    await page.route("**/api/auth/privacy/access-logs*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+    await page.route("**/api/communities/*/privacy*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ communityId: "11111111-2222-3333-4444-555555555555", openDataPolicy: "RESTRICTED" }) }));
     await page.route('**/api/signals/prioritized*', async (route) => {
       sizes.push(new URL(route.request().url()).searchParams.get('size') ?? '');
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(prioritizedPayload) });
@@ -171,7 +164,12 @@ test.describe('Field data mode', () => {
   });
 
   test('the setting says exactly what field mode stops fetching', async ({ page }) => {
-    await seedSession(page, 'field');
+    await seedAuthenticatedApp(page, 'PUBLIC_SERVANT', { dataMode: 'field' });
+    await mockHelpCenter(page);
+    await page.route("**/api/signals/export/csv*", (route) => route.fulfill({ status: 200, contentType: "text/csv", body: "id,title" }));
+    await page.route("**/api/auth/profile/me*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ username: "liaison", email: "liaison@example.com", displayName: "liaison", bio: "" }) }));
+    await page.route("**/api/auth/privacy/access-logs*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+    await page.route("**/api/communities/*/privacy*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ communityId: "11111111-2222-3333-4444-555555555555", openDataPolicy: "RESTRICTED" }) }));
     await page.route('**/api/auth/me', async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
     });

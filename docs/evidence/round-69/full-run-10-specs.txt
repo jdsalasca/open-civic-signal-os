@@ -1,0 +1,82 @@
+
+Running 37 tests using 4 workers
+
+  ok  2 [chromium] ÔÇ║ src\tests\dashboard-clarity.spec.ts:13:3 ÔÇ║ Dashboard clarity hierarchy ÔÇ║ shows one dominant primary action and moves the rest into a secondary surface (5.4s)
+  ok  4 [chromium] ÔÇ║ src\tests\dashboard-aging.spec.ts:8:3 ÔÇ║ Dashboard case aging and SLA risk ÔÇ║ shows SLA counters, buckets, and the worst breaching case to staff (5.5s)
+  ok  3 [chromium] ÔÇ║ src\tests\dashboard-aging.spec.ts:128:3 ÔÇ║ Dashboard case aging and SLA risk ÔÇ║ hides the aging panel from citizens (6.6s)
+  ok  1 [chromium] ÔÇ║ src\tests\dashboard-filter-query.spec.ts:20:3 ÔÇ║ Dashboard filters change the query ÔÇ║ CRITICAL filter must reach the API as minScore, not just repaint rows (8.8s)
+  ok  8 [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:135:3 ÔÇ║ Field data mode ÔÇ║ field mode asks for fewer rows (2.4s)
+  ok  7 [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:110:3 ÔÇ║ Field data mode ÔÇ║ field mode does not request the optional panels at all (5.1s)
+  ok  9 [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:166:3 ÔÇ║ Field data mode ÔÇ║ the setting says exactly what field mode stops fetching (3.0s)
+  ok 10 [chromium] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it (2.6s)
+  ok 11 [chromium] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed (2.5s)
+  ok 12 [chromium] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge (9.1s)
+  ok  5 [chromium] ÔÇ║ src\tests\dashboard-filter-query.spec.ts:103:3 ÔÇ║ Dashboard filters change the query ÔÇ║ status filter must still reach the API as status (20.3s)
+  ok  6 [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:91:3 ÔÇ║ Field data mode ÔÇ║ full mode requests every panel (20.5s)
+  ok 14 [chromium] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list (8.7s)
+  ok 17 [chromium] ÔÇ║ src\tests\no-locale-timestamps.spec.ts:50:1 ÔÇ║ no view renders a timestamp through the reader browser locale (589ms)
+  ok 13 [chromium] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision (19.5s)
+  ok 15 [chromium] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided (11.4s)
+  ok 19 [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:149:3 ÔÇ║ Public backlog without an account ÔÇ║ shows a sign-in path rather than a dead end (4.1s)
+  ok 18 [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:117:3 ÔÇ║ Public backlog without an account ÔÇ║ renders the ranked backlog, the formula, and the freshness stamp (8.7s)
+  ok 21 [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:174:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ lifecycle is spelled out instead of exposing the raw enum (5.5s)
+  ok 20 [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:156:3 ÔÇ║ Public backlog without an account ÔÇ║ an unreachable API shows an unavailable state, not a login prompt (8.6s)
+  ok 22 [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:185:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ the freshness stamp is unambiguous and free of clock noise (7.4s)
+  ok 23 [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:195:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ a score does not claim precision the formula cannot produce (4.8s)
+  ok 24 [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:211:3 ÔÇ║ Freshness does not depend on the reader browser locale ÔÇ║ renders the same stamp under a non-English locale (6.7s)
+  ok 26 [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:38:3 ÔÇ║ The case screen describes itself ÔÇ║ the header does not restate the card immediately below it (6.8s)
+  ok 25 [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:26:3 ÔÇ║ The case screen describes itself ÔÇ║ the eyebrow names the case instead of repeating a card below it (7.9s)
+  ok 27 [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:51:3 ÔÇ║ The case screen describes itself ÔÇ║ the topbar stops presenting a single case as the dashboard (8.5s)
+  ok 29 [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:17:3 ÔÇ║ Signal detail speaks plain language ÔÇ║ the header badge spells out the lifecycle state (9.2s)
+  ok 30 [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:27:3 ÔÇ║ Signal detail speaks plain language ÔÇ║ the timeline transition reads as two states, not two identifiers (9.1s)
+  ok 31 [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:42:3 ÔÇ║ Signal detail timestamps do not depend on the reader browser locale ÔÇ║ renders the audit trail the same way under a non-English locale (7.8s)
+  ok 32 [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:118:3 ÔÇ║ Weekly digest view ÔÇ║ shows the bulletin body and the counts (7.9s)
+  ok 33 [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:137:3 ÔÇ║ Weekly digest view ÔÇ║ an unpublished week says so and offers a publish control (5.8s)
+  x  16 [chromium] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list (30.3s)
+  ok 34 [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:150:3 ÔÇ║ Weekly digest view ÔÇ║ a published week says so and does not offer to publish again (6.2s)
+  ok 35 [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:164:3 ÔÇ║ Weekly digest view ÔÇ║ the scheduler history shows what happened and why (11.1s)
+  ok 36 [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:203:3 ÔÇ║ Weekly digest view ÔÇ║ an unreachable API shows an unavailable state (22.2s)
+  ok 37 [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:178:3 ÔÇ║ Weekly digest view ÔÇ║ publishing sends the week and reloads (8.4s)
+  x  28 [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:67:1 ÔÇ║ The topbar still frames the pages it is meant to frame ÔÇ║ the dashboard keeps its "what needs attention today" framing (31.3s)
+
+
+  1) [chromium] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list 
+
+    [31mTest timeout of 30000ms exceeded while setting up "page".[39m
+
+    Error: browserContext.newPage: Test timeout of 30000ms exceeded.
+
+  2) [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:67:1 ÔÇ║ The topbar still frames the pages it is meant to frame ÔÇ║ the dashboard keeps its "what needs attention today" framing 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('app-topbar-label')
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 30000ms[22m
+    [2m  - waiting for getByTestId('app-topbar-label')[22m
+
+
+      92 |
+      93 |     await page.goto('/');
+    > 94 |     await expect(page.getByTestId('app-topbar-label')).toBeVisible({ timeout: 30000 });
+         |                                                        ^
+      95 |     await expect(page.getByTestId('app-topbar-label')).toContainText('What needs attention today');
+      96 |     await expect(page.getByTestId('app-topbar-title')).toHaveText('Home');
+      97 |   });
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\signal-detail-describes-itself.spec.ts:94:56
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\signal-detail-describes-it-3bff3-eds-attention-today-framing-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\signal-detail-describes-it-3bff3-eds-attention-today-framing-chromium\error-context.md
+
+  2 failed
+    [chromium] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list 
+    [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:67:1 ÔÇ║ The topbar still frames the pages it is meant to frame ÔÇ║ the dashboard keeps its "what needs attention today" framing 
+  35 passed (2.5m)

@@ -210,7 +210,9 @@ patron que mas caro sale:
 | 67 | Tres specs muertas del dashboard vuelven a correr | `signals/aging` y `help-center` sin mockear causaban `logout()`; 3 tests en verde y 18 con las specs del detalle | Hecho este commit |
 | 68 | `dashboard-aging` vuelve a correr y el helper de sesion queda completo | Le faltaban `auth/me` y `help-center`; 2 tests en verde y 20 con todo lo de las rondas 64-68 | Hecho este commit |
 | 69 | Convertir las specs de comunidad y digest que siguen fuera | `weekly-digest`, `merge-review`, `field-data-mode` y `community-rooms-history` necesitan **membresia activa** en `communities/my`, no solo rutas | Siguiente |
-| 70 | El script `dev` fija `--port 3002` en el npm script | `npm run dev -- --port X` emite el flag duplicado; el default pertenece a `vite.config.ts` | Siguiente |
+| 69 | 17 specs de comunidad y digest vuelven a correr | `field-data-mode` 4, `weekly-digest` 7, `merge-review` 6; **37 tests en serial**; el patron se repite: falta una ruta y el sintoma apunta a la vista | Hecho este commit |
+| 70 | La suite es fragil bajo carga en paralelo | Con 10 specs y 4 workers salen 2-4 timeouts; en serial, 37/37. Los `waitForTimeout` son adiciones y ningun workflow corre la suite | Siguiente |
+| 71 | `package.json` fija `--port 3002` en el script `dev` | `npm run dev -- --port X` emite el flag duplicado; el default pertenece a `vite.config.ts` | Siguiente |
 
 ## Proximas rondas candidatas
 
