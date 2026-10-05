@@ -6,7 +6,7 @@ es el plan de trabajo con criterios verificables.
 
 ## Estado
 
-- **Tests:** 437 en `apps/api-java`, todos en verde con `mvn clean test`.
+- **Tests:** 438 en `apps/api-java`, todos en verde con `mvn clean test`.
 - **Calidad:** `npm run agent:preflight` en verde; parity OpenAPI 178 rutas / 147 documentadas /
   9 intencionalmente no documentadas.
 - **Issues:** 2 abiertos, ambos de proceso (`#120` calidad de agentes, `#121` foco de sprint).
@@ -73,6 +73,16 @@ patron que mas caro sale:
    construyo**, asi que en la suite ninguna columna `seq` se rellena y el fix de la ronda 48 nunca se ha
    ejercitado. El orden que importa para un resident que audita una respuesta municipal esta verificado
    en produccion y sin verificar en las pruebas.
+10. **Una columna que la base asigna no se lee desde la entidad ya gestionada.** Con
+   `insertable = false` el valor lo pone la base, pero el objeto que queda en el contexto de
+   persistencia sigue con `null`: un test que lea esa entidad informa del estado en memoria de Hibernate
+   y declara rota una base de datos que funciona. `flush()` + `clear()` antes de releer. Y el
+   `coalesce(e.seq, 0)` que escribi en V50 para "sobrevivir a una base sin secuencia" estaba
+   escondiendo justo que en la suite no habia secuencia: una defensa contra un caso que nunca ocurre
+   tapando el que si ocurre.
+   Y `create-drop` no es un detalle de tests: significa que **las 49 migraciones llegan a produccion sin
+   que la suite las haya ejecutado nunca**. Una columna que solo existe en un `.sql` no existe para las
+   pruebas.
 
 ## Rondas
 
@@ -94,7 +104,8 @@ patron que mas caro sale:
 | 52 | Contar los mensajes de una sala ya no los lee | 433 tests; el test mide I/O y falla por mutacion | Hecho este commit |
 | 53 | Las pantallas de sala dejan de consultar una vez por fila | 436 tests; 58->8 queries y 61->5 entity loads; 2 mutaciones | Hecho este commit |
 | 54 | La bandeja de menciones deja de consultar 3 veces por fila | 437 tests; 30->15 queries; y el orden de evidencia de asamblea, que hacia fallar el preflight | Hecho este commit |
-| 55 | La suite nunca rellena las columnas `seq`: el fix de V50 no esta ejercitado | Un test que falle si `seq` es NULL, o una decision sobre create-drop vs Flyway | Siguiente |
+| 55 | La secuencia del timeline de auditoria ya se puebla y se testea | 438 tests; falla por mutacion sin el `columnDefinition` | Hecho este commit |
+| 56 | Las 49 migraciones nunca llegan a ejecutarse en la suite (`create-drop`) | Decision sobre que schema construyen los tests de integracion | Siguiente |
 
 ## Proximas rondas candidatas
 
@@ -123,9 +134,9 @@ patron que mas caro sale:
   transfronterizo.
 - **Scores historicos solo desde la ronda 48.** El ledger existe; las senales anteriores a el no tienen
   entrada y su score pasado es incunable. El informe lo declara en `reproducibilityLimits`.
-- **La garantia de orden del timeline de auditoria no esta verificada por la suite.** `ddl-auto:
-  create-drop` reemplaza el esquema que Flyway construye, y `SignalStatusEntry.seq` esta mapeada como
-  `insertable = false`, asi que en las pruebas la columna queda NULL y `ORDER BY seq` no ordena nada.
-  En produccion (`validate` + Flyway) si funciona. Ronda 55.
+- **La garantia de orden del timeline de auditoria ya esta verificada (ronda 55).** Antes: `ddl-auto:
+  create-drop` reemplazaba el esquema de Flyway y `seq` quedaba NULL en toda fila, asi que V50 nunca se
+  habia ejercitado. Corregido con `columnDefinition` en la entidad. **Lo que sigue sin ejercitarse son
+  las 49 migraciones en si mismas** - ver la ronda 56.
 - **`%TEMP%/get-shit-done/` sin trackear en el arbol de trabajo.** Instalacion del framework de
   agentes con la variable sin expandir; no pertenece al repositorio y no se commitea.
