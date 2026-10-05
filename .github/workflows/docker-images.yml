@@ -75,11 +75,18 @@ jobs:
           # --add-host so the container can reach the runner's service container. GitHub runs service
           # containers on the VM's network, so localhost inside the job is the database, but a
           # `docker run` container needs the host gateway named explicitly.
+          # JWT_SECRET has no default on purpose, so the container refuses to boot without one. Generated
+          # here rather than hardcoded: this is a throwaway value whose only job is to prove the image
+          # starts, and a literal secret in a workflow file is a literal secret that eventually ships.
+          # Worth knowing why this was not caught locally: a developer's shell often already has one
+          # exported, so the image boots on a laptop and fails in a clean runner.
+          JWT_SECRET=$(head -c 48 /dev/urandom | base64)
           docker run -d --name api-smoke -p 18080:8080 \
             --add-host=host.docker.internal:host-gateway \
             -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/signalos \
             -e SPRING_DATASOURCE_USERNAME=admin \
             -e SPRING_DATASOURCE_PASSWORD=password \
+            -e JWT_SECRET="$JWT_SECRET" \
             local/${{ github.event.repository.name }}-api:smoke
           for i in {1..45}; do
             if curl -fsS http://localhost:18080/actuator/health > /dev/null; then
