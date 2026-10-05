@@ -107,12 +107,17 @@ public class CommunityRoomService {
     }
 
     @Transactional(readOnly = true)
-    public CommunityRoomDetailResponse getRoom(UUID communityId, UUID roomId, String username) {
+    public CommunityRoomDetailResponse getRoom(UUID communityId, UUID roomId, String username, Integer limit) {
         User user = communityAccessService.getCurrentUser(username);
         communityAccessService.requireMembership(user.getId(), communityId);
         CommunityRoom room = requireRoom(communityId, roomId);
 
-        List<CommunityRoomMessage> messages = messageRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
+        // Bounded, because this platform is used in the field on a phone with little bandwidth and a
+        // room that has been running for a year would otherwise be downloaded whole on every open. The
+        // workspace endpoint beside this one already took a limit; this one took none.
+        int effectiveLimit = CommunityListLimits.resolveLimit(limit);
+        List<CommunityRoomMessage> allMessages = messageRepository.findByRoomIdOrderByCreatedAtDesc(roomId);
+        List<CommunityRoomMessage> messages = allMessages.stream().limit(effectiveLimit).toList();
         List<UUID> messageIds = messages.stream().map(CommunityRoomMessage::getId).toList();
         Map<UUID, List<CommunityRoomMention>> mentionsByMessage = mentionsByMessage(messageIds);
 
@@ -144,7 +149,10 @@ public class CommunityRoomService {
             room.isArchived(),
             mute != null,
             mute == null ? null : mute.getMutedAt(),
-            messages.size(),
+            // The true total, not the capped page size, so a reader can tell a quiet room from a
+            // truncated one.
+            allMessages.size(),
+            allMessages.size() > messages.size(),
             mentionRepository.countByRoomIdAndMentionedUserIdAndReadAtIsNull(roomId, user.getId()),
             payload
         );
@@ -176,6 +184,20 @@ public class CommunityRoomService {
             "room-created", room.getId(), room.getCommunityId(), null, user.getId(), room.getCreatedAt()
         ));
         return toSummary(room, user.getId(), Map.of());
+    }
+
+    /**
+     * Checks that the caller may read a room, without building the room view.
+     *
+     * <p>Exists because the SSE stream endpoint needs the check and nothing else. Calling
+     * {@code getRoom} for it meant loading and serialising a room's recent history on every stream
+     * connection, for a value the caller discarded.
+     */
+    @Transactional(readOnly = true)
+    public void requireRoomAccess(UUID communityId, UUID roomId, String username) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireMembership(user.getId(), communityId);
+        requireRoom(communityId, roomId);
     }
 
     @Transactional

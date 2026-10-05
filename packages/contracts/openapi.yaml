@@ -4333,6 +4333,17 @@ paths:
           schema:
             type: string
             format: uuid
+        - in: query
+          name: limit
+          required: false
+          description: >-
+            How many recent messages to include. Defaults to 50 and is capped at 200, so a room
+            that has run for months is not downloaded whole on every open. messageCount always
+            reports the true total and hasMoreMessages says when the list is a truncated page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
       responses:
         '200':
           description: Coordination room detail
@@ -10356,7 +10367,7 @@ components:
           $ref: '#/components/schemas/CommunityRoomMentionInbox'
     CommunityRoomDetail:
       type: object
-      required: [id, communityId, name, topic, createdBy, createdAt, archived, muted, messageCount, unreadMentionCount, messages]
+      required: [id, communityId, name, topic, createdBy, createdAt, archived, muted, messageCount, hasMoreMessages, unreadMentionCount, messages]
       properties:
         id:
           type: string
@@ -10385,10 +10396,16 @@ components:
         mutedAt:
           type: string
           format: date-time
-          nullable: true
         messageCount:
           type: integer
           format: int64
+          description: Total messages in the room, not the size of the returned page.
+        hasMoreMessages:
+          type: boolean
+          description: >-
+            True when messages is a truncated page rather than the room's whole
+            history. Capping the list silently would let a consumer render "no older
+            messages" and be wrong with nothing in the payload to say so.
         unreadMentionCount:
           type: integer
           format: int64

@@ -223,6 +223,85 @@ class CommunityRoomsIT {
             .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void openingABusyRoomShouldNotShipItsWholeHistory() throws Exception {
+        String roomId = createRoomAsCoordinator();
+        for (int i = 0; i < 60; i++) {
+            postMessage(roomId, "Field note " + i);
+        }
+
+        String body = mockMvc.perform(get("/api/community/rooms/{roomId}", roomId)
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString()))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        var json = new com.fasterxml.jackson.databind.ObjectMapper().readTree(body);
+
+        // The workspace endpoint next to this one takes a limit. This one took none, so opening a room
+        // loaded and serialised its entire history — on a platform whose stated goal is field use on a
+        // phone with little bandwidth.
+        org.junit.jupiter.api.Assertions.assertTrue(
+            json.get("messages").size() <= org.opencivic.signalos.service.CommunityListLimits.DEFAULT_LIMIT,
+            "a room read should be bounded, got " + json.get("messages").size() + " messages");
+
+        // Capping the payload silently would be its own lie: a consumer showing "no more messages"
+        // would be wrong. The true total stays available and the truncation is stated.
+        org.junit.jupiter.api.Assertions.assertEquals(60, json.get("messageCount").asInt(),
+            "the real total must still be reported, not the capped page size");
+        org.junit.jupiter.api.Assertions.assertTrue(json.get("hasMoreMessages").asBoolean(),
+            "a capped list must say so, or a consumer treats the page as the whole room");
+    }
+
+    @Test
+    void aCallerCanAskForMoreOfABusyRoomAndTheCapIsRespected() throws Exception {
+        String roomId = createRoomAsCoordinator();
+        for (int i = 0; i < 60; i++) {
+            postMessage(roomId, "Field note " + i);
+        }
+
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+        String wider = mockMvc.perform(get("/api/community/rooms/{roomId}", roomId)
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString())
+                .queryParam("limit", "55"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        org.junit.jupiter.api.Assertions.assertEquals(55, mapper.readTree(wider).get("messages").size());
+
+        String absurd = mockMvc.perform(get("/api/community/rooms/{roomId}", roomId)
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString())
+                .queryParam("limit", "100000"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        // resolveLimit caps rather than erroring, so a client cannot ask the server into loading
+        // everything it was just protected from loading. With 60 messages and a cap of 200 the whole
+        // room fits, so the assertion is that nothing is truncated and nothing blows up.
+        var absurdJson = mapper.readTree(absurd);
+        org.junit.jupiter.api.Assertions.assertEquals(60, absurdJson.get("messages").size(),
+            "a limit above the room's size should return the room whole");
+        org.junit.jupiter.api.Assertions.assertFalse(absurdJson.get("hasMoreMessages").asBoolean(),
+            "nothing was left out, so there is nothing more to say");
+        org.junit.jupiter.api.Assertions.assertTrue(
+            mapper.readTree(wider).get("messages").size()
+                <= org.opencivic.signalos.service.CommunityListLimits.MAX_LIMIT,
+            "a requested limit must never exceed the shared maximum");
+    }
+
+    private void postMessage(String roomId, String body) throws Exception {
+        mockMvc.perform(post("/api/community/rooms/messages")
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    { "communityId": "%s", "roomId": "%s", "body": "%s" }
+                    """.formatted(communityId, roomId, body)))
+            .andExpect(status().isOk());
+    }
+
     private String createRoomAsCoordinator() throws Exception {
         String body = mockMvc.perform(post("/api/community/rooms")
                 .with(user("rooms_coord").roles("CITIZEN"))

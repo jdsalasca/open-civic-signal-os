@@ -50,9 +50,10 @@ public class CommunityRoomController {
     public CommunityRoomDetailResponse getRoom(
         @PathVariable UUID roomId,
         @RequestParam UUID communityId,
+        @RequestParam(required = false) Integer limit,
         Principal principal
     ) {
-        return roomService.getRoom(communityId, roomId, principal.getName());
+        return roomService.getRoom(communityId, roomId, principal.getName(), limit);
     }
 
     @PostMapping
@@ -97,7 +98,7 @@ public class CommunityRoomController {
         @RequestParam UUID communityId,
         Principal principal
     ) {
-        roomService.getRoom(communityId, roomId, principal.getName());
+        roomService.requireRoomAccess(communityId, roomId, principal.getName());
         return eventBroker.subscribe(roomId);
     }
 }
