@@ -7,6 +7,10 @@ const communityId = "11111111-1111-1111-1111-111111111111";
 const proposalId = "22222222-2222-2222-2222-222222222222";
 const boardId = "33333333-3333-3333-3333-333333333333";
 const taskId = "44444444-4444-4444-4444-444444444444";
+// The task this test creates on the new board. Moving and commenting happen on it, because the test
+// is named "adds a task, moves it, and leaves a task note" - not on the board's seeded task, which
+// lives on the board that creation pushed to second place.
+const createdTaskId = "88888888-8888-8888-8888-888888888888";
 
 test.describe("Community project boards", () => {
   test("creates a board, adds a task, moves it, and leaves a task note", async ({ page }) => {
@@ -177,7 +181,7 @@ test.describe("Community project boards", () => {
       createTaskPayload = route.request().postDataJSON() as Record<string, unknown>;
       const targetBoard = boards[0];
       const createdTask: CommunityProjectTask = {
-        id: "88888888-8888-8888-8888-888888888888",
+        id: createdTaskId,
         projectBoardId: targetBoard.id,
         title: String(createTaskPayload.title),
         details: String(createTaskPayload.details),
@@ -210,7 +214,7 @@ test.describe("Community project boards", () => {
         ...boards[0],
         taskCounts: { todo: 0, inProgress: 1, done: 0 },
         tasks: boards[0].tasks.map<CommunityProjectTask>((task) =>
-          task.id === taskId
+          task.id === createdTaskId
             ? {
                 ...task,
                 status: "IN_PROGRESS",
@@ -234,7 +238,7 @@ test.describe("Community project boards", () => {
       const updatedBoard: CommunityProjectBoard = {
         ...boards[0],
         tasks: boards[0].tasks.map<CommunityProjectTask>((task) =>
-          task.id === taskId
+          task.id === createdTaskId
             ? {
                 ...task,
                 comments: [
@@ -305,24 +309,29 @@ test.describe("Community project boards", () => {
     });
     await expect(page.getByTestId("community-project-column-todo")).toContainText("Schedule Saturday volunteer shift");
 
-    await page.getByTestId(`project-task-move-forward-${taskId}`).click();
+    await page.getByTestId(`project-task-move-forward-${createdTaskId}`).click();
     await expect.poll(() => updateTaskPayload).not.toBeNull();
     expect(updateTaskPayload).toMatchObject({
       status: "IN_PROGRESS",
       assigneeUsername: "project_member",
     });
-    await expect(page.getByTestId("community-project-column-in_progress")).toContainText("Confirm school committee palette");
+    // The task this test just created, not "Confirm school committee palette". That one is asserted in
+    // the todo column before the board exists; creating a board selects the new board, so the seeded
+    // board's task is no longer on screen and could not have been the thing that moved.
+    await expect(page.getByTestId("community-project-column-in_progress")).toContainText(
+      "Schedule Saturday volunteer shift"
+    );
 
     await page
-      .getByTestId(`project-task-comment-input-${taskId}`)
+      .getByTestId(`project-task-comment-input-${createdTaskId}`)
       .fill("School committee approved the warmer palette after the afternoon walkthrough.");
-    await page.getByTestId(`project-task-comment-submit-${taskId}`).click();
+    await page.getByTestId(`project-task-comment-submit-${createdTaskId}`).click();
 
     await expect.poll(() => addCommentPayload).not.toBeNull();
     expect(addCommentPayload).toMatchObject({
       content: "School committee approved the warmer palette after the afternoon walkthrough.",
     });
-    await expect(page.getByTestId(`community-project-task-${taskId}`)).toContainText(
+    await expect(page.getByTestId(`community-project-task-${createdTaskId}`)).toContainText(
       "School committee approved the warmer palette after the afternoon walkthrough."
     );
   });

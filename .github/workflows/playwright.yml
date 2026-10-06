@@ -94,6 +94,7 @@ jobs:
           src/tests/dashboard-clarity.spec.ts
           src/tests/dashboard-filter-query.spec.ts
           src/tests/field-data-mode.spec.ts
+          src/tests/community-proposals.spec.ts
           src/tests/merge-review.spec.ts
           src/tests/weekly-digest.spec.ts
           src/tests/no-locale-timestamps.spec.ts

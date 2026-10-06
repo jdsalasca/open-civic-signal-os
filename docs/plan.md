@@ -218,7 +218,9 @@ patron que mas caro sale:
 | 74 | `community-trust-metrics` en verde y dos locators ambiguos corregidos | Gate de 14 specs, **82 tests** en verde; `community-proposals` usaba `getByText` que matcheaba 2 y 4 elementos | Hecho este commit |
 | 75 | La ambiguedad de locator era una clase, no un incidente | 5 `getByText().click()` acotados; `community-decisions` y `community-governance` en verde. Gate de 16 specs, **86 tests** | Hecho este commit |
 | 76 | `mockAppBootstrap` degradaba el rol de membresia a MEMBER | Regresion propia de las rondas 73-75: pisaba el COORDINATOR que el spec sembraba y dejaba el boton deshabilitado. Rol ahora parametrizado | Hecho este commit |
-| 77 | Tres specs bloqueadas por estado de vista | `community-projects` ya supera la creacion; `community-proposals` espera un control de moderacion; 2 necesitan decision de producto | Siguiente |
+| 77 | `community-projects` afirmaba sobre la tarea equivocada | Crear un board lo selecciona, asi que la tarea sembrada salia de pantalla y el test era impasable. Ahora mueve y comenta la tarea que creo; gate sube a 17 specs | Hecho este commit |
+| 78 | Las specs de las rondas 73-75 pueden afirmar menos de lo que pretenden | Dos rounds seguidos(~2 specs) exhilarating una asercion o un permiso, no la app. Falta una forma de distinguir "afirmo otra cosa" de "no afirmo nada" | Siguiente |
+| 79 | Tres specs siguen bloqueadas | `community-proposals` espera un control de moderacion; 2 necesitan decision de producto | Siguiente |
 
 ## Proximas rondas candidatas
 

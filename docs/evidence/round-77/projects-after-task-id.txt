@@ -1,0 +1,5 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ src\tests\community-projects.spec.ts:17:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note
+[1A[2K  1 passed (4.9s)
