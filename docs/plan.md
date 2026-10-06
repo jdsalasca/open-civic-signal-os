@@ -232,7 +232,8 @@ patron que mas caro sale:
 | 90 | Puertos del compose dev parametrizados | `MAILPIT_PORT`/`POSTGRES_PORT`/`API_PORT`/`WEB_PORT` con defaults intactos. Verificado: dev y prod corriendo a la vez en puertos distintos | Hecho este commit |
 | 91 | `civic-api-dev` sin healthcheck: "stack healthy" no verificaba nada | Anadido el mismo healthcheck del compose prod, con `start_period: 180s` para la compilacion en frio de 420 fuentes. El API no estaba roto: compilaba | Hecho este commit |
 | 93 | Ventana del healthcheck del api dev insuficiente | Marcaba unhealthy a media compilacion: `start_period: 180s` no cubre un build Maven frio. Ahora 600s + 120 retries. Descartado: no es que corra tests, el entrypoint usa `-DskipTests` | Hecho este commit |
-| 94 | La cuenta `admin` sembrada sigue sin observarse | El API dev compila en frio; en cuanto levante, login + las 4 specs de backend. Requiere recrear el contenedor para aplicar la ventana nueva | Siguiente |
+| 94 | El admin sembrado existe: login 200 | API dev healthy a los 6.8 min (la ventana de 180s de la 91 lo habria marcado unhealthy) y `admin`/`admin12345` autentica. Cerrado el bloqueo de las rondas 85-89 | Hecho este commit |
+| 95 | Correr una spec de backend contra el API dev | `vite.config.ts` proxya `/api` a `VITE_PROXY_TARGET` (default 8081); apuntando a 18081 las 4 specs de backend y las paginas autenticadas quedan alcanzables | Siguiente |
 | 92 | `docker:dev:up` reportaba healthy sin verificar | El probe sondea puertos fijos 8081/5173, que aqui son el API prod y el frontend de otro proyecto. Ahora deriva de las mismas vars que el compose. Misma corrida: antes "healthy" en segundos, ahora "did not become healthy in time" | Hecho este commit |
 etries=0 | Siguiente |
 
