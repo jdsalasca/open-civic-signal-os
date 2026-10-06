@@ -1,4 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 import type {
   CommunityIntegrationCenter,
   CommunityPermissionPolicy,
@@ -164,6 +166,10 @@ test.describe("Community outbound integrations", () => {
         body: JSON.stringify(created),
       });
     });
+
+    await mockAppBootstrap(page, communityId);
+
+    await mockHelpCenter(page);
 
     await page.goto("/communities/integrations");
 

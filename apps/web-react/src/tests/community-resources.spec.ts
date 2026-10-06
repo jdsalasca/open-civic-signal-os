@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 import type {
   CommunityPermissionPolicy,
   CommunityResourceBoard,
@@ -158,6 +160,10 @@ test.describe("Community shared resources", () => {
         body: JSON.stringify(decided),
       });
     });
+
+    await mockAppBootstrap(page, communityId);
+
+    await mockHelpCenter(page);
 
     await page.goto("/communities/resources");
 

@@ -213,7 +213,8 @@ patron que mas caro sale:
 | 69 | 17 specs de comunidad y digest vuelven a correr | `field-data-mode` 4, `weekly-digest` 7, `merge-review` 6; **37 tests en serial**; el patron se repite: falta una ruta y el sintoma apunta a la vista | Hecho este commit |
 | 70 | La suite Playwright se ejecuta en CI contra un build de produccion | Nuevo `.github/workflows/playwright.yml`; 76 tests en verde en modo CI; la suite entera da 42/42 y queda en cuarentena explicita | Hecho este commit |
 | 71 | Un solo puerto, declarado una vez | `ports.ts` exporta `WEB_PORT`; `vite.config.js` **versionado** eclipsaba al `.ts` y hacia inútiles todas las ediciones previas del config | Hecho este commit |
-| 72 | Convertir las 36 specs que el gate aún no cubre | Quedan 36 de 47; `community-decisions`, `community-rooms-history` y `dashboard-guided-home` necesitan más que una ruta faltante | Siguiente |
+| 72 | La suite no puede volver a correr contra otra app | `globalSetup` compara el `<title>` con `Open Civic Signal OS`; 2 specs mas al gate (13 de 47), **80 tests** en verde | Hecho este commit |
+| 73 | Convertir 5 specs de comunidad que resistieron la receta | `community-projects`, `community-proposals`, `community-governance`, `community-open-data`, `community-official-announcements` | Siguiente |
 
 ## Proximas rondas candidatas
 

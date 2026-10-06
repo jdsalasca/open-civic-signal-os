@@ -11,5 +11,5 @@
   },
   // ports.ts is imported by vite.config.ts and playwright.config.ts, so a project that only listed
   // the config would refuse to resolve it.
-  "include": ["vite.config.ts", "playwright.config.ts", "ports.ts"]
+  "include": ["vite.config.ts", "playwright.config.ts", "playwright.global-setup.ts", "ports.ts"]
 }

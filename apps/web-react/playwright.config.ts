@@ -3,6 +3,7 @@ import { WEB_PORT } from './ports';
 
 export default defineConfig({
   testDir: './src/tests',
+  globalSetup: './playwright.global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
