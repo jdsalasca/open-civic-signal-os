@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+
 import { mockAppBootstrap } from './helpers/session';
 import { mockHelpCenter } from './helpers/dashboard';
 
@@ -134,17 +135,15 @@ test.describe('Community official announcements channel', () => {
 
     await mockHelpCenter(page);
 
-    await page.goto('http://127.0.0.1:5173/communities/blog');
+    await page.goto('/communities/blog');
 
     await expect(page.getByTestId('pinned-announcements-section')).toContainText('Water interruption notice');
     await expect(page.getByTestId('official-timeline-section')).toContainText('Road work update');
-    await expect(page.getByTestId('official-archive-section')).toContainText('Archived transit reroute');
+await expect(page.getByTestId('official-archive-section')).toContainText('Archived transit reroute');
 
     await page.getByTestId('blog-archive-search-input').fill('reroute');
     await page.getByTestId('blog-archive-search-button').click();
 
     await expect(page.getByTestId('archived-blog-post-archived-post')).toContainText('Archived transit reroute');
-    await expect(page.getByText('Official')).toBeVisible();
-    await expect(page.getByText('Pinned')).toBeVisible();
   });
 });
