@@ -378,7 +378,7 @@ test.describe("Community proposals", () => {
       });
     });
 
-    await mockAppBootstrap(page, communityId);
+    await mockAppBootstrap(page, communityId, "COORDINATOR");
 
     await mockHelpCenter(page);
 

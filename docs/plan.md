@@ -220,7 +220,9 @@ patron que mas caro sale:
 | 76 | `mockAppBootstrap` degradaba el rol de membresia a MEMBER | Regresion propia de las rondas 73-75: pisaba el COORDINATOR que el spec sembraba y dejaba el boton deshabilitado. Rol ahora parametrizado | Hecho este commit |
 | 77 | `community-projects` afirmaba sobre la tarea equivocada | Crear un board lo selecciona, asi que la tarea sembrada salia de pantalla y el test era impasable. Ahora mueve y comenta la tarea que creo; gate sube a 17 specs | Hecho este commit |
 | 78 | Las specs de las rondas 73-75 pueden afirmar menos de lo que pretenden | Dos rounds seguidos(~2 specs) exhilarating una asercion o un permiso, no la app. Falta una forma de distinguir "afirmo otra cosa" de "no afirmo nada" | Siguiente |
-| 79 | Tres specs siguen bloqueadas | `community-proposals` espera un control de moderacion; 2 necesitan decision de producto | Siguiente |
+| 79 | `community-proposals`expects un control de moderacion que nunca renderiza | Misma regresion de la ronda 76 sin aplicar aqui: `canModerate` exige COORDINATOR y el helper pisaba el rol a MEMBER. Verde en aislamiento | Hecho este commit |
+| 80 | El gate tiene 17 specs y `community-projects` no esta | La edicion de la ronda 77 renombro en vez de anadir; la verificacion por linea de comandos no lo detecto | Siguiente |
+| 81 | `community-trust-metrics` es flaky en mobile-chrome | Sale al ampliar el gate a 18 specs. Bloquea volver a crecer el gate | Siguiente |
 
 ## Proximas rondas candidatas
 
