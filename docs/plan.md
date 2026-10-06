@@ -229,7 +229,9 @@ patron que mas caro sale:
 | 85 | Las specs con backend no estan bloqueadas "sin backend" | El backend ya corria en 8080/8081 y el preview proxea `/api` a 8081. El bloqueo real es que no hay admin sembrado: login expira con `admin`/`admin12345`, credenciales que el CHANGELOG documenta | Hecho este commit |
 | 86 | Auditoria visual del backlog publico | Sin defecto: el espacio de "Formula version v1" si existe, era la fuente. Quinta vez que un defecto aparente se evapora al verificar | Hecho este commit |
 | 87 | Causa raiz de las specs con backend, probada | El contenedor corre desde el compose prod con SPRING_PROFILES_ACTIVE=prod, asi que el seeder @Profile({dev,test}) queda excluido y no hay usuarios. Login responde 401 Invalid credentials. El compose dev ya setea dev, pero docker:dev:up no bindea el 8025 porque civic-mail (prod) lo tiene | Hecho este commit |
-| 90 | `docker:dev:up` no puede coexistir con el stack prod | Colision de puertos: 8025. Hay que elegir entre parar el stack o parametrizar el puerto de mail. Decision de stack, no de ronda de tests | Siguiente |
+| 90 | Puertos del compose dev parametrizados | `MAILPIT_PORT`/`POSTGRES_PORT`/`API_PORT`/`WEB_PORT` con defaults intactos. Verificado: dev y prod corriendo a la vez en puertos distintos | Hecho este commit |
+| 91 | El API dev no quedo healthy | Ninguna spec de backend se ha corrido end-to-end; la cuenta admin sembrada sigue sin observarse | Siguiente |
+| 92 | `docker-dev.mjs` imprime URLs fijas | Con puertos sobrescritos reporta 8081/5173 en vez de los reales. Cosmético pero va a engañar | Siguiente |
 etries=0 | Siguiente |
 
 
