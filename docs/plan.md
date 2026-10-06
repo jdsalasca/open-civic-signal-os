@@ -231,9 +231,9 @@ patron que mas caro sale:
 | 87 | Causa raiz de las specs con backend, probada | El contenedor corre desde el compose prod con SPRING_PROFILES_ACTIVE=prod, asi que el seeder @Profile({dev,test}) queda excluido y no hay usuarios. Login responde 401 Invalid credentials. El compose dev ya setea dev, pero docker:dev:up no bindea el 8025 porque civic-mail (prod) lo tiene | Hecho este commit |
 | 90 | Puertos del compose dev parametrizados | `MAILPIT_PORT`/`POSTGRES_PORT`/`API_PORT`/`WEB_PORT` con defaults intactos. Verificado: dev y prod corriendo a la vez en puertos distintos | Hecho este commit |
 | 91 | `civic-api-dev` sin healthcheck: "stack healthy" no verificaba nada | Anadido el mismo healthcheck del compose prod, con `start_period: 180s` para la compilacion en frio de 420 fuentes. El API no estaba roto: compilaba | Hecho este commit |
-| 93 | El healthcheck del api dev solo aplica al recrear el contenedor | Por eso el contenedor en curso sigue sin health y la cuenta `admin` sembrada sigue sin observarse | Siguiente |
+| 93 | Ventana del healthcheck del api dev insuficiente | Marcaba unhealthy a media compilacion: `start_period: 180s` no cubre un build Maven frio. Ahora 600s + 120 retries. Descartado: no es que corra tests, el entrypoint usa `-DskipTests` | Hecho este commit |
+| 94 | La cuenta `admin` sembrada sigue sin observarse | El API dev compila en frio; en cuanto levante, login + las 4 specs de backend. Requiere recrear el contenedor para aplicar la ventana nueva | Siguiente |
 | 92 | `docker:dev:up` reportaba healthy sin verificar | El probe sondea puertos fijos 8081/5173, que aqui son el API prod y el frontend de otro proyecto. Ahora deriva de las mismas vars que el compose. Misma corrida: antes "healthy" en segundos, ahora "did not become healthy in time" | Hecho este commit |
-| 93 | La cuenta `admin` sembrada sigue sin observarse | El API dev compilo las fuentes principales y esta en test-classes; aun no escucha. En cuanto levante, el login y las 4 specs de backend | Siguiente |
 etries=0 | Siguiente |
 
 

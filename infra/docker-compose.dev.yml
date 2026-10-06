@@ -57,8 +57,8 @@ services:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 30
-      start_period: 180s
+      retries: 120
+      start_period: 600s
     depends_on:
       civic-db-dev:
         condition: service_healthy
