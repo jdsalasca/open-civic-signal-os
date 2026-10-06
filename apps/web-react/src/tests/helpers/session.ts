@@ -104,7 +104,11 @@ export const DEFAULT_COMMUNITY_ID = '11111111-1111-1111-1111-111111111111';
  * clear its active community, and a community-scoped view then renders nothing: that reads as a
  * broken component rather than as a missing fixture. Pass `communityId` for those.
  */
-export async function mockAppBootstrap(page: Page, communityId?: string) {
+export async function mockAppBootstrap(
+  page: Page,
+  communityId?: string,
+  membershipRole = 'MEMBER',
+) {
   await assertCivicAppIsServed();
   await page.route('**/api/auth/me', (route) =>
     route.fulfill(json({ username: 'liaison', role: 'PUBLIC_SERVANT', interfaceMode: 'ADVANCED' })));
@@ -118,7 +122,7 @@ export async function mockAppBootstrap(page: Page, communityId?: string) {
           communitySlug: 'los-rosales',
           parentCommunityId: null,
           breadcrumb: [{ id: communityId, name: 'Los Rosales', slug: 'los-rosales' }],
-          role: 'MEMBER',
+          role: membershipRole,
           createdBy: '33333333-3333-3333-3333-333333333333',
           createdAt: '2026-03-05T10:00:00',
         },

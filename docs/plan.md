@@ -217,7 +217,8 @@ patron que mas caro sale:
 | 73 | Seis specs navegaban a `127.0.0.1:5173`, que es la app de otro proyecto | Rutas relativas: ahora respetan `baseURL`; el contexto de error paso de una universidad a la app civic. **Fallan aun** por aserciones de contenido | Hecho este commit |
 | 74 | `community-trust-metrics` en verde y dos locators ambiguos corregidos | Gate de 14 specs, **82 tests** en verde; `community-proposals` usaba `getByText` que matcheaba 2 y 4 elementos | Hecho este commit |
 | 75 | La ambiguedad de locator era una clase, no un incidente | 5 `getByText().click()` acotados; `community-decisions` y `community-governance` en verde. Gate de 16 specs, **86 tests** | Hecho este commit |
-| 76 | Cuatro specs bloqueadas por estado de vista | 2 necesitan decision de producto: `community-open-data-token-scope-EXPORT_METRICS` no existe en ninguna vista y `pinned-announcements-section` pertenece a otra vista | Siguiente |
+| 76 | `mockAppBootstrap` degradaba el rol de membresia a MEMBER | Regresion propia de las rondas 73-75: pisaba el COORDINATOR que el spec sembraba y dejaba el boton deshabilitado. Rol ahora parametrizado | Hecho este commit |
+| 77 | Tres specs bloqueadas por estado de vista | `community-projects` ya supera la creacion; `community-proposals` espera un control de moderacion; 2 necesitan decision de producto | Siguiente |
 
 ## Proximas rondas candidatas
 

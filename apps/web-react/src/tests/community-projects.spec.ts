@@ -262,7 +262,7 @@ test.describe("Community project boards", () => {
       });
     });
 
-    await mockAppBootstrap(page, communityId);
+    await mockAppBootstrap(page, communityId, "COORDINATOR");
 
     await mockHelpCenter(page);
 
