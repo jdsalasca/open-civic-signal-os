@@ -1,0 +1,32 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note
+[1A[2K  1) [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note 
+
+    Error: locator.click: Error: strict mode violation: getByText('Safer school crossing', { exact: true }) resolved to 2 elements:
+        1) <span>Safer school crossing</span> aka getByTestId('community-project-board-detail-card').getByText('Safer school crossing')
+        2) <span data-pc-section="itemlabel" class="p-dropdown-item-label">Safer school crossing</span> aka getByLabel('Option List').getByText('Safer school crossing')
+
+    Call log:
+    [2m  - waiting for getByText('Safer school crossing', { exact: true })[22m
+
+
+      274 |
+      275 |     await page.getByTestId("project-board-linked-proposal-select").click();
+    > 276 |     await page.getByText("Safer school crossing", { exact: true }).click();
+          |                                                                    ^
+      277 |     await page.getByTestId("project-board-title-input").fill("Crossing volunteers delivery board");
+      278 |     await page
+      279 |       .getByTestId("project-board-summary-input")
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-projects.spec.ts:276:68
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-projects-Communi-195a6-s-it-and-leaves-a-task-note-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-projects-Communi-195a6-s-it-and-leaves-a-task-note-chromium\error-context.md
+
+
+[1A[2K  1 failed
+    [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note 

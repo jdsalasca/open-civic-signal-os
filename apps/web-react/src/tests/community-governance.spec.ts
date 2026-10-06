@@ -259,7 +259,9 @@ test.describe("Community governance library", () => {
 
     await page.getByTestId("governance-query-input").fill("coexistence");
     await page.getByTestId("governance-type-filter").click();
-    await page.getByText("Agreement", { exact: true }).click();
+    // Scoped to the dropdown item: "Agreement" is also a visible field label on the form, so a bare
+    // getByText resolves to more than one element and Playwright refuses the click.
+    await page.locator(".p-dropdown-item", { hasText: "Agreement" }).click();
     await page.getByTestId("governance-apply-filters").click();
 
     await expect(page.getByTestId("governance-list-card")).toContainText("Community coexistence framework 2026");

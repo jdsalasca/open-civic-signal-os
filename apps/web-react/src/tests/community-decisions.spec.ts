@@ -221,11 +221,11 @@ test.describe("Community decision ledger", () => {
     await page.getByTestId("decision-title-input").fill("Approve Saturday volunteer deployment");
     await page.getByTestId("decision-summary-input").fill("The committee approved Saturday deployment and linked it to the active execution board for follow-through.");
     await page.getByTestId("decision-proposal-select").click();
-    await page.getByText("Safer school crossing rollout", { exact: true }).click();
+    await page.locator(".p-dropdown-item", { hasText: "Safer school crossing rollout" }).click();
     await page.getByTestId("decision-governance-select").click();
-    await page.getByText("Assembly act approving the crossing rollout", { exact: true }).click();
+    await page.locator(".p-dropdown-item", { hasText: "Assembly act approving the crossing rollout" }).click();
     await page.getByTestId("decision-project-select").click();
-    await page.getByText("Crossing execution board", { exact: true }).click();
+    await page.locator(".p-dropdown-item", { hasText: "Crossing execution board" }).click();
     await page.getByTestId("decision-execution-owner-input").fill("liaison");
     await page.getByTestId("decision-basis-summary-input").fill("Assembly minutes and board ownership were reviewed before recording this execution decision.");
     await page.getByTestId("decision-submit-button").click();

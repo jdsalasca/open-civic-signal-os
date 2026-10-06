@@ -272,7 +272,9 @@ test.describe("Community project boards", () => {
     await expect(page.getByTestId("community-project-column-todo")).toContainText("Confirm school committee palette");
 
     await page.getByTestId("project-board-linked-proposal-select").click();
-    await page.getByText("Safer school crossing", { exact: true }).click();
+    // Scoped to the dropdown item: the same proposal title also renders on the board card, so a
+    // bare getByText resolves to two elements and Playwright refuses the click.
+    await page.locator(".p-dropdown-item", { hasText: "Safer school crossing" }).click();
     await page.getByTestId("project-board-title-input").fill("Crossing volunteers delivery board");
     await page
       .getByTestId("project-board-summary-input")
