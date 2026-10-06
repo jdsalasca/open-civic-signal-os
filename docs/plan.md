@@ -228,7 +228,9 @@ patron que mas caro sale:
 | 84 | `community-official-announcements` entra al gate | El blocker del flake ya estaba resuelto en la ronda 83. Gate: 20 specs, 94 passed con `retries=0` | Hecho este commit |
 | 85 | Las specs con backend no estan bloqueadas "sin backend" | El backend ya corria en 8080/8081 y el preview proxea `/api` a 8081. El bloqueo real es que no hay admin sembrado: login expira con `admin`/`admin12345`, credenciales que el CHANGELOG documenta | Hecho este commit |
 | 86 | Auditoria visual del backlog publico | Sin defecto: el espacio de "Formula version v1" si existe, era la fuente. Quinta vez que un defecto aparente se evapora al verificar | Hecho este commit |
-| 87 | Las specs con backend quedan fuera del gate por dos razones | (a) No hay admin sembrado: decidir perfil, entorno y politica de password es decision de backend. (b) El workflow de playwright no levanta backend, asi que necesitarian un segundo job con la pila completa. Gate re-verificado en la ronda 87: 20 specs, 94 passed, etries=0 | Siguiente |
+| 87 | Causa raiz de las specs con backend, probada | El contenedor corre desde el compose prod con SPRING_PROFILES_ACTIVE=prod, asi que el seeder @Profile({dev,test}) queda excluido y no hay usuarios. Login responde 401 Invalid credentials. El compose dev ya setea dev, pero docker:dev:up no bindea el 8025 porque civic-mail (prod) lo tiene | Hecho este commit |
+| 90 | `docker:dev:up` no puede coexistir con el stack prod | Colision de puertos: 8025. Hay que elegir entre parar el stack o parametrizar el puerto de mail. Decision de stack, no de ronda de tests | Siguiente |
+etries=0 | Siguiente |
 
 
 ## Proximas rondas candidatas
