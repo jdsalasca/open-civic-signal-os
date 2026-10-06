@@ -227,7 +227,8 @@ patron que mas caro sale:
 | 83 | El flake de mobile-chrome no era de ninguna spec | `browserContext.newPage` agotaba 30s: `workers: CI ? 1 : undefined` abria contexts en paralelo en local, y CI ya iba con 1. Ahora `workers: 1` siempre; gate con `--retries=0` | Hecho este commit |
 | 84 | `community-official-announcements` entra al gate | El blocker del flake ya estaba resuelto en la ronda 83. Gate: 20 specs, 94 passed con `retries=0` | Hecho este commit |
 | 85 | Las specs con backend no estan bloqueadas "sin backend" | El backend ya corria en 8080/8081 y el preview proxea `/api` a 8081. El bloqueo real es que no hay admin sembrado: login expira con `admin`/`admin12345`, credenciales que el CHANGELOG documenta | Hecho este commit |
-| 86 | Sembrar un SUPER_ADMIN es decision de backend | Que perfil, que entorno, que politica de password. No es una decision de una ronda de tests | Siguiente |
+| 86 | Auditoria visual del backlog publico | Sin defecto: el espacio de "Formula version v1" si existe, era la fuente. Quinta vez que un defecto aparente se evapora al verificar | Hecho este commit |
+| 88 | Sembrar un SUPER_ADMIN es decision de backend | Que perfil, que entorno, que politica de password. No es una decision de una ronda de tests | Siguiente |
 | 87 | Las specs con backend necesitan un segundo job de CI | El workflow de playwright no levanta backend alguno, asi que no pueden entrar a ese gate aunque el admin exista | Siguiente |
 
 ## Proximas rondas candidatas
