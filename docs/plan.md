@@ -222,7 +222,8 @@ patron que mas caro sale:
 | 78 | Las specs de las rondas 73-75 pueden afirmar menos de lo que pretenden | Dos rounds seguidos(~2 specs) exhilarating una asercion o un permiso, no la app. Falta una forma de distinguir "afirmo otra cosa" de "no afirmo nada" | Siguiente |
 | 79 | `community-proposals`expects un control de moderacion que nunca renderiza | Misma regresion de la ronda 76 sin aplicar aqui: `canModerate` exige COORDINATOR y el helper pisaba el rol a MEMBER. Verde en aislamiento | Hecho este commit |
 | 80 | `community-trust-metrics` era flaky en mobile-chrome | `getByText` sin scope sobre una opcion de PrimeReact podia resolver a un nodo desmontado bajo carga. Ahora `.p-dropdown-item`, y `community-projects` si esta en el gate (18 specs, 2 corridas iguales) | Hecho este commit |
-| 81 | Solo 18 de las specs estan en el gate | El resto depende de backend sembrado o de decision de producto | Siguiente |
+| 81 | Dos specs etiquetadas "decision de producto" sin verificarlo | Ninguna lo era: testid obsoleto en open-data (`scope-` vs `token-scope-`), y en announcements el testid si es de la vista que visita | Hecho este commit |
+| 82 | `community-official-announcements`: el POST mock no alimenta la lista | Con URL relativa y badge testid, la timeline muestra otro post ("Road work update") y no el creado. Divergencia mock/estado, igual que la ronda 77 | Siguiente |
 
 ## Proximas rondas candidatas
 

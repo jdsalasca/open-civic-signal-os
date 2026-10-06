@@ -209,7 +209,7 @@ test.describe("Community open-data center", () => {
 
     await page.getByTestId("community-open-data-token-label").fill("Transparency portal");
     await page.getByTestId("community-open-data-rate-limit").fill("24");
-    await page.getByTestId("community-open-data-token-scope-EXPORT_METRICS").click();
+    await page.getByTestId("community-open-data-scope-EXPORT_METRICS").click();
     await page.getByTestId("community-open-data-create-token-button").click();
 
     await expect.poll(() => createPayload).not.toBeNull();
