@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { WEB_PORT } from './ports';
 
 export default defineConfig({
   testDir: './src/tests',
@@ -8,7 +9,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html', { outputFolder: '../../output/playwright-report' }]],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3002',
+    baseURL: process.env.BASE_URL || `http://localhost:${WEB_PORT}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',

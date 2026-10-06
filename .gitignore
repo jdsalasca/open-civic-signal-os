@@ -25,3 +25,9 @@ docs/incidents/
 # Agent scratch: handoff notes and tool caches written during a session. Transient by nature, and
 # every round's real output belongs in docs/evidence/round-<n>/ where it is versioned on purpose.
 .tmp/
+
+# tsc -b emits these next to the config unless an outDir is set, and a stale vite.config.js
+# shadows the .ts one: Vite resolves it first, so editing the .ts silently did nothing.
+apps/web-react/vite.config.js
+apps/web-react/vite.config.d.ts
+apps/web-react/*.tsbuildinfo

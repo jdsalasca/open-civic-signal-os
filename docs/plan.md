@@ -212,7 +212,8 @@ patron que mas caro sale:
 | 69 | Convertir las specs de comunidad y digest que siguen fuera | `weekly-digest`, `merge-review`, `field-data-mode` y `community-rooms-history` necesitan **membresia activa** en `communities/my`, no solo rutas | Siguiente |
 | 69 | 17 specs de comunidad y digest vuelven a correr | `field-data-mode` 4, `weekly-digest` 7, `merge-review` 6; **37 tests en serial**; el patron se repite: falta una ruta y el sintoma apunta a la vista | Hecho este commit |
 | 70 | La suite Playwright se ejecuta en CI contra un build de produccion | Nuevo `.github/workflows/playwright.yml`; 76 tests en verde en modo CI; la suite entera da 42/42 y queda en cuarentena explicita | Hecho este commit |
-| 71 | Reconciliar el puerto: config dice 5173, script dice 3002 | `playwright.config.ts` usa 3002 por defecto y `vite.config.ts` dice `server.port: 5173`; el default pertenece a la config | Siguiente |
+| 71 | Un solo puerto, declarado una vez | `ports.ts` exporta `WEB_PORT`; `vite.config.js` **versionado** eclipsaba al `.ts` y hacia inútiles todas las ediciones previas del config | Hecho este commit |
+| 72 | Convertir las 36 specs que el gate aún no cubre | Quedan 36 de 47; `community-decisions`, `community-rooms-history` y `dashboard-guided-home` necesitan más que una ruta faltante | Siguiente |
 
 ## Proximas rondas candidatas
 

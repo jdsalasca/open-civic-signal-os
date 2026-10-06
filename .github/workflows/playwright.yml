@@ -60,9 +60,9 @@ jobs:
 
       - name: Serve the production build
         run: |
-          npx --workspace @open-civic/web-react vite preview --port 3002 --strictPort &
+          npx --workspace @open-civic/web-react vite preview --strictPort &
           for attempt in $(seq 1 30); do
-            if curl -fsS -o /dev/null http://localhost:3002/backlog; then
+            if curl -fsS -o /dev/null "http://localhost:3002/backlog"; then
               echo "preview ready"
               exit 0
             fi
