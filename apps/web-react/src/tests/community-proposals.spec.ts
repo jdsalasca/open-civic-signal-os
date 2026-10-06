@@ -391,7 +391,10 @@ test.describe("Community proposals", () => {
     await page.getByTestId("proposal-beneficiaries-input").fill("Students, families, nearby residents, and drivers using the corridor each day.");
     await page.getByTestId("proposal-link-input-0").fill("https://example.com/supporting-reference");
     await page.getByTestId("proposal-related-signal-select").click();
-    await page.getByText("Unsafe pedestrian crossing", { exact: true }).click();
+    // Scoped to the dropdown item: the same title also renders as a related-signal link, so a bare
+    // getByText resolves to two elements and Playwright refuses the click. Same pattern the sort
+    // dropdowns use in community-threads-paging.spec.ts.
+    await page.locator(".p-dropdown-item", { hasText: "Unsafe pedestrian crossing" }).click();
     await page.getByTestId("proposal-submit-button").click();
 
     await expect.poll(() => savedPayload).not.toBeNull();
@@ -414,7 +417,7 @@ test.describe("Community proposals", () => {
     await expect(deliberationCard).toContainText("Families already documented repeated close calls");
 
     await page.getByTestId("proposal-deliberation-type-select").click();
-    await page.getByText("Evidence", { exact: true }).click();
+    await page.locator(".p-dropdown-item", { hasText: /^Evidence$/ }).click();
     await page.getByTestId("proposal-deliberation-link-input").fill("https://example.com/evidence/crossing-data");
     await page
       .getByTestId("proposal-deliberation-content-input")
