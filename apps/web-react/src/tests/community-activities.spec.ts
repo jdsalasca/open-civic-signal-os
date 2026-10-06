@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 import type {
   CommunityActivityAttendanceStatus,
   CommunityActivityBoard,
@@ -115,6 +117,11 @@ test.describe("Community volunteer activities", () => {
 
     let attendanceCalls = 0;
     let signupCalls = 0;
+
+    await mockAppBootstrap(page, communityId);
+
+    await mockHelpCenter(page);
+
 
     await page.route(`**/api/communities/${communityId}/permissions`, async (route) => {
       await route.fulfill({

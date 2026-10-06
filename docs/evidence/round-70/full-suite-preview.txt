@@ -1,0 +1,1277 @@
+
+Running 85 tests using 4 workers
+
+[1A[2K[1/85] [chromium] ÔÇ║ src\tests\auth-edge-cases.spec.ts:5:3 ÔÇ║ Auth Edge Cases (P1) ÔÇ║ Should return 409 Conflict when registering duplicate email
+[1A[2K[2/85] [chromium] ÔÇ║ src\tests\auth-edge-cases.spec.ts:72:3 ÔÇ║ Auth Edge Cases (P1) ÔÇ║ Should show onboarding progress cues from register to verify
+[1A[2K[3/85] [chromium] ÔÇ║ src\tests\accessibility-keyboard.spec.ts:4:3 ÔÇ║ Accessibility keyboard baseline ÔÇ║ skip link moves focus to main content and route remains keyboard navigable
+[1A[2K[4/85] [chromium] ÔÇ║ src\tests\auth-edge-cases.spec.ts:26:3 ÔÇ║ Auth Edge Cases (P1) ÔÇ║ Should surface verify recovery path when email delivery fails
+[1A[2K[5/85] [chromium] ÔÇ║ src\tests\community-buttons.spec.ts:4:3 ÔÇ║ Community Buttons UX (P0) ÔÇ║ Community actions avoid dead clicks and execute end-to-end
+[1A[2K[6/85] [chromium] ÔÇ║ src\tests\community-activities.spec.ts:13:3 ÔÇ║ Community volunteer activities ÔÇ║ shows the signup window, blocks a full activity, and records attendance
+[1A[2K[7/85] [chromium] ÔÇ║ src\tests\community-decisions.spec.ts:11:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context
+[1A[2K  1) [chromium] ÔÇ║ src\tests\community-decisions.spec.ts:11:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-decision-detail-card')
+    Expected substring: [32m"Approve the safer crossing rollout"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-decision-detail-card')[22m
+
+
+      210 |     await page.goto("http://127.0.0.1:5173/communities/decisions");
+      211 |
+    > 212 |     await expect(page.getByTestId("community-decision-detail-card")).toContainText("Approve the safer crossing rollout");
+          |                                                                      ^
+      213 |     await expect(page.getByTestId("community-decision-related-card")).toContainText("Assembly act approving the crossing rollout");
+      214 |
+      215 |     await page.getByTestId("decision-title-input").fill("Approve Saturday volunteer deployment");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-decisions.spec.ts:212:70
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-decisions-Commun-0c1da-nance-and-execution-context-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-decisions-Commun-0c1da-nance-and-execution-context-chromium\error-context.md
+
+
+[1A[2K[8/85] [chromium] ÔÇ║ src\tests\community-governance.spec.ts:8:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents
+[1A[2K  2) [chromium] ÔÇ║ src\tests\community-activities.spec.ts:13:3 ÔÇ║ Community volunteer activities ÔÇ║ shows the signup window, blocks a full activity, and records attendance 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-activities-list-card')
+    Expected substring: [32m"Lighting audit walk"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-activities-list-card')[22m
+
+
+      199 |     await page.goto("/communities/activities");
+      200 |
+    > 201 |     await expect(page.getByTestId("community-activities-list-card")).toContainText("Lighting audit walk");
+          |                                                                      ^
+      202 |     await expect(page.getByTestId("community-activities-stats-grid")).toContainText("Open activities");
+      203 |
+      204 |     const activityCard = page.getByTestId(`community-activity-${activityId}`);
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-activities.spec.ts:201:70
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-activities-Commu-9fa93-vity-and-records-attendance-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-activities-Commu-9fa93-vity-and-records-attendance-chromium\error-context.md
+
+
+[1A[2K[9/85] [chromium] ÔÇ║ src\tests\community-hierarchy.spec.ts:22:3 ÔÇ║ Community hierarchy hub ÔÇ║ renders breadcrumb context and nested tree with user-friendly role labels
+[1A[2K  3) [chromium] ÔÇ║ src\tests\accessibility-keyboard.spec.ts:4:3 ÔÇ║ Accessibility keyboard baseline ÔÇ║ skip link moves focus to main content and route remains keyboard navigable 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       8 |     await page.getByTestId('login-submit-button').click();
+       9 |
+    > 10 |     await page.waitForURL('**/');
+         |                ^
+      11 |     await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 30000 });
+      12 |
+      13 |     await page.keyboard.press('Tab');
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\accessibility-keyboard.spec.ts:10:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\accessibility-keyboard-Acc-1d694--remains-keyboard-navigable-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\accessibility-keyboard-Acc-1d694--remains-keyboard-navigable-chromium\error-context.md
+
+
+[1A[2K  4) [chromium] ÔÇ║ src\tests\community-hierarchy.spec.ts:22:3 ÔÇ║ Community hierarchy hub ÔÇ║ renders breadcrumb context and nested tree with user-friendly role labels 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('active-community-breadcrumb-card')
+    Expected substring: [32m"Los Rosales"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('active-community-breadcrumb-card')[22m
+
+
+       98 |
+       99 |     const breadcrumbCard = page.getByTestId('active-community-breadcrumb-card');
+    > 100 |     await expect(breadcrumbCard).toContainText('Los Rosales');
+          |                                  ^
+      101 |     await expect(breadcrumbCard).toContainText('Building A');
+      102 |     await expect(breadcrumbCard).toContainText('Member');
+      103 |
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-hierarchy.spec.ts:100:34
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-hierarchy-Commun-9a6af-h-user-friendly-role-labels-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-hierarchy-Commun-9a6af-h-user-friendly-role-labels-chromium\error-context.md
+
+
+[1A[2K[10/85] [chromium] ÔÇ║ src\tests\community-integrations.spec.ts:12:3 ÔÇ║ Community outbound integrations ÔÇ║ surfaces a failed delivery, retries it, and connects a new channel
+[1A[2K[11/85] [chromium] ÔÇ║ src\tests\community-map.spec.ts:7:3 ÔÇ║ Community geospatial map ÔÇ║ loads community map and sends real API filters for local and cross-community heat
+[1A[2K  5) [chromium] ÔÇ║ src\tests\community-buttons.spec.ts:4:3 ÔÇ║ Community Buttons UX (P0) ÔÇ║ Community actions avoid dead clicks and execute end-to-end 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      15 |     await page.getByTestId('login-submit-button').click();
+      16 |
+    > 17 |     await page.waitForURL('**/');
+         |                ^
+      18 |     await page.goto('/communities');
+      19 |
+      20 |     await page.getByTestId('open-create-community-button').click();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-buttons.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-buttons-Communit-1d5bc-icks-and-execute-end-to-end-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-buttons-Communit-1d5bc-icks-and-execute-end-to-end-chromium\error-context.md
+
+
+[1A[2K  6) [chromium] ÔÇ║ src\tests\community-governance.spec.ts:8:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('governance-title-input')[22m
+
+
+      230 |     await page.goto("http://127.0.0.1:5173/communities/governance");
+      231 |
+    > 232 |     await page.getByTestId("governance-title-input").fill("Community coexistence framework 2026");
+          |                                                      ^
+      233 |     await page.getByTestId("governance-summary-input").fill("Shared framework for coexistence, meeting rhythm, and committee escalation rules.");
+      234 |     await page.getByTestId("governance-tags-input").fill("coexistence, minutes, 2026");
+      235 |     await page.getByTestId("governance-content-input").fill("This governance framework defines community coexistence norms, the committee operating cycle, and the escalation path for unresolved conflicts during 2026.");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-governance.spec.ts:232:54
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-governance-Commu-c4e6d-rsions-governance-documents-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-governance-Commu-c4e6d-rsions-governance-documents-chromium\error-context.md
+
+
+[1A[2K[12/85] [chromium] ÔÇ║ src\tests\community-official-announcements.spec.ts:6:3 ÔÇ║ Community official announcements channel ÔÇ║ shows pinned announcements separately and supports archive search
+[1A[2K[13/85] [chromium] ÔÇ║ src\tests\community-open-data.spec.ts:11:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access
+[1A[2K  7) [chromium] ÔÇ║ src\tests\community-integrations.spec.ts:12:3 ÔÇ║ Community outbound integrations ÔÇ║ surfaces a failed delivery, retries it, and connects a new channel 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-integrations-list-card')
+    Expected substring: [32m"Neighbourhood board feed"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-integrations-list-card')[22m
+
+
+      168 |     await page.goto("/communities/integrations");
+      169 |
+    > 170 |     await expect(page.getByTestId("community-integrations-list-card")).toContainText("Neighbourhood board feed");
+          |                                                                        ^
+      171 |     await expect(page.getByTestId("community-integrations-stats-grid")).toContainText("Failed");
+      172 |
+      173 |     const deliveryRow = page.getByTestId(`community-integration-delivery-${deliveryId}`);
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-integrations.spec.ts:170:72
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-integrations-Com-1f391--and-connects-a-new-channel-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-integrations-Com-1f391--and-connects-a-new-channel-chromium\error-context.md
+
+
+[1A[2K  8) [chromium] ÔÇ║ src\tests\community-map.spec.ts:7:3 ÔÇ║ Community geospatial map ÔÇ║ loads community map and sends real API filters for local and cross-community heat 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-map-community-card')
+    Expected substring: [32m"Unsafe crossing"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-map-community-card')[22m
+
+
+      207 |     await page.goto('http://127.0.0.1:5173/communities/map');
+      208 |
+    > 209 |     await expect(page.getByTestId('community-map-community-card')).toContainText('Unsafe crossing');
+          |                                                                    ^
+      210 |     await expect(page.getByTestId('community-map-heat-card')).toContainText('Campus Norte');
+      211 |
+      212 |     await page.getByTestId('community-map-category-filter').click();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-map.spec.ts:209:68
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-map-Community-ge-0ff8a-al-and-cross-community-heat-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-map-Community-ge-0ff8a-al-and-cross-community-heat-chromium\error-context.md
+
+
+[1A[2K  9) [chromium] ÔÇ║ src\tests\community-official-announcements.spec.ts:6:3 ÔÇ║ Community official announcements channel ÔÇ║ shows pinned announcements separately and supports archive search 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('pinned-announcements-section')
+    Expected substring: [32m"Water interruption notice"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('pinned-announcements-section')[22m
+
+
+      131 |     await page.goto('http://127.0.0.1:5173/communities/blog');
+      132 |
+    > 133 |     await expect(page.getByTestId('pinned-announcements-section')).toContainText('Water interruption notice');
+          |                                                                    ^
+      134 |     await expect(page.getByTestId('official-timeline-section')).toContainText('Road work update');
+      135 |     await expect(page.getByTestId('official-archive-section')).toContainText('Archived transit reroute');
+      136 |
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-official-announcements.spec.ts:133:68
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-official-announc-d2ff4-and-supports-archive-search-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-official-announc-d2ff4-and-supports-archive-search-chromium\error-context.md
+
+
+[1A[2K  10) [chromium] ÔÇ║ src\tests\community-open-data.spec.ts:11:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-open-data-datasets-card')
+    Expected substring: [32m"Signals"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-open-data-datasets-card')[22m
+
+
+      200 |     await page.goto("http://127.0.0.1:5173/communities/open-data");
+      201 |
+    > 202 |     await expect(page.getByTestId("community-open-data-datasets-card")).toContainText("Signals");
+          |                                                                         ^
+      203 |
+      204 |     await page.getByTestId("community-open-data-token-label").fill("Transparency portal");
+      205 |     await page.getByTestId("community-open-data-rate-limit").fill("24");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-open-data.spec.ts:202:73
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-open-data-Commun-604ec-ts-and-revokes-token-access-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-open-data-Commun-604ec-ts-and-revokes-token-access-chromium\error-context.md
+
+
+[1A[2K[14/85] [chromium] ÔÇ║ src\tests\community-permission-policies.spec.ts:13:3 ÔÇ║ Community permission policies ÔÇ║ coordinator can edit and save community policy matrix
+[1A[2K[15/85] [chromium] ÔÇ║ src\tests\community-permission-reasons.spec.ts:4:3 ÔÇ║ Community creation permission reasons ÔÇ║ shows backend permission reason inline for thread and blog creation
+[1A[2K[16/85] [chromium] ÔÇ║ src\tests\community-projects.spec.ts:10:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note
+[1A[2K[17/85] [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:8:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation
+[1A[2K  11) [chromium] ÔÇ║ src\tests\community-permission-policies.spec.ts:13:3 ÔÇ║ Community permission policies ÔÇ║ coordinator can edit and save community policy matrix 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-permission-card')
+    Expected substring: [32m"Community policies"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-permission-card')[22m
+
+
+      239 |     await page.goto('http://127.0.0.1:5173/communities');
+      240 |
+    > 241 |     await expect(page.getByTestId('community-permission-card')).toContainText('Community policies');
+          |                                                                 ^
+      242 |     await page.getByTestId('community-permission-toggle-CREATE_THREAD-MEMBER').click();
+      243 |     await page.getByTestId('community-permission-save-button').click();
+      244 |
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-permission-policies.spec.ts:241:65
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-permission-polic-082f8-ave-community-policy-matrix-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-permission-polic-082f8-ave-community-policy-matrix-chromium\error-context.md
+
+
+[1A[2K  12) [chromium] ÔÇ║ src\tests\community-projects.spec.ts:10:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-project-board-detail-card')
+    Expected substring: [32m"School crossing delivery board"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-project-board-detail-card')[22m
+
+
+      263 |     await page.goto("http://127.0.0.1:5173/communities/projects");
+      264 |
+    > 265 |     await expect(page.getByTestId("community-project-board-detail-card")).toContainText("School crossing delivery board");
+          |                                                                           ^
+      266 |     await expect(page.getByTestId("community-project-column-todo")).toContainText("Confirm school committee palette");
+      267 |
+      268 |     await page.getByTestId("project-board-linked-proposal-select").click();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-projects.spec.ts:265:75
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-projects-Communi-195a6-s-it-and-leaves-a-task-note-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-projects-Communi-195a6-s-it-and-leaves-a-task-note-chromium\error-context.md
+
+
+[1A[2K[18/85] [chromium] ÔÇ║ src\tests\community-resources.spec.ts:12:3 ÔÇ║ Community shared resources ÔÇ║ shows policy, exposes the approval queue, and records a decision
+[1A[2K[19/85] [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:121:3 ÔÇ║ A truncated room history says so ÔÇ║ shows what is loaded out of the total when older messages exist
+[1A[2K  13) [chromium] ÔÇ║ src\tests\community-resources.spec.ts:12:3 ÔÇ║ Community shared resources ÔÇ║ shows policy, exposes the approval queue, and records a decision 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-resources-list-card')
+    Expected substring: [32m"Community hall"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-resources-list-card')[22m
+
+
+      163 |
+      164 |     const detail = page.getByTestId("community-resources-detail-card");
+    > 165 |     await expect(page.getByTestId("community-resources-list-card")).toContainText("Community hall");
+          |                                                                     ^
+      166 |     await expect(detail).toContainText("Needs coordinator approval");
+      167 |     await expect(detail).toContainText("Minimum notice: 24h");
+      168 |     await expect(detail).toContainText("Maximum booking: 4h");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-resources.spec.ts:165:69
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-resources-Commun-a5477-ueue-and-records-a-decision-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-resources-Commun-a5477-ueue-and-records-a-decision-chromium\error-context.md
+
+
+[1A[2K[20/85] [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:155:3 ÔÇ║ A truncated room history says so ÔÇ║ loads older messages on request rather than refusing to page
+[1A[2K  14) [chromium] ÔÇ║ src\tests\community-permission-reasons.spec.ts:4:3 ÔÇ║ Community creation permission reasons ÔÇ║ shows backend permission reason inline for thread and blog creation 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       7 |     await page.getByTestId('login-password-input').fill('admin12345');
+       8 |     await page.getByTestId('login-submit-button').click();
+    >  9 |     await page.waitForURL('**/');
+         |                ^
+      10 |
+      11 |     await page.route('**/api/community/threads', async (route) => {
+      12 |       if (route.request().method() !== 'POST') {
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-permission-reasons.spec.ts:9:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-permission-reaso-e2417-or-thread-and-blog-creation-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-permission-reaso-e2417-or-thread-and-blog-creation-chromium\error-context.md
+
+
+[1A[2K  15) [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:8:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.fill: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('proposal-title-input')[22m
+
+
+      379 |     await page.goto("http://127.0.0.1:5173/communities/proposals");
+      380 |
+    > 381 |     await page.getByTestId("proposal-title-input").fill("Raised crossing and signage at school entrance");
+          |                                                    ^
+      382 |     await page.getByTestId("proposal-problem-input").fill("Students and caregivers cross at peak hours without physical slowing measures at the main gate.");
+      383 |     await page.getByTestId("proposal-solution-input").fill("Build a raised crossing, repaint lane markings, and add school-zone signage with reflective paint.");
+      384 |     await page.getByTestId("proposal-cost-input").fill("COP 18M for construction, paint, and signs plus one week of traffic management.");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-proposals.spec.ts:381:52
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-proposals-Commun-bbcb7-ons-with-typed-deliberation-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-proposals-Commun-bbcb7-ons-with-typed-deliberation-chromium\error-context.md
+
+
+[1A[2K[21/85] [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:198:3 ÔÇ║ A truncated room history says so ÔÇ║ says nothing about paging when the whole room is loaded
+[1A[2K[22/85] [chromium] ÔÇ║ src\tests\community-rooms.spec.ts:12:3 ÔÇ║ Community coordination rooms ÔÇ║ posts mentions, surfaces the audit trail, and mutes per user
+[1A[2K  16) [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:121:3 ÔÇ║ A truncated room history says so ÔÇ║ shows what is loaded out of the total when older messages exist 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('community-rooms-history-note')
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 30000ms[22m
+    [2m  - waiting for getByTestId('community-rooms-history-note')[22m
+
+
+      148 |
+      149 |     // Both numbers, because one alone is misleading: 50 alone hides that there are 1,204.
+    > 150 |     await expect(page.getByTestId("community-rooms-history-note")).toBeVisible({ timeout: 30000 });
+          |                                                                    ^
+      151 |     await expect(page.getByTestId("community-rooms-history-note")).toContainText("50");
+      152 |     await expect(page.getByTestId("community-rooms-history-note")).toContainText("1204");
+      153 |   });
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-rooms-history.spec.ts:150:68
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-rooms-history-A--3067c-l-when-older-messages-exist-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-rooms-history-A--3067c-l-when-older-messages-exist-chromium\error-context.md
+
+
+[1A[2K[23/85] [chromium] ÔÇ║ src\tests\community-threads-paging.spec.ts:107:3 ÔÇ║ Community Threads pagination and status persistence (P1) ÔÇ║ threads list keeps paging/filter state and sends deterministic backend query params
+[1A[2K  17) [chromium] ÔÇ║ src\tests\community-rooms.spec.ts:12:3 ÔÇ║ Community coordination rooms ÔÇ║ posts mentions, surfaces the audit trail, and mutes per user 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-rooms-list-card')
+    Expected substring: [32m"Night patrol working group"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-rooms-list-card')[22m
+    [2m    - locator resolved to <div data-testid="community-rooms-list-card" class="glass-panel u-card-surface motion-card motion-card-hover rounded-3xl overflow-hidden civic-card">ÔÇª</div>[22m
+    [2m    - unexpected value "RoomsNo coordination rooms yetA coordinator can open the first room for this community so working groups can coordinate in one place."[22m
+
+
+      204 |     await page.goto("/communities/rooms");
+      205 |
+    > 206 |     await expect(page.getByTestId("community-rooms-list-card")).toContainText("Night patrol working group");
+          |                                                                 ^
+      207 |     await expect(page.getByTestId("community-rooms-stats-grid")).toContainText("Rooms");
+      208 |
+      209 |     await page.getByTestId("community-rooms-message-input").fill("@vecina please confirm the 7pm walk start");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-rooms.spec.ts:206:65
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-rooms-Community--cc73a-it-trail-and-mutes-per-user-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-rooms-Community--cc73a-it-trail-and-mutes-per-user-chromium\error-context.md
+
+
+[1A[2K[24/85] [chromium] ÔÇ║ src\tests\community-threads-paging.spec.ts:214:3 ÔÇ║ Community Threads pagination and status persistence (P1) ÔÇ║ community blog initial load uses batched comment count endpoint without per-post comment fan-out
+[1A[2K  18) [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:155:3 ÔÇ║ A truncated room history says so ÔÇ║ loads older messages on request rather than refusing to page 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('community-rooms-load-older')
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 30000ms[22m
+    [2m  - waiting for getByTestId('community-rooms-load-older')[22m
+
+
+      187 |     await page.goto("/communities/rooms");
+      188 |
+    > 189 |     await expect(page.getByTestId("community-rooms-load-older")).toBeVisible({ timeout: 30000 });
+          |                                                                  ^
+      190 |     await page.getByTestId("community-rooms-load-older").click();
+      191 |
+      192 |     // The request must actually raise the limit; a button that re-fetches the same page is a control
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-rooms-history.spec.ts:189:66
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-rooms-history-A--8b3aa-ather-than-refusing-to-page-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-rooms-history-A--8b3aa-ather-than-refusing-to-page-chromium\error-context.md
+
+
+[1A[2K  19) [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:198:3 ÔÇ║ A truncated room history says so ÔÇ║ says nothing about paging when the whole room is loaded 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('community-rooms-message-list')
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 30000ms[22m
+    [2m  - waiting for getByTestId('community-rooms-message-list')[22m
+
+
+      224 |     await page.goto("/communities/rooms");
+      225 |
+    > 226 |     await expect(page.getByTestId("community-rooms-message-list")).toBeVisible({ timeout: 30000 });
+          |                                                                    ^
+      227 |     // Offering to load more of a room that fits would train people to distrust the control.
+      228 |     await expect(page.getByTestId("community-rooms-load-older")).toHaveCount(0);
+      229 |     await expect(page.getByTestId("community-rooms-history-note")).toHaveCount(0);
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-rooms-history.spec.ts:226:68
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-rooms-history-A--9795d-en-the-whole-room-is-loaded-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-rooms-history-A--9795d-en-the-whole-room-is-loaded-chromium\error-context.md
+
+
+[1A[2K[25/85] [chromium] ÔÇ║ src\tests\community-trust-metrics.spec.ts:7:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K  20) [chromium] ÔÇ║ src\tests\community-threads-paging.spec.ts:107:3 ÔÇ║ Community Threads pagination and status persistence (P1) ÔÇ║ threads list keeps paging/filter state and sends deterministic backend query params 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      14 |   await page.getByTestId('login-password-input').fill('admin12345');
+      15 |   await page.getByTestId('login-submit-button').click();
+    > 16 |   await page.waitForURL('**/');
+         |              ^
+      17 | }
+      18 |
+      19 | async function buildCommunitiesAndThreads(page: Page): Promise<AuthContext> {
+        at loginAsAdmin (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-threads-paging.spec.ts:16:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-threads-paging.spec.ts:108:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-threads-paging-C-d3d1e-nistic-backend-query-params-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-threads-paging-C-d3d1e-nistic-backend-query-params-chromium\error-context.md
+
+
+[1A[2K  21) [chromium] ÔÇ║ src\tests\community-threads-paging.spec.ts:214:3 ÔÇ║ Community Threads pagination and status persistence (P1) ÔÇ║ community blog initial load uses batched comment count endpoint without per-post comment fan-out 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      14 |   await page.getByTestId('login-password-input').fill('admin12345');
+      15 |   await page.getByTestId('login-submit-button').click();
+    > 16 |   await page.waitForURL('**/');
+         |              ^
+      17 | }
+      18 |
+      19 | async function buildCommunitiesAndThreads(page: Page): Promise<AuthContext> {
+        at loginAsAdmin (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-threads-paging.spec.ts:16:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-threads-paging.spec.ts:215:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-threads-paging-C-515df-ut-per-post-comment-fan-out-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-threads-paging-C-515df-ut-per-post-comment-fan-out-chromium\error-context.md
+
+
+[1A[2K[26/85] [chromium] ÔÇ║ src\tests\dashboard-aging.spec.ts:8:3 ÔÇ║ Dashboard case aging and SLA risk ÔÇ║ shows SLA counters, buckets, and the worst breaching case to staff
+[1A[2K[27/85] [chromium] ÔÇ║ src\tests\dashboard-aging.spec.ts:128:3 ÔÇ║ Dashboard case aging and SLA risk ÔÇ║ hides the aging panel from citizens
+[1A[2K[28/85] [chromium] ÔÇ║ src\tests\dashboard-clarity.spec.ts:13:3 ÔÇ║ Dashboard clarity hierarchy ÔÇ║ shows one dominant primary action and moves the rest into a secondary surface
+[1A[2K[29/85] [chromium] ÔÇ║ src\tests\dashboard-filter-query.spec.ts:20:3 ÔÇ║ Dashboard filters change the query ÔÇ║ CRITICAL filter must reach the API as minScore, not just repaint rows
+[1A[2K[30/85] [chromium] ÔÇ║ src\tests\dashboard-filter-query.spec.ts:103:3 ÔÇ║ Dashboard filters change the query ÔÇ║ status filter must still reach the API as status
+[1A[2K[31/85] [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:13:3 ÔÇ║ Dashboard guided home by role ÔÇ║ citizen sees report, support, and follow guidance
+[1A[2K[32/85] [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:25:3 ÔÇ║ Dashboard guided home by role ÔÇ║ public servant sees publish, review, and resolve guidance
+[1A[2K  22) [chromium] ÔÇ║ src\tests\community-trust-metrics.spec.ts:7:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-trust-overview')
+    Expected substring: [32m"Los Rosales"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-trust-overview')[22m
+
+
+      167 |     await page.goto("http://127.0.0.1:5173/communities/trust");
+      168 |
+    > 169 |     await expect(page.getByTestId("community-trust-overview")).toContainText("Los Rosales");
+          |                                                                ^
+      170 |     await expect(page.getByTestId("community-trust-freshness")).toContainText("20m ago");
+      171 |     await expect(page.getByTestId("community-trust-card-resolution_rate")).toContainText("50%");
+      172 |     await expect(page.getByTestId("community-trust-card-participation_coverage")).toContainText("67%");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-trust-metrics.spec.ts:169:64
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-trust-metrics-Co-73fcc-ly-for-low-data-communities-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-trust-metrics-Co-73fcc-ly-for-low-data-communities-chromium\error-context.md
+
+
+[1A[2K[33/85] [chromium] ÔÇ║ src\tests\empty-and-restricted-states.spec.ts:4:3 ÔÇ║ Action-oriented empty and restricted states ÔÇ║ community hub and unauthorized state explain the situation and offer a next action
+[1A[2K[34/85] [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:35:3 ÔÇ║ Dashboard guided home by role ÔÇ║ community moderator context sees moderation and community-health guidance
+[1A[2K  23) [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:35:3 ÔÇ║ Dashboard guided home by role ÔÇ║ community moderator context sees moderation and community-health guidance 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       6 |   await page.getByTestId('login-password-input').fill(password);
+       7 |   await page.getByTestId('login-submit-button').click();
+    >  8 |   await page.waitForURL('**/');
+         |              ^
+       9 |   await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
+      10 | }
+      11 |
+        at login (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\dashboard-guided-home.spec.ts:8:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\dashboard-guided-home.spec.ts:36:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\dashboard-guided-home-Dash-23991-d-community-health-guidance-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\dashboard-guided-home-Dash-23991-d-community-health-guidance-chromium\error-context.md
+
+
+[1A[2K[35/85] [chromium] ÔÇ║ src\tests\excellence.spec.ts:5:3 ÔÇ║ Signal OS - High Quality E2E Suite ÔÇ║ Complete Quality Audit Flow with Verification
+[1A[2K  24) [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:25:3 ÔÇ║ Dashboard guided home by role ÔÇ║ public servant sees publish, review, and resolve guidance 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       6 |   await page.getByTestId('login-password-input').fill(password);
+       7 |   await page.getByTestId('login-submit-button').click();
+    >  8 |   await page.waitForURL('**/');
+         |              ^
+       9 |   await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
+      10 | }
+      11 |
+        at login (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\dashboard-guided-home.spec.ts:8:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\dashboard-guided-home.spec.ts:26:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\dashboard-guided-home-Dash-e90bb-review-and-resolve-guidance-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\dashboard-guided-home-Dash-e90bb-review-and-resolve-guidance-chromium\error-context.md
+
+
+[1A[2K  25) [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:13:3 ÔÇ║ Dashboard guided home by role ÔÇ║ citizen sees report, support, and follow guidance 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       6 |   await page.getByTestId('login-password-input').fill(password);
+       7 |   await page.getByTestId('login-submit-button').click();
+    >  8 |   await page.waitForURL('**/');
+         |              ^
+       9 |   await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
+      10 | }
+      11 |
+        at login (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\dashboard-guided-home.spec.ts:8:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\dashboard-guided-home.spec.ts:14:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\dashboard-guided-home-Dash-5b3dc-support-and-follow-guidance-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\dashboard-guided-home-Dash-5b3dc-support-and-follow-guidance-chromium\error-context.md
+
+
+[1A[2K  26) [chromium] ÔÇ║ src\tests\empty-and-restricted-states.spec.ts:4:3 ÔÇ║ Action-oriented empty and restricted states ÔÇ║ community hub and unauthorized state explain the situation and offer a next action 
+
+    [31mTest timeout of 30000ms exceeded while setting up "page".[39m
+
+    Error: browserContext.newPage: Test timeout of 30000ms exceeded.
+
+
+[1A[2K[36/85] [chromium] ÔÇ║ src\tests\explainability-snippets.spec.ts:4:3 ÔÇ║ Explainability snippets in dashboard list ÔÇ║ shows list-level explainability and keeps detail explainability visible
+[1A[2K[37/85] [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:91:3 ÔÇ║ Field data mode ÔÇ║ full mode requests every panel
+[1A[2K[38/85] [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:110:3 ÔÇ║ Field data mode ÔÇ║ field mode does not request the optional panels at all
+[1A[2K[39/85] [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:135:3 ÔÇ║ Field data mode ÔÇ║ field mode asks for fewer rows
+[1A[2K[40/85] [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:166:3 ÔÇ║ Field data mode ÔÇ║ the setting says exactly what field mode stops fetching
+[1A[2K[41/85] [chromium] ÔÇ║ src\tests\global-state-integrity.spec.ts:4:3 ÔÇ║ Global State Integrity (P0) ÔÇ║ Buttons and route navigation must not reset language, theme, or community context
+[1A[2K[42/85] [chromium] ÔÇ║ src\tests\help-center.spec.ts:12:3 ÔÇ║ Help center onboarding and contextual guidance ÔÇ║ dashboard contextual help opens the full help center guide
+[1A[2K  27) [chromium] ÔÇ║ src\tests\excellence.spec.ts:5:3 ÔÇ║ Signal OS - High Quality E2E Suite ÔÇ║ Complete Quality Audit Flow with Verification 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('welcome-message')
+    Expected substring: [32m"admin"[39m
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 30000ms[22m
+    [2m  - waiting for getByTestId('welcome-message')[22m
+
+
+      13 |     // Identity Welcome - Wait for hydration and dashboard load
+      14 |     await page.waitForSelector('[data-testid="auth-loading"]', { state: 'detached' }).catch(() => { });
+    > 15 |     await expect(page.getByTestId('welcome-message')).toContainText('admin', { timeout: 30000 });
+         |                                                       ^
+      16 |     await expect(page.getByTestId('dashboard-freshness-badge')).toBeVisible();
+      17 |
+      18 |     // Settings: i18n Toggle Verification (click Espa├▒ol, verify Spanish label, then reset)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\excellence.spec.ts:15:55
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\excellence-Signal-OS---Hig-3adf5-udit-Flow-with-Verification-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\excellence-Signal-OS---Hig-3adf5-udit-Flow-with-Verification-chromium\error-context.md
+
+
+[1A[2K[43/85] [chromium] ÔÇ║ src\tests\help-center.spec.ts:25:3 ÔÇ║ Help center onboarding and contextual guidance ÔÇ║ help center supports surface filters and searchable guide retrieval
+[1A[2K  28) [chromium] ÔÇ║ src\tests\explainability-snippets.spec.ts:4:3 ÔÇ║ Explainability snippets in dashboard list ÔÇ║ shows list-level explainability and keeps detail explainability visible 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('signals-datatable')
+    Expected: visible
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 30000ms[22m
+    [2m  - waiting for getByTestId('signals-datatable')[22m
+
+
+      76 |
+      77 |     await page.waitForSelector('[data-testid="auth-loading"]', { state: 'detached' }).catch(() => {});
+    > 78 |     await expect(page.getByTestId('signals-datatable')).toBeVisible({ timeout: 30000 });
+         |                                                         ^
+      79 |
+      80 |     const explainabilitySnippet = page.locator('[data-testid^="signal-explainability-"]').first();
+      81 |     await expect(explainabilitySnippet).toBeVisible();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\explainability-snippets.spec.ts:78:57
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\explainability-snippets-Ex-55f5d-tail-explainability-visible-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\explainability-snippets-Ex-55f5d-tail-explainability-visible-chromium\error-context.md
+
+
+[1A[2K[44/85] [chromium] ÔÇ║ src\tests\interface-mode-settings.spec.ts:12:3 ÔÇ║ Interface Mode Settings ÔÇ║ simple and advanced modes persist and change dashboard complexity
+[1A[2K  29) [chromium] ÔÇ║ src\tests\global-state-integrity.spec.ts:4:3 ÔÇ║ Global State Integrity (P0) ÔÇ║ Buttons and route navigation must not reset language, theme, or community context 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      20 |     await page.getByTestId('login-password-input').fill('admin12345');
+      21 |     await page.getByTestId('login-submit-button').click();
+    > 22 |     await page.waitForURL('**/');
+         |                ^
+      23 |
+      24 |     await page.goto('/settings');
+      25 |     await page.locator('.p-selectbutton >> text=Espa├▒ol').click();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\global-state-integrity.spec.ts:22:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\global-state-integrity-Glo-0ad64--theme-or-community-context-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\global-state-integrity-Glo-0ad64--theme-or-community-context-chromium\error-context.md
+
+
+[1A[2K[45/85] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[46/85] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K  30) [chromium] ÔÇ║ src\tests\help-center.spec.ts:12:3 ÔÇ║ Help center onboarding and contextual guidance ÔÇ║ dashboard contextual help opens the full help center guide 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       6 |   await page.getByTestId('login-password-input').fill(password);
+       7 |   await page.getByTestId('login-submit-button').click();
+    >  8 |   await page.waitForURL('**/');
+         |              ^
+       9 | }
+      10 |
+      11 | test.describe('Help center onboarding and contextual guidance', () => {
+        at login (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\help-center.spec.ts:8:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\help-center.spec.ts:13:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\help-center-Help-center-on-d3acd--the-full-help-center-guide-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\help-center-Help-center-on-d3acd--the-full-help-center-guide-chromium\error-context.md
+
+
+[1A[2K[47/85] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[48/85] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[49/85] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[50/85] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[51/85] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[52/85] [chromium] ÔÇ║ src\tests\mobile-navigation.spec.ts:6:3 ÔÇ║ Mobile Navigation Integrity (P0) ÔÇ║ Drawer menu layering and opacity on mobile
+[1A[2K  31) [chromium] ÔÇ║ src\tests\help-center.spec.ts:25:3 ÔÇ║ Help center onboarding and contextual guidance ÔÇ║ help center supports surface filters and searchable guide retrieval 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       6 |   await page.getByTestId('login-password-input').fill(password);
+       7 |   await page.getByTestId('login-submit-button').click();
+    >  8 |   await page.waitForURL('**/');
+         |              ^
+       9 | }
+      10 |
+      11 | test.describe('Help center onboarding and contextual guidance', () => {
+        at login (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\help-center.spec.ts:8:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\help-center.spec.ts:26:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\help-center-Help-center-on-94145--searchable-guide-retrieval-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\help-center-Help-center-on-94145--searchable-guide-retrieval-chromium\error-context.md
+
+
+[1A[2K[53/85] [chromium] ÔÇ║ src\tests\navigation-clarity.spec.ts:34:3 ÔÇ║ Navigation clarity ÔÇ║ mobile bottom nav stays short and routes extra options through the drawer
+[1A[2K[54/85] [chromium] ÔÇ║ src\tests\no-locale-timestamps.spec.ts:50:1 ÔÇ║ no view renders a timestamp through the reader browser locale
+[1A[2K[55/85] [chromium] ÔÇ║ src\tests\profile-identity-settings.spec.ts:12:3 ÔÇ║ Profile Identity Settings ÔÇ║ user can save civic profile fields and visibility preferences
+[1A[2K[56/85] [chromium] ÔÇ║ src\tests\navigation-clarity.spec.ts:13:3 ÔÇ║ Navigation clarity ÔÇ║ desktop keeps only the core path visible until more tools is expanded
+[1A[2K  32) [chromium] ÔÇ║ src\tests\interface-mode-settings.spec.ts:12:3 ÔÇ║ Interface Mode Settings ÔÇ║ simple and advanced modes persist and change dashboard complexity 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       6 |   await page.getByTestId('login-password-input').fill('admin12345');
+       7 |   await page.getByTestId('login-submit-button').click();
+    >  8 |   await page.waitForURL('**/');
+         |              ^
+       9 | }
+      10 |
+      11 | test.describe('Interface Mode Settings', () => {
+        at login (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\interface-mode-settings.spec.ts:8:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\interface-mode-settings.spec.ts:13:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\interface-mode-settings-In-073de-change-dashboard-complexity-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\interface-mode-settings-In-073de-change-dashboard-complexity-chromium\error-context.md
+
+
+[1A[2K[57/85] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:117:3 ÔÇ║ Public backlog without an account ÔÇ║ renders the ranked backlog, the formula, and the freshness stamp
+[1A[2K[58/85] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:149:3 ÔÇ║ Public backlog without an account ÔÇ║ shows a sign-in path rather than a dead end
+[1A[2K[59/85] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:156:3 ÔÇ║ Public backlog without an account ÔÇ║ an unreachable API shows an unavailable state, not a login prompt
+[1A[2K[60/85] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:174:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ lifecycle is spelled out instead of exposing the raw enum
+[1A[2K[61/85] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:185:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ the freshness stamp is unambiguous and free of clock noise
+[1A[2K[62/85] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:195:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ a score does not claim precision the formula cannot produce
+[1A[2K[63/85] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:211:3 ÔÇ║ Freshness does not depend on the reader browser locale ÔÇ║ renders the same stamp under a non-English locale
+[1A[2K[64/85] [chromium] ÔÇ║ src\tests\report-form-ux.spec.ts:3:1 ÔÇ║ Report form wizard supports structured intake
+[1A[2K  33) [chromium] ÔÇ║ src\tests\mobile-navigation.spec.ts:6:3 ÔÇ║ Mobile Navigation Integrity (P0) ÔÇ║ Drawer menu layering and opacity on mobile 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      11 |     await page.getByTestId('login-submit-button').click();
+      12 |
+    > 13 |     await page.waitForURL('**/');
+         |                ^
+      14 |     await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 30000 });
+      15 |
+      16 |     // Open Drawer
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\mobile-navigation.spec.ts:13:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\mobile-navigation-Mobile-N-4d239-ering-and-opacity-on-mobile-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\mobile-navigation-Mobile-N-4d239-ering-and-opacity-on-mobile-chromium\error-context.md
+
+
+[1A[2K[65/85] [chromium] ÔÇ║ src\tests\report-success-lifecycle.spec.ts:6:3 ÔÇ║ Report success lifecycle clarity ÔÇ║ successful report explains what happens next and offers follow-up actions
+[1A[2K  34) [chromium] ÔÇ║ src\tests\navigation-clarity.spec.ts:13:3 ÔÇ║ Navigation clarity ÔÇ║ desktop keeps only the core path visible until more tools is expanded 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       6 |   await page.getByTestId('login-password-input').fill('admin12345');
+       7 |   await page.getByTestId('login-submit-button').click();
+    >  8 |   await page.waitForURL('**/');
+         |              ^
+       9 |   await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 30000 });
+      10 | }
+      11 |
+        at login (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\navigation-clarity.spec.ts:8:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\navigation-clarity.spec.ts:15:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\navigation-clarity-Navigat-23fb9-ntil-more-tools-is-expanded-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\navigation-clarity-Navigat-23fb9-ntil-more-tools-is-expanded-chromium\error-context.md
+
+
+[1A[2K  35) [chromium] ÔÇ║ src\tests\profile-identity-settings.spec.ts:12:3 ÔÇ║ Profile Identity Settings ÔÇ║ user can save civic profile fields and visibility preferences 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       6 |   await page.getByTestId('login-password-input').fill('admin12345');
+       7 |   await page.getByTestId('login-submit-button').click();
+    >  8 |   await page.waitForURL('**/');
+         |              ^
+       9 | }
+      10 |
+      11 | test.describe('Profile Identity Settings', () => {
+        at login (C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\profile-identity-settings.spec.ts:8:14)
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\profile-identity-settings.spec.ts:13:5
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\profile-identity-settings--766c5--and-visibility-preferences-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\profile-identity-settings--766c5--and-visibility-preferences-chromium\error-context.md
+
+
+[1A[2K[66/85] [chromium] ÔÇ║ src\tests\role-switch-ux.spec.ts:4:3 ÔÇ║ Role Switch UX (P0) ÔÇ║ Role dropdown is intuitive and keeps selected role across navigation
+[1A[2K[67/85] [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:26:3 ÔÇ║ The case screen describes itself ÔÇ║ the eyebrow names the case instead of repeating a card below it
+[1A[2K[68/85] [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:38:3 ÔÇ║ The case screen describes itself ÔÇ║ the header does not restate the card immediately below it
+[1A[2K[69/85] [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:51:3 ÔÇ║ The case screen describes itself ÔÇ║ the topbar stops presenting a single case as the dashboard
+[1A[2K[70/85] [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:67:1 ÔÇ║ The topbar still frames the pages it is meant to frame ÔÇ║ the dashboard keeps its "what needs attention today" framing
+[1A[2K[71/85] [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:17:3 ÔÇ║ Signal detail speaks plain language ÔÇ║ the header badge spells out the lifecycle state
+[1A[2K[72/85] [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:27:3 ÔÇ║ Signal detail speaks plain language ÔÇ║ the timeline transition reads as two states, not two identifiers
+[1A[2K[73/85] [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:42:3 ÔÇ║ Signal detail timestamps do not depend on the reader browser locale ÔÇ║ renders the audit trail the same way under a non-English locale
+[1A[2K[74/85] [chromium] ÔÇ║ src\tests\signal-detail-timeline.spec.ts:3:1 ÔÇ║ signal detail shows assignee and timeline events
+[1A[2K  36) [chromium] ÔÇ║ src\tests\report-form-ux.spec.ts:3:1 ÔÇ║ Report form wizard supports structured intake 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       9 |   await page.getByTestId('login-password-input').fill('citizen123');
+      10 |   await page.getByTestId('login-submit-button').click();
+    > 11 |   await page.waitForURL('**/');
+         |              ^
+      12 |   
+      13 |   // Navigate to report
+      14 |   await page.goto('/report');
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\report-form-ux.spec.ts:11:14
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\report-form-ux-Report-form-wizard-supports-structured-intake-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\report-form-ux-Report-form-wizard-supports-structured-intake-chromium\error-context.md
+
+
+[1A[2K[75/85] [chromium] ÔÇ║ src\tests\signal-provenance.spec.ts:45:3 ÔÇ║ Signal provenance ÔÇ║ shows the ingest channel and scoring rule version for an institutional update
+[1A[2K  37) [chromium] ÔÇ║ src\tests\report-success-lifecycle.spec.ts:6:3 ÔÇ║ Report success lifecycle clarity ÔÇ║ successful report explains what happens next and offers follow-up actions 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      11 |     await page.getByTestId('login-password-input').fill('citizen123');
+      12 |     await page.getByTestId('login-submit-button').click();
+    > 13 |     await page.waitForURL('**/');
+         |                ^
+      14 |
+      15 |     await page.goto('/report');
+      16 |     await page.getByTestId('report-title-input').fill(`Blocked drainage near school entrance ${uniqueSuffix}`);
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\report-success-lifecycle.spec.ts:13:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\report-success-lifecycle-R-9cbd6-nd-offers-follow-up-actions-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\report-success-lifecycle-R-9cbd6-nd-offers-follow-up-actions-chromium\error-context.md
+
+
+[1A[2K[76/85] [chromium] ÔÇ║ src\tests\signal-provenance.spec.ts:96:3 ÔÇ║ Signal provenance ÔÇ║ labels a citizen report differently from an institutional update
+[1A[2K  38) [chromium] ÔÇ║ src\tests\signal-provenance.spec.ts:45:3 ÔÇ║ Signal provenance ÔÇ║ shows the ingest channel and scoring rule version for an institutional update 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByTestId('signal-detail-provenance')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('signal-detail-provenance')[22m
+
+
+      82 |
+      83 |     const provenance = page.getByTestId("signal-detail-provenance");
+    > 84 |     await expect(provenance).toBeVisible();
+         |                              ^
+      85 |     await expect(page.getByTestId("signal-detail-provenance-channel")).toContainText("Institutional update");
+      86 |     await expect(page.getByTestId("signal-detail-provenance-ref")).toContainText("municipal-ticket/88213");
+      87 |     await expect(page.getByTestId("signal-detail-provenance-version")).toContainText("v1");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\signal-provenance.spec.ts:84:30
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\signal-provenance-Signal-p-caf15-for-an-institutional-update-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\signal-provenance-Signal-p-caf15-for-an-institutional-update-chromium\error-context.md
+
+
+[1A[2K[77/85] [chromium] ÔÇ║ src\tests\stress-auth.spec.ts:5:3 ÔÇ║ Signal OS - Infrastructure Stress Test (P0) ÔÇ║ Concurrent Registration Stress
+[1A[2K  39) [chromium] ÔÇ║ src\tests\role-switch-ux.spec.ts:4:3 ÔÇ║ Role Switch UX (P0) ÔÇ║ Role dropdown is intuitive and keeps selected role across navigation 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      13 |     await page.getByTestId('login-password-input').fill('admin12345');
+      14 |     await page.getByTestId('login-submit-button').click();
+    > 15 |     await page.waitForURL('**/');
+         |                ^
+      16 |
+      17 |     await page.goto('/settings');
+      18 |     await expect(page.getByTestId('role-switch-dropdown')).toBeVisible();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\role-switch-ux.spec.ts:15:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\role-switch-ux-Role-Switch-9c71a-cted-role-across-navigation-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\role-switch-ux-Role-Switch-9c71a-cted-role-across-navigation-chromium\error-context.md
+
+
+[1A[2K  40) [chromium] ÔÇ║ src\tests\signal-provenance.spec.ts:96:3 ÔÇ║ Signal provenance ÔÇ║ labels a citizen report differently from an institutional update 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('signal-detail-provenance-channel')
+    Expected substring: [32m"Community web form"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('signal-detail-provenance-channel')[22m
+
+
+      132 |     await page.goto(`/signal/${signalId}`);
+      133 |
+    > 134 |     await expect(page.getByTestId("signal-detail-provenance-channel")).toContainText("Community web form");
+          |                                                                        ^
+      135 |     await expect(page.getByTestId("signal-detail-provenance-ref")).toHaveCount(0);
+      136 |   });
+      137 | });
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\signal-provenance.spec.ts:134:72
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\signal-provenance-Signal-p-2452e-rom-an-institutional-update-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\signal-provenance-Signal-p-2452e-rom-an-institutional-update-chromium\error-context.md
+
+
+[1A[2K[78/85] [chromium] ÔÇ║ src\tests\stress-auth.spec.ts:24:3 ÔÇ║ Signal OS - Infrastructure Stress Test (P0) ÔÇ║ Auth Code Brute Force Mitigation (Visual)
+[1A[2K[79/85] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:118:3 ÔÇ║ Weekly digest view ÔÇ║ shows the bulletin body and the counts
+[1A[2K[80/85] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:137:3 ÔÇ║ Weekly digest view ÔÇ║ an unpublished week says so and offers a publish control
+[1A[2K[81/85] [chromium] ÔÇ║ src\tests\theme-consistency.spec.ts:4:3 ÔÇ║ Theme Consistency (P1) ÔÇ║ Light/Dark switch keeps consistent visual tokens
+[1A[2K[82/85] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:150:3 ÔÇ║ Weekly digest view ÔÇ║ a published week says so and does not offer to publish again
+[1A[2K[83/85] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:164:3 ÔÇ║ Weekly digest view ÔÇ║ the scheduler history shows what happened and why
+[1A[2K[84/85] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:178:3 ÔÇ║ Weekly digest view ÔÇ║ publishing sends the week and reloads
+[1A[2K[85/85] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:203:3 ÔÇ║ Weekly digest view ÔÇ║ an unreachable API shows an unavailable state
+[1A[2K  41) [chromium] ÔÇ║ src\tests\signal-detail-timeline.spec.ts:3:1 ÔÇ║ signal detail shows assignee and timeline events 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      68 |   await page.getByTestId('login-password-input').fill('admin12345');
+      69 |   await page.getByTestId('login-submit-button').click();
+    > 70 |   await page.waitForURL('**/');
+         |              ^
+      71 |
+      72 |   await page.goto(`/signals/${signalId}`);
+      73 |   await expect(page.getByTestId('signal-detail-assignment-card')).toBeVisible();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\signal-detail-timeline.spec.ts:70:14
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\signal-detail-timeline-sig-f5035-ssignee-and-timeline-events-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\signal-detail-timeline-sig-f5035-ssignee-and-timeline-events-chromium\error-context.md
+
+
+[1A[2K  42) [chromium] ÔÇ║ src\tests\theme-consistency.spec.ts:4:3 ÔÇ║ Theme Consistency (P1) ÔÇ║ Light/Dark switch keeps consistent visual tokens 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+       8 |     await page.getByTestId('login-submit-button').click();
+       9 |
+    > 10 |     await page.waitForURL('**/');
+         |                ^
+      11 |     await expect(page.getByTestId('welcome-message')).toBeVisible();
+      12 |
+      13 |     await page.goto('/settings');
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\theme-consistency.spec.ts:10:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\theme-consistency-Theme-Co-e5d7e-ps-consistent-visual-tokens-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\theme-consistency-Theme-Co-e5d7e-ps-consistent-visual-tokens-chromium\error-context.md
+
+
+[1A[2K  42 failed
+    [chromium] ÔÇ║ src\tests\accessibility-keyboard.spec.ts:4:3 ÔÇ║ Accessibility keyboard baseline ÔÇ║ skip link moves focus to main content and route remains keyboard navigable 
+    [chromium] ÔÇ║ src\tests\community-activities.spec.ts:13:3 ÔÇ║ Community volunteer activities ÔÇ║ shows the signup window, blocks a full activity, and records attendance 
+    [chromium] ÔÇ║ src\tests\community-buttons.spec.ts:4:3 ÔÇ║ Community Buttons UX (P0) ÔÇ║ Community actions avoid dead clicks and execute end-to-end 
+    [chromium] ÔÇ║ src\tests\community-decisions.spec.ts:11:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context 
+    [chromium] ÔÇ║ src\tests\community-governance.spec.ts:8:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents 
+    [chromium] ÔÇ║ src\tests\community-hierarchy.spec.ts:22:3 ÔÇ║ Community hierarchy hub ÔÇ║ renders breadcrumb context and nested tree with user-friendly role labels 
+    [chromium] ÔÇ║ src\tests\community-integrations.spec.ts:12:3 ÔÇ║ Community outbound integrations ÔÇ║ surfaces a failed delivery, retries it, and connects a new channel 
+    [chromium] ÔÇ║ src\tests\community-map.spec.ts:7:3 ÔÇ║ Community geospatial map ÔÇ║ loads community map and sends real API filters for local and cross-community heat 
+    [chromium] ÔÇ║ src\tests\community-official-announcements.spec.ts:6:3 ÔÇ║ Community official announcements channel ÔÇ║ shows pinned announcements separately and supports archive search 
+    [chromium] ÔÇ║ src\tests\community-open-data.spec.ts:11:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access 
+    [chromium] ÔÇ║ src\tests\community-permission-policies.spec.ts:13:3 ÔÇ║ Community permission policies ÔÇ║ coordinator can edit and save community policy matrix 
+    [chromium] ÔÇ║ src\tests\community-permission-reasons.spec.ts:4:3 ÔÇ║ Community creation permission reasons ÔÇ║ shows backend permission reason inline for thread and blog creation 
+    [chromium] ÔÇ║ src\tests\community-projects.spec.ts:10:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note 
+    [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:8:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation 
+    [chromium] ÔÇ║ src\tests\community-resources.spec.ts:12:3 ÔÇ║ Community shared resources ÔÇ║ shows policy, exposes the approval queue, and records a decision 
+    [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:121:3 ÔÇ║ A truncated room history says so ÔÇ║ shows what is loaded out of the total when older messages exist 
+    [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:155:3 ÔÇ║ A truncated room history says so ÔÇ║ loads older messages on request rather than refusing to page 
+    [chromium] ÔÇ║ src\tests\community-rooms-history.spec.ts:198:3 ÔÇ║ A truncated room history says so ÔÇ║ says nothing about paging when the whole room is loaded 
+    [chromium] ÔÇ║ src\tests\community-rooms.spec.ts:12:3 ÔÇ║ Community coordination rooms ÔÇ║ posts mentions, surfaces the audit trail, and mutes per user 
+    [chromium] ÔÇ║ src\tests\community-threads-paging.spec.ts:107:3 ÔÇ║ Community Threads pagination and status persistence (P1) ÔÇ║ threads list keeps paging/filter state and sends deterministic backend query params 
+    [chromium] ÔÇ║ src\tests\community-threads-paging.spec.ts:214:3 ÔÇ║ Community Threads pagination and status persistence (P1) ÔÇ║ community blog initial load uses batched comment count endpoint without per-post comment fan-out 
+    [chromium] ÔÇ║ src\tests\community-trust-metrics.spec.ts:7:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities 
+    [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:13:3 ÔÇ║ Dashboard guided home by role ÔÇ║ citizen sees report, support, and follow guidance 
+    [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:25:3 ÔÇ║ Dashboard guided home by role ÔÇ║ public servant sees publish, review, and resolve guidance 
+    [chromium] ÔÇ║ src\tests\dashboard-guided-home.spec.ts:35:3 ÔÇ║ Dashboard guided home by role ÔÇ║ community moderator context sees moderation and community-health guidance 
+    [chromium] ÔÇ║ src\tests\empty-and-restricted-states.spec.ts:4:3 ÔÇ║ Action-oriented empty and restricted states ÔÇ║ community hub and unauthorized state explain the situation and offer a next action 
+    [chromium] ÔÇ║ src\tests\excellence.spec.ts:5:3 ÔÇ║ Signal OS - High Quality E2E Suite ÔÇ║ Complete Quality Audit Flow with Verification 
+    [chromium] ÔÇ║ src\tests\explainability-snippets.spec.ts:4:3 ÔÇ║ Explainability snippets in dashboard list ÔÇ║ shows list-level explainability and keeps detail explainability visible 
+    [chromium] ÔÇ║ src\tests\global-state-integrity.spec.ts:4:3 ÔÇ║ Global State Integrity (P0) ÔÇ║ Buttons and route navigation must not reset language, theme, or community context 
+    [chromium] ÔÇ║ src\tests\help-center.spec.ts:12:3 ÔÇ║ Help center onboarding and contextual guidance ÔÇ║ dashboard contextual help opens the full help center guide 
+    [chromium] ÔÇ║ src\tests\help-center.spec.ts:25:3 ÔÇ║ Help center onboarding and contextual guidance ÔÇ║ help center supports surface filters and searchable guide retrieval 
+    [chromium] ÔÇ║ src\tests\interface-mode-settings.spec.ts:12:3 ÔÇ║ Interface Mode Settings ÔÇ║ simple and advanced modes persist and change dashboard complexity 
+    [chromium] ÔÇ║ src\tests\mobile-navigation.spec.ts:6:3 ÔÇ║ Mobile Navigation Integrity (P0) ÔÇ║ Drawer menu layering and opacity on mobile 
+    [chromium] ÔÇ║ src\tests\navigation-clarity.spec.ts:13:3 ÔÇ║ Navigation clarity ÔÇ║ desktop keeps only the core path visible until more tools is expanded 
+    [chromium] ÔÇ║ src\tests\profile-identity-settings.spec.ts:12:3 ÔÇ║ Profile Identity Settings ÔÇ║ user can save civic profile fields and visibility preferences 
+    [chromium] ÔÇ║ src\tests\report-form-ux.spec.ts:3:1 ÔÇ║ Report form wizard supports structured intake 
+    [chromium] ÔÇ║ src\tests\report-success-lifecycle.spec.ts:6:3 ÔÇ║ Report success lifecycle clarity ÔÇ║ successful report explains what happens next and offers follow-up actions 
+    [chromium] ÔÇ║ src\tests\role-switch-ux.spec.ts:4:3 ÔÇ║ Role Switch UX (P0) ÔÇ║ Role dropdown is intuitive and keeps selected role across navigation 
+    [chromium] ÔÇ║ src\tests\signal-detail-timeline.spec.ts:3:1 ÔÇ║ signal detail shows assignee and timeline events 
+    [chromium] ÔÇ║ src\tests\signal-provenance.spec.ts:45:3 ÔÇ║ Signal provenance ÔÇ║ shows the ingest channel and scoring rule version for an institutional update 
+    [chromium] ÔÇ║ src\tests\signal-provenance.spec.ts:96:3 ÔÇ║ Signal provenance ÔÇ║ labels a citizen report differently from an institutional update 
+    [chromium] ÔÇ║ src\tests\theme-consistency.spec.ts:4:3 ÔÇ║ Theme Consistency (P1) ÔÇ║ Light/Dark switch keeps consistent visual tokens 
+  1 skipped
+  42 passed (7.0m)

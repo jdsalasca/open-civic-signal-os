@@ -1,0 +1,97 @@
+name: Playwright Suite
+
+# Nothing ran this suite before this workflow. `frontend-ux-evidence-gate.yml` only checks that a PR
+# body contains evidence; it never executes a test. That is why rounds 67 to 69 could find specs that
+# had never passed anywhere, and it is why a broken assertion in a view could sit unnoticed for as
+# long as it stayed unrun.
+#
+# The suite runs against a production build served by `vite preview`, not against the dev server.
+# That is not a preference: measured on the same 10 specs, the dev server produced 2 to 4 timeouts
+# depending on how many spec files shared it, while the production build ran 74 tests across both
+# projects with no failures and no flakes. The dev server transforms modules on the fly, and one of
+# them serving four browsers does not answer inside the assertion timeout.
+#
+# `playwright.config.ts` already encodes the CI posture: one worker, two retries, `forbidOnly`.
+
+on:
+  pull_request:
+    paths:
+      - 'apps/web-react/**'
+      - '.github/workflows/playwright.yml'
+  push:
+    branches: [develop]
+    paths:
+      - 'apps/web-react/**'
+      - '.github/workflows/playwright.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: playwright-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx --workspace @open-civic/web-react playwright install --with-deps chromium
+
+      # The build is what makes the suite stable, so it is a step rather than an optimisation: the
+      # suite runs against `vite preview`, which serves this output.
+      - name: Build the web app
+        run: npm run build --workspace @open-civic/web-react
+
+      - name: Serve the production build
+        run: |
+          npx --workspace @open-civic/web-react vite preview --port 3002 --strictPort &
+          for attempt in $(seq 1 30); do
+            if curl -fsS -o /dev/null http://localhost:3002/backlog; then
+              echo "preview ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "preview never became ready"
+          exit 1
+
+      # QUARANTINE, and it is meant to be temporary.
+      #
+      # The whole suite is not green yet: measured against this same production build, chromium
+      # alone reports 42 passed and 42 failed. Those 42 need the missing-route work that rounds 67 to
+      # 69 did spec by spec, and this gate must not be red in the meantime or it gets ignored, which
+      # is how the suite went unrun for as long as it did.
+      #
+      # So the gate covers the specs that are known green, and grows as each is converted. Deleting
+      # the filter is the whole point: the moment the full suite passes, drop `--` and the list.
+      - name: Run the suite
+        working-directory: apps/web-react
+        run: >
+          npx playwright test
+          src/tests/community-activities.spec.ts
+          src/tests/dashboard-aging.spec.ts
+          src/tests/dashboard-clarity.spec.ts
+          src/tests/dashboard-filter-query.spec.ts
+          src/tests/field-data-mode.spec.ts
+          src/tests/merge-review.spec.ts
+          src/tests/weekly-digest.spec.ts
+          src/tests/no-locale-timestamps.spec.ts
+          src/tests/public-backlog.spec.ts
+          src/tests/signal-detail-lifecycle.spec.ts
+          src/tests/signal-detail-describes-itself.spec.ts
