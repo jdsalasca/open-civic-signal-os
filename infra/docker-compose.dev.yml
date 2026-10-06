@@ -50,6 +50,15 @@ services:
       JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-me}
     ports:
       - "${API_PORT:-8081}:8080"
+    # The prod compose already healthchecks the API on this endpoint. Without it here, this service
+    # reports no status at all, so `docker:dev:up` printed "Docker dev stack is healthy" while the API
+    # was still compiling - a claim nothing was verifying.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 180s
     depends_on:
       civic-db-dev:
         condition: service_healthy

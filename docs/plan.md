@@ -230,7 +230,8 @@ patron que mas caro sale:
 | 86 | Auditoria visual del backlog publico | Sin defecto: el espacio de "Formula version v1" si existe, era la fuente. Quinta vez que un defecto aparente se evapora al verificar | Hecho este commit |
 | 87 | Causa raiz de las specs con backend, probada | El contenedor corre desde el compose prod con SPRING_PROFILES_ACTIVE=prod, asi que el seeder @Profile({dev,test}) queda excluido y no hay usuarios. Login responde 401 Invalid credentials. El compose dev ya setea dev, pero docker:dev:up no bindea el 8025 porque civic-mail (prod) lo tiene | Hecho este commit |
 | 90 | Puertos del compose dev parametrizados | `MAILPIT_PORT`/`POSTGRES_PORT`/`API_PORT`/`WEB_PORT` con defaults intactos. Verificado: dev y prod corriendo a la vez en puertos distintos | Hecho este commit |
-| 91 | El API dev no quedo healthy | Ninguna spec de backend se ha corrido end-to-end; la cuenta admin sembrada sigue sin observarse | Siguiente |
+| 91 | `civic-api-dev` sin healthcheck: "stack healthy" no verificaba nada | Anadido el mismo healthcheck del compose prod, con `start_period: 180s` para la compilacion en frio de 420 fuentes. El API no estaba roto: compilaba | Hecho este commit |
+| 93 | El healthcheck del api dev solo aplica al recrear el contenedor | Por eso el contenedor en curso sigue sin health y la cuenta `admin` sembrada sigue sin observarse | Siguiente |
 | 92 | `docker-dev.mjs` imprime URLs fijas | Con puertos sobrescritos reporta 8081/5173 en vez de los reales. Cosmético pero va a engañar | Siguiente |
 etries=0 | Siguiente |
 
