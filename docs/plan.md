@@ -225,7 +225,8 @@ patron que mas caro sale:
 | 81 | Dos specs etiquetadas "decision de producto" sin verificarlo | Ninguna lo era: testid obsoleto en open-data (`scope-` vs `token-scope-`), y en announcements el testid si es de la vista que visita | Hecho este commit |
 | 82 | `community-official-announcements`: 3 fallos en 12 lineas | URL absoluta a otro puerto, badge traducido afirmado en ingles, y `getByText('Pinned')` sobre un flag que no renderiza texto. Verde: 1 passed | Hecho este commit |
 | 83 | El flake de mobile-chrome no era de ninguna spec | `browserContext.newPage` agotaba 30s: `workers: CI ? 1 : undefined` abria contexts en paralelo en local, y CI ya iba con 1. Ahora `workers: 1` siempre; gate con `--retries=0` | Hecho este commit |
-| 84 | `community-official-announcements` verificada solo en aislamiento | Su blocker ya no existe; entra al gate (20 specs) | Siguiente |
+| 84 | `community-official-announcements` entra al gate | El blocker del flake ya estaba resuelto en la ronda 83. Gate: 20 specs, 94 passed con `retries=0` | Hecho este commit |
+| 85 | Las specs fuera del gate piden backend sembrado | `community-threads-paging`, `community-buttons`, `signal-detail-timeline`, `auth-edge-cases` hacen login admin real | Siguiente |
 
 ## Proximas rondas candidatas
 
