@@ -179,7 +179,10 @@ test.describe("Community trust metrics dashboard", () => {
     await expect(page.getByTestId("community-trust-breakdown-signals_by_status")).toContainText("Issue outcomes in this period");
 
     await page.getByTestId("community-trust-period-filter").click();
-    await page.getByText("Last 7 days", { exact: true }).click();
+    // Scoped to .p-dropdown-item for the same reason community-decisions and community-governance are:
+// an unscoped getByText can match the Select's own label or a stale overlay node, which resolves to a
+// detached element under parallel load. That is the flake round 80 was chasing.
+await page.locator(".p-dropdown-item", { hasText: "Last 7 days" }).click();
 
     await expect(page.getByTestId("community-trust-low-data")).toContainText("Only one report and no finished execution tasks");
     await expect(page.getByTestId("community-trust-breakdown-signals_by_status")).toContainText("Not enough data yet");

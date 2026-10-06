@@ -88,6 +88,7 @@ jobs:
           src/tests/community-decisions.spec.ts
           src/tests/community-governance.spec.ts
           src/tests/community-integrations.spec.ts
+          src/tests/community-projects.spec.ts
           src/tests/community-resources.spec.ts
           src/tests/community-trust-metrics.spec.ts
           src/tests/dashboard-aging.spec.ts

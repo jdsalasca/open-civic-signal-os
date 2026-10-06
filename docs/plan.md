@@ -221,8 +221,8 @@ patron que mas caro sale:
 | 77 | `community-projects` afirmaba sobre la tarea equivocada | Crear un board lo selecciona, asi que la tarea sembrada salia de pantalla y el test era impasable. Ahora mueve y comenta la tarea que creo; gate sube a 17 specs | Hecho este commit |
 | 78 | Las specs de las rondas 73-75 pueden afirmar menos de lo que pretenden | Dos rounds seguidos(~2 specs) exhilarating una asercion o un permiso, no la app. Falta una forma de distinguir "afirmo otra cosa" de "no afirmo nada" | Siguiente |
 | 79 | `community-proposals`expects un control de moderacion que nunca renderiza | Misma regresion de la ronda 76 sin aplicar aqui: `canModerate` exige COORDINATOR y el helper pisaba el rol a MEMBER. Verde en aislamiento | Hecho este commit |
-| 80 | El gate tiene 17 specs y `community-projects` no esta | La edicion de la ronda 77 renombro en vez de anadir; la verificacion por linea de comandos no lo detecto | Siguiente |
-| 81 | `community-trust-metrics` es flaky en mobile-chrome | Sale al ampliar el gate a 18 specs. Bloquea volver a crecer el gate | Siguiente |
+| 80 | `community-trust-metrics` era flaky en mobile-chrome | `getByText` sin scope sobre una opcion de PrimeReact podia resolver a un nodo desmontado bajo carga. Ahora `.p-dropdown-item`, y `community-projects` si esta en el gate (18 specs, 2 corridas iguales) | Hecho este commit |
+| 81 | Solo 18 de las specs estan en el gate | El resto depende de backend sembrado o de decision de producto | Siguiente |
 
 ## Proximas rondas candidatas
 
