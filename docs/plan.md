@@ -228,8 +228,8 @@ patron que mas caro sale:
 | 84 | `community-official-announcements` entra al gate | El blocker del flake ya estaba resuelto en la ronda 83. Gate: 20 specs, 94 passed con `retries=0` | Hecho este commit |
 | 85 | Las specs con backend no estan bloqueadas "sin backend" | El backend ya corria en 8080/8081 y el preview proxea `/api` a 8081. El bloqueo real es que no hay admin sembrado: login expira con `admin`/`admin12345`, credenciales que el CHANGELOG documenta | Hecho este commit |
 | 86 | Auditoria visual del backlog publico | Sin defecto: el espacio de "Formula version v1" si existe, era la fuente. Quinta vez que un defecto aparente se evapora al verificar | Hecho este commit |
-| 88 | Sembrar un SUPER_ADMIN es decision de backend | Que perfil, que entorno, que politica de password. No es una decision de una ronda de tests | Siguiente |
-| 87 | Las specs con backend necesitan un segundo job de CI | El workflow de playwright no levanta backend alguno, asi que no pueden entrar a ese gate aunque el admin exista | Siguiente |
+| 87 | Las specs con backend quedan fuera del gate por dos razones | (a) No hay admin sembrado: decidir perfil, entorno y politica de password es decision de backend. (b) El workflow de playwright no levanta backend, asi que necesitarian un segundo job con la pila completa. Gate re-verificado en la ronda 87: 20 specs, 94 passed, etries=0 | Siguiente |
+
 
 ## Proximas rondas candidatas
 
