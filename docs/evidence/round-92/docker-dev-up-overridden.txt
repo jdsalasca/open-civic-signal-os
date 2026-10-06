@@ -1,0 +1,13 @@
+
+> open-civic-signal-os@0.2.0 docker:dev:up
+> node scripts/docker-dev.mjs up
+
+time="2026-10-06T00:24:05-05:00" level=warning msg="Found orphan containers (civic-api, civic-mail, civic-db) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container infra-civic-api-dev-1 Running 
+ Container infra-civic-web-dev-1 Running 
+ Container infra-civic-mail-dev-1 Running 
+ Container infra-civic-db-dev-1 Running 
+ Container infra-civic-db-dev-1 Waiting 
+ Container infra-civic-db-dev-1 Healthy 
+Docker dev stack did not become healthy in time.
+Inspect with `npm run docker:dev:logs`.

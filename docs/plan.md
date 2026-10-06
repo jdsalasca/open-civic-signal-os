@@ -232,7 +232,8 @@ patron que mas caro sale:
 | 90 | Puertos del compose dev parametrizados | `MAILPIT_PORT`/`POSTGRES_PORT`/`API_PORT`/`WEB_PORT` con defaults intactos. Verificado: dev y prod corriendo a la vez en puertos distintos | Hecho este commit |
 | 91 | `civic-api-dev` sin healthcheck: "stack healthy" no verificaba nada | Anadido el mismo healthcheck del compose prod, con `start_period: 180s` para la compilacion en frio de 420 fuentes. El API no estaba roto: compilaba | Hecho este commit |
 | 93 | El healthcheck del api dev solo aplica al recrear el contenedor | Por eso el contenedor en curso sigue sin health y la cuenta `admin` sembrada sigue sin observarse | Siguiente |
-| 92 | `docker-dev.mjs` imprime URLs fijas | Con puertos sobrescritos reporta 8081/5173 en vez de los reales. Cosmético pero va a engañar | Siguiente |
+| 92 | `docker:dev:up` reportaba healthy sin verificar | El probe sondea puertos fijos 8081/5173, que aqui son el API prod y el frontend de otro proyecto. Ahora deriva de las mismas vars que el compose. Misma corrida: antes "healthy" en segundos, ahora "did not become healthy in time" | Hecho este commit |
+| 93 | La cuenta `admin` sembrada sigue sin observarse | El API dev compilo las fuentes principales y esta en test-classes; aun no escucha. En cuanto levante, el login y las 4 specs de backend | Siguiente |
 etries=0 | Siguiente |
 
 

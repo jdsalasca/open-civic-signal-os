@@ -7,11 +7,21 @@ import process from "node:process";
 const args = process.argv.slice(2);
 const command = args[0] ?? "help";
 const composeArgs = ["compose", "-f", "infra/docker-compose.dev.yml"];
+// Must mirror the ${VAR:-default} values in infra/docker-compose.dev.yml. Hardcoding these meant
+// that with overridden ports the readiness probe polled whatever else happened to be listening on
+// 8081 and 5173 - on this machine another project's API and frontend - so `up` reported "Docker dev
+// stack is healthy" while the dev API was still compiling.
+const devPorts = {
+  api: process.env.API_PORT ?? "8081",
+  web: process.env.WEB_PORT ?? "5173",
+  db: process.env.POSTGRES_PORT ?? "5432",
+  mail: process.env.MAILPIT_PORT ?? "8025",
+};
 const healthTargets = [
-  { name: "API", url: "http://localhost:8081/actuator/health" },
-  { name: "Web", url: "http://localhost:5173" }
+  { name: "API", url: `http://localhost:${devPorts.api}/actuator/health` },
+  { name: "Web", url: `http://localhost:${devPorts.web}` }
 ];
-const requiredHostPorts = [5173, 8081, 5432, 8025];
+const requiredHostPorts = [devPorts.web, devPorts.api, devPorts.db, devPorts.mail].map(Number);
 
 function run(commandName, commandArgs, options = {}) {
   const result = spawnSync(commandName, commandArgs, {
