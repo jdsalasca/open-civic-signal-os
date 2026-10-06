@@ -164,7 +164,7 @@ test.describe("Community trust metrics dashboard", () => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) });
     });
 
-    await page.goto("http://127.0.0.1:5173/communities/trust");
+    await page.goto("/communities/trust");
 
     await expect(page.getByTestId("community-trust-overview")).toContainText("Los Rosales");
     await expect(page.getByTestId("community-trust-freshness")).toContainText("20m ago");

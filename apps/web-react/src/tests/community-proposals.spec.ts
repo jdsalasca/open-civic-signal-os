@@ -1,4 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 import type { CommunityProposal, CommunityProposalDeliberation, CommunityProposalVoting } from "../types";
 
 const communityId = "11111111-1111-1111-1111-111111111111";
@@ -376,7 +378,11 @@ test.describe("Community proposals", () => {
       });
     });
 
-    await page.goto("http://127.0.0.1:5173/communities/proposals");
+    await mockAppBootstrap(page, communityId);
+
+    await mockHelpCenter(page);
+
+    await page.goto("/communities/proposals");
 
     await page.getByTestId("proposal-title-input").fill("Raised crossing and signage at school entrance");
     await page.getByTestId("proposal-problem-input").fill("Students and caregivers cross at peak hours without physical slowing measures at the main gate.");

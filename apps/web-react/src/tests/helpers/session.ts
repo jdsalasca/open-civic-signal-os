@@ -1,6 +1,41 @@
 import type { Page } from '@playwright/test';
 
 /**
+ * Assert the base URL is serving this app before a test navigates anywhere.
+ *
+ * A global setup runs once, and that turned out not to be enough: several projects on this machine
+ * serve a Vite app, the civic preview server dies on its own during a session, and the next project
+ * to start claims the port. When that happens mid-run the suite keeps going against the wrong app and
+ * fails assertions one by one, each pointing at a view it never loaded. A spec that failed that way
+ * produced an error context showing a Spanish university navigation and nothing in the failure text
+ * hinted at the cause.
+ *
+ * Checking here rather than only in globalSetup means the check runs per test, so it also catches a
+ * port that changes while the suite is already running.
+ */
+export async function assertCivicAppIsServed() {
+  // Mirrors playwright.config.ts, which reads WEB_PORT from ports.ts at the repo root. A spec cannot
+  // import that module: it sits outside tsconfig's `src` include, and a file inside `src` importing it
+  // puts one file in two composite projects. One mirrored literal beats that fight.
+  const baseURL = process.env.BASE_URL || 'http://localhost:3002';
+  let title = '';
+  try {
+    title = /<title>([^<]*)<\/title>/i.exec(await (await fetch(`${baseURL}/`)).text())?.[1] ?? '';
+  } catch {
+    throw new Error(
+      `Cannot reach ${baseURL}. Start the app first: npm --prefix apps/web-react run dev`,
+    );
+  }
+  if (!title.includes('Open Civic Signal OS')) {
+    throw new Error(
+      `${baseURL} is serving "${title || 'a page with no title'}". Another project on this machine is ` +
+        'using the port, so this test would run against the wrong application. Point BASE_URL at a ' +
+        'civic server or stop the other one before trusting any result.',
+    );
+  }
+}
+
+/**
  * The requests every authenticated screen fires before it renders anything of its own, and the
  * seeded state that gets it there.
  *
@@ -70,6 +105,7 @@ export const DEFAULT_COMMUNITY_ID = '11111111-1111-1111-1111-111111111111';
  * broken component rather than as a missing fixture. Pass `communityId` for those.
  */
 export async function mockAppBootstrap(page: Page, communityId?: string) {
+  await assertCivicAppIsServed();
   await page.route('**/api/auth/me', (route) =>
     route.fulfill(json({ username: 'liaison', role: 'PUBLIC_SERVANT', interfaceMode: 'ADVANCED' })));
 

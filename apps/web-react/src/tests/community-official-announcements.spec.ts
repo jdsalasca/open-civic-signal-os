@@ -1,4 +1,6 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 
 const communityId = '11111111-1111-1111-1111-111111111111';
 
@@ -127,6 +129,10 @@ test.describe('Community official announcements channel', () => {
         ])
       });
     });
+
+    await mockAppBootstrap(page, communityId);
+
+    await mockHelpCenter(page);
 
     await page.goto('http://127.0.0.1:5173/communities/blog');
 

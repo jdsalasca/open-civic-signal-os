@@ -1,4 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 import type { CommunityProjectBoard, CommunityProjectTask } from "../types";
 
 const communityId = "11111111-1111-1111-1111-111111111111";
@@ -260,7 +262,11 @@ test.describe("Community project boards", () => {
       });
     });
 
-    await page.goto("http://127.0.0.1:5173/communities/projects");
+    await mockAppBootstrap(page, communityId);
+
+    await mockHelpCenter(page);
+
+    await page.goto("/communities/projects");
 
     await expect(page.getByTestId("community-project-board-detail-card")).toContainText("School crossing delivery board");
     await expect(page.getByTestId("community-project-column-todo")).toContainText("Confirm school committee palette");

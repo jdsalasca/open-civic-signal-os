@@ -207,7 +207,7 @@ test.describe("Community decision ledger", () => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(created) });
     });
 
-    await page.goto("http://127.0.0.1:5173/communities/decisions");
+    await page.goto("/communities/decisions");
 
     await expect(page.getByTestId("community-decision-detail-card")).toContainText("Approve the safer crossing rollout");
     await expect(page.getByTestId("community-decision-related-card")).toContainText("Assembly act approving the crossing rollout");

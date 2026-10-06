@@ -1,0 +1,21 @@
+
+Running 80 tests using 1 worker
+┬À├ù┬▒┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À├ù┬▒┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À┬À
+┬À┬À
+
+  1) [chromium] ÔÇ║ src\tests\community-integrations.spec.ts:15:3 ÔÇ║ Community outbound integrations ÔÇ║ surfaces a failed delivery, retries it, and connects a new channel 
+
+    [31mTest timeout of 30000ms exceeded while setting up "page".[39m
+
+    Error: browserContext.newPage: Test timeout of 30000ms exceeded.
+
+  2) [mobile-chrome] ÔÇ║ src\tests\community-resources.spec.ts:14:3 ÔÇ║ Community shared resources ÔÇ║ shows policy, exposes the approval queue, and records a decision 
+
+    [31mTest timeout of 30000ms exceeded while setting up "page".[39m
+
+    Error: browserContext.newPage: Test timeout of 30000ms exceeded.
+
+  2 flaky
+    [chromium] ÔÇ║ src\tests\community-integrations.spec.ts:15:3 ÔÇ║ Community outbound integrations ÔÇ║ surfaces a failed delivery, retries it, and connects a new channel 
+    [mobile-chrome] ÔÇ║ src\tests\community-resources.spec.ts:14:3 ÔÇ║ Community shared resources ÔÇ║ shows policy, exposes the approval queue, and records a decision 
+  78 passed (7.0m)

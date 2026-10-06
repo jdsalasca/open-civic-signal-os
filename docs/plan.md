@@ -214,7 +214,8 @@ patron que mas caro sale:
 | 70 | La suite Playwright se ejecuta en CI contra un build de produccion | Nuevo `.github/workflows/playwright.yml`; 76 tests en verde en modo CI; la suite entera da 42/42 y queda en cuarentena explicita | Hecho este commit |
 | 71 | Un solo puerto, declarado una vez | `ports.ts` exporta `WEB_PORT`; `vite.config.js` **versionado** eclipsaba al `.ts` y hacia inútiles todas las ediciones previas del config | Hecho este commit |
 | 72 | La suite no puede volver a correr contra otra app | `globalSetup` compara el `<title>` con `Open Civic Signal OS`; 2 specs mas al gate (13 de 47), **80 tests** en verde | Hecho este commit |
-| 73 | Convertir 5 specs de comunidad que resistieron la receta | `community-projects`, `community-proposals`, `community-governance`, `community-open-data`, `community-official-announcements` | Siguiente |
+| 73 | Seis specs navegaban a `127.0.0.1:5173`, que es la app de otro proyecto | Rutas relativas: ahora respetan `baseURL`; el contexto de error paso de una universidad a la app civic. **Fallan aun** por aserciones de contenido | Hecho este commit |
+| 74 | Arreglar las 7 specs que ya corren contra la app correcta | Fallan en `Expected substring: "Approve the safer crossing rollout"`; un POST mockeado no actualiza el estado de la vista | Siguiente |
 
 ## Proximas rondas candidatas
 

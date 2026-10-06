@@ -1,4 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { mockAppBootstrap } from './helpers/session';
+import { mockHelpCenter } from './helpers/dashboard';
 import type {
   CommunityOpenDataCenter,
   CommunityOpenDataToken,
@@ -197,7 +199,11 @@ test.describe("Community open-data center", () => {
       });
     });
 
-    await page.goto("http://127.0.0.1:5173/communities/open-data");
+    await mockAppBootstrap(page, communityId);
+
+    await mockHelpCenter(page);
+
+    await page.goto("/communities/open-data");
 
     await expect(page.getByTestId("community-open-data-datasets-card")).toContainText("Signals");
 
