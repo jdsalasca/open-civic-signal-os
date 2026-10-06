@@ -1,0 +1,41 @@
+
+Running 28 tests using 4 workers
+
+[1A[2K[1/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[2/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[3/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[4/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[5/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[6/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[7/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[8/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[9/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[10/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[11/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[12/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[13/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[14/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[15/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[16/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[17/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[18/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[19/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[20/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[21/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[22/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[23/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[24/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[25/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[26/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[27/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[28/28] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K  1) [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list 
+
+    [31mTest timeout of 30000ms exceeded while setting up "page".[39m
+
+    Error: browserContext.newPage: Test timeout of 30000ms exceeded.
+
+
+[1A[2K  1 failed
+    [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list 
+  27 passed (2.2m)

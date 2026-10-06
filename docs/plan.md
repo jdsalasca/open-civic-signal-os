@@ -224,7 +224,8 @@ patron que mas caro sale:
 | 80 | `community-trust-metrics` era flaky en mobile-chrome | `getByText` sin scope sobre una opcion de PrimeReact podia resolver a un nodo desmontado bajo carga. Ahora `.p-dropdown-item`, y `community-projects` si esta en el gate (18 specs, 2 corridas iguales) | Hecho este commit |
 | 81 | Dos specs etiquetadas "decision de producto" sin verificarlo | Ninguna lo era: testid obsoleto en open-data (`scope-` vs `token-scope-`), y en announcements el testid si es de la vista que visita | Hecho este commit |
 | 82 | `community-official-announcements`: 3 fallos en 12 lineas | URL absoluta a otro puerto, badge traducido afirmado en ingles, y `getByText('Pinned')` sobre un flag que no renderiza texto. Verde: 1 passed | Hecho este commit |
-| 83 | El flake de mobile-chrome parece sistematico | Ronda 80: `community-trust-metrics`. Ronda 82: `merge-review`. Dos specs distintas, mismo proyecto de navegador => causa compartida, no locator. Bloquea crecer el gate | Siguiente |
+| 83 | El flake de mobile-chrome no era de ninguna spec | `browserContext.newPage` agotaba 30s: `workers: CI ? 1 : undefined` abria contexts en paralelo en local, y CI ya iba con 1. Ahora `workers: 1` siempre; gate con `--retries=0` | Hecho este commit |
+| 84 | `community-official-announcements` verificada solo en aislamiento | Su blocker ya no existe; entra al gate (20 specs) | Siguiente |
 
 ## Proximas rondas candidatas
 
