@@ -21,6 +21,15 @@ public interface CommunityMembershipRepository extends JpaRepository<CommunityMe
     List<UUID> findUserIdsByCommunityId(@Param("communityId") UUID communityId);
     Optional<CommunityMembership> findByUserIdAndCommunityId(UUID userId, UUID communityId);
     long countByCommunityId(UUID communityId);
+
+    /**
+     * Member counts for every community in one query, for the public directory.
+     *
+     * <p>Counting per community in a loop is one query per city on a page that lists them all. This
+     * returns the whole table's counts at once so the landing page stays a single read.
+     */
+    @Query("select m.communityId, count(m) from CommunityMembership m group by m.communityId")
+    List<Object[]> countGroupedByCommunity();
     long countByUserId(UUID userId);
     long countByUserIdAndRoleIn(UUID userId, List<CommunityRole> roles);
 }

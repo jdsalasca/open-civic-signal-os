@@ -171,7 +171,10 @@ export type Community = {
   name: string;
   slug: string;
   description?: string;
+  country?: string | null;
+  region?: string | null;
   parentCommunityId?: string | null;
+  memberCount?: number;
   createdAt?: string;
 };
 

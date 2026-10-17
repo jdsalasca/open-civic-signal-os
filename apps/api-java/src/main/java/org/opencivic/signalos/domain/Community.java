@@ -53,6 +53,18 @@ public class Community {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    /**
+     * Where this community is. Optional, because a community can be a neighborhood, a building or a
+     * working group rather than a municipality, and forcing a country on those would be a lie. Kept on
+     * the entity rather than derived, so the public city directory can group and search without
+     * guessing from the free-text name.
+     */
+    @Column(length = 120)
+    private String country;
+
+    @Column(length = 120)
+    private String region;
+
     private UUID parentCommunityId;
 
     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
@@ -99,6 +111,22 @@ public class Community {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public UUID getParentCommunityId() {

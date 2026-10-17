@@ -1309,6 +1309,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Community'
+  /api/communities/public:
+    get:
+      summary: List public city directory with member counts (no session required)
+      responses:
+        '200':
+          description: Public city directory, largest community first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Community'
   /api/communities/tree:
     get:
       summary: List communities as a hierarchical tree
@@ -7859,10 +7871,19 @@ components:
           type: string
         description:
           type: string
+        country:
+          type: string
+          nullable: true
+        region:
+          type: string
+          nullable: true
         parentCommunityId:
           type: string
           format: uuid
           nullable: true
+        memberCount:
+          type: integer
+          format: int64
         createdAt:
           type: string
           format: date-time
@@ -9880,6 +9901,12 @@ components:
           type: string
         description:
           type: string
+        country:
+          type: string
+          nullable: true
+        region:
+          type: string
+          nullable: true
         parentCommunityId:
           type: string
           format: uuid
