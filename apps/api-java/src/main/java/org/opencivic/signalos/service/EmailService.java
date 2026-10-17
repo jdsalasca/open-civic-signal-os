@@ -33,6 +33,9 @@ public class EmailService {
     @Value("${spring.mail.username:no-reply@localhost}")
     private String fromEmail;
 
+    @Value("${application.mail.enabled:true}")
+    private boolean mailEnabled = true;
+
     public EmailDeliveryResult sendVerificationCode(String to, String username, String code) {
         Context context = new Context();
         context.setVariables(Map.of("username", username, "code", code));
@@ -62,6 +65,9 @@ public class EmailService {
     }
 
     private EmailDeliveryResult sendHtmlEmail(String to, String subject, String htmlBody, String flow) {
+        if (!mailEnabled) {
+            return disabledEmailResult(flow);
+        }
         try {
             if (fromEmail == null || fromEmail.isBlank()) {
                 String reason = "SMTP Configuration Error: spring.mail.username is not set.";
@@ -89,6 +95,9 @@ public class EmailService {
     }
 
     private EmailDeliveryResult sendSimpleEmail(String to, String subject, String body, String flow) {
+        if (!mailEnabled) {
+            return disabledEmailResult(flow);
+        }
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
@@ -105,6 +114,11 @@ public class EmailService {
             auditEmailFailure(flow, to, reason);
             return EmailDeliveryResult.failed(reason);
         }
+    }
+
+    private EmailDeliveryResult disabledEmailResult(String flow) {
+        log.info("Email delivery is disabled; skipping flow={}", flow);
+        return EmailDeliveryResult.failed("Email delivery is disabled by configuration.");
     }
 
     private void auditEmailFailure(String flow, String to, String reason) {
