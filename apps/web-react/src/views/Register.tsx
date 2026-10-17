@@ -1,5 +1,6 @@
+import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
@@ -7,9 +8,11 @@ import { classNames } from "primereact/utils";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { Community } from "../types";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicField } from "../components/ui/CivicField";
+import { CivicSelect } from "../components/ui/CivicSelect";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -20,7 +23,13 @@ type RegisterForm = {
   email: string;
   password: string;
   confirmPassword: string;
+  communityId: string;
+  communityName: string;
+  communityCountry: string;
+  communityRegion: string;
 };
+
+type CityMode = "join" | "create";
 
 type RegisterResponse = {
   message?: string;
@@ -33,16 +42,77 @@ type RegisterResponse = {
 export function Register() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { control, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<RegisterForm>({
-    defaultValues: { username: '', email: '', password: '', confirmPassword: '' }
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      communityId: searchParams.get('communityId') ?? '',
+      communityName: '',
+      communityCountry: '',
+      communityRegion: '',
+    }
   });
 
   const password = watch('password');
+  const [cities, setCities] = useState<Community[]>([]);
+  const [cityMode, setCityMode] = useState<CityMode>(
+    searchParams.get('mode') === 'create' ? 'create' : 'join'
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadCities = async () => {
+      try {
+        const response = await apiClient.get<Community[]>("communities/public");
+        if (!cancelled) {
+          setCities(response.data || []);
+        }
+      } catch {
+        // The city directory is a convenience at registration. If it is unavailable, the person can
+        // still create an account and join a city later rather than be blocked by a failed read.
+      }
+    };
+    loadCities();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const cityOptions = useMemo(
+    () =>
+      cities.map((city) => ({
+        label: [city.name, [city.region, city.country].filter(Boolean).join(", ")]
+          .filter((part) => part && part.length > 0)
+          .join(" — "),
+        value: city.id,
+      })),
+    [cities]
+  );
 
   const onSubmit = async (data: RegisterForm) => {
     try {
-      const { confirmPassword, ...registerData } = data;
-      const res = await apiClient.post<RegisterResponse>("auth/register", registerData);
+      const payload: Record<string, string> = {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+      };
+
+      if (cityMode === 'join' && data.communityId) {
+        payload.communityId = data.communityId;
+      } else if (cityMode === 'create' && data.communityName.trim()) {
+        payload.communityName = data.communityName.trim();
+        if (data.communityCountry.trim()) {
+          payload.communityCountry = data.communityCountry.trim();
+        }
+        if (data.communityRegion.trim()) {
+          payload.communityRegion = data.communityRegion.trim();
+        }
+      }
+
+      const res = await apiClient.post<RegisterResponse>("auth/register", payload);
 
       if (res.status === 200 || res.status === 201) {
         const emailDeliveryFailed = res.data?.emailDeliveryStatus === "FAILED";
@@ -146,6 +216,108 @@ export function Register() {
                 )}
               />
             </CivicField>
+
+            <div className="mb-4 p-4 border-round-xl border-1 border-subtle bg-surface-soft" data-testid="register-city-section">
+              <div className="mb-3">
+                <div className="u-eyebrow">{t('auth.city_section_title')}</div>
+                <div className="text-xs text-muted mt-2">{t('auth.city_section_desc')}</div>
+              </div>
+
+              <div className="flex gap-2 mb-3 flex-wrap">
+                <CivicButton
+                  type="button"
+                  label={t('auth.city_mode_join')}
+                  variant={cityMode === 'join' ? 'secondary' : 'ghost'}
+                  size="small"
+                  onClick={() => setCityMode('join')}
+                  data-testid="register-city-mode-join"
+                />
+                <CivicButton
+                  type="button"
+                  label={t('auth.city_mode_create')}
+                  variant={cityMode === 'create' ? 'secondary' : 'ghost'}
+                  size="small"
+                  onClick={() => setCityMode('create')}
+                  data-testid="register-city-mode-create"
+                />
+              </div>
+
+              {cityMode === 'join' ? (
+                <CivicField label={t('auth.city_select_label')} error={errors.communityId?.message}>
+                  <Controller name="communityId" control={control}
+                    render={({ field }) => (
+                      <CivicSelect
+                        value={field.value}
+                        options={cityOptions}
+                        onChange={(event) => field.onChange(event.value)}
+                        filter
+                        filterBy="label"
+                        showClear
+                        placeholder={t('auth.city_select_placeholder')}
+                        emptyMessage={t('auth.city_select_empty')}
+                        className="w-full"
+                        data-testid="register-city-select"
+                      />
+                    )}
+                  />
+                </CivicField>
+              ) : (
+                <div className="flex flex-column">
+                  <CivicField label={t('auth.city_name_label')} error={errors.communityName?.message}>
+                    <Controller name="communityName" control={control}
+                      rules={{
+                        validate: (value) =>
+                          cityMode !== 'create' || (value && value.trim().length >= 2) || t('auth.city_name_required')
+                      }}
+                      render={({ field, fieldState }) => (
+                        <InputText
+                          {...field}
+                          className={classNames('w-full p-inputtext-lg', { 'p-invalid': fieldState.error })}
+                          placeholder={t('auth.city_name_placeholder')}
+                          data-testid="register-city-name-input"
+                        />
+                      )}
+                    />
+                  </CivicField>
+
+                  <CivicField label={t('auth.city_country_label')} error={errors.communityCountry?.message}>
+                    <Controller name="communityCountry" control={control}
+                      rules={{
+                        validate: (value) =>
+                          cityMode !== 'create' || (value && value.trim().length >= 2) || t('auth.city_country_required')
+                      }}
+                      render={({ field, fieldState }) => (
+                        <InputText
+                          {...field}
+                          className={classNames('w-full p-inputtext-lg', { 'p-invalid': fieldState.error })}
+                          placeholder={t('auth.city_country_placeholder')}
+                          data-testid="register-city-country-input"
+                        />
+                      )}
+                    />
+                  </CivicField>
+
+                  <CivicField label={t('auth.city_region_label')}>
+                    <Controller name="communityRegion" control={control}
+                      render={({ field }) => (
+                        <InputText
+                          {...field}
+                          className="w-full"
+                          placeholder={t('auth.city_region_placeholder')}
+                          data-testid="register-city-region-input"
+                        />
+                      )}
+                    />
+                  </CivicField>
+
+                  <p className="text-xs text-muted m-0" data-testid="register-city-organizer-note">
+                    {t('auth.city_organizer_note')}
+                  </p>
+                </div>
+              )}
+
+              <p className="text-xs text-muted mt-3 mb-0">{t('auth.city_optional_note')}</p>
+            </div>
 
             <div className="p-4 bg-surface-soft border-round-xl text-sm text-secondary flex align-items-center gap-3 border-1 border-subtle mb-4">
               <i className="pi pi-shield text-brand-primary text-lg"></i>
