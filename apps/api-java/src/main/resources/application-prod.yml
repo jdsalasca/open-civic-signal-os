@@ -1,0 +1,39 @@
+# Production-only tuning for memory-constrained hosts (~2GB RAM shared with other sites).
+# This file is bound to the "prod" profile and never applies to dev or test.
+# Every setting here is a resource knob only: no feature, validation, or security
+# behaviour changes. See docs/RELEASE_POLICY.md reproducibility notes for scoring changes.
+
+spring:
+  main:
+    # Beans are created on first use instead of at startup. Startup peak drops and
+    # unused-in-practice beans never allocate. Flyway still runs: the API only becomes
+    # healthy after Hibernate validate passes against the migrated schema.
+    lazy-initialization: true
+    banner-mode: off
+  datasource:
+    hikari:
+      # Each idle connection also costs server-side Postgres memory; 5 is enough for a
+      # low-traffic civic backlog and matches the Postgres max_connections=30 budget.
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 30000
+  autoconfigure:
+    exclude:
+      # No RestTemplate/WebClient is used anywhere in the codebase.
+      - org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration
+      # JMX MBean server is not consumed in production.
+      - org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration
+
+server:
+  tomcat:
+    # Default 200 threads x 1MB stack is the single largest heap reservation in the
+    # container. 25 threads covers the expected concurrent civic traffic.
+    threads:
+      max: 25
+      min-spare: 5
+    accept-count: 50
+    connection-timeout: 15000
+
+logging:
+  level:
+    root: info
