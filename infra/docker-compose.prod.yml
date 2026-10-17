@@ -1,0 +1,124 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-signalos}
+      POSTGRES_USER: ${POSTGRES_USER:-signalos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in infra/.env.prod}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --username=\"$${POSTGRES_USER}\" --dbname=\"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    mem_limit: 384m
+    restart: unless-stopped
+    stop_grace_period: 60s
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  api:
+    build:
+      context: ../apps/api-java
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-signalos}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-signalos}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in infra/.env.prod}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required in infra/.env.prod}
+      INTEGRATION_CREDENTIAL_KEY: ${INTEGRATION_CREDENTIAL_KEY:?INTEGRATION_CREDENTIAL_KEY is required in infra/.env.prod}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?CORS_ALLOWED_ORIGINS is required in infra/.env.prod}
+      SUPPORT_CONTACT_EMAIL: ${SUPPORT_CONTACT_EMAIL:-support@open-comunity.eridu.top}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--Xms64m -Xmx384m -XX:MaxMetaspaceSize=160m -XX:ActiveProcessorCount=2 -XX:+UseSerialGC}
+      APPLICATION_MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      SPRING_MAIL_HOST: ${SMTP_HOST:-localhost}
+      SPRING_MAIL_PORT: ${SMTP_PORT:-25}
+      SPRING_MAIL_USERNAME: ${SMTP_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SMTP_PASSWORD:-}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: ${SMTP_AUTH:-false}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: ${SMTP_STARTTLS_ENABLE:-false}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --show-error http://localhost:8080/actuator/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
+    mem_limit: 640m
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 60s
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  web:
+    build:
+      context: ../apps/web-react
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+    ports:
+      - "127.0.0.1:5175:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --spider http://127.0.0.1:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    mem_limit: 128m
+    restart: unless-stopped
+    stop_grace_period: 20s
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  backup:
+    image: postgres:15-alpine
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - chown postgres:postgres /backups && exec su-exec postgres /bin/sh /usr/local/bin/pg-backup-loop.sh
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-signalos}
+      POSTGRES_USER: ${POSTGRES_USER:-signalos}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in infra/.env.prod}
+      PGHOST: db
+      PGPORT: "5432"
+      BACKUP_HOUR_UTC: ${BACKUP_HOUR_UTC:-2}
+    volumes:
+      - postgres-backups:/backups
+      - ./scripts/pg-backup-loop.sh:/usr/local/bin/pg-backup-loop.sh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "test -n \"$$(find /backups -maxdepth 1 -type f -name 'open-community-*.dump' -mmin -1560 -print -quit)\""]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+    mem_limit: 128m
+    restart: unless-stopped
+    stop_grace_period: 30s
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  postgres-data:
+  postgres-backups:
