@@ -21,6 +21,7 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.EmailService;
 import org.opencivic.signalos.service.EmailDeliveryResult;
 import org.opencivic.signalos.service.JwtService;
+import org.opencivic.signalos.service.CommunityService;
 import org.opencivic.signalos.service.PrivacyAccessLogService;
 import org.opencivic.signalos.web.dto.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +35,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.SecureRandom;
@@ -56,6 +58,7 @@ public class AuthController {
     private final CommunityMembershipRepository membershipRepository;
     private final SignalRepository signalRepository;
     private final PrivacyAccessLogService privacyAccessLogService;
+    private final CommunityService communityService;
 
     private static final Set<String> ALLOWED_AVATAR_PRESETS = Set.of(
         "civic-sunrise",
@@ -83,7 +86,8 @@ public class AuthController {
                           RateLimitService rateLimitService,
                           CommunityMembershipRepository membershipRepository,
                           SignalRepository signalRepository,
-                          PrivacyAccessLogService privacyAccessLogService) {
+                          PrivacyAccessLogService privacyAccessLogService,
+                          CommunityService communityService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -94,9 +98,18 @@ public class AuthController {
         this.membershipRepository = membershipRepository;
         this.signalRepository = signalRepository;
         this.privacyAccessLogService = privacyAccessLogService;
+        this.communityService = communityService;
     }
 
+    /**
+     * Creates the account and, when asked, attaches the new person to their city.
+     *
+     * <p>The whole method is one transaction because the account and its membership are a single
+     * outcome: a user row that exists while the membership it was supposed to create does not would
+     * leave the username taken and the person not in any city, with no way to finish registering.
+     */
     @PostMapping("/register")
+    @Transactional
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new ConflictException("Username already exists in the registry.");
@@ -104,6 +117,14 @@ public class AuthController {
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ConflictException("Identity already registered with this email address.");
+        }
+
+        UUID joinCommunityId = request.communityId();
+        String newCityName = trimToNull(request.communityName());
+        // Validate the chosen city before touching the users table: a bad choice must fail as a bad
+        // choice, not as an account that got created and then could not be attached.
+        if (joinCommunityId != null) {
+            communityService.requireCommunity(joinCommunityId);
         }
 
         User user = new User(
@@ -120,6 +141,23 @@ public class AuthController {
         user.setEnabled(false);
         
         userRepository.save(user);
+
+        if (joinCommunityId != null) {
+            communityService.joinCommunityForUser(joinCommunityId, user.getId(), CommunityRole.MEMBER);
+        } else if (newCityName != null) {
+            // The founder of a city is its organizer. A city with nobody accountable for it is not a
+            // community yet, and the person who created it is the one who can hand that on.
+            communityService.createCommunityAndJoin(
+                user.getId(),
+                newCityName,
+                null,
+                null,
+                request.communityCountry(),
+                request.communityRegion(),
+                null,
+                CommunityRole.COORDINATOR
+            );
+        }
 
         EmailDeliveryResult delivery = emailService.sendVerificationCode(user.getEmail(), user.getUsername(), verificationCode);
         if (delivery.delivered()) {

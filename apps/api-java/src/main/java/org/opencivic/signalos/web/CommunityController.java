@@ -49,6 +49,14 @@ public class CommunityController {
         return communityService.getAllCommunities();
     }
 
+    /**
+     * The public city directory behind the landing page. No session required.
+     */
+    @GetMapping("/public")
+    public List<CommunityResponse> getPublicCities() {
+        return communityService.getPublicCities();
+    }
+
     @GetMapping("/tree")
     public List<CommunityTreeNodeResponse> getCommunityTree() {
         return communityService.getCommunityTree();
@@ -68,6 +76,8 @@ public class CommunityController {
             request.name(),
             request.slug(),
             request.description(),
+            request.country(),
+            request.region(),
             request.parentCommunityId(),
             principal.getName()
         );
