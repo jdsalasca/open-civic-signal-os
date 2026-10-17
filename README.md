@@ -6,6 +6,12 @@
 
 Monorepo civic-tech platform that converts community signals into transparent public priorities.
 
+## Pitch (ES / EN)
+
+**ES:** Regístrate en tu ciudad y empieza a construir comunidad. En producción: https://open-comunity.eridu.top · Despliegue: docs/DEPLOY_PRODUCTION.md
+
+**EN:** Register in your city and start building community. Live: https://open-comunity.eridu.top · Deploy: docs/DEPLOY_PRODUCTION.md
+
 ## Why this product exists
 
 Open Civic Signal OS helps communities turn repeated local problems into a public backlog that people can understand, trust, and act on.
