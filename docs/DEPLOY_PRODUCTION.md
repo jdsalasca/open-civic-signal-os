@@ -35,7 +35,13 @@ Variables esperadas (los nombres exactos son los que aparecen en `infra/.env.pro
 | `CORS_ALLOWED_ORIGINS` | Orígenes del navegador permitidos. Debe incluir `https://open-comunity.eridu.top`. |
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` | SMTP opcional para correo real. |
 | `INTEGRATION_CREDENTIAL_KEY` | Clave para cifrar tokens de integraciones (recomendada si se usan bots). |
+| `REQUIRE_EMAIL_VERIFICATION` | `true` (default) exige verificación de email antes de login. `false` marca la cuenta verificada al registrarse (ver advertencia abajo). |
 | `API_IMAGE`, `WEB_IMAGE` | Imágenes a desplegar (por tag/SHA, no `latest` en producción). |
+
+> **Advertencia:** con `REQUIRE_EMAIL_VERIFICATION=false`, cualquier persona puede registrarse con un email
+> no verificado (puerta abierta a spam y cuentas falsamente atribuidas). Úsalo **solo** como medida
+> temporal mientras el servicio SMTP no está configurado; en cuanto `MAIL_ENABLED=true` con un SMTP
+> funcional, vuelve a `true`.
 
 `CORS_ALLOWED_ORIGINS` debe ser restrictivo: solo el origen público y, si aplica, el host local de administración.
 

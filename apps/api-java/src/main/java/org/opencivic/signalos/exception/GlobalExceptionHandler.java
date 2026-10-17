@@ -1,5 +1,6 @@
 package org.opencivic.signalos.exception;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -101,6 +102,14 @@ public class GlobalExceptionHandler {
             "message", ex.getMessage(),
             "resetAt", ex.getResetAt()
         ), HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    // P0-D: A body that cannot be read (malformed JSON, wrong encoding) is a client error, not an
+    // internal one. It used to fall through to the RuntimeException handler and surface as a 500.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+        log.warn("Malformed or unreadable request body: {}", ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST, "The request body is malformed or has an invalid encoding. Send a valid JSON payload.");
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)

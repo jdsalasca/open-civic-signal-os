@@ -79,6 +79,9 @@ public class AuthController {
     @Value("${support.contact.email:support@open-civic.local}")
     private String supportContactEmail;
 
+    @Value("${app.auth.require-email-verification:true}")
+    private boolean requireEmailVerification;
+
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, 
                           EmailService emailService, JwtService jwtService, 
                           AuthenticationManager authenticationManager,
@@ -157,6 +160,18 @@ public class AuthController {
                 null,
                 CommunityRole.COORDINATOR
             );
+        }
+
+        if (!requireEmailVerification) {
+            user.setVerified(true);
+            user.setEnabled(true);
+            userRepository.save(user);
+            return ResponseEntity.ok(Map.of(
+                "message", "Registration successful. Your account is active.",
+                "username", user.getUsername(),
+                "emailDeliveryStatus", "SKIPPED",
+                "supportEmail", supportContactEmail
+            ));
         }
 
         EmailDeliveryResult delivery = emailService.sendVerificationCode(user.getEmail(), user.getUsername(), verificationCode);

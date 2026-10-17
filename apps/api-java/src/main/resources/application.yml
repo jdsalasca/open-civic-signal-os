@@ -52,6 +52,12 @@ application:
     telegram-api: ${TELEGRAM_API:}
     whatsapp-api: ${WHATSAPP_API:}
 
+app:
+  auth:
+    # When false, registration marks the account verified immediately and no verification email is
+    # required. Default true keeps the email-verification flow unchanged.
+    require-email-verification: ${REQUIRE_EMAIL_VERIFICATION:true}
+
 management:
   endpoints:
     web:
