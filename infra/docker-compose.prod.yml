@@ -41,6 +41,10 @@ services:
         max-file: "3"
 
   api:
+    networks:
+      default:
+        aliases:
+          - civic-api
     build:
       context: ../apps/api-java
       dockerfile: Dockerfile
