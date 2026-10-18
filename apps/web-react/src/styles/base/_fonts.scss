@@ -1,0 +1,27 @@
+// Self-hosted Paper Craft type: Fraunces (display) + Nunito Sans (body/labels).
+// Files are Latin subsets living in public/fonts; licenses in public/fonts/LICENSES.md.
+// font-display: swap keeps text readable while the ~39 KB of woff2 arrives.
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/fonts/fraunces-soft-560.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito Sans";
+  src: url("/fonts/nunito-sans-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito Sans";
+  src: url("/fonts/nunito-sans-800.woff2") format("woff2");
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}

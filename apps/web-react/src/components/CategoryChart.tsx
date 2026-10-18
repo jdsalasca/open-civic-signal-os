@@ -64,7 +64,7 @@ export function CategoryChart({ signals }: Props) {
           usePointStyle: true,
           pointStyle: 'circle',
           padding: 25,
-          font: { size: 10, weight: 700, family: 'Plus Jakarta Sans' },
+          font: { size: 10, weight: 700, family: 'Nunito Sans' },
         },
       },
       tooltip: {

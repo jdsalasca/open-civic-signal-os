@@ -15,6 +15,7 @@
     "build:web": "npm --workspace apps/web-react run build",
     "preview:web": "npm --workspace apps/web-react run preview",
     "agent:gate": "node scripts/agent-gate.mjs",
+    "check:contrast": "node scripts/check-design-contrast.mjs",
     "quality:quick": "npm run prioritize && npm run build:web && npm run agent:gate",
     "quality:release": "node scripts/release-quality-gate.mjs",
     "docker:prod:up": "docker compose -f infra/docker-compose.yml up --build -d",

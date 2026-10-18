@@ -1,160 +1,352 @@
+// ---------------------------------------------------------------------------
+// Paper Craft design tokens (primary language), with Isotype reserved for
+// data chart series. Source of the language: sibling harness open-beauty-site
+//   node dist/cli.js guide papercraft --json
+// Hard tokens: cream #FBF1E2 table, paper #FFF8EA sheet, ink #4A3A32 pen,
+// terracotta #CE7256 / sage #A9C3A0 / sky #B8D4E0 / butter #F2C879 sheets,
+// plum #7C5A72 tiny accent, warm-brown soft shadows, cut-paper radii
+// (30px 12px 28px 14px), 480ms cubic-bezier(.22,.9,.24,1) motion.
+// Paper Craft never: 0px corners, dashed stitching, 3px black borders, acid
+// colours, monospace type, rounded-sans displays, hard shadows.
+// Contrast pairs are enforced by scripts/check-design-contrast.mjs
+// (npm run check:contrast); every declared text pair must reach WCAG AA 4.5:1.
+// ---------------------------------------------------------------------------
+
+// ---------- 1. Theme-independent tokens: type, spacing, radii, motion -------
+@mixin papercraft-shared-tokens {
+  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-body: "Nunito Sans", "Segoe UI", "Trebuchet MS", sans-serif;
+  // Paper Craft forbids monospace on the page; data stays in the body face.
+  --font-mono: "Nunito Sans", "Segoe UI", sans-serif;
+
+  --leading-display: 0.98;
+  --leading-tight: 1.2;
+  --leading-body: 1.62;
+  --tracking-display: -0.015em;
+  --tracking-label: 0.14em;
+  --tracking-wide: 0.05em;
+
+  --text-2xs: clamp(0.62rem, 0.59rem + 0.12vw, 0.68rem);
+  --text-xs: clamp(0.68rem, 0.65rem + 0.15vw, 0.75rem);
+  --text-sm: clamp(0.78rem, 0.74rem + 0.2vw, 0.88rem);
+  --text-body: clamp(0.92rem, 0.88rem + 0.25vw, 1rem);
+  --text-lead: clamp(1rem, 0.94rem + 0.4vw, 1.18rem);
+  --text-title: clamp(1.25rem, 1.05rem + 1.1vw, 1.9rem);
+  --text-display: clamp(2.2rem, 1.4rem + 4vw, 4.25rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  --radius-sm: 0.6rem;
+  --radius-md: 0.9rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2.1rem;
+  // Cut-paper corners: a visible delta between the four corners, never a
+  // perfect rounded rectangle.
+  --radius-paper: 30px 12px 28px 14px;
+  --radius-paper-sm: 22px 12px 20px 14px;
+  --radius-paper-lg: 38px 12px 34px 16px;
+  --radius-paper-chip: 18px 10px 16px 12px;
+  --radius-pill: 999px;
+
+  --motion-fast: 180ms;
+  --motion-enter: 480ms;
+  --motion-slow: 800ms;
+  --motion-stagger: 90ms;
+  --motion-distance: 22px;
+  --ease-paper: cubic-bezier(0.22, 0.9, 0.24, 1);
+}
+
+// ---------- 2. Light theme: the paper table --------------------------------
+@mixin papercraft-light-tokens {
+  --bg-app: #fbf1e2;
+  --bg-nav: rgba(251, 241, 226, 0.88);
+  --bg-surface: #fff8ea;
+  --bg-card: #fff8ea;
+  --bg-elevated: #f6e8d5;
+  --bg-sidebar: rgba(255, 248, 234, 0.94);
+
+  --text-main: #4a3a32;
+  --text-secondary: #5c453a;
+  --text-muted: #7a5f50;
+
+  --border-subtle: #e2d0b8;
+  --glass-stroke: rgba(74, 58, 50, 0.1);
+
+  --shadow-premium: 0 2px 2px rgba(74, 58, 50, 0.1), 0 18px 32px rgba(74, 58, 50, 0.16);
+  --shadow-lift: 0 3px 4px rgba(74, 58, 50, 0.12), 0 26px 44px rgba(74, 58, 50, 0.2);
+  --shadow-paper: var(--shadow-premium);
+  --shadow-paper-lift: var(--shadow-lift);
+  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(74, 58, 50, 0.06);
+
+  --mesh-gradient-1: rgba(180, 90, 60, 0.1);
+  --mesh-gradient-2: rgba(90, 140, 110, 0.1);
+  --mesh-gradient-3: rgba(230, 180, 95, 0.14);
+
+  --scrollbar-thumb: #d9c6ae;
+  --tooltip-bg: #4a3a32;
+  --tooltip-text: #fbf1e2;
+  --tooltip-shadow: 0 18px 32px -18px rgba(74, 58, 50, 0.45);
+
+  --field-bg: #fff8ea;
+  --field-bg-focus: #fffdf7;
+  --field-text: #4a3a32;
+  --field-border: #d9c6ae;
+  --field-border-focus: #a34a2f;
+
+  --surface-hover: rgba(163, 74, 47, 0.08);
+  --table-row-hover: rgba(163, 74, 47, 0.05);
+  --focus-ring: rgba(74, 58, 50, 0.2);
+  --focus-ring-color: #4a3a32;
+  --shimmer-highlight: rgba(163, 74, 47, 0.12);
+
+  --pill-bg: rgba(74, 58, 50, 0.05);
+  --pill-border: rgba(74, 58, 50, 0.14);
+  --pill-hover: rgba(74, 58, 50, 0.1);
+  --panel-soft-bg: rgba(163, 74, 47, 0.05);
+  --surface-soft: rgba(74, 58, 50, 0.045);
+  --surface-soft-strong: rgba(74, 58, 50, 0.08);
+  --surface-soft-hover: rgba(74, 58, 50, 0.1);
+  --surface-soft-border: rgba(74, 58, 50, 0.14);
+
+  --interactive-neutral-bg: #f3e6d2;
+  --interactive-neutral-hover: #ebd9bf;
+  --interactive-neutral-border: #d9c6ae;
+  --interactive-neutral-text: #4a3a32;
+
+  --logo-surface: #4a3a32;
+  --logo-icon: #fbf1e2;
+
+  --alpha-surface-05: rgba(74, 58, 50, 0.04);
+  --alpha-surface-10: rgba(74, 58, 50, 0.08);
+  --alpha-border-05: rgba(74, 58, 50, 0.06);
+  --alpha-border-10: rgba(74, 58, 50, 0.12);
+  --alpha-border-20: rgba(74, 58, 50, 0.2);
+  --alpha-border-30: rgba(74, 58, 50, 0.28);
+  --alpha-overlay-20: rgba(251, 241, 226, 0.72);
+  --alpha-overlay-30: rgba(251, 241, 226, 0.82);
+  --alpha-overlay-40: rgba(251, 241, 226, 0.9);
+  --alpha-overlay-80: rgba(251, 241, 226, 0.96);
+
+  // Interactive ink: buttons are ink with cream text (Paper Craft signature).
+  --brand-primary: #4a3a32;
+  --brand-primary-hover: #33261f;
+  --brand-primary-glow: rgba(74, 58, 50, 0.28);
+  --brand-primary-glow-strong: rgba(74, 58, 50, 0.44);
+  --brand-accent: #4e744e;
+  --brand-accent-soft: rgba(169, 195, 160, 0.32);
+  --brand-ink: #4a3a32;
+  --brand-sun: #e8b65f;
+  --on-brand: #fbf1e2;
+  --on-surface-strong: #fbf1e2;
+  --link-color: #9e4a30;
+  --link-color-hover: #7c3a26;
+
+  --status-new: #2f6e8c;
+  --status-progress: #8a5a00;
+  --status-resolved: #3f6e3f;
+  --status-rejected: #a63a2e;
+  --status-rejected-glow: rgba(166, 58, 46, 0.34);
+
+  --brand-primary-alpha-10: rgba(74, 58, 50, 0.08);
+  --brand-primary-alpha-20: rgba(74, 58, 50, 0.16);
+  --brand-primary-alpha-30: rgba(74, 58, 50, 0.24);
+  --status-progress-alpha-10: rgba(138, 90, 0, 0.12);
+  --status-progress-alpha-20: rgba(138, 90, 0, 0.22);
+  --status-resolved-alpha-10: rgba(63, 110, 63, 0.12);
+  --status-rejected-alpha-10: rgba(166, 58, 46, 0.12);
+  --status-rejected-alpha-20: rgba(166, 58, 46, 0.22);
+
+  // Data charts borrow Isotype, not Paper Craft: pictogram colours, no
+  // decoration. Adjusted to keep >= 3:1 against paper.
+  --chart-1: #b53328;
+  --chart-2: #2a7f7a;
+  --chart-3: #a8721a;
+  --chart-4: #7c5a72;
+  --chart-5: #2f6e8c;
+  --chart-6: #7a6d5e;
+
+  // Semantic aliases (names other code can adopt without knowing the theme).
+  --color-surface: var(--bg-surface);
+  --color-surface-2: var(--bg-elevated);
+  --color-text: var(--text-main);
+  --color-muted: var(--text-muted);
+  --color-accent: #a34a2f;
+  --color-accent-deco: #ce7256;
+  --color-accent-soft: rgba(206, 114, 86, 0.18);
+  --color-danger: var(--status-rejected);
+  --color-warn: var(--status-progress);
+  --color-ok: var(--status-resolved);
+  --color-plum: #7c5a72;
+  --color-sage: #a9c3a0;
+  --color-sky: #b8d4e0;
+  --color-butter: #f2c879;
+  --color-tape: rgba(232, 182, 95, 0.82);
+}
+
+// ---------- 3. Dark theme: the paper table at night ------------------------
+@mixin papercraft-dark-tokens {
+  --bg-app: #201814;
+  --bg-nav: rgba(32, 24, 20, 0.88);
+  --bg-surface: #2a211b;
+  --bg-card: #2f251f;
+  --bg-elevated: #3a2e27;
+  --bg-sidebar: rgba(38, 29, 23, 0.95);
+
+  --text-main: #f7ebdd;
+  --text-secondary: #e4d3c2;
+  --text-muted: #c0a892;
+
+  --border-subtle: #4b3b31;
+  --glass-stroke: rgba(247, 235, 221, 0.1);
+
+  --shadow-premium: 0 2px 2px rgba(12, 8, 6, 0.28), 0 18px 32px rgba(12, 8, 6, 0.4);
+  --shadow-lift: 0 3px 4px rgba(12, 8, 6, 0.32), 0 26px 44px rgba(12, 8, 6, 0.48);
+  --shadow-paper: var(--shadow-premium);
+  --shadow-paper-lift: var(--shadow-lift);
+  --shadow-edge: inset 0 1px 0 rgba(247, 235, 221, 0.06), inset 0 -2px 0 rgba(12, 8, 6, 0.28);
+
+  --mesh-gradient-1: rgba(224, 138, 108, 0.1);
+  --mesh-gradient-2: rgba(140, 175, 120, 0.08);
+  --mesh-gradient-3: rgba(242, 200, 121, 0.07);
+
+  --scrollbar-thumb: #5c493c;
+  --tooltip-bg: #f7ebdd;
+  --tooltip-text: #2a1d16;
+  --tooltip-shadow: 0 18px 32px -18px rgba(0, 0, 0, 0.6);
+
+  --field-bg: #251c17;
+  --field-bg-focus: #2e241e;
+  --field-text: #f7ebdd;
+  --field-border: #55443a;
+  --field-border-focus: #e9a987;
+
+  --surface-hover: rgba(233, 169, 135, 0.1);
+  --table-row-hover: rgba(233, 169, 135, 0.06);
+  --focus-ring: rgba(242, 200, 121, 0.3);
+  --focus-ring-color: #f2c879;
+  --shimmer-highlight: rgba(233, 169, 135, 0.14);
+
+  --pill-bg: rgba(247, 235, 221, 0.06);
+  --pill-border: rgba(247, 235, 221, 0.14);
+  --pill-hover: rgba(247, 235, 221, 0.11);
+  --panel-soft-bg: rgba(233, 169, 135, 0.07);
+  --surface-soft: rgba(247, 235, 221, 0.05);
+  --surface-soft-strong: rgba(12, 8, 6, 0.3);
+  --surface-soft-hover: rgba(247, 235, 221, 0.1);
+  --surface-soft-border: rgba(247, 235, 221, 0.13);
+
+  --interactive-neutral-bg: rgba(247, 235, 221, 0.08);
+  --interactive-neutral-hover: rgba(247, 235, 221, 0.14);
+  --interactive-neutral-border: rgba(247, 235, 221, 0.16);
+  --interactive-neutral-text: #f7ebdd;
+
+  --logo-surface: #f2c879;
+  --logo-icon: #241a15;
+
+  --alpha-surface-05: rgba(247, 235, 221, 0.04);
+  --alpha-surface-10: rgba(247, 235, 221, 0.08);
+  --alpha-border-05: rgba(247, 235, 221, 0.08);
+  --alpha-border-10: rgba(247, 235, 221, 0.14);
+  --alpha-border-20: rgba(247, 235, 221, 0.22);
+  --alpha-border-30: rgba(247, 235, 221, 0.32);
+  --alpha-overlay-20: rgba(32, 24, 20, 0.3);
+  --alpha-overlay-30: rgba(32, 24, 20, 0.42);
+  --alpha-overlay-40: rgba(32, 24, 20, 0.56);
+  --alpha-overlay-80: rgba(32, 24, 20, 0.84);
+
+  // Warm terracotta out of the night: light enough to stay readable on card.
+  --brand-primary: #e9a987;
+  --brand-primary-hover: #f2bc9f;
+  --brand-primary-glow: rgba(233, 169, 135, 0.3);
+  --brand-primary-glow-strong: rgba(233, 169, 135, 0.46);
+  --brand-accent: #b7d3ae;
+  --brand-accent-soft: rgba(183, 211, 174, 0.2);
+  --brand-ink: #f7ebdd;
+  --brand-sun: #f2c879;
+  --on-brand: #241a15;
+  --on-surface-strong: #241a15;
+  --link-color: #f0b092;
+  --link-color-hover: #f6c6ae;
+
+  --status-new: #8fc0e0;
+  --status-progress: #e9c46a;
+  --status-resolved: #9cc79a;
+  --status-rejected: #e08a7a;
+  --status-rejected-glow: rgba(224, 138, 122, 0.34);
+
+  --brand-primary-alpha-10: rgba(233, 169, 135, 0.12);
+  --brand-primary-alpha-20: rgba(233, 169, 135, 0.2);
+  --brand-primary-alpha-30: rgba(233, 169, 135, 0.3);
+  --status-progress-alpha-10: rgba(233, 196, 106, 0.14);
+  --status-progress-alpha-20: rgba(233, 196, 106, 0.24);
+  --status-resolved-alpha-10: rgba(156, 199, 154, 0.14);
+  --status-rejected-alpha-10: rgba(224, 138, 122, 0.14);
+  --status-rejected-alpha-20: rgba(224, 138, 122, 0.24);
+
+  --chart-1: #d96a55;
+  --chart-2: #5fb3ad;
+  --chart-3: #e4b95c;
+  --chart-4: #c9a3c0;
+  --chart-5: #7fb6d9;
+  --chart-6: #9a9a9a;
+
+  --color-surface: var(--bg-surface);
+  --color-surface-2: var(--bg-elevated);
+  --color-text: var(--text-main);
+  --color-muted: var(--text-muted);
+  --color-accent: #f0b092;
+  --color-accent-deco: #e0956f;
+  --color-accent-soft: rgba(233, 169, 135, 0.16);
+  --color-danger: var(--status-rejected);
+  --color-warn: var(--status-progress);
+  --color-ok: var(--status-resolved);
+  --color-plum: #c9a3c0;
+  --color-sage: #b7d3ae;
+  --color-sky: #8fc0e0;
+  --color-butter: #f2c879;
+  --color-tape: rgba(242, 200, 121, 0.82);
+}
+
+// ---------- 4. Apply: default light, class/attr overrides, OS preference ----
 :root {
-  --brand-primary: #c65d2e;
-  --brand-primary-hover: #ab4e25;
-  --brand-primary-glow: rgba(198, 93, 46, 0.28);
-  --brand-primary-glow-strong: rgba(198, 93, 46, 0.44);
-  --brand-accent: #2f7f73;
-  --brand-accent-soft: rgba(47, 127, 115, 0.18);
-  --brand-ink: #1f2a37;
-  --brand-sun: #efc066;
-  --on-brand: #fff8f1;
-  --on-surface-strong: #fff8f1;
-  --link-color: #ab4e25;
-  --link-color-hover: #8f3f1c;
+  @include papercraft-shared-tokens;
+  @include papercraft-light-tokens;
+  color-scheme: light;
+}
 
-  --status-new: #4d7bb3;
-  --status-progress: #d1962b;
-  --status-resolved: #2f7f73;
-  --status-rejected: #bf5b61;
-  --status-rejected-glow: rgba(191, 91, 97, 0.34);
+:root.light-theme,
+:root[data-theme="light"] {
+  @include papercraft-light-tokens;
+  color-scheme: light;
+}
 
-  --brand-primary-alpha-10: rgba(198, 93, 46, 0.1);
-  --brand-primary-alpha-20: rgba(198, 93, 46, 0.2);
-  --brand-primary-alpha-30: rgba(198, 93, 46, 0.3);
-  --status-progress-alpha-10: rgba(209, 150, 43, 0.12);
-  --status-progress-alpha-20: rgba(209, 150, 43, 0.24);
-  --status-resolved-alpha-10: rgba(47, 127, 115, 0.12);
-  --status-rejected-alpha-10: rgba(191, 91, 97, 0.12);
-  --status-rejected-alpha-20: rgba(191, 91, 97, 0.24);
+:root.dark-theme,
+:root[data-theme="dark"] {
+  @include papercraft-dark-tokens;
+  color-scheme: dark;
+}
 
-  --chart-1: #c65d2e;
-  --chart-2: #2f7f73;
-  --chart-3: #d1962b;
-  --chart-4: #bf5b61;
-  --chart-5: #5a7ca8;
-  --chart-6: #7f4f24;
-
-  &.dark-theme,
-  &:not(.light-theme) {
-    --bg-app: #17161a;
-    --bg-nav: rgba(23, 22, 26, 0.82);
-    --bg-surface: #221f25;
-    --bg-card: #2a262e;
-    --bg-elevated: #35303a;
-
-    --text-main: #f4ece3;
-    --text-secondary: #dfd1c4;
-    --text-muted: #b8aa9a;
-
-    --border-subtle: #4b434e;
-    --glass-stroke: rgba(255, 248, 241, 0.08);
-    --shadow-premium: 0 0 0 1px rgba(255, 248, 241, 0.05), 0 28px 60px -28px rgba(0, 0, 0, 0.72);
-    --shadow-lift: 0 30px 65px -28px rgba(0, 0, 0, 0.82);
-
-    --mesh-gradient-1: rgba(198, 93, 46, 0.19);
-    --mesh-gradient-2: rgba(47, 127, 115, 0.12);
-    --mesh-gradient-3: rgba(239, 192, 102, 0.08);
-
-    --scrollbar-thumb: #665b67;
-    --tooltip-bg: #2b262d;
-    --tooltip-text: #fff8f1;
-    --field-bg: rgba(17, 15, 20, 0.62);
-    --field-bg-focus: rgba(31, 28, 35, 0.98);
-    --field-text: #f4ece3;
-    --field-border: #655868;
-    --field-border-focus: #efc066;
-    --bg-sidebar: rgba(31, 28, 35, 0.88);
-    --surface-hover: rgba(255, 248, 241, 0.06);
-    --table-row-hover: rgba(255, 248, 241, 0.04);
-    --focus-ring: rgba(239, 192, 102, 0.28);
-    --tooltip-shadow: 0 16px 36px -24px rgba(0, 0, 0, 0.8);
-    --shimmer-highlight: rgba(255, 248, 241, 0.1);
-    --pill-bg: rgba(255, 248, 241, 0.06);
-    --pill-border: rgba(255, 248, 241, 0.1);
-    --pill-hover: rgba(255, 248, 241, 0.11);
-    --panel-soft-bg: rgba(255, 248, 241, 0.04);
-    --surface-soft: rgba(255, 248, 241, 0.06);
-    --surface-soft-strong: rgba(10, 10, 12, 0.28);
-    --surface-soft-hover: rgba(255, 248, 241, 0.11);
-    --surface-soft-border: rgba(255, 248, 241, 0.12);
-    --interactive-neutral-bg: rgba(255, 248, 241, 0.08);
-    --interactive-neutral-hover: rgba(255, 248, 241, 0.14);
-    --interactive-neutral-border: rgba(255, 248, 241, 0.14);
-    --interactive-neutral-text: #f4ece3;
-    --logo-surface: #efc066;
-    --logo-icon: #1f2a37;
-    --alpha-surface-05: rgba(255, 248, 241, 0.04);
-    --alpha-surface-10: rgba(255, 248, 241, 0.08);
-    --alpha-border-05: rgba(255, 248, 241, 0.08);
-    --alpha-border-10: rgba(255, 248, 241, 0.14);
-    --alpha-border-20: rgba(255, 248, 241, 0.22);
-    --alpha-border-30: rgba(255, 248, 241, 0.32);
-    --alpha-overlay-20: rgba(10, 10, 12, 0.28);
-    --alpha-overlay-30: rgba(10, 10, 12, 0.4);
-    --alpha-overlay-40: rgba(10, 10, 12, 0.56);
-    --alpha-overlay-80: rgba(10, 10, 12, 0.82);
+// Unprefixed root follows the operating system, unless a theme was chosen
+// explicitly through either the legacy class or the data-theme attribute.
+@media (prefers-color-scheme: dark) {
+  :root:not(.light-theme):not(.dark-theme):not([data-theme="light"]):not([data-theme="dark"]) {
+    @include papercraft-dark-tokens;
+    color-scheme: dark;
   }
+}
 
-  &.light-theme {
-    --bg-app: #f4ede4;
-    --bg-nav: rgba(252, 248, 243, 0.88);
-    --bg-surface: #fff9f3;
-    --bg-card: #ffffff;
-    --bg-elevated: #f5eee6;
-
-    --text-main: #1f2a37;
-    --text-secondary: #354455;
-    --text-muted: #6d7683;
-
-    --border-subtle: #dfd3c7;
-    --glass-stroke: rgba(31, 42, 55, 0.06);
-    --shadow-premium: 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 22px 46px -32px rgba(74, 49, 33, 0.24);
-    --shadow-lift: 0 28px 58px -34px rgba(74, 49, 33, 0.3);
-
-    --mesh-gradient-1: rgba(198, 93, 46, 0.14);
-    --mesh-gradient-2: rgba(47, 127, 115, 0.09);
-    --mesh-gradient-3: rgba(239, 192, 102, 0.18);
-
-    --scrollbar-thumb: #cfbaaa;
-    --tooltip-bg: #1f2a37;
-    --tooltip-text: #fff8f1;
-    --field-bg: #ffffff;
-    --field-bg-focus: #fffcf8;
-    --field-text: #1f2a37;
-    --field-border: #d5c5b7;
-    --field-border-focus: #c65d2e;
-    --bg-sidebar: rgba(255, 250, 245, 0.9);
-    --surface-hover: rgba(198, 93, 46, 0.08);
-    --table-row-hover: rgba(198, 93, 46, 0.05);
-    --focus-ring: rgba(198, 93, 46, 0.18);
-    --tooltip-shadow: 0 18px 32px -24px rgba(31, 42, 55, 0.4);
-    --shimmer-highlight: rgba(198, 93, 46, 0.12);
-    --pill-bg: rgba(198, 93, 46, 0.08);
-    --pill-border: rgba(198, 93, 46, 0.16);
-    --pill-hover: rgba(198, 93, 46, 0.14);
-    --panel-soft-bg: rgba(198, 93, 46, 0.05);
-    --surface-soft: rgba(198, 93, 46, 0.06);
-    --surface-soft-strong: rgba(198, 93, 46, 0.1);
-    --surface-soft-hover: rgba(198, 93, 46, 0.14);
-    --surface-soft-border: rgba(198, 93, 46, 0.16);
-    --interactive-neutral-bg: #f5ede4;
-    --interactive-neutral-hover: #efdfd1;
-    --interactive-neutral-border: #d8c7b8;
-    --interactive-neutral-text: #1f2a37;
-    --logo-surface: #1f2a37;
-    --logo-icon: #fff8f1;
-    --alpha-surface-05: rgba(198, 93, 46, 0.04);
-    --alpha-surface-10: rgba(198, 93, 46, 0.08);
-    --alpha-border-05: rgba(198, 93, 46, 0.06);
-    --alpha-border-10: rgba(198, 93, 46, 0.12);
-    --alpha-border-20: rgba(198, 93, 46, 0.2);
-    --alpha-border-30: rgba(198, 93, 46, 0.28);
-    --alpha-overlay-20: rgba(255, 249, 243, 0.72);
-    --alpha-overlay-30: rgba(255, 249, 243, 0.82);
-    --alpha-overlay-40: rgba(255, 249, 243, 0.9);
-    --alpha-overlay-80: rgba(255, 249, 243, 0.96);
-  }
-
+// ---------- 5. PrimeReact bridge -------------------------------------------
+// html:root beats the plain :root block PrimeReact's theme.css ships, no
+// matter which stylesheet the bundler places last.
+html:root {
+  --font-family: var(--font-body), "Segoe UI", sans-serif;
   --primary-color: var(--brand-primary);
   --primary-color-text: var(--on-brand);
   --surface-ground: var(--bg-app);
@@ -169,6 +361,7 @@
   --input-border-color: var(--field-border);
 }
 
+// ---------- 6. Shared utilities --------------------------------------------
 .text-main { color: var(--text-main) !important; }
 .text-secondary { color: var(--text-secondary) !important; }
 .text-muted { color: var(--text-muted) !important; }
@@ -218,6 +411,8 @@
 .u-logo-badge {
   background: var(--logo-surface) !important;
   border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-paper-sm) !important;
+  transform: rotate(-2deg);
 }
 
 .u-logo-icon {
@@ -230,16 +425,19 @@
 }
 
 .u-section-title {
-  color: var(--brand-primary);
-  letter-spacing: 0.1em;
+  color: var(--color-plum);
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .u-page-title {
   color: var(--text-main);
-  letter-spacing: -0.05em;
-  font-family: "Sora", "Plus Jakarta Sans", sans-serif;
+  letter-spacing: var(--tracking-display);
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-display);
+  text-wrap: balance;
 }
 
 .u-page-subtitle {
@@ -253,7 +451,7 @@
   gap: 0.5rem;
   width: 100%;
   border: 1px solid var(--field-border);
-  border-radius: 1rem;
+  border-radius: var(--radius-sm);
   background: var(--field-bg);
   color: var(--field-text);
   padding: 0.45rem 0.75rem;
@@ -262,7 +460,7 @@
 
 .app-search-shell:focus-within {
   border-color: var(--field-border-focus);
-  box-shadow: 0 0 0 2px var(--focus-ring);
+  box-shadow: 0 0 0 3px var(--focus-ring);
   background: var(--field-bg-focus);
 }
 
@@ -292,39 +490,43 @@
   color: var(--text-muted);
   border: 1px solid var(--alpha-border-10);
   background: var(--alpha-surface-05);
-  border-radius: 0.45rem;
+  border-radius: var(--radius-sm);
   padding: 0.12rem 0.42rem;
   font-size: 0.62rem;
   font-weight: 700;
 }
 
-@keyframes motion-enter-fade {
+// Paper settles: the sheet arrives from above with a small rotation, the
+// shadow trails slightly behind. No scale, no spring.
+@keyframes motion-enter-reveal {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes motion-enter-up {
+@keyframes motion-paper-settle {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(calc(var(--motion-distance) * -0.6)) rotate(-1.2deg);
+    box-shadow: var(--shadow-edge), 0 4px 8px rgba(74, 58, 50, 0.08);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
+    box-shadow: var(--shadow-edge), var(--shadow-paper);
   }
 }
 
-@keyframes motion-soft-pulse {
+@keyframes motion-soft-float {
   0%,
-  100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
+  100% { transform: rotate(-0.6deg); }
+  50% { transform: rotate(0.6deg); }
 }
 
-.motion-page { animation: motion-enter-fade 0.28s ease-out both; }
-.motion-card { animation: motion-enter-up 0.34s ease-out both; }
-.motion-card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.motion-card-hover:hover { transform: translateY(-2px); }
-.motion-pulse-soft { animation: motion-soft-pulse 2.6s ease-in-out infinite; }
+.motion-page { animation: motion-enter-reveal 0.28s ease-out both; }
+.motion-card { animation: motion-paper-settle var(--motion-enter) var(--ease-paper) both; }
+.motion-card-hover { transition: transform var(--motion-fast) var(--ease-paper), box-shadow var(--motion-fast) var(--ease-paper); }
+.motion-card-hover:hover { transform: translateY(-3px); }
+.motion-pulse-soft { animation: motion-soft-float 8s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .motion-page,

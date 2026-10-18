@@ -76,6 +76,9 @@ export function App() {
       html.classList.add('light-theme');
       html.classList.remove('dark-theme');
     }
+    // Mirrored as a data attribute so the CSS supports [data-theme] as well as
+    // the legacy classes; dropping both makes prefers-color-scheme decide.
+    html.dataset.theme = theme;
   }, [theme]);
 
   useEffect(() => {
@@ -122,13 +125,13 @@ export function App() {
           style: {
             background: 'var(--bg-nav)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid var(--glass-stroke)',
+            border: '1px solid var(--border-subtle)',
             color: 'var(--text-main)',
-            borderRadius: '16px',
+            borderRadius: 'var(--radius-paper-sm)',
             padding: '16px 24px',
             fontSize: '14px',
             fontWeight: '600',
-            boxShadow: 'var(--shadow-premium)',
+            boxShadow: 'var(--shadow-edge), var(--shadow-premium)',
             maxWidth: '400px',
           },
           success: {

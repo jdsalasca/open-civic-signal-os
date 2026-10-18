@@ -1,8 +1,10 @@
 @use "base/variables" as *;
 @use "theme";
 @use "base/mixins" as *;
+@use "base/fonts";
 
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Sora:wght@600;700;800&display=swap");
+// Fonts are self-hosted (public/fonts, Latin subset, ~39 KB total) so the app
+// owns its type at the same time it owns its palette. No Google Fonts import.
 
 html {
   scroll-behavior: smooth;
@@ -10,10 +12,13 @@ html {
 
 body {
   margin: 0;
-  font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
   background-color: var(--bg-app);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
+  // The paper table: cream ground, sheets faintly tinted sage/sky/sun.
   background-image:
     radial-gradient(circle at top left, var(--mesh-gradient-1) 0, transparent 35%),
     radial-gradient(circle at top right, var(--mesh-gradient-2) 0, transparent 38%),
@@ -22,8 +27,28 @@ body {
   background-attachment: fixed;
   min-height: 100vh;
   transition: background-color 0.4s ease, color 0.4s ease;
-  letter-spacing: -0.015em;
-  line-height: 1.6;
+  letter-spacing: 0;
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+.u-page-title,
+.u-section-title-lg {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-optical-sizing: auto;
+  text-wrap: balance;
+}
+
+.u-metric-value,
+.civic-stat-value,
+.dashboard-story-metric-value,
+.civic-empty-state-title {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-display);
 }
 
 * {
@@ -65,11 +90,12 @@ a:hover {
 }
 
 .glass-panel {
-  background: color-mix(in srgb, var(--bg-surface) 90%, transparent);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+  // Kept as the shared shell for cards and toasts, but it is now a paper
+  // sheet: opaque surface, warm hairline border, cut corners.
+  background: color-mix(in srgb, var(--bg-surface) 96%, transparent);
   border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-premium), inset 0 1px 0 0 var(--glass-stroke);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
 }
 
 .page-container {
@@ -109,8 +135,12 @@ a:hover {
 }
 
 .app-sidebar {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-sidebar) 92%, transparent), color-mix(in srgb, var(--bg-surface) 94%, transparent));
-  backdrop-filter: blur(20px);
+  background: linear-gradient(
+    180deg,
+    var(--bg-sidebar),
+    color-mix(in srgb, var(--bg-surface) 94%, var(--bg-elevated))
+  );
+  border-right: 1px solid var(--border-subtle);
 }
 
 .app-sidebar-brand {
@@ -118,26 +148,45 @@ a:hover {
 }
 
 .app-brand-panel {
-  padding: 1.25rem;
-  border-radius: 1.5rem;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--bg-card) 96%, transparent), color-mix(in srgb, var(--bg-elevated) 92%, transparent));
-  border: 1px solid var(--alpha-border-10);
+  position: relative;
+  isolation: isolate;
+  padding: 1.7rem 1.25rem 1.25rem;
+  border-radius: var(--radius-paper);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+  transform: rotate(-0.6deg);
   min-width: 0;
+}
+
+// Washi tape holding the brand sheet down: the Paper Craft signature.
+.app-brand-panel::before {
+  content: "";
+  position: absolute;
+  top: -0.8rem;
+  left: 50%;
+  width: 7.5rem;
+  height: 2rem;
+  transform: translateX(-50%) rotate(-5deg);
+  z-index: 2;
+  pointer-events: none;
+  @include paper-tape;
 }
 
 .app-brand-kicker {
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--tracking-label);
   font-size: 0.66rem;
   font-weight: 800;
 }
 
 .app-brand-title {
   color: var(--text-main);
-  font-family: "Sora", "Plus Jakarta Sans", sans-serif;
-  font-weight: 900;
-  letter-spacing: -0.05em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
 }
 
 .app-brand-copy {
@@ -159,7 +208,7 @@ a:hover {
 .app-context-label {
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--tracking-label);
   font-size: 0.65rem;
   font-weight: 800;
 }
@@ -178,11 +227,11 @@ a:hover {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.95rem 1rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-md);
   text-decoration: none;
   border: 1px solid transparent;
   color: var(--text-secondary);
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+  transition: transform var(--motion-fast) var(--ease-paper), border-color var(--motion-fast) var(--ease-paper), background var(--motion-fast) var(--ease-paper), color var(--motion-fast) var(--ease-paper);
 }
 
 .app-nav-link > div,
@@ -196,20 +245,23 @@ a:hover {
 }
 
 .app-nav-link:hover {
-  transform: translateX(2px);
+  transform: translateY(-2px);
   border-color: var(--alpha-border-10);
   background: var(--alpha-surface-05);
   color: var(--text-main);
+  box-shadow: var(--shadow-edge), 0 10px 18px -14px rgba(74, 58, 50, 0.4);
 }
 
 .app-nav-link.is-active {
   background: linear-gradient(135deg, var(--brand-primary-alpha-10), var(--brand-accent-soft));
   border-color: var(--alpha-border-20);
+  border-radius: var(--radius-paper-chip);
   color: var(--text-main);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
 }
 
 .app-nav-link.is-active .app-nav-link-icon {
-  color: var(--brand-primary);
+  color: var(--color-accent);
 }
 
 .app-nav-link-icon {
@@ -219,15 +271,16 @@ a:hover {
 .app-nav-link-dot {
   width: 0.45rem;
   height: 0.45rem;
-  border-radius: 999px;
-  background: var(--brand-primary);
-  box-shadow: 0 0 0 6px var(--brand-primary-alpha-10);
+  border-radius: 50%;
+  background: var(--color-accent-deco);
+  box-shadow: 0 0 0 6px var(--color-accent-soft);
 }
 
 .app-topbar {
-  background: color-mix(in srgb, var(--bg-nav) 88%, transparent);
+  background: color-mix(in srgb, var(--bg-nav) 92%, transparent);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 2px 2px rgba(74, 58, 50, 0.06);
 }
 
 .app-topbar-intro {
@@ -241,14 +294,16 @@ a:hover {
   color: var(--text-muted);
   font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--tracking-label);
   font-weight: 800;
 }
 
 .app-topbar-title {
   color: var(--text-main);
-  font-size: 1rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: var(--leading-tight);
   overflow-wrap: anywhere;
   text-wrap: pretty;
 }
@@ -259,7 +314,7 @@ a:hover {
 }
 
 .civic-card {
-  border-radius: 1.7rem;
+  border-radius: var(--radius-paper) !important;
 }
 
 .civic-page-header {
@@ -386,16 +441,17 @@ a:hover {
 }
 
 .u-surface-note {
-  border-radius: 1rem;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  box-shadow: var(--shadow-edge);
   padding: 0.95rem 1rem;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .u-surface-note-compact {
   padding: 0.8rem 0.9rem;
-  border-radius: 0.9rem;
+  border-radius: var(--radius-sm);
 }
 
 .u-metric-shell {
@@ -498,6 +554,8 @@ a:hover {
 }
 
 .civic-badge {
+  border-radius: var(--radius-paper-chip) !important;
+  font-family: var(--font-body);
   letter-spacing: 0.03em;
   max-width: 100%;
   white-space: normal;
@@ -584,7 +642,7 @@ a:hover {
 
 .community-map-point:focus-visible,
 .community-heat-node:focus-visible {
-  outline: 2px solid var(--brand-primary);
+  outline: 3px solid var(--focus-ring-color);
   outline-offset: 6px;
 }
 
@@ -767,13 +825,16 @@ a:hover {
 }
 
 .civic-empty-state-icon {
+  border-radius: var(--radius-paper) !important;
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
   background: linear-gradient(180deg, var(--alpha-surface-10), transparent);
 }
 
 .civic-toolbar {
-  background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
-  border-radius: 1.3rem;
+  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  border-radius: var(--radius-paper-sm) !important;
   border-color: var(--surface-soft-border) !important;
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
 }
 
 .u-pill {
@@ -781,7 +842,7 @@ a:hover {
   align-items: center;
   gap: 0.45rem;
   padding: 0.48rem 0.78rem;
-  border-radius: 999px;
+  border-radius: var(--radius-paper-chip);
   border: 1px solid var(--pill-border);
   background: var(--pill-bg);
   color: var(--text-secondary);
@@ -827,9 +888,10 @@ a:hover {
   min-width: 0;
   min-height: 9.25rem;
   padding: 1.15rem;
-  border-radius: 1.45rem;
+  border-radius: var(--radius-paper);
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -922,15 +984,16 @@ a:hover {
 }
 
 .achievement-card {
-  border-radius: 1.35rem;
+  border-radius: var(--radius-paper-sm);
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  box-shadow: var(--shadow-edge);
   padding: 1rem;
   min-width: 0;
 }
 
 .achievement-card-earned {
-  box-shadow: 0 12px 34px -26px var(--brand-primary-glow-strong);
+  box-shadow: var(--shadow-edge), 0 12px 34px -26px var(--brand-primary-glow-strong);
   border-color: color-mix(in srgb, var(--status-resolved) 50%, var(--border-subtle));
 }
 
@@ -1096,7 +1159,7 @@ a:hover {
   align-items: center;
   gap: 0.45rem;
   padding: 0.66rem 1rem;
-  border-radius: 999px;
+  border-radius: var(--radius-paper-chip);
   border: 1px solid var(--pill-border);
   background: var(--pill-bg);
   color: var(--text-secondary);
@@ -1126,7 +1189,7 @@ a:hover {
   background: var(--panel-soft-bg);
   border: 1px solid var(--pill-border);
   color: var(--text-secondary);
-  border-radius: 999px;
+  border-radius: var(--radius-paper-chip);
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
@@ -1187,9 +1250,10 @@ a:hover {
   min-width: 0;
   min-height: 8.75rem;
   padding: 1.15rem;
-  border-radius: 1.45rem;
+  border-radius: var(--radius-paper);
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  box-shadow: var(--shadow-edge);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1270,18 +1334,19 @@ a:hover {
 }
 
 .community-feed-list-card {
-  border-radius: 1.35rem;
+  border-radius: var(--radius-paper);
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg-card) 95%, transparent);
+  box-shadow: var(--shadow-edge);
   padding: 1rem;
-  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  transition: border-color var(--motion-fast) var(--ease-paper), transform var(--motion-fast) var(--ease-paper), background var(--motion-fast) var(--ease-paper);
   min-width: 0;
 }
 
 .community-feed-list-card:hover {
-  border-color: var(--brand-primary);
-  transform: translateY(-1px);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--brand-primary) 8%, var(--bg-card)), color-mix(in srgb, var(--bg-card) 96%, transparent));
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 8%, var(--bg-card)), color-mix(in srgb, var(--bg-card) 96%, transparent));
 }
 
 .community-feed-list-card h3,
@@ -1292,8 +1357,9 @@ a:hover {
 }
 
 .app-mobile-nav {
-  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  background: color-mix(in srgb, var(--bg-nav) 94%, transparent);
   backdrop-filter: blur(16px);
+  box-shadow: 0 -3px 12px -8px rgba(74, 58, 50, 0.5);
 }
 
 .animate-fade-up {
@@ -1308,9 +1374,10 @@ a:hover {
   background: var(--brand-primary);
   color: var(--on-brand);
   padding: 0.6rem 0.9rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-sm);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 800;
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
   transition: top 0.15s ease;
 }
 
@@ -1326,8 +1393,8 @@ select:focus-visible,
 [tabindex]:focus-visible,
 .p-dropdown:focus-within,
 .p-selectbutton .p-button:focus-visible {
-  outline: 2px solid var(--brand-primary);
-  outline-offset: 2px;
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 3px;
 }
 
 .p-component,
@@ -1335,6 +1402,11 @@ select:focus-visible,
 .p-inputtextarea,
 .p-dropdown .p-dropdown-label {
   color: var(--text-main);
+}
+
+// PrimeReact ships "Inter var" from its theme; the app speaks Nunito Sans.
+.p-component {
+  font-family: var(--font-body);
 }
 
 .p-inputtext::placeholder,
@@ -1346,26 +1418,27 @@ select:focus-visible,
 .p-card {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-subtle) !important;
-  border-radius: $radius-lg !important;
-  box-shadow: var(--shadow-premium) !important;
+  border-radius: var(--radius-paper) !important;
+  box-shadow: var(--shadow-edge), var(--shadow-premium) !important;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  transition: transform var(--motion-fast) var(--ease-paper), box-shadow var(--motion-fast) var(--ease-paper) !important;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lift) !important;
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-edge), var(--shadow-lift) !important;
   }
 }
 
 .p-button {
-  border-radius: 999px !important;
+  border-radius: var(--radius-paper-sm) !important;
+  font-family: var(--font-body) !important;
   font-size: 0.8rem !important;
   font-weight: 800 !important;
   text-transform: none;
-  letter-spacing: 0 !important;
+  letter-spacing: 0.04em !important;
   padding: 0.92rem 1.25rem !important;
-  transition: all 0.25s ease !important;
+  transition: all var(--motion-fast) var(--ease-paper) !important;
   overflow: hidden;
   position: relative;
 
@@ -1381,12 +1454,12 @@ select:focus-visible,
     background: var(--brand-primary) !important;
     color: var(--on-brand) !important;
     border: none !important;
-    box-shadow: 0 8px 18px -12px var(--brand-primary-glow-strong) !important;
+    box-shadow: var(--shadow-edge), 0 12px 20px -14px var(--brand-primary-glow-strong) !important;
 
     &:hover {
       background: var(--brand-primary-hover) !important;
-      transform: translateY(-1px);
-      box-shadow: 0 14px 24px -16px var(--brand-primary-glow-strong) !important;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-edge), 0 18px 28px -16px var(--brand-primary-glow-strong) !important;
     }
   }
 
@@ -1422,11 +1495,12 @@ select:focus-visible,
   background: var(--field-bg) !important;
   border: 1px solid var(--field-border) !important;
   color: var(--field-text) !important;
-  border-radius: 1.1rem !important;
+  border-radius: var(--radius-sm) !important;
   padding: 1rem !important;
+  font-family: var(--font-body) !important;
   font-weight: 600 !important;
   transition: all 0.2s ease !important;
-  box-shadow: none !important;
+  box-shadow: var(--shadow-edge) !important;
 
   &:focus {
     border-color: var(--field-border-focus) !important;
@@ -1438,7 +1512,7 @@ select:focus-visible,
 .p-dropdown {
   background: var(--field-bg) !important;
   border: 1px solid var(--field-border) !important;
-  border-radius: 1.1rem !important;
+  border-radius: var(--radius-sm) !important;
   min-height: 3.2rem;
 
   .p-dropdown-label {
@@ -1465,8 +1539,8 @@ select:focus-visible,
 .p-dropdown-panel {
   background: var(--bg-surface) !important;
   border: 1px solid var(--border-subtle) !important;
-  border-radius: 1rem !important;
-  box-shadow: var(--shadow-premium) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-edge), var(--shadow-premium) !important;
 
   .p-dropdown-items .p-dropdown-item {
     padding: 0.85rem 1rem !important;
@@ -1491,8 +1565,8 @@ select:focus-visible,
 .p-password-panel {
   background: var(--bg-surface) !important;
   border: 1px solid var(--border-subtle) !important;
-  border-radius: 1rem !important;
-  box-shadow: var(--shadow-premium) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-edge), var(--shadow-premium) !important;
   color: var(--text-main) !important;
 }
 
@@ -1527,11 +1601,12 @@ select:focus-visible,
   .p-datatable-thead > tr > th {
     background: transparent !important;
     color: var(--text-muted) !important;
+    font-family: var(--font-body) !important;
     font-size: 0.68rem !important;
     text-transform: uppercase !important;
-    letter-spacing: 0.12em !important;
+    letter-spacing: var(--tracking-label) !important;
     font-weight: 800 !important;
-    border-bottom: 1px solid var(--alpha-border-05) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
     padding: 1.1rem 1rem !important;
   }
 
@@ -1540,7 +1615,7 @@ select:focus-visible,
     border-bottom: 1px solid var(--alpha-border-05) !important;
 
     &:hover {
-      background: var(--surface-soft) !important;
+      background: var(--table-row-hover) !important;
     }
   }
 
@@ -1630,8 +1705,8 @@ select:focus-visible,
 .p-dialog {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-subtle) !important;
-  border-radius: 1.8rem !important;
-  box-shadow: var(--shadow-premium) !important;
+  border-radius: var(--radius-paper-lg) !important;
+  box-shadow: var(--shadow-edge), var(--shadow-lift) !important;
 
   .p-dialog-header {
     background: transparent !important;
@@ -1665,11 +1740,12 @@ select:focus-visible,
 .p-tooltip .p-tooltip-text {
   background: var(--tooltip-bg) !important;
   color: var(--tooltip-text) !important;
+  font-family: var(--font-body) !important;
   font-size: 0.7rem !important;
   font-weight: 800 !important;
   letter-spacing: 0.05em;
   padding: 0.5rem 0.8rem !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-sm) !important;
   border: 1px solid var(--border-subtle) !important;
   box-shadow: var(--tooltip-shadow);
 }
@@ -1734,5 +1810,33 @@ select:focus-visible,
 @media (hover: none) {
   .hover-actions {
     opacity: 1 !important;
+  }
+}
+
+// Paper Craft motion is a settle, not a requirement: when the visitor asks
+// for reduced motion everything arrives already in place.
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .app-brand-panel,
+  .u-logo-badge,
+  .app-nav-link,
+  .civic-stat-card,
+  .dashboard-story-metric,
+  .community-feed-list-card,
+  .achievement-card,
+  .p-card,
+  .p-button {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .p-card:hover,
+  .p-button:hover,
+  .app-nav-link:hover,
+  .community-feed-list-card:hover {
+    transform: none !important;
   }
 }
