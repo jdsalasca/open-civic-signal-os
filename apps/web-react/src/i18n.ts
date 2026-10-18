@@ -166,7 +166,28 @@ const resources = {
         "empty_desc": "Be the first to start a community for your city.",
         "load_error": "Could not load the city directory.",
         "why_title": "Why join a city",
-        "why_desc": "You attach your reports to a place, see what your neighbors prioritize, and follow what institutions do with it."
+        "why_desc": "You attach your reports to a place, see what your neighbors prioritize, and follow what institutions do with it.",
+        "hero_eyebrow": "Community feedback, on the record",
+        "hero_title": "Your city, on the record",
+        "primary_cta": "Start your city",
+        "secondary_cta": "Find your city",
+        "hero_illustration_alt": "Cut-paper illustration of a neighbourhood: layered city buildings, neighbours below and speech bubbles rising above them",
+        "directory_eyebrow": "The city directory",
+        "search_label": "Search cities",
+        "how_title": "How it works",
+        "how_subtitle": "Three steps, in the open. Nothing moves without a person deciding.",
+        "step_report_title": "Report",
+        "step_report_desc": "A neighbour describes a local problem in plain words and attaches it to the city.",
+        "step_prioritise_title": "Neighbours prioritise",
+        "step_prioritise_desc": "Residents vote and the platform ranks each case with a formula anyone can read.",
+        "step_respond_title": "Institutions respond",
+        "step_respond_desc": "Public bodies answer on the record and the case stays visible until it is resolved.",
+        "trust_title": "Built for public trust",
+        "trust_desc": "Every ranking is explainable, every source is traceable, and people stay in the loop.",
+        "trust_point_evidence": "Evidence over intuition: scores need explicit inputs.",
+        "trust_point_transparent": "No black boxes: the formula is published with each list.",
+        "trust_point_human": "Human in the loop: the algorithm suggests, people decide.",
+        "empty_illustration_alt": "Cut-paper illustration of an empty neighbourhood plot with a signpost, waiting for its first neighbours"
       },
       "auth": {
         "login_title": "Access Portal",
@@ -226,7 +247,12 @@ const resources = {
         "email_delivery_support": "If this continues, contact support at {{email}}.",
         "email_delivery_help": "Check spam folder first, then resend. If delivery still fails, use support contact.",
         "verify_protocol": "Identity verification is a mandatory protocol for Signal OS access.",
-        "verified_success": "Account activated! You can now log in."
+        "verified_success": "Account activated! You can now log in.",
+        "password_hint": "At least 8 characters. Mix letters, numbers and a symbol.",
+        "login_password_hint": "Enter the password for your account.",
+        "confirm_password_hint": "Repeat the same password to avoid typos.",
+        "city_select_help": "Choose the city you belong to. You can change it later from Communities.",
+        "city_create_help": "You will be the organizer of this new city."
       },
       "dashboard": {
         "welcome": "Welcome back",
@@ -2010,7 +2036,9 @@ const resources = {
         "403_switch": "Switch Intelligence Identity",
         "chunk_title": "Protocol Resynchronization",
         "chunk_desc": "A system module failed to load due to a stale cache or temporary signal loss.",
-        "chunk_button": "Refresh Intelligence"
+        "chunk_button": "Refresh Intelligence",
+        "404_illustration_alt": "Cut-paper illustration of a folded paper map whose dotted route runs off the sheet",
+        "403_illustration_alt": "Cut-paper illustration of a closed paper door held shut by a padlock"
       },
       "help_center": {
         "title": "Civic Onboarding and Help Center",
@@ -2242,7 +2270,28 @@ const resources = {
         "empty_desc": "Sé la primera persona en crear una comunidad para tu ciudad.",
         "load_error": "No se pudo cargar el directorio de ciudades.",
         "why_title": "Por qué unirte a una ciudad",
-        "why_desc": "Vinculas tus reportes a un lugar, ves lo que priorizan tus vecinos y sigues lo que las instituciones hacen con ello."
+        "why_desc": "Vinculas tus reportes a un lugar, ves lo que priorizan tus vecinos y sigues lo que las instituciones hacen con ello.",
+        "hero_eyebrow": "Aportes comunitarios, en el registro",
+        "hero_title": "Tu ciudad, en el registro",
+        "primary_cta": "Crea tu ciudad",
+        "secondary_cta": "Encuentra tu ciudad",
+        "hero_illustration_alt": "Ilustración de papel recortado de un barrio: edificios por capas, vecinos abajo y bocadillos de diálogo elevándose",
+        "directory_eyebrow": "El directorio de ciudades",
+        "search_label": "Buscar ciudades",
+        "how_title": "Cómo funciona",
+        "how_subtitle": "Tres pasos, a la vista. Nada avanza sin que una persona lo decida.",
+        "step_report_title": "Reporta",
+        "step_report_desc": "Un vecino describe un problema local con palabras sencillas y lo vincula a la ciudad.",
+        "step_prioritise_title": "Los vecinos priorizan",
+        "step_prioritise_desc": "La comunidad vota y la plataforma ordena cada caso con una fórmula que cualquiera puede leer.",
+        "step_respond_title": "Las instituciones responden",
+        "step_respond_desc": "Los organismos públicos responden en el registro y el caso sigue visible hasta resolverse.",
+        "trust_title": "Diseñado para la confianza pública",
+        "trust_desc": "Cada ranking es explicable, cada fuente es rastreable y las personas siguen en el circuito.",
+        "trust_point_evidence": "Evidencia antes que intuición: las puntuaciones requieren datos explícitos.",
+        "trust_point_transparent": "Sin cajas negras: la fórmula se publica con cada lista.",
+        "trust_point_human": "Humanos en el circuito: el algoritmo sugiere, las personas deciden.",
+        "empty_illustration_alt": "Ilustración de papel recortado de un lote de barrio vacío con un cartel, esperando a sus primeros vecinos"
       },
       "auth": {
         "login_title": "Portal de Acceso",
@@ -2302,7 +2351,12 @@ const resources = {
         "email_delivery_support": "Si continúa, contacte soporte en {{email}}.",
         "email_delivery_help": "Revise spam primero, luego reenvíe. Si sigue fallando, use el contacto de soporte.",
         "verify_protocol": "La verificación de identidad es un protocolo obligatorio para acceder a Signal OS.",
-        "verified_success": "¡Cuenta activada! Ya puede iniciar sesión."
+        "verified_success": "¡Cuenta activada! Ya puede iniciar sesión.",
+        "password_hint": "Mínimo 8 caracteres. Combina letras, números y un símbolo.",
+        "login_password_hint": "Ingresa la contraseña de tu cuenta.",
+        "confirm_password_hint": "Repite la misma contraseña para evitar errores.",
+        "city_select_help": "Elige la ciudad a la que perteneces. Puedes cambiarla luego desde Comunidades.",
+        "city_create_help": "Serás el organizador de esta nueva ciudad."
       },
       "dashboard": {
         "welcome": "Bienvenido de nuevo",
@@ -4094,7 +4148,9 @@ const resources = {
         "403_switch": "Cambiar Identidad de Inteligencia",
         "chunk_title": "Resincronización de Protocolo",
         "chunk_desc": "Un módulo del sistema falló al cargar debido a caché obsoleta o pérdida temporal de señal.",
-        "chunk_button": "Refrescar Inteligencia"
+        "chunk_button": "Refrescar Inteligencia",
+        "404_illustration_alt": "Ilustración de papel recortado de un mapa doblado cuyo recorrido punteado se sale de la hoja",
+        "403_illustration_alt": "Ilustración de papel recortado de una puerta de papel cerrada con un candado"
       },
       "help_center": {
         "title": "Centro de ayuda y onboarding cívico",
