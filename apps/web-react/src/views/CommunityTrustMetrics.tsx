@@ -112,15 +112,13 @@ export function CommunityTrustMetrics() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <div className="flex flex-column md:flex-row justify-content-between align-items-start gap-4 mb-8">
-          <CivicPageHeader
-            title={t("community_trust.title")}
-            description={t("community_trust.desc", {
-              community: activeMembership?.communityName ?? t("dashboard.community_default"),
-            })}
-            className="mb-0"
-          />
-          <CivicActionBar className="community-home-action-bar">
+        <CivicPageHeader
+          title={t("community_trust.title")}
+          description={t("community_trust.desc", {
+            community: activeMembership?.communityName ?? t("dashboard.community_default"),
+          })}
+          actions={
+            <CivicActionBar className="community-home-action-bar">
             <div className="community-home-action-copy">
               <div className="u-eyebrow">{t("community_trust.filters.kicker")}</div>
               <p className="u-section-copy text-sm m-0">{t("community_trust.filters.desc")}</p>
@@ -139,8 +137,9 @@ export function CommunityTrustMetrics() {
               <CivicButton type="button" icon="pi pi-sitemap" label={t("nav.community_decisions")} variant="ghost" onClick={() => navigate("/communities/decisions")} />
               <CivicButton type="button" icon="pi pi-briefcase" label={t("nav.community_projects")} variant="ghost" onClick={() => navigate("/communities/projects")} />
             </div>
-          </CivicActionBar>
-        </div>
+            </CivicActionBar>
+          }
+        />
 
         {!selectedCommunityId ? (
           <CivicCard>

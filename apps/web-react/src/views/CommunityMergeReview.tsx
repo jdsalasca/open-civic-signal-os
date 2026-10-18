@@ -232,7 +232,7 @@ export function CommunityMergeReview() {
         )}
 
         <div className="mt-6">
-          <h2 className="text-lg">{t("merge_review.history_title")}</h2>
+          <h2 className="text-xl font-black text-main m-0 mb-3">{t("merge_review.history_title")}</h2>
           {history.length === 0 ? (
             <CivicEmptyState
               icon="pi pi-history"

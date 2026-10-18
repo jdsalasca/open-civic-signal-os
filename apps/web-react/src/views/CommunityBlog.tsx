@@ -34,7 +34,7 @@ type ApiError = Error & {
 const renderContent = (content: string) => {
   const cleaned = stripMarkdownImages(content);
   return (
-    <p className="text-secondary text-base line-height-4 font-medium m-0" style={{ whiteSpace: "pre-wrap" }}>
+    <p className="text-secondary text-base line-height-4 font-medium m-0 community-reading-width" style={{ whiteSpace: "pre-wrap" }}>
       {cleaned}
     </p>
   );

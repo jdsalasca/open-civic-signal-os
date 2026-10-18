@@ -280,15 +280,13 @@ export function CommunityProjects() {
     <Layout>
       <div className="animate-fade-up motion-page">
         <ContextualHelpPanel surface="PROJECTS" className="mb-6" dataTestId="projects-contextual-help" />
-        <div className="flex flex-column xl:flex-row justify-content-between align-items-start gap-4 mb-8">
-          <CivicPageHeader
+        <CivicPageHeader
             title={t("community_projects.title")}
             description={t("community_projects.desc", {
               community: activeMembership?.communityName ?? t("dashboard.community_default"),
             })}
-            className="mb-0"
-          />
-          <CivicActionBar className="w-full xl:w-auto">
+          actions={
+            <CivicActionBar className="w-full xl:w-auto">
             <div className="community-home-action-copy">
               <div className="u-eyebrow">{t("community_projects.badge")}</div>
               <p className="u-section-copy text-sm m-0">{t("community_projects.badge_desc")}</p>
@@ -297,8 +295,9 @@ export function CommunityProjects() {
               <CivicButton type="button" icon="pi pi-file-edit" label={t("community_proposals.open_hub")} variant="ghost" onClick={() => navigate("/communities/proposals")} />
               <CivicButton type="button" icon="pi pi-comments" label={t("nav.dialogues")} variant="ghost" onClick={() => navigate("/communities/threads")} />
             </div>
-          </CivicActionBar>
-        </div>
+            </CivicActionBar>
+          }
+        />
 
         {!activeCommunityId ? (
           <CivicCard>

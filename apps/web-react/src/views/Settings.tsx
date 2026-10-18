@@ -437,7 +437,7 @@ export function Settings() {
 
   return (
     <Layout>
-      <div className="animate-fade-up motion-page max-w-64rem mx-auto">
+      <div className="animate-fade-up motion-page settings-shell">
         <CivicPageHeader title={t('settings.title')} description={t('settings.desc')} />
 
         <div className="grid">
