@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-10-06T04:19:46.700Z
+Last updated: 2026-03-05T01:29:01.932Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,42 +10,23 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-09-29T04:19:43.930Z)
-- Throughput (issues closed): 118
+- Window: last 7 days (since 2026-02-26T01:29:00.895Z)
+- Throughput (issues closed): 0
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
 ## 2026-Q2 Foundation
 
-- TODO: 0
+- TODO: 3
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 3
+- DONE: 0
 
 ### TODO
-- _No issues_
-
-### IN_PROGRESS
-- _No issues_
-
-### BLOCKED
-- _No issues_
-
-### DONE
 - #5 P1: Public dashboard with filters and status lifecycle
 - #4 P0: Add explainable scoring breakdown in prioritized output
 - #3 P0: Build multi-channel ingest adapters (forms, CSV, chat exports)
 
-## 2026-Q3 Expansion
-
-- TODO: 0
-- IN_PROGRESS: 0
-- BLOCKED: 0
-- DONE: 3
-
-### TODO
-- _No issues_
-
 ### IN_PROGRESS
 - _No issues_
 
@@ -53,20 +34,20 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- _No issues_
+
+## 2026-Q3 Expansion
+
+- TODO: 3
+- IN_PROGRESS: 0
+- BLOCKED: 0
+- DONE: 0
+
+### TODO
 - #8 P1: Duplicate signal detection and merge workflow
 - #7 P1: Messaging relay for WhatsApp/Telegram weekly updates
 - #6 P1: Weekly Top-10 unresolved civic problems digest
 
-## 2026-Q4 Scale
-
-- TODO: 0
-- IN_PROGRESS: 0
-- BLOCKED: 0
-- DONE: 3
-
-### TODO
-- _No issues_
-
 ### IN_PROGRESS
 - _No issues_
 
@@ -74,23 +55,20 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- _No issues_
+
+## 2026-Q4 Scale
+
+- TODO: 3
+- IN_PROGRESS: 0
+- BLOCKED: 0
+- DONE: 0
+
+### TODO
 - #11 P2: Federation API for multi-city civic deployments
 - #10 P2: Institutional action bridge (ticket export + SLA sync)
 - #9 P2: Fairness weighting and bias diagnostics module
 
-## No Milestone
-
-- TODO: 4
-- IN_PROGRESS: 0
-- BLOCKED: 0
-- DONE: 109
-
-### TODO
-- #124 Current Sprint Focus 2026-W41
-- #123 Agent Quality Review 2026-W41
-- #121 Current Sprint Focus 2026-W40
-- #120 Agent Quality Review 2026-W40
-
 ### IN_PROGRESS
 - _No issues_
 
@@ -98,64 +76,16 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
-- #119 Current Sprint Focus 2026-W39
-- #118 Agent Quality Review 2026-W39
-- #117 Current Sprint Focus 2026-W38
-- #116 Agent Quality Review 2026-W38
-- #115 Current Sprint Focus 2026-W37
-- #114 Agent Quality Review 2026-W37
-- #113 Current Sprint Focus 2026-W36
-- #112 Agent Quality Review 2026-W36
-- #111 Current Sprint Focus 2026-W35
-- #110 Agent Quality Review 2026-W35
-- #109 Current Sprint Focus 2026-W34
-- #108 Agent Quality Review 2026-W34
-- #107 Current Sprint Focus 2026-W33
-- #106 Agent Quality Review 2026-W33
-- #105 Current Sprint Focus 2026-W32
-- #104 Agent Quality Review 2026-W32
-- #103 Current Sprint Focus 2026-W31
-- #102 Agent Quality Review 2026-W31
-- #101 Current Sprint Focus 2026-W30
-- #100 Agent Quality Review 2026-W30
-- #99 Current Sprint Focus 2026-W29
-- #98 Agent Quality Review 2026-W29
-- #97 Current Sprint Focus 2026-W28
-- #96 Agent Quality Review 2026-W28
-- #95 Current Sprint Focus 2026-W27
-- #94 Agent Quality Review 2026-W27
-- #93 Current Sprint Focus 2026-W26
-- #92 Agent Quality Review 2026-W26
-- #91 Current Sprint Focus 2026-W25
-- #90 Agent Quality Review 2026-W25
-- #89 Current Sprint Focus 2026-W24
-- #88 Agent Quality Review 2026-W24
-- #87 Current Sprint Focus 2026-W23
-- #86 Agent Quality Review 2026-W23
-- #85 Current Sprint Focus 2026-W22
-- #84 Agent Quality Review 2026-W22
-- #83 Current Sprint Focus 2026-W21
-- #82 Agent Quality Review 2026-W21
-- #81 Current Sprint Focus 2026-W20
-- #80 Agent Quality Review 2026-W20
-- #79 Current Sprint Focus 2026-W19
-- #78 Agent Quality Review 2026-W19
-- #77 Current Sprint Focus 2026-W18
-- #76 Agent Quality Review 2026-W18
-- #75 Current Sprint Focus 2026-W17
-- #74 Agent Quality Review 2026-W17
-- #73 Current Sprint Focus 2026-W16
-- #72 Agent Quality Review 2026-W16
-- #71 Current Sprint Focus 2026-W15
-- #70 Agent Quality Review 2026-W15
-- #69 Current Sprint Focus 2026-W14
-- #68 Agent Quality Review 2026-W14
-- #67 Current Sprint Focus 2026-W13
-- #66 Agent Quality Review 2026-W13
-- #65 Current Sprint Focus 2026-W12
-- #64 Agent Quality Review 2026-W12
-- #63 Current Sprint Focus 2026-W11
-- #62 Agent Quality Review 2026-W11
+- _No issues_
+
+## No Milestone
+
+- TODO: 51
+- IN_PROGRESS: 0
+- BLOCKED: 0
+- DONE: 0
+
+### TODO
 - #60 Current Sprint Focus 2026-W10
 - #59 Agent Quality Review 2026-W10
 - #58 Current Sprint Focus 2026-W09
@@ -207,3 +137,12 @@ Status labels used by this board:
 - #12 ingest: implement WhatsApp/Telegram export parser with schema validation
 - #2 roadmap: publish auditable public backlog dashboard
 - #1 roadmap: add feedback collector API endpoint
+
+### IN_PROGRESS
+- _No issues_
+
+### BLOCKED
+- _No issues_
+
+### DONE
+- _No issues_
