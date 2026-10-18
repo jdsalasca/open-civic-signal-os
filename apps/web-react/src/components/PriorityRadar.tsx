@@ -74,7 +74,7 @@ export function PriorityRadar({ urgency, impact, votes, people }: PriorityRadarP
         grid: { color: palette.grid },
         pointLabels: {
           color: palette.textMuted,
-          font: { size: 10, weight: 700, family: "Plus Jakarta Sans" },
+          font: { size: 10, weight: 700, family: "Nunito Sans" },
         },
         ticks: { display: false, stepSize: 20 },
         suggestedMin: 0,
