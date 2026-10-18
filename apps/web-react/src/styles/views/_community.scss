@@ -1,0 +1,56 @@
+// ---------------------------------------------------------------------------
+// Community-area patterns shared by the Community*.tsx views and the hub.
+// ---------------------------------------------------------------------------
+
+// A compact metadata line (author + date) used inside community cards. Five
+// views referenced this class before it existed, so it rendered as unstyled
+// text; the definition below is what makes those rows read as metadata.
+.u-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.9rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.u-meta-row > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+// Merge review: the suggestion list reads better with a measure narrower than
+// the 1300px app shell, so the shell is centred and capped.
+.merge-review-shell {
+  max-width: 76rem;
+  margin-inline: auto;
+  min-width: 0;
+}
+
+// Long-form community content (blog bodies, thread messages, governance
+// documents) uses the shared reading measure from _shared.scss.
+.community-prose {
+  max-width: 44rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+// A compact link/row that must never force the page wider than the viewport at
+// 360px: the trailing action drops below the field instead of overflowing.
+.community-inline-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.community-inline-field > .community-inline-field-control {
+  flex: 1 1 12rem;
+  min-width: 0;
+}

@@ -1,0 +1,8 @@
+// ---------------------------------------------------------------------------
+// Help center view: a centred measure so guides stay readable at every width.
+// ---------------------------------------------------------------------------
+.help-center-shell {
+  max-width: 76rem;
+  margin-inline: auto;
+  min-width: 0;
+}
