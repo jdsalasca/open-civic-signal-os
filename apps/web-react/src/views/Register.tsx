@@ -138,8 +138,8 @@ export function Register() {
 
   return (
     <Layout authMode>
-      <div className="min-h-screen flex justify-content-center align-items-center p-4">
-        <CivicCard className="w-full max-w-30rem animate-fade-up" padding="lg">
+      <main className="min-h-screen flex justify-content-center align-items-center p-4">
+        <CivicCard className="auth-panel auth-panel-wide animate-fade-up" padding="lg">
           <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface-soft" data-testid="onboarding-progress-register">
             <div className="u-eyebrow">{t('auth.onboarding_step_register_title')}</div>
             <div className="text-xs text-muted mt-2">{t('auth.onboarding_step_register_next')}</div>
@@ -193,6 +193,10 @@ export function Register() {
                   />
                 )}
               />
+              <small className="auth-hint" data-testid="register-password-hint">
+                <i className="pi pi-info-circle" aria-hidden="true"></i>
+                {t('auth.password_hint')}
+              </small>
             </CivicField>
 
             <CivicField label={t('auth.confirm_password')} error={errors.confirmPassword?.message}>
@@ -215,6 +219,10 @@ export function Register() {
                   />
                 )}
               />
+              <small className="auth-hint">
+                <i className="pi pi-info-circle" aria-hidden="true"></i>
+                {t('auth.confirm_password_hint')}
+              </small>
             </CivicField>
 
             <div className="mb-4 p-4 border-round-xl border-1 border-subtle bg-surface-soft" data-testid="register-city-section">
@@ -260,6 +268,9 @@ export function Register() {
                       />
                     )}
                   />
+                  <p className="auth-city-help" data-testid="register-city-help">
+                    {t('auth.city_select_help')}
+                  </p>
                 </CivicField>
               ) : (
                 <div className="flex flex-column">
@@ -338,7 +349,7 @@ export function Register() {
             </p>
           </form>
         </CivicCard>
-      </div>
+      </main>
     </Layout>
   );
 }

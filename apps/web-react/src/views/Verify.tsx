@@ -58,8 +58,9 @@ export function Verify() {
       await apiClient.post("auth/verify", { username, code: data.code });
       toast.success(t('auth.verified_success'));
       navigate("/login");
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Invalid verification code.");
+    } catch (err) {
+      const apiErr = err as { friendlyMessage?: string };
+      toast.error(apiErr.friendlyMessage || "Invalid verification code.");
     }
   };
 
@@ -91,15 +92,16 @@ export function Verify() {
       } else {
         toast.success(t('auth.code_resent'));
       }
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Failed to resend code.");
+    } catch (err) {
+      const apiErr = err as { friendlyMessage?: string };
+      toast.error(apiErr.friendlyMessage || "Failed to resend code.");
     }
   };
 
   return (
     <Layout authMode>
-      <div className="min-h-screen flex justify-content-center align-items-center p-4">
-        <CivicCard className="w-full max-w-28rem animate-fade-up text-center" padding="lg">
+      <main className="min-h-screen flex justify-content-center align-items-center p-4">
+        <CivicCard className="auth-panel animate-fade-up text-center" padding="lg">
           <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface-soft text-left" data-testid="onboarding-progress-verify">
             <div className="u-eyebrow">{t('auth.onboarding_step_verify_title')}</div>
             <div className="text-xs text-muted mt-2">{t('auth.onboarding_step_verify_next')}</div>
@@ -166,7 +168,7 @@ export function Verify() {
             </div>
           </form>
         </CivicCard>
-      </div>
+      </main>
     </Layout>
   );
 }
