@@ -10,7 +10,7 @@ export function Unauthorized() {
 
   return (
     <Layout authMode>
-      <main className="min-h-screen flex justify-content-center align-items-center p-4">
+      <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="w-full max-w-30rem text-center animate-fade-up" padding="lg" data-testid="unauthorized-card">
           <img
             className="state-illustration state-illustration-wide"
@@ -49,7 +49,7 @@ export function Unauthorized() {
             />
           </div>
         </CivicCard>
-      </main>
+      </div>
     </Layout>
   );
 }

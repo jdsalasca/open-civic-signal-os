@@ -91,7 +91,7 @@ export function Landing() {
 
   return (
     <Layout authMode>
-      <main className="landing-shell" data-testid="landing-page">
+      <div className="landing-shell" data-testid="landing-page">
         <div className="flex justify-content-between align-items-center gap-3 flex-wrap mb-5">
           <div className="flex align-items-center gap-3">
             <div className="p-2 bg-surface-soft border-round-2xl border-1 border-subtle">
@@ -290,7 +290,7 @@ export function Landing() {
             ))}
           </ul>
         </section>
-      </main>
+      </div>
     </Layout>
   );
 }

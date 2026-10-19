@@ -100,7 +100,7 @@ export function Verify() {
 
   return (
     <Layout authMode>
-      <main className="min-h-screen flex justify-content-center align-items-center p-4">
+      <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="auth-panel animate-fade-up text-center" padding="lg">
           <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface-soft text-left" data-testid="onboarding-progress-verify">
             <div className="u-eyebrow">{t('auth.onboarding_step_verify_title')}</div>
@@ -168,7 +168,7 @@ export function Verify() {
             </div>
           </form>
         </CivicCard>
-      </main>
+      </div>
     </Layout>
   );
 }

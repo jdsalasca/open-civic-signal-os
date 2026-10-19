@@ -44,7 +44,7 @@ export function Login() {
 
   return (
     <Layout authMode>
-      <main className="min-h-screen flex justify-content-center align-items-center p-4">
+      <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="auth-panel animate-fade-up" padding="lg" data-testid="login-card">
           <div className="text-center mb-8">
             <div className="inline-flex align-items-center justify-content-center p-3 bg-surface-soft border-round-2xl mb-4 border-1 border-subtle">
@@ -135,7 +135,7 @@ export function Login() {
             </Link>
           </div>
         </CivicCard>
-      </main>
+      </div>
     </Layout>
   );
 }

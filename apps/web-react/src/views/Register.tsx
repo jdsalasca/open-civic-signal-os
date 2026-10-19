@@ -138,7 +138,7 @@ export function Register() {
 
   return (
     <Layout authMode>
-      <main className="min-h-screen flex justify-content-center align-items-center p-4">
+      <div className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="auth-panel auth-panel-wide animate-fade-up" padding="lg">
           <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface-soft" data-testid="onboarding-progress-register">
             <div className="u-eyebrow">{t('auth.onboarding_step_register_title')}</div>
@@ -349,7 +349,7 @@ export function Register() {
             </p>
           </form>
         </CivicCard>
-      </main>
+      </div>
     </Layout>
   );
 }
