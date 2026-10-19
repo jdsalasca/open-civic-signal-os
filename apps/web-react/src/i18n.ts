@@ -330,6 +330,25 @@ const resources = {
         "quickstart_contributions": "My Contributions",
         "track_contributions": "Track my contributions",
         "community_path_empty": "No active community path yet.",
+        "attention_title": "Needs attention first",
+        "attention_desc": "The strongest open cases from the published ranking, before the full feed.",
+        "attention_empty_title": "Nothing critical right now",
+        "attention_empty_desc": "No open case crosses the critical threshold. New reports will appear here.",
+        "attention_open_feed": "Open the full feed",
+        "distribution_desc": "Each bar is one sector. The pattern repeats the colour, so the reading survives greyscale.",
+        "distribution_aria": "Bar chart of visible signals per sector.",
+        "alerts_title": "Operational alerts",
+        "alerts_empty": "No system alerts recorded.",
+        "alerts_top_issues": "Top unresolved issues",
+        "alerts_target": "Target: {{group}}",
+        "alerts_channels": {
+          "EMAIL": "Email",
+          "EMAIL_FAILURE": "Email failure"
+        },
+        "alerts_groups": {
+          "ALL_STAFF": "All staff",
+          "AUTH_PIPELINE": "Auth pipeline"
+        },
         "community_hub": {
           "title": "Your place in the community",
           "desc": "You are participating in {{community}} as {{role}}. Keep this space healthy, visible, and easy to navigate for everyone else.",
@@ -404,7 +423,13 @@ const resources = {
         "total": "Total Signals",
         "new": "Newly Reported",
         "analysis": "Under Analysis",
-        "avg": "Priority Avg"
+        "avg": "Priority Avg",
+        "total_support": "Visible under the current filter.",
+        "new_support": "Reported and waiting for first review.",
+        "analysis_support": "Owned and being worked on.",
+        "avg_support": "Mean priority score in this view.",
+        "trend_label": "Last 7 days",
+        "region_label": "Civic metrics overview"
       },
       "report": {
         "title": "Report Community Signal",
@@ -742,6 +767,11 @@ const resources = {
         "filter_resolved": "Resolved",
         "view_details": "View Details",
         "no_results": "No results match your filters",
+        "no_results_title": "Nothing matches here yet",
+        "no_results_desc": "Try a different word, or clear the search to see every signal in this view.",
+        "showing_count": "Showing {{count}} of {{total}}",
+        "priority_scale_label": "Priority scale",
+        "priority_scale_help": "Five marks from low to critical, anchored to the platform's critical threshold.",
         "protocol_id": "Protocol ID",
         "context_header": "Intelligence Context",
         "sector_header": "Sector",
@@ -828,12 +858,28 @@ const resources = {
           "communityVotes": "Community support"
         }
       },
+      "signal_experience": {
+        "priority_level_low": "Low",
+        "priority_level_moderate": "Moderate",
+        "priority_level_high": "High",
+        "priority_level_urgent": "Urgent",
+        "priority_level_critical": "Critical",
+        "priority_label": "Priority {{level}}, score {{score}}",
+        "priority_legend_low": "Low",
+        "priority_legend_critical": "Critical",
+        "radar_title": "Scoring factor profile",
+        "radar_aria": "Radar chart of the four scoring factors, each shown as a share of its cap.",
+        "radar_cap_share": "{{percent}}% of cap"
+      },
       "my_contributions": {
         "title": "My Contributions",
         "desc": "Track the impact of the issues you've reported.",
         "total_reports": "Total Reports",
         "resolved": "Resolved",
         "community_votes": "Community Votes",
+        "total_support": "Reports you have submitted.",
+        "resolved_support": "Closed with a positive outcome.",
+        "votes_support": "Support from other residents.",
         "empty": "You haven't reported any issues yet.",
         "empty_title": "You have not submitted any reports yet",
         "empty_desc": "Start with one issue you know well. Once you report it, this page becomes your trail for follow-up and outcomes.",
@@ -2501,6 +2547,25 @@ const resources = {
         "quickstart_contributions": "Mis Contribuciones",
         "track_contributions": "Ver mis aportes",
         "community_path_empty": "Aún no hay una ruta comunitaria activa.",
+        "attention_title": "Primero lo que necesita atención",
+        "attention_desc": "Los casos abiertos más fuertes del ranking publicado, antes del listado completo.",
+        "attention_empty_title": "Nada crítico por ahora",
+        "attention_empty_desc": "Ningún caso abierto supera el umbral crítico. Los nuevos reportes aparecerán aquí.",
+        "attention_open_feed": "Abrir el listado completo",
+        "distribution_desc": "Cada barra es un sector. El patrón repite el color para que la lectura sobreviva al blanco y negro.",
+        "distribution_aria": "Gráfico de barras de señales visibles por sector.",
+        "alerts_title": "Alertas operativas",
+        "alerts_empty": "No hay alertas del sistema registradas.",
+        "alerts_top_issues": "Problemas sin resolver principales",
+        "alerts_target": "Destino: {{group}}",
+        "alerts_channels": {
+          "EMAIL": "Correo",
+          "EMAIL_FAILURE": "Fallo de correo"
+        },
+        "alerts_groups": {
+          "ALL_STAFF": "Todo el equipo",
+          "AUTH_PIPELINE": "Flujo de autenticación"
+        },
         "community_hub": {
           "title": "Su lugar en la comunidad",
           "desc": "Usted participa en {{community}} como {{role}}. Mantenga este espacio saludable, visible y fácil de recorrer para los demás.",
@@ -2575,7 +2640,13 @@ const resources = {
         "total": "Total de Señales",
         "new": "Nuevos Reportes",
         "analysis": "Bajo Análisis",
-        "avg": "Promedio Prioridad"
+        "avg": "Promedio Prioridad",
+        "total_support": "Visibles bajo el filtro actual.",
+        "new_support": "Reportadas y esperando la primera revisión.",
+        "analysis_support": "Asignadas y en trabajo activo.",
+        "avg_support": "Puntaje de prioridad promedio en esta vista.",
+        "trend_label": "Últimos 7 días",
+        "region_label": "Resumen de métricas cívicas"
       },
       "report": {
         "title": "Reportar Señal Comunitaria",
@@ -2913,6 +2984,11 @@ const resources = {
         "filter_resolved": "Resueltas",
         "view_details": "Ver Detalles",
         "no_results": "No hay resultados para esos filtros",
+        "no_results_title": "Aquí aún no hay coincidencias",
+        "no_results_desc": "Pruebe con otra palabra o borre la búsqueda para ver todas las señales de esta vista.",
+        "showing_count": "Mostrando {{count}} de {{total}}",
+        "priority_scale_label": "Escala de prioridad",
+        "priority_scale_help": "Cinco marcas de baja a crítica, ancladas al umbral crítico de la plataforma.",
         "protocol_id": "ID de protocolo",
         "context_header": "Contexto de Inteligencia",
         "sector_header": "Sector",
@@ -2999,12 +3075,28 @@ const resources = {
           "communityVotes": "Apoyo comunitario"
         }
       },
+      "signal_experience": {
+        "priority_level_low": "Baja",
+        "priority_level_moderate": "Moderada",
+        "priority_level_high": "Alta",
+        "priority_level_urgent": "Urgente",
+        "priority_level_critical": "Crítica",
+        "priority_label": "Prioridad {{level}}, puntaje {{score}}",
+        "priority_legend_low": "Baja",
+        "priority_legend_critical": "Crítica",
+        "radar_title": "Perfil de factores del puntaje",
+        "radar_aria": "Gráfico de radar de los cuatro factores del puntaje, cada uno como porcentaje de su tope.",
+        "radar_cap_share": "{{percent}}% del tope"
+      },
       "my_contributions": {
         "title": "Mis Contribuciones",
         "desc": "Siga el impacto de los problemas que ha reportado.",
         "total_reports": "Reportes Totales",
         "resolved": "Resueltos",
         "community_votes": "Votos Comunitarios",
+        "total_support": "Reportes que ha enviado.",
+        "resolved_support": "Cerrados con resultado positivo.",
+        "votes_support": "Apoyo de otras personas de la comunidad.",
         "empty": "Aún no ha reportado ningún problema.",
         "empty_title": "Todavía no ha enviado reportes",
         "empty_desc": "Empiece con un problema que conozca bien. Cuando lo reporte, esta página se vuelve su rastro para seguimiento y resultados.",

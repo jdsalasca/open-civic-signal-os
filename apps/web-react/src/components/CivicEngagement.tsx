@@ -127,12 +127,13 @@ export function CivicEngagement({
   return (
     <div className="flex flex-column gap-6 mt-8">
       {/* REACTION BAR */}
-      <div className="flex flex-wrap align-items-center gap-2 p-3 bg-surface-soft border-round-2xl border-1 border-surface-soft">
+      <div className="signal-surface-soft flex flex-wrap align-items-center gap-2">
         <span className="text-xs font-black uppercase text-muted px-2 mr-2">{t("engagement.reactions")}</span>
         {REACTION_TYPES.map(emoji => (
           <button 
             key={emoji}
             type="button"
+            aria-pressed={viewerReaction === emoji}
             onClick={() => handleReact(emoji)}
             disabled={Boolean(reactionPending)}
             className={`flex align-items-center gap-2 px-3 py-2 border-round-xl border-1 transition-all cursor-pointer group ${

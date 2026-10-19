@@ -1,41 +1,53 @@
 import { Signal } from "../types";
 import { useTranslation } from "react-i18next";
 import { CivicCard } from "./ui/CivicCard";
-import { CivicBadge } from "./ui/CivicBadge";
+import { PriorityScale, StatusChip } from "./signalPrimitives";
+import { useSignalStatusLabel } from "../utils/signalStatus";
 import { useNavigate } from "react-router-dom";
 
 type Props = {
   signals: Signal[];
+  criticalThreshold?: number;
 };
 
-export function DigestSidebar({ signals }: Props) {
+/**
+ * A bulletin, not a table: the three strongest items on screen, numbered, each with the same
+ * priority scale and lifecycle chip used everywhere else. The ordering is the backend's; this
+ * component never recomputes the rank.
+ */
+export function DigestSidebar({ signals, criticalThreshold = 0 }: Props) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const statusLabel = useSignalStatusLabel();
   const top3 = [...signals]
     .sort((a, b) => b.priorityScore - a.priorityScore)
     .slice(0, 3);
 
   return (
-    <CivicCard title={t('dashboard.digest_title')} variant="brand">
-      <div className="flex flex-column gap-5">
+    <CivicCard title={t("dashboard.digest_title")} variant="brand" data-testid="dashboard-digest">
+      <div className="flex flex-column gap-3">
         {top3.length === 0 ? (
           <div className="text-center py-4 text-muted italic text-sm">
-            {t('dashboard.digest_empty')}
+            {t("dashboard.digest_empty")}
           </div>
         ) : (
           top3.map((s, i) => (
-            <div key={s.id} className="u-surface-note flex gap-4 align-items-start group cursor-pointer hover:bg-surface-soft transition-colors" onClick={() => navigate(`/signal/${s.id}`)}>
-              <span className="text-3xl font-black text-brand-primary opacity-20 group-hover:opacity-100 transition-opacity flex-shrink-0">0{i + 1}</span>
-              <div className="flex flex-column gap-2 overflow-hidden flex-1 min-w-0">
-                <h4 className="u-list-item-title m-0 group-hover:text-brand-primary transition-colors">
-                  {s.title}
-                </h4>
-                <div className="u-card-meta-row">
-                  <span className="text-xs text-brand-primary font-black">{s.priorityScore.toFixed(0)} {t('signals.score_short')}</span>
-                  <CivicBadge label={t(`categories.${s.category}`)} type="category" />
-                </div>
-              </div>
-            </div>
+            <button
+              key={s.id}
+              type="button"
+              className="signal-digest-item text-left border-none w-full"
+              onClick={() => navigate(`/signal/${s.id}`)}
+              data-testid={`dashboard-digest-item-${i + 1}`}
+            >
+              <span className="signal-digest-item__rank" aria-hidden="true">{i + 1}</span>
+              <span className="signal-digest-item__copy">
+                <span className="signal-digest-item__title">{s.title}</span>
+                <span className="signal-digest-item__meta">
+                  <PriorityScale score={s.priorityScore} threshold={criticalThreshold} compact testId={`dashboard-digest-priority-${i + 1}`} />
+                  <StatusChip status={s.status} label={statusLabel(s.status)} />
+                </span>
+              </span>
+            </button>
           ))
         )}
       </div>

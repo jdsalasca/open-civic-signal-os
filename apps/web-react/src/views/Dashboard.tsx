@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 import { Signal, Notification, SignalMeta, SignalAging } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
 import { SignalTable } from "../components/SignalTable";
+import { PriorityScale, SignalEmpty, StatusChip } from "../components/signalPrimitives";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
 import { CategoryChart } from "../components/CategoryChart";
@@ -23,6 +24,7 @@ import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useSettingsStore, PAGE_SIZE_BY_DATA_MODE } from "../store/useSettingsStore";
 import { toRoleLabel } from "../constants/roleLabels";
+import { useSignalStatusLabel } from "../utils/signalStatus";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -196,6 +198,19 @@ export function Dashboard() {
   };
 
   const displayedSignals = signals;
+  const statusLabel = useSignalStatusLabel();
+
+  // "Needs attention" reads the head of the ranking the backend already published: open cases,
+  // strongest first. It never re-sorts by a client rule, and the page keeps its own ordering.
+  const attentionSignals = useMemo(
+    () =>
+      displayedSignals
+        .filter((signal) => signal.status === "NEW" || signal.status === "IN_PROGRESS")
+        .slice()
+        .sort((a, b) => (b.priorityScore ?? 0) - (a.priorityScore ?? 0))
+        .slice(0, 3),
+    [displayedSignals]
+  );
 
   // With the filter pushed into the query, the visible count is the backend total. Counting
   // critical rows client-side would report "how many of this page" instead of "how many exist".
@@ -511,6 +526,78 @@ export function Dashboard() {
           </CivicCard>
         </section>
 
+        {/*
+          Attention first. Before the community surfaces and the numbers, the dashboard answers the
+          only question a visitor has on arrival: what here cannot wait. The three cards are the head
+          of the backend's own ranking, with the same priority scale and lifecycle chip used across
+          the product.
+        */}
+        <section className="mb-6" data-testid="dashboard-attention">
+          <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
+            <div className="flex flex-column gap-1 min-w-0">
+              <span className="signal-kicker">
+                <i className="pi pi-bolt" aria-hidden="true"></i>
+                {t("dashboard.attention_title")}
+              </span>
+              <p className="signal-copy text-sm m-0">{t("dashboard.attention_desc")}</p>
+            </div>
+            <CivicButton
+              type="button"
+              variant="ghost"
+              size="small"
+              label={t("dashboard.attention_open_feed")}
+              icon="pi pi-arrow-down"
+              onClick={() =>
+                document
+                  .querySelector('[data-testid="signals-datatable"]')
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+              data-testid="dashboard-attention-open-feed"
+            />
+          </div>
+
+          {loading ? (
+            <div className="signal-skeleton" aria-hidden="true">
+              {[0, 1, 2].map((row) => (
+                <div key={row} className="signal-skeleton__row" style={{ height: "4.75rem" }} />
+              ))}
+            </div>
+          ) : attentionSignals.length === 0 ? (
+            <SignalEmpty
+              icon="pi pi-check-circle"
+              title={t("dashboard.attention_empty_title")}
+              description={t("dashboard.attention_empty_desc")}
+              testId="dashboard-attention-empty"
+            />
+          ) : (
+            <div className="signal-attention" data-testid="dashboard-attention-list">
+              {attentionSignals.map((signal, index) => (
+                <button
+                  key={signal.id}
+                  type="button"
+                  className="signal-attention-card"
+                  onClick={() => navigate(`/signal/${signal.id}`)}
+                  data-testid={`dashboard-attention-card-${index + 1}`}
+                >
+                  <span className="signal-attention-card__copy">
+                    <span className="signal-attention-card__title">{signal.title}</span>
+                    <span className="signal-attention-card__meta">
+                      <PriorityScale
+                        score={signal.priorityScore}
+                        threshold={criticalThreshold}
+                        compact
+                        testId={`dashboard-attention-priority-${index + 1}`}
+                      />
+                      <StatusChip status={signal.status} label={statusLabel(signal.status)} />
+                    </span>
+                  </span>
+                  <i className="pi pi-arrow-right signal-attention-card__arrow" aria-hidden="true"></i>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
         <CivicCard className="mb-6" data-testid="dashboard-community-focus">
           <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
             <div className="flex flex-column gap-1">
@@ -686,6 +773,7 @@ export function Dashboard() {
                   rows={lazyState.rows}
                   first={lazyState.first}
                   onPage={onPage}
+                  criticalThreshold={criticalThreshold}
                 />
               </CivicCard>
             )}
@@ -715,7 +803,7 @@ export function Dashboard() {
                       </CivicActionBar>
                     </CivicCard>
                   )}
-                  <DigestSidebar signals={displayedSignals} />
+                  <DigestSidebar signals={displayedSignals} criticalThreshold={criticalThreshold} />
                   {isStaff && aging && (
                     <CivicCard
                       title={t("dashboard.aging_title")}
