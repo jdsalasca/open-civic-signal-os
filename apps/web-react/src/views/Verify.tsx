@@ -58,8 +58,9 @@ export function Verify() {
       await apiClient.post("auth/verify", { username, code: data.code });
       toast.success(t('auth.verified_success'));
       navigate("/login");
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Invalid verification code.");
+    } catch (err) {
+      const apiErr = err as { friendlyMessage?: string };
+      toast.error(apiErr.friendlyMessage || "Invalid verification code.");
     }
   };
 
@@ -91,15 +92,20 @@ export function Verify() {
       } else {
         toast.success(t('auth.code_resent'));
       }
-    } catch (err: any) {
-      toast.error(err.friendlyMessage || "Failed to resend code.");
+    } catch (err) {
+      const apiErr = err as { friendlyMessage?: string };
+      toast.error(apiErr.friendlyMessage || "Failed to resend code.");
     }
   };
 
   return (
     <Layout authMode>
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
-        <CivicCard className="w-full max-w-28rem animate-fade-up text-center" padding="lg">
+        <CivicCard className="auth-panel animate-fade-up text-center" padding="lg">
+          <div className="mb-4 p-3 border-round-xl border-1 border-subtle bg-surface-soft text-left" data-testid="onboarding-progress-verify">
+            <div className="u-eyebrow">{t('auth.onboarding_step_verify_title')}</div>
+            <div className="text-xs text-muted mt-2">{t('auth.onboarding_step_verify_next')}</div>
+          </div>
           <div className="mb-8">
             <div className="inline-flex align-items-center justify-content-center p-3 bg-brand-primary-alpha-10 border-round-2xl mb-4 border-1 border-brand-primary-alpha-20">
               <i className="pi pi-shield text-4xl text-brand-primary"></i>
@@ -109,7 +115,7 @@ export function Verify() {
           </div>
 
           {lastResendFailed && (
-            <div className="mb-5 p-3 border-round-xl border-1 border-white-alpha-20 bg-white-alpha-5 text-sm text-left line-height-3">
+            <div className="mb-5 p-3 border-round-xl border-1 border-surface-soft bg-surface-soft text-sm text-left line-height-3">
               <div className="font-bold mb-2 text-main">
                 <i className="pi pi-exclamation-triangle mr-2 text-status-progress" />
                 {t('auth.email_delivery_warning_title')}
@@ -131,7 +137,7 @@ export function Verify() {
                     {...field} 
                     id="verify-code" 
                     placeholder="000000" 
-                    className="text-center text-4xl font-black tracking-widest py-3 w-full"
+                    className="text-center text-4xl font-black tracking-tight py-3 w-full"
                     autoFocus
                     maxLength={6}
                   />
@@ -148,8 +154,8 @@ export function Verify() {
               glow
             />
             
-            <div className="mt-8 pt-6 border-top-1 border-white-alpha-10 flex flex-column gap-3 text-center">
-              <p className="text-muted text-sm m-0">Didn't receive the code?</p>
+            <div className="mt-8 pt-6 border-top-1 border-surface-soft flex flex-column gap-3 text-center">
+              <p className="text-muted text-sm m-0">{t('auth.resend_prompt')}</p>
               <CivicButton 
                 type="button" 
                 label={resendLabel}

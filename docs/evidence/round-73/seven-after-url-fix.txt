@@ -1,0 +1,215 @@
+
+Running 7 tests using 4 workers
+
+[1A[2K[1/7] [chromium] ÔÇ║ src\tests\community-decisions.spec.ts:11:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context
+[1A[2K[2/7] [chromium] ÔÇ║ src\tests\community-governance.spec.ts:11:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents
+[1A[2K[3/7] [chromium] ÔÇ║ src\tests\community-open-data.spec.ts:14:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access
+[1A[2K[4/7] [chromium] ÔÇ║ src\tests\community-official-announcements.spec.ts:9:3 ÔÇ║ Community official announcements channel ÔÇ║ shows pinned announcements separately and supports archive search
+[1A[2K  1) [chromium] ÔÇ║ src\tests\community-decisions.spec.ts:11:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-decision-detail-card')
+    Expected substring: [32m"Approve the safer crossing rollout"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-decision-detail-card')[22m
+
+
+      210 |     await page.goto("/communities/decisions");
+      211 |
+    > 212 |     await expect(page.getByTestId("community-decision-detail-card")).toContainText("Approve the safer crossing rollout");
+          |                                                                      ^
+      213 |     await expect(page.getByTestId("community-decision-related-card")).toContainText("Assembly act approving the crossing rollout");
+      214 |
+      215 |     await page.getByTestId("decision-title-input").fill("Approve Saturday volunteer deployment");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-decisions.spec.ts:212:70
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-decisions-Commun-0c1da-nance-and-execution-context-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-decisions-Commun-0c1da-nance-and-execution-context-chromium\error-context.md
+
+
+[1A[2K[5/7] [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note
+[1A[2K  2) [chromium] ÔÇ║ src\tests\community-official-announcements.spec.ts:9:3 ÔÇ║ Community official announcements channel ÔÇ║ shows pinned announcements separately and supports archive search 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('pinned-announcements-section')
+    Expected substring: [32m"Water interruption notice"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('pinned-announcements-section')[22m
+
+
+      138 |     await page.goto('http://127.0.0.1:5173/communities/blog');
+      139 |
+    > 140 |     await expect(page.getByTestId('pinned-announcements-section')).toContainText('Water interruption notice');
+          |                                                                    ^
+      141 |     await expect(page.getByTestId('official-timeline-section')).toContainText('Road work update');
+      142 |     await expect(page.getByTestId('official-archive-section')).toContainText('Archived transit reroute');
+      143 |
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-official-announcements.spec.ts:140:68
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-official-announc-d2ff4-and-supports-archive-search-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-official-announc-d2ff4-and-supports-archive-search-chromium\error-context.md
+
+
+[1A[2K  3) [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note 
+
+    Error: locator.click: Error: strict mode violation: getByText('Safer school crossing', { exact: true }) resolved to 2 elements:
+        1) <span>Safer school crossing</span> aka getByTestId('community-project-board-detail-card').getByText('Safer school crossing')
+        2) <span data-pc-section="itemlabel" class="p-dropdown-item-label">Safer school crossing</span> aka getByLabel('Option List').getByText('Safer school crossing')
+
+    Call log:
+    [2m  - waiting for getByText('Safer school crossing', { exact: true })[22m
+
+
+      274 |
+      275 |     await page.getByTestId("project-board-linked-proposal-select").click();
+    > 276 |     await page.getByText("Safer school crossing", { exact: true }).click();
+          |                                                                    ^
+      277 |     await page.getByTestId("project-board-title-input").fill("Crossing volunteers delivery board");
+      278 |     await page
+      279 |       .getByTestId("project-board-summary-input")
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-projects.spec.ts:276:68
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-projects-Communi-195a6-s-it-and-leaves-a-task-note-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-projects-Communi-195a6-s-it-and-leaves-a-task-note-chromium\error-context.md
+
+
+[1A[2K[6/7] [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation
+[1A[2K[7/7] [chromium] ÔÇ║ src\tests\community-trust-metrics.spec.ts:7:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K  4) [chromium] ÔÇ║ src\tests\community-governance.spec.ts:11:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents 
+
+    Error: locator.click: Error: strict mode violation: getByText('Agreement', { exact: true }) resolved to 6 elements:
+        1) <div class="u-eyebrow">Agreement</div> aka getByTestId('governance-document-row-55555555-5555-5555-5555-555555555555')
+        2) <div class="u-eyebrow">Agreement</div> aka getByTestId('governance-document-row-22222222-2222-2222-2222-222222222222')
+        3) <option selected value="AGREEMENT" data-pc-section="option">Agreement</option> aka getByTestId('governance-document-type-select').getByRole('combobox')
+        4) <span tabindex="-1" data-pc-section="input" class="p-dropdown-label p-inputtext">Agreement</span> aka getByTestId('governance-document-type-select').locator('span').filter({ hasText: 'Agreement' })
+        5) <div class="civic-stat-value">Agreement</div> aka getByTestId('governance-detail-card').getByText('Agreement', { exact: true })
+        6) <span data-pc-section="itemlabel" class="p-dropdown-item-label">Agreement</span> aka getByLabel('Agreement').getByText('Agreement', { exact: true })
+
+    Call log:
+    [2m  - waiting for getByText('Agreement', { exact: true })[22m
+
+
+      261 |     await page.getByTestId("governance-query-input").fill("coexistence");
+      262 |     await page.getByTestId("governance-type-filter").click();
+    > 263 |     await page.getByText("Agreement", { exact: true }).click();
+          |                                                        ^
+      264 |     await page.getByTestId("governance-apply-filters").click();
+      265 |
+      266 |     await expect(page.getByTestId("governance-list-card")).toContainText("Community coexistence framework 2026");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-governance.spec.ts:263:56
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-governance-Commu-c4e6d-rsions-governance-documents-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-governance-Commu-c4e6d-rsions-governance-documents-chromium\error-context.md
+
+
+[1A[2K  5) [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation 
+
+    Error: locator.click: Error: strict mode violation: getByText('Unsafe pedestrian crossing', { exact: true }) resolved to 2 elements:
+        1) <button type="button" data-testid="community-proposal-related-signal-link" class="border-none bg-transparent p-0 text-left text-brand-primary font-bold cursor-pointer">Unsafe pedestrian crossing</button> aka getByTestId('community-proposal-related-signal-link')
+        2) <span data-pc-section="itemlabel" class="p-dropdown-item-label">Unsafe pedestrian crossing</span> aka getByLabel('Option List').getByText('Unsafe pedestrian crossing')
+
+    Call log:
+    [2m  - waiting for getByText('Unsafe pedestrian crossing', { exact: true })[22m
+
+
+      393 |     await page.getByTestId("proposal-link-input-0").fill("https://example.com/supporting-reference");
+      394 |     await page.getByTestId("proposal-related-signal-select").click();
+    > 395 |     await page.getByText("Unsafe pedestrian crossing", { exact: true }).click();
+          |                                                                         ^
+      396 |     await page.getByTestId("proposal-submit-button").click();
+      397 |
+      398 |     await expect.poll(() => savedPayload).not.toBeNull();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-proposals.spec.ts:395:73
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-proposals-Commun-bbcb7-ons-with-typed-deliberation-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-proposals-Commun-bbcb7-ons-with-typed-deliberation-chromium\error-context.md
+
+
+[1A[2K  6) [chromium] ÔÇ║ src\tests\community-open-data.spec.ts:14:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('community-open-data-token-scope-EXPORT_METRICS')[22m
+
+
+      211 |     await page.getByTestId("community-open-data-token-label").fill("Transparency portal");
+      212 |     await page.getByTestId("community-open-data-rate-limit").fill("24");
+    > 213 |     await page.getByTestId("community-open-data-token-scope-EXPORT_METRICS").click();
+          |                                                                              ^
+      214 |     await page.getByTestId("community-open-data-create-token-button").click();
+      215 |
+      216 |     await expect.poll(() => createPayload).not.toBeNull();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-open-data.spec.ts:213:78
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-open-data-Commun-604ec-ts-and-revokes-token-access-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-open-data-Commun-604ec-ts-and-revokes-token-access-chromium\error-context.md
+
+
+[1A[2K  7) [chromium] ÔÇ║ src\tests\community-trust-metrics.spec.ts:7:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: getByTestId('community-trust-overview')
+    Expected substring: [32m"Los Rosales"[39m
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('community-trust-overview')[22m
+
+
+      167 |     await page.goto("/communities/trust");
+      168 |
+    > 169 |     await expect(page.getByTestId("community-trust-overview")).toContainText("Los Rosales");
+          |                                                                ^
+      170 |     await expect(page.getByTestId("community-trust-freshness")).toContainText("20m ago");
+      171 |     await expect(page.getByTestId("community-trust-card-resolution_rate")).toContainText("50%");
+      172 |     await expect(page.getByTestId("community-trust-card-participation_coverage")).toContainText("67%");
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-trust-metrics.spec.ts:169:64
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-trust-metrics-Co-73fcc-ly-for-low-data-communities-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-trust-metrics-Co-73fcc-ly-for-low-data-communities-chromium\error-context.md
+
+
+[1A[2K  7 failed
+    [chromium] ÔÇ║ src\tests\community-decisions.spec.ts:11:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context 
+    [chromium] ÔÇ║ src\tests\community-governance.spec.ts:11:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents 
+    [chromium] ÔÇ║ src\tests\community-official-announcements.spec.ts:9:3 ÔÇ║ Community official announcements channel ÔÇ║ shows pinned announcements separately and supports archive search 
+    [chromium] ÔÇ║ src\tests\community-open-data.spec.ts:14:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access 
+    [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note 
+    [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation 
+    [chromium] ÔÇ║ src\tests\community-trust-metrics.spec.ts:7:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities 

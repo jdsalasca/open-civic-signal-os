@@ -1,4 +1,6 @@
 import { Notification } from "../types";
+import { formatTime } from "../utils/formatStamp";
+import { useTranslation } from "react-i18next";
 import { CivicCard } from "./ui/CivicCard";
 import { CivicBadge } from "./ui/CivicBadge";
 
@@ -7,22 +9,31 @@ type Props = {
 };
 
 export function NotificationSidebar({ notifications }: Props) {
+  const { t } = useTranslation();
+
+  const channelLabel = (channel: string) =>
+    t(`dashboard.alerts_channels.${channel}`, { defaultValue: channel });
+  const groupLabel = (group: string) =>
+    t(`dashboard.alerts_groups.${group}`, { defaultValue: group });
+  const categoryLabel = (category: string) =>
+    t(`categories.${category}`, { defaultValue: category });
+
   const parseAlertMessage = (msg: string) => {
-    if (!msg.startsWith('Top unresolved community issues:')) {
+    if (!msg.startsWith("Top unresolved community issues:")) {
       return (
         <p className="text-sm text-secondary m-0 leading-relaxed font-medium">
           {msg}
         </p>
       );
     }
-    const issuesPart = msg.replace('Top unresolved community issues:', '').trim();
-    const issues = issuesPart.split(',').map(i => i.trim()).filter(Boolean).slice(0, 3);
+    const issuesPart = msg.replace("Top unresolved community issues:", "").trim();
+    const issues = issuesPart.split(",").map((i) => i.trim()).filter(Boolean).slice(0, 3);
 
     return (
       <div className="flex flex-column gap-2 mt-2">
-        <span className="text-xs font-bold text-main uppercase tracking-widest mb-1 flex align-items-center gap-2">
-          <span className="w-1rem h-1rem border-circle bg-status-rejected shadow-1" style={{ animation: 'pulse 2s infinite' }}></span>
-          Top Unresolved Issues
+        <span className="u-eyebrow mb-1 flex align-items-center gap-2">
+          <span className="signal-status-chip__dot" style={{ background: "var(--status-rejected)" }} aria-hidden="true"></span>
+          {t("dashboard.alerts_top_issues")}
         </span>
         <div className="flex flex-column gap-1">
           {issues.map((issue, idx) => {
@@ -30,13 +41,13 @@ export function NotificationSidebar({ notifications }: Props) {
             if (match) {
               const [, category, title] = match;
               return (
-                <div key={idx} className="flex align-items-center gap-2 text-sm p-2 bg-surface border-round-lg border-1 border-subtle">
-                  <span className="text-status-rejected font-mono text-min uppercase tracking-tighter bg-status-rejected-alpha-10 px-1 border-round">[{category}]</span>
-                  <span className="text-main font-medium line-height-3 text-sm">{title}</span>
+                <div key={idx} className="u-surface-note u-surface-note-compact flex align-items-center gap-2 text-sm">
+                  <CivicBadge label={categoryLabel(category)} severity="rejected" />
+                  <span className="u-list-item-copy text-sm">{title}</span>
                 </div>
               );
             }
-            return <div key={idx} className="text-sm text-secondary border-bottom-1 border-subtle pb-2">{issue}</div>;
+            return <div key={idx} className="u-list-item-copy text-sm border-bottom-1 border-subtle pb-2">{issue}</div>;
           })}
         </div>
       </div>
@@ -46,29 +57,30 @@ export function NotificationSidebar({ notifications }: Props) {
   return (
     <CivicCard
       title={(
-        <div className="flex align-items-center gap-2">
-          <i className="pi pi-bolt text-status-rejected"></i>
-          <span>Operational Alerts</span>
-        </div>
+        <span className="flex align-items-center gap-2">
+          <i className="pi pi-bolt text-status-rejected" aria-hidden="true"></i>
+          <span>{t("dashboard.alerts_title")}</span>
+        </span>
       )}
       variant="danger"
+      data-testid="dashboard-alerts"
     >
       <div className="flex flex-column gap-4">
         {notifications.length === 0 ? (
           <div className="text-center py-4 text-muted italic text-sm">
-            No system alerts recorded.
+            {t("dashboard.alerts_empty")}
           </div>
         ) : (
           notifications.slice(0, 3).map((n) => (
-            <div key={n.id} className="p-4 bg-white-alpha-5 border-round-2xl border-1 border-white-alpha-10 hover:bg-white-alpha-10 transition-colors">
-              <div className="flex justify-content-between align-items-center mb-3">
-                <CivicBadge label={n.channel} severity="progress" />
-                <span className="text-xs font-mono text-muted">{new Date(n.sentAt).toLocaleTimeString()}</span>
+            <div key={n.id} className="u-surface-note hover:bg-surface-soft transition-colors" data-testid={`dashboard-alert-${n.id}`}>
+              <div className="u-card-split-header mb-3">
+                <CivicBadge label={channelLabel(n.channel)} severity="progress" />
+                <span className="text-xs text-muted u-meta-value">{formatTime(n.sentAt) ?? "-"}</span>
               </div>
               {parseAlertMessage(n.message)}
-              <div className="mt-3 text-min font-black uppercase tracking-tighter text-muted flex align-items-center gap-2">
-                <i className="pi pi-users text-muted"></i>
-                Target: {n.recipientGroup}
+              <div className="mt-3 u-eyebrow flex align-items-center gap-2">
+                <i className="pi pi-users text-muted" aria-hidden="true"></i>
+                {t("dashboard.alerts_target", { group: groupLabel(n.recipientGroup) })}
               </div>
             </div>
           ))

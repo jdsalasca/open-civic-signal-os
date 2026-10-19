@@ -5,6 +5,17 @@ export type ScoreBreakdown = {
   communityVotes: number;
 };
 
+export type ExplainabilityFactor = {
+  key: "urgency" | "impact" | "affectedPeople" | "communityVotes";
+  contribution: number;
+};
+
+export type ExplainabilitySummary = {
+  version: string;
+  topFactors: ExplainabilityFactor[];
+  summary: string;
+};
+
 export type CivicComment = {
   id: string;
   parentId: string;
@@ -21,6 +32,9 @@ export type Signal = {
   title: string;
   description: string;
   imageUrl?: string;
+  assignedToUsername?: string | null;
+  locationLabel?: string | null;
+  evidenceUrls?: string[];
   category: string;
   status: string;
   priorityScore: number;
@@ -28,6 +42,76 @@ export type Signal = {
   communityVotes: number;
   reactions: Record<string, number>;
   viewerReaction?: string;
+  explainabilitySummary: ExplainabilitySummary;
+  latitude?: number | null;
+  longitude?: number | null;
+  /** ISO timestamp the API already returns; used for coarse trend lines on metric cards. */
+  createdAt?: string | null;
+  sourceChannel?: SignalSourceChannel | null;
+  sourceRef?: string | null;
+  transformationVersion?: string | null;
+};
+
+export type SignalSourceChannel =
+  | "WEB_FORM"
+  | "CSV_IMPORT"
+  | "CHAT_EXPORT"
+  | "PUBLIC_API"
+  | "INSTITUTIONAL_UPDATE";
+
+export type FormulaWeight = {
+  factor: string;
+  input: string;
+  expression: string;
+  cap: number;
+};
+
+export type PrioritizationFormula = {
+  version: string;
+  formula: string;
+  effectiveFrom: string;
+  weights: FormulaWeight[];
+  cappedFactors: string[];
+  changeNote: string;
+};
+
+export type SignalSlaRisk = "ON_TRACK" | "AT_RISK" | "BREACHED";
+
+export type SignalAgingBucket = {
+  bucket: "FRESH_0_7" | "AGING_7_14" | "STALE_14_PLUS" | "OVERDUE";
+  count: number;
+};
+
+export type SignalAgingItem = {
+  id: string;
+  title: string;
+  category: string;
+  status: string;
+  priorityScore: number;
+  ageDays: number;
+  slaTargetDays: number;
+  slaRisk: SignalSlaRisk;
+  daysOverTarget: number;
+  createdAt: string;
+};
+
+export type SignalAgingTrendPoint = {
+  date: string;
+  created: number;
+  resolved: number;
+};
+
+export type SignalAging = {
+  communityId?: string | null;
+  generatedAt: string;
+  slaTargetDays: number;
+  unresolvedCount: number;
+  atRiskCount: number;
+  breachedCount: number;
+  medianAgeDays: number;
+  ageBuckets: SignalAgingBucket[];
+  atRiskSignals: SignalAgingItem[];
+  trend: SignalAgingTrendPoint[];
 };
 
 export type Notification = {
@@ -42,9 +126,41 @@ export type SignalMeta = {
   totalSignals: number;
   unresolvedSignals: number;
   lastUpdatedAt: string | null;
+  /**
+   * Score at or above which the platform calls a signal critical. Published by the backend so the
+   * dashboard filter and the API filter cannot drift apart.
+   */
+  criticalScoreThreshold: number;
 };
 
 export type UserRole = "SUPER_ADMIN" | "PUBLIC_SERVANT" | "CITIZEN" | "GUEST";
+
+export type ProfileVisibility = "PUBLIC" | "COMMUNITY" | "ADMINS";
+export type InterfaceMode = "SIMPLE" | "ADVANCED";
+
+export type UserProfile = {
+  username: string;
+  displayName: string;
+  email?: string | null;
+  verified: boolean;
+  civicRole?: string | null;
+  bio?: string | null;
+  affiliations: string[];
+  profileVisibility: ProfileVisibility;
+  affiliationVisibility: ProfileVisibility;
+  activityVisibility: ProfileVisibility;
+  interfaceMode: InterfaceMode;
+  avatarPreset: string;
+  achievements: ProfileAchievement[];
+  viewerScope: ProfileVisibility;
+};
+
+export type ProfileAchievement = {
+  key: string;
+  earned: boolean;
+  currentProgress: number;
+  targetProgress: number;
+};
 
 export type AuthInfo = {
   user: string;
@@ -57,7 +173,26 @@ export type Community = {
   name: string;
   slug: string;
   description?: string;
+  country?: string | null;
+  region?: string | null;
+  parentCommunityId?: string | null;
+  memberCount?: number;
   createdAt?: string;
+};
+
+export type CommunityBreadcrumbItem = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+export type CommunityTreeNode = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parentCommunityId?: string | null;
+  children: CommunityTreeNode[];
 };
 
 export type CommunityMembership = {
@@ -65,9 +200,274 @@ export type CommunityMembership = {
   communityId: string;
   communityName: string;
   communitySlug: string;
+  parentCommunityId?: string | null;
+  breadcrumb: CommunityBreadcrumbItem[];
   role: "MEMBER" | "MODERATOR" | "COORDINATOR" | "PUBLIC_SERVANT_LIAISON";
   createdBy: string;
   createdAt: string;
+};
+
+export type DigestItem = {
+  signalId: string;
+  title: string;
+  category: string;
+  status: string;
+  locationLabel: string | null;
+  priorityScore: number;
+  daysOpen: number;
+  /** The formula's own terms, so a reader can check the claim rather than take it on faith. */
+  whyRanked: string;
+};
+
+export type DigestWeek = {
+  key: string;
+  startDate: string;
+  endDate: string;
+  previousKey: string;
+};
+
+export type WeeklyDigest = {
+  version: string;
+  communityId: string;
+  communityName: string;
+  week: DigestWeek;
+  topUnresolved: DigestItem[];
+  resolvedThisWeek: number;
+  rejectedThisWeek: number;
+  reportedThisWeek: number;
+  stillOpenTotal: number;
+  /** The rendered digest, suitable for an email or channel message. */
+  body: string;
+  contentHash: string;
+  published: boolean;
+  publishedAt: string | null;
+  generatedAt: string;
+  /** How many configured channels accepted it. Zero is normal when none are configured. */
+  deliveredToChannels: number;
+};
+
+export type DigestScheduleRun = {
+  communityId: string;
+  communityName: string | null;
+  weekKey: string;
+  outcome: "PREPARED" | "SKIPPED" | "FAILED";
+  detail: string | null;
+  ranAt: string;
+};
+
+export type SignalMergeCandidate = {
+  signalId: string;
+  title: string;
+  category: string;
+  status: string;
+  reportedAt: string | null;
+  /** 0..1. The same scale the merge decision uses, so the queue and the decision cannot disagree. */
+  similarity: number | null;
+};
+
+export type SignalMergeSuggestion = {
+  targetSignalId: string;
+  targetTitle: string;
+  targetCategory: string;
+  candidates: SignalMergeCandidate[];
+  threshold: number;
+  /** Most recent human decision for this target, so a reviewer does not re-decide it. */
+  latestDecision: "APPROVED" | "REJECTED" | "SPLIT" | null;
+  reviewedAt: string | null;
+};
+
+export type SignalMergeReview = {
+  decisionId: string;
+  targetSignalId: string;
+  targetTitle: string | null;
+  decision: "APPROVED" | "REJECTED" | "SPLIT";
+  suggestedCount: number;
+  /** Null unless the decision applied a merge, so a rejection cannot be read as one. */
+  mergedTargetSignalId: string | null;
+  mergedTitle: string | null;
+  decidedAt: string;
+  note: string | null;
+};
+export type CommunityPermissionScope =
+  | "CAST_PROPOSAL_VOTE"
+  | "CREATE_PROPOSAL"
+  | "IMPORT_SIGNALS"
+  | "MANAGE_MODERATION_QUEUE"
+  | "MANAGE_PRIVACY_SETTINGS"
+  | "MANAGE_OPEN_DATA_EXPORTS"
+  | "MANAGE_DECISION_LEDGER"
+  | "MANAGE_GOVERNANCE_LIBRARY"
+  | "MANAGE_PROJECT_BOARDS"
+  | "CREATE_THREAD"
+  | "ADD_THREAD_MESSAGE"
+  | "MODERATE_THREAD_MESSAGE"
+  | "POST_ROOM_MESSAGE"
+  | "MANAGE_ROOMS"
+  | "JOIN_ACTIVITIES"
+  | "MANAGE_ACTIVITIES"
+  | "BOOK_RESOURCES"
+  | "MANAGE_RESOURCES"
+  | "MANAGE_INTEGRATIONS"
+  | "CREATE_OFFICIAL_UPDATE"
+  | "UPDATE_OFFICIAL_UPDATE"
+  | "MANAGE_MEMBERSHIPS"
+  | "MANAGE_PERMISSION_POLICIES"
+  | "VIEW_SENSITIVE_DATA";
+
+export type CommunityPermissionPolicy = {
+  communityId: string;
+  scope: CommunityPermissionScope;
+  allowedRoles: CommunityMembership["role"][];
+  updatedBy?: string | null;
+  updatedAt?: string | null;
+};
+
+export type SensitiveDataAccessType =
+  | "PROFILE_ADMIN_VIEW"
+  | "SIGNAL_EXPORT";
+
+export type SensitiveDataAccessLog = {
+  id: string;
+  accessType: SensitiveDataAccessType;
+  actorUserId: string;
+  actorUsername: string;
+  targetUserId?: string | null;
+  targetUsername?: string | null;
+  communityId?: string | null;
+  communityName?: string | null;
+  note: string;
+  createdAt: string;
+};
+
+export type CommunityOpenDataPolicy =
+  | "DISABLED"
+  | "AGGREGATED_PUBLIC"
+  | "AGGREGATED_AND_DECISIONS";
+
+export type CommunityPrivacyPolicy = {
+  communityId: string;
+  communityName: string;
+  openDataPolicy: CommunityOpenDataPolicy;
+  updatedByUsername?: string | null;
+  updatedAt?: string | null;
+  recentAccessLogs: SensitiveDataAccessLog[];
+};
+
+export type CommunityOpenDataAccessChannel = "USER_EXPORT" | "API_TOKEN";
+
+export type CommunityOpenDataExportType =
+  | "SIGNALS"
+  | "PROPOSALS"
+  | "VOTES"
+  | "DECISIONS"
+  | "METRICS";
+
+export type CommunityOpenDataFormat = "CSV" | "JSON";
+
+export type CommunityOpenDataTokenScope =
+  | "EXPORT_SIGNALS"
+  | "EXPORT_PROPOSALS"
+  | "EXPORT_VOTES"
+  | "EXPORT_DECISIONS"
+  | "EXPORT_METRICS";
+
+export type CommunityOpenDataDataset = {
+  resource: CommunityOpenDataExportType;
+  description: string;
+  formats: CommunityOpenDataFormat[];
+  externalPath: string;
+};
+
+export type CommunityOpenDataToken = {
+  id: string;
+  label: string;
+  tokenPrefix: string;
+  scopes: CommunityOpenDataTokenScope[];
+  rateLimitPerHour: number;
+  active: boolean;
+  createdAt: string;
+  lastUsedAt?: string | null;
+  revokedAt?: string | null;
+};
+
+export type CommunityOpenDataAccessLog = {
+  id: string;
+  accessChannel: CommunityOpenDataAccessChannel;
+  exportType: CommunityOpenDataExportType;
+  format: CommunityOpenDataFormat;
+  actorUsername?: string | null;
+  tokenLabel?: string | null;
+  note: string;
+  createdAt: string;
+};
+
+export type CommunityOpenDataCenter = {
+  communityId: string;
+  communityName: string;
+  defaultRateLimitPerHour: number;
+  datasets: CommunityOpenDataDataset[];
+  tokens: CommunityOpenDataToken[];
+  recentAccessLogs: CommunityOpenDataAccessLog[];
+};
+
+export type CreateCommunityOpenDataTokenResponse = {
+  token: CommunityOpenDataToken;
+  plainToken: string;
+};
+
+export type HelpAudience = "CITIZEN" | "MODERATOR" | "REPRESENTATIVE";
+export type HelpSurface =
+  | "GENERAL"
+  | "DASHBOARD"
+  | "REPORT"
+  | "COMMUNITIES"
+  | "PROPOSALS"
+  | "GOVERNANCE"
+  | "PROJECTS";
+
+export type HelpGuideKind = "ARTICLE" | "CONTEXTUAL";
+
+export type OnboardingStep = {
+  key: string;
+  audience: HelpAudience;
+  title: string;
+  description: string;
+  actionLabel: string;
+  actionRoute: string;
+  completed: boolean;
+  dismissed: boolean;
+};
+
+export type HelpGuide = {
+  id: string;
+  kind: HelpGuideKind;
+  surface: HelpSurface;
+  audience: HelpAudience;
+  title: string;
+  summary: string;
+  body: string;
+  tags: string[];
+  actionLabel?: string | null;
+  actionRoute?: string | null;
+  dismissible: boolean;
+  dismissed: boolean;
+};
+
+export type HelpCenterResponse = {
+  persona: HelpAudience;
+  language: "en" | "es";
+  surface?: HelpSurface | null;
+  query?: string | null;
+  generatedAt: string;
+  completedStepKeys: string[];
+  dismissedGuideKeys: string[];
+  onboardingSteps: OnboardingStep[];
+  guides: HelpGuide[];
+};
+
+export type HelpCenterStateResponse = {
+  completedStepKeys: string[];
+  dismissedGuideKeys: string[];
 };
 
 export type CommunityThreadMessage = {
@@ -76,6 +476,8 @@ export type CommunityThreadMessage = {
   authorId: string;
   sourceCommunityId: string;
   parentMessageId?: string;
+  depth: number;
+  directReplyCount: number;
   content: string;
   hidden: boolean;
   moderationReason?: string;
@@ -93,6 +495,11 @@ export type CommunityThread = {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  totalMessages: number;
+  totalReplies: number;
+  totalReactions: number;
+  relevanceScore: number;
+  relevanceSummary: string;
   messages: CommunityThreadMessage[];
 };
 
@@ -102,9 +509,13 @@ export type CommunityBlogPost = {
   authorId: string;
   authorUsername: string;
   authorRole: string;
+  official: boolean;
+  pinned: boolean;
   title: string;
   content: string;
   statusTag: string;
+  archivedBy?: string | null;
+  archivedAt?: string | null;
   publishedAt: string;
   updatedAt: string;
   reactions: Record<string, number>;
@@ -114,9 +525,11 @@ export type CommunityBlogPost = {
 export type SignalStatusEntry = {
   id: string;
   signalId: string;
+  eventType: "CREATED" | "STATUS_CHANGED" | "ASSIGNED";
   statusFrom: string;
   statusTo: string;
   changedBy: string;
+  assignedToUsername?: string | null;
   reason: string;
   createdAt: string;
 };
@@ -131,6 +544,461 @@ export type CommunityFeedItem = {
   freshness: string;
 };
 
+export type CommunityProposal = {
+  id: string;
+  communityId: string;
+  authorId: string;
+  authorUsername: string;
+  relatedSignalId?: string | null;
+  relatedSignalTitle?: string | null;
+  title: string;
+  templateKey: string;
+  status: string;
+  problemStatement: string;
+  proposedSolution: string;
+  estimatedCost: string;
+  beneficiariesSummary: string;
+  supportingLinks: string[];
+  voteMode: CommunityProposalVoteMode;
+  resultVisibility: CommunityProposalVoteVisibility;
+  eligibilityRule: CommunityProposalVoteEligibility;
+  votingOpensAt?: string | null;
+  votingClosesAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CommunityProposalVoteMode = "YES_NO" | "SCORE_1_5";
+export type CommunityProposalVoteVisibility = "COMMUNITY" | "AFTER_VOTE";
+export type CommunityProposalVoteEligibility = "ALL_MEMBERS" | "VERIFIED_MEMBERS";
+export type CommunityProposalVoteChoice = "FOR" | "AGAINST";
+
+export type CommunityProposalDeliberationType = "PRO" | "CON" | "QUESTION" | "EVIDENCE";
+
+export type CommunityProposalDeliberationEntry = {
+  id: string;
+  proposalId: string;
+  authorId: string;
+  authorUsername: string;
+  entryType: CommunityProposalDeliberationType;
+  content: string;
+  supportingLink?: string | null;
+  hidden: boolean;
+  moderationReason?: string | null;
+  hiddenByUsername?: string | null;
+  hiddenAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CommunityProposalDeliberationCounts = {
+  pros: number;
+  cons: number;
+  questions: number;
+  evidence: number;
+  visibleEntries: number;
+  hiddenEntries: number;
+};
+
+export type CommunityProposalDeliberation = {
+  proposalId: string;
+  counts: CommunityProposalDeliberationCounts;
+  entries: CommunityProposalDeliberationEntry[];
+};
+
+export type CommunityProposalVoteConfig = {
+  voteMode: CommunityProposalVoteMode;
+  resultVisibility: CommunityProposalVoteVisibility;
+  eligibilityRule: CommunityProposalVoteEligibility;
+  votingOpensAt?: string | null;
+  votingClosesAt?: string | null;
+};
+
+export type CommunityProposalVoteRecord = {
+  voterId: string;
+  voterUsername: string;
+  membershipRole: string;
+  verifiedMember: boolean;
+  choice?: CommunityProposalVoteChoice | null;
+  scoreValue?: number | null;
+  castAt: string;
+};
+
+export type CommunityProposalVoteScoreBucket = {
+  score: number;
+  count: number;
+};
+
+export type CommunityProposalVoteTally = {
+  visible: boolean;
+  visibilityReason?: string | null;
+  totalBallots: number;
+  distinctVoters: number;
+  turnoutPercentage: number;
+  forVotes: number;
+  againstVotes: number;
+  averageScore?: number | null;
+  scoreDistribution: CommunityProposalVoteScoreBucket[];
+};
+
+export type CommunityProposalVoteAuditSummary = {
+  acceptedVotes: number;
+  duplicateBlockedAttempts: number;
+  eligibilityBlockedAttempts: number;
+  closedWindowBlockedAttempts: number;
+};
+
+export type CommunityProposalVoting = {
+  proposalId: string;
+  config: CommunityProposalVoteConfig;
+  openForVoting: boolean;
+  canCurrentUserVote: boolean;
+  blockedReason?: string | null;
+  currentUserVote?: CommunityProposalVoteRecord | null;
+  tally: CommunityProposalVoteTally;
+  auditSummary: CommunityProposalVoteAuditSummary;
+};
+
+export type CommunityProjectStatus = "TODO" | "IN_PROGRESS" | "DONE";
+
+export type CommunityProjectTaskComment = {
+  id: string;
+  taskId: string;
+  authorId: string;
+  authorUsername: string;
+  content: string;
+  createdAt: string;
+};
+
+export type CommunityProjectTask = {
+  id: string;
+  projectBoardId: string;
+  title: string;
+  details: string;
+  status: CommunityProjectStatus;
+  assigneeId?: string | null;
+  assigneeUsername?: string | null;
+  dueDate?: string | null;
+  sortOrder: number;
+  comments: CommunityProjectTaskComment[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CommunityProjectTaskCounts = {
+  todo: number;
+  inProgress: number;
+  done: number;
+};
+
+export type CommunityProjectBoard = {
+  id: string;
+  communityId: string;
+  linkedProposalId?: string | null;
+  linkedProposalTitle?: string | null;
+  ownerId: string;
+  ownerUsername: string;
+  title: string;
+  summary: string;
+  dueDate?: string | null;
+  taskCounts: CommunityProjectTaskCounts;
+  tasks: CommunityProjectTask[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GovernanceDocumentType = "STATUTE" | "REGULATION" | "MINUTES" | "AGREEMENT" | "BUDGET" | "REPORT";
+export type GovernanceDocumentVisibility = "PUBLIC" | "COMMUNITY" | "ADMINS";
+
+export type GovernanceDocumentVersion = {
+  id: string;
+  documentId: string;
+  createdBy: string;
+  authorUsername: string;
+  versionNumber: number;
+  content: string;
+  changeSummary: string;
+  sourceUrl: string | null;
+  effectiveDate: string | null;
+  meetingDate: string | null;
+  createdAt: string;
+};
+
+export type GovernanceDocument = {
+  id: string;
+  communityId: string;
+  createdBy: string;
+  authorUsername: string;
+  title: string;
+  summary: string;
+  documentType: GovernanceDocumentType;
+  visibility: GovernanceDocumentVisibility;
+  tags: string[];
+  currentVersionNumber: number;
+  currentVersion: GovernanceDocumentVersion | null;
+  versions: GovernanceDocumentVersion[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CommunityDecisionType =
+  | "APPROVAL"
+  | "REJECTION"
+  | "PRIORITIZATION"
+  | "DIRECTIVE"
+  | "STATUS_UPDATE";
+
+export type CommunityDecisionStatus =
+  | "RECORDED"
+  | "IN_EXECUTION"
+  | "COMPLETED"
+  | "REJECTED"
+  | "SUPERSEDED";
+
+export type CommunityDecisionBasisType =
+  | "COMMUNITY_VOTE"
+  | "COORDINATOR_REVIEW"
+  | "GOVERNANCE_RECORD"
+  | "STAFF_DIRECTIVE"
+  | "MIXED_RECORD";
+
+export type CommunityDecision = {
+  id: string;
+  communityId: string;
+  linkedProposalId?: string | null;
+  linkedProposalTitle?: string | null;
+  governanceDocumentId?: string | null;
+  governanceDocumentTitle?: string | null;
+  projectBoardId?: string | null;
+  projectBoardTitle?: string | null;
+  decidedBy: string;
+  decidedByUsername: string;
+  executionOwnerId?: string | null;
+  executionOwnerUsername?: string | null;
+  decisionType: CommunityDecisionType;
+  decisionStatus: CommunityDecisionStatus;
+  approvalBasisType: CommunityDecisionBasisType;
+  approvalBasisSummary: string;
+  title: string;
+  summary: string;
+  decidedAt: string;
+  effectiveDate?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CommunityHomeSignal = {
+  id: string;
+  title: string;
+  status: string;
+  priorityScore?: number | null;
+};
+
+export type CommunityHome = {
+  communityId: string;
+  generatedAt: string;
+  freshness: string;
+  activeRoomsCount: number;
+  officialUpdates: CommunityBlogPost[];
+  hotThreads: CommunityThread[];
+  topSignals: CommunityHomeSignal[];
+};
+
+export type CommunityTrustMetricsPeriod = "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS";
+
+export type TrustMetricCard = {
+  key: string;
+  label: string;
+  value: string;
+  unit: string;
+  definition: string;
+  formula: string;
+  supportingText: string;
+};
+
+export type TrustMetricBreakdownItem = {
+  label: string;
+  value: number;
+  share: number;
+};
+
+export type TrustMetricBreakdown = {
+  key: string;
+  title: string;
+  description: string;
+  items: TrustMetricBreakdownItem[];
+};
+
+export type CommunityTrustMetrics = {
+  communityId: string;
+  communityName: string;
+  communitySlug: string;
+  period: CommunityTrustMetricsPeriod;
+  startDate: string;
+  endDate: string;
+  generatedAt: string;
+  lastUpdatedAt: string | null;
+  freshness: string;
+  lowData: boolean;
+  lowDataReason: string | null;
+  cards: TrustMetricCard[];
+  breakdowns: TrustMetricBreakdown[];
+};
+
+export type CommunityModerationReasonCode =
+  | "ABUSE"
+  | "HARASSMENT"
+  | "SPAM"
+  | "MISINFORMATION"
+  | "OFF_TOPIC"
+  | "OTHER";
+
+export type CommunityModerationTargetType =
+  | "THREAD_MESSAGE"
+  | "PROPOSAL_DELIBERATION";
+
+export type CommunityModerationReportStatus =
+  | "OPEN"
+  | "ACTIONED"
+  | "DISMISSED";
+
+export type CommunitySanctionType =
+  | "WARN"
+  | "LIMIT_POSTING_7_DAYS"
+  | "SUSPEND_7_DAYS"
+  | "SUSPEND_30_DAYS";
+
+export type CommunitySanction = {
+  id: string;
+  sanctionType: CommunitySanctionType;
+  status: string;
+  reason: string;
+  targetUserId: string;
+  targetUsername: string;
+  issuedByUserId: string;
+  issuedByUsername: string;
+  startsAt: string;
+  endsAt?: string | null;
+  appealAvailable: boolean;
+};
+
+export type CommunityModerationAction = {
+  actionType: string;
+  actorUsername: string;
+  note: string;
+  happenedAt: string;
+};
+
+export type CommunityModerationReport = {
+  id: string;
+  communityId: string;
+  targetType: CommunityModerationTargetType;
+  targetId: string;
+  targetPreview: string;
+  reporterUserId: string;
+  reporterUsername: string;
+  reportedUserId: string;
+  reportedUsername: string;
+  reasonCode: CommunityModerationReasonCode;
+  details: string;
+  status: CommunityModerationReportStatus;
+  contentHidden: boolean;
+  falsePositiveReviewRecommended: boolean;
+  resolutionReason?: string | null;
+  resolvedByUsername?: string | null;
+  sanction?: CommunitySanction | null;
+  actionHistory: CommunityModerationAction[];
+  createdAt: string;
+  resolvedAt?: string | null;
+};
+
+export type CommunityModerationQueue = {
+  communityId: string;
+  openReports: number;
+  actionedReports: number;
+  dismissedReports: number;
+  activeSanctions: number;
+  reports: CommunityModerationReport[];
+};
+
+export type SignalMapFilters = {
+  category?: string | null;
+  statuses: string[];
+  fromDate?: string | null;
+  toDate?: string | null;
+};
+
+export type CommunitySignalMapPoint = {
+  signalId: string;
+  communityId: string;
+  communityName: string;
+  title: string;
+  category: string;
+  status: string;
+  locationLabel?: string | null;
+  latitude: number;
+  longitude: number;
+  priorityScore: number;
+  heatWeight: number;
+  createdAt: string;
+};
+
+export type CommunitySignalCluster = {
+  clusterKey: string;
+  communityId: string;
+  communityName: string;
+  latitude: number;
+  longitude: number;
+  signalCount: number;
+  cumulativePriorityScore: number;
+  primaryCategory: string;
+  topSignalId?: string | null;
+  topSignalTitle?: string | null;
+};
+
+export type CommunitySignalMap = {
+  communityId: string;
+  communityName: string;
+  communitySlug: string;
+  generatedAt: string;
+  freshness: string;
+  filters: SignalMapFilters;
+  availableCategories: string[];
+  availableStatuses: string[];
+  mappedSignalsCount: number;
+  unmappedSignalsCount: number;
+  cumulativeHeatScore: number;
+  points: CommunitySignalMapPoint[];
+  clusters: CommunitySignalCluster[];
+};
+
+export type CommunitySignalHeatCell = {
+  communityId: string;
+  communityName: string;
+  communitySlug: string;
+  latitude: number;
+  longitude: number;
+  mappedSignalsCount: number;
+  unmappedSignalsCount: number;
+  cumulativeHeatScore: number;
+  averagePriorityScore: number;
+  topCategory: string;
+  topSignalId?: string | null;
+  topSignalTitle?: string | null;
+};
+
+export type CommunitySignalsHeatMap = {
+  generatedAt: string;
+  freshness: string;
+  filters: SignalMapFilters;
+  availableCategories: string[];
+  availableStatuses: string[];
+  visibleCommunitiesCount: number;
+  totalMappedSignalsCount: number;
+  totalHeatScore: number;
+  communities: CommunitySignalHeatCell[];
+};
+
 export type PageResponse<T> = {
   content: T[];
   totalElements: number;
@@ -140,3 +1008,242 @@ export type PageResponse<T> = {
 };
 
 export type ThreadStatusFilter = "ALL" | "ACTIVE" | "STALE";
+export type ThreadSortBy = "RELEVANCE" | "RECENT";
+
+export type CommunityRoomSummary = {
+  id: string;
+  communityId: string;
+  projectBoardId?: string | null;
+  name: string;
+  topic: string;
+  createdBy: string;
+  createdAt: string;
+  archived: boolean;
+  messageCount: number;
+  unreadMentionCount: number;
+  muted: boolean;
+  lastActivityAt?: string | null;
+};
+
+export type CommunityRoomMessage = {
+  id: string;
+  roomId: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+  mentionedUserIds: string[];
+  mentionsCurrentUser: boolean;
+};
+
+export type CommunityRoomMention = {
+  id: string;
+  roomId: string;
+  roomName: string;
+  messageId: string;
+  messagePreview: string;
+  mentionedUserId: string;
+  mentionedBy?: string | null;
+  mentionedByName: string;
+  createdAt: string;
+  readAt?: string | null;
+};
+
+export type CommunityRoomMentionInbox = {
+  communityId: string;
+  unreadTotal: number;
+  items: CommunityRoomMention[];
+};
+
+export type CommunityRoomWorkspace = {
+  communityId: string;
+  communityName: string;
+  mentionableUsernames: string[];
+  rooms: CommunityRoomSummary[];
+  mentionInbox: CommunityRoomMentionInbox;
+};
+
+export type CommunityRoomDetail = {
+  id: string;
+  communityId: string;
+  projectBoardId?: string | null;
+  name: string;
+  topic: string;
+  createdBy: string;
+  createdAt: string;
+  archived: boolean;
+  muted: boolean;
+  mutedAt?: string | null;
+  /** Total messages in the room, not the size of the returned page. */
+  messageCount: number;
+  /** True when `messages` is a page of a longer history rather than the whole room. */
+  hasMoreMessages: boolean;
+  unreadMentionCount: number;
+  messages: CommunityRoomMessage[];
+};
+
+export type CommunityRoomMuteState = {
+  roomId: string;
+  communityId: string;
+  muted: boolean;
+  mutedAt?: string | null;
+};
+
+export type CommunityActivitySignupStatus = "CONFIRMED" | "CANCELLED";
+export type CommunityActivityAttendanceStatus = "PENDING" | "ATTENDED" | "NO_SHOW";
+export type CommunityActivityWindowState = "UPCOMING" | "OPEN" | "FULL" | "CLOSED" | "CANCELLED";
+
+export type CommunityActivityVolunteer = {
+  signupId: string;
+  volunteerId: string;
+  volunteerName: string;
+  status: CommunityActivitySignupStatus;
+  attendanceStatus: CommunityActivityAttendanceStatus;
+  createdAt: string;
+  cancelledAt?: string | null;
+  attendedAt?: string | null;
+};
+
+export type CommunityActivity = {
+  id: string;
+  communityId: string;
+  title: string;
+  description: string;
+  locationLabel: string;
+  startsAt: string;
+  endsAt: string;
+  signupOpensAt: string;
+  signupClosesAt: string;
+  signupCapacity: number;
+  organizerId: string;
+  organizerName: string;
+  createdAt: string;
+  cancelled: boolean;
+  signupWindowState: CommunityActivityWindowState;
+  signupOpen: boolean;
+  fullReason?: string | null;
+  confirmedCount: number;
+  fillRatePercent: number;
+  currentVolunteerSignupId?: string | null;
+  currentVolunteerStatus?: CommunityActivitySignupStatus | null;
+  roster: CommunityActivityVolunteer[];
+};
+
+export type CommunityActivityBoard = {
+  communityId: string;
+  communityName: string;
+  openActivities: number;
+  myUpcomingSignups: number;
+  activities: CommunityActivity[];
+};
+
+export type CommunityActivitySignupResult = {
+  activityId: string;
+  communityId: string;
+  signupId?: string | null;
+  status: string;
+  message: string;
+};
+
+export type CommunityResourceBookingStatus =
+  | "PENDING_APPROVAL"
+  | "APPROVED"
+  | "REJECTED"
+  | "CANCELLED";
+
+export type CommunityResourceBooking = {
+  id: string;
+  resourceId: string;
+  resourceName: string;
+  communityId: string;
+  requesterId: string;
+  requesterName: string;
+  purpose: string;
+  startsAt: string;
+  endsAt: string;
+  status: CommunityResourceBookingStatus;
+  decisionNote?: string | null;
+  requestedAt: string;
+  decidedAt?: string | null;
+  decidedByName?: string | null;
+  cancelledAt?: string | null;
+};
+
+export type CommunityResource = {
+  id: string;
+  communityId: string;
+  name: string;
+  description: string;
+  locationLabel: string;
+  requiresApproval: boolean;
+  minNoticeHours: number;
+  maxBookingHours: number;
+  archived: boolean;
+  createdBy: string;
+  createdAt: string;
+  upcomingBlockingCount: number;
+  currentRequesterBookingId?: string | null;
+  currentRequesterBookingStatus?: CommunityResourceBookingStatus | null;
+  upcomingBookings: CommunityResourceBooking[];
+};
+
+export type CommunityResourceBoard = {
+  communityId: string;
+  communityName: string;
+  resourceCount: number;
+  pendingApprovals: number;
+  resources: CommunityResource[];
+  myBookings: CommunityResourceBooking[];
+  approvalsQueue: CommunityResourceBooking[];
+};
+
+export type CommunityIntegrationChannel =
+  | "WEBHOOK"
+  | "EMAIL_DIGEST"
+  | "CALENDAR_FEED"
+  | "MAP_LINK";
+
+export type CommunityIntegrationDeliveryStatus = "PENDING" | "DELIVERED" | "FAILED";
+
+export type CommunityIntegration = {
+  id: string;
+  communityId: string;
+  channel: CommunityIntegrationChannel;
+  name: string;
+  targetUri: string;
+  enabled: boolean;
+  autoRetry: boolean;
+  dispatchable: boolean;
+  createdBy: string;
+  createdAt: string;
+  lastAttemptAt?: string | null;
+  lastSuccessAt?: string | null;
+  consecutiveFailures: number;
+  pendingDeliveries: number;
+  failedDeliveries: number;
+};
+
+export type CommunityIntegrationDelivery = {
+  id: string;
+  integrationId: string;
+  integrationName: string;
+  channel: string;
+  eventType: string;
+  referenceId?: string | null;
+  status: CommunityIntegrationDeliveryStatus;
+  attempts: number;
+  lastError?: string | null;
+  createdAt: string;
+  completedAt?: string | null;
+};
+
+export type CommunityIntegrationCenter = {
+  communityId: string;
+  communityName: string;
+  supportedChannels: CommunityIntegrationChannel[];
+  integrationCount: number;
+  pendingDeliveries: number;
+  failedDeliveries: number;
+  integrations: CommunityIntegration[];
+  recentDeliveries: CommunityIntegrationDelivery[];
+};

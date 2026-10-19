@@ -40,6 +40,16 @@ public class SecurityRBAC_IT {
     }
 
     @Test
+    @WithMockUser(username = "citizen", roles = {"CITIZEN"})
+    void citizenShouldNotAssignSignal() throws Exception {
+        String url = String.format("/api/signals/%s/assign", UUID.randomUUID());
+        mockMvc.perform(patch(url)
+                .contentType("application/json")
+                .content("{\"assigneeUsername\":\"staff\"}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @WithMockUser(username = "staff", roles = {"PUBLIC_SERVANT"})
     void staffShouldAccessModerationQueue() throws Exception {
         mockMvc.perform(get("/api/signals/flagged"))

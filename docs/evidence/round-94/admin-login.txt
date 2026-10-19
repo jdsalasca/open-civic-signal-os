@@ -1,0 +1,5 @@
+LOGIN OK
+claves: accessToken, refreshToken, role, username
+activeRole: 
+rawRoles: 
+tokenLength: 174

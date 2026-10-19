@@ -6,6 +6,30 @@ output/playwright-report/
 apps/web-react/test-results/
 .playwright-cli/
 apps/web-react/dashboard-audit.png
+apps/api-java/target/
 !coverage/coverage-summary.json
-!coverage/
-!coverage/coverage-summary.json
+!/coverage/
+!/coverage/coverage-summary.json
+
+# Real secrets never belong in git. The tracked *.example files stay; filled copies do not.
+.env
+.env.*
+!.env.example
+!infra/.env.example
+!infra/.env.prod.example
+infra/secrets/
+/backups/
+
+# Incident evidence bundles are operational records, not source.
+# The protocol says capture before fixing; the file is referenced from the incident write-up.
+docs/incidents/
+
+# Agent scratch: handoff notes and tool caches written during a session. Transient by nature, and
+# every round's real output belongs in docs/evidence/round-<n>/ where it is versioned on purpose.
+.tmp/
+
+# tsc -b emits these next to the config unless an outDir is set, and a stale vite.config.js
+# shadows the .ts one: Vite resolves it first, so editing the .ts silently did nothing.
+apps/web-react/vite.config.js
+apps/web-react/vite.config.d.ts
+apps/web-react/*.tsbuildinfo

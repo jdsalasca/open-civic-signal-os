@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { Signal, SignalStatusEntry } from "../types";
+import { PrioritizationFormula, Signal, SignalStatusEntry } from "../types";
 import { ProgressBar } from "primereact/progressbar";
 import { Divider } from "primereact/divider";
+import { InputText } from "primereact/inputtext";
 import { useAuthStore } from "../store/useAuthStore";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
@@ -13,6 +14,11 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicEngagement } from "../components/CivicEngagement";
 import { PriorityRadar } from "../components/PriorityRadar";
+import { PriorityScale, StatusChip } from "../components/signalPrimitives";
+import { CivicPageHeader } from "../components/ui/CivicPageHeader";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { formatStamp } from "../utils/formatStamp";
+import { useSignalStatusLabel } from "../utils/signalStatus";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -20,27 +26,36 @@ interface ApiError extends Error {
 
 export function SignalDetail() {
   const { t } = useTranslation();
+  const statusLabel = useSignalStatusLabel();
   const { id } = useParams();
   const navigate = useNavigate();
   const { activeRole } = useAuthStore();
   const [signal, setSignal] = useState<Signal | null>(null);
+  const [formula, setFormula] = useState<PrioritizationFormula | null>(null);
   const [history, setHistory] = useState<SignalStatusEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
+  const [assignmentUser, setAssignmentUser] = useState("");
+  const [assigning, setAssigning] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [signalRes, historyRes] = await Promise.all([
+      const [signalRes, historyRes, formulaRes] = await Promise.all([
         apiClient.get(`signals/${id}`),
-        apiClient.get(`signals/${id}/history`)
+        apiClient.get(`signals/${id}/history`),
+        apiClient.get("signals/formula").catch(() => null)
       ]);
-      
+
       if (signalRes.status === 200) {
         setSignal(signalRes.data);
+        setAssignmentUser(signalRes.data.assignedToUsername || "");
       }
       if (historyRes.status === 200) {
         setHistory(historyRes.data || []);
+      }
+      if (formulaRes?.status === 200) {
+        setFormula(formulaRes.data);
       }
     } catch (err) {
       const apiErr = err as ApiError;
@@ -57,7 +72,10 @@ export function SignalDetail() {
 
   const updateStatus = async (newStatus: string) => {
     try {
-      const res = await apiClient.patch(`signals/${id}/status`, { status: newStatus });
+      const res = await apiClient.patch(`signals/${id}/status`, {
+        status: newStatus,
+        reason: t("signals.timeline_status_reason", { status: newStatus }),
+      });
       if (res.status === 200) {
         toast.success(t('signals.lifecycle_success', { status: newStatus }));
         fetchData();
@@ -84,37 +102,82 @@ export function SignalDetail() {
     }
   };
 
+  const handleAssign = async () => {
+    if (!assignmentUser.trim()) {
+      toast.error(t("common.required"));
+      return;
+    }
+    setAssigning(true);
+    try {
+      const res = await apiClient.patch(`signals/${id}/assign`, {
+        assigneeUsername: assignmentUser.trim(),
+        reason: t("signals.timeline_assignment_reason", { assignee: assignmentUser.trim() }),
+      });
+      if (res.status === 200) {
+        toast.success(t("signals.assignment_success", { assignee: assignmentUser.trim() }));
+        fetchData();
+      }
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('common.error'));
+    } finally {
+      setAssigning(false);
+    }
+  };
+
   if (loading) return <Layout><div className="p-6"><ProgressBar mode="indeterminate" style={{ height: '6px' }} /></div></Layout>;
   if (!signal) return null;
 
+  const evidenceUrls = (signal.evidenceUrls?.length ? signal.evidenceUrls : signal.imageUrl ? [signal.imageUrl] : []).filter(Boolean) as string[];
+
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
-  
-  let severity: 'new' | 'progress' | 'resolved' | 'rejected' = 'new';
-  if (signal.status === "IN_PROGRESS") severity = 'progress';
-  if (signal.status === "RESOLVED") severity = 'resolved';
-  if (signal.status === "REJECTED") severity = 'rejected';
+
+  const renderTimelineLabel = (entry: SignalStatusEntry) => {
+    if (entry.eventType === "ASSIGNED") {
+      return t("signals.timeline_event_assigned");
+    }
+    if (entry.eventType === "CREATED") {
+      return t("signals.timeline_event_created");
+    }
+    return t("signals.timeline_event_status_changed");
+  };
 
   return (
     <Layout>
       <div className="animate-fade-up motion-page pb-8">
         <div className="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-8 gap-4">
-          <div className="flex align-items-center gap-4">
+          <div className="flex align-items-start gap-4 min-w-0">
             <CivicButton
               icon="pi pi-arrow-left"
               variant="ghost"
               onClick={() => navigate('/')}
               className="p-3 border-round-circle"
             />
-            <div>
-              <div className="flex align-items-center gap-3 mb-2">
-                <CivicBadge label={signal.status} severity={severity} />
-                <span className="text-xs text-muted font-mono font-bold uppercase tracking-widest">Protocol ID: {signal.id.substring(0,8)}</span>
+            <div className="min-w-0">
+              <div className="u-card-meta-row mb-2">
+                <StatusChip
+                  status={signal.status}
+                  label={statusLabel(signal.status)}
+                  testId="signal-detail-status-badge"
+                />
+                <span className="text-xs text-muted font-bold uppercase tracking-wide">
+                  {t("signals.protocol_id")}: {signal.id.substring(0,8)}
+                </span>
               </div>
-              <h1 className="text-5xl font-black text-main m-0 tracking-tighter leading-tight">{signal.title}</h1>
+<CivicPageHeader
+                  title={signal.title}
+                  className="mb-0"
+                  /* The eyebrow cannot be "Priority Rank": that is the title of the card below which
+                     shows the number. The category is what kind of case this is, and nothing else up
+                     here says it. No subtitle at all, because "Intelligence Context" is the title of
+                     the first card underneath and every fact one could carry is already in a labelled
+                     card or a badge. */
+                  eyebrow={t(`categories.${signal.category}`)}
+                />
             </div>
           </div>
           <CivicButton 
-            label={voting ? "Processing..." : "Support Signal"} 
+            label={voting ? t("signals.support_loading") : t("signals.support_button")} 
             icon="pi pi-heart-fill" 
             variant="danger"
             className="py-4 px-6 text-lg shadow-xl"
@@ -126,78 +189,118 @@ export function SignalDetail() {
 
         <div className="grid">
           <div className="col-12 lg:col-8">
-            <CivicCard className="mb-8">
-              <div className="flex justify-content-between align-items-center mb-8">
-                <h3 className="text-brand-primary uppercase text-xs font-black tracking-widest m-0">Intelligence Context</h3>
-                <CivicButton 
-                  icon="pi pi-download" 
-                  label="Trust Packet" 
+            <CivicCard
+              className="mb-8"
+              title={t("signals.context_header")}
+              headerActions={(
+                <CivicButton
+                  icon="pi pi-download"
+                  label={t("signals.trust_packet")}
                   variant="ghost"
                   className="text-xs"
                   onClick={() => window.open(`/api/signals/${signal.id}/trust-packet`, '_blank')}
                 />
-              </div>
+              )}
+            >
               <p className="text-xl line-height-4 m-0 text-secondary font-medium leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
                 {signal.description}
               </p>
 
-              {signal.imageUrl && (
-                <div className="mt-5 border-round-2xl overflow-hidden border-1 border-subtle">
-                  <img
-                    src={signal.imageUrl}
-                    alt={signal.title}
-                    loading="lazy"
-                    className="w-full"
-                    style={{ maxHeight: "24rem", objectFit: "cover" }}
-                  />
+              {(signal.locationLabel || evidenceUrls.length > 0) && (
+                <div className="mt-5 flex flex-column gap-4">
+                  {signal.locationLabel && (
+                  <div className="u-pill w-fit" data-testid="signal-detail-location-label">
+                    <i className="pi pi-map-marker text-brand-primary"></i>
+                    {signal.locationLabel}
+                  </div>
+                  )}
+                  {evidenceUrls.length > 0 && (
+                    <div className="grid">
+                      {evidenceUrls.map((url, index) => (
+                        <div key={`${url}-${index}`} className="col-12 md:col-6">
+                          <div className="u-media-frame h-full">
+                            <img
+                              src={url}
+                              alt={t("signals.evidence_alt", { title: signal.title, index: index + 1 })}
+                              loading="lazy"
+                              className="w-full h-full"
+                              style={{ maxHeight: "20rem", objectFit: "cover" }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               
               <Divider className="my-8 opacity-10" />
               
-              <div className="grid grid-nogutter">
-                <div className="col-12 md:col-6 flex align-items-center gap-4 mb-4">
-                  <div className="bg-brand-primary-alpha-10 border-round-xl p-4 flex align-items-center justify-content-center shadow-lg" style={{ width: '4.5rem', height: '4rem' }}>
-                    <i className="pi pi-users text-brand-primary text-2xl"></i>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">Affected Citizens</div>
-                    <div className="text-2xl font-black text-main">{signal.scoreBreakdown?.affectedPeople * 10} Estimated</div>
-                  </div>
-                </div>
-                <div className="col-12 md:col-6 flex align-items-center gap-4 mb-4">
-                  <div className="bg-status-progress-alpha-10 border-round-xl p-4 flex align-items-center justify-content-center shadow-lg" style={{ width: '4.5rem', height: '4rem' }}>
-                    <i className="pi pi-tag text-status-progress text-2xl"></i>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted uppercase font-black tracking-widest mb-1">Classification</div>
-                    <div className="text-2xl font-black text-main uppercase tracking-tighter">{t(`categories.${signal.category}`)}</div>
-                  </div>
-                </div>
+              <div className="civic-stat-grid civic-stat-grid-comfortable">
+                <CivicStatCard
+                  label={t("signals.affected_estimation")}
+                  value={`${(signal.scoreBreakdown?.affectedPeople || 0) * 10} ${t("signals.citizens")}`}
+                  supportingText={t("signals.affected_summary")}
+                  icon={<i className="pi pi-users text-brand-primary"></i>}
+                />
+                <CivicStatCard
+                  label={t("signals.civic_category")}
+                  value={t(`categories.${signal.category}`)}
+                  supportingText={t("signals.classification_summary")}
+                  icon={<i className="pi pi-tag text-status-progress"></i>}
+                />
               </div>
             </CivicCard>
 
-            <CivicCard title="Operational Audit Trail" padding="none" className="mb-8">
-              <div className="flex flex-column gap-px bg-white-alpha-10">
+            <CivicCard title={t("signals.timeline_title")} padding="none" className="mb-8" data-testid="signal-detail-timeline">
+              <div className="flex flex-column gap-px bg-surface-soft">
                 {history.map((entry, idx) => (
-                  <div key={entry.id} className="bg-surface p-5 hover:bg-white-alpha-5 transition-colors flex gap-4">
+                  <div key={entry.id} className="bg-surface p-5 hover:bg-surface-soft transition-colors flex gap-4" data-testid={`signal-timeline-entry-${idx}`}>
                     <div className="flex flex-column align-items-center gap-2">
                       <div className="bg-brand-primary-alpha-20 border-circle p-2 flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
-                        <i className={`pi ${idx === 0 ? 'pi-star-fill' : 'pi-history'} text-brand-primary text-xs`}></i>
+                        <i className={`pi ${
+                          entry.eventType === "ASSIGNED"
+                            ? "pi-user-edit"
+                            : idx === 0
+                              ? "pi-star-fill"
+                              : "pi-history"
+                        } text-brand-primary text-xs`}></i>
                       </div>
-                      {idx !== history.length - 1 && <div className="flex-grow-1 w-2px bg-white-alpha-10"></div>}
+                      {idx !== history.length - 1 && <div className="flex-grow-1 w-2px bg-surface-soft"></div>}
                     </div>
                     <div className="flex-grow-1">
                       <div className="flex justify-content-between align-items-start mb-2">
                         <div className="flex align-items-center gap-2">
-                          <CivicBadge label={entry.statusTo} severity={entry.statusTo === 'RESOLVED' ? 'resolved' : 'progress'} />
-                          <span className="text-xs font-bold text-muted">from {entry.statusFrom}</span>
+                          {entry.eventType === "ASSIGNED" ? (
+                            <CivicBadge
+                              label={entry.assignedToUsername || t("signals.timeline_unassigned")}
+                              severity="progress"
+                              data-testid={`signal-timeline-status-badge-${idx}`}
+                            />
+                          ) : (
+                            <StatusChip
+                              status={entry.statusTo}
+                              label={statusLabel(entry.statusTo)}
+                              testId={`signal-timeline-status-badge-${idx}`}
+                            />
+                          )}
+                          <span className="text-xs font-bold text-muted">{renderTimelineLabel(entry)}</span>
                         </div>
-                        <span className="text-xs font-mono text-muted">{new Date(entry.createdAt).toLocaleString()}</span>
+                        <span className="text-xs text-muted">{formatStamp(entry.createdAt) ?? entry.createdAt}</span>
                       </div>
+                      {entry.eventType === "STATUS_CHANGED" && (
+                        <div className="text-xs font-bold text-muted mb-2">
+                          {t("signals.timeline_transition", { from: statusLabel(entry.statusFrom), to: statusLabel(entry.statusTo) })}
+                        </div>
+                      )}
+                      {entry.eventType === "ASSIGNED" && entry.assignedToUsername && (
+                        <div className="text-xs font-bold text-muted mb-2">
+                          {t("signals.timeline_assignee_line", { assignee: entry.assignedToUsername })}
+                        </div>
+                      )}
                       <p className="m-0 text-secondary text-sm font-medium">{entry.reason}</p>
-                      <div className="mt-3 text-xs font-black uppercase tracking-widest text-muted">
-                        Authored by: <span className="text-brand-primary">{entry.changedBy}</span>
+                      <div className="mt-3 text-xs font-black uppercase tracking-wide text-muted">
+                        {t("signals.timeline_actor_label")}: <span className="text-brand-primary">{entry.changedBy}</span>
                       </div>
                     </div>
                   </div>
@@ -214,11 +317,64 @@ export function SignalDetail() {
           </div>
 
           <div className="col-12 lg:col-4">
-            <CivicCard className="text-center mb-8" variant="brand" title="Intelligence Index">
+            <CivicCard title={t("signals.assignment_title")} className="mb-8" data-testid="signal-detail-assignment-card">
+              <div className="flex flex-column gap-4">
+                <div>
+                  <div className="text-xs text-muted uppercase font-black tracking-wide mb-1">{t("signals.assignment_current_label")}</div>
+                  <div className="text-xl font-black text-main" data-testid="signal-assignee-current">
+                    {signal.assignedToUsername || t("signals.timeline_unassigned")}
+                  </div>
+                </div>
+                <div className="p-3 border-round-xl border-1 border-subtle bg-surface">
+                  <div className="text-xs text-muted uppercase font-black tracking-wide mb-1">{t("signals.assignment_status_label")}</div>
+                  <div className="text-sm text-secondary">
+                    {signal.assignedToUsername
+                      ? t("signals.assignment_status_assigned", { assignee: signal.assignedToUsername })
+                      : t("signals.assignment_status_unassigned")}
+                  </div>
+                </div>
+                {isStaff && (
+                  <div className="flex flex-column gap-3">
+                    <label htmlFor="signal-assignee-input" className="text-xs font-black uppercase tracking-wide text-main">
+                      {t("signals.assignment_input_label")}
+                    </label>
+                    <InputText
+                      id="signal-assignee-input"
+                      value={assignmentUser}
+                      onChange={(e) => setAssignmentUser(e.target.value)}
+                      className="w-full"
+                      placeholder={t("signals.assignment_input_placeholder")}
+                      data-testid="signal-assignee-input"
+                    />
+                    <CivicButton
+                      type="button"
+                      label={t("signals.assignment_cta")}
+                      icon="pi pi-user-edit"
+                      onClick={handleAssign}
+                      loading={assigning}
+                      data-testid="signal-assignee-submit"
+                    />
+                  </div>
+                )}
+              </div>
+            </CivicCard>
+
+            <CivicCard className="text-center mb-8" variant="brand" title={t("signals.intel_index")} data-testid="signal-detail-priority-card">
               <div className="text-8xl font-black text-main mb-2 tracking-tighter">
                 {signal.priorityScore?.toFixed(0)}
               </div>
-              <p className="text-muted text-sm font-bold mb-8 uppercase tracking-widest">Public Priority Rank</p>
+              <p className="text-muted text-sm font-bold mb-4 uppercase tracking-wide">{t("signals.priority_rank")}</p>
+              {/*
+                The number alone is not a priority: the scale names the level and the help line
+                explains what it is anchored to, so the card cannot be read as a bare score.
+              */}
+              <div className="flex justify-content-center mb-3">
+                <PriorityScale
+                  score={signal.priorityScore ?? 0}
+                  testId="signal-detail-priority-scale"
+                />
+              </div>
+              <p className="text-xs text-muted m-0">{t("signals.priority_scale_help")}</p>
             </CivicCard>
 
             <PriorityRadar 
@@ -230,35 +386,82 @@ export function SignalDetail() {
 
             <div className="mb-8"></div>
 
-            <CivicCard title={t('signals.why_ranked_title')} className="mb-8">
+            <CivicCard title={t('signals.why_ranked_title')} className="mb-8" data-testid="signal-detail-why-ranked">
               <p className="text-sm text-secondary mt-0 mb-5 leading-relaxed">
-                {t('signals.why_ranked_desc')}
+                {t('signals.formula_desc')}
               </p>
-              <div className="flex flex-column gap-4">
-                {[
-                  { label: "Urgency", formula: "Urgency Factor * 30" },
-                  { label: "Social Impact", formula: "Impact Score * 25" },
-                  { label: "Affected Citizens", formula: "min(People/10, 30)" },
-                  { label: "Community Support", formula: "min(Votes/5, 15)" }
-                ].map((item, idx) => (
-                  <div key={idx} className="p-4 border-round-xl bg-white-alpha-5 border-1 border-white-alpha-10 shadow-sm">
-                    <div className="text-xs font-black text-main uppercase tracking-widest mb-1">
-                      {item.label}
+<div className="flex flex-column gap-4" data-testid="signal-detail-formula-weights">
+                {(formula?.weights ?? []).map((weight) => {
+                  const capped = formula?.cappedFactors.includes(weight.factor);
+                  return (
+                    <div
+                      key={weight.factor}
+                      className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm"
+                    >
+                      <div className="text-xs font-black text-main uppercase tracking-wide mb-1">
+                        {t(`signals.formula_factors.${weight.factor}`, { defaultValue: weight.factor })}
+                      </div>
+                      <div className="text-xs text-muted leading-tight break-all">
+                        {weight.expression}
+                      </div>
+                      {capped && (
+                        <div className="text-xs text-secondary mt-2">
+                          {t("signals.formula_capped")}: {weight.cap}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-xs text-muted font-mono leading-tight">
-                      {item.formula}
+                  );
+                })}
+                {formula && (
+                  <div className="p-4 border-round-xl border-1 border-surface-soft" data-testid="signal-detail-formula-meta">
+                    <div className="text-xs text-muted">
+                      {t("signals.formula_effective_from")}: {formula.effectiveFrom}
+                    </div>
+                    <div className="text-xs text-muted mt-1">
+                      {t("signals.formula_change_note")}: {formula.changeNote}
                     </div>
                   </div>
-                ))}
+                )}
+              </div>
+            </CivicCard>
+
+            <CivicCard title={t('signals.provenance_title')} className="mb-8" data-testid="signal-detail-provenance">
+              <p className="text-sm text-secondary mt-0 mb-4 leading-relaxed">
+                {t('signals.provenance_desc')}
+              </p>
+              <div className="flex flex-column gap-3">
+                <div className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm">
+                  <div className="text-xs font-black text-main uppercase tracking-wide mb-1">
+                    {t('signals.provenance_channel_label')}
+                  </div>
+                  <div className="text-sm text-secondary" data-testid="signal-detail-provenance-channel">
+                    {signal.sourceChannel
+                      ? t(`signals.provenance_channels.${signal.sourceChannel}`)
+                      : t('signals.provenance_unknown')}
+                  </div>
+                  {signal.sourceRef && (
+                    <div className="text-xs text-muted mt-2 break-all" data-testid="signal-detail-provenance-ref">
+                      {signal.sourceRef}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 border-round-xl bg-surface-soft border-1 border-surface-soft shadow-sm">
+                  <div className="text-xs font-black text-main uppercase tracking-wide mb-1">
+                    {t('signals.provenance_version_label')}
+                  </div>
+                  <div className="text-sm text-secondary" data-testid="signal-detail-provenance-version">
+                    {signal.transformationVersion ?? t('signals.provenance_unknown')}
+                  </div>
+                </div>
               </div>
             </CivicCard>
 
             {isStaff && (
-              <CivicCard title="Protocol Management" variant="brand" className="mb-8">
+              <CivicCard title={t("signals.lifecycle_admin")} variant="brand" className="mb-8">
                 <div className="flex flex-column gap-3">
-                  <CivicButton label="Restore to Pending" variant="secondary" className="text-xs w-full" onClick={() => updateStatus('NEW')} disabled={signal.status === 'NEW'} />
-                  <CivicButton label="Authorize Progress" icon="pi pi-bolt" className="bg-status-progress text-black text-xs w-full" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} />
-                  <CivicButton label="Finalize Resolution" icon="pi pi-check" className="bg-status-resolved text-black text-xs w-full" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} />
+                  <CivicButton label={t("signals.reset_new")} variant="secondary" className="text-xs w-full" onClick={() => updateStatus('NEW')} disabled={signal.status === 'NEW'} />
+                  <CivicButton label={t("signals.mark_inprogress")} icon="pi pi-bolt" className="bg-status-progress text-on-brand text-xs w-full" onClick={() => updateStatus('IN_PROGRESS')} disabled={signal.status === 'IN_PROGRESS'} />
+                  <CivicButton label={t("signals.mark_resolved")} icon="pi pi-check" className="bg-status-resolved text-on-brand text-xs w-full" onClick={() => updateStatus('RESOLVED')} disabled={signal.status === 'RESOLVED'} />
                 </div>
               </CivicCard>
             )}

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="ca-title ca-desc">
+  <title id="ca-title">A plot on the paper map waiting for its first neighbours</title>
+  <desc id="ca-desc">A plot on the paper map waiting for its first neighbours. Animated SVG; respects reduced motion.</desc>
+  <metadata>{"style":"papercraft","title":"A plot on the paper map waiting for its first neighbours","assets":[]}</metadata>
+  <style>:root{--ca-duration:16s}
+  .ca-anim{transform-box:fill-box;transform-origin:center}
+  .ca-drift{animation:ca-drift calc(var(--ca-duration) / var(--ca-speed,1)) ease-in-out infinite alternate;animation-delay:var(--ca-delay,0s)}
+  .ca-float{animation:ca-float calc(var(--ca-duration) / var(--ca-speed,1)) ease-in-out infinite alternate;animation-delay:var(--ca-delay,0s)}
+  .ca-sway{animation:ca-sway calc(var(--ca-duration) / var(--ca-speed,1)) ease-in-out infinite alternate;animation-delay:var(--ca-delay,0s)}
+  .ca-spin{animation:ca-spin calc(var(--ca-duration) * 3 / var(--ca-speed,1)) linear infinite;animation-delay:var(--ca-delay,0s)}
+  .ca-breathe{animation:ca-breathe calc(var(--ca-duration) / var(--ca-speed,1)) ease-in-out infinite;animation-delay:var(--ca-delay,0s)}
+  .ca-pulse{animation:ca-pulse calc(var(--ca-duration) / var(--ca-speed,1)) ease-in-out infinite;animation-delay:var(--ca-delay,0s)}
+  .ca-reveal{animation:ca-reveal 1.4s ease both;animation-delay:var(--ca-delay,0s)}
+  .ca-draw{stroke-dasharray:1000;stroke-dashoffset:1000;animation:ca-draw calc(var(--ca-duration) * .8 / var(--ca-speed,1)) ease forwards;animation-delay:var(--ca-delay,0s)}
+  @keyframes ca-drift{to{transform:translateX(16px)}}
+  @keyframes ca-float{to{transform:translateY(-14px)}}
+  @keyframes ca-sway{to{transform:rotate(2deg)}}
+  @keyframes ca-spin{to{transform:rotate(360deg)}}
+  @keyframes ca-breathe{0%,100%{transform:scale(.97);opacity:.82}50%{transform:scale(1.03);opacity:1}}
+  @keyframes ca-pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  @keyframes ca-reveal{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes ca-draw{to{stroke-dashoffset:0}}
+  @media (prefers-reduced-motion:reduce){.ca-anim,.ca-drift,.ca-float,.ca-sway,.ca-spin,.ca-breathe,.ca-pulse,.ca-reveal,.ca-draw{animation:none!important;transform:none!important;opacity:1!important;stroke-dashoffset:0!important}}</style>
+  <defs><filter id="ca-paper" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.5"/></filter><filter id="ca-grain"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="7"/><feColorMatrix type="saturate" values="0"/></filter></defs>
+  <rect width="1200" height="1200" fill="transparent"/>
+  <g filter="url(#ca-paper)"><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1" transform="translate(120 120) scale(1)"><g class="ca-anim ca-drift" style="--ca-delay:0s;--ca-speed:1"><path d="M0 60 C 0 18 56 4 94 22 C 126 -14 202 -4 216 46 C 264 44 282 96 246 116 H30 C -12 116 -24 80 0 60 Z" fill="#B8D4E0"/></g></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1" transform="translate(800 92) scale(0.85)"><g class="ca-anim ca-drift" style="--ca-delay:1.4s;--ca-speed:1"><path d="M0 60 C 0 18 56 4 94 22 C 126 -14 202 -4 216 46 C 264 44 282 96 246 116 H30 C -12 116 -24 80 0 60 Z" fill="#B8D4E0"/></g></g>
+<g class="ca-anim ca-breathe" style="--ca-delay:0s;--ca-speed:0.5"><circle cx="1004" cy="222" r="84" fill="#F2C879"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M0 700 C 280 668 520 716 820 686 S 1080 706 1200 680 V 1200 H 0 Z" fill="#A9C3A0"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M0 812 C 280 790 560 820 860 794 S 1100 810 1200 792 V 1200 H 0 Z" fill="#FFF8EA"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1" transform="translate(110 720)"><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="0" y="-134" width="156" height="134" rx="6" fill="#B8D4E0"/></g><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M-14 -134 L 78 -204 L 170 -134 Z" fill="#7C5A72"/></g><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="56" y="-44" width="44" height="44" rx="4" fill="#F2C879"/></g></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1" transform="translate(900 716)"><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="0" y="-126" width="150" height="126" rx="6" fill="#CE7256"/></g><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M-14 -126 L 75 -196 L 164 -126 Z" fill="#7C5A72"/></g><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="53" y="-44" width="44" height="44" rx="4" fill="#F2C879"/></g></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="756" y="812" width="38" height="132" rx="6" fill="#CE7256"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><circle cx="776" cy="786" r="72" fill="#A9C3A0"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><circle cx="838" cy="822" r="52" fill="#A9C3A0"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><circle cx="716" cy="826" r="48" fill="#A9C3A0"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="210" y="856" width="440" height="250" rx="44" fill="#FFF8EA" stroke="#4A3A32" stroke-width="3"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="408" y="918" width="30" height="150" rx="4" fill="#4A3A32"/></g>
+<g class="ca-anim ca-sway" style="--ca-delay:0s;--ca-speed:0.5"><rect x="322" y="848" width="202" height="100" rx="20" fill="#F2C879" stroke="#4A3A32" stroke-width="3"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M360 884 H 486 M360 912 H 440" fill="none" stroke="#4A3A32" stroke-width="8"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1" transform="translate(956 1052)"><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><circle cx="0" cy="-62" r="20" fill="#FFF8EA" stroke="#4A3A32" stroke-width="2"/></g><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M-26 -34 C -26 -50 26 -50 26 -34 L 34 46 H -34 Z" fill="#7C5A72"/></g><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M-26 -20 L -52 12 M26 -20 L 52 12" fill="none" stroke="#7C5A72" stroke-width="10"/></g></g></g>
+  
+  
+</svg>

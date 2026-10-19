@@ -1,0 +1,6 @@
+
+Running 2 tests using 2 workers
+
+[1A[2K[1/2] [chromium] ÔÇ║ src\tests\community-governance.spec.ts:11:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents
+[1A[2K[2/2] [chromium] ÔÇ║ src\tests\community-decisions.spec.ts:14:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context
+[1A[2K  2 passed (8.7s)

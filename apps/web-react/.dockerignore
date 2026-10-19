@@ -1,6 +1,13 @@
 node_modules
 dist
+target
+logs
+coverage
+output
+test-results
 .git
-npm-debug.log*
+*.log
 Dockerfile
 docker-compose*.yml
+.env
+.env.*

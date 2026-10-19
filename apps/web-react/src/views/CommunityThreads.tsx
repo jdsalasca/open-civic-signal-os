@@ -6,10 +6,11 @@ import { InputText } from "primereact/inputtext";
 import { Avatar } from "primereact/avatar";
 import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import { useTranslation } from "react-i18next";
-import { CommunityMembership, CommunityThread, CommunityThreadMessage, PageResponse, ThreadStatusFilter } from "../types";
+import { CommunityMembership, CommunityThread, CommunityThreadMessage, PageResponse, ThreadSortBy, ThreadStatusFilter } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicBadge } from "../components/ui/CivicBadge";
@@ -22,8 +23,12 @@ import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { extractFirstImageUrl, prependImageToContent, stripMarkdownImages, isValidImageUrl } from "../utils/communityContent";
 import { isSubmitShortcut } from "../utils/keyboard";
+import { ModerationReportDialog } from "../components/community/ModerationReportDialog";
 
-type ApiError = Error & { friendlyMessage?: string };
+type ApiError = Error & {
+  friendlyMessage?: string;
+  response?: { status?: number; data?: { message?: string } };
+};
 
 const REACTION_TYPES = ["👍", "🔥", "🙌", "📍", "👏", "🆘"];
 
@@ -36,6 +41,7 @@ export function CommunityThreads() {
   const [threadPage, setThreadPage] = useState(0);
   const [threadRows, setThreadRows] = useState(10);
   const [threadStatusFilter, setThreadStatusFilter] = useState<ThreadStatusFilter>("ALL");
+  const [threadSortBy, setThreadSortBy] = useState<ThreadSortBy>("RELEVANCE");
   const [targetCommunityId, setTargetCommunityId] = useState<string>("");
   const [newThreadTitle, setNewThreadTitle] = useState("");
   const [threadQuery, setThreadQuery] = useState("");
@@ -44,6 +50,10 @@ export function CommunityThreads() {
   const [replyTargetByThread, setReplyTargetByThread] = useState<Record<string, CommunityThreadMessage | null>>({});
   const [sendingByThread, setSendingByThread] = useState<Record<string, boolean>>({});
   const [reactingByMessage, setReactingByMessage] = useState<Record<string, boolean>>({});
+  const [threadCreatePermissionReason, setThreadCreatePermissionReason] = useState("");
+  const [reportingMessage, setReportingMessage] = useState<CommunityThreadMessage | null>(null);
+  const [reportingThreadTitle, setReportingThreadTitle] = useState("");
+  const [submittingReport, setSubmittingReport] = useState(false);
 
   const threadTitleLength = newThreadTitle.trim().length;
 
@@ -58,6 +68,10 @@ export function CommunityThreads() {
     { label: t("community_threads.filter_active"), value: "ACTIVE" },
     { label: t("community_threads.filter_stale"), value: "STALE" },
   ];
+  const threadSortOptions = [
+    { label: t("community_threads.sort_relevance"), value: "RELEVANCE" },
+    { label: t("community_threads.sort_recent"), value: "RECENT" },
+  ];
 
   useEffect(() => {
     if (!activeCommunityId) return;
@@ -65,14 +79,16 @@ export function CommunityThreads() {
     setThreadPage(persisted.page);
     setThreadRows(persisted.rows);
     setThreadStatusFilter(persisted.status);
+    setThreadSortBy(persisted.sortBy);
   }, [activeCommunityId, getThreadListState]);
 
   const loadThreads = useCallback(async () => {
     if (!activeCommunityId) return;
     try {
       const statusQuery = threadStatusFilter === "ALL" ? "" : `&status=${threadStatusFilter}`;
+      const sortQuery = `&sortBy=${threadSortBy}`;
       const res = await apiClient.get<PageResponse<CommunityThread>>(
-        `community/threads?communityId=${activeCommunityId}&page=${threadPage}&size=${threadRows}${statusQuery}`
+        `community/threads?communityId=${activeCommunityId}&page=${threadPage}&size=${threadRows}${statusQuery}${sortQuery}`
       );
       setThreads(res.data?.content || []);
       setTotalRecords(res.data?.totalElements || 0);
@@ -80,19 +96,27 @@ export function CommunityThreads() {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t("community_threads.load_error"));
     }
-  }, [activeCommunityId, t, threadPage, threadRows, threadStatusFilter]);
+  }, [activeCommunityId, t, threadPage, threadRows, threadSortBy, threadStatusFilter]);
 
   useEffect(() => {
     loadThreads();
   }, [loadThreads]);
 
   useEffect(() => {
+    setThreadCreatePermissionReason("");
+  }, [activeCommunityId, targetCommunityId]);
+
+  const resolvePermissionReason = (error: ApiError) =>
+    (error.friendlyMessage || error.response?.data?.message || t("community_threads.permission_reason_fallback")).trim();
+
+  useEffect(() => {
     if (!activeCommunityId) return;
-    setThreadListState(activeCommunityId, { page: threadPage, rows: threadRows, status: threadStatusFilter });
-  }, [activeCommunityId, threadPage, threadRows, threadStatusFilter, setThreadListState]);
+    setThreadListState(activeCommunityId, { page: threadPage, rows: threadRows, status: threadStatusFilter, sortBy: threadSortBy });
+  }, [activeCommunityId, threadPage, threadRows, threadSortBy, threadStatusFilter, setThreadListState]);
 
   const createThread = async () => {
     if (!activeCommunityId || !targetCommunityId || threadTitleLength < FORM_LIMITS.threads.titleMin) return;
+    setThreadCreatePermissionReason("");
     try {
       await apiClient.post("community/threads", {
         sourceCommunityId: activeCommunityId,
@@ -105,7 +129,13 @@ export function CommunityThreads() {
       loadThreads();
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t("community_threads.create_error"));
+      if (apiErr.response?.status === 403) {
+        const reason = resolvePermissionReason(apiErr);
+        setThreadCreatePermissionReason(reason);
+        toast.error(t("community_threads.permission_denied"));
+      } else {
+        toast.error(apiErr.friendlyMessage || t("community_threads.create_error"));
+      }
     }
   };
 
@@ -209,6 +239,11 @@ export function CommunityThreads() {
     setThreadPage(0);
   };
 
+  const onSortChange = (value: ThreadSortBy) => {
+    setThreadSortBy(value);
+    setThreadPage(0);
+  };
+
   const buildThreadTree = (messages: CommunityThreadMessage[]) => {
     const childrenByParent: Record<string, CommunityThreadMessage[]> = {};
     const roots: CommunityThreadMessage[] = [];
@@ -234,22 +269,27 @@ export function CommunityThreads() {
     depth = 0
   ): JSX.Element => {
     const children = childrenByParent[message.id] || [];
-    const leftPadding = Math.min(depth, 4) * 1.2;
+    const leftPadding = Math.min(message.depth ?? depth, 4) * 1.2;
 
     return (
       <div key={message.id} className="flex flex-column gap-3" style={{ marginLeft: `${leftPadding}rem` }}>
-        <div className={`p-4 border-round-2xl border-1 ${depth === 0 ? "bg-surface border-subtle" : "bg-white-alpha-5 border-white-alpha-10"} ${message.hidden ? "opacity-60" : ""}`}>
-          <div className="flex justify-content-between align-items-start gap-3 mb-3">
-            <div className="flex align-items-center gap-3">
+        <div className={`u-card-surface-block ${depth === 0 ? "bg-surface border-subtle" : "bg-surface-soft border-surface-soft"} ${message.hidden ? "opacity-60" : ""}`}>
+          <div className="u-card-split-header mb-3">
+            <div className="flex align-items-center gap-3 u-card-copy">
               <Avatar label={depth === 0 ? "OP" : "R"} shape="circle" className="bg-brand-primary text-white font-bold text-xs" />
-              <div className="flex flex-column">
+              <div className="flex flex-column u-card-copy">
                 <span className="text-sm font-black text-main">
                   {t("community_threads.member_id", { id: message.authorId.slice(0, 4) })}
                 </span>
-                <span className="text-min text-muted">{new Date(message.createdAt).toLocaleString()}</span>
+                <span className="text-xs text-muted">{formatStamp(message.createdAt) ?? "-"}</span>
               </div>
             </div>
-            <div className="flex align-items-center gap-2 flex-wrap justify-content-end">
+            <div className="u-card-meta-row">
+              {message.directReplyCount > 0 && (
+                <span className="text-xs text-muted font-bold" data-testid={`thread-message-replies-${message.id}`}>
+                  {t("community_threads.reply_count", { count: message.directReplyCount })}
+                </span>
+              )}
               <CivicButton
                 type="button"
                 variant="ghost"
@@ -268,10 +308,24 @@ export function CommunityThreads() {
                   onClick={() => moderateMessage(thread.id, message.id, !message.hidden)}
                 />
               )}
+              {!message.hidden && (
+                <CivicButton
+                  type="button"
+                  variant="ghost"
+                  size="small"
+                  icon="pi pi-flag"
+                  label={t("moderation.report_action")}
+                  onClick={() => {
+                    setReportingMessage(message);
+                    setReportingThreadTitle(thread.title);
+                  }}
+                  data-testid={`thread-report-message-${message.id}`}
+                />
+              )}
             </div>
           </div>
 
-          <p className={`m-0 line-height-3 ${message.hidden ? "text-muted italic" : "text-secondary"}`}>
+          <p className={`m-0 line-height-3 community-reading-width ${message.hidden ? "text-muted italic" : "text-secondary"}`}>
             {message.hidden
               ? `[${t("community_threads.hidden_label")}: ${message.moderationReason}]`
               : stripMarkdownImages(message.content) || t("community_threads.image_only_message")}
@@ -297,7 +351,7 @@ export function CommunityThreads() {
                 className={`flex align-items-center gap-2 px-2 py-1 border-round-lg border-1 ${
                   message.viewerReaction === emoji
                     ? "border-brand-primary-alpha-60 bg-brand-primary-alpha-20 shadow-1"
-                    : "border-white-alpha-10 bg-black-alpha-20 hover:border-brand-primary-alpha-30"
+                    : "border-surface-soft bg-surface-soft-strong hover:border-brand-primary-alpha-30"
                 }`}
               >
                 <span>{emoji}</span>
@@ -339,6 +393,16 @@ export function CommunityThreads() {
               data-testid="threads-status-filter"
             />
           </div>
+          <div className="w-full md:w-16rem">
+            <CivicSelect
+              value={threadSortBy}
+              options={threadSortOptions}
+              onChange={(e) => onSortChange(e.value as ThreadSortBy)}
+              className="w-full"
+              placeholder={t("community_threads.sort_label")}
+              data-testid="threads-sort-filter"
+            />
+          </div>
           <div className="w-full md:w-20rem">
             <span className="p-input-icon-left w-full">
               <i className="pi pi-search" />
@@ -367,7 +431,7 @@ export function CommunityThreads() {
 
         <div className="grid">
           <div className="col-12 lg:col-4">
-            <CivicCard id="thread-compose-card" title={t("community_threads.channel_title")} className="mb-6" variant="brand">
+            <CivicCard id="thread-compose-card" title={t("community_threads.channel_title")} className="mb-6" variant="brand" fullHeight>
               <div className="flex flex-column gap-2">
                 <CivicField label={t("community_threads.topic")}>
                   <div className="flex flex-column gap-2">
@@ -397,6 +461,11 @@ export function CommunityThreads() {
                 {!canOpenCrossCommunityThread && activeCommunityId && (
                   <small className="text-muted text-xs" data-testid="thread-create-permission-note">
                     {t("community_threads.permission_note")}
+                  </small>
+                )}
+                {threadCreatePermissionReason && (
+                  <small className="p-error text-xs" data-testid="thread-create-permission-reason">
+                    {t("community_threads.permission_reason_label", { reason: threadCreatePermissionReason })}
                   </small>
                 )}
                 <CivicButton
@@ -432,7 +501,7 @@ export function CommunityThreads() {
                           total: totalRecords,
                         })}
                   </div>
-                  <div className="flex flex-column gap-px bg-white-alpha-10">
+                  <div className="flex flex-column gap-px bg-surface-soft">
                     {filteredThreads.map((thread) => {
                       const { roots, childrenByParent } = buildThreadTree(thread.messages || []);
                       const draft = messageDraftByThread[thread.id] || "";
@@ -443,27 +512,48 @@ export function CommunityThreads() {
 
                       return (
                         <div key={thread.id} className="bg-surface p-5 md:p-6 flex flex-column gap-4">
-                          <div className="flex justify-content-between align-items-start gap-3">
-                            <div>
-                              <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2">{thread.title}</h3>
-                              <span className="text-xs text-muted font-bold uppercase tracking-wider">
-                                {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
-                              </span>
+                          <div className="u-card-split-header">
+                            <div className="u-card-title-wrap">
+                              <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2 u-card-title-xl">{thread.title}</h3>
+                              <div className="u-card-meta-row">
+                                <span className="text-xs text-muted font-bold uppercase tracking-widest">
+                                  {t("community_threads.link_label")}: {thread.id.substring(0, 8)}
+                                </span>
+                                <span className="text-xs text-muted font-bold uppercase tracking-widest" data-testid={`thread-score-${thread.id}`}>
+                                  {t("community_threads.relevance_score")}: {Math.round(thread.relevanceScore)}
+                                </span>
+                              </div>
                             </div>
-                            <CivicBadge label={t("community_threads.verified_channel")} severity="progress" />
+                            <div className="flex flex-column align-items-end gap-2">
+                              <CivicBadge
+                                label={threadSortBy === "RELEVANCE" ? t("community_threads.sorted_relevance") : t("community_threads.sorted_recent")}
+                                severity="progress"
+                              />
+                              <CivicBadge label={t("community_threads.verified_channel")} severity="progress" />
+                            </div>
                           </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            <span className="u-pill">{t("community_threads.total_messages", { count: thread.totalMessages })}</span>
+                            <span className="u-pill">{t("community_threads.total_replies", { count: thread.totalReplies })}</span>
+                            <span className="u-pill">{t("community_threads.total_reactions", { count: thread.totalReactions })}</span>
+                          </div>
+
+                          <p className="text-sm text-secondary m-0 community-reading-width" data-testid={`thread-relevance-summary-${thread.id}`}>
+                            {thread.relevanceSummary}
+                          </p>
 
                           <div className="flex flex-column gap-3">
                             {roots.length === 0 ? (
-                              <div className="p-4 border-round-xl bg-white-alpha-5 text-muted text-sm">
-                                {t("community_threads.no_messages")}
-                              </div>
+                            <div className="u-surface-note text-muted text-sm">
+                              {t("community_threads.no_messages")}
+                            </div>
                             ) : (
                               roots.map((root) => renderMessageNode(thread, root, childrenByParent, 0))
                             )}
                           </div>
 
-                          <div className="p-4 border-round-2xl bg-black-alpha-20 border-1 border-white-alpha-10">
+                          <div className="u-surface-note bg-surface-soft-strong border-surface-soft">
                             {replyTarget && (
                               <div className="mb-3 flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">
                                 <span className="text-sm text-main">
@@ -545,7 +635,7 @@ export function CommunityThreads() {
                       );
                     })}
                   </div>
-                  <div className="p-4 border-top-1 border-white-alpha-10">
+                  <div className="p-4 border-top-1 border-surface-soft">
                     <Paginator
                       first={threadPage * threadRows}
                       rows={threadRows}
@@ -562,6 +652,45 @@ export function CommunityThreads() {
             </CivicCard>
           </div>
         </div>
+        <ModerationReportDialog
+          visible={Boolean(reportingMessage)}
+          submitting={submittingReport}
+          targetLabel={
+            reportingMessage
+              ? `${reportingThreadTitle}: ${stripMarkdownImages(reportingMessage.content).trim() || t("community_threads.image_only_message")}`
+              : ""
+          }
+          onHide={() => {
+            if (submittingReport) {
+              return;
+            }
+            setReportingMessage(null);
+            setReportingThreadTitle("");
+          }}
+          onSubmit={async ({ reasonCode, details }) => {
+            if (!activeCommunityId || !reportingMessage) {
+              return;
+            }
+            setSubmittingReport(true);
+            try {
+              await apiClient.post("community/moderation/reports", {
+                communityId: activeCommunityId,
+                targetType: "THREAD_MESSAGE",
+                targetId: reportingMessage.id,
+                reasonCode,
+                details,
+              });
+              toast.success(t("moderation.report_success"));
+              setReportingMessage(null);
+              setReportingThreadTitle("");
+            } catch (err) {
+              const apiErr = err as ApiError;
+              toast.error(apiErr.friendlyMessage || t("moderation.report_error"));
+            } finally {
+              setSubmittingReport(false);
+            }
+          }}
+        />
       </div>
     </Layout>
   );

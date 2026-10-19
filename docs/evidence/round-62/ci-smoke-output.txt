@@ -1,0 +1,6 @@
+2026-10-05T19:00:37.3019033Z ^[[36;1m    echo "API container is up"^[[0m
+2026-10-05T19:00:47.4841445Z API container is up
+2026-10-05T19:00:47.4866560Z ^[[36;1m    echo "Web container is serving"^[[0m
+2026-10-05T19:00:47.4869922Z ^[[36;1mecho "Web serves the app and proxies the API"^[[0m
+2026-10-05T19:00:47.5066517Z Web container is serving
+2026-10-05T19:00:47.5300261Z Web serves the app and proxies the API

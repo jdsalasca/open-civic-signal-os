@@ -17,12 +17,24 @@ public class Signal {
 
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
-    private String category;
+    @Column(columnDefinition = "TEXT")
+    private String locationLabel;
+private String category;
     private int urgency;
     private int impact;
     private int affectedPeople;
     private int communityVotes;
     private double priorityScore;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private SignalSourceChannel sourceChannel = SignalSourceChannel.WEB_FORM;
+
+    @Column(length = 180)
+    private String sourceRef;
+
+    @Column(nullable = false, length = 120)
+    private String transformationVersion = Signal.TRANSFORMATION_VERSION_V1;
     
     @Embedded
     @AttributeOverrides({
@@ -44,6 +56,9 @@ public class Signal {
     @Column(name = "author_id")
     private UUID authorId;
 
+    @Column(name = "assigned_to_user_id")
+    private UUID assignedToUserId;
+
     @Column(name = "community_id")
     private UUID communityId;
     
@@ -51,6 +66,11 @@ public class Signal {
     
     private Double latitude;
     private Double longitude;
+
+    @ElementCollection
+    @CollectionTable(name = "signal_evidence_urls", joinColumns = @JoinColumn(name = "signal_id"))
+    @Column(name = "evidence_url", columnDefinition = "TEXT")
+    private List<String> evidenceUrls = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "signal_reactions", joinColumns = @JoinColumn(name = "signal_id"))
@@ -66,6 +86,8 @@ public class Signal {
     public void setReactions(java.util.Map<String, Integer> reactions) {
         this.reactions = reactions;
     }
+
+    public static final String TRANSFORMATION_VERSION_V1 = "v1";
 
     public Signal() {}
 
@@ -95,6 +117,7 @@ public class Signal {
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public String getImageUrl() { return imageUrl; }
+    public String getLocationLabel() { return locationLabel; }
     public String getStatus() { return status; }
     public double getPriorityScore() { return priorityScore; }
     public int getUrgency() { return urgency; }
@@ -105,10 +128,15 @@ public class Signal {
     public ScoreBreakdown getScoreBreakdown() { return scoreBreakdown; }
     public String getModerationReason() { return moderationReason; }
     public UUID getAuthorId() { return authorId; }
+    public UUID getAssignedToUserId() { return assignedToUserId; }
     public UUID getCommunityId() { return communityId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public Double getLatitude() { return latitude; }
     public Double getLongitude() { return longitude; }
+    public List<String> getEvidenceUrls() {
+        if (evidenceUrls == null) evidenceUrls = new ArrayList<>();
+        return evidenceUrls;
+    }
     
     public List<UUID> getMergedFrom() { 
         if (mergedFrom == null) mergedFrom = new ArrayList<>();
@@ -120,6 +148,7 @@ public class Signal {
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setLocationLabel(String locationLabel) { this.locationLabel = locationLabel; }
     public void setCategory(String category) { this.category = category; }
     public void setUrgency(int urgency) { this.urgency = urgency; }
     public void setImpact(int impact) { this.impact = impact; }
@@ -127,13 +156,23 @@ public class Signal {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setStatus(String status) { this.status = status; }
     public void setPriorityScore(double priorityScore) { this.priorityScore = priorityScore; }
+    public SignalSourceChannel getSourceChannel() { return sourceChannel; }
+    public void setSourceChannel(SignalSourceChannel sourceChannel) { this.sourceChannel = sourceChannel; }
+    public String getSourceRef() { return sourceRef; }
+    public void setSourceRef(String sourceRef) { this.sourceRef = sourceRef; }
+    public String getTransformationVersion() { return transformationVersion; }
+    public void setTransformationVersion(String transformationVersion) { this.transformationVersion = transformationVersion; }
     public void setScoreBreakdown(ScoreBreakdown scoreBreakdown) { this.scoreBreakdown = scoreBreakdown; }
     public void setCommunityVotes(int communityVotes) { this.communityVotes = communityVotes; }
     public void setModerationReason(String moderationReason) { this.moderationReason = moderationReason; }
     public void setAuthorId(UUID authorId) { this.authorId = authorId; }
+    public void setAssignedToUserId(UUID assignedToUserId) { this.assignedToUserId = assignedToUserId; }
     public void setCommunityId(UUID communityId) { this.communityId = communityId; }
     public void setLatitude(Double latitude) { this.latitude = latitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public void setEvidenceUrls(List<String> evidenceUrls) {
+        this.evidenceUrls = evidenceUrls != null ? new ArrayList<>(evidenceUrls) : new ArrayList<>();
+    }
 
     public Signal withScore(double score, ScoreBreakdown breakdown) {
         this.priorityScore = score;

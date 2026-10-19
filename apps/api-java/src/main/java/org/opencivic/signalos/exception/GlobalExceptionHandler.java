@@ -1,5 +1,6 @@
 package org.opencivic.signalos.exception;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,15 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -54,12 +60,56 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleForbidden(AccessDeniedException ex) {
+        if (ex instanceof CommunityPermissionDeniedException permissionDeniedException) {
+            return new ResponseEntity<>(Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.FORBIDDEN.value(),
+                "error", HttpStatus.FORBIDDEN.getReasonPhrase(),
+                "message", permissionDeniedException.getMessage(),
+                "code", "COMMUNITY_PERMISSION_DENIED",
+                "communityId", permissionDeniedException.getCommunityId(),
+                "permissionScope", permissionDeniedException.getScope().name(),
+                "currentRole", permissionDeniedException.getCurrentRole().name(),
+                "allowedRoles", permissionDeniedException.getAllowedRoles().stream().map(Enum::name).sorted().toList()
+            ), HttpStatus.FORBIDDEN);
+        }
+        if (ex instanceof CommunitySanctionActiveException sanctionActiveException) {
+            return new ResponseEntity<>(Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.FORBIDDEN.value(),
+                "error", HttpStatus.FORBIDDEN.getReasonPhrase(),
+                "message", sanctionActiveException.getMessage(),
+                "code", "COMMUNITY_SANCTION_ACTIVE",
+                "communityId", sanctionActiveException.getCommunityId(),
+                "sanctionType", sanctionActiveException.getSanctionType().name(),
+                "sanctionEndsAt", sanctionActiveException.getEndsAt()
+            ), HttpStatus.FORBIDDEN);
+        }
         return buildResponse(HttpStatus.FORBIDDEN, "Security clearance insufficient for this sector.");
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleValidation(IllegalArgumentException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<?> handleTooManyRequests(TooManyRequestsException ex) {
+        return new ResponseEntity<>(Map.of(
+            "timestamp", LocalDateTime.now(),
+            "status", HttpStatus.TOO_MANY_REQUESTS.value(),
+            "error", HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
+            "message", ex.getMessage(),
+            "resetAt", ex.getResetAt()
+        ), HttpStatus.TOO_MANY_REQUESTS);
+    }
+
+    // P0-D: A body that cannot be read (malformed JSON, wrong encoding) is a client error, not an
+    // internal one. It used to fall through to the RuntimeException handler and surface as a 500.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+        log.warn("Malformed or unreadable request body: {}", ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST, "The request body is malformed or has an invalid encoding. Send a valid JSON payload.");
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -72,6 +122,11 @@ public class GlobalExceptionHandler {
     // P0-D: RuntimeException defaults to 500 for uncontrolled internal errors
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> handleInternalError(RuntimeException ex) {
+        // Logged, never returned. The generic message is right for the caller — an internal failure
+        // should not describe itself over the wire — but this handler used to discard the cause
+        // entirely, so every 500 became a guessing exercise with no way to tell a misconfiguration
+        // from a data problem. The stack stays in the log, where it belongs.
+        log.error("Unhandled internal error: {}", ex.getMessage(), ex);
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected system synchronization error occurred.");
     }
 

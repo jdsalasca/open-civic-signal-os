@@ -13,14 +13,30 @@ const ReportSignal = lazy(() => import("./views/ReportSignal").then(m => ({ defa
 const SignalDetail = lazy(() => import("./views/SignalDetail").then(m => ({ default: m.SignalDetail })));
 const MySignals = lazy(() => import("./views/MySignals").then(m => ({ default: m.MySignals })));
 const Settings = lazy(() => import("./views/Settings").then(m => ({ default: m.Settings })));
+const HelpCenter = lazy(() => import("./views/HelpCenter").then(m => ({ default: m.HelpCenter })));
 const Register = lazy(() => import("./views/Register").then(m => ({ default: m.Register })));
 const Verify = lazy(() => import("./views/Verify").then(m => ({ default: m.Verify })));
+const PublicBacklog = lazy(() => import("./views/PublicBacklog").then(m => ({ default: m.PublicBacklog })));
+const CommunityMergeReview = lazy(() => import("./views/CommunityMergeReview").then(m => ({ default: m.CommunityMergeReview })));
+const WeeklyDigestView = lazy(() => import("./views/WeeklyDigestView").then(m => ({ default: m.WeeklyDigestView })));
 const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
 const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
 const Communities = lazy(() => import("./views/Communities").then(m => ({ default: m.Communities })));
+const Landing = lazy(() => import("./views/Landing").then(m => ({ default: m.Landing })));
 const CommunityThreads = lazy(() => import("./views/CommunityThreads").then(m => ({ default: m.CommunityThreads })));
 const CommunityBlog = lazy(() => import("./views/CommunityBlog").then(m => ({ default: m.CommunityBlog })));
 const CommunityFeed = lazy(() => import("./views/CommunityFeed").then(m => ({ default: m.CommunityFeed })));
+const CommunityMap = lazy(() => import("./views/CommunityMap").then(m => ({ default: m.CommunityMap })));
+const CommunityProposals = lazy(() => import("./views/CommunityProposals").then(m => ({ default: m.CommunityProposals })));
+const CommunityDecisions = lazy(() => import("./views/CommunityDecisions").then(m => ({ default: m.CommunityDecisions })));
+const CommunityProjects = lazy(() => import("./views/CommunityProjects").then(m => ({ default: m.CommunityProjects })));
+const CommunityGovernance = lazy(() => import("./views/CommunityGovernance").then(m => ({ default: m.CommunityGovernance })));
+const CommunityTrustMetrics = lazy(() => import("./views/CommunityTrustMetrics").then(m => ({ default: m.CommunityTrustMetrics })));
+const CommunityOpenData = lazy(() => import("./views/CommunityOpenData").then(m => ({ default: m.CommunityOpenData })));
+const CommunityRooms = lazy(() => import("./views/CommunityRooms").then(m => ({ default: m.CommunityRooms })));
+const CommunityActivities = lazy(() => import("./views/CommunityActivities").then(m => ({ default: m.CommunityActivities })));
+const CommunityResources = lazy(() => import("./views/CommunityResources").then(m => ({ default: m.CommunityResources })));
+const CommunityIntegrations = lazy(() => import("./views/CommunityIntegrations").then(m => ({ default: m.CommunityIntegrations })));
 const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.NotFound })));
 const Unauthorized = lazy(() => import("./views/Unauthorized").then(m => ({ default: m.Unauthorized })));
 
@@ -30,9 +46,26 @@ const LoadingFallback = () => (
   </div>
 );
 
+/**
+ * The root decides between the workspace and the public front door.
+ *
+ * <p>A logged-in visitor keeps seeing the dashboard at "/" exactly as before; a visitor with no
+ * session gets the city directory instead of a login wall, so the platform's first impression is
+ * what it is for rather than a form. It waits for rehydration like AuthGuard does, otherwise a
+ * signed-in person refreshing the page would see the public landing flash before their session is
+ * read back from storage.
+ */
+function HomeRoute() {
+  const { isLoggedIn, isHydrated } = useAuthStore();
+  if (!isHydrated) {
+    return <LoadingFallback />;
+  }
+  return isLoggedIn ? <Dashboard /> : <Landing />;
+}
+
 export function App() {
   const { isLoggedIn } = useAuthStore();
-  const { theme } = useSettingsStore();
+  const { theme, interfaceMode, setInterfaceMode } = useSettingsStore();
 
   useEffect(() => {
     const html = document.documentElement;
@@ -43,7 +76,39 @@ export function App() {
       html.classList.add('light-theme');
       html.classList.remove('dark-theme');
     }
+    // Mirrored as a data attribute so the CSS supports [data-theme] as well as
+    // the legacy classes; dropping both makes prefers-color-scheme decide.
+    html.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.remove('interface-mode-simple', 'interface-mode-advanced');
+    html.classList.add(`interface-mode-${interfaceMode}`);
+  }, [interfaceMode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const syncInterfaceMode = async () => {
+      if (!isLoggedIn) {
+        return;
+      }
+      try {
+        const module = await import("./api/axios");
+        const response = await module.default.get("auth/me");
+        const backendMode = response.data?.interfaceMode;
+        if (!cancelled && (backendMode === "SIMPLE" || backendMode === "ADVANCED")) {
+          setInterfaceMode(backendMode.toLowerCase());
+        }
+      } catch {
+        // Keep local preference if server sync is unavailable.
+      }
+    };
+    syncInterfaceMode();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, setInterfaceMode]);
 
   return (
     <BrowserRouter>
@@ -60,13 +125,13 @@ export function App() {
           style: {
             background: 'var(--bg-nav)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid var(--glass-stroke)',
+            border: '1px solid var(--border-subtle)',
             color: 'var(--text-main)',
-            borderRadius: '16px',
+            borderRadius: 'var(--radius-paper-sm)',
             padding: '16px 24px',
             fontSize: '14px',
             fontWeight: '600',
-            boxShadow: 'var(--shadow-premium)',
+            boxShadow: 'var(--shadow-edge), var(--shadow-premium)',
             maxWidth: '400px',
           },
           success: {
@@ -95,20 +160,40 @@ export function App() {
             <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
             <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
             <Route path="/verify" element={<Verify />} />
+            {/*
+              The backlog is readable without an account. The API already serves it publicly, so
+              requiring a login to look at it asked people to register before they could see
+              whether registering was worth it. Outside the AuthGuard on purpose.
+            */}
+            <Route path="/backlog" element={<PublicBacklog />} />
+            <Route path="/" element={<HomeRoute />} />
             
             <Route element={<AuthGuard />}>
-              <Route path="/" element={<Dashboard />} />
               <Route path="/report" element={<ReportSignal />} />
               <Route path="/signal/:id" element={<SignalDetail />} />
               <Route path="/mine" element={<MySignals />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/help" element={<HelpCenter />} />
               <Route path="/communities" element={<Communities />} />
               <Route path="/communities/threads" element={<CommunityThreads />} />
               <Route path="/communities/blog" element={<CommunityBlog />} />
               <Route path="/communities/feed" element={<CommunityFeed />} />
+              <Route path="/communities/map" element={<CommunityMap />} />
+              <Route path="/communities/proposals" element={<CommunityProposals />} />
+              <Route path="/communities/decisions" element={<CommunityDecisions />} />
+              <Route path="/communities/projects" element={<CommunityProjects />} />
+              <Route path="/communities/governance" element={<CommunityGovernance />} />
+              <Route path="/communities/trust" element={<CommunityTrustMetrics />} />
+              <Route path="/communities/merge-review" element={<CommunityMergeReview />} />
+              <Route path="/communities/weekly-digest" element={<WeeklyDigestView />} />
+              <Route path="/communities/open-data" element={<CommunityOpenData />} />
+  <Route path="/communities/rooms" element={<CommunityRooms />} />
+  <Route path="/communities/activities" element={<CommunityActivities />} />
+  <Route path="/communities/resources" element={<CommunityResources />} />
+  <Route path="/communities/integrations" element={<CommunityIntegrations />} />
             </Route>
 
-            <Route element={<AuthGuard allowedRoles={["PUBLIC_SERVANT", "SUPER_ADMIN"]} />}>
+            <Route element={<AuthGuard />}>
               <Route path="/moderation" element={<Moderation />} />
             </Route>
             

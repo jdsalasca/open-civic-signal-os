@@ -1,0 +1,10 @@
+
+Running 6 tests using 4 workers
+
+[1A[2K[1/6] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[2/6] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[3/6] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[4/6] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[5/6] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[6/6] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K  6 passed (32.8s)

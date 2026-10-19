@@ -2,13 +2,15 @@
 
 ## Overview
 
-This roadmap stabilizes trust-critical behavior first, then aligns contracts and quality gates, and finally hardens community workflows for scalable civic operations. The sequence prioritizes reproducibility, explainability, and CI-enforceable reliability before adding new feature breadth.
+This roadmap stabilizes trust-critical behavior first, then aligns contracts and quality gates, hardens community workflows for scale, expands frontend audience/usability, and then grows into a full community operating system. The sequence prioritizes reproducibility, explainability, and CI-enforceable reliability before introducing higher-order governance, execution, and transparency capabilities.
 
 ## Phases
 
-- [ ] **Phase 1: Trust and Contract Stabilization** - Remove trust-critical runtime mismatches and align OpenAPI with live API behavior.
-- [ ] **Phase 2: Quality Gate Hardening** - Make verification and evidence gates deterministic across environments.
-- [ ] **Phase 3: Community Workflow Scalability** - Improve paging/performance/state integrity for high-activity communities.
+- [x] **Phase 1: Trust and Contract Stabilization** - Remove trust-critical runtime mismatches and align OpenAPI with live API behavior.
+- [x] **Phase 2: Quality Gate Hardening** - Make verification and evidence gates deterministic across environments.
+- [x] **Phase 3: Community Workflow Scalability** - Improve paging/performance/state integrity for high-activity communities.
+- [x] **Phase 4: Frontend Audience and Usability Growth** - Expand reach, onboarding completion, and usability with measurable frontend outcomes.
+- [ ] **Phase 5: Community Operating System Expansion** - Add identity, deliberation, execution, governance, and transparency layers for real community operations.
 
 ## Phase Details
 
@@ -23,9 +25,9 @@ This roadmap stabilizes trust-critical behavior first, then aligns contracts and
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Fix public endpoint auth null-safety and add regression tests.
-- [ ] 01-02: Update OpenAPI to match active routes, pagination, and error schemas.
-- [ ] 01-03: Align CI/gates with non-skipped backend verification policy.
+- [x] 01-01: Fix public endpoint auth null-safety and add regression tests.
+- [x] 01-02: Update OpenAPI to match active routes, pagination, and error schemas.
+- [x] 01-03: Align CI/gates with non-skipped backend verification policy.
 
 ### Phase 2: Quality Gate Hardening
 **Goal**: Quality evidence is reliable and repeatable for contributors and CI.
@@ -35,12 +37,13 @@ Plans:
 1. Playwright evidence command works reliably on Windows/Linux contributor paths.
 2. Coverage gate enforces non-zero thresholds with meaningful coverage summaries.
 3. Onboarding/verification degraded-mode UX is validated with deterministic test evidence.
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: Fix Playwright wrapper fallback behavior and add Windows path normalization checks.
-- [ ] 02-02: Raise and enforce release coverage minimum with updated reporting.
-- [ ] 02-03: Expand auth/verify degraded-mode tests and UX evidence artifacts.
+- [x] 02-01: Fix Playwright wrapper fallback behavior and add Windows path normalization checks.
+- [x] 02-02: Raise and enforce release coverage minimum with updated reporting.
+- [x] 02-03: Expand auth/verify degraded-mode tests and UX evidence artifacts.
+- [x] 02-04: Make ingest pipeline deterministic and idempotent for reproducible replays.
 
 ### Phase 3: Community Workflow Scalability
 **Goal**: Community collaboration surfaces remain performant and predictable at scale.
@@ -53,14 +56,52 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Optimize thread/message retrieval and validate paging contracts end-to-end.
-- [ ] 03-02: Harden community state persistence and route transition behavior with tests.
-- [ ] 03-03: Reduce engagement call fan-out in community blog/feed paths.
+- [x] 03-01: Optimize thread/message retrieval and validate paging contracts end-to-end.
+- [x] 03-02: Harden community state persistence and route transition behavior with tests.
+- [x] 03-03: Reduce engagement call fan-out in community blog/feed paths.
+
+### Phase 4: Frontend Audience and Usability Growth
+**Goal**: Increase civic participation by improving onboarding conversion, accessibility, language clarity, and shareability.
+**Depends on**: Phase 3
+**Requirements**: UX-01, UX-02, GROW-01, GROW-02, ACC-01, TRUST-UX-01
+**Success Criteria**:
+1. Frontend backlog for audience/usability is measurable, prioritized, and seed-ready.
+2. Each story maps to API/contract/UI ownership with explicit validation evidence.
+3. Operational backlog sequence is clear for next implementation wave.
+**Plans**: 4 plans
+
+Plans:
+- [x] 04-01: Build spec-driven frontend audience/usability backlog pack and story sequencing.
+- [x] 04-02: Implement OCS-P1-015 onboarding funnel progress/recovery UX with test evidence.
+- [x] 04-03: Stabilize local Docker dev runtime with resilient backend/frontend hot reload.
+- [x] 04-04: Re-sequence phase 4 around product clarity, simplified navigation, and user-value communication before follow-on growth surfaces.
+
+### Phase 5: Community Operating System Expansion
+**Goal**: turn the current civic signal product into a modular community operating system that supports identity, communication, deliberation, execution, and transparency for universities, neighborhoods, and local institutions.
+**Depends on**: Phase 4
+**Requirements**: COS-01, COS-02, COS-03, COS-04, COS-05, COS-06, COS-07, COS-08
+**Success Criteria**:
+1. Communities can model people, roles, spaces, and permissions without leaking sensitive data or creating opaque rules.
+2. The product supports the full loop from issue reporting and proposals to execution boards, decisions, and public metrics.
+3. Every new governance-sensitive feature maps to API, contract, and UI ownership with auditable validation evidence.
+**Plans**: Rolling execution plan set (31 tracked subplans so far under `.planning/phases/05-community-operating-system-expansion/`)
+
+Plan groups:
+- [x] 05-01: Convert community operating system redesign into executable GSD backlog, requirements, and wave sequencing.
+- [x] 05-02: Implement identity, hierarchy, and permissions foundations.
+- [x] 05-03: Implement communication, issue workflow, and deliberation foundations.
+- [x] 05-04: Implement execution, governance, and transparency foundations through rolling subplans.
+- [ ] 05-05: Validate privacy, accessibility, onboarding, integrations, and pilot readiness.
+
+Operational note:
+- Detailed execution for Phase 5 moved into rolling subplans `05-04A` through `05-28` and the canonical queue in `docs/community/current-backlog.md`.
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Trust and Contract Stabilization | 0/3 | Not started | - |
-| 2. Quality Gate Hardening | 0/3 | Not started | - |
-| 3. Community Workflow Scalability | 0/3 | Not started | - |
+| 1. Trust and Contract Stabilization | 3/3 | Completed | 2026-03-04 |
+| 2. Quality Gate Hardening | 4/4 | Completed | 2026-03-04 |
+| 3. Community Workflow Scalability | 3/3 | Completed | 2026-03-04 |
+| 4. Frontend Audience and Usability Growth | 4/4 | Completed | 2026-03-05 |
+| 5. Community Operating System Expansion | Rolling (31 tracked subplans) | In progress | - |

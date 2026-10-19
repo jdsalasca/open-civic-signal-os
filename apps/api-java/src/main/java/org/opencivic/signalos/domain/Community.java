@@ -22,8 +22,58 @@ public class Community {
     @Column(nullable = false, unique = true)
     private String slug;
 
+    /**
+     * A stable, public key for addressing this community from another instance.
+     *
+     * <p>Not the id, which is instance-local: a peer that had to learn a UUID minted by this
+     * deployment before it could ask for anything could not bootstrap itself. Not the slug either,
+     * which is mutable — a federation key that changes under a peer breaks it silently, with no error
+     * on either side.
+     */
+    @Column(nullable = false, unique = true, length = 64)
+    private String federationKey;
+
+    /**
+     * Mints a federation key for any community saved without one.
+     *
+     * <p>A lifecycle callback rather than a line in the creation service, because the key is an
+     * invariant of the entity: a community saved by a test, a seed or an admin path has to be
+     * addressable too. Leaving it to one service would mean a null column that only shows up when a
+     * peer tries to use it.
+     */
+    @jakarta.persistence.PrePersist
+    void assignFederationKey() {
+        if (federationKey == null || federationKey.isBlank()) {
+            byte[] bytes = new byte[12];
+            new java.security.SecureRandom().nextBytes(bytes);
+            federationKey = java.util.HexFormat.of().formatHex(bytes);
+        }
+    }
+
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    /**
+     * Where this community is. Optional, because a community can be a neighborhood, a building or a
+     * working group rather than a municipality, and forcing a country on those would be a lie. Kept on
+     * the entity rather than derived, so the public city directory can group and search without
+     * guessing from the free-text name.
+     */
+    @Column(length = 120)
+    private String country;
+
+    @Column(length = 120)
+    private String region;
+
+    private UUID parentCommunityId;
+
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(nullable = false)
+    private CommunityOpenDataPolicy openDataPolicy = CommunityOpenDataPolicy.DISABLED;
+
+    private UUID privacyUpdatedBy;
+
+    private LocalDateTime privacyUpdatedAt;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -47,6 +97,14 @@ public class Community {
         this.slug = slug;
     }
 
+    public String getFederationKey() {
+        return federationKey;
+    }
+
+    public void setFederationKey(String federationKey) {
+        this.federationKey = federationKey;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -55,11 +113,59 @@ public class Community {
         this.description = description;
     }
 
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public UUID getParentCommunityId() {
+        return parentCommunityId;
+    }
+
+    public void setParentCommunityId(UUID parentCommunityId) {
+        this.parentCommunityId = parentCommunityId;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public CommunityOpenDataPolicy getOpenDataPolicy() {
+        return openDataPolicy;
+    }
+
+    public void setOpenDataPolicy(CommunityOpenDataPolicy openDataPolicy) {
+        this.openDataPolicy = openDataPolicy;
+    }
+
+    public UUID getPrivacyUpdatedBy() {
+        return privacyUpdatedBy;
+    }
+
+    public void setPrivacyUpdatedBy(UUID privacyUpdatedBy) {
+        this.privacyUpdatedBy = privacyUpdatedBy;
+    }
+
+    public LocalDateTime getPrivacyUpdatedAt() {
+        return privacyUpdatedAt;
+    }
+
+    public void setPrivacyUpdatedAt(LocalDateTime privacyUpdatedAt) {
+        this.privacyUpdatedAt = privacyUpdatedAt;
     }
 }

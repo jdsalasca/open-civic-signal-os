@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import type { Page, Request } from '@playwright/test';
 
 type AuthContext = {
   token: string;
@@ -87,6 +87,22 @@ async function buildCommunitiesAndThreads(page: Page): Promise<AuthContext> {
   };
 }
 
+async function createCommunityBlogPosts(page: Page, auth: AuthContext, count: number) {
+  const headers = { Authorization: `Bearer ${auth.token}` };
+  for (let i = 0; i < count; i += 1) {
+    const createBlogRes = await page.request.post('/api/community/blog', {
+      headers,
+      data: {
+        communityId: auth.sourceCommunityId,
+        title: `Blog fanout baseline ${Date.now()}-${i + 1}`,
+        content: `Performance validation entry ${i + 1}`,
+        statusTag: 'IN_PROGRESS',
+      },
+    });
+    expect(createBlogRes.ok()).toBeTruthy();
+  }
+}
+
 test.describe('Community Threads pagination and status persistence (P1)', () => {
   test('threads list keeps paging/filter state and sends deterministic backend query params', async ({ page }) => {
     await loginAsAdmin(page);
@@ -107,7 +123,10 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
 
     const initialThreadsResponse = page.waitForResponse((resp) => {
       const url = resp.url();
-      return url.includes('/api/community/threads') && url.includes(`communityId=${auth.sourceCommunityId}`) && resp.ok();
+      return url.includes('/api/community/threads')
+        && url.includes(`communityId=${auth.sourceCommunityId}`)
+        && url.includes('sortBy=RELEVANCE')
+        && resp.ok();
     });
     await page.goto('/communities/threads');
     await initialThreadsResponse;
@@ -117,6 +136,7 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
       return (
         url.includes('/api/community/threads') &&
         url.includes(`communityId=${auth.sourceCommunityId}`) &&
+        url.includes('sortBy=RELEVANCE') &&
         url.includes('page=1') &&
         url.includes('size=10') &&
         resp.ok()
@@ -132,6 +152,7 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
       return (
         url.includes('/api/community/threads') &&
         url.includes(`communityId=${auth.sourceCommunityId}`) &&
+        url.includes('sortBy=RELEVANCE') &&
         url.includes('page=1') &&
         url.includes('size=10') &&
         resp.ok()
@@ -140,20 +161,37 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
     await page.goto('/communities/threads');
     await persistedPageResponse;
 
-    await page.getByTestId('threads-status-filter').click();
-    await page.locator('.p-dropdown-item', { hasText: /Stale|Desactualizados/i }).click();
+    await page.getByTestId('threads-sort-filter').click();
+    await Promise.all([
+      page.waitForResponse((resp) => {
+        const url = resp.url();
+        return (
+          url.includes('/api/community/threads') &&
+          url.includes(`communityId=${auth.sourceCommunityId}`) &&
+          url.includes('sortBy=RECENT') &&
+          url.includes('page=0') &&
+          resp.ok()
+        );
+      }),
+      page.locator('.p-dropdown-item', { hasText: /Most recent first|Más recientes primero/i }).click(),
+    ]);
 
-    await page.waitForResponse((resp) => {
-      const url = resp.url();
-      return (
-        url.includes('/api/community/threads') &&
-        url.includes(`communityId=${auth.sourceCommunityId}`) &&
-        url.includes('status=STALE') &&
-        url.includes('page=0') &&
-        url.includes('size=10') &&
-        resp.ok()
-      );
-    });
+    await page.getByTestId('threads-status-filter').click();
+    await Promise.all([
+      page.waitForResponse((resp) => {
+        const url = resp.url();
+        return (
+          url.includes('/api/community/threads') &&
+          url.includes(`communityId=${auth.sourceCommunityId}`) &&
+          url.includes('status=STALE') &&
+          url.includes('sortBy=RECENT') &&
+          url.includes('page=0') &&
+          url.includes('size=10') &&
+          resp.ok()
+        );
+      }),
+      page.locator('.p-dropdown-item', { hasText: /Stale|Desactualizados/i }).click(),
+    ]);
 
     await page.goto('/communities/feed');
     await page.waitForLoadState('networkidle');
@@ -163,6 +201,7 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
         url.includes('/api/community/threads') &&
         url.includes(`communityId=${auth.sourceCommunityId}`) &&
         url.includes('status=STALE') &&
+        url.includes('sortBy=RECENT') &&
         url.includes('page=0') &&
         url.includes('size=10') &&
         resp.ok()
@@ -170,5 +209,43 @@ test.describe('Community Threads pagination and status persistence (P1)', () => 
     });
     await page.goto('/communities/threads');
     await persistedFilterResponse;
+  });
+
+  test('community blog initial load uses batched comment count endpoint without per-post comment fan-out', async ({ page }) => {
+    await loginAsAdmin(page);
+    const auth = await buildCommunitiesAndThreads(page);
+    await createCommunityBlogPosts(page, auth, 4);
+
+    await page.evaluate((sourceCommunityId: string) => {
+      const raw = localStorage.getItem('community-storage');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      parsed.state = parsed.state || {};
+      parsed.state.activeCommunityId = sourceCommunityId;
+      localStorage.setItem('community-storage', JSON.stringify(parsed));
+    }, auth.sourceCommunityId);
+
+    let batchedCountRequests = 0;
+    let perPostCommentRequests = 0;
+    const onRequest = (request: Request) => {
+      const url = request.url();
+      if (request.method() !== 'GET') return;
+      if (url.includes('/api/community/blog/comments/count')) {
+        batchedCountRequests += 1;
+      }
+      if (/\/api\/community\/blog\/[^/]+\/comments(\?|$)/.test(url)) {
+        perPostCommentRequests += 1;
+      }
+    };
+    page.on('request', onRequest);
+
+    await page.goto('/communities/blog');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByText(/Blog fanout baseline/i).first()).toBeVisible();
+
+    page.off('request', onRequest);
+
+    expect(batchedCountRequests).toBe(1);
+    expect(perPostCommentRequests).toBe(0);
   });
 });

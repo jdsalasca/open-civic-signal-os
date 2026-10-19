@@ -1,129 +1,126 @@
-# Current Backlog (2026-02-19)
+# Current Backlog (2026-03-19)
 
-Operational backlog snapshot for immediate execution in Open Civic Signal OS.
+Operational execution source for immediate work in Open Civic Signal OS.
+
+## Canonical Sources
+
+- Primary story inventory: `docs/community/issue-backlog.md`
+- Community operating-system expansion pack: `docs/community/community-operating-system-backlog.md`
+- Frontend/backend top-20 priority pack: `docs/community/frontend-backend-top20-priority-backlog.md`
 
 ## Current State
 
-- Backend Java API is active with prioritization and score breakdown.
-- React dashboard supports list and detail navigation for signals.
-- Agent governance and quality workflows are configured.
+Shipped Phase 5 foundations:
+
+- `OCS-P1-029` civic identity profiles + privacy controls
+- `OCS-P1-030` hierarchical communities + breadcrumbs
+- `OCS-P1-031` community-scoped permission policies
+- `OCS-P1-032` simple vs advanced experience modes + community-first visual system
+- `OCS-P1-033` official announcements channel
+- `OCS-P1-034` relevance-ranked community threads
+- `OCS-P1-036` backend-owned community home
+- `OCS-P1-037` structured issue reporting wizard
+- `OCS-P1-038` signal timeline + assignment audit trail
+- `OCS-P1-039` community map + cross-community heat view
+- `OCS-P1-040` structured proposal templates
+- `OCS-P1-041` proposal deliberation with typed pro/con/evidence
+- `OCS-P1-043` community project boards
+- `OCS-P1-046` governance library + searchable agreements
+- `OCS-P1-047` decision ledger linked to proposals, governance, and execution
+- `OCS-P1-048` public trust metrics dashboard
+- `OCS-P1-042` verifiable community voting
+- `OCS-P1-049` moderation queue and sanction policy engine
+- `OCS-P1-050` privacy center and sensitive-data access logs
+- `OCS-P1-051` civic onboarding, tours, and help center
+- `OCS-P1-052` open civic data exports and scoped API
+- `OCS-P1-035` real-time coordination rooms, mentions, and mute controls
+- `OCS-P1-044` volunteering and activity slots
+- `OCS-P1-045` shared resource booking and conflict rules
+- `OCS-P1-053` outbound integrations layer
+- `OCS-P0-005` full audit metadata from ingest to publish
+- `OCS-P1-003` versioned and published formula metadata
+- `OCS-P1-001` issue aging, trends, and SLA risk views
+
+Shipped ingest hardening:
+
+- `OCS-P1-037` bulk ingest validator with row-level error reports
+- `OCS-P1-004` monthly transparency report pipeline over closed calendar months
 
 ## Now (Next 7 Days)
 
-1. Stabilize signal detail flow end-to-end.
-   - Validate `GET /api/signals/{id}` behavior for missing/non-existing IDs.
-   - Add API tests for detail endpoint status and payload.
-   - Add web test for dashboard-to-detail navigation.
-2. Harden prioritization reliability.
-   - Add deterministic dataset regression checks for score order.
-   - Validate duplicate-detection behavior with realistic near-duplicate cases.
-3. Publish explainability trust surface.
-   - Add "why ranked here" section in detail page with factor descriptions.
-   - Add docs journey: report -> score -> publish -> audit trail.
-4. Protect delivery quality.
-   - Restore/verify `npm run quality:quick` as required local gate.
-   - Add Java compile/test check in CI for `apps/api-java`.
+Recommended next execution order:
+
+1. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+2. `story:OCS-P1-004` transparency monthly report pipeline
+
+Execution note:
+
+- `story:OCS-P1-001` is shipped with a backend-owned `GET /api/signals/aging` returning SLA risk, age buckets, median age, and a created-versus-resolved trend read from the status audit trail, plus a staff dashboard panel carrying a freshness timestamp. The remaining hardening items are compose secret policy and OpenAPI parity.
+- Bulk ingest is shipped with `POST /api/ingest/validate` (dry run) and `POST /api/ingest/commit` (accepted rows only) over CSV, WhatsApp, and Telegram exports. One malformed row no longer discards an upload, every rejected row reports its column and reason, ragged rows are rejected rather than shifted into the wrong column, and each accepted signal keeps a `fileName#line` source reference plus a `transformationVersion`. See `docs/architecture/ADR-20260321-bulk-ingest-contract.md`.
+- `story:OCS-P1-004` is shipped with `GET /api/community/transparency-report` over a closed calendar month, carrying the previous month on every figure, and `npm run report:transparency` to render Markdown and JSON for publication. A published month is reproducible: days-open is measured to the period end rather than to today, so regenerating March in June returns March's numbers. Open items are always named, and the renderer refuses to frame an ambiguous metric as a win or a loss. See `docs/architecture/ADR-20260321-transparency-report-pipeline.md`.
 
 ## Next (7-21 Days)
 
-1. Ingest channel expansion.
-   - CSV validator with row-level error report.
-   - WhatsApp/Telegram export parser adapter.
-2. Execution bridge.
-   - Backlog item ownership workflow and status transitions.
-   - Municipal export format adapter for top prioritized issues.
-3. Civic messaging automation.
-   - Weekly top issues digest generation.
-   - "You asked, we shipped" operational digest template.
-
-## Community Features Track (New)
-
-1. Multi-community memberships.
-   - Users can belong to one or more communities with explicit membership records.
-   - Dashboard and reporting filters are scoped by selected community context.
-2. Inter-community communication.
-   - Community spaces can open structured cross-community conversations on shared issues.
-   - Add moderation and audit logs for community-to-community threads.
-3. Community internal roles.
-   - Define community-scoped roles (member, moderator, coordinator, public-servant liaison).
-   - Enforce role-based permissions for posting, moderation, and official announcements.
-4. Community progress blog for public servants.
-   - Public servants can publish progress updates per community.
-   - Citizens can follow updates and see timeline visibility of what is being worked on.
+1. Prepare the next enablement layer.
+  - platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+  - `story:OCS-P1-004`
 
 ## P0 Execution Queue (Agent Order)
 
-1. `story:OCS-P0-003` expose prioritized backlog API with explainability fields.
-2. `story:OCS-P0-004` ship public dashboard top problems and filters.
-3. `story:OCS-P0-005` add full audit metadata from ingest to publish.
-4. `story:OCS-P0-006` add abuse detection pipeline and moderator queue.
-5. `story:OCS-P0-008` add reproducibility script for ranking outputs.
+This section is preserved for repository compatibility. The active P0-equivalent execution order is:
+
+1. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+2. `story:OCS-P1-004`
+
+## Wave Sequencing
+
+### Wave 1: Trust Loop Completion
+
+1. `story:OCS-P1-001`
+
+### Wave 2: Safety and Data Responsibility
+
+2. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+
+### Wave 3: Operational Growth
+
+8. `story:OCS-P1-017`
+9. `story:OCS-P1-021`
+10. `story:OCS-P1-022`
+11. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+
+### Wave 4: Cross-App Hardening
+
+12. `story:OCS-P1-016`
+13. `story:OCS-P1-018`
+14. `story:OCS-P1-019`
+15. platform hardening pack from `docs/community/frontend-backend-top20-priority-backlog.md`
+
+## Story Notes
+
+- `OCS-P1-047` shipped and now closes the proposal -> decision -> execution trust chain with explicit approval basis and execution ownership.
+- `OCS-P1-048` shipped and now exposes backend-owned public proof of freshness, participation, execution progress, and case throughput for each community.
+- `OCS-P1-042` shipped and now closes the proposal -> vote -> decision legitimacy gap with backend-owned eligibility rules, tally visibility, and anti-abuse counters.
+- `OCS-P1-049` shipped and now adds auditable moderation reports, queue-based review, and proportional sanctions without moving civic policy logic into the frontend.
+- `OCS-P1-050` shipped and now adds user-facing privacy controls, sensitive-data access logs, and backend-owned community publication policy management without moving trust rules into the frontend.
+- `OCS-P1-051` shipped and now adds backend-owned onboarding state, searchable bilingual help guides, and contextual workflow help panels without moving role/audience logic into the frontend.
+- `OCS-P1-052` shipped and now adds community-scoped CSV/JSON exports, scoped API tokens, backend rate limits, and auditable access logs without moving export policy into the frontend.
+- `OCS-P1-035` shipped and now adds community-scoped coordination rooms, server-resolved mentions, per-user mute and mention-read state, and a server-sent room event stream without moving notification policy into the frontend.
+- `OCS-P1-044` shipped and now adds capacity-enforced volunteer activities with published signup windows, releasable signups, and an organizer attendance trail without moving slot policy into the frontend.
+- `OCS-P1-045` shipped and now adds policy-carrying shared resources, half-open conflict detection, a conflict-free approval queue, and requester-visible booking decisions without moving allocation rules into the frontend.
+- `OCS-P1-053` shipped and now adds hashed-secret outbound channels with JDK-only HTTP delivery, per-attempt delivery records, visible failures, and operator retry, so a broken channel is never silent.
+- `OCS-P0-005` shipped and now stamps every signal with its ingest channel, source reference, and scoring rule version, so a ranked number can be traced back to how it was produced.
+- `OCS-P1-003` shipped and now publishes the scoring formula as versioned data from one service, with the user-facing ranking explanation rendered from it instead of duplicated copy.
+- `OCS-P1-001` shipped and now derives SLA risk, age buckets, median age, and created-versus-resolved throughput server-side, with a staff dashboard panel that carries a freshness timestamp.
 
 ## Definition of Ready for Any New Story
 
-- Story ID exists in `docs/community/issue-backlog.md`.
-- Acceptance criteria and validation commands are explicit.
-- Contract and rollback notes are included.
-- Owner lane assigned (backend, frontend, docs, ops).
+- Story ID exists in `docs/community/issue-backlog.md`
+- API, contract, and UI ownership are explicit
+- Acceptance criteria are measurable
+- Validation commands are specified
+- Rollback path is documented
 
-## Critical Fix Backlog (Audit 2026-02-23)
+## Historical Note
 
-1. `P0 security: remove dev profile from production compose runtime`
-   - Replace `SPRING_PROFILES_ACTIVE: dev` in `infra/docker-compose.yml` with a hardened runtime profile.
-   - Acceptance criteria:
-     - verification code backdoor (`123456`) is not accepted in compose runtime
-     - SQL debug logging is disabled in compose runtime
-     - auth and signal flows still pass smoke tests
-2. `P0 security: externalize JWT secret and forbid hardcoded fallback in compose`
-   - Remove inline secret from `infra/docker-compose.yml` and load via environment/secret manager.
-   - Acceptance criteria:
-     - compose starts only when explicit secret is provided
-     - no static secret literal remains in repo runtime files
-3. `P1 trust-critical: align OpenAPI with active signal endpoints`
-   - Add contract entries for currently used endpoints (`/api/signals/{id}`, `/api/signals/meta`, `/api/signals/mine`, `/api/signals/{id}/vote`).
-   - Acceptance criteria:
-     - OpenAPI includes request/response + error schemas for these routes
-     - API integration tests validate at least detail + meta contract examples
-4. `P1 performance: remove N+1 engagement calls in community blog timeline`
-   - Replace per-post `GET /api/community/blog/{id}/comments` fetch pattern with batched comment summary/list endpoint.
-   - Acceptance criteria:
-     - blog timeline load requires O(1) or O(log n) API calls for engagement data
-     - Playwright trace shows at least 70% fewer blog comment requests on initial load
-5. `P1 performance: cache and de-duplicate membership loading in layout`
-   - Avoid repeated `GET /api/communities/my` calls across route transitions.
-   - Acceptance criteria:
-     - a single navigation session does not re-fetch memberships on every page unless explicit refresh
-     - global state persistence tests remain green
-
-## Critical Fix Backlog (Audit 2026-02-25)
-
-1. `P0 trust-critical: harden registration email delivery in compose/prod-like runtime`
-   - Evidence: API logs show repeated `EmailService ... Authentication failed` during `POST /api/auth/register` and welcome flow.
-   - Civic risk: users cannot complete verification without out-of-band DB access, breaking onboarding trust.
-   - Acceptance criteria:
-     - registration + resend + welcome emails succeed in compose runtime with configured SMTP credentials
-     - if SMTP is unavailable, API returns explicit degraded-mode message and stores auditable delivery failure reason
-2. `P0 ux-critical: expose verification fallback UX when email delivery fails`
-   - Evidence: current verify flow assumes inbox delivery and provides no in-app recovery route.
-   - Civic risk: real users get blocked at account activation with no guided resolution path.
-   - Acceptance criteria:
-     - verify screen includes clear retry/help path (`resend`, cooldown, support route, and state feedback)
-     - Playwright desktop/mobile coverage confirms complete recovery path from failed delivery
-3. `P1 scalability: add pagination/filter contract to community threads endpoint`
-   - Evidence: smoke call to `GET /api/community/threads?communityId=...` returned 50 items with no paging controls.
-   - Civic risk: thread timelines will degrade quickly for active communities and increase payload costs.
-   - Acceptance criteria:
-     - API supports deterministic paging (`page`, `size`, `sort`) and optional status filter
-     - frontend uses server paging and preserves current filter/sort between route transitions
-4. `P1 trust-critical: show backend permission reason in blog/thread creation UI`
-   - Evidence: `POST /api/community/blog` returns `403 Security clearance insufficient for this sector` for non-staff roles.
-   - Civic risk: users perceive broken actions if role constraints are not explained contextually.
-   - Acceptance criteria:
-     - UI hides disabled actions for unauthorized roles and shows inline rationale where relevant
-     - role requirements are documented in EN/ES copy for blog + threads entry points
-5. `P1 developer-experience: fix Windows Playwright wrapper path normalization`
-   - Evidence: `npm run agent:ux:pw -- open ...` failed with `/bin/bash: C:Users...playwright_cli.sh: No such file or directory`.
-   - Civic risk: required UX evidence gate becomes unreliable for contributors on Windows.
-   - Acceptance criteria:
-     - wrapper resolves Windows paths correctly or cleanly falls back to `npx @playwright/cli`
-     - `agent:ux:pw` open/snapshot workflow works from Windows and Linux without manual env overrides
+Older phase-4 clarity/usability items and pre-Phase-5 audit backlogs remain documented in their dedicated source files, but they are not the primary execution queue anymore unless a trust-critical regression reopens them.

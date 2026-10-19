@@ -1,6 +1,9 @@
 package org.opencivic.signalos.service;
 
+import org.opencivic.signalos.domain.PrioritizationFormula;
 import org.opencivic.signalos.domain.Signal;
+import org.opencivic.signalos.domain.SignalSourceChannel;
+import org.opencivic.signalos.domain.SignalScoreEntry;
 import org.opencivic.signalos.domain.ScoreBreakdown;
 import org.opencivic.signalos.domain.SignalStatus;
 import org.opencivic.signalos.domain.User;
@@ -9,6 +12,7 @@ import org.opencivic.signalos.domain.SignalStatusEntry;
 import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.repository.SignalRepository;
+import org.opencivic.signalos.repository.SignalScoreEntryRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.repository.VoteRepository;
 import org.opencivic.signalos.repository.SignalStatusEntryRepository;
@@ -19,12 +23,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,20 +38,67 @@ import java.util.stream.Collectors;
 public class PrioritizationServiceImpl implements PrioritizationService {
 
     private static final Logger log = LoggerFactory.getLogger(PrioritizationServiceImpl.class);
+
+    /**
+     * Stamped on every signal so an auditor can tell which scoring rule produced a rank.
+     * Bump this string whenever the weights in {@link #getBreakdown} change, and add a
+     * regression note in docs/ per the reproducibility rule.
+     */
+    public static final String TRANSFORMATION_VERSION = Signal.TRANSFORMATION_VERSION_V1;
+
+    /**
+     * Statuses hidden from the public ranking regardless of any filter.
+     *
+     * <p>A threshold is not allowed to bring back content moderation removed, so every path that
+     * does not name statuses explicitly still excludes these.
+     */
+    static final List<String> HIDDEN_STATUSES = List.of("FLAGGED", "REJECTED");
+
     private final SignalRepository signalRepository;
     private final VoteRepository voteRepository;
     private final UserRepository userRepository;
     private final SignalStatusEntryRepository statusHistoryRepository;
+  private final SignalScoreEntryRepository scoreEntryRepository;
 
-    public PrioritizationServiceImpl(SignalRepository signalRepository, 
-                                  VoteRepository voteRepository, 
-                                  UserRepository userRepository,
-                                  SignalStatusEntryRepository statusHistoryRepository) {
-        this.signalRepository = signalRepository;
-        this.voteRepository = voteRepository;
-        this.userRepository = userRepository;
-        this.statusHistoryRepository = statusHistoryRepository;
-    }
+public PrioritizationServiceImpl(SignalRepository signalRepository,
+    VoteRepository voteRepository,
+    UserRepository userRepository,
+    SignalStatusEntryRepository statusHistoryRepository,
+    SignalScoreEntryRepository scoreEntryRepository) {
+  this.signalRepository = signalRepository;
+  this.voteRepository = voteRepository;
+  this.userRepository = userRepository;
+  this.statusHistoryRepository = statusHistoryRepository;
+  this.scoreEntryRepository = scoreEntryRepository;
+  }
+
+  /**
+   * Records what a signal's score is right now, and why it moved.
+   *
+   * <p>Called at the only three places a score changes at runtime: a signal being recorded, a resident
+   * supporting it, and a duplicate merge summing votes. Approving a formula change does not rescore
+   * anything here, so there is no fourth caller to remember.
+   *
+   * <p>The raw inputs travel with the score, read off the signal rather than off
+   * {@link ScoreBreakdown}, which holds the weighted terms: an audit record wants the numbers a person
+   * declared, not the arithmetic applied to them. {@code cause} is what makes this an audit trail
+   * rather than a column of numbers, because a score that rose because a resident supported the issue
+   * is a different fact from one that rose because two duplicates were merged.
+   */
+  private void recordScore(Signal signal, SignalScoreEntry.Cause cause) {
+    SignalScoreEntry entry = new SignalScoreEntry();
+    entry.setId(UUID.randomUUID());
+    entry.setSignalId(signal.getId());
+    entry.setPriorityScore(signal.getPriorityScore());
+    entry.setUrgency(signal.getUrgency());
+    entry.setImpact(signal.getImpact());
+    entry.setAffectedPeople(signal.getAffectedPeople());
+    entry.setCommunityVotes(signal.getCommunityVotes());
+    entry.setFormulaVersion(PrioritizationFormulaService.VERSION);
+    entry.setCause(cause);
+    entry.setRecordedAt(LocalDateTime.now());
+    scoreEntryRepository.save(entry);
+  }
 
     @Override
     public TrustPacket getTrustPacket(UUID signalId) {
@@ -65,14 +118,54 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             signal.getCreatedAt(),
             score,
             breakdown,
-            TrustPacket.CURRENT_FORMULA,
+            PrioritizationFormula.expression(),
             hash
         );
     }
 
     @Override
     public List<SignalStatusEntry> getStatusHistory(UUID signalId) {
-        return statusHistoryRepository.findBySignalIdOrderByCreatedAtDesc(signalId);
+        return statusHistoryRepository.findTimeline(signalId);
+    }
+
+    @Override
+    @Transactional
+    public Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason) {
+        Signal signal = signalRepository.findById(signalId)
+            .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + signalId));
+
+        User assignee = userRepository.findByUsername(assigneeUsername)
+            .orElseThrow(() -> new ResourceNotFoundException("Assignee not found: " + assigneeUsername));
+
+        signal.setAssignedToUserId(assignee.getId());
+        Signal saved = signalRepository.save(signal);
+
+        statusHistoryRepository.save(new SignalStatusEntry(
+            signalId,
+            signal.getStatus(),
+            signal.getStatus(),
+            "ASSIGNED",
+            changedBy,
+            reason == null || reason.isBlank() ? "Case assignment updated" : reason,
+            assignee.getUsername()
+        ));
+
+        return saved;
+    }
+
+    /**
+     * Unknown channel strings are rejected rather than silently defaulted, so a bad ingest
+     * label shows up as a failed import instead of an unattributed civic signal.
+     */
+    private SignalSourceChannel resolveSourceChannel(String rawChannel) {
+        if (rawChannel == null || rawChannel.isBlank()) {
+            return SignalSourceChannel.WEB_FORM;
+        }
+        try {
+            return SignalSourceChannel.valueOf(rawChannel.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown signal sourceChannel: " + rawChannel);
+        }
     }
 
     private String generateHash(String input) {
@@ -97,15 +190,39 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public Page<Signal> getPrioritizedSignals(Pageable pageable, UUID communityId, Collection<String> statuses) {
+        return getPrioritizedSignals(pageable, communityId, statuses, null);
+    }
+
+    @Override
+    public Page<Signal> getPrioritizedSignals(
+        Pageable pageable,
+        UUID communityId,
+        Collection<String> statuses,
+        Double minScore
+    ) {
+        boolean hasStatuses = statuses != null && !statuses.isEmpty();
+        boolean hasThreshold = minScore != null;
+
         Page<Signal> basePage;
-        if (statuses != null && !statuses.isEmpty()) {
-            basePage = communityId == null
-                ? signalRepository.findByStatusIn(statuses, pageable)
-                : signalRepository.findByStatusInAndCommunityId(statuses, communityId, pageable);
+        if (hasThreshold && hasStatuses && communityId == null) {
+            basePage = signalRepository.findByStatusInAndPriorityScoreGreaterThanEqual(statuses, minScore, pageable);
+        } else if (hasThreshold && hasStatuses) {
+            basePage = signalRepository.findByStatusInAndCommunityIdAndPriorityScoreGreaterThanEqual(statuses, communityId, minScore, pageable);
+        } else if (hasThreshold && communityId == null) {
+            // Keeps excluding FLAGGED and REJECTED, same as the unfiltered path.
+            basePage = signalRepository.findByStatusNotInAndPriorityScoreGreaterThanEqual(
+                HIDDEN_STATUSES, minScore, pageable);
+        } else if (hasThreshold) {
+            basePage = signalRepository.findByStatusNotInAndCommunityIdAndPriorityScoreGreaterThanEqual(
+                HIDDEN_STATUSES, communityId, minScore, pageable);
+        } else if (hasStatuses && communityId == null) {
+            basePage = signalRepository.findByStatusIn(statuses, pageable);
+        } else if (hasStatuses) {
+            basePage = signalRepository.findByStatusInAndCommunityId(statuses, communityId, pageable);
+        } else if (communityId == null) {
+            basePage = signalRepository.findByStatusNotIn(HIDDEN_STATUSES, pageable);
         } else {
-            basePage = communityId == null
-                ? signalRepository.findByStatusNotIn(List.of("FLAGGED", "REJECTED"), pageable)
-                : signalRepository.findByStatusNotInAndCommunityId(List.of("FLAGGED", "REJECTED"), communityId, pageable);
+            basePage = signalRepository.findByStatusNotInAndCommunityId(HIDDEN_STATUSES, communityId, pageable);
         }
         return basePage
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)));
@@ -118,9 +235,22 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public List<Signal> getTopUnresolved(int limit, UUID communityId) {
-        List<Signal> baseSignals = communityId == null
-            ? signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, limit))
-            : signalRepository.findTopSignalsByStatusAndCommunityId("NEW", communityId, PageRequest.of(0, limit));
+        return getTopUnresolved(limit, communityId, null);
+    }
+
+    @Override
+    public List<Signal> getTopUnresolved(int limit, UUID communityId, Double minScore) {
+        List<Signal> baseSignals;
+        if (minScore != null) {
+            PageRequest page = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "priorityScore"));
+            baseSignals = communityId == null
+                ? signalRepository.findByStatusAndPriorityScoreGreaterThanEqual("NEW", minScore, page).getContent()
+                : signalRepository.findByStatusAndCommunityIdAndPriorityScoreGreaterThanEqual("NEW", communityId, minScore, page).getContent();
+        } else {
+            baseSignals = communityId == null
+                ? signalRepository.findTopSignalsByStatus("NEW", PageRequest.of(0, limit))
+                : signalRepository.findTopSignalsByStatusAndCommunityId("NEW", communityId, PageRequest.of(0, limit));
+        }
         return baseSignals
                 .stream()
                 .map(signal -> signal.withScore(calculateScore(signal), getBreakdown(signal)))
@@ -149,11 +279,14 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     public ScoreBreakdown getBreakdown(Signal signal) {
+        // Every term comes from PrioritizationFormula, which is also what the published formula
+        // string is built from. The numbers used to live here and again as prose in two other
+        // classes; a divergence is no longer possible by construction.
         return new ScoreBreakdown(
-            signal.getUrgency() * 30.0,
-            signal.getImpact() * 25.0,
-            Math.min(signal.getAffectedPeople() / 10.0, 30.0),
-            Math.min(signal.getCommunityVotes() / 5.0, 15.0)
+            PrioritizationFormula.urgencyTerm(signal.getUrgency()),
+            PrioritizationFormula.impactTerm(signal.getImpact()),
+            PrioritizationFormula.affectedPeopleTerm(signal.getAffectedPeople()),
+            PrioritizationFormula.communityVotesTerm(signal.getCommunityVotes())
         );
     }
 
@@ -192,6 +325,37 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         }
         return duplicateMap;
     }
+
+    /**
+     * Similarity between two signals on the same scale the boolean check uses, so the review queue
+ * and the merge decision can never disagree about what counted as similar.
+ *
+ * <p>Shares its components with {@link #isSimilar}: identical and containment cases return 1.0,
+ * everything else returns the token overlap the boolean path already gates on. Returning the
+ * boolean twice would leave a reviewer unable to see how close a borderline case was.
+ */
+public double similarityScore(Signal s1, Signal s2) {
+    if (s1 == null || s2 == null) {
+        return 0.0;
+    }
+    if (s1.getCategory() == null || s2.getCategory() == null
+        || !s1.getCategory().equalsIgnoreCase(s2.getCategory())) {
+        return 0.0;
+    }
+    String t1 = normalizeTitle(s1.getTitle());
+    String t2 = normalizeTitle(s2.getTitle());
+    if (t1.isBlank() || t2.isBlank()) {
+        return 0.0;
+    }
+    if (t1.equals(t2)) {
+        return 1.0;
+    }
+    int minLen = Math.min(t1.length(), t2.length());
+    if (minLen >= 12 && (t1.contains(t2) || t2.contains(t1))) {
+        return 1.0;
+    }
+    return tokenOverlap(t1, t2);
+}
 
     private boolean isSimilar(Signal s1, Signal s2) {
         if (s1.getCategory() == null || s2.getCategory() == null || !s1.getCategory().equalsIgnoreCase(s2.getCategory())) {
@@ -286,7 +450,9 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         }
         
         target.setPriorityScore(calculateScore(target));
-        return signalRepository.save(target);
+        Signal merged = signalRepository.save(target);
+        recordScore(merged, SignalScoreEntry.Cause.DUPLICATE_MERGE);
+        return merged;
     }
 
     @Override
@@ -312,7 +478,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         Signal saved = signalRepository.save(signal);
 
         statusHistoryRepository.save(new SignalStatusEntry(
-            id, oldStatus, signal.getStatus(), "moderator", reason
+            id, oldStatus, signal.getStatus(), "STATUS_CHANGED", "moderator", reason, null
         ));
 
         return saved;
@@ -320,23 +486,51 @@ public class PrioritizationServiceImpl implements PrioritizationService {
 
     @Override
     @Transactional
-    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, Double latitude, Double longitude, String username) {
-        return createSignal(title, description, category, urgency, impact, affectedPeople, imageUrl, latitude, longitude, username, null);
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String username) {
+        return createSignal(title, description, category, urgency, impact, affectedPeople, imageUrl, locationLabel, evidenceUrls, latitude, longitude, username, null);
+    }
+
+@Override
+    @Transactional
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String username, UUID communityId) {
+        return createSignal(
+            title, description, category, urgency, impact, affectedPeople,
+            imageUrl, locationLabel, evidenceUrls, latitude, longitude,
+            null, null, username, communityId
+        );
     }
 
     @Override
     @Transactional
-    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, Double latitude, Double longitude, String username, UUID communityId) {
+    public Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String sourceChannel, String sourceRef, String username, UUID communityId) {
         User author = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Author user not found: " + username));
+
+        List<String> normalizedEvidence = new ArrayList<>();
+        if (evidenceUrls != null) {
+            normalizedEvidence = evidenceUrls.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .distinct()
+                .toList();
+        }
+        String normalizedPrimaryEvidence = normalizedEvidence.isEmpty()
+            ? (imageUrl == null || imageUrl.isBlank() ? null : imageUrl.trim())
+            : normalizedEvidence.get(0);
 
         Signal signal = new Signal(
             UUID.randomUUID(), title, description, category,
             urgency, impact, affectedPeople,
             0, 0.0, null, SignalStatus.NEW.name(), new ArrayList<>(), author.getId(), java.time.LocalDateTime.now(), communityId);
-        signal.setLatitude(latitude);
+signal.setLatitude(latitude);
         signal.setLongitude(longitude);
-        signal.setImageUrl(imageUrl);
+        signal.setSourceChannel(resolveSourceChannel(sourceChannel));
+        signal.setSourceRef(sourceRef == null || sourceRef.isBlank() ? null : sourceRef.trim());
+        signal.setTransformationVersion(TRANSFORMATION_VERSION);
+        signal.setImageUrl(normalizedPrimaryEvidence);
+        signal.setLocationLabel(locationLabel == null || locationLabel.isBlank() ? null : locationLabel.trim());
+        signal.setEvidenceUrls(normalizedEvidence);
         
         ScoreBreakdown breakdown = getBreakdown(signal);
         double score = breakdown.urgency() + breakdown.impact() + breakdown.affectedPeople() + breakdown.communityVotes();
@@ -346,10 +540,10 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         
         Signal saved = saveSignal(signal);
         
-        statusHistoryRepository.save(new SignalStatusEntry(
-            saved.getId(), "NONE", "NEW", username, "Initial report submission"
+statusHistoryRepository.save(new SignalStatusEntry(
+            saved.getId(), "NONE", "NEW", "CREATED", username, "Initial report submission", null
         ));
-
+        recordScore(saved, SignalScoreEntry.Cause.INGEST);
         return saved;
     }
 
@@ -366,12 +560,24 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     @Override
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus) {
-        return updateStatus(id, newStatus, null);
+        return updateStatus(id, newStatus, null, "system_operator", "Standard lifecycle transition");
+    }
+
+    @Override
+    @Transactional
+    public Optional<Signal> updateStatus(UUID id, String newStatus, String changedBy, String reason) {
+        return updateStatus(id, newStatus, null, changedBy, reason);
     }
 
     @Override
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId) {
+        return updateStatus(id, newStatus, communityId, "system_operator", "Standard lifecycle transition");
+    }
+
+    @Override
+    @Transactional
+    public Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId, String changedBy, String reason) {
         log.info("Updating status for signal {}. Target: {}", id, newStatus);
         Signal signal = (communityId == null
             ? signalRepository.findById(id)
@@ -390,7 +596,13 @@ public class PrioritizationServiceImpl implements PrioritizationService {
         Signal saved = signalRepository.save(signal);
         
         statusHistoryRepository.save(new SignalStatusEntry(
-            id, oldStatus, newStatus, "system_operator", "Standard lifecycle transition"
+            id,
+            oldStatus,
+            newStatus,
+            "STATUS_CHANGED",
+            changedBy == null || changedBy.isBlank() ? "system_operator" : changedBy,
+            reason == null || reason.isBlank() ? "Standard lifecycle transition" : reason,
+            null
         ));
         
         return Optional.of(saved);
@@ -421,7 +633,9 @@ public class PrioritizationServiceImpl implements PrioritizationService {
             voteRepository.save(new Vote(user.getId(), signalId));
             signal.setCommunityVotes(signal.getCommunityVotes() + 1);
             signal.setPriorityScore(calculateScore(signal));
-            return signalRepository.save(signal);
+            Signal rescored = signalRepository.save(signal);
+            recordScore(rescored, SignalScoreEntry.Cause.SUPPORT_VOTE);
+            return rescored;
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Concurrent support attempt detected and rejected.");
         }

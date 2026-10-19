@@ -1,0 +1,36 @@
+
+Running 32 tests using 1 worker
+
+[1A[2K[1/32] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[2/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[3/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[4/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[5/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[6/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[7/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[8/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[9/32] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[10/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[11/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[12/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[13/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[14/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[15/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[16/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[17/32] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[18/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[19/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[20/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[21/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[22/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[23/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[24/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[25/32] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[26/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[27/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[28/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[29/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[30/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[31/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[32/32] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K  32 passed (1.7m)

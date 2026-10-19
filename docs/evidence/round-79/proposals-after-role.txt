@@ -1,0 +1,5 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation
+[1A[2K  1 passed (9.5s)

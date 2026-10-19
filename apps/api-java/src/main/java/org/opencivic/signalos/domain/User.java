@@ -25,6 +25,40 @@ public class User {
     @Column(nullable = false)
     private String roles; // Comma-separated
 
+    private String displayName;
+    private String civicRole;
+
+    @Column(columnDefinition = "TEXT")
+    private String affiliationsCsv;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(columnDefinition = "TEXT")
+    private String onboardingCompletedStepKeysCsv;
+
+    @Column(columnDefinition = "TEXT")
+    private String dismissedGuideKeysCsv;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProfileVisibility profileVisibility = ProfileVisibility.PUBLIC;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProfileVisibility affiliationVisibility = ProfileVisibility.COMMUNITY;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProfileVisibility activityVisibility = ProfileVisibility.COMMUNITY;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private InterfaceMode interfaceMode = InterfaceMode.SIMPLE;
+
+    @Column(nullable = false)
+    private String avatarPreset = "civic-sunrise";
+
     private boolean enabled = false;
     
     // V3: Verification Flow
@@ -57,6 +91,30 @@ public class User {
     public void setEmail(String email) { this.email = email; }
     public String getRoles() { return roles; }
     public void setRoles(String roles) { this.roles = roles; }
+    public String getDisplayName() { return displayName; }
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
+    public String getCivicRole() { return civicRole; }
+    public void setCivicRole(String civicRole) { this.civicRole = civicRole; }
+    public String getAffiliationsCsv() { return affiliationsCsv; }
+    public void setAffiliationsCsv(String affiliationsCsv) { this.affiliationsCsv = affiliationsCsv; }
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
+    public String getOnboardingCompletedStepKeysCsv() { return onboardingCompletedStepKeysCsv; }
+    public void setOnboardingCompletedStepKeysCsv(String onboardingCompletedStepKeysCsv) {
+        this.onboardingCompletedStepKeysCsv = onboardingCompletedStepKeysCsv;
+    }
+    public String getDismissedGuideKeysCsv() { return dismissedGuideKeysCsv; }
+    public void setDismissedGuideKeysCsv(String dismissedGuideKeysCsv) { this.dismissedGuideKeysCsv = dismissedGuideKeysCsv; }
+    public ProfileVisibility getProfileVisibility() { return profileVisibility; }
+    public void setProfileVisibility(ProfileVisibility profileVisibility) { this.profileVisibility = profileVisibility; }
+    public ProfileVisibility getAffiliationVisibility() { return affiliationVisibility; }
+    public void setAffiliationVisibility(ProfileVisibility affiliationVisibility) { this.affiliationVisibility = affiliationVisibility; }
+    public ProfileVisibility getActivityVisibility() { return activityVisibility; }
+    public void setActivityVisibility(ProfileVisibility activityVisibility) { this.activityVisibility = activityVisibility; }
+    public InterfaceMode getInterfaceMode() { return interfaceMode; }
+    public void setInterfaceMode(InterfaceMode interfaceMode) { this.interfaceMode = interfaceMode; }
+    public String getAvatarPreset() { return avatarPreset; }
+    public void setAvatarPreset(String avatarPreset) { this.avatarPreset = avatarPreset; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     
@@ -64,4 +122,65 @@ public class User {
     public void setVerificationCode(String verificationCode) { this.verificationCode = verificationCode; }
     public boolean isVerified() { return isVerified; }
     public void setVerified(boolean verified) { isVerified = verified; }
+
+    public List<String> getAffiliations() {
+        if (affiliationsCsv == null || affiliationsCsv.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(affiliationsCsv.split(","))
+            .map(String::trim)
+            .filter(value -> !value.isBlank())
+            .toList();
+    }
+
+    public void setAffiliations(List<String> affiliations) {
+        if (affiliations == null || affiliations.isEmpty()) {
+            this.affiliationsCsv = null;
+            return;
+        }
+        this.affiliationsCsv = affiliations.stream()
+            .map(String::trim)
+            .filter(value -> !value.isBlank())
+            .collect(Collectors.joining(","));
+    }
+
+    public List<String> getOnboardingCompletedStepKeys() {
+        return csvToList(onboardingCompletedStepKeysCsv);
+    }
+
+    public void setOnboardingCompletedStepKeys(List<String> keys) {
+        onboardingCompletedStepKeysCsv = listToCsv(keys);
+    }
+
+    public List<String> getDismissedGuideKeys() {
+        return csvToList(dismissedGuideKeysCsv);
+    }
+
+    public void setDismissedGuideKeys(List<String> keys) {
+        dismissedGuideKeysCsv = listToCsv(keys);
+    }
+
+    private List<String> csvToList(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(value.split(","))
+            .map(String::trim)
+            .filter(item -> !item.isBlank())
+            .distinct()
+            .sorted()
+            .toList();
+    }
+
+    private String listToCsv(List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+        return values.stream()
+            .map(String::trim)
+            .filter(item -> !item.isBlank())
+            .distinct()
+            .sorted()
+            .collect(Collectors.joining(","));
+    }
 }

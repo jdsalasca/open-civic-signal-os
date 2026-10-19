@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 import { CivicSelect } from "./ui/CivicSelect";
 import { toRoleLabel } from "../constants/roleLabels";
+import { useSettingsStore } from "../store/useSettingsStore";
 
 type Props = {
   children: ReactNode;
@@ -23,11 +24,23 @@ type NavItem = {
   testId?: string;
 };
 
+/**
+ * Routes that are a destination rather than a navigation item, mapped to the label the topbar should
+ * announce for them. Kept as data so adding a detail screen is one line instead of another branch in
+ * the component.
+ */
+const SECTION_FOR_DETAIL_ROUTES: Record<string, string> = {
+  "/signal/": "nav.case_detail",
+};
+
 export function Layout({ children, authMode = false }: Props) {
   const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
+  const mainContentId = "main-content";
+  const mobileNavId = "mobile-navigation-drawer";
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const interfaceMode = useSettingsStore((state) => state.interfaceMode);
   const { isLoggedIn, activeRole, userName, logout } = useAuthStore();
   const {
     memberships,
@@ -37,14 +50,32 @@ export function Layout({ children, authMode = false }: Props) {
     shouldRefreshMemberships,
   } = useCommunityStore();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const [desktopMoreVisible, setDesktopMoreVisible] = useState(interfaceMode === "advanced");
+  const mainContentRef = useRef<HTMLElement | null>(null);
+
+  const focusMainContentTarget = () => {
+    const mainElement = mainContentRef.current;
+    if (!mainElement) {
+      return;
+    }
+    const firstFocusable = mainElement.querySelector<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    (firstFocusable ?? mainElement).focus();
+  };
 
   useEffect(() => {
+    setDesktopMoreVisible(interfaceMode === "advanced");
+  }, [interfaceMode]);
+
+  useEffect(() => {
+    let cancelled = false;
     const loadMemberships = async () => {
       if (!isLoggedIn) return;
       if (!shouldRefreshMemberships(MEMBERSHIP_CACHE_TTL_MS)) return;
       try {
         const res = await apiClient.get("communities/my");
-        if (res.status === 200) {
+        if (!cancelled && res.status === 200) {
           setMemberships(res.data || []);
         }
       } catch (err) {
@@ -52,6 +83,9 @@ export function Layout({ children, authMode = false }: Props) {
       }
     };
     loadMemberships();
+    return () => {
+      cancelled = true;
+    };
   }, [isLoggedIn, setMemberships, shouldRefreshMemberships]);
 
   const handleLogout = async () => {
@@ -66,6 +100,9 @@ export function Layout({ children, authMode = false }: Props) {
   };
 
   const handleCommunitySwitch = async (communityId: string) => {
+    if (communityId === activeCommunityId) {
+      return;
+    }
     try {
       await apiClient.post(`communities/${communityId}/switch`);
       setActiveCommunityId(communityId);
@@ -74,42 +111,109 @@ export function Layout({ children, authMode = false }: Props) {
     }
   };
 
-  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
-
-  const mainNav: NavItem[] = [
-    { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
-    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
-    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
-  ];
-
-  const socialNav: NavItem[] = [
-    { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
-    { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
-  ];
-
-  const personalNav: NavItem[] = [
-    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
-    { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && isStaff },
-    { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
-    { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
-  ];
-
   const communityOptions = memberships.map((m) => ({
     label: m.communityName,
     value: m.communityId,
     role: m.role
   }));
-
-  const quickActions = [
-    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn },
+  const activeMembership =
+    memberships.find((membership) => membership.communityId === activeCommunityId) ??
+    memberships[0] ??
+    null;
+  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
+  const canAccessModeration =
+    isStaff ||
+    activeMembership?.role === "MODERATOR" ||
+    activeMembership?.role === "COORDINATOR" ||
+    activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
+  const canAccessOpenData =
+    isStaff ||
+    activeMembership?.role === "COORDINATOR" ||
+    activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
+  const primaryNav: NavItem[] = [
+    { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
+    { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
     { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
   ];
+  const collaborationNav: NavItem[] = [
+    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
+      { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn },
+      { label: t('nav.community_merge_review'), to: '/communities/merge-review', icon: 'pi pi-clone', visible: isLoggedIn },
+      { label: t('nav.community_weekly_digest'), to: '/communities/weekly-digest', icon: 'pi pi-envelope', visible: isLoggedIn },
+    { label: t('nav.community_decisions'), to: '/communities/decisions', icon: 'pi pi-sitemap', visible: isLoggedIn },
+    { label: t('nav.community_projects'), to: '/communities/projects', icon: 'pi pi-briefcase', visible: isLoggedIn },
+    { label: t('nav.community_governance'), to: '/communities/governance', icon: 'pi pi-book', visible: isLoggedIn },
+    { label: t('nav.community_open_data'), to: '/communities/open-data', icon: 'pi pi-database', visible: isLoggedIn && Boolean(canAccessOpenData) },
+    { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
+    { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
+    { label: t('nav.community_rooms'), to: '/communities/rooms', icon: 'pi pi-comments', visible: isLoggedIn },
+    { label: t('nav.community_activities'), to: '/communities/activities', icon: 'pi pi-calendar', visible: isLoggedIn },
+    { label: t('nav.community_resources'), to: '/communities/resources', icon: 'pi pi-building', visible: isLoggedIn },
+    { label: t('nav.community_integrations'), to: '/communities/integrations', icon: 'pi pi-send', visible: isLoggedIn && Boolean(canAccessOpenData) },
+  ];
+  const advancedNav: NavItem[] = [
+    { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && Boolean(canAccessModeration) },
+    { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
+    { label: t('nav.help_center'), to: '/help', icon: 'pi pi-question-circle', visible: isLoggedIn },
+    { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
+  ];
+  const activeBreadcrumb = activeMembership?.breadcrumb ?? [];
+  const navItems = [...primaryNav, ...collaborationNav, ...advancedNav];
+  const matchedNavItem = navItems.find((item) => item.to === location.pathname);
+  /*
+   * Detail routes are not navigation destinations, so an exact match can never find them and the
+   * old fallback rendered nav.insights, whose value is literally "Home", on every case screen.
+   * Longest-prefix keeps a nested route under the section that contains it, and the explicit map
+   * covers routes with no nav ancestor at all.
+   */
+  const sectionFromPrefix = navItems
+    .filter((item) => item.to !== "/" && location.pathname.startsWith(`${item.to}/`))
+    .sort((a, b) => b.to.length - a.to.length)[0];
+  const detailRoute = Object.keys(SECTION_FOR_DETAIL_ROUTES).find((prefix) =>
+    location.pathname.startsWith(prefix),
+  );
+  const activeSection =
+    matchedNavItem?.label ??
+    sectionFromPrefix?.label ??
+    (detailRoute ? t(SECTION_FOR_DETAIL_ROUTES[detailRoute]) : t("nav.insights"));
+  const isSectionRoute = Boolean(matchedNavItem);
+  /*
+   * "What needs attention today" is a dashboard framing. Showing it above a single case described
+   * nothing, so the framing line is rendered only where it actually frames something.
+   */
+  const topbarEyebrow = isSectionRoute
+    ? activeMembership && location.pathname === "/"
+      ? t("nav.community_home_label")
+      : t("dashboard.focus_today")
+    : null;
 
-  const mobileNav = [mainNav[0], mainNav[2], personalNav[0], socialNav[0], personalNav[3]].filter((item) => item?.visible);
+  const visibleMoreCount = [...collaborationNav, ...advancedNav].filter((item) => item.visible).length;
+  const mobileNav = primaryNav.filter((item) => item.visible);
 
-  if (authMode) return <div className="auth-page min-h-screen">{children}</div>;
+  /*
+   * Public pages (landing, login, register, verify, backlog) skip the full shell, but the keyboard
+   * contract must not skip with it: the first Tab lands on the skip link and Enter moves focus into
+   * the main landmark, exactly as it does inside the authenticated layout.
+   */
+  if (authMode) {
+    return (
+      <div className="auth-page min-h-screen">
+        <a
+          href={`#${mainContentId}`}
+          className="skip-link"
+          data-testid="skip-to-content-link"
+          onClick={() => window.requestAnimationFrame(() => document.getElementById(mainContentId)?.focus())}
+        >
+          {t('nav.skip_to_content')}
+        </a>
+        <main id={mainContentId} tabIndex={-1} data-testid="main-content">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
-  const NavGroup = ({ title, items }: { title: string, items: any[] }) => (
+  const NavGroup = ({ title, items }: { title: string, items: NavItem[] }) => (
     <div className="mb-6">
       <div className="text-muted text-xs font-black uppercase tracking-widest mb-3 ml-4 nav-group-title">{title}</div>
       <div className="flex flex-column gap-1">
@@ -117,17 +221,17 @@ export function Layout({ children, authMode = false }: Props) {
           <Link
             key={link.to}
             to={link.to}
-            className={`flex align-items-center justify-content-between px-4 py-3 border-round-xl no-underline transition-all font-bold ${location.pathname === link.to ? 'bg-elevated text-main shadow-sm' : 'text-secondary hover:text-main hover:bg-surface'}`}
+            className={`app-nav-link font-bold ${location.pathname === link.to ? 'is-active' : ''}`}
             data-testid={link.testId}
             aria-label={link.label}
             aria-current={location.pathname === link.to ? "page" : undefined}
             onClick={() => setMobileMenuVisible(false)}
           >
             <div className="flex align-items-center gap-3">
-              <i className={`${link.icon} text-base ${location.pathname === link.to ? 'text-brand-primary' : 'opacity-70'}`}></i>
+              <i className={`${link.icon} app-nav-link-icon text-base`}></i>
               <span className="text-sm tracking-tight">{link.label}</span>
             </div>
-            {location.pathname === link.to && <div className="w-4px h-4px border-circle bg-brand-primary shadow-lg"></div>}
+            {location.pathname === link.to && <div className="app-nav-link-dot"></div>}
           </Link>
         ))}
       </div>
@@ -135,21 +239,83 @@ export function Layout({ children, authMode = false }: Props) {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-app">
-      <a href="#main-content" className="skip-link">{t('nav.skip_to_content')}</a>
+    <div className={`app-shell flex h-screen overflow-hidden bg-app interface-mode-shell-${interfaceMode}`}>
+      <a
+        href={`#${mainContentId}`}
+        className="skip-link"
+        data-testid="skip-to-content-link"
+        onClick={() => window.requestAnimationFrame(focusMainContentTarget)}
+      >
+        {t('nav.skip_to_content')}
+      </a>
       {/* SIDEBAR */}
-      <aside className="hidden lg:flex flex-column w-18rem border-right-1 border-white-alpha-5 bg-card z-2">
-        <div className="p-6 flex align-items-center gap-3">
-          <div className="u-logo-badge border-round-xl flex align-items-center justify-content-center shadow-premium" style={{ width: '36px', height: '36px' }}>
-            <i className="pi pi-signal u-logo-icon text-lg"></i>
+      <aside className="app-sidebar hidden lg:flex flex-column w-21rem border-right-1 border-subtle z-2">
+        <div className="app-sidebar-brand">
+          <div className="app-brand-panel motion-card">
+            <div className="flex align-items-center gap-3 mb-4">
+              <div className="u-logo-badge border-round-2xl flex align-items-center justify-content-center shadow-premium" style={{ width: '44px', height: '44px' }}>
+                <i className="pi pi-signal u-logo-icon text-xl"></i>
+              </div>
+              <div className="flex flex-column">
+                <span className="app-brand-kicker">{t("nav.brand_kicker")}</span>
+                <span className="app-brand-title text-2xl">SignalOS</span>
+              </div>
+            </div>
+            <p className="app-brand-copy m-0">
+              {t("dashboard.guided_home.citizen.hero_subtitle")}
+            </p>
           </div>
-          <span className="text-xl font-black tracking-tighter uppercase text-main">Signal<span className="text-brand-primary">OS</span></span>
         </div>
 
         <nav className="flex-grow-1 px-3 py-4 overflow-y-auto" aria-label={t('nav.main_navigation')}>
-          <NavGroup title={t('nav.group_intelligence')} items={mainNav} />
-          <NavGroup title={t('nav.group_collaboration')} items={socialNav} />
-          <NavGroup title={t('nav.group_personal')} items={personalNav} />
+          {activeMembership && (
+            <div className="app-context-card mb-5 mx-3 motion-card" data-testid="layout-community-context-card">
+              <span className="app-context-label">{t("nav.active_community")}</span>
+              <div className="app-context-value mt-2">{activeMembership.communityName}</div>
+              {activeBreadcrumb.length > 1 && (
+                <p className="text-xs text-muted mt-2 mb-0 line-height-3">
+                  {activeBreadcrumb.map((item) => item.name).join(" / ")}
+                </p>
+              )}
+              <div className="flex align-items-center gap-2 mt-3">
+                <span className="u-pill">
+                  <i className="pi pi-users text-brand-primary"></i>
+                  {toRoleLabel(activeMembership.role, t)}
+                </span>
+                <span className="u-pill" data-testid="interface-mode-badge">
+                  <i className={`pi ${interfaceMode === "simple" ? "pi-sparkles" : "pi-sliders-h"} text-brand-primary`}></i>
+                  {interfaceMode === "simple" ? t("settings.interface_modes.simple") : t("settings.interface_modes.advanced")}
+                </span>
+              </div>
+            </div>
+          )}
+          <NavGroup title={t('nav.group_primary')} items={primaryNav} />
+          <div className="mb-6">
+            <div className="px-2">
+              <button
+                type="button"
+                className="w-full flex align-items-center justify-content-between px-4 py-3 border-round-xl border-1 border-subtle bg-surface text-main font-bold cursor-pointer"
+                onClick={() => setDesktopMoreVisible((current) => !current)}
+                aria-expanded={desktopMoreVisible}
+                data-testid="desktop-more-toggle"
+              >
+                <span className="flex align-items-center gap-2">
+                  <i className="pi pi-compass text-brand-primary"></i>
+                  {desktopMoreVisible ? t('nav.hide_more_tools') : t('nav.show_more_tools')}
+                </span>
+                <span className="text-xs text-muted">{visibleMoreCount}</span>
+              </button>
+              <p className="text-xs text-muted mt-2 mb-0 px-2" data-testid="desktop-more-hint">
+                {t('nav.more_tools_hint')}
+              </p>
+            </div>
+            {desktopMoreVisible && (
+              <div className="mt-4" data-testid="desktop-more-panel">
+                <NavGroup title={t('nav.group_collaboration')} items={collaborationNav} />
+                <NavGroup title={t('nav.group_tools')} items={advancedNav} />
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="mt-auto p-4 border-top-1 border-subtle bg-surface">
@@ -157,8 +323,8 @@ export function Layout({ children, authMode = false }: Props) {
             <div className="flex align-items-center gap-3 px-2">
               <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
               <div className="flex flex-column overflow-hidden">
-                <span className="text-xs font-black text-main truncate uppercase tracking-wider">{userName}</span>
-                <span className="text-min font-bold text-muted uppercase nav-clearance-label">
+                <span className="text-sm font-black text-main app-user-name">{userName}</span>
+                <span className="text-xs font-bold text-muted nav-clearance-label app-user-role">
                   {t('nav.clearance')}: {toRoleLabel(activeRole, t)}
                 </span>
               </div>
@@ -177,7 +343,7 @@ export function Layout({ children, authMode = false }: Props) {
 
       {/* VIEW AREA */}
       <div className="flex flex-column flex-grow-1 overflow-hidden relative">
-        <header className="h-5rem flex align-items-center justify-content-between px-6 border-bottom-1 border-subtle bg-nav backdrop-blur-xl z-1">
+        <header className="app-topbar min-h-6rem py-3 flex align-items-center justify-content-between px-4 lg:px-6 border-bottom-1 border-subtle z-1">
           <div className="flex align-items-center gap-4 flex-grow-1">
             <Button
               icon="pi pi-bars"
@@ -185,12 +351,29 @@ export function Layout({ children, authMode = false }: Props) {
               className="lg:hidden text-main"
               onClick={() => setMobileMenuVisible(true)}
               aria-label={t('nav.open_navigation')}
+              aria-expanded={mobileMenuVisible}
+              aria-controls={mobileNavId}
               data-testid="mobile-menu-toggle"
             />
-            <div className="hidden md:flex align-items-center">
-              <span className="text-sm text-muted font-semibold">
-                {t('dashboard.focus_today')}
+            <div className="app-topbar-intro">
+              {topbarEyebrow && (
+                <span className="app-topbar-label" data-testid="app-topbar-label">
+                  {topbarEyebrow}
+                </span>
+              )}
+              <span className="app-topbar-title" data-testid="app-topbar-title">
+                {activeSection}
               </span>
+              {activeMembership && (
+                <span className="text-xs text-muted line-height-3">
+                  {/*
+                    Defensive: a membership row without a breadcrumb used to throw here and take the
+                    whole app down on every page, because this renders in the shared layout. A stale
+                    or partial persisted membership is not a reason for a blank screen.
+                  */}
+                  {(activeMembership.breadcrumb ?? []).map((item) => item.name).join(' / ')} · {toRoleLabel(activeMembership.role, t)}
+                </span>
+              )}
             </div>
           </div>
 
@@ -203,48 +386,66 @@ export function Layout({ children, authMode = false }: Props) {
                   options={communityOptions}
                   onChange={(e) => handleCommunitySwitch(e.value)}
                   placeholder="Sector"
-                  className="w-10rem border-none bg-transparent font-bold text-sm"
+                  className="w-13rem border-none bg-transparent font-bold text-sm"
                   data-testid="community-switch-dropdown"
                   itemTemplate={(option) => (
                     <div className="flex flex-column py-1">
-                      <span className="font-black text-xs uppercase tracking-widest">{option.label}</span>
-                      <small className="text-muted text-min font-mono mt-1">{toRoleLabel(option.role, t)}</small>
+                      <span className="font-black text-sm layout-community-option-label">{option.label}</span>
+                      <small className="text-muted text-xs mt-1 layout-community-option-role">{toRoleLabel(option.role, t)}</small>
                     </div>
                   )}
                 />
               </div>
             )}
 
-            <div className="hidden xl:flex align-items-center gap-3 u-pill">
-              <div className="w-8px h-8px border-circle bg-status-resolved animate-pulse"></div>
-              <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
-            </div>
+            {interfaceMode === "advanced" && (
+              <div className="hidden xl:flex align-items-center gap-3 u-pill">
+                <div className="w-8px h-8px border-circle bg-status-resolved animate-pulse"></div>
+                <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
+              </div>
+            )}
 
-            <div className="hidden lg:flex align-items-center gap-2">
-              {quickActions.map((action) => (
-                <Button
-                  key={action.to}
-                  type="button"
-                  icon={action.icon}
-                  label={action.label}
-                  text
-                  className="u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
-                  onClick={() => navigate(action.to)}
-                />
-              ))}
-            </div>
+            <Button
+              type="button"
+              icon="pi pi-plus-circle"
+              label={t('nav.report')}
+              text
+              className="hidden lg:flex u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
+              onClick={() => navigate('/report')}
+              data-testid="header-primary-report"
+            />
 
-            <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
+            {activeMembership && location.pathname !== "/communities" && (
+              <Button
+                type="button"
+                icon="pi pi-globe"
+                label={t("nav.open_community_hub")}
+                text
+                className="hidden lg:flex u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
+                onClick={() => navigate('/communities')}
+                data-testid="header-community-hub"
+              />
+            )}
+
+            {interfaceMode === "advanced" && (
+              <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
+            )}
           </div>
         </header>
 
-        <main id="main-content" className="flex-grow-1 overflow-y-auto p-6 lg:p-10 bg-app">
+        <main
+          id={mainContentId}
+          ref={mainContentRef}
+          tabIndex={-1}
+          className="app-main flex-grow-1 overflow-y-auto p-4 md:p-6 lg:p-10 bg-app"
+          data-testid="main-content"
+        >
           <div className="page-container mx-auto" style={{ maxWidth: '1300px' }}>
             {children}
           </div>
         </main>
 
-        <nav className="lg:hidden flex justify-content-around align-items-center bg-card border-top-1 border-subtle h-5rem px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
+        <nav className="app-mobile-nav lg:hidden flex justify-content-around align-items-center border-top-1 border-subtle min-h-5rem py-2 px-2 sticky bottom-0 z-5" aria-label={t('nav.main_navigation')}>
           {mobileNav.map(link => (
             <Link
               key={link.to}
@@ -255,22 +456,45 @@ export function Layout({ children, authMode = false }: Props) {
               aria-current={location.pathname === link.to ? "page" : undefined}
             >
               <i className={`${link.icon} text-xl`}></i>
-              <span style={{ fontSize: '9px' }} className="font-bold uppercase tracking-widest">{link.label.split(' ')[0]}</span>
+              <span className="font-bold tracking-wide mobile-nav-label">{link.label}</span>
             </Link>
           ))}
+          <button
+            type="button"
+            className={`flex flex-column align-items-center gap-1 border-none bg-transparent ${mobileMenuVisible ? 'text-brand-primary' : 'text-muted'}`}
+            onClick={() => setMobileMenuVisible(true)}
+            aria-label={t('nav.open_navigation')}
+            aria-expanded={mobileMenuVisible}
+            aria-controls={mobileNavId}
+            data-testid="mobile-more-toggle"
+          >
+            <i className="pi pi-ellipsis-h text-xl"></i>
+            <span className="font-bold tracking-wide mobile-nav-label">{t('nav.more_short')}</span>
+          </button>
         </nav>
       </div>
 
-      <Sidebar visible={mobileMenuVisible} onHide={() => setMobileMenuVisible(false)} className="w-20rem bg-app">
+      <Sidebar
+        visible={mobileMenuVisible}
+        onHide={() => setMobileMenuVisible(false)}
+        className="w-20rem bg-app"
+        id={mobileNavId}
+      >
         <div className="p-4 flex flex-column gap-6">
-          <div className="flex align-items-center gap-3">
-            <div className="u-logo-badge border-round-xl p-2 shadow-lg"><i className="pi pi-signal u-logo-icon"></i></div>
-            <span className="text-xl font-black text-main">SignalOS</span>
+          <div className="app-brand-panel">
+            <div className="flex align-items-center gap-3 mb-3">
+              <div className="u-logo-badge border-round-2xl p-3 shadow-lg"><i className="pi pi-signal u-logo-icon"></i></div>
+              <div className="flex flex-column">
+                <span className="app-brand-kicker">{t("nav.brand_kicker")}</span>
+                <span className="app-brand-title text-xl">SignalOS</span>
+              </div>
+            </div>
+            <p className="app-brand-copy m-0">{t('nav.mobile_drawer_guidance')}</p>
           </div>
           <nav className="flex flex-column gap-4" aria-label={t('nav.main_navigation')}>
-            <NavGroup title={t('nav.group_main')} items={mainNav} />
-            <NavGroup title={t('nav.group_social')} items={socialNav} />
-            <NavGroup title={t('nav.group_system')} items={personalNav} />
+            <NavGroup title={t('nav.group_primary')} items={primaryNav} />
+            <NavGroup title={t('nav.group_collaboration')} items={collaborationNav} />
+            <NavGroup title={t('nav.group_tools')} items={advancedNav} />
           </nav>
           <Button
             label={t('nav.sign_out')}

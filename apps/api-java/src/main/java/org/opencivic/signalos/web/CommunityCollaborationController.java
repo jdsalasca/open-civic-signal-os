@@ -2,18 +2,54 @@ package org.opencivic.signalos.web;
 
 import jakarta.validation.Valid;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.service.CommunityCollaborationService;
+import org.opencivic.signalos.service.CommunityDecisionLedgerService;
+import org.opencivic.signalos.service.CommunityProjectBoardService;
+import org.opencivic.signalos.service.CommunityProposalDeliberationService;
+import org.opencivic.signalos.service.CommunityProposalService;
+import org.opencivic.signalos.service.CommunityProposalVotingService;
+import org.opencivic.signalos.service.CommunityModerationService;
+import org.opencivic.signalos.service.CommunityTrustMetricsService;
+import org.opencivic.signalos.service.TransparencyReportService;
+import org.opencivic.signalos.service.GovernanceLibraryService;
+import org.opencivic.signalos.web.dto.ArchiveCommunityBlogPostRequest;
 import org.opencivic.signalos.web.dto.CommunityBlogPostResponse;
 import org.opencivic.signalos.web.dto.CommunityFeedItemResponse;
+import org.opencivic.signalos.web.dto.CommunityHomeResponse;
+import org.opencivic.signalos.web.dto.CommunityModerationQueueResponse;
+import org.opencivic.signalos.web.dto.CommunityModerationReportResponse;
+import org.opencivic.signalos.web.dto.CommunityDecisionResponse;
+import org.opencivic.signalos.web.dto.CommunityProjectBoardResponse;
+import org.opencivic.signalos.web.dto.CommunityProposalDeliberationResponse;
+import org.opencivic.signalos.web.dto.CommunityProposalResponse;
+import org.opencivic.signalos.web.dto.CommunityProposalVotingResponse;
+import org.opencivic.signalos.web.dto.CommunityTrustMetricsResponse;
+import org.opencivic.signalos.web.dto.TransparencyReportResponse;
+import org.opencivic.signalos.web.dto.CastCommunityProposalVoteRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityProjectBoardRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityDecisionRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskCommentRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityProjectTaskRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityProposalDeliberationRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityModerationReportRequest;
 import org.opencivic.signalos.web.dto.CommunityThreadMessageResponse;
 import org.opencivic.signalos.web.dto.CommunityThreadResponse;
+import org.opencivic.signalos.web.dto.CreateGovernanceDocumentRequest;
+import org.opencivic.signalos.web.dto.CreateGovernanceDocumentVersionRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityBlogPostRequest;
+import org.opencivic.signalos.web.dto.CreateCommunityProposalRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadMessageRequest;
 import org.opencivic.signalos.web.dto.CreateCommunityThreadRequest;
+import org.opencivic.signalos.web.dto.GovernanceDocumentResponse;
 import org.opencivic.signalos.web.dto.ModerateThreadMessageRequest;
+import org.opencivic.signalos.web.dto.ModerateCommunityProposalEntryRequest;
+import org.opencivic.signalos.web.dto.ModerateCommunityReportRequest;
+import org.opencivic.signalos.web.dto.UpdateCommunityProjectTaskRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityBlogPostRequest;
+import org.opencivic.signalos.web.dto.UpdateCommunityProposalRequest;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
 import org.opencivic.signalos.web.dto.ReactionStateResponse;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,11 +73,41 @@ import java.util.Map;
 @RequestMapping("/api/community")
 public class CommunityCollaborationController {
     private final CommunityCollaborationService collaborationService;
+    private final CommunityDecisionLedgerService decisionLedgerService;
+    private final CommunityProjectBoardService projectBoardService;
+    private final CommunityModerationService moderationService;
+    private final CommunityProposalService proposalService;
+    private final CommunityProposalDeliberationService proposalDeliberationService;
+    private final CommunityProposalVotingService proposalVotingService;
+    private final CommunityTrustMetricsService trustMetricsService;
+    private final GovernanceLibraryService governanceLibraryService;
     private final CivicEngagementService engagementService;
+    private final TransparencyReportService transparencyReportService;
 
-    public CommunityCollaborationController(CommunityCollaborationService collaborationService, CivicEngagementService engagementService) {
+    public CommunityCollaborationController(
+        CommunityCollaborationService collaborationService,
+        CommunityDecisionLedgerService decisionLedgerService,
+        CommunityProjectBoardService projectBoardService,
+        CommunityModerationService moderationService,
+        CommunityProposalService proposalService,
+        CommunityProposalDeliberationService proposalDeliberationService,
+        CommunityProposalVotingService proposalVotingService,
+        CommunityTrustMetricsService trustMetricsService,
+        GovernanceLibraryService governanceLibraryService,
+        CivicEngagementService engagementService,
+        TransparencyReportService transparencyReportService
+    ) {
         this.collaborationService = collaborationService;
+        this.decisionLedgerService = decisionLedgerService;
+        this.projectBoardService = projectBoardService;
+        this.moderationService = moderationService;
+        this.proposalService = proposalService;
+        this.proposalDeliberationService = proposalDeliberationService;
+        this.proposalVotingService = proposalVotingService;
+        this.trustMetricsService = trustMetricsService;
+        this.governanceLibraryService = governanceLibraryService;
         this.engagementService = engagementService;
+        this.transparencyReportService = transparencyReportService;
     }
 
     @GetMapping("/blog/{id}/comments")
@@ -68,11 +134,12 @@ public class CommunityCollaborationController {
     public ApiPageResponse<CommunityThreadResponse> getThreads(
         @RequestParam UUID communityId,
         @RequestParam(required = false) String status,
+        @RequestParam(required = false, defaultValue = "RELEVANCE") String sortBy,
         @PageableDefault(size = 20, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
         Principal principal
     ) {
         return ApiPageResponse.from(
-            collaborationService.getThreads(communityId, status, pageable, principal.getName())
+            collaborationService.getThreads(communityId, status, sortBy, pageable, principal.getName())
         );
     }
 
@@ -144,6 +211,23 @@ public class CommunityCollaborationController {
         return collaborationService.getBlogTimeline(communityId, principal.getName());
     }
 
+    @GetMapping("/blog/archive")
+    public List<CommunityBlogPostResponse> getBlogArchive(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String query,
+        @RequestParam(required = false) LocalDate dateFrom,
+        @RequestParam(required = false) LocalDate dateTo,
+        Principal principal
+    ) {
+        return collaborationService.getBlogArchive(
+            communityId,
+            query,
+            dateFrom,
+            dateTo,
+            principal.getName()
+        );
+    }
+
     @PostMapping("/blog")
     public CommunityBlogPostResponse createBlog(
         @Valid @RequestBody CreateCommunityBlogPostRequest request,
@@ -154,6 +238,7 @@ public class CommunityCollaborationController {
             request.title(),
             request.content(),
             request.statusTag(),
+            request.pinned(),
             principal.getName()
         );
     }
@@ -169,6 +254,20 @@ public class CommunityCollaborationController {
             request.title(),
             request.content(),
             request.statusTag(),
+            request.pinned(),
+            principal.getName()
+        );
+    }
+
+    @PatchMapping("/blog/{postId}/archive")
+    public CommunityBlogPostResponse archiveBlog(
+        @PathVariable UUID postId,
+        @Valid @RequestBody ArchiveCommunityBlogPostRequest request,
+        Principal principal
+    ) {
+        return collaborationService.archiveBlogPost(
+            postId,
+            request.archived(),
             principal.getName()
         );
     }
@@ -180,5 +279,259 @@ public class CommunityCollaborationController {
         Principal principal
     ) {
         return collaborationService.getCommunityFeed(communityId, days, principal.getName());
+    }
+
+    @GetMapping("/home")
+    public CommunityHomeResponse getCommunityHome(
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        return collaborationService.getCommunityHome(communityId, principal.getName());
+    }
+
+    @GetMapping("/trust-metrics")
+    public CommunityTrustMetricsResponse getTrustMetrics(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false, defaultValue = "LAST_30_DAYS") String period,
+        Principal principal
+    ) {
+        return trustMetricsService.getTrustMetrics(communityId, period, principal.getName());
+    }
+
+    @GetMapping("/transparency-report")
+    public TransparencyReportResponse getTransparencyReport(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String period,
+        Principal principal
+    ) {
+        return transparencyReportService.getReport(communityId, period, principal.getName());
+    }
+
+    @GetMapping("/moderation/queue")
+    public CommunityModerationQueueResponse getModerationQueue(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String targetType,
+        Principal principal
+    ) {
+        return moderationService.getQueue(communityId, status, targetType, principal.getName());
+    }
+
+    @PostMapping("/moderation/reports")
+    public CommunityModerationReportResponse createModerationReport(
+        @Valid @RequestBody CreateCommunityModerationReportRequest request,
+        Principal principal
+    ) {
+        return moderationService.createReport(request, principal.getName());
+    }
+
+    @PatchMapping("/moderation/reports/{reportId}")
+    public CommunityModerationReportResponse resolveModerationReport(
+        @PathVariable UUID reportId,
+        @Valid @RequestBody ModerateCommunityReportRequest request,
+        Principal principal
+    ) {
+        return moderationService.resolveReport(reportId, request, principal.getName());
+    }
+
+    @GetMapping("/proposals")
+    public List<CommunityProposalResponse> getProposals(
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        return proposalService.getProposals(communityId, principal.getName());
+    }
+
+    @GetMapping("/proposals/{proposalId}")
+    public CommunityProposalResponse getProposal(
+        @PathVariable UUID proposalId,
+        Principal principal
+    ) {
+        return proposalService.getProposal(proposalId, principal.getName());
+    }
+
+    @GetMapping("/proposals/{proposalId}/vote")
+    public CommunityProposalVotingResponse getProposalVoting(
+        @PathVariable UUID proposalId,
+        Principal principal
+    ) {
+        return proposalVotingService.getVoting(proposalId, principal.getName());
+    }
+
+    @PostMapping("/proposals/{proposalId}/vote")
+    public CommunityProposalVotingResponse castProposalVote(
+        @PathVariable UUID proposalId,
+        @Valid @RequestBody CastCommunityProposalVoteRequest request,
+        Principal principal
+    ) {
+        return proposalVotingService.castVote(proposalId, request, principal.getName());
+    }
+
+    @PostMapping("/proposals")
+    public CommunityProposalResponse createProposal(
+        @Valid @RequestBody CreateCommunityProposalRequest request,
+        Principal principal
+    ) {
+        return proposalService.createProposal(request, principal.getName());
+    }
+
+    @PutMapping("/proposals/{proposalId}")
+    public CommunityProposalResponse updateProposal(
+        @PathVariable UUID proposalId,
+        @Valid @RequestBody UpdateCommunityProposalRequest request,
+        Principal principal
+    ) {
+        return proposalService.updateProposal(proposalId, request, principal.getName());
+    }
+
+    @GetMapping("/decisions")
+    public List<CommunityDecisionResponse> getDecisions(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String decisionStatus,
+        @RequestParam(required = false) String decisionType,
+        @RequestParam(required = false) LocalDate dateFrom,
+        @RequestParam(required = false) LocalDate dateTo,
+        Principal principal
+    ) {
+        return decisionLedgerService.getDecisions(
+            communityId,
+            decisionStatus,
+            decisionType,
+            dateFrom,
+            dateTo,
+            principal.getName()
+        );
+    }
+
+    @GetMapping("/decisions/{decisionId}")
+    public CommunityDecisionResponse getDecision(
+        @PathVariable UUID decisionId,
+        Principal principal
+    ) {
+        return decisionLedgerService.getDecision(decisionId, principal.getName());
+    }
+
+    @PostMapping("/decisions")
+    public CommunityDecisionResponse createDecision(
+        @Valid @RequestBody CreateCommunityDecisionRequest request,
+        Principal principal
+    ) {
+        return decisionLedgerService.createDecision(request, principal.getName());
+    }
+
+    @GetMapping("/projects")
+    public List<CommunityProjectBoardResponse> getProjects(
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        return projectBoardService.getBoards(communityId, principal.getName());
+    }
+
+    @GetMapping("/projects/{projectId}")
+    public CommunityProjectBoardResponse getProject(
+        @PathVariable UUID projectId,
+        Principal principal
+    ) {
+        return projectBoardService.getBoard(projectId, principal.getName());
+    }
+
+    @PostMapping("/projects")
+    public CommunityProjectBoardResponse createProject(
+        @Valid @RequestBody CreateCommunityProjectBoardRequest request,
+        Principal principal
+    ) {
+        return projectBoardService.createBoard(request, principal.getName());
+    }
+
+    @PostMapping("/projects/{projectId}/tasks")
+    public CommunityProjectBoardResponse createProjectTask(
+        @PathVariable UUID projectId,
+        @Valid @RequestBody CreateCommunityProjectTaskRequest request,
+        Principal principal
+    ) {
+        return projectBoardService.createTask(projectId, request, principal.getName());
+    }
+
+    @PatchMapping("/projects/{projectId}/tasks/{taskId}")
+    public CommunityProjectBoardResponse updateProjectTask(
+        @PathVariable UUID projectId,
+        @PathVariable UUID taskId,
+        @Valid @RequestBody UpdateCommunityProjectTaskRequest request,
+        Principal principal
+    ) {
+        return projectBoardService.updateTask(projectId, taskId, request, principal.getName());
+    }
+
+    @PostMapping("/projects/{projectId}/tasks/{taskId}/comments")
+    public CommunityProjectBoardResponse addProjectTaskComment(
+        @PathVariable UUID projectId,
+        @PathVariable UUID taskId,
+        @Valid @RequestBody CreateCommunityProjectTaskCommentRequest request,
+        Principal principal
+    ) {
+        return projectBoardService.addTaskComment(projectId, taskId, request, principal.getName());
+    }
+
+    @GetMapping("/governance")
+    public List<GovernanceDocumentResponse> getGovernanceDocuments(
+        @RequestParam UUID communityId,
+        @RequestParam(required = false) String documentType,
+        @RequestParam(required = false) String visibility,
+        @RequestParam(required = false) String query,
+        Principal principal
+    ) {
+        return governanceLibraryService.getDocuments(communityId, documentType, visibility, query, principal.getName());
+    }
+
+    @GetMapping("/governance/{documentId}")
+    public GovernanceDocumentResponse getGovernanceDocument(
+        @PathVariable UUID documentId,
+        Principal principal
+    ) {
+        return governanceLibraryService.getDocument(documentId, principal.getName());
+    }
+
+    @PostMapping("/governance")
+    public GovernanceDocumentResponse createGovernanceDocument(
+        @Valid @RequestBody CreateGovernanceDocumentRequest request,
+        Principal principal
+    ) {
+        return governanceLibraryService.createDocument(request, principal.getName());
+    }
+
+    @PostMapping("/governance/{documentId}/versions")
+    public GovernanceDocumentResponse createGovernanceDocumentVersion(
+        @PathVariable UUID documentId,
+        @Valid @RequestBody CreateGovernanceDocumentVersionRequest request,
+        Principal principal
+    ) {
+        return governanceLibraryService.addVersion(documentId, request, principal.getName());
+    }
+
+    @GetMapping("/proposals/{proposalId}/deliberation")
+    public CommunityProposalDeliberationResponse getProposalDeliberation(
+        @PathVariable UUID proposalId,
+        Principal principal
+    ) {
+        return proposalDeliberationService.getDeliberation(proposalId, principal.getName());
+    }
+
+    @PostMapping("/proposals/{proposalId}/deliberation")
+    public CommunityProposalDeliberationResponse createProposalDeliberationEntry(
+        @PathVariable UUID proposalId,
+        @Valid @RequestBody CreateCommunityProposalDeliberationRequest request,
+        Principal principal
+    ) {
+        return proposalDeliberationService.createEntry(proposalId, request, principal.getName());
+    }
+
+    @PatchMapping("/proposals/{proposalId}/deliberation/{entryId}/moderate")
+    public CommunityProposalDeliberationResponse moderateProposalDeliberationEntry(
+        @PathVariable UUID proposalId,
+        @PathVariable UUID entryId,
+        @Valid @RequestBody ModerateCommunityProposalEntryRequest request,
+        Principal principal
+    ) {
+        return proposalDeliberationService.moderateEntry(proposalId, entryId, request, principal.getName());
     }
 }

@@ -1,0 +1,5 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ src\tests\community-open-data.spec.ts:14:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access
+[1A[2K  1 passed (6.6s)

@@ -6,6 +6,7 @@ type CommunityThreadListState = {
   page: number;
   rows: number;
   status: "ALL" | "ACTIVE" | "STALE";
+  sortBy: "RELEVANCE" | "RECENT";
 };
 
 interface CommunityState {
@@ -19,6 +20,7 @@ interface CommunityState {
   getThreadListState: (communityId: string) => CommunityThreadListState;
   shouldRefreshMemberships: (maxAgeMs: number) => boolean;
   markMembershipsStale: () => void;
+  getActiveMembership: () => CommunityMembership | null;
   clear: () => void;
 }
 
@@ -31,6 +33,11 @@ export const useCommunityStore = create<CommunityState>()(
       threadListStateByCommunity: {},
       setMemberships: (memberships) =>
         set((state) => ({
+          threadListStateByCommunity: Object.fromEntries(
+            Object.entries(state.threadListStateByCommunity).filter(([communityId]) =>
+              memberships.some((membership) => membership.communityId === communityId)
+            )
+          ),
           memberships,
           membershipsLoadedAt: Date.now(),
           activeCommunityId:
@@ -38,7 +45,17 @@ export const useCommunityStore = create<CommunityState>()(
             memberships[0]?.communityId ??
             null,
         })),
-      setActiveCommunityId: (communityId) => set({ activeCommunityId: communityId }),
+      setActiveCommunityId: (communityId) =>
+        set((state) => {
+          if (communityId === null) {
+            return { activeCommunityId: null };
+          }
+          const isValidMembership = state.memberships.some((membership) => membership.communityId === communityId);
+          if (!isValidMembership) {
+            return {};
+          }
+          return { activeCommunityId: communityId };
+        }),
       setThreadListState: (communityId, state) =>
         set((current) => ({
           threadListStateByCommunity: {
@@ -47,7 +64,7 @@ export const useCommunityStore = create<CommunityState>()(
           },
         })),
       getThreadListState: (communityId) =>
-        get().threadListStateByCommunity[communityId] ?? { page: 0, rows: 10, status: "ALL" },
+        get().threadListStateByCommunity[communityId] ?? { page: 0, rows: 10, status: "ALL", sortBy: "RELEVANCE" },
       shouldRefreshMemberships: (maxAgeMs) => {
         const { membershipsLoadedAt } = get();
         if (membershipsLoadedAt === null) {
@@ -56,6 +73,13 @@ export const useCommunityStore = create<CommunityState>()(
         return Date.now() - membershipsLoadedAt > maxAgeMs;
       },
       markMembershipsStale: () => set({ membershipsLoadedAt: null }),
+      getActiveMembership: () => {
+        const state = get();
+        if (!state.activeCommunityId) {
+          return null;
+        }
+        return state.memberships.find((membership) => membership.communityId === state.activeCommunityId) ?? null;
+      },
       clear: () =>
         set({
           activeCommunityId: null,

@@ -5,25 +5,24 @@
 1. Install Node 20+ and Java 21.
 2. From repo root run:
 
-`ash
+```bash
 npm install
 npm run prioritize
-`
+```
 
-3. Start backend:
+3. Start the integrated hot-reload runtime:
 
-`ash
-cd apps/api-java
-mvn spring-boot:run
-`
+```bash
+npm run docker:dev:up
+```
 
-4. Start frontend:
+4. Check runtime health when needed:
 
-`ash
-cd apps/web-react
-npm install
-npm run dev
-`
+```bash
+npm run docker:dev:doctor
+npm run docker:dev:ps
+npm run docker:dev:logs
+```
 
 ## Working agreements for agents
 
@@ -31,3 +30,4 @@ npm run dev
 - Keep OpenAPI updated before frontend integration.
 - Attach sample payloads to every feature PR.
 - Use milestone + P0/P1/P2 labels in all planning issues.
+- Use Docker as the canonical integrated runtime; do not silently replace it with bare frontend/backend local processes during agent validation.

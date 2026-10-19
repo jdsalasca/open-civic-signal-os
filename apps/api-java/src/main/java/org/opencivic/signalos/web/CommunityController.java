@@ -5,17 +5,24 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.opencivic.signalos.domain.Community;
+import org.opencivic.signalos.web.dto.CommunityPermissionPolicyResponse;
+import org.opencivic.signalos.web.dto.CommunityBreadcrumbItemResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityRequest;
 import org.opencivic.signalos.web.dto.CommunityMembershipResponse;
+import org.opencivic.signalos.web.dto.CommunityResponse;
+import org.opencivic.signalos.web.dto.CommunityTreeNodeResponse;
 import org.opencivic.signalos.web.dto.JoinCommunityRequest;
+import org.opencivic.signalos.web.dto.UpdateCommunityPermissionPoliciesRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityRoleRequest;
+import org.opencivic.signalos.service.CommunityPermissionPolicyService;
+import org.opencivic.signalos.service.CommunityPrivacyService;
 import org.opencivic.signalos.service.CommunityService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,18 +31,44 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/communities")
 public class CommunityController {
     private final CommunityService communityService;
+    private final CommunityPermissionPolicyService permissionPolicyService;
+    private final CommunityPrivacyService communityPrivacyService;
 
-    public CommunityController(CommunityService communityService) {
+    public CommunityController(
+        CommunityService communityService,
+        CommunityPermissionPolicyService permissionPolicyService,
+        CommunityPrivacyService communityPrivacyService
+    ) {
         this.communityService = communityService;
+        this.permissionPolicyService = permissionPolicyService;
+        this.communityPrivacyService = communityPrivacyService;
     }
 
     @GetMapping
-    public List<Community> getAllCommunities() {
+    public List<CommunityResponse> getAllCommunities() {
         return communityService.getAllCommunities();
     }
 
+    /**
+     * The public city directory behind the landing page. No session required.
+     */
+    @GetMapping("/public")
+    public List<CommunityResponse> getPublicCities() {
+        return communityService.getPublicCities();
+    }
+
+    @GetMapping("/tree")
+    public List<CommunityTreeNodeResponse> getCommunityTree() {
+        return communityService.getCommunityTree();
+    }
+
+    @GetMapping("/{communityId}/breadcrumb")
+    public List<CommunityBreadcrumbItemResponse> getCommunityBreadcrumb(@PathVariable UUID communityId) {
+        return communityService.getCommunityBreadcrumb(communityId);
+    }
+
     @PostMapping
-    public Community createCommunity(
+    public CommunityResponse createCommunity(
         @Valid @RequestBody CreateCommunityRequest request,
         Principal principal
     ) {
@@ -43,6 +76,9 @@ public class CommunityController {
             request.name(),
             request.slug(),
             request.description(),
+            request.country(),
+            request.region(),
+            request.parentCommunityId(),
             principal.getName()
         );
     }
@@ -69,6 +105,40 @@ public class CommunityController {
         Principal principal
     ) {
         return communityService.updateRole(communityId, userId, request.role(), principal.getName());
+    }
+
+    @GetMapping("/{communityId}/permissions")
+    public List<CommunityPermissionPolicyResponse> getPermissionPolicies(
+        @PathVariable UUID communityId,
+        Principal principal
+    ) {
+        return permissionPolicyService.getPolicies(communityId, principal.getName());
+    }
+
+    @PutMapping("/{communityId}/permissions")
+    public List<CommunityPermissionPolicyResponse> updatePermissionPolicies(
+        @PathVariable UUID communityId,
+        @Valid @RequestBody UpdateCommunityPermissionPoliciesRequest request,
+        Principal principal
+    ) {
+        return permissionPolicyService.updatePolicies(communityId, request, principal.getName());
+    }
+
+    @GetMapping("/{communityId}/privacy")
+    public org.opencivic.signalos.web.dto.CommunityPrivacyPolicyResponse getCommunityPrivacyPolicy(
+        @PathVariable UUID communityId,
+        Principal principal
+    ) {
+        return communityPrivacyService.getPolicy(communityId, principal.getName());
+    }
+
+    @PutMapping("/{communityId}/privacy")
+    public org.opencivic.signalos.web.dto.CommunityPrivacyPolicyResponse updateCommunityPrivacyPolicy(
+        @PathVariable UUID communityId,
+        @Valid @RequestBody org.opencivic.signalos.web.dto.UpdateCommunityPrivacyPolicyRequest request,
+        Principal principal
+    ) {
+        return communityPrivacyService.updatePolicy(communityId, request, principal.getName());
     }
 
     @PostMapping("/{communityId}/switch")

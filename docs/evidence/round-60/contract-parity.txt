@@ -1,0 +1,5 @@
+
+> open-civic-signal-os@0.2.0 contract:parity:check
+> node scripts/check-openapi-parity.mjs
+
+OpenAPI parity check passed: 178 routes across 194 controller sources, 147 documented paths, 9 intentionally undocumented.

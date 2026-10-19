@@ -10,6 +10,8 @@ public record CommunityThreadMessageResponse(
     UUID authorId,
     UUID sourceCommunityId,
     UUID parentMessageId,
+    int depth,
+    int directReplyCount,
     String content,
     boolean hidden,
     String moderationReason,

@@ -64,11 +64,23 @@ console.log("Detected changed files:", files.length);
 
 run("npm run agent:context:check");
 run("npm run backlog:current:check");
+run("npm run security:runtime:check");
+run("node test/generate-transparency-report.test.mjs");
+run("node test/check-ranking-reproducibility.test.mjs");
+run("node test/overlay-append-to.test.mjs");
+run("node test/capture-trust-incident.test.mjs");
+run("node test/ingest.test.mjs");
+run("node test/prioritize.test.mjs");
 
 const frontendChanged = hasPrefix(files, "apps/web-react/");
 const backendChanged = hasPrefix(files, "apps/api-java/");
 const docsChanged = hasPrefix(files, "docs/");
 const contractChanged = hasOneOf(files, ["packages/contracts/", "docs/architecture/"]);
+// A new or removed endpoint is contract drift even when the .yaml was not touched,
+// so the parity gate also fires on controller changes.
+const controllerChanged = files.some((file) =>
+  /^apps\/api-java\/src\/main\/java\/org\/opencivic\/signalos\/web\/[^/]+\.java$/.test(file)
+);
 
 if (frontendChanged) {
   run("npm run build:web");
@@ -84,6 +96,10 @@ if (backendChanged) {
 
 if (contractChanged) {
   run("npm run agent:adr:check");
+}
+
+if (contractChanged || controllerChanged) {
+  run("npm run contract:parity:check");
 }
 
 if (docsChanged) {

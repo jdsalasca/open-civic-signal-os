@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,8 +60,10 @@ class CommunityRBAC_IT {
     private UUID liaisonUserId;
     private UUID targetUserId;
     private UUID threadId;
+    private UUID recentThreadId;
     private UUID staleThreadId;
     private UUID messageId;
+    private UUID recentThreadMessageId;
 
     @BeforeEach
     void setUp() {
@@ -96,6 +99,16 @@ class CommunityRBAC_IT {
         thread = threadRepository.save(thread);
         threadId = thread.getId();
 
+        CommunityThread recentThread = new CommunityThread();
+        recentThread.setSourceCommunityId(communityId);
+        recentThread.setTargetCommunityId(communityId);
+        recentThread.setTitle("Recent active thread for paging order");
+        recentThread.setCreatedBy(coordinatorUserId);
+        recentThread.setCreatedAt(LocalDateTime.now().minusDays(1));
+        recentThread.setUpdatedAt(LocalDateTime.now().minusHours(4));
+        recentThread = threadRepository.save(recentThread);
+        recentThreadId = recentThread.getId();
+
         CommunityThread staleThread = new CommunityThread();
         staleThread.setSourceCommunityId(communityId);
         staleThread.setTargetCommunityId(communityId);
@@ -113,6 +126,23 @@ class CommunityRBAC_IT {
         message.setContent("Initial message");
         message = messageRepository.save(message);
         messageId = message.getId();
+
+        CommunityThreadMessage recentMessage = new CommunityThreadMessage();
+        recentMessage.setThreadId(recentThreadId);
+        recentMessage.setAuthorId(memberUserId);
+        recentMessage.setSourceCommunityId(communityId);
+        recentMessage.setContent("Recent message with strong engagement");
+        recentMessage.setReactions(Map.of("🔥", 5, "👍", 3));
+        recentMessage = messageRepository.save(recentMessage);
+        recentThreadMessageId = recentMessage.getId();
+
+        CommunityThreadMessage recentReply = new CommunityThreadMessage();
+        recentReply.setThreadId(recentThreadId);
+        recentReply.setAuthorId(targetUserId);
+        recentReply.setSourceCommunityId(communityId);
+        recentReply.setParentMessageId(recentThreadMessageId);
+        recentReply.setContent("Reply keeps this discussion active");
+        recentReply = messageRepository.save(recentReply);
     }
 
     @Test
@@ -185,23 +215,126 @@ class CommunityRBAC_IT {
         mockMvc.perform(
                 get("/api/community/threads")
                     .param("communityId", communityId.toString())
+                    .param("sortBy", "RECENT")
                     .param("page", "0")
                     .param("size", "1")
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()").value(1))
-            .andExpect(jsonPath("$.totalElements").value(2));
+            .andExpect(jsonPath("$.totalElements").value(3))
+            .andExpect(jsonPath("$.content[0].id").value(threadId.toString()));
+
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("sortBy", "RECENT")
+                    .param("page", "1")
+                    .param("size", "1")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(1))
+            .andExpect(jsonPath("$.content[0].id").value(recentThreadId.toString()));
+
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("status", "ACTIVE")
+                    .param("sortBy", "RECENT")
+                    .param("page", "0")
+                    .param("size", "10")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content.length()").value(2))
+            .andExpect(jsonPath("$.content[0].id").value(threadId.toString()))
+            .andExpect(jsonPath("$.content[1].id").value(recentThreadId.toString()));
 
         mockMvc.perform(
                 get("/api/community/threads")
                     .param("communityId", communityId.toString())
                     .param("status", "STALE")
+                    .param("sortBy", "RECENT")
                     .param("page", "0")
                     .param("size", "10")
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content.length()").value(1))
             .andExpect(jsonPath("$.content[0].id").value(staleThreadId.toString()));
+
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("sortBy", "RECENT")
+                    .param("page", "0")
+                    .param("size", "1")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id").value(threadId.toString()));
+    }
+
+    @Test
+    @WithMockUser(username = "member_user", roles = {"CITIZEN"})
+    void memberCanListThreadsSortedByRelevance() throws Exception {
+        mockMvc.perform(
+                get("/api/community/threads")
+                    .param("communityId", communityId.toString())
+                    .param("sortBy", "RELEVANCE")
+                    .param("page", "0")
+                    .param("size", "10")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id").value(recentThreadId.toString()))
+            .andExpect(jsonPath("$.content[0].relevanceScore").isNumber())
+            .andExpect(jsonPath("$.content[0].totalReactions").value(8))
+            .andExpect(jsonPath("$.content[0].totalReplies").value(1))
+            .andExpect(jsonPath("$.content[0].messages[0].depth").value(0))
+            .andExpect(jsonPath("$.content[0].messages[0].directReplyCount").value(1))
+            .andExpect(jsonPath("$.content[0].messages[1].depth").value(1));
+    }
+
+    @Test
+    @WithMockUser(username = "member_user", roles = {"CITIZEN"})
+    void memberCannotReplyBeyondDefinedDepthLimit() throws Exception {
+        CommunityThreadMessage levelOne = new CommunityThreadMessage();
+        levelOne.setThreadId(threadId);
+        levelOne.setAuthorId(memberUserId);
+        levelOne.setSourceCommunityId(communityId);
+        levelOne.setParentMessageId(messageId);
+        levelOne.setContent("Level one");
+        levelOne = messageRepository.save(levelOne);
+
+        CommunityThreadMessage levelTwo = new CommunityThreadMessage();
+        levelTwo.setThreadId(threadId);
+        levelTwo.setAuthorId(memberUserId);
+        levelTwo.setSourceCommunityId(communityId);
+        levelTwo.setParentMessageId(levelOne.getId());
+        levelTwo.setContent("Level two");
+        levelTwo = messageRepository.save(levelTwo);
+
+        CommunityThreadMessage levelThree = new CommunityThreadMessage();
+        levelThree.setThreadId(threadId);
+        levelThree.setAuthorId(memberUserId);
+        levelThree.setSourceCommunityId(communityId);
+        levelThree.setParentMessageId(levelTwo.getId());
+        levelThree.setContent("Level three");
+        levelThree = messageRepository.save(levelThree);
+
+        CommunityThreadMessage levelFour = new CommunityThreadMessage();
+        levelFour.setThreadId(threadId);
+        levelFour.setAuthorId(memberUserId);
+        levelFour.setSourceCommunityId(communityId);
+        levelFour.setParentMessageId(levelThree.getId());
+        levelFour.setContent("Level four");
+        levelFour = messageRepository.save(levelFour);
+
+        mockMvc.perform(
+                post("/api/community/threads/" + threadId + "/messages")
+                    .contentType("application/json")
+                    .content(
+                        "{\"sourceCommunityId\":\"" + communityId + "\",\"content\":\"Too deep\",\"parentMessageId\":\"" + levelFour.getId() + "\"}"
+                    )
+            )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Reply depth limit exceeded. Community threads support up to 4 nested reply levels."));
     }
 
     private User createUser(String username) {

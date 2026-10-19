@@ -14,5 +14,14 @@ public record TrustPacket(
     String prioritizationFormula,
     String verificationHash
 ) {
-    public static final String CURRENT_FORMULA = "(Urgency * 30) + (Impact * 25) + min(People/10, 30) + min(Votes/5, 15)";
+    /**
+     * The formula as published, derived from the same constants the score is computed with.
+     *
+     * <p>Previously a hand-written string in this record, which was the third copy of the weights
+     * and free to drift from the arithmetic. Kept as a convenience accessor; the definition lives in
+     * {@link org.opencivic.signalos.domain.PrioritizationFormula}.
+     */
+    public static String currentFormula() {
+        return org.opencivic.signalos.domain.PrioritizationFormula.expression();
+    }
 }

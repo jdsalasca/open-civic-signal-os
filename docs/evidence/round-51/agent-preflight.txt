@@ -1,0 +1,235 @@
+
+> open-civic-signal-os@0.2.0 agent:preflight
+> node scripts/agent-preflight.mjs
+
+Detected changed files: 77
+
+> npm run agent:context:check
+
+> open-civic-signal-os@0.2.0 agent:context:check
+> node scripts/agent-context-check.mjs
+
+Agent context check passed.
+
+> npm run backlog:current:check
+
+> open-civic-signal-os@0.2.0 backlog:current:check
+> node scripts/check-current-backlog.mjs
+
+Current backlog check passed.
+
+> npm run security:runtime:check
+
+> open-civic-signal-os@0.2.0 security:runtime:check
+> node scripts/check-runtime-secrets.mjs
+
+Runtime secret policy check passed.
+
+> node test/generate-transparency-report.test.mjs
+generate-transparency-report
+  ok  renders a valid report
+  ok  reports both artifacts
+  ok  includes the unaddressed section
+  ok  produces byte-identical output across runs
+  ok  reports unchanged files on a rerun into the same directory
+  ok  rejects a report with no previous period
+  ok  rejects a malformed period key
+  ok  rejects a metric with no comparison
+  ok  rejects a report with no formula version
+  ok  fails fast on a missing input file
+  ok  states the closed period
+  ok  names the unaddressed item
+  ok  names the actioned item
+  ok  reads a falling resolution time as improved
+  ok  leaves an ambiguous intake metric unframed
+  ok  does not claim rising intake is a win
+  ok  cites the scoring formula
+  ok  claims reproducibility
+
+all checks passed
+
+> node test/check-ranking-reproducibility.test.mjs
+check-ranking-reproducibility
+  ok  accepts a capture that matches its own hash
+  ok  reports the formula version it verified
+  ok  reports the ordering hash
+  ok  rejects a reordered capture
+  ok  names the recorded and recomputed hashes
+  ok  says the file was edited
+  ok  rejects a capture with no recorded hash
+  ok  fails loudly on a missing capture
+  ok  distinguishes could-not-check from not-reproducible
+  ok  never passes when the API is unreachable
+  ok  explains that the API could not be reached
+  ok  rejects a non-numeric size before calling the API
+  ok  documents the exit codes
+
+all checks passed
+
+> node test/overlay-append-to.test.mjs
+floating panels mount outside their container
+  ok  Communities.tsx
+  ok  CommunityActivities.tsx
+  ok  CommunityBlog.tsx
+  ok  CommunityDecisions.tsx
+  ok  CommunityFeed.tsx
+  ok  CommunityGovernance.tsx
+  ok  CommunityIntegrations.tsx
+  ok  CommunityMap.tsx
+  ok  CommunityMergeReview.tsx
+  ok  CommunityOpenData.tsx
+  ok  CommunityProjects.tsx
+  ok  CommunityProposals.tsx
+  ok  CommunityResources.tsx
+  ok  CommunityRooms.tsx
+  ok  CommunityThreads.tsx
+  ok  CommunityTrustMetrics.tsx
+  ok  Dashboard.tsx
+  ok  HelpCenter.tsx
+  ok  Login.tsx
+  ok  Moderation.tsx
+  ok  MySignals.tsx
+  ok  NotFound.tsx
+  ok  PublicBacklog.tsx
+  ok  Register.tsx
+  ok  ReportSignal.tsx
+  ok  Settings.tsx
+  ok  SignalDetail.tsx
+  ok  Unauthorized.tsx
+  ok  Verify.tsx
+  ok  WeeklyDigestView.tsx
+
+all views mount their floating panels on document.body
+
+> node test/capture-trust-incident.test.mjs
+capture-trust-incident
+  ok  refuses to write an unlabelled bundle
+  ok  says why the label is required
+  ok  wrote nothing when it refused
+  ok  writes a bundle even when the API is unreachable
+  ok  produced exactly one file
+  ok  records the label
+  ok  records a capture timestamp
+  ok  has a schema version
+  ok  attempted every probe
+  ok  marks unreachable probes as failed rather than omitting them
+  ok  explains what an incomplete bundle means
+  ok  tells the operator the bundle is incomplete
+  ok  rejects a flag with no value
+  ok  names the file after the label
+  ok  documents both exit codes
+  ok  captures against a reachable API
+  ok  reports no failed probes
+  ok  captured the formula version
+  ok  captured the counts
+  ok  captured a real ordering hash
+  ok  captured the top titles
+  ok  captured which surfaces are stale
+  ok  did not report a healthy surface as stale
+
+all checks passed
+
+> npm run build:web
+
+> open-civic-signal-os@0.2.0 build:web
+> npm --workspace apps/web-react run build
+
+
+> @open-civic/web-react@0.1.0 build
+> tsc -b && vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+DEPRECATION WARNING [legacy-js-api]: The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0.
+
+More info: https://sass-lang.com/d/legacy-js-api
+
+[32mÔ£ô[39m 1988 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                                  [39m[1m[2m  0.61 kB[22m[1m[22m[2m Ôöé gzip:   0.41 kB[22m
+[2mdist/[22m[32massets/primeicons-C6QP2o4f.woff2            [39m[1m[2m 35.15 kB[22m[1m[22m
+[2mdist/[22m[32massets/primeicons-MpK4pl85.ttf              [39m[1m[2m 84.98 kB[22m[1m[22m
+[2mdist/[22m[32massets/primeicons-WjwUDZjB.woff             [39m[1m[2m 85.06 kB[22m[1m[22m
+[2mdist/[22m[32massets/primeicons-DMOk5skT.eot              [39m[1m[2m 85.16 kB[22m[1m[22m
+[2mdist/[22m[32massets/primeicons-Dr5RGzOO.svg              [39m[1m[2m342.53 kB[22m[1m[22m[2m Ôöé gzip: 105.26 kB[22m
+[2mdist/[22m[32massets/InterVariable-CWi-zmRD.woff2         [39m[1m[2m345.59 kB[22m[1m[22m
+[2mdist/[22m[32massets/InterVariable-Italic-d6KXgdvN.woff2  [39m[1m[2m380.90 kB[22m[1m[22m
+[2mdist/[22m[35massets/index-CME_ORfE.css                   [39m[1m[2m588.64 kB[22m[1m[22m[2m Ôöé gzip:  63.81 kB[22m
+[2mdist/[22m[36massets/keyboard-D8jPvXa5.js                 [39m[1m[2m  0.07 kB[22m[1m[22m[2m Ôöé gzip:   0.09 kB[22m
+[2mdist/[22m[36massets/CivicActionBar-DajsdDaB.js           [39m[1m[2m  0.29 kB[22m[1m[22m[2m Ôöé gzip:   0.23 kB[22m
+[2mdist/[22m[36massets/CivicCharacterCount-LbtLdUdX.js      [39m[1m[2m  0.31 kB[22m[1m[22m[2m Ôöé gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/CivicMetaRow-BLrPa2BB.js             [39m[1m[2m  0.35 kB[22m[1m[22m[2m Ôöé gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/communityContent-BHXDq_8R.js         [39m[1m[2m  0.37 kB[22m[1m[22m[2m Ôöé gzip:   0.26 kB[22m
+[2mdist/[22m[36massets/CivicBadge-DFqYjLuY.js               [39m[1m[2m  0.56 kB[22m[1m[22m[2m Ôöé gzip:   0.33 kB[22m
+[2mdist/[22m[36massets/CivicField-BCSIdvXe.js               [39m[1m[2m  0.59 kB[22m[1m[22m[2m Ôöé gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/CivicStatCard-DarInIJ_.js            [39m[1m[2m  0.60 kB[22m[1m[22m[2m Ôöé gzip:   0.29 kB[22m
+[2mdist/[22m[36massets/CivicPageHeader-KQaCj0WO.js          [39m[1m[2m  0.61 kB[22m[1m[22m[2m Ôöé gzip:   0.35 kB[22m
+[2mdist/[22m[36massets/formLimits-DwhJ0PaM.js               [39m[1m[2m  0.90 kB[22m[1m[22m[2m Ôöé gzip:   0.36 kB[22m
+[2mdist/[22m[36massets/CivicEmptyState-DZxbJcAS.js          [39m[1m[2m  1.08 kB[22m[1m[22m[2m Ôöé gzip:   0.56 kB[22m
+[2mdist/[22m[36massets/index.esm-CEYrNB3E.js                [39m[1m[2m  1.20 kB[22m[1m[22m[2m Ôöé gzip:   0.74 kB[22m
+[2mdist/[22m[36massets/NotFound-OA8RH8D6.js                 [39m[1m[2m  1.30 kB[22m[1m[22m[2m Ôöé gzip:   0.63 kB[22m
+[2mdist/[22m[36massets/Unauthorized-ql9Fog9V.js             [39m[1m[2m  1.50 kB[22m[1m[22m[2m Ôöé gzip:   0.68 kB[22m
+[2mdist/[22m[36massets/keyfilter.esm-C3N__Gcg.js            [39m[1m[2m  1.60 kB[22m[1m[22m[2m Ôöé gzip:   0.86 kB[22m
+[2mdist/[22m[36massets/ContextualHelpPanel-Bye6RfvS.js      [39m[1m[2m  2.42 kB[22m[1m[22m[2m Ôöé gzip:   1.12 kB[22m
+[2mdist/[22m[36massets/ModerationReportDialog-BXkyFYJE.js   [39m[1m[2m  3.04 kB[22m[1m[22m[2m Ôöé gzip:   1.23 kB[22m
+[2mdist/[22m[36massets/divider.esm-na4ybi6c.js              [39m[1m[2m  3.51 kB[22m[1m[22m[2m Ôöé gzip:   1.08 kB[22m
+[2mdist/[22m[36massets/inputtext.esm-x1Uh9SFo.js            [39m[1m[2m  3.63 kB[22m[1m[22m[2m Ôöé gzip:   1.55 kB[22m
+[2mdist/[22m[36massets/PublicBacklog-uRSmb0s5.js            [39m[1m[2m  3.96 kB[22m[1m[22m[2m Ôöé gzip:   1.45 kB[22m
+[2mdist/[22m[36massets/Verify-BO4fcCS0.js                   [39m[1m[2m  4.07 kB[22m[1m[22m[2m Ôöé gzip:   1.69 kB[22m
+[2mdist/[22m[36massets/MySignals-CEe5zNfy.js                [39m[1m[2m  4.39 kB[22m[1m[22m[2m Ôöé gzip:   1.74 kB[22m
+[2mdist/[22m[36massets/inputtextarea.esm-BP8EpFNM.js        [39m[1m[2m  4.45 kB[22m[1m[22m[2m Ôöé gzip:   1.83 kB[22m
+[2mdist/[22m[36massets/Register-DhUHFiU-.js                 [39m[1m[2m  4.67 kB[22m[1m[22m[2m Ôöé gzip:   1.70 kB[22m
+[2mdist/[22m[36massets/CivicSkeleton-D3VeNb7X.js            [39m[1m[2m  4.83 kB[22m[1m[22m[2m Ôöé gzip:   1.77 kB[22m
+[2mdist/[22m[36massets/CommunityMergeReview-CPkizsQj.js     [39m[1m[2m  4.97 kB[22m[1m[22m[2m Ôöé gzip:   1.80 kB[22m
+[2mdist/[22m[36massets/WeeklyDigestView-DtZvlJWO.js         [39m[1m[2m  5.47 kB[22m[1m[22m[2m Ôöé gzip:   1.78 kB[22m
+[2mdist/[22m[36massets/CivicEngagement-DIazdHeR.js          [39m[1m[2m  5.50 kB[22m[1m[22m[2m Ôöé gzip:   2.10 kB[22m
+[2mdist/[22m[36massets/checkbox.esm-wpGg43ZU.js             [39m[1m[2m  5.81 kB[22m[1m[22m[2m Ôöé gzip:   2.45 kB[22m
+[2mdist/[22m[36massets/Login-SO6-TQai.js                    [39m[1m[2m  6.22 kB[22m[1m[22m[2m Ôöé gzip:   2.21 kB[22m
+[2mdist/[22m[36massets/CommunityTrustMetrics-DLcKeZVa.js    [39m[1m[2m  6.37 kB[22m[1m[22m[2m Ôöé gzip:   2.08 kB[22m
+[2mdist/[22m[36massets/HelpCenter-B2JDDFn_.js               [39m[1m[2m  8.77 kB[22m[1m[22m[2m Ôöé gzip:   2.47 kB[22m
+[2mdist/[22m[36massets/CommunityFeed-CI3pX4bj.js            [39m[1m[2m  9.17 kB[22m[1m[22m[2m Ôöé gzip:   2.04 kB[22m
+[2mdist/[22m[36massets/CommunityIntegrations-Buqt31wX.js    [39m[1m[2m 11.02 kB[22m[1m[22m[2m Ôöé gzip:   3.04 kB[22m
+[2mdist/[22m[36massets/Moderation-dUZpmytz.js               [39m[1m[2m 12.46 kB[22m[1m[22m[2m Ôöé gzip:   3.50 kB[22m
+[2mdist/[22m[36massets/CommunityMap-D6FgrLiN.js             [39m[1m[2m 12.83 kB[22m[1m[22m[2m Ôöé gzip:   3.21 kB[22m
+[2mdist/[22m[36massets/CommunityRooms-BiCRToWR.js           [39m[1m[2m 12.99 kB[22m[1m[22m[2m Ôöé gzip:   3.66 kB[22m
+[2mdist/[22m[36massets/CommunityActivities-FzQfQGai.js      [39m[1m[2m 13.49 kB[22m[1m[22m[2m Ôöé gzip:   3.55 kB[22m
+[2mdist/[22m[36massets/CommunityBlog-DWzhB1lt.js            [39m[1m[2m 13.74 kB[22m[1m[22m[2m Ôöé gzip:   4.14 kB[22m
+[2mdist/[22m[36massets/SignalDetail-DjqNRC1l.js             [39m[1m[2m 14.55 kB[22m[1m[22m[2m Ôöé gzip:   4.50 kB[22m
+[2mdist/[22m[36massets/CommunityProjects--l49TK7j.js        [39m[1m[2m 16.40 kB[22m[1m[22m[2m Ôöé gzip:   4.05 kB[22m
+[2mdist/[22m[36massets/Communities-CosHZptj.js              [39m[1m[2m 16.40 kB[22m[1m[22m[2m Ôöé gzip:   4.53 kB[22m
+[2mdist/[22m[36massets/CommunityThreads-CXhGurbO.js         [39m[1m[2m 16.65 kB[22m[1m[22m[2m Ôöé gzip:   5.28 kB[22m
+[2mdist/[22m[36massets/CommunityOpenData-D_Bq2vum.js        [39m[1m[2m 16.80 kB[22m[1m[22m[2m Ôöé gzip:   4.14 kB[22m
+[2mdist/[22m[36massets/CommunityResources-DsJW9cnK.js       [39m[1m[2m 17.02 kB[22m[1m[22m[2m Ôöé gzip:   4.04 kB[22m
+[2mdist/[22m[36massets/password.esm-C3vKCLGn.js             [39m[1m[2m 18.41 kB[22m[1m[22m[2m Ôöé gzip:   6.88 kB[22m
+[2mdist/[22m[36massets/CommunityGovernance-BiZu0kch.js      [39m[1m[2m 19.65 kB[22m[1m[22m[2m Ôöé gzip:   4.13 kB[22m
+[2mdist/[22m[36massets/CommunityDecisions-B1LVMmEI.js       [39m[1m[2m 21.65 kB[22m[1m[22m[2m Ôöé gzip:   4.72 kB[22m
+[2mdist/[22m[36massets/inputnumber.esm-DteA_dYy.js          [39m[1m[2m 26.98 kB[22m[1m[22m[2m Ôöé gzip:   8.44 kB[22m
+[2mdist/[22m[36massets/dialog.esm-oRfGO4v6.js               [39m[1m[2m 28.98 kB[22m[1m[22m[2m Ôöé gzip:   8.82 kB[22m
+[2mdist/[22m[36massets/paginator.esm-Cs-cXsA-.js            [39m[1m[2m 30.14 kB[22m[1m[22m[2m Ôöé gzip:   9.10 kB[22m
+[2mdist/[22m[36massets/index.esm-CKwgMtOn.js                [39m[1m[2m 31.16 kB[22m[1m[22m[2m Ôöé gzip:  11.34 kB[22m
+[2mdist/[22m[36massets/Dashboard-BsDITKoL.js                [39m[1m[2m 31.24 kB[22m[1m[22m[2m Ôöé gzip:   8.65 kB[22m
+[2mdist/[22m[36massets/ReportSignal-BCi1SMeh.js             [39m[1m[2m 32.72 kB[22m[1m[22m[2m Ôöé gzip:   8.98 kB[22m
+[2mdist/[22m[36massets/CommunityProposals-BktIbUQr.js       [39m[1m[2m 35.05 kB[22m[1m[22m[2m Ôöé gzip:   7.13 kB[22m
+[2mdist/[22m[36massets/Settings-D0GAQYqp.js                 [39m[1m[2m 36.07 kB[22m[1m[22m[2m Ôöé gzip:   9.16 kB[22m
+[2mdist/[22m[36massets/axios-CU3TuHa9.js                    [39m[1m[2m 38.39 kB[22m[1m[22m[2m Ôöé gzip:  15.37 kB[22m
+[2mdist/[22m[36massets/calendar.esm-BW8wLMqQ.js             [39m[1m[2m 69.79 kB[22m[1m[22m[2m Ôöé gzip:  19.76 kB[22m
+[2mdist/[22m[36massets/Layout-tTUFkwRg.js                   [39m[1m[2m 99.15 kB[22m[1m[22m[2m Ôöé gzip:  27.62 kB[22m
+[2mdist/[22m[36massets/column.esm-iHy02poC.js               [39m[1m[2m170.29 kB[22m[1m[22m[2m Ôöé gzip:  45.93 kB[22m
+[2mdist/[22m[36massets/index-BdNwWYOq.js                    [39m[1m[2m177.65 kB[22m[1m[22m[2m Ôöé gzip:  62.33 kB[22m
+[2mdist/[22m[36massets/index-ZG1CzwII.js                    [39m[1m[33m569.66 kB[39m[22m[2m Ôöé gzip: 176.22 kB[22m
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[32mÔ£ô built in 7.60s[39m
+
+Playwright evidence reminder:
+Run: npm run agent:ux:pw -- open http://localhost:5173 --headed
+Run: npm run agent:ux:pw -- snapshot
+Run: npm run agent:ux:pw -- screenshot output/playwright/<name>.png
+
+Docs changed: ensure links and examples remain valid.
+
+Agent preflight passed.

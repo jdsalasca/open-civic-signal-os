@@ -1,0 +1,45 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note
+[1A[2K  1) [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('project-board-submit-button')[22m
+    [2m    - locator resolved to <button disabled type="submit" data-pc-name="button" data-pc-section="root" aria-label="Open board" data-testid="project-board-submit-button" class="transition-all active:scale-95 px-4 py-2 font-bold text-sm civic-button-base p-button-primary civic-button civic-button-primary p-button p-component p-disabled">ÔÇª</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 ├ù waiting for element to be visible, enabled and stable[22m
+    [2m      - element is not enabled[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 ├ù waiting for element to be visible, enabled and stable[22m
+    [2m      - element is not enabled[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    52 ├ù waiting for element to be visible, enabled and stable[22m
+    [2m       - element is not enabled[22m
+    [2m     - retrying click action[22m
+    [2m       - waiting 500ms[22m
+
+
+      282 |       .fill("Coordinate volunteer shifts, paint prep, procurement, and final walkthrough for the crossing rollout.");
+      283 |     await page.getByTestId("project-board-due-date-input").fill("2026-04-02");
+    > 284 |     await page.getByTestId("project-board-submit-button").click();
+          |                                                           ^
+      285 |
+      286 |     await expect.poll(() => createBoardPayload).not.toBeNull();
+      287 |     expect(createBoardPayload).toMatchObject({
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-projects.spec.ts:284:59
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-projects-Communi-195a6-s-it-and-leaves-a-task-note-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-projects-Communi-195a6-s-it-and-leaves-a-task-note-chromium\error-context.md
+
+
+[1A[2K  1 failed
+    [chromium] ÔÇ║ src\tests\community-projects.spec.ts:13:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note 

@@ -67,4 +67,35 @@ class AuthHardeningIT {
             .andExpect(jsonPath("$.supportEmail").exists())
             .andExpect(jsonPath("$.message", containsString("could not be delivered")));
     }
+
+    @Test
+    void resendCodeShouldReturnDegradedEmailStatusWhenSmtpFails() throws Exception {
+        when(mailSender.createMimeMessage()).thenReturn(new MimeMessage(Session.getDefaultInstance(new Properties())));
+        doThrow(new RuntimeException("smtp down")).when(mailSender).send(ArgumentMatchers.any(MimeMessage.class));
+
+        String username = "degraded_resend_user";
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "username":"degraded_resend_user",
+                      "password":"Passw0rd!",
+                      "email":"degraded_resend_user@example.com"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.emailDeliveryStatus").value("FAILED"));
+
+        mockMvc.perform(post("/api/auth/resend-code")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "username":"%s"
+                    }
+                    """.formatted(username)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.emailDeliveryStatus").value("FAILED"))
+            .andExpect(jsonPath("$.supportEmail").exists())
+            .andExpect(jsonPath("$.message", containsString("Could not deliver verification email")));
+    }
 }

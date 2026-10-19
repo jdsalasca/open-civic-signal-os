@@ -1,0 +1,470 @@
+package org.opencivic.signalos.service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.opencivic.signalos.domain.Community;
+import org.opencivic.signalos.domain.CommunityMembership;
+import org.opencivic.signalos.domain.CommunityPermissionScope;
+import org.opencivic.signalos.domain.CommunityProjectBoard;
+import org.opencivic.signalos.domain.CommunityRoom;
+import org.opencivic.signalos.domain.CommunityRoomMention;
+import org.opencivic.signalos.domain.CommunityRoomMessage;
+import org.opencivic.signalos.domain.CommunityRoomMute;
+import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.exception.ResourceNotFoundException;
+import org.opencivic.signalos.repository.CommunityMembershipRepository;
+import org.opencivic.signalos.repository.CommunityProjectBoardRepository;
+import org.opencivic.signalos.repository.CommunityRepository;
+import org.opencivic.signalos.repository.CommunityRoomMentionRepository;
+import org.opencivic.signalos.repository.CommunityRoomMessageRepository;
+import org.opencivic.signalos.repository.CommunityRoomMuteRepository;
+import org.opencivic.signalos.repository.CommunityRoomRepository;
+import org.opencivic.signalos.repository.UserRepository;
+import org.opencivic.signalos.web.dto.CommunityRoomDetailResponse;
+import org.opencivic.signalos.web.dto.CommunityRoomEventResponse;
+import org.opencivic.signalos.web.dto.CommunityRoomMentionInboxResponse;
+import org.opencivic.signalos.web.dto.CommunityRoomMentionResponse;
+import org.opencivic.signalos.web.dto.CommunityRoomMessageResponse;
+import org.opencivic.signalos.web.dto.CommunityRoomMuteResponse;
+import org.opencivic.signalos.web.dto.CommunityRoomSummaryResponse;
+import org.opencivic.signalos.web.dto.CommunityRoomWorkspaceResponse;
+import org.opencivic.signalos.web.dto.CreateCommunityRoomRequest;
+import org.opencivic.signalos.web.dto.PostCommunityRoomMessageRequest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class CommunityRoomService {
+    private static final Pattern MENTION_PATTERN = Pattern.compile("@([A-Za-z0-9._-]{2,40})");
+
+    private final CommunityAccessService communityAccessService;
+    private final CommunityRepository communityRepository;
+    private final CommunityMembershipRepository membershipRepository;
+    private final CommunityProjectBoardRepository projectBoardRepository;
+    private final UserRepository userRepository;
+    private final CommunityRoomRepository roomRepository;
+    private final CommunityRoomMessageRepository messageRepository;
+    private final CommunityRoomMentionRepository mentionRepository;
+    private final CommunityRoomMuteRepository muteRepository;
+    private final CommunityRoomEventBroker eventBroker;
+
+    public CommunityRoomService(
+        CommunityAccessService communityAccessService,
+        CommunityRepository communityRepository,
+        CommunityMembershipRepository membershipRepository,
+        CommunityProjectBoardRepository projectBoardRepository,
+        UserRepository userRepository,
+        CommunityRoomRepository roomRepository,
+        CommunityRoomMessageRepository messageRepository,
+        CommunityRoomMentionRepository mentionRepository,
+        CommunityRoomMuteRepository muteRepository,
+        CommunityRoomEventBroker eventBroker
+    ) {
+        this.communityAccessService = communityAccessService;
+        this.communityRepository = communityRepository;
+        this.membershipRepository = membershipRepository;
+        this.projectBoardRepository = projectBoardRepository;
+        this.userRepository = userRepository;
+        this.roomRepository = roomRepository;
+        this.messageRepository = messageRepository;
+        this.mentionRepository = mentionRepository;
+        this.muteRepository = muteRepository;
+        this.eventBroker = eventBroker;
+    }
+
+    @Transactional(readOnly = true)
+    public CommunityRoomWorkspaceResponse getWorkspace(UUID communityId, String username, Integer limit) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireMembership(user.getId(), communityId);
+        Community community = getCommunity(communityId);
+        int max = CommunityListLimits.resolveLimit(limit);
+
+        List<CommunityRoom> rooms = roomRepository.findByCommunityIdAndArchivedFalseOrderByCreatedAtDesc(communityId);
+        Map<UUID, CommunityRoomMute> mutesByRoom = mutesFor(user.getId(), rooms.stream().map(CommunityRoom::getId).toList());
+
+        List<CommunityRoomSummaryResponse> summaries = rooms.stream()
+            .limit(max)
+            .map(room -> toSummary(room, user.getId(), mutesByRoom))
+            .sorted(Comparator.comparing(CommunityRoomSummaryResponse::lastActivityAt,
+                Comparator.nullsLast(Comparator.reverseOrder())))
+            .toList();
+
+        return new CommunityRoomWorkspaceResponse(
+            community.getId(),
+            community.getName(),
+            mentionableUsernames(communityId),
+            summaries,
+            buildInbox(communityId, user.getId())
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public CommunityRoomDetailResponse getRoom(UUID communityId, UUID roomId, String username, Integer limit) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireMembership(user.getId(), communityId);
+        CommunityRoom room = requireRoom(communityId, roomId);
+
+        // Bounded, because this platform is used in the field on a phone with little bandwidth and a
+        // room that has been running for a year would otherwise be downloaded whole on every open. The
+        // workspace endpoint beside this one already took a limit; this one took none.
+        //
+        // The limit reaches the database. Capping a list that was already fully read bounds the
+        // response and nothing else: the row count a busy room costs stays the same no matter how few
+        // messages the caller asked for.
+        int effectiveLimit = CommunityListLimits.resolveLimit(limit);
+        List<CommunityRoomMessage> messages = messageRepository
+            .findByRoomIdOrderByCreatedAtDescIdDesc(roomId, PageRequest.of(0, effectiveLimit));
+        long totalMessages = messageRepository.countByRoomId(roomId);
+        List<UUID> messageIds = messages.stream().map(CommunityRoomMessage::getId).toList();
+        Map<UUID, List<CommunityRoomMention>> mentionsByMessage = mentionsByMessage(messageIds);
+        // Resolved once for the page, not once per message inside the render loop. Every message on a
+        // page has an author, so this used to be a user query per row.
+        Map<UUID, String> authorNames = displayNamesOf(
+            messages.stream().map(CommunityRoomMessage::getAuthorId).distinct().toList());
+
+        List<CommunityRoomMessageResponse> payload = messages.stream()
+            .map(message -> {
+                List<CommunityRoomMention> mentions = mentionsByMessage.getOrDefault(message.getId(), List.of());
+                return new CommunityRoomMessageResponse(
+                    message.getId(),
+                    roomId,
+                    message.getAuthorId(),
+                    authorNames.getOrDefault(message.getAuthorId(), "unknown"),
+                    message.getBody(),
+                    message.getCreatedAt(),
+                    mentions.stream().map(CommunityRoomMention::getMentionedUserId).distinct().toList(),
+                    mentions.stream().anyMatch(mention -> mention.getMentionedUserId().equals(user.getId()))
+                );
+            })
+            .toList();
+
+        CommunityRoomMute mute = muteRepository.findByRoomIdAndUserId(roomId, user.getId()).orElse(null);
+        return new CommunityRoomDetailResponse(
+            room.getId(),
+            room.getCommunityId(),
+            room.getProjectBoardId(),
+            room.getName(),
+            room.getTopic(),
+            room.getCreatedBy(),
+            room.getCreatedAt(),
+            room.isArchived(),
+            mute != null,
+            mute == null ? null : mute.getMutedAt(),
+            // The true total, not the capped page size, so a reader can tell a quiet room from a
+            // truncated one.
+            totalMessages,
+            totalMessages > messages.size(),
+            mentionRepository.countByRoomIdAndMentionedUserIdAndReadAtIsNull(roomId, user.getId()),
+            payload
+        );
+    }
+
+    @Transactional
+    public CommunityRoomSummaryResponse createRoom(CreateCommunityRoomRequest request, String username) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireScope(user.getId(), request.communityId(), CommunityPermissionScope.MANAGE_ROOMS);
+        getCommunity(request.communityId());
+
+        if (request.projectBoardId() != null) {
+            CommunityProjectBoard board = projectBoardRepository.findById(request.projectBoardId())
+                .orElseThrow(() -> new ResourceNotFoundException("Project board not found: " + request.projectBoardId()));
+            if (!board.getCommunityId().equals(request.communityId())) {
+                throw new ResourceNotFoundException("Project board does not belong to community " + request.communityId());
+            }
+        }
+
+        CommunityRoom room = new CommunityRoom();
+        room.setCommunityId(request.communityId());
+        room.setProjectBoardId(request.projectBoardId());
+        room.setName(request.name().trim());
+        room.setTopic(request.topic().trim());
+        room.setCreatedBy(user.getId());
+        room = roomRepository.save(room);
+
+        eventBroker.publish(new CommunityRoomEventResponse(
+            "room-created", room.getId(), room.getCommunityId(), null, user.getId(), room.getCreatedAt()
+        ));
+        return toSummary(room, user.getId(), Map.of());
+    }
+
+    /**
+     * Checks that the caller may read a room, without building the room view.
+     *
+     * <p>Exists because the SSE stream endpoint needs the check and nothing else. Calling
+     * {@code getRoom} for it meant loading and serialising a room's recent history on every stream
+     * connection, for a value the caller discarded.
+     */
+    @Transactional(readOnly = true)
+    public void requireRoomAccess(UUID communityId, UUID roomId, String username) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireMembership(user.getId(), communityId);
+        requireRoom(communityId, roomId);
+    }
+
+    @Transactional
+    public CommunityRoomMessageResponse postMessage(PostCommunityRoomMessageRequest request, String username) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireScope(user.getId(), request.communityId(), CommunityPermissionScope.POST_ROOM_MESSAGE);
+        CommunityRoom room = requireRoom(request.communityId(), request.roomId());
+
+        CommunityRoomMessage message = new CommunityRoomMessage();
+        message.setRoomId(room.getId());
+        message.setCommunityId(room.getCommunityId());
+        message.setAuthorId(user.getId());
+        message.setBody(request.body().trim());
+        message = messageRepository.save(message);
+
+        List<CommunityRoomMention> mentions = createMentions(room, message, user.getId());
+        mentionRepository.saveAll(mentions);
+
+        eventBroker.publish(new CommunityRoomEventResponse(
+            "room-message",
+            room.getId(),
+            room.getCommunityId(),
+            message.getId(),
+            user.getId(),
+            message.getCreatedAt()
+        ));
+
+        return new CommunityRoomMessageResponse(
+            message.getId(),
+            room.getId(),
+            user.getId(),
+            displayNameOf(user.getId()),
+            message.getBody(),
+            message.getCreatedAt(),
+            mentions.stream().map(CommunityRoomMention::getMentionedUserId).distinct().toList(),
+            false
+        );
+    }
+
+    @Transactional
+    public CommunityRoomMuteResponse setMute(UUID communityId, UUID roomId, boolean muted, String username) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireMembership(user.getId(), communityId);
+        CommunityRoom room = requireRoom(communityId, roomId);
+
+        CommunityRoomMute existing = muteRepository.findByRoomIdAndUserId(roomId, user.getId()).orElse(null);
+        if (muted && existing == null) {
+            CommunityRoomMute mute = new CommunityRoomMute();
+            mute.setRoomId(roomId);
+            mute.setCommunityId(room.getCommunityId());
+            mute.setUserId(user.getId());
+            existing = muteRepository.save(mute);
+        } else if (!muted && existing != null) {
+            muteRepository.delete(existing);
+            existing = null;
+        }
+
+        return new CommunityRoomMuteResponse(roomId, communityId, existing != null, existing == null ? null : existing.getMutedAt());
+    }
+
+    @Transactional
+    public CommunityRoomMentionInboxResponse markMentionsRead(UUID communityId, UUID roomId, String username) {
+        User user = communityAccessService.getCurrentUser(username);
+        communityAccessService.requireMembership(user.getId(), communityId);
+        if (roomId != null) {
+            requireRoom(communityId, roomId);
+        }
+
+        List<CommunityRoomMention> pending = roomId == null
+            ? mentionRepository.findByMentionedUserIdAndCommunityIdAndReadAtIsNullOrderByCreatedAtDesc(user.getId(), communityId)
+            : mentionRepository.findByRoomIdOrderByCreatedAtDesc(roomId).stream()
+                .filter(mention -> mention.getMentionedUserId().equals(user.getId()) && mention.getReadAt() == null)
+                .toList();
+
+        LocalDateTime now = LocalDateTime.now();
+        pending.forEach(mention -> mention.setReadAt(now));
+        mentionRepository.saveAll(pending);
+
+        return buildInbox(communityId, user.getId());
+    }
+
+    private CommunityRoomMentionInboxResponse buildInbox(UUID communityId, UUID userId) {
+        List<CommunityRoomMention> pending =
+            mentionRepository.findByMentionedUserIdAndCommunityIdAndReadAtIsNullOrderByCreatedAtDesc(userId, communityId);
+        Map<UUID, CommunityRoomMention> dedupedByMessage = new LinkedHashMap<>();
+        pending.forEach(mention -> dedupedByMessage.putIfAbsent(mention.getMessageId(), mention));
+
+        List<CommunityRoomMention> rows = dedupedByMessage.values().stream().limit(20).toList();
+        // Three lookups per row used to make this screen cost three queries per mention: the room, the
+        // message and the author's name. Read each of the three once for the whole inbox instead.
+        Map<UUID, CommunityRoom> roomsById = roomRepository.findAllById(
+            rows.stream().map(CommunityRoomMention::getRoomId).distinct().toList()).stream()
+            .collect(Collectors.toMap(CommunityRoom::getId, room -> room));
+        Map<UUID, CommunityRoomMessage> messagesById = messageRepository.findAllById(
+            rows.stream().map(CommunityRoomMention::getMessageId).distinct().toList()).stream()
+            .collect(Collectors.toMap(CommunityRoomMessage::getId, message -> message));
+        Map<UUID, String> authorNames = displayNamesOf(messagesById.values().stream()
+            .map(CommunityRoomMessage::getAuthorId)
+            .filter(authorId -> authorId != null)
+            .distinct()
+            .toList());
+
+        List<CommunityRoomMentionResponse> items = rows.stream().map(mention -> {
+            CommunityRoom room = roomsById.get(mention.getRoomId());
+            CommunityRoomMessage message = messagesById.get(mention.getMessageId());
+            UUID authorId = message == null ? null : message.getAuthorId();
+            return new CommunityRoomMentionResponse(
+                mention.getId(),
+                mention.getRoomId(),
+                room == null ? "" : room.getName(),
+                mention.getMessageId(),
+                message == null ? "" : message.getBody(),
+                mention.getMentionedUserId(),
+                authorId,
+                authorId == null ? "" : authorNames.getOrDefault(authorId, "unknown"),
+                mention.getCreatedAt(),
+                mention.getReadAt()
+            );
+        }).toList();
+
+        return new CommunityRoomMentionInboxResponse(communityId, pending.size(), items);
+    }
+
+    private List<CommunityRoomMention> createMentions(CommunityRoom room, CommunityRoomMessage message, UUID authorId) {
+        List<String> handles = extractMentionHandles(message.getBody());
+        if (handles.isEmpty()) {
+            return List.of();
+        }
+        Map<String, UUID> memberIdsByUsername = memberIdsByUsername(room.getCommunityId());
+        List<CommunityRoomMention> mentions = new ArrayList<>();
+        for (String handle : handles) {
+            UUID mentionedId = memberIdsByUsername.get(handle);
+            if (mentionedId == null || mentionedId.equals(authorId)) {
+                continue;
+            }
+            CommunityRoomMention mention = new CommunityRoomMention();
+            mention.setMessageId(message.getId());
+            mention.setRoomId(room.getId());
+            mention.setCommunityId(room.getCommunityId());
+            mention.setMentionedUserId(mentionedId);
+            mentions.add(mention);
+        }
+        return mentions;
+    }
+
+    static List<String> extractMentionHandles(String body) {
+        List<String> handles = new ArrayList<>();
+        Matcher matcher = MENTION_PATTERN.matcher(body);
+        while (matcher.find()) {
+            String handle = matcher.group(1).toLowerCase(Locale.ROOT);
+            if (!handles.contains(handle)) {
+                handles.add(handle);
+            }
+        }
+        return handles;
+    }
+
+    private List<String> mentionableUsernames(UUID communityId) {
+        return memberIdsByUsername(communityId).keySet().stream().sorted().toList();
+    }
+
+    private Map<String, UUID> memberIdsByUsername(UUID communityId) {
+        Map<String, UUID> result = new LinkedHashMap<>();
+        // One query, two columns, no membership rows and no User entities: the workspace open used to
+        // cost one lookup per member, so a community of 500 cost 500 queries on the screen that lists
+        // its rooms.
+        for (UserRepository.DisplayName user
+            : userRepository.findDisplayNamesByIdIn(membershipRepository.findUserIdsByCommunityId(communityId))) {
+            if (user.getUsername() != null && !user.getUsername().isBlank()) {
+                result.put(user.getUsername().toLowerCase(Locale.ROOT), user.getId());
+            }
+        }
+        return result;
+    }
+
+    private Map<UUID, List<CommunityRoomMention>> mentionsByMessage(List<UUID> messageIds) {
+        Map<UUID, List<CommunityRoomMention>> result = new HashMap<>();
+        if (messageIds.isEmpty()) {
+            return result;
+        }
+        // One query for the whole page, then group in memory. This used to ask per message id, so the
+        // cost of opening a room grew with the size of the page it showed.
+        for (CommunityRoomMention mention : mentionRepository.findByMessageIdIn(messageIds)) {
+            result.computeIfAbsent(mention.getMessageId(), key -> new ArrayList<>()).add(mention);
+        }
+        return result;
+    }
+
+    private Map<UUID, CommunityRoomMute> mutesFor(UUID userId, List<UUID> roomIds) {
+        Map<UUID, CommunityRoomMute> result = new LinkedHashMap<>();
+        if (roomIds.isEmpty()) {
+            return result;
+        }
+        for (CommunityRoomMute mute : muteRepository.findByRoomIdInAndUserId(roomIds, userId)) {
+            result.put(mute.getRoomId(), mute);
+        }
+        return result;
+    }
+
+    private CommunityRoomSummaryResponse toSummary(CommunityRoom room, UUID userId, Map<UUID, CommunityRoomMute> mutesByRoom) {
+        // This runs once per room on every workspace open, which is the screen a coordinator loads to
+        // find out which room is busy. It used to load each room's entire history to call .size() on it
+        // and read the newest timestamp: twenty busy rooms meant twenty full histories to draw a list
+        // of twenty rows. A count and the single newest row answer both questions.
+        long messageCount = messageRepository.countByRoomId(room.getId());
+        List<CommunityRoomMessage> newest = messageRepository
+            .findByRoomIdOrderByCreatedAtDescIdDesc(room.getId(), PageRequest.of(0, 1));
+        CommunityRoomMute mute = mutesByRoom.get(room.getId());
+        return new CommunityRoomSummaryResponse(
+            room.getId(),
+            room.getCommunityId(),
+            room.getProjectBoardId(),
+            room.getName(),
+            room.getTopic(),
+            room.getCreatedBy(),
+            room.getCreatedAt(),
+            room.isArchived(),
+            messageCount,
+            mentionRepository.countByRoomIdAndMentionedUserIdAndReadAtIsNull(room.getId(), userId),
+            mute != null,
+            newest.isEmpty() ? room.getCreatedAt() : newest.get(0).getCreatedAt()
+        );
+    }
+
+    private Map<UUID, String> displayNamesOf(List<UUID> userIds) {
+        Map<UUID, String> names = new HashMap<>();
+        if (userIds.isEmpty()) {
+            // A room that has just been created has no messages, so this runs with nothing to look up.
+            return names;
+        }
+        for (UserRepository.DisplayName user : userRepository.findDisplayNamesByIdIn(userIds)) {
+            String displayName = user.getDisplayName() != null && !user.getDisplayName().isBlank()
+                ? user.getDisplayName()
+                : user.getUsername();
+            names.put(user.getId(), displayName != null ? displayName : "unknown");
+        }
+        return names;
+    }
+
+    /** Single-name convenience for the callers that resolve one author, not a page of them. */
+    private String displayNameOf(UUID userId) {
+        return displayNamesOf(List.of(userId)).getOrDefault(userId, "unknown");
+    }
+
+    private CommunityRoom requireRoom(UUID communityId, UUID roomId) {
+        CommunityRoom room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new ResourceNotFoundException("Community room not found: " + roomId));
+        if (!room.getCommunityId().equals(communityId)) {
+            throw new ResourceNotFoundException("Community room not found: " + roomId);
+        }
+        return room;
+    }
+
+    private Community getCommunity(UUID communityId) {
+        return communityRepository.findById(communityId)
+            .orElseThrow(() -> new ResourceNotFoundException("Community not found: " + communityId));
+    }
+}

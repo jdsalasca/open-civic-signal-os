@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
-import { Signal, Notification, SignalMeta } from "../types";
+import { Signal, Notification, SignalMeta, SignalAging } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
 import { SignalTable } from "../components/SignalTable";
+import { PriorityScale, SignalEmpty, StatusChip } from "../components/signalPrimitives";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
 import { CategoryChart } from "../components/CategoryChart";
@@ -11,18 +12,33 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
+import { formatStamp } from "../utils/formatStamp";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicSkeleton } from "../components/ui/CivicSkeleton";
 import { CivicToolbar } from "../components/ui/CivicToolbar";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { CivicBadge } from "../components/ui/CivicBadge";
+import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useCommunityStore } from "../store/useCommunityStore";
+import { useSettingsStore, PAGE_SIZE_BY_DATA_MODE } from "../store/useSettingsStore";
+import { toRoleLabel } from "../constants/roleLabels";
+import { useSignalStatusLabel } from "../utils/signalStatus";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
 }
 
-const CRITICAL_SCORE_THRESHOLD = 220;
+/**
+ * Bootstrap value only.
+ *
+ * The platform publishes the real threshold at /api/signals/meta and it wins as soon as that
+ * response lands. The CRITICAL filter itself is applied by the backend through minScore, never
+ * here, so the number a resident reads is the true total rather than how many critical rows
+ * happened to fall inside one page.
+ */
+const CRITICAL_SCORE_THRESHOLD_FALLBACK = 220;
 const STATUS_FILTERS = new Set(["NEW", "IN_PROGRESS", "RESOLVED"]);
 const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
 
@@ -40,21 +56,38 @@ export function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeRole, userName } = useAuthStore();
-  const { activeCommunityId } = useCommunityStore();
+  const interfaceMode = useSettingsStore((state) => state.interfaceMode);
+  const dataMode = useSettingsStore((state) => state.dataMode);
+  // Field mode is about bytes, not chrome. On a slow connection the optional panels are the cost,
+  // so they are skipped rather than merely hidden.
+  const fieldMode = dataMode === "field";
+  // Declared here rather than beside the other role checks because the fetch effect above needs it.
+  const staffRole = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
+  const { activeCommunityId, memberships } = useCommunityStore();
   
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<SignalMeta | null>(null);
+  // Server-published threshold, with a bootstrap fallback only for the first paint before /meta
+  // resolves. Once meta arrives this is the platform's number, not a local copy.
+  const criticalThreshold = meta?.criticalScoreThreshold ?? CRITICAL_SCORE_THRESHOLD_FALLBACK;
   const [duplicateClusters, setDuplicateClusters] = useState(0);
+  const [aging, setAging] = useState<SignalAging | null>(null);
   const [totalRecords, setTotalRecords] = useState(0);
   
   const [activeFilter, setActiveFilter] = useState<string>("ALL");
   const [lazyState, setLazyState] = useState({
     first: 0,
-    rows: 10,
+    rows: PAGE_SIZE_BY_DATA_MODE[dataMode],
     page: 0
   });
+
+  // Switching data mode changes how many rows are worth asking for. Applied on the next load rather
+  // than by mutating state here, so the change is one request rather than two.
+  useEffect(() => {
+    setLazyState((prev) => ({ ...prev, first: 0, page: 0, rows: PAGE_SIZE_BY_DATA_MODE[dataMode] }));
+  }, [dataMode]);
 
   const loadData = useCallback(async (signal?: AbortSignal, force = false) => {
     const cacheKey = [
@@ -81,16 +114,29 @@ export function Dashboard() {
 
     try {
       setLoading(true);
-      const prioritizedQuery = STATUS_FILTERS.has(activeFilter)
-        ? `signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}&status=${activeFilter}`
-        : `signals/prioritized?page=${lazyState.page}&size=${lazyState.rows}`;
+      // Every filter that changes the visible set must change the query, never just the
+      // highlight. CRITICAL becomes minScore so the backend filters and reports the real total.
+      const prioritizedParams = new URLSearchParams({
+        page: String(lazyState.page),
+        size: String(lazyState.rows),
+      });
+      if (STATUS_FILTERS.has(activeFilter)) {
+        prioritizedParams.set("status", activeFilter);
+      }
+      if (activeFilter === "CRITICAL") {
+        prioritizedParams.set("minScore", String(criticalThreshold));
+      }
+      const prioritizedQuery = `signals/prioritized?${prioritizedParams.toString()}`;
+
       const [signalsRes, metaRes, notificationsRes, duplicatesRes] = await Promise.all([
         apiClient.get(prioritizedQuery, { signal }),
         apiClient.get("signals/meta", { signal }),
-        (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
+        // Field mode skips the optional panels entirely. Hiding them after fetching would still
+        // pay for the bytes, which is the whole cost being avoided.
+        (staffRole && !fieldMode)
           ? apiClient.get("notifications/recent", { signal })
           : Promise.resolve(null),
-        (activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN")
+        (staffRole && !fieldMode)
           ? apiClient.get("signals/duplicates", { signal })
           : Promise.resolve(null)
       ]);
@@ -134,7 +180,7 @@ export function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [activeRole, t, lazyState, activeFilter, activeCommunityId]);
+  }, [activeRole, t, lazyState, activeFilter, activeCommunityId, criticalThreshold]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -151,21 +197,56 @@ export function Dashboard() {
     setLazyState((prev) => ({ ...prev, first: 0, page: 0 }));
   };
 
-  const displayedSignals = useMemo(() => {
-    if (activeFilter === "CRITICAL") {
-      return signals.filter((s) => (s.priorityScore ?? 0) >= CRITICAL_SCORE_THRESHOLD);
-    }
-    return signals;
-  }, [signals, activeFilter]);
+  const displayedSignals = signals;
+  const statusLabel = useSignalStatusLabel();
 
-  const visibleRecords = activeFilter === "CRITICAL" ? displayedSignals.length : totalRecords;
+  // "Needs attention" reads the head of the ranking the backend already published: open cases,
+  // strongest first. It never re-sorts by a client rule, and the page keeps its own ordering.
+  const attentionSignals = useMemo(
+    () =>
+      displayedSignals
+        .filter((signal) => signal.status === "NEW" || signal.status === "IN_PROGRESS")
+        .slice()
+        .sort((a, b) => (b.priorityScore ?? 0) - (a.priorityScore ?? 0))
+        .slice(0, 3),
+    [displayedSignals]
+  );
+
+  // With the filter pushed into the query, the visible count is the backend total. Counting
+  // critical rows client-side would report "how many of this page" instead of "how many exist".
+  const visibleRecords = totalRecords;
   const criticalCount = useMemo(
-    () => signals.filter((s) => (s.priorityScore ?? 0) >= CRITICAL_SCORE_THRESHOLD).length,
-    [signals]
+    () => (activeFilter === "CRITICAL" ? totalRecords : signals.filter((s) => (s.priorityScore ?? 0) >= criticalThreshold).length),
+    [totalRecords, signals, activeFilter, criticalThreshold]
   );
   const newCount = useMemo(
     () => signals.filter((s) => s.status === "NEW").length,
     [signals]
+  );
+  const formatLastUpdated = (isoDate: string | null) => {
+    if (!isoDate) return t('dashboard.freshness_pending');
+    const date = new Date(isoDate);
+    const diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+    if (diffMinutes < 1) return t('dashboard.freshness_now');
+    if (diffMinutes < 60) return t('dashboard.freshness_minutes', { count: diffMinutes });
+    return t('dashboard.freshness_hours', { count: Math.floor(diffMinutes / 60) });
+  };
+  const heroStats = useMemo(
+    () => [
+      {
+        label: t("dashboard.priority_strip_critical", { count: criticalCount }),
+        value: criticalCount.toString(),
+      },
+      {
+        label: t("dashboard.priority_strip_new", { count: newCount }),
+        value: newCount.toString(),
+      },
+      {
+        label: t("dashboard.freshness_label"),
+        value: formatLastUpdated(meta?.lastUpdatedAt ?? null),
+      },
+    ],
+    [criticalCount, meta?.lastUpdatedAt, newCount, t]
   );
 
   const handleRelay = async () => {
@@ -181,16 +262,106 @@ export function Dashboard() {
     }
   };
 
-  const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
+  const isStaff = staffRole;
+  const activeMembership = useMemo(
+    () =>
+      memberships.find((membership) => membership.communityId === activeCommunityId) ??
+      memberships[0] ??
+      null,
+    [activeCommunityId, memberships]
+  );
+  const activeBreadcrumb = activeMembership?.breadcrumb ?? [];
+  const isCommunityModerator =
+    activeMembership?.role === "MODERATOR" || activeMembership?.role === "COORDINATOR";
+  const activeCommunityName = activeMembership?.communityName ?? t("dashboard.community_default");
+  const activeCommunityRoleLabel = activeMembership ? toRoleLabel(activeMembership.role, t) : null;
+  const activeCommunityPath =
+    activeBreadcrumb.length > 0
+      ? activeBreadcrumb.map((item) => item.name).join(" / ")
+      : t("dashboard.community_path_empty");
 
-  const formatLastUpdated = (isoDate: string | null) => {
-    if (!isoDate) return t('dashboard.freshness_pending');
-    const date = new Date(isoDate);
-    const diffMinutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
-    if (diffMinutes < 1) return t('dashboard.freshness_now');
-    if (diffMinutes < 60) return t('dashboard.freshness_minutes', { count: diffMinutes });
-    return t('dashboard.freshness_hours', { count: Math.floor(diffMinutes / 60) });
-  };
+  // Aging is fetched separately from the prioritized list so it does not widen or
+  // invalidate the dashboard cache, which is keyed on the signal page.
+  useEffect(() => {
+    if (!isStaff || fieldMode) {
+      // Field mode does not fetch aging at all. The panel is additive, and on a slow connection the
+      // bytes are the cost, so skipping the request is the point rather than hiding the result.
+      return;
+    }
+    const controller = new AbortController();
+    apiClient
+      .get<SignalAging>("signals/aging", { signal: controller.signal })
+      .then((res) => {
+        if (res.status === 200) {
+          setAging(res.data);
+        }
+      })
+      .catch(() => {
+        // Aging is an additive panel; a failure must not break the dashboard.
+      });
+    return () => controller.abort();
+  }, [isStaff, activeCommunityId, totalRecords]);
+
+  const guidedHome = useMemo(() => {
+    if (isStaff) {
+      return {
+        personaLabel: t("dashboard.guided_home.public_servant.persona"),
+        heroTitle: t("dashboard.guided_home.public_servant.hero_title"),
+        heroSubtitle: t("dashboard.guided_home.public_servant.hero_subtitle"),
+        heroGuidance: t("dashboard.guided_home.public_servant.hero_guidance"),
+        primaryActionLabel: t("dashboard.guided_home.public_servant.primary_action"),
+        primaryActionIcon: "pi pi-megaphone",
+        primaryAction: () => navigate("/communities/blog"),
+        cardTitle: t("dashboard.guided_home.public_servant.card_title"),
+        cardDescription: t("dashboard.guided_home.public_servant.card_description"),
+        steps: [
+          t("dashboard.guided_home.public_servant.step_1"),
+          t("dashboard.guided_home.public_servant.step_2"),
+          t("dashboard.guided_home.public_servant.step_3"),
+        ],
+      };
+    }
+
+    if (isCommunityModerator) {
+      return {
+        personaLabel: t("dashboard.guided_home.moderator.persona"),
+        heroTitle: t("dashboard.guided_home.moderator.hero_title"),
+        heroSubtitle: t("dashboard.guided_home.moderator.hero_subtitle"),
+        heroGuidance: t("dashboard.guided_home.moderator.hero_guidance", {
+          community: activeMembership?.communityName ?? t("dashboard.community_default"),
+        }),
+        primaryActionLabel: t("dashboard.guided_home.moderator.primary_action"),
+        primaryActionIcon: "pi pi-comments",
+        primaryAction: () => navigate("/communities/threads"),
+        cardTitle: t("dashboard.guided_home.moderator.card_title"),
+        cardDescription: t("dashboard.guided_home.moderator.card_description", {
+          community: activeMembership?.communityName ?? t("dashboard.community_default"),
+        }),
+        steps: [
+          t("dashboard.guided_home.moderator.step_1"),
+          t("dashboard.guided_home.moderator.step_2"),
+          t("dashboard.guided_home.moderator.step_3"),
+        ],
+      };
+    }
+
+    return {
+      personaLabel: t("dashboard.guided_home.citizen.persona"),
+      heroTitle: t("dashboard.guided_home.citizen.hero_title"),
+      heroSubtitle: t("dashboard.guided_home.citizen.hero_subtitle"),
+      heroGuidance: t("dashboard.guided_home.citizen.hero_guidance"),
+      primaryActionLabel: t("dashboard.guided_home.citizen.primary_action"),
+      primaryActionIcon: "pi pi-plus",
+      primaryAction: () => navigate("/report"),
+      cardTitle: t("dashboard.guided_home.citizen.card_title"),
+      cardDescription: t("dashboard.guided_home.citizen.card_description"),
+      steps: [
+        t("dashboard.guided_home.citizen.step_1"),
+        t("dashboard.guided_home.citizen.step_2"),
+        t("dashboard.guided_home.citizen.step_3"),
+      ],
+    };
+  }, [activeMembership?.communityName, isCommunityModerator, isStaff, navigate, t]);
 
   const quickFilters = [
     { label: t('signals.filter_all'), value: "ALL", icon: "pi-list" },
@@ -210,73 +381,327 @@ export function Dashboard() {
     handleFilterChange(filterByMetric[metricId]);
   };
 
+  const communityActionCards = useMemo(
+    () => [
+      {
+        title: t("dashboard.community_surface.official_title"),
+        description: t("dashboard.community_surface.official_desc", { community: activeCommunityName }),
+        icon: "pi pi-megaphone",
+        actionLabel: t("dashboard.community_surface.official_action"),
+        action: () => navigate("/communities/blog"),
+        testId: "dashboard-community-action-blog",
+      },
+      {
+        title: t("dashboard.community_surface.talks_title"),
+        description: t("dashboard.community_surface.talks_desc", { community: activeCommunityName }),
+        icon: "pi pi-comments",
+        actionLabel: t("dashboard.community_surface.talks_action"),
+        action: () => navigate("/communities/threads"),
+        testId: "dashboard-community-action-threads",
+      },
+      {
+        title: t("dashboard.community_surface.membership_title"),
+        description: t("dashboard.community_surface.membership_desc", {
+          count: memberships.length,
+          role: activeCommunityRoleLabel ?? t("dashboard.community_surface.membership_no_role"),
+        }),
+        icon: "pi pi-users",
+        actionLabel: t("dashboard.community_surface.membership_action"),
+        action: () => navigate("/communities"),
+        testId: "dashboard-community-action-hub",
+      },
+    ],
+    [activeCommunityName, activeCommunityRoleLabel, memberships.length, navigate, t]
+  );
+
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <section className="mb-8 flex flex-column lg:flex-row justify-content-between align-items-end gap-6" data-testid="dashboard-hero">
-          <div>
+        <section className="dashboard-hero-shell mb-8" data-testid="dashboard-hero">
+          <CivicCard className="dashboard-story-card" padding="lg">
             <div className="flex align-items-center flex-wrap gap-3 mb-4">
               <div className="u-pill" data-testid="welcome-message">
                 <i className="pi pi-user text-brand-primary"></i>
                 {userName}
+              </div>
+              <div className="u-pill" data-testid="dashboard-guided-persona">
+                <i className="pi pi-compass text-brand-primary"></i>
+                {guidedHome.personaLabel}
+              </div>
+              <div className="u-pill" data-testid="dashboard-active-community-pill">
+                <i className="pi pi-globe text-brand-primary"></i>
+                {activeCommunityName}
               </div>
               <div className="u-pill" data-testid="dashboard-freshness-badge">
                 <i className="pi pi-clock text-brand-primary"></i>
                 {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-black m-0 tracking-tight text-main line-height-2">
-              {t('dashboard.focus_today')}
+            <h1 className="u-page-title text-4xl md:text-5xl font-black m-0 line-height-2">
+              {guidedHome.heroTitle}
             </h1>
             <p className="text-secondary text-lg mt-3 mb-0 font-medium max-w-30rem">
-              {t('dashboard.focus_subtitle')}
+              {guidedHome.heroSubtitle}
             </p>
-          </div>
-
-          <CivicActionBar className="dashboard-hero-actions">
-            <CivicButton
-              type="button"
-              label={t('dashboard.new_issue')}
-              icon="pi pi-plus"
-              onClick={() => navigate("/report")}
-              data-testid="dashboard-action-report"
-            />
-            <CivicButton
-              type="button"
-              label={t('nav.dialogues')}
-              icon="pi pi-comments"
-              variant="secondary"
-              onClick={() => navigate("/communities/threads")}
-              data-testid="dashboard-action-threads"
-            />
-            <CivicButton
-              type="button"
-              label={t('nav.public_blog')}
-              icon="pi pi-megaphone"
-              variant="ghost"
-              onClick={() => navigate("/communities/blog")}
-              data-testid="dashboard-action-blog"
-            />
-            {isStaff && (
+            <p className="text-sm text-muted mt-3 mb-0 max-w-28rem" data-testid="dashboard-primary-guidance">
+              {guidedHome.heroGuidance}
+            </p>
+            <div className="dashboard-story-grid mt-5">
+              {heroStats.map((item) => (
+                <CivicStatCard
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
+                  compact
+                  tone="brand"
+                />
+              ))}
+            </div>
+            <CivicActionBar className="dashboard-hero-actions mt-5">
               <CivicButton
                 type="button"
-                label={t('dashboard.broadcast')}
-                icon="pi pi-bolt"
-                variant="danger"
-                onClick={handleRelay}
-                data-testid="dashboard-action-broadcast"
+                label={guidedHome.primaryActionLabel}
+                icon={guidedHome.primaryActionIcon}
+                onClick={guidedHome.primaryAction}
+                className="shadow-xl"
+                data-testid="dashboard-action-report"
               />
-            )}
-          </CivicActionBar>
+            </CivicActionBar>
+          </CivicCard>
+          <CivicCard variant="brand" padding="lg" data-testid="dashboard-community-hub-card">
+            <span className="u-section-title text-xs">{t("dashboard.community_hub.title")}</span>
+            <h2 className="text-xl font-black text-main mt-3 mb-0">{activeCommunityName}</h2>
+            <p className="text-secondary text-sm mt-3 mb-0" data-testid="dashboard-guided-home-description">
+              {t("dashboard.community_hub.desc", {
+                community: activeCommunityName,
+                role: activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback"),
+              })}
+            </p>
+            <div className="dashboard-community-summary-grid mt-4" data-testid="dashboard-community-summary">
+              <CivicStatCard
+                label={t("dashboard.community_hub.path_label")}
+                value={activeCommunityName}
+                supportingText={activeCommunityPath}
+                compact
+                data-testid="dashboard-community-summary-path"
+              />
+              <CivicStatCard
+                label={t("dashboard.community_hub.role_label")}
+                value={activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback")}
+                supportingText={guidedHome.personaLabel}
+                compact
+                data-testid="dashboard-community-summary-role"
+              />
+              <CivicStatCard
+                label={t("dashboard.community_hub.memberships_label")}
+                value={memberships.length}
+                supportingText={t("settings.community_membership_title")}
+                compact
+                data-testid="dashboard-community-summary-memberships"
+              />
+            </div>
+            <div className="mt-5 pt-4 border-top-1 border-surface-soft">
+              <span className="text-xs font-black uppercase tracking-wide text-muted">
+                {t("dashboard.community_hub.next_actions_label")}
+              </span>
+              <div className="dashboard-action-cluster mt-3">
+                <CivicButton
+                  type="button"
+                  label={t("dashboard.community_hub.action_hub")}
+                  icon="pi pi-globe"
+                  variant="ghost"
+                  onClick={() => navigate("/communities")}
+                  data-testid="dashboard-community-open-hub"
+                />
+                <CivicButton
+                  type="button"
+                  label={t("dashboard.track_contributions")}
+                  icon="pi pi-user"
+                  variant="ghost"
+                  onClick={() => navigate("/mine")}
+                  data-testid="dashboard-hero-action-mine"
+                />
+              </div>
+            </div>
+          </CivicCard>
         </section>
+
+        {/*
+          Attention first. Before the community surfaces and the numbers, the dashboard answers the
+          only question a visitor has on arrival: what here cannot wait. The three cards are the head
+          of the backend's own ranking, with the same priority scale and lifecycle chip used across
+          the product.
+        */}
+        <section className="mb-6" data-testid="dashboard-attention">
+          <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
+            <div className="flex flex-column gap-1 min-w-0">
+              <span className="signal-kicker">
+                <i className="pi pi-bolt" aria-hidden="true"></i>
+                {t("dashboard.attention_title")}
+              </span>
+              <p className="signal-copy text-sm m-0">{t("dashboard.attention_desc")}</p>
+            </div>
+            <CivicButton
+              type="button"
+              variant="ghost"
+              size="small"
+              label={t("dashboard.attention_open_feed")}
+              icon="pi pi-arrow-down"
+              onClick={() =>
+                document
+                  .querySelector('[data-testid="signals-datatable"]')
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
+              data-testid="dashboard-attention-open-feed"
+            />
+          </div>
+
+          {loading ? (
+            <div className="signal-skeleton" aria-hidden="true">
+              {[0, 1, 2].map((row) => (
+                <div key={row} className="signal-skeleton__row" style={{ height: "4.75rem" }} />
+              ))}
+            </div>
+          ) : attentionSignals.length === 0 ? (
+            <SignalEmpty
+              icon="pi pi-check-circle"
+              title={t("dashboard.attention_empty_title")}
+              description={t("dashboard.attention_empty_desc")}
+              testId="dashboard-attention-empty"
+            />
+          ) : (
+            <div className="signal-attention" data-testid="dashboard-attention-list">
+              {attentionSignals.map((signal, index) => (
+                <button
+                  key={signal.id}
+                  type="button"
+                  className="signal-attention-card"
+                  onClick={() => navigate(`/signal/${signal.id}`)}
+                  data-testid={`dashboard-attention-card-${index + 1}`}
+                >
+                  <span className="signal-attention-card__copy">
+                    <span className="signal-attention-card__title">{signal.title}</span>
+                    <span className="signal-attention-card__meta">
+                      <PriorityScale
+                        score={signal.priorityScore}
+                        threshold={criticalThreshold}
+                        compact
+                        testId={`dashboard-attention-priority-${index + 1}`}
+                      />
+                      <StatusChip status={signal.status} label={statusLabel(signal.status)} />
+                    </span>
+                  </span>
+                  <i className="pi pi-arrow-right signal-attention-card__arrow" aria-hidden="true"></i>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <CivicCard className="mb-6" data-testid="dashboard-community-focus">
+          <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
+            <div className="flex flex-column gap-1">
+              <span className="text-xs font-black uppercase tracking-wide text-muted">
+                {t("dashboard.community_surface.kicker")}
+              </span>
+              <h2 className="text-2xl font-black text-main m-0">{t("dashboard.community_surface.title", { community: activeCommunityName })}</h2>
+              <p className="text-sm text-secondary m-0">{t("dashboard.community_surface.desc")}</p>
+            </div>
+            {interfaceMode === "simple" && (
+              <div className="u-pill" data-testid="dashboard-community-mode-hint">
+                <i className="pi pi-sparkles text-brand-primary"></i>
+                {t("dashboard.community_surface.simple_mode_hint")}
+              </div>
+            )}
+          </div>
+          <div className="dashboard-community-surface-grid">
+            {communityActionCards.map((card) => (
+              <div key={card.title} className="dashboard-community-surface-card" data-testid={card.testId}>
+                <div className="flex align-items-start justify-content-between gap-3">
+                  <div className="flex-1">
+                    <div className="dashboard-story-metric-label">{card.title}</div>
+                    <p className="text-sm text-secondary mt-3 mb-0 line-height-3">{card.description}</p>
+                  </div>
+                  <div className="u-pill">
+                    <i className={`${card.icon} text-brand-primary`}></i>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <CivicButton
+                    type="button"
+                    label={card.actionLabel}
+                    icon="pi pi-arrow-right"
+                    variant="ghost"
+                    onClick={card.action}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CivicCard>
+
+        <ContextualHelpPanel surface="DASHBOARD" className="mb-6" dataTestId="dashboard-contextual-help" />
+
+        {interfaceMode === "advanced" && (
+          <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
+            <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
+              <div className="flex flex-column gap-1">
+                <span className="text-xs font-black uppercase tracking-wide text-muted">
+                  {t("dashboard.secondary_actions_title")}
+                </span>
+                <span className="text-sm text-secondary">
+                  {t("dashboard.secondary_actions_desc")}
+                </span>
+              </div>
+              <CivicActionBar className="dashboard-secondary-action-bar">
+                <div className="dashboard-action-cluster">
+                  <CivicButton
+                    type="button"
+                    label={t('nav.public_blog')}
+                    icon="pi pi-megaphone"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/blog")}
+                    data-testid="dashboard-action-blog"
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t('nav.dialogues')}
+                    icon="pi pi-comments"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/threads")}
+                    data-testid="dashboard-action-threads"
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t('dashboard.track_contributions')}
+                    icon="pi pi-user"
+                    variant="ghost"
+                    onClick={() => navigate("/mine")}
+                    data-testid="dashboard-action-mine"
+                  />
+                </div>
+                {isStaff && (
+                  <CivicButton
+                    type="button"
+                    label={t('dashboard.broadcast')}
+                    icon="pi pi-bolt"
+                    variant="secondary"
+                    onClick={handleRelay}
+                    data-testid="dashboard-action-broadcast"
+                  />
+                )}
+              </CivicActionBar>
+            </div>
+          </CivicCard>
+        )}
 
         <CivicCard className="mb-6" variant="brand">
           <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
             <div className="flex flex-column gap-1">
-              <span className="text-xs font-black uppercase tracking-widest text-muted">{t("dashboard.priority_strip_title")}</span>
-              <span className="text-sm text-secondary">{t("dashboard.priority_strip_desc")}</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
+                <span className="text-xs font-black uppercase tracking-wide text-muted">{t("dashboard.priority_strip_title")}</span>
+                <span className="text-sm text-secondary">{t("dashboard.priority_strip_desc")}</span>
+              </div>
+            <div className="dashboard-action-cluster">
               <CivicButton
                 type="button"
                 size="small"
@@ -348,6 +773,7 @@ export function Dashboard() {
                   rows={lazyState.rows}
                   first={lazyState.first}
                   onPage={onPage}
+                  criticalThreshold={criticalThreshold}
                 />
               </CivicCard>
             )}
@@ -359,7 +785,7 @@ export function Dashboard() {
                 <CivicSkeleton type="text" count={3} />
               ) : (
                 <>
-                  {displayedSignals.length > 0 && (
+                  {interfaceMode === "advanced" && displayedSignals.length > 0 && (
                     <CategoryChart signals={displayedSignals} />
                   )}
                   {!isStaff && (
@@ -370,26 +796,108 @@ export function Dashboard() {
                         <li className="line-height-3">2. {t('dashboard.quickstart_step_2')}</li>
                         <li className="line-height-3">3. {t('dashboard.quickstart_step_3')}</li>
                       </ul>
-                      <div className="mt-4 flex flex-column md:flex-row gap-2">
+                      <CivicActionBar className="dashboard-quickstart-actions mt-4">
                         <CivicButton label={t('dashboard.quickstart_report')} onClick={() => navigate('/report')} />
                         <CivicButton label={t('dashboard.quickstart_forums')} variant="secondary" onClick={() => navigate('/communities/threads')} />
-                        <CivicButton label={t('dashboard.quickstart_contributions')} variant="ghost" onClick={() => navigate('/mine')} className="md:ml-auto" />
-                      </div>
+                        <CivicButton label={t('dashboard.quickstart_contributions')} variant="ghost" onClick={() => navigate('/mine')} />
+                      </CivicActionBar>
                     </CivicCard>
                   )}
-                  <DigestSidebar signals={displayedSignals} />
+                  <DigestSidebar signals={displayedSignals} criticalThreshold={criticalThreshold} />
+                  {isStaff && aging && (
+                    <CivicCard
+                      title={t("dashboard.aging_title")}
+                      data-testid="dashboard-aging-panel"
+                    >
+                      <div className="civic-stat-grid civic-stat-grid-comfortable mb-4">
+                        <CivicStatCard
+                          compact
+                          label={t("dashboard.aging_unresolved")}
+                          value={aging.unresolvedCount}
+                          supportingText={t("dashboard.aging_target", { days: aging.slaTargetDays })}
+                        />
+                        <CivicStatCard
+                          compact
+                          label={t("dashboard.aging_at_risk")}
+                          value={aging.atRiskCount}
+                          supportingText={t("dashboard.aging_at_risk_desc")}
+                        />
+                        <CivicStatCard
+                          compact
+                          label={t("dashboard.aging_breached")}
+                          value={aging.breachedCount}
+                          supportingText={t("dashboard.aging_breached_desc")}
+                        />
+                        <CivicStatCard
+                          compact
+                          label={t("dashboard.aging_median")}
+                          value={aging.medianAgeDays}
+                          supportingText={t("dashboard.aging_median_desc")}
+                        />
+                      </div>
+
+                      <div className="u-surface-note mb-4">
+                        <div className="u-eyebrow mb-2">{t("dashboard.aging_buckets")}</div>
+                        <div className="flex flex-wrap gap-3">
+                          {aging.ageBuckets.map((bucket) => (
+                            <span key={bucket.bucket} className="text-sm text-secondary">
+                              {t(`dashboard.aging_bucket_${bucket.bucket}`)}: {bucket.count}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {aging.atRiskSignals.length === 0 ? (
+                        <p className="text-secondary m-0" data-testid="dashboard-aging-empty">
+                          {t("dashboard.aging_all_on_track")}
+                        </p>
+                      ) : (
+                        <div className="flex flex-column gap-2" data-testid="dashboard-aging-list">
+                          {aging.atRiskSignals.slice(0, 5).map((item) => (
+                            <div
+                              key={item.id}
+                              className="border-round-xl border-1 border-surface-soft p-3 flex justify-content-between align-items-center gap-3 flex-wrap"
+                            >
+                              <span className="text-sm text-main">{item.title}</span>
+                              <span className="flex align-items-center gap-2 flex-wrap">
+                                <CivicBadge
+                                  label={t(`dashboard.aging_risk_${item.slaRisk}`)}
+                                  severity={
+                                    item.slaRisk === "BREACHED"
+                                      ? "rejected"
+                                      : item.slaRisk === "AT_RISK"
+                                        ? "progress"
+                                        : "neutral"
+                                  }
+                                />
+                                <span className="text-xs text-muted">
+                                  {t("dashboard.aging_age", { days: item.ageDays })}
+                                </span>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <small className="text-muted mt-3 block">
+                        {t("dashboard.aging_generated_at")}: {formatStamp(aging.generatedAt) ?? "-"}
+                      </small>
+                    </CivicCard>
+                  )}
                   {isStaff && notifications.length > 0 && (
                     <NotificationSidebar notifications={notifications} />
                   )}
-                  {isStaff && (
-                    <CivicCard title="Integrity Alerts" variant="danger">
+                  {isStaff && interfaceMode === "advanced" && (
+                    <CivicCard title={t("dashboard.integrity_title")} variant="danger">
                       <div className="flex flex-column gap-4">
-                        <div className="flex align-items-center justify-content-between bg-status-rejected-alpha-10 p-3 border-round-xl">
-                          <span className="text-sm font-bold text-main">Duplicates</span>
-                          <span className="bg-status-rejected text-on-brand px-2 py-1 border-round font-black text-xs">{duplicateClusters}</span>
-                        </div>
+                        <CivicStatCard
+                          label={t("dashboard.integrity_duplicates")}
+                          value={duplicateClusters}
+                          supportingText={t("dashboard.duplicates_desc", { count: duplicateClusters })}
+                          compact
+                        />
                         <CivicButton 
-                          label="Review Queue" 
+                          label={t("dashboard.integrity_review")} 
                           variant="ghost" 
                           className="w-full text-xs" 
                           onClick={() => navigate('/moderation')}

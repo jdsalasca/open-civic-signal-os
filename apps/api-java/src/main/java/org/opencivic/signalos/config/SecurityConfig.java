@@ -46,12 +46,41 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta").permitAll()
+                .requestMatchers("/api/open-data/**").permitAll()
+                // The city directory is the landing page's content. Asking someone to register before
+                // they can see which cities exist is asking them to commit blind.
+                .requestMatchers(HttpMethod.GET, "/api/communities/public").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta", "/api/signals/formula").permitAll()
+                // A published backlog is a claim a visitor checks. A check only its publisher can run
+                // is not one a visitor can trust, so both the claim and the comparison are public.
+                .requestMatchers(HttpMethod.GET, "/api/community/backlog-publications/current", "/api/community/backlog-publications/verify").permitAll()
+                // What would a set of weights do. A pure computation that stores nothing, so anyone can
+                // ask before a change is even proposed.
+                .requestMatchers(HttpMethod.POST, "/api/formula-change-proposals/preview").permitAll()
+                // A community arguing about weights should be able to run the comparison itself.
+                // Storing nothing, so there is nothing to protect.
+                .requestMatchers(HttpMethod.POST, "/api/policy-simulation").permitAll()
+                // A peer has to read the contract before it can decide whether to ask for a token.
+                // The manifest carries no data, so there is nothing to protect.
+                .requestMatchers(HttpMethod.GET, "/api/federation/manifest", "/api/federation/compatibility").permitAll()
+                // The formula is platform-wide, so proposing and deciding a change is not a
+                // community-scoped act. Reading the governance record requires a session.
+                .requestMatchers(HttpMethod.POST, "/api/formula-change-proposals/**").hasRole("SUPER_ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/formula-change-proposals/**").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/signals/export/**").hasRole("SUPER_ADMIN")
                 
                 .requestMatchers(HttpMethod.POST, "/api/signals/*/vote").hasRole("CITIZEN")
                 .requestMatchers(HttpMethod.POST, "/api/signals").hasAnyRole("CITIZEN", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/community/proposals").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/community/proposals/*").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/community/projects").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/community/projects/*/tasks").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/community/projects/*/tasks/*").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/community/projects/*/tasks/*/comments").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/community/governance").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/community/governance/*/versions").hasAnyRole("CITIZEN", "PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/signals/*/status").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/signals/*/assign").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/signals/merge").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers("/api/signals/flagged", "/api/signals/*/moderate").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
                 .requestMatchers("/api/notifications/recent", "/api/notifications/relay/**").hasAnyRole("PUBLIC_SERVANT", "SUPER_ADMIN")
@@ -88,7 +117,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-Community-Id"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "X-Community-Id", "X-Api-Token"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

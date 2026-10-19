@@ -33,6 +33,9 @@ public class EmailService {
     @Value("${spring.mail.username:no-reply@localhost}")
     private String fromEmail;
 
+    @Value("${application.mail.enabled:true}")
+    private boolean mailEnabled = true;
+
     public EmailDeliveryResult sendVerificationCode(String to, String username, String code) {
         Context context = new Context();
         context.setVariables(Map.of("username", username, "code", code));
@@ -46,7 +49,25 @@ public class EmailService {
         return sendSimpleEmail(to, "Welcome to Signal OS", body, "WELCOME");
     }
 
+    /**
+     * Sends a rendered digest body, typically a weekly civic bulletin.
+     *
+     * <p>Deliberately on the same audited helper as the other two: whatever records failures and
+     * notifies on them must apply here too, because a bulletin that silently fails to send looks
+     * exactly like a week where nothing happened.
+     *
+     * <p>The body arrives already rendered. This method does not compose it, because the digest is
+     * the thing that has to be reproducible and its rendering belongs with the digest, not with the
+     * transport.
+     */
+    public EmailDeliveryResult sendDigest(String to, String subject, String body) {
+        return sendSimpleEmail(to, subject, body, "WEEKLY_DIGEST");
+    }
+
     private EmailDeliveryResult sendHtmlEmail(String to, String subject, String htmlBody, String flow) {
+        if (!mailEnabled) {
+            return disabledEmailResult(flow);
+        }
         try {
             if (fromEmail == null || fromEmail.isBlank()) {
                 String reason = "SMTP Configuration Error: spring.mail.username is not set.";
@@ -74,6 +95,9 @@ public class EmailService {
     }
 
     private EmailDeliveryResult sendSimpleEmail(String to, String subject, String body, String flow) {
+        if (!mailEnabled) {
+            return disabledEmailResult(flow);
+        }
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
@@ -90,6 +114,11 @@ public class EmailService {
             auditEmailFailure(flow, to, reason);
             return EmailDeliveryResult.failed(reason);
         }
+    }
+
+    private EmailDeliveryResult disabledEmailResult(String flow) {
+        log.info("Email delivery is disabled; skipping flow={}", flow);
+        return EmailDeliveryResult.failed("Email delivery is disabled by configuration.");
     }
 
     private void auditEmailFailure(String flow, String to, String reason) {

@@ -1,0 +1,454 @@
+// ---------------------------------------------------------------------------
+// Public face: the landing front door, the auth forms and the empty/404/403
+// states. Paper Craft language: layered sheets, washi tape, cut corners and a
+// gentle settle instead of a spring. Mobile-first from 360px.
+// ---------------------------------------------------------------------------
+@use "../base/mixins" as *;
+
+// ---------- Landing hero ----------------------------------------------------
+.landing-shell {
+  width: 100%;
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) var(--space-8);
+}
+
+.landing-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: center;
+  margin-bottom: var(--space-7);
+}
+
+.landing-hero-copy {
+  min-width: 0;
+}
+
+.landing-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: var(--radius-paper-chip);
+  border: 1px solid var(--pill-border);
+  background: var(--pill-bg);
+  color: var(--text-secondary);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  transform: rotate(-1.2deg);
+}
+
+.landing-hero-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.35rem, 7vw, 4.1rem);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--text-main);
+  margin: var(--space-4) 0 0;
+  text-wrap: balance;
+}
+
+.landing-hero-subtitle {
+  color: var(--text-secondary);
+  font-size: var(--text-lead);
+  line-height: var(--leading-body);
+  max-width: 42rem;
+  margin: var(--space-3) 0 0;
+  text-wrap: pretty;
+}
+
+.landing-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.landing-hero-actions > * {
+  min-width: 0;
+}
+
+.landing-hero-art {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  padding: var(--space-3);
+}
+
+// The sheet the illustration is cut onto, tilted like everything else on the
+// paper table. It sits behind the artwork so the transparent sky reads as paper.
+.landing-hero-art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-paper-lg);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+  transform: rotate(-1.4deg);
+}
+
+.landing-hero-art::after {
+  content: "";
+  position: absolute;
+  top: -0.7rem;
+  left: 12%;
+  width: 6.5rem;
+  height: 1.9rem;
+  z-index: 2;
+  transform: rotate(-5deg);
+  pointer-events: none;
+  @include paper-tape;
+}
+
+.landing-hero-illustration {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+// ---------- Sections --------------------------------------------------------
+.landing-section {
+  margin-bottom: var(--space-7);
+}
+
+.landing-section-head {
+  margin-bottom: var(--space-5);
+  max-width: 46rem;
+}
+
+.landing-section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-display);
+  color: var(--text-main);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.landing-section-subtitle {
+  color: var(--text-secondary);
+  margin: var(--space-2) 0 0;
+  line-height: var(--leading-body);
+  text-wrap: pretty;
+}
+
+// ---------- How it works ----------------------------------------------------
+.landing-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  counter-reset: landing-step;
+}
+
+.landing-step {
+  position: relative;
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--bg-card) 96%, transparent);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+}
+
+.landing-step:nth-child(2) {
+  transform: rotate(0.7deg);
+}
+
+.landing-step:nth-child(3) {
+  transform: rotate(-0.6deg);
+}
+
+.landing-step-index {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: var(--radius-paper-chip);
+  background: var(--brand-primary);
+  color: var(--on-brand);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-edge), 0 12px 20px -14px var(--brand-primary-glow-strong);
+}
+
+.landing-step-body {
+  min-width: 0;
+}
+
+.landing-step-title {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--text-main);
+}
+
+.landing-step-desc {
+  margin: 0.4rem 0 0;
+  color: var(--text-secondary);
+  line-height: var(--leading-body);
+  text-wrap: pretty;
+}
+
+// ---------- Trust strip -----------------------------------------------------
+.landing-trust-strip {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: linear-gradient(135deg, var(--brand-primary-alpha-10), var(--brand-accent-soft));
+  border: 1px solid var(--alpha-border-10);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+}
+
+.landing-trust-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  color: var(--text-main);
+}
+
+.landing-trust-desc {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  line-height: var(--leading-body);
+  max-width: 34rem;
+  text-wrap: pretty;
+}
+
+.landing-trust-points {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.landing-trust-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.landing-trust-point i {
+  color: var(--color-accent);
+  margin-top: 0.15rem;
+}
+
+// ---------- City directory + search ----------------------------------------
+.landing-directory {
+  scroll-margin-top: 5.5rem;
+}
+
+.landing-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: var(--space-4);
+}
+
+.landing-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+// The shared input rule sets a 1rem padding with !important; the field has to
+// reserve room for the icon or the magnifier lands on top of the placeholder.
+.landing-search .p-inputtext {
+  width: 100%;
+  padding-left: 3rem !important;
+}
+
+.landing-city-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.landing-city-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--bg-card) 96%, transparent);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+  transition: transform var(--motion-fast) var(--ease-paper), box-shadow var(--motion-fast) var(--ease-paper);
+}
+
+.landing-city-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-edge), var(--shadow-lift);
+}
+
+.landing-city-name {
+  font-weight: 900;
+  font-size: 1.18rem;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.landing-city-location {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  margin-top: 0.2rem;
+}
+
+.landing-city-desc {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.landing-city-cta {
+  margin-top: auto;
+}
+
+// ---------- Empty / 404 / 403 illustrations --------------------------------
+.state-illustration {
+  display: block;
+  width: 100%;
+  max-width: 22rem;
+  height: auto;
+  margin: 0 auto var(--space-4);
+}
+
+.state-illustration-wide {
+  max-width: 30rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .state-illustration {
+    animation: landing-art-settle var(--motion-enter) var(--ease-paper) both;
+  }
+}
+
+@keyframes landing-art-settle {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--motion-distance) * -0.5)) rotate(-1deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// ---------- Auth form polish ------------------------------------------------
+.auth-panel {
+  width: 100%;
+  max-width: 30rem;
+}
+
+.auth-panel-wide {
+  max-width: 34rem;
+}
+
+// The icon-led fields inside the auth panels share the search field's rule: the
+// shared input padding would otherwise leave the glyph sitting on the text.
+.auth-panel .p-input-icon-left > .p-inputtext {
+  padding-left: 2.75rem !important;
+}
+
+// PrimeReact wraps the password input in an inline-flex shell; without this the
+// field collapses to the width of its placeholder.
+.p-password {
+  width: 100%;
+  display: flex;
+}
+
+.p-password .p-icon-field {
+  width: 100%;
+  display: flex;
+}
+
+.p-password .p-inputtext {
+  width: 100%;
+}
+
+.p-password .p-password-input {
+  flex: 1 1 auto;
+}
+
+.auth-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
+.auth-city-help {
+  margin: var(--space-3) 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
+// ---------- Larger screens --------------------------------------------------
+@media (min-width: 720px) {
+  .landing-shell {
+    padding: var(--space-5) var(--space-6) var(--space-8);
+  }
+
+  .landing-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .landing-step {
+    flex-direction: column;
+  }
+
+  .landing-trust-strip {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .landing-city-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1000px) {
+  .landing-hero {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: var(--space-7);
+  }
+
+  .landing-city-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

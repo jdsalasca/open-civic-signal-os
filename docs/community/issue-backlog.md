@@ -107,3 +107,57 @@ Use `.github/workflows/seed-community-issues.yml` to persist these as GitHub iss
 4. `story:OCS-P1-012 ship public-servant community blog (create/list/update) with public timeline view`
 5. `story:OCS-P1-013 add community context switcher and scoped dashboards/reporting`
 6. `story:OCS-P1-014 add moderation workflow for community conversations and blog comments`
+
+## Frontend Audience and Usability Expansion (GSD 2026-03-04)
+
+1. `story:OCS-P1-015 harden register->verify->first-action funnel with explicit progress and recovery states`
+2. `story:OCS-P1-016 add low-bandwidth mobile UX mode with payload/performance budget enforcement`
+3. `story:OCS-P1-017 ship public shareability surfaces and social card metadata for top civic issues`
+4. `story:OCS-P1-018 complete plain-language EN/ES copy parity for trust-critical and contribution flows`
+5. `story:OCS-P1-019 uplift accessibility baseline (keyboard-first paths, landmarks, focus states, contrast)`
+6. `story:OCS-P1-020 expose list-level explainability snippets to improve ranking trust for new users`
+7. `story:OCS-P1-021 add notification preference UX for re-engagement and community follow-ups`
+8. `story:OCS-P1-022 instrument frontend conversion funnel analytics with auditable event contracts`
+9. `story:OCS-P1-023 simplify dashboard action hierarchy to reduce first-view choice overload`
+10. `story:OCS-P1-024 add role-aware guided home with one recommended next action`
+11. `story:OCS-P1-025 simplify navigation labels and progressively disclose advanced options`
+12. `story:OCS-P1-026 explain the report-to-outcome lifecycle in plain language after submission`
+13. `story:OCS-P1-027 make empty and restricted states action-oriented with recovery paths`
+14. `story:OCS-P1-028 rewrite public-facing README and landing narrative around user value`
+
+Reference pack: `docs/community/frontend-audience-usability-backlog.md`
+
+## Community Operating System Expansion (GSD 2026-03-05)
+
+1. `story:OCS-P1-029 add enriched civic identity profiles with privacy visibility controls`
+2. `story:OCS-P1-030 model hierarchical communities (organization -> subgroup -> channel) with breadcrumbs`
+3. `story:OCS-P1-031 implement community-scoped RBAC policies with configurable scopes`
+4. `story:OCS-P1-032 add role-aware simple vs advanced experience modes`
+5. `story:OCS-P1-033 build official announcements channel with pinned archive and trust labeling`
+6. `story:OCS-P1-034 evolve community discussions into nested forum threads with relevance ordering`
+7. `story:OCS-P1-035 add real-time community rooms, mentions, and thread mute controls`
+8. `story:OCS-P1-036 unify official updates, discussions, and chat presence in community home`
+9. `story:OCS-P1-037 turn report flow into issue tracker with wizard, evidence, and impact capture`
+10. `story:OCS-P1-038 add case timeline, assignment, and lifecycle audit trail to every issue`
+11. `story:OCS-P1-039 add geospatial issue map with clustering and community filters`
+12. `story:OCS-P1-040 launch proposal templates with problem, solution, cost, and beneficiaries structure`
+13. `story:OCS-P1-041 add structured deliberation with pro/con arguments and evidence markers`
+14. `story:OCS-P1-042 implement verifiable community voting and prioritization rules`
+15. `story:OCS-P2-006 establish verified identity tiers for sensitive actions`
+16. `story:OCS-P2-007 design secure election workflow with auditable vote handling`
+17. `story:OCS-P2-008 prototype participatory budgeting allocation flow`
+18. `story:OCS-P1-043 add community project boards with micro-kanban and task accountability`
+19. `story:OCS-P1-044 add volunteering signup flows with slots, quotas, and reminders`
+20. `story:OCS-P1-045 add shared resource booking calendars with approval rules`
+21. `story:OCS-P1-046 build governance library for rules, minutes, budgets, and agreements`
+22. `story:OCS-P1-047 add community decision ledger linked to proposals, votes, and execution`
+23. `story:OCS-P1-048 publish public trust metrics dashboards with freshness and drill-downs`
+24. `story:OCS-P1-049 implement moderation queues, sanctions, and policy-based enforcement`
+25. `story:OCS-P1-050 ship privacy center with visibility controls and sensitive-data access logs`
+26. `story:OCS-P1-051 add civic onboarding, guided education, and contextual help center`
+27. `story:OCS-P1-052 expose open civic data exports and scoped external API access`
+28. `story:OCS-P1-053 add outbound integrations layer for calendar, messaging, email, and maps`
+29. `story:OCS-P2-009 design bounded civic reputation model with non-toxic incentives`
+30. `story:OCS-P2-010 expand community identity surfaces with reusable stat cards, profile covers, and contributor recognition across the app`
+
+Reference pack: `docs/community/community-operating-system-backlog.md`

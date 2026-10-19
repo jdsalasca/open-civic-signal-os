@@ -1,0 +1,31 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ src\tests\community-buttons.spec.ts:4:3 ÔÇ║ Community Buttons UX (P0) ÔÇ║ Community actions avoid dead clicks and execute end-to-end
+[1A[2K  1) [chromium] ÔÇ║ src\tests\community-buttons.spec.ts:4:3 ÔÇ║ Community Buttons UX (P0) ÔÇ║ Community actions avoid dead clicks and execute end-to-end 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/" until "load"
+    ============================================================
+
+      15 |     await page.getByTestId('login-submit-button').click();
+      16 |
+    > 17 |     await page.waitForURL('**/');
+         |                ^
+      18 |     await page.goto('/communities');
+      19 |
+      20 |     await page.getByTestId('open-create-community-button').click();
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-buttons.spec.ts:17:16
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-buttons-Communit-1d5bc-icks-and-execute-end-to-end-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-buttons-Communit-1d5bc-icks-and-execute-end-to-end-chromium\error-context.md
+
+
+[1A[2K  1 failed
+    [chromium] ÔÇ║ src\tests\community-buttons.spec.ts:4:3 ÔÇ║ Community Buttons UX (P0) ÔÇ║ Community actions avoid dead clicks and execute end-to-end 

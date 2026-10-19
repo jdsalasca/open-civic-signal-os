@@ -1,0 +1,185 @@
+// ---------------------------------------------------------------------------
+// Public backlog and weekly digest: readable without an account.
+//
+// The rank is a position, the priority is a scale with a text label, and the
+// score terms are the formula's own words so a reader can check the claim.
+// ---------------------------------------------------------------------------
+
+.signal-backlog-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+  padding: 1.15rem;
+  border-radius: var(--radius-paper);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  box-shadow: var(--shadow-edge);
+  transition: transform var(--motion-fast) var(--ease-paper), border-color var(--motion-fast) var(--ease-paper);
+}
+
+.signal-backlog-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-primary);
+}
+
+.signal-backlog-item__rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.6rem;
+  height: 2.6rem;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-paper-chip);
+  background: color-mix(in srgb, var(--brand-primary) 16%, transparent);
+  color: var(--brand-primary);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.signal-backlog-item__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.signal-backlog-item__title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.signal-backlog-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.signal-backlog-item__why {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.signal-backlog-item__score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.signal-backlog-item__score-value {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.7rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--text-main);
+}
+
+.signal-backlog-item__score-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .signal-backlog-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .signal-backlog-item__score {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+}
+
+// Weekly digest: the week's counts as big-number cards.
+.signal-digest-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 0.85rem;
+}
+
+.signal-digest-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-paper);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  box-shadow: var(--shadow-edge);
+  min-width: 0;
+}
+
+.signal-digest-metric__value {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--text-main);
+}
+
+.signal-digest-metric__label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.signal-digest-run {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--surface-soft-border);
+  min-width: 0;
+}
+
+.signal-digest-run:last-child {
+  border-bottom: 0;
+}
+
+.signal-digest-run__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.signal-digest-run__week {
+  font-weight: 800;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.signal-digest-run__detail {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}

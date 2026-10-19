@@ -40,6 +40,17 @@
 - [ ] **QUAL-03**: Coverage gate has non-zero enforceable threshold with meaningful summaries.
 - [ ] **QUAL-04**: Documentation artifacts are well-formed and free of malformed markdown/json.
 
+### Community Operating System Foundations
+
+- [ ] **COS-01**: User identity supports role, affiliation, and privacy-controlled profile visibility by audience scope.
+- [ ] **COS-02**: Communities support hierarchical spaces, breadcrumbs, and scoped navigation from umbrella entity to working subgroup.
+- [ ] **COS-03**: Sensitive community actions are enforced by configurable community-scoped permissions with audit trail.
+- [ ] **COS-04**: Product supports structured community communication across official announcements, forum threads, and real-time coordination.
+- [ ] **COS-05**: Issue, proposal, and voting workflows preserve explainability, traceability, and one-record lifecycle history.
+- [ ] **COS-06**: Execution layer supports projects, volunteering, and shared resources with explicit ownership and state.
+- [ ] **COS-07**: Governance transparency surfaces expose documents, decisions, and public metrics with freshness metadata.
+- [ ] **COS-08**: Privacy, moderation, onboarding, and open-data capabilities remain auditable and user-friendly across communities.
+
 ## v2 Requirements
 
 ### Advanced Governance
@@ -83,12 +94,20 @@
 | QUAL-02 | Phase 2 | Pending |
 | QUAL-03 | Phase 2 | Pending |
 | QUAL-04 | Phase 1 | Pending |
+| COS-01 | Phase 5 | Planned |
+| COS-02 | Phase 5 | Planned |
+| COS-03 | Phase 5 | Planned |
+| COS-04 | Phase 5 | Planned |
+| COS-05 | Phase 5 | Planned |
+| COS-06 | Phase 5 | Planned |
+| COS-07 | Phase 5 | Planned |
+| COS-08 | Phase 5 | Planned |
 
 **Coverage:**
-- v1 requirements: 20 total
-- Mapped to phases: 20
+- v1 requirements: 28 total
+- Mapped to phases: 28
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after spec-driven codebase baseline*
+*Last updated: 2026-03-05 after adding Phase 5 community operating system requirements*

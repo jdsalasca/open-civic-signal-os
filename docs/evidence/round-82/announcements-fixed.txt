@@ -1,0 +1,5 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ src\tests\community-official-announcements.spec.ts:9:3 ÔÇ║ Community official announcements channel ÔÇ║ shows pinned announcements separately and supports archive search
+[1A[2K  1 passed (5.5s)

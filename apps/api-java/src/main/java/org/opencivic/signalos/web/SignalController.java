@@ -4,10 +4,13 @@ import jakarta.validation.Valid;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -19,11 +22,21 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.CommunityAccessService;
 import org.opencivic.signalos.service.ExportService;
 import org.opencivic.signalos.service.PrioritizationService;
+import org.opencivic.signalos.service.PrioritizationFormulaService;
+import org.opencivic.signalos.service.PrivacyAccessLogService;
+import org.opencivic.signalos.service.SignalGeoService;
 import org.opencivic.signalos.service.UserReactionService;
 import org.opencivic.signalos.web.dto.SignalCreateRequest;
+import org.opencivic.signalos.web.dto.ExplainabilityFactor;
+import org.opencivic.signalos.web.dto.ExplainabilitySummary;
+import org.opencivic.signalos.web.dto.AssignSignalRequest;
+import org.opencivic.signalos.web.dto.PrioritizationFormulaResponse;
 import org.opencivic.signalos.web.dto.SignalMetaResponse;
 import org.opencivic.signalos.web.dto.SignalResponse;
+import org.opencivic.signalos.web.dto.SignalTimelineEntryResponse;
 import org.opencivic.signalos.web.dto.ApiPageResponse;
+import org.opencivic.signalos.web.dto.CommunitySignalMapResponse;
+import org.opencivic.signalos.web.dto.CommunitySignalsHeatMapResponse;
 import org.opencivic.signalos.web.dto.ReactionStateResponse;
 import org.opencivic.signalos.service.CivicEngagementService;
 import org.opencivic.signalos.web.dto.CivicCommentResponse;
@@ -39,6 +52,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,6 +72,7 @@ public class SignalController {
     private static final int MAX_PAGE_SIZE = 100;
     private static final Collection<String> RESOLVED_STATUSES = List.of("RESOLVED", "REJECTED");
     private final PrioritizationService prioritizationService;
+    private final PrioritizationFormulaService prioritizationFormulaService;
     private final ExportService exportService;
     private final UserRepository userRepository;
     private final SignalRepository signalRepository;
@@ -65,18 +80,24 @@ public class SignalController {
     private final UserReactionService userReactionService;
     private final MeterRegistry meterRegistry;
     private final CivicEngagementService engagementService;
+    private final SignalGeoService signalGeoService;
+    private final PrivacyAccessLogService privacyAccessLogService;
 
     public SignalController(
         PrioritizationService prioritizationService,
+        PrioritizationFormulaService prioritizationFormulaService,
         ExportService exportService,
         UserRepository userRepository,
         SignalRepository signalRepository,
         CommunityAccessService communityAccessService,
         UserReactionService userReactionService,
         MeterRegistry meterRegistry,
-        CivicEngagementService engagementService
+        CivicEngagementService engagementService,
+        SignalGeoService signalGeoService,
+        PrivacyAccessLogService privacyAccessLogService
     ) {
         this.prioritizationService = prioritizationService;
+        this.prioritizationFormulaService = prioritizationFormulaService;
         this.exportService = exportService;
         this.userRepository = userRepository;
         this.signalRepository = signalRepository;
@@ -84,6 +105,8 @@ public class SignalController {
         this.userReactionService = userReactionService;
         this.meterRegistry = meterRegistry;
         this.engagementService = engagementService;
+        this.signalGeoService = signalGeoService;
+        this.privacyAccessLogService = privacyAccessLogService;
     }
 
     @GetMapping("/{id}/comments")
@@ -107,14 +130,27 @@ public class SignalController {
     }
 
     @GetMapping("/{id}/history")
-    public List<org.opencivic.signalos.domain.SignalStatusEntry> getStatusHistory(@PathVariable UUID id) {
-        return prioritizationService.getStatusHistory(id);
+    public List<SignalTimelineEntryResponse> getStatusHistory(@PathVariable UUID id) {
+        return prioritizationService.getStatusHistory(id).stream()
+            .map(entry -> new SignalTimelineEntryResponse(
+                entry.getId(),
+                entry.getSignalId(),
+                entry.getEventType(),
+                entry.getStatusFrom(),
+                entry.getStatusTo(),
+                entry.getChangedBy(),
+                entry.getAssignedToUsername(),
+                entry.getReason(),
+                entry.getCreatedAt()
+            ))
+            .toList();
     }
 
     @GetMapping("/prioritized")
     public ApiPageResponse<SignalResponse> getPrioritizedSignals(
         @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
         @RequestParam(value = "status", required = false) String statusFilter,
+        @RequestParam(value = "minScore", required = false) Double minScore,
         Authentication authentication,
         @PageableDefault(size = 20, sort = "priorityScore", direction = Sort.Direction.DESC) Pageable pageable
     ) {
@@ -122,6 +158,7 @@ public class SignalController {
         Timer.Sample latencySample = Timer.start(meterRegistry);
         String status = "success";
         validateCommunityScope(authentication, communityId);
+        validateMinScore(minScore);
         List<String> statuses = normalizeStatusFilter(statusFilter);
         Pageable sanitized = PageRequest.of(
             pageable.getPageNumber(),
@@ -129,8 +166,9 @@ public class SignalController {
             pageable.getSort()
         );
         try {
-            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses)
-                .map(signal -> mapToResponse(signal, authentication.getName()));
+            String viewerUsername = resolveUsername(authentication);
+            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses, minScore)
+                .map(signal -> mapToResponse(signal, viewerUsername));
 
             meterRegistry.counter("signalos.prioritized.requests.total", "scope", scope).increment();
             DistributionSummary.builder("signalos.prioritized.result.size")
@@ -180,10 +218,26 @@ public class SignalController {
         if (newStatusStr == null || newStatusStr.isBlank()) {
             throw new IllegalArgumentException("Status field is mandatory.");
         }
-        return prioritizationService.updateStatus(id, newStatusStr, communityId)
+        return prioritizationService.updateStatus(id, newStatusStr, communityId, authentication.getName(), body.get("reason"))
             .map(signal -> mapToResponse(signal, authentication.getName()))
             .map(ResponseEntity::ok)
             .orElseThrow(() -> new ResourceNotFoundException("Signal not found for status update: " + id));
+    }
+
+    @PatchMapping("/{id}/assign")
+    public ResponseEntity<SignalResponse> assignSignal(
+        @PathVariable UUID id,
+        @Valid @RequestBody AssignSignalRequest request,
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        return ResponseEntity.ok(
+            mapToResponse(
+                prioritizationService.assignSignal(id, request.assigneeUsername(), authentication.getName(), request.reason()),
+                authentication.getName()
+            )
+        );
     }
 
     @PostMapping("/{id}/vote")
@@ -221,6 +275,10 @@ public class SignalController {
     @GetMapping("/export/csv")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ResponseEntity<Resource> exportCsv() {
+        Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            userRepository.findByUsername(authentication.getName()).ifPresent(privacyAccessLogService::recordSignalExport);
+        }
         String filename = "signalos_intelligence_export_" + LocalDateTime.now() + ".csv";
         InputStreamResource file = new InputStreamResource(exportService.exportSignalsToCsv());
 
@@ -233,12 +291,39 @@ public class SignalController {
     @GetMapping("/top-10")
     public List<SignalResponse> getTopUnresolved(
         @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        @RequestParam(value = "minScore", required = false) Double minScore,
         Authentication authentication
     ) {
         validateCommunityScope(authentication, communityId);
-        return prioritizationService.getTopUnresolved(10, communityId).stream()
-            .map(signal -> mapToResponse(signal, authentication.getName()))
+        validateMinScore(minScore);
+        String viewerUsername = resolveUsername(authentication);
+        return prioritizationService.getTopUnresolved(10, communityId, minScore).stream()
+            .map(signal -> mapToResponse(signal, viewerUsername))
             .collect(Collectors.toList());
+    }
+
+/**
+ * Rejects a nonsensical threshold instead of ignoring it.
+ *
+ * <p>A negative minimum would silently behave as "no filter", so a caller who asked for
+ * "everything above minus ten" would get the whole backlog and no indication of it. Failing
+ * loudly is the only honest response to a filter the platform cannot honour.
+ */
+private void validateMinScore(Double minScore) {
+    if (minScore == null) {
+        return;
+    }
+    if (minScore.isNaN() || minScore.isInfinite()) {
+        throw new IllegalArgumentException("minScore must be a finite number.");
+    }
+    if (minScore < 0) {
+        throw new IllegalArgumentException("minScore must be greater than or equal to 0, but was: " + minScore);
+    }
+}
+
+    @GetMapping("/formula")
+    public PrioritizationFormulaResponse getPrioritizationFormula() {
+        return prioritizationFormulaService.getFormula();
     }
 
     @GetMapping("/meta")
@@ -261,7 +346,53 @@ public class SignalController {
                 .map(Signal::getCreatedAt)
                 .orElse(null);
 
-        return new SignalMetaResponse(totalSignals, unresolvedSignals, lastUpdatedAt);
+        return new SignalMetaResponse(totalSignals, unresolvedSignals, lastUpdatedAt, DEFAULT_CRITICAL_SCORE_THRESHOLD);
+    }
+
+    /**
+     * Score at or above which a signal counts as critical.
+     *
+     * <p>Single source of truth for both the paginated ranking and the top-10 list, published on
+     * /api/signals/meta so the dashboard uses the same number instead of its own copy. Raising it
+     * changes what the platform calls critical everywhere at once.
+     */
+    public static final double DEFAULT_CRITICAL_SCORE_THRESHOLD = 220.0;
+
+    @GetMapping("/map")
+    public CommunitySignalMapResponse getCommunitySignalMap(
+        @RequestParam("communityId") UUID communityId,
+        @RequestParam(value = "category", required = false) String category,
+        @RequestParam(value = "status", required = false) String statusFilter,
+        @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        return signalGeoService.getCommunityMap(
+            communityId,
+            normalizeCategoryFilter(category),
+            normalizeStatusFilter(statusFilter),
+            fromDate,
+            toDate
+        );
+    }
+
+    @GetMapping("/map/heat")
+    public CommunitySignalsHeatMapResponse getCommunityHeatMap(
+        @RequestParam(value = "category", required = false) String category,
+        @RequestParam(value = "status", required = false) String statusFilter,
+        @RequestParam(value = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(value = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+        Authentication authentication
+    ) {
+        return signalGeoService.getCommunityHeatMap(
+            resolveUsername(authentication),
+            allowGlobalHeatMap(authentication),
+            normalizeCategoryFilter(category),
+            normalizeStatusFilter(statusFilter),
+            fromDate,
+            toDate
+        );
     }
 
     @GetMapping("/mine")
@@ -300,8 +431,12 @@ public class SignalController {
             request.impact(),
             request.affectedPeople(),
             request.imageUrl(),
-            request.latitude(),
+            request.locationLabel(),
+            request.evidenceUrls(),
+request.latitude(),
             request.longitude(),
+            request.sourceChannel(),
+            request.sourceRef(),
             authentication.getName(),
             communityId
         );
@@ -335,6 +470,9 @@ public class SignalController {
             s.getTitle(),
             s.getDescription(),
             s.getImageUrl(),
+            resolveAssignedUsername(s),
+            s.getLocationLabel(),
+            s.getEvidenceUrls(),
             s.getCategory(),
             s.getStatus(),
             s.getPriorityScore(),
@@ -342,9 +480,41 @@ public class SignalController {
             s.getCommunityVotes(),
             s.getReactions(),
             userReactionService.getViewerReaction("SIGNAL", s.getId(), viewerId),
+            buildExplainabilitySummary(s),
             s.getLatitude(),
-            s.getLongitude()
+            s.getLongitude(),
+            s.getSourceChannel() == null ? null : s.getSourceChannel().name(),
+            s.getSourceRef(),
+            s.getTransformationVersion()
         );
+    }
+
+    private ExplainabilitySummary buildExplainabilitySummary(Signal signal) {
+        if (signal.getScoreBreakdown() == null) {
+            return new ExplainabilitySummary(
+                "v1",
+                List.of(),
+                "Priority is calculated from deterministic civic scoring factors."
+            );
+        }
+
+        List<ExplainabilityFactor> topFactors = List.of(
+                new ExplainabilityFactor("urgency", signal.getScoreBreakdown().urgency()),
+                new ExplainabilityFactor("impact", signal.getScoreBreakdown().impact()),
+                new ExplainabilityFactor("affectedPeople", signal.getScoreBreakdown().affectedPeople()),
+                new ExplainabilityFactor("communityVotes", signal.getScoreBreakdown().communityVotes())
+            ).stream()
+            .sorted(Comparator.comparingDouble(ExplainabilityFactor::contribution).reversed())
+            .limit(2)
+            .toList();
+
+        String summary = topFactors.isEmpty()
+            ? "Priority is calculated from deterministic civic scoring factors."
+            : "Top drivers: " + topFactors.stream()
+                .map(f -> f.key() + " (" + String.format(Locale.ROOT, "%.1f", f.contribution()) + ")")
+                .collect(Collectors.joining(", "));
+
+        return new ExplainabilitySummary("v1", topFactors, summary);
     }
 
     private UUID resolveViewerId(String username) {
@@ -352,6 +522,22 @@ public class SignalController {
             return null;
         }
         return userRepository.findByUsername(username).map(User::getId).orElse(null);
+    }
+
+    private String resolveAssignedUsername(Signal signal) {
+        if (signal.getAssignedToUserId() == null) {
+            return null;
+        }
+        return userRepository.findById(signal.getAssignedToUserId())
+            .map(User::getUsername)
+            .orElse(null);
+    }
+
+    private String resolveUsername(Authentication authentication) {
+        if (authentication == null) {
+            return null;
+        }
+        return authentication.getName();
     }
 
     private void validateCommunityScope(Authentication authentication, UUID communityId) {
@@ -372,6 +558,22 @@ public class SignalController {
             .map(String::toUpperCase)
             .distinct()
             .toList();
+    }
+
+    private String normalizeCategoryFilter(String category) {
+        if (category == null || category.isBlank()) {
+            return null;
+        }
+        return category.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private boolean allowGlobalHeatMap(Authentication authentication) {
+        if (authentication == null) {
+            return false;
+        }
+        return authentication.getAuthorities().stream().anyMatch(authority ->
+            authority.getAuthority().equals("ROLE_SUPER_ADMIN") || authority.getAuthority().equals("ROLE_PUBLIC_SERVANT")
+        );
     }
 }
 

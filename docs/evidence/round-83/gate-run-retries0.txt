@@ -1,0 +1,96 @@
+
+Running 92 tests using 1 worker
+
+[1A[2K[1/92] [chromium] ÔÇ║ src\tests\community-activities.spec.ts:15:3 ÔÇ║ Community volunteer activities ÔÇ║ shows the signup window, blocks a full activity, and records attendance
+[1A[2K[2/92] [chromium] ÔÇ║ src\tests\community-decisions.spec.ts:14:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context
+[1A[2K[3/92] [chromium] ÔÇ║ src\tests\community-governance.spec.ts:11:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents
+[1A[2K[4/92] [chromium] ÔÇ║ src\tests\community-integrations.spec.ts:15:3 ÔÇ║ Community outbound integrations ÔÇ║ surfaces a failed delivery, retries it, and connects a new channel
+[1A[2K[5/92] [chromium] ÔÇ║ src\tests\community-open-data.spec.ts:14:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access
+[1A[2K[6/92] [chromium] ÔÇ║ src\tests\community-projects.spec.ts:17:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note
+[1A[2K[7/92] [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation
+[1A[2K[8/92] [chromium] ÔÇ║ src\tests\community-resources.spec.ts:14:3 ÔÇ║ Community shared resources ÔÇ║ shows policy, exposes the approval queue, and records a decision
+[1A[2K[9/92] [chromium] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[10/92] [chromium] ÔÇ║ src\tests\dashboard-aging.spec.ts:8:3 ÔÇ║ Dashboard case aging and SLA risk ÔÇ║ shows SLA counters, buckets, and the worst breaching case to staff
+[1A[2K[11/92] [chromium] ÔÇ║ src\tests\dashboard-aging.spec.ts:128:3 ÔÇ║ Dashboard case aging and SLA risk ÔÇ║ hides the aging panel from citizens
+[1A[2K[12/92] [chromium] ÔÇ║ src\tests\dashboard-clarity.spec.ts:13:3 ÔÇ║ Dashboard clarity hierarchy ÔÇ║ shows one dominant primary action and moves the rest into a secondary surface
+[1A[2K[13/92] [chromium] ÔÇ║ src\tests\dashboard-filter-query.spec.ts:20:3 ÔÇ║ Dashboard filters change the query ÔÇ║ CRITICAL filter must reach the API as minScore, not just repaint rows
+[1A[2K[14/92] [chromium] ÔÇ║ src\tests\dashboard-filter-query.spec.ts:103:3 ÔÇ║ Dashboard filters change the query ÔÇ║ status filter must still reach the API as status
+[1A[2K[15/92] [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:91:3 ÔÇ║ Field data mode ÔÇ║ full mode requests every panel
+[1A[2K[16/92] [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:110:3 ÔÇ║ Field data mode ÔÇ║ field mode does not request the optional panels at all
+[1A[2K[17/92] [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:135:3 ÔÇ║ Field data mode ÔÇ║ field mode asks for fewer rows
+[1A[2K[18/92] [chromium] ÔÇ║ src\tests\field-data-mode.spec.ts:166:3 ÔÇ║ Field data mode ÔÇ║ the setting says exactly what field mode stops fetching
+[1A[2K[19/92] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[20/92] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[21/92] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[22/92] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[23/92] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[24/92] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[25/92] [chromium] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[26/92] [chromium] ÔÇ║ src\tests\no-locale-timestamps.spec.ts:50:1 ÔÇ║ no view renders a timestamp through the reader browser locale
+[1A[2K[27/92] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:117:3 ÔÇ║ Public backlog without an account ÔÇ║ renders the ranked backlog, the formula, and the freshness stamp
+[1A[2K[28/92] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:149:3 ÔÇ║ Public backlog without an account ÔÇ║ shows a sign-in path rather than a dead end
+[1A[2K[29/92] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:156:3 ÔÇ║ Public backlog without an account ÔÇ║ an unreachable API shows an unavailable state, not a login prompt
+[1A[2K[30/92] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:174:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ lifecycle is spelled out instead of exposing the raw enum
+[1A[2K[31/92] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:185:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ the freshness stamp is unambiguous and free of clock noise
+[1A[2K[32/92] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:195:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ a score does not claim precision the formula cannot produce
+[1A[2K[33/92] [chromium] ÔÇ║ src\tests\public-backlog.spec.ts:211:3 ÔÇ║ Freshness does not depend on the reader browser locale ÔÇ║ renders the same stamp under a non-English locale
+[1A[2K[34/92] [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:26:3 ÔÇ║ The case screen describes itself ÔÇ║ the eyebrow names the case instead of repeating a card below it
+[1A[2K[35/92] [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:38:3 ÔÇ║ The case screen describes itself ÔÇ║ the header does not restate the card immediately below it
+[1A[2K[36/92] [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:51:3 ÔÇ║ The case screen describes itself ÔÇ║ the topbar stops presenting a single case as the dashboard
+[1A[2K[37/92] [chromium] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:67:1 ÔÇ║ The topbar still frames the pages it is meant to frame ÔÇ║ the dashboard keeps its "what needs attention today" framing
+[1A[2K[38/92] [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:17:3 ÔÇ║ Signal detail speaks plain language ÔÇ║ the header badge spells out the lifecycle state
+[1A[2K[39/92] [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:27:3 ÔÇ║ Signal detail speaks plain language ÔÇ║ the timeline transition reads as two states, not two identifiers
+[1A[2K[40/92] [chromium] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:42:3 ÔÇ║ Signal detail timestamps do not depend on the reader browser locale ÔÇ║ renders the audit trail the same way under a non-English locale
+[1A[2K[41/92] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:118:3 ÔÇ║ Weekly digest view ÔÇ║ shows the bulletin body and the counts
+[1A[2K[42/92] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:137:3 ÔÇ║ Weekly digest view ÔÇ║ an unpublished week says so and offers a publish control
+[1A[2K[43/92] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:150:3 ÔÇ║ Weekly digest view ÔÇ║ a published week says so and does not offer to publish again
+[1A[2K[44/92] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:164:3 ÔÇ║ Weekly digest view ÔÇ║ the scheduler history shows what happened and why
+[1A[2K[45/92] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:178:3 ÔÇ║ Weekly digest view ÔÇ║ publishing sends the week and reloads
+[1A[2K[46/92] [chromium] ÔÇ║ src\tests\weekly-digest.spec.ts:203:3 ÔÇ║ Weekly digest view ÔÇ║ an unreachable API shows an unavailable state
+[1A[2K[47/92] [mobile-chrome] ÔÇ║ src\tests\community-activities.spec.ts:15:3 ÔÇ║ Community volunteer activities ÔÇ║ shows the signup window, blocks a full activity, and records attendance
+[1A[2K[48/92] [mobile-chrome] ÔÇ║ src\tests\community-decisions.spec.ts:14:3 ÔÇ║ Community decision ledger ÔÇ║ records decisions with linked proposal, governance, and execution context
+[1A[2K[49/92] [mobile-chrome] ÔÇ║ src\tests\community-governance.spec.ts:11:3 ÔÇ║ Community governance library ÔÇ║ creates, filters, and versions governance documents
+[1A[2K[50/92] [mobile-chrome] ÔÇ║ src\tests\community-integrations.spec.ts:15:3 ÔÇ║ Community outbound integrations ÔÇ║ surfaces a failed delivery, retries it, and connects a new channel
+[1A[2K[51/92] [mobile-chrome] ÔÇ║ src\tests\community-open-data.spec.ts:14:3 ÔÇ║ Community open-data center ÔÇ║ creates scoped tokens, downloads datasets, and revokes token access
+[1A[2K[52/92] [mobile-chrome] ÔÇ║ src\tests\community-projects.spec.ts:17:3 ÔÇ║ Community project boards ÔÇ║ creates a board, adds a task, moves it, and leaves a task note
+[1A[2K[53/92] [mobile-chrome] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation
+[1A[2K[54/92] [mobile-chrome] ÔÇ║ src\tests\community-resources.spec.ts:14:3 ÔÇ║ Community shared resources ÔÇ║ shows policy, exposes the approval queue, and records a decision
+[1A[2K[55/92] [mobile-chrome] ÔÇ║ src\tests\community-trust-metrics.spec.ts:9:3 ÔÇ║ Community trust metrics dashboard ÔÇ║ shows explainable trust cards and degrades cleanly for low-data communities
+[1A[2K[56/92] [mobile-chrome] ÔÇ║ src\tests\dashboard-aging.spec.ts:8:3 ÔÇ║ Dashboard case aging and SLA risk ÔÇ║ shows SLA counters, buckets, and the worst breaching case to staff
+[1A[2K[57/92] [mobile-chrome] ÔÇ║ src\tests\dashboard-aging.spec.ts:128:3 ÔÇ║ Dashboard case aging and SLA risk ÔÇ║ hides the aging panel from citizens
+[1A[2K[58/92] [mobile-chrome] ÔÇ║ src\tests\dashboard-clarity.spec.ts:13:3 ÔÇ║ Dashboard clarity hierarchy ÔÇ║ shows one dominant primary action and moves the rest into a secondary surface
+[1A[2K[59/92] [mobile-chrome] ÔÇ║ src\tests\dashboard-filter-query.spec.ts:20:3 ÔÇ║ Dashboard filters change the query ÔÇ║ CRITICAL filter must reach the API as minScore, not just repaint rows
+[1A[2K[60/92] [mobile-chrome] ÔÇ║ src\tests\dashboard-filter-query.spec.ts:103:3 ÔÇ║ Dashboard filters change the query ÔÇ║ status filter must still reach the API as status
+[1A[2K[61/92] [mobile-chrome] ÔÇ║ src\tests\field-data-mode.spec.ts:91:3 ÔÇ║ Field data mode ÔÇ║ full mode requests every panel
+[1A[2K[62/92] [mobile-chrome] ÔÇ║ src\tests\field-data-mode.spec.ts:110:3 ÔÇ║ Field data mode ÔÇ║ field mode does not request the optional panels at all
+[1A[2K[63/92] [mobile-chrome] ÔÇ║ src\tests\field-data-mode.spec.ts:135:3 ÔÇ║ Field data mode ÔÇ║ field mode asks for fewer rows
+[1A[2K[64/92] [mobile-chrome] ÔÇ║ src\tests\field-data-mode.spec.ts:166:3 ÔÇ║ Field data mode ÔÇ║ the setting says exactly what field mode stops fetching
+[1A[2K[65/92] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:77:3 ÔÇ║ Duplicate review ÔÇ║ shows the suggestion with the score that justified it
+[1A[2K[66/92] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:102:3 ÔÇ║ Duplicate review ÔÇ║ approving sends back exactly the candidates it displayed
+[1A[2K[67/92] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:157:3 ÔÇ║ Duplicate review ÔÇ║ rejecting records a decision without claiming a merge
+[1A[2K[68/92] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:201:3 ÔÇ║ Duplicate review ÔÇ║ a suggestion already decided stays visible carrying its decision
+[1A[2K[69/92] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:225:3 ÔÇ║ Duplicate review ÔÇ║ an empty queue says so rather than showing a broken list
+[1A[2K[70/92] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:241:3 ÔÇ║ Duplicate review ÔÇ║ the history records what was decided
+[1A[2K[71/92] [mobile-chrome] ÔÇ║ src\tests\merge-review.spec.ts:275:3 ÔÇ║ Duplicate review ÔÇ║ an unreachable queue shows an unavailable state, not a broken list
+[1A[2K[72/92] [mobile-chrome] ÔÇ║ src\tests\no-locale-timestamps.spec.ts:50:1 ÔÇ║ no view renders a timestamp through the reader browser locale
+[1A[2K[73/92] [mobile-chrome] ÔÇ║ src\tests\public-backlog.spec.ts:117:3 ÔÇ║ Public backlog without an account ÔÇ║ renders the ranked backlog, the formula, and the freshness stamp
+[1A[2K[74/92] [mobile-chrome] ÔÇ║ src\tests\public-backlog.spec.ts:149:3 ÔÇ║ Public backlog without an account ÔÇ║ shows a sign-in path rather than a dead end
+[1A[2K[75/92] [mobile-chrome] ÔÇ║ src\tests\public-backlog.spec.ts:156:3 ÔÇ║ Public backlog without an account ÔÇ║ an unreachable API shows an unavailable state, not a login prompt
+[1A[2K[76/92] [mobile-chrome] ÔÇ║ src\tests\public-backlog.spec.ts:174:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ lifecycle is spelled out instead of exposing the raw enum
+[1A[2K[77/92] [mobile-chrome] ÔÇ║ src\tests\public-backlog.spec.ts:185:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ the freshness stamp is unambiguous and free of clock noise
+[1A[2K[78/92] [mobile-chrome] ÔÇ║ src\tests\public-backlog.spec.ts:195:3 ÔÇ║ Public backlog reads as plain language ÔÇ║ a score does not claim precision the formula cannot produce
+[1A[2K[79/92] [mobile-chrome] ÔÇ║ src\tests\public-backlog.spec.ts:211:3 ÔÇ║ Freshness does not depend on the reader browser locale ÔÇ║ renders the same stamp under a non-English locale
+[1A[2K[80/92] [mobile-chrome] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:26:3 ÔÇ║ The case screen describes itself ÔÇ║ the eyebrow names the case instead of repeating a card below it
+[1A[2K[81/92] [mobile-chrome] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:38:3 ÔÇ║ The case screen describes itself ÔÇ║ the header does not restate the card immediately below it
+[1A[2K[82/92] [mobile-chrome] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:51:3 ÔÇ║ The case screen describes itself ÔÇ║ the topbar stops presenting a single case as the dashboard
+[1A[2K[83/92] [mobile-chrome] ÔÇ║ src\tests\signal-detail-describes-itself.spec.ts:67:1 ÔÇ║ The topbar still frames the pages it is meant to frame ÔÇ║ the dashboard keeps its "what needs attention today" framing
+[1A[2K[84/92] [mobile-chrome] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:17:3 ÔÇ║ Signal detail speaks plain language ÔÇ║ the header badge spells out the lifecycle state
+[1A[2K[85/92] [mobile-chrome] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:27:3 ÔÇ║ Signal detail speaks plain language ÔÇ║ the timeline transition reads as two states, not two identifiers
+[1A[2K[86/92] [mobile-chrome] ÔÇ║ src\tests\signal-detail-lifecycle.spec.ts:42:3 ÔÇ║ Signal detail timestamps do not depend on the reader browser locale ÔÇ║ renders the audit trail the same way under a non-English locale
+[1A[2K[87/92] [mobile-chrome] ÔÇ║ src\tests\weekly-digest.spec.ts:118:3 ÔÇ║ Weekly digest view ÔÇ║ shows the bulletin body and the counts
+[1A[2K[88/92] [mobile-chrome] ÔÇ║ src\tests\weekly-digest.spec.ts:137:3 ÔÇ║ Weekly digest view ÔÇ║ an unpublished week says so and offers a publish control
+[1A[2K[89/92] [mobile-chrome] ÔÇ║ src\tests\weekly-digest.spec.ts:150:3 ÔÇ║ Weekly digest view ÔÇ║ a published week says so and does not offer to publish again
+[1A[2K[90/92] [mobile-chrome] ÔÇ║ src\tests\weekly-digest.spec.ts:164:3 ÔÇ║ Weekly digest view ÔÇ║ the scheduler history shows what happened and why
+[1A[2K[91/92] [mobile-chrome] ÔÇ║ src\tests\weekly-digest.spec.ts:178:3 ÔÇ║ Weekly digest view ÔÇ║ publishing sends the week and reloads
+[1A[2K[92/92] [mobile-chrome] ÔÇ║ src\tests\weekly-digest.spec.ts:203:3 ÔÇ║ Weekly digest view ÔÇ║ an unreachable API shows an unavailable state
+[1A[2K  92 passed (4.5m)

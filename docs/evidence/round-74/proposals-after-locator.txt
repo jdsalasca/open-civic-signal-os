@@ -1,0 +1,31 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation
+[1A[2K  1) [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('proposal-deliberation-moderate-88888888-8888-8888-8888-888888888888')[22m
+
+
+      438 |       await dialog.accept("Duplicate evidence, merged into the updated traffic count source.");
+      439 |     });
+    > 440 |     await page.getByTestId("proposal-deliberation-moderate-88888888-8888-8888-8888-888888888888").click();
+          |                                                                                                   ^
+      441 |
+      442 |     await expect.poll(() => moderatedPayload).not.toBeNull();
+      443 |     expect(moderatedPayload).toMatchObject({
+        at C:\Users\jdsal\Documents\Programming-personal\open-civic-signal-os\apps\web-react\src\tests\community-proposals.spec.ts:440:99
+
+    attachment #1: screenshot (image/png) ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+    test-results\community-proposals-Commun-bbcb7-ons-with-typed-deliberation-chromium\test-failed-1.png
+    ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+
+    Error Context: test-results\community-proposals-Commun-bbcb7-ons-with-typed-deliberation-chromium\error-context.md
+
+
+[1A[2K  1 failed
+    [chromium] ÔÇ║ src\tests\community-proposals.spec.ts:11:3 ÔÇ║ Community proposals ÔÇ║ creates a structured proposal and renders comparable detail sections with typed deliberation 
