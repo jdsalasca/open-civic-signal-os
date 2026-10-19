@@ -169,30 +169,22 @@ export function WeeklyDigestView() {
               )}
             </div>
 
-            <div className="grid mb-4">
-              <div className="col-12 md:col-3">
-                <CivicCard padding="md" data-testid="weekly-digest-reported">
-                  <div className="text-2xl font-bold">{digest.reportedThisWeek}</div>
-                  <div className="text-xs text-secondary">{t("weekly_digest.reported")}</div>
-                </CivicCard>
+            <div className="signal-digest-metrics mb-4">
+              <div className="signal-digest-metric" data-testid="weekly-digest-reported">
+                <span className="signal-digest-metric__value">{digest.reportedThisWeek}</span>
+                <span className="signal-digest-metric__label">{t("weekly_digest.reported")}</span>
               </div>
-              <div className="col-12 md:col-3">
-                <CivicCard padding="md" data-testid="weekly-digest-resolved">
-                  <div className="text-2xl font-bold">{digest.resolvedThisWeek}</div>
-                  <div className="text-xs text-secondary">{t("weekly_digest.resolved")}</div>
-                </CivicCard>
+              <div className="signal-digest-metric" data-testid="weekly-digest-resolved">
+                <span className="signal-digest-metric__value">{digest.resolvedThisWeek}</span>
+                <span className="signal-digest-metric__label">{t("weekly_digest.resolved")}</span>
               </div>
-              <div className="col-12 md:col-3">
-                <CivicCard padding="md" data-testid="weekly-digest-rejected">
-                  <div className="text-2xl font-bold">{digest.rejectedThisWeek}</div>
-                  <div className="text-xs text-secondary">{t("weekly_digest.rejected")}</div>
-                </CivicCard>
+              <div className="signal-digest-metric" data-testid="weekly-digest-rejected">
+                <span className="signal-digest-metric__value">{digest.rejectedThisWeek}</span>
+                <span className="signal-digest-metric__label">{t("weekly_digest.rejected")}</span>
               </div>
-              <div className="col-12 md:col-3">
-                <CivicCard padding="md" data-testid="weekly-digest-open">
-                  <div className="text-2xl font-bold">{digest.stillOpenTotal}</div>
-                  <div className="text-xs text-secondary">{t("weekly_digest.still_open")}</div>
-                </CivicCard>
+              <div className="signal-digest-metric" data-testid="weekly-digest-open">
+                <span className="signal-digest-metric__value">{digest.stillOpenTotal}</span>
+                <span className="signal-digest-metric__label">{t("weekly_digest.still_open")}</span>
               </div>
             </div>
 
@@ -240,12 +232,14 @@ export function WeeklyDigestView() {
                   {history.map((run) => (
                     <li
                       key={`${run.weekKey}-${run.ranAt}`}
-                      className="py-2 border-top-1 border-surface-soft text-sm"
+                      className="signal-digest-run"
                       data-testid={`weekly-digest-run-${run.weekKey}`}
                     >
-                      <span className="font-semibold">{run.weekKey}</span> ·{" "}
-                      {t(`weekly_digest.outcome_${run.outcome}`)}
-                      {run.detail ? ` · ${run.detail}` : ""}
+                      <div className="signal-digest-run__top">
+                        <span className="signal-digest-run__week">{run.weekKey}</span>
+                        <span className="text-sm text-secondary">{t(`weekly_digest.outcome_${run.outcome}`)}</span>
+                      </div>
+                      {run.detail ? <div className="signal-digest-run__detail">{run.detail}</div> : null}
                     </li>
                   ))}
                 </ul>

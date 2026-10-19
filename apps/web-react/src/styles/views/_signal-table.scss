@@ -1,0 +1,135 @@
+// ---------------------------------------------------------------------------
+// Signal list: a readable table on wide screens, cards under 640px.
+//
+// The cards are the same rows, not a second component. PrimeReact keeps
+// `.p-datatable-tbody tr` as the click target, so the row stays navigable and
+// the tests that click it keep working on phones; only the layout changes.
+// ---------------------------------------------------------------------------
+
+.signal-table-shell {
+  position: relative;
+  min-width: 0;
+}
+
+.signal-table-shell .p-datatable {
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+}
+
+.signal-table-shell .p-datatable-wrapper {
+  overflow-x: auto;
+}
+
+.signal-table-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+}
+
+.signal-table-header__copy {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.signal-table-header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-paper-chip);
+  background: var(--brand-primary);
+  color: var(--on-brand);
+  flex: 0 0 auto;
+}
+
+.signal-table-header__title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.signal-table-header__count {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+// Cards under 640px: the header row becomes a card, every cell becomes a
+// labelled row, and the trailing action spans the full width.
+@media (max-width: 640px) {
+  .signal-table-shell .p-datatable-table,
+  .signal-table-shell table {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .signal-table-shell .p-datatable-thead {
+    display: none;
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr {
+    display: block;
+    margin: 0 0.75rem 0.75rem;
+    padding: 0.95rem 1rem;
+    border-radius: var(--radius-paper);
+    border: 1px solid var(--border-subtle);
+    background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+    box-shadow: var(--shadow-edge);
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr:last-child {
+    margin-bottom: 0.75rem;
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr > td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0 !important;
+    padding: 0.35rem 0 !important;
+    background: transparent !important;
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr > td::before {
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex: 0 0 auto;
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr > td[data-label=""]::before,
+  .signal-table-shell .p-datatable-tbody > tr > td:not([data-label])::before {
+    content: none;
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr > td[data-label=""] {
+    display: block;
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr > td.signal-table-cell--action {
+    justify-content: stretch;
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr > td.signal-table-cell--action::before {
+    content: none;
+  }
+
+  .signal-table-shell .p-datatable-tbody > tr > td.signal-table-cell--action > * {
+    width: 100%;
+  }
+
+  .signal-table-shell .p-paginator {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

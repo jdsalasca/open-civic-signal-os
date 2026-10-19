@@ -6,6 +6,7 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicSkeleton } from "../components/ui/CivicSkeleton";
+import { PriorityScale, StatusChip } from "../components/signalPrimitives";
 import apiClient from "../api/axios";
 import type { PrioritizationFormula, Signal, SignalMeta } from "../types";
 import { formatStamp } from "../utils/formatStamp";
@@ -129,55 +130,65 @@ export function PublicBacklog() {
           <ol className="list-none p-0 m-0 flex flex-column gap-3" data-testid="public-backlog-list">
             {signals.map((signal, index) => (
               <li key={signal.id}>
-                <CivicCard padding="md" data-testid={`public-backlog-item-${index + 1}`}>
-                  <div className="flex gap-3">
-                    <div className="text-lg font-bold" style={{ minWidth: '2rem' }}>
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold mb-1">{signal.title}</div>
-                      <div className="flex flex-wrap gap-2 text-xs text-secondary mb-2">
-                        <span>{signal.category}</span>
-                        {signal.locationLabel && <span>{signal.locationLabel}</span>}
-                        <span>{t("public_backlog.status", { status: statusLabel(signal.status) })}</span>
-                      </div>
-                      {/*
-                        AGENTS.md: every list exposes why an item is ranked where it is. The terms
-                        are the ones the published formula uses, so this is checkable rather than a
-                        claim about the score.
-                      */}
-                      {signal.scoreBreakdown && (
-                        <div
-                          className="text-xs"
-                          data-testid={`public-backlog-why-${index + 1}`}
-                        >
-                          {t('public_backlog.why', {
-                            urgency: signal.scoreBreakdown.urgency,
-                            impact: signal.scoreBreakdown.impact,
-                            people: signal.scoreBreakdown.affectedPeople,
-                            votes: signal.scoreBreakdown.communityVotes,
-                          })}
-                        </div>
-                      )}
-                      {signal.explainabilitySummary?.summary && (
-                        <div className="text-xs text-secondary mt-1">
-                          {signal.explainabilitySummary.summary}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div
-                        className="font-bold"
-                        data-testid={`public-backlog-score-${index + 1}`}
-                      >
-                        {signal.priorityScore}
-                      </div>
-                      <div className="text-xs text-secondary">
-                        {t('public_backlog.score_label')}
-                      </div>
-                    </div>
+                <article className="signal-backlog-item" data-testid={`public-backlog-item-${index + 1}`}>
+                  <div className="signal-backlog-item__rank" aria-hidden="true">
+                    {index + 1}
                   </div>
-                </CivicCard>
+                  <div className="signal-backlog-item__copy">
+                    <div className="signal-backlog-item__title">{signal.title}</div>
+                    <div className="signal-backlog-item__meta">
+                      <span className="signal-status-chip" data-status={signal.category}>
+                        <span className="signal-status-chip__dot" aria-hidden="true" style={{ background: "var(--chart-4)" }} />
+                        <span>{t(`categories.${signal.category}`)}</span>
+                      </span>
+                      {signal.locationLabel && (
+                        <span className="signal-status-chip">
+                          <i className="pi pi-map-marker text-xs" aria-hidden="true"></i>
+                          <span>{signal.locationLabel}</span>
+                        </span>
+                      )}
+                      <StatusChip
+                        status={signal.status}
+                        label={t("public_backlog.status", { status: statusLabel(signal.status) })}
+                      />
+                    </div>
+                    {/*
+                      AGENTS.md: every list exposes why an item is ranked where it is. The terms
+                      are the ones the published formula uses, so this is checkable rather than a
+                      claim about the score.
+                    */}
+                    {signal.scoreBreakdown && (
+                      <div
+                        className="signal-backlog-item__why"
+                        data-testid={`public-backlog-why-${index + 1}`}
+                      >
+                        {t('public_backlog.why', {
+                          urgency: signal.scoreBreakdown.urgency,
+                          impact: signal.scoreBreakdown.impact,
+                          people: signal.scoreBreakdown.affectedPeople,
+                          votes: signal.scoreBreakdown.communityVotes,
+                        })}
+                      </div>
+                    )}
+                    {signal.explainabilitySummary?.summary && (
+                      <div className="signal-backlog-item__why">
+                        {signal.explainabilitySummary.summary}
+                      </div>
+                    )}
+                  </div>
+                  <div className="signal-backlog-item__score">
+                    <div
+                      className="signal-backlog-item__score-value"
+                      data-testid={`public-backlog-score-${index + 1}`}
+                    >
+                      {signal.priorityScore}
+                    </div>
+                    <div className="signal-backlog-item__score-label">
+                      {t('public_backlog.score_label')}
+                    </div>
+                    <PriorityScale score={signal.priorityScore} compact showLabel={false} />
+                  </div>
+                </article>
               </li>
             ))}
           </ol>

@@ -45,6 +45,8 @@ export type Signal = {
   explainabilitySummary: ExplainabilitySummary;
   latitude?: number | null;
   longitude?: number | null;
+  /** ISO timestamp the API already returns; used for coarse trend lines on metric cards. */
+  createdAt?: string | null;
   sourceChannel?: SignalSourceChannel | null;
   sourceRef?: string | null;
   transformationVersion?: string | null;

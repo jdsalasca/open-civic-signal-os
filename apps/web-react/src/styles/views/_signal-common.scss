@@ -1,0 +1,423 @@
+// ---------------------------------------------------------------------------
+// Signal experience: shared primitives.
+//
+// The Paper Craft language stays in theme.scss; this file only gives the core
+// signal surfaces a common vocabulary so the dashboard, the list, the case and
+// the public backlog read as one product. Every colour comes from a CSS custom
+// property so light and dark stay readable without a second stylesheet.
+// ---------------------------------------------------------------------------
+
+.signal-surface {
+  position: relative;
+  border-radius: var(--radius-paper);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 96%, transparent);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+  padding: 1.25rem;
+  min-width: 0;
+}
+
+.signal-surface-soft {
+  border-radius: var(--radius-paper-sm);
+  border: 1px solid var(--surface-soft-border);
+  background: var(--surface-soft);
+  padding: 1rem;
+  min-width: 0;
+}
+
+.signal-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.signal-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--text-main);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.signal-copy {
+  color: var(--text-secondary);
+  line-height: var(--leading-body);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+// ---------- Sparklines -----------------------------------------------------
+// A metric card states a number; the sparkline states the direction. It is
+// decorative, so it is hidden from assistive tech and the number carries the
+// meaning.
+.signal-sparkline {
+  display: block;
+  width: 100%;
+  height: 1.35rem;
+  overflow: visible;
+}
+
+.signal-sparkline__area {
+  opacity: 0.22;
+}
+
+.signal-sparkline__line {
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+// ---------- Priority scale -------------------------------------------------
+// Priority is shown as a scale of five marks, never only a number. Each mark is
+// a distinct tone *and* a distinct pattern, so a colour-blind reader still gets
+// the level, and the visible text label carries it for everyone else.
+.signal-priority {
+  --signal-priority-color: var(--chart-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.signal-priority[data-level="low"] {
+  --signal-priority-color: var(--chart-2);
+}
+
+.signal-priority[data-level="moderate"] {
+  --signal-priority-color: var(--chart-3);
+}
+
+.signal-priority[data-level="high"] {
+  --signal-priority-color: var(--chart-5);
+}
+
+.signal-priority[data-level="urgent"] {
+  --signal-priority-color: var(--chart-1);
+}
+
+.signal-priority[data-level="critical"] {
+  --signal-priority-color: var(--status-rejected);
+}
+
+.signal-priority__track {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.signal-priority__segment {
+  position: relative;
+  width: 1.05rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-soft-strong);
+  overflow: hidden;
+  transition: background var(--motion-fast) var(--ease-paper);
+}
+
+.signal-priority__segment.is-on {
+  background: var(--signal-priority-color);
+}
+
+// Patterns, not only colour: a different geometry per mark so the level survives
+// greyscale and the common colour-blind pairs.
+.signal-priority__segment.is-on::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 4px);
+}
+
+.signal-priority__segment.is-on:nth-child(1)::after {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.3) 1px, transparent 1.4px);
+  background-size: 3px 3px;
+}
+
+.signal-priority__segment.is-on:nth-child(2)::after {
+  background-image: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px);
+}
+
+.signal-priority__segment.is-on:nth-child(3)::after {
+  background-image: repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px);
+}
+
+.signal-priority__segment.is-on:nth-child(4)::after {
+  background-image:
+    repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+}
+
+.signal-priority__segment.is-on:nth-child(5)::after {
+  background-image: repeating-radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px);
+}
+
+.signal-priority__label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.signal-priority--compact .signal-priority__segment {
+  width: 0.85rem;
+  height: 0.4rem;
+}
+
+// ---------- Status chips ---------------------------------------------------
+// A lifecycle chip pairs colour with a dot shape, so the state is not carried
+// by colour alone. The label is the plain-language lifecycle word.
+.signal-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.68rem;
+  border-radius: var(--radius-paper-chip);
+  border: 1px solid var(--pill-border);
+  background: var(--pill-bg);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.signal-status-chip__dot {
+  flex: 0 0 auto;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--signal-status-color, var(--text-muted));
+}
+
+.signal-status-chip[data-status="NEW"] {
+  --signal-status-color: var(--status-new);
+}
+
+.signal-status-chip[data-status="IN_PROGRESS"] {
+  --signal-status-color: var(--status-progress);
+}
+
+.signal-status-chip[data-status="RESOLVED"] {
+  --signal-status-color: var(--status-resolved);
+}
+
+.signal-status-chip[data-status="REJECTED"] {
+  --signal-status-color: var(--status-rejected);
+}
+
+.signal-status-chip[data-status="IN_PROGRESS"] .signal-status-chip__dot {
+  border-radius: 0.12rem;
+}
+
+.signal-status-chip[data-status="RESOLVED"] .signal-status-chip__dot {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  border-radius: 0;
+}
+
+.signal-status-chip[data-status="REJECTED"] .signal-status-chip__dot {
+  border-radius: 0.12rem;
+  transform: rotate(45deg);
+}
+
+// ---------- Metric cards ---------------------------------------------------
+.signal-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14.5rem), 1fr));
+  gap: 0.9rem;
+}
+
+.signal-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.1rem 1.15rem;
+  border-radius: var(--radius-paper);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  box-shadow: var(--shadow-edge);
+  min-width: 0;
+  min-height: 8.25rem;
+  transition: transform var(--motion-fast) var(--ease-paper), box-shadow var(--motion-fast) var(--ease-paper);
+}
+
+.signal-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-edge), var(--shadow-lift);
+}
+
+.signal-metric-card.is-interactive {
+  cursor: pointer;
+}
+
+.signal-metric-card.is-interactive:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+.signal-metric-card__icon {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  flex: 0 0 auto;
+}
+
+.signal-metric-card--accent {
+  background: linear-gradient(180deg, var(--alpha-surface-05), color-mix(in srgb, var(--brand-primary-alpha-10) 45%, var(--bg-card)));
+}
+
+.signal-metric-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.signal-metric-card__label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.signal-metric-card__value {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2rem, 3.4vw, 2.9rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--text-main);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.signal-metric-card__foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.signal-metric-card__support {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.signal-metric-card__spark {
+  width: 4rem;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.signal-metric-card__trend {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+// ---------- Friendly empty state ------------------------------------------
+.signal-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.9rem;
+  padding: 2.5rem 1.25rem;
+  border-radius: var(--radius-paper);
+  border: 1px dashed var(--surface-soft-border);
+  background: var(--alpha-surface-05);
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.signal-empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: var(--radius-paper);
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, var(--alpha-surface-10), transparent);
+  color: var(--text-muted);
+  box-shadow: var(--shadow-edge);
+}
+
+.signal-empty__title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+  text-wrap: balance;
+}
+
+.signal-empty__desc {
+  color: var(--text-secondary);
+  line-height: var(--leading-body);
+  max-width: 26rem;
+  margin: 0;
+  text-wrap: pretty;
+}
+
+// ---------- Skeleton -------------------------------------------------------
+.signal-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.signal-skeleton__row {
+  border-radius: var(--radius-paper-sm);
+  background: var(--surface-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.signal-skeleton__row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--shimmer-highlight), transparent);
+  animation: signal-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes signal-skeleton-shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-skeleton__row::after {
+    animation: none;
+    opacity: 0.4;
+  }
+}

@@ -14,6 +14,7 @@ import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicEngagement } from "../components/CivicEngagement";
 import { PriorityRadar } from "../components/PriorityRadar";
+import { PriorityScale, StatusChip } from "../components/signalPrimitives";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { formatStamp } from "../utils/formatStamp";
@@ -130,11 +131,6 @@ export function SignalDetail() {
   const evidenceUrls = (signal.evidenceUrls?.length ? signal.evidenceUrls : signal.imageUrl ? [signal.imageUrl] : []).filter(Boolean) as string[];
 
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
-  
-  let severity: 'new' | 'progress' | 'resolved' | 'rejected' = 'new';
-  if (signal.status === "IN_PROGRESS") severity = 'progress';
-  if (signal.status === "RESOLVED") severity = 'resolved';
-  if (signal.status === "REJECTED") severity = 'rejected';
 
   const renderTimelineLabel = (entry: SignalStatusEntry) => {
     if (entry.eventType === "ASSIGNED") {
@@ -159,10 +155,10 @@ export function SignalDetail() {
             />
             <div className="min-w-0">
               <div className="u-card-meta-row mb-2">
-                <CivicBadge
+                <StatusChip
+                  status={signal.status}
                   label={statusLabel(signal.status)}
-                  severity={severity}
-                  data-testid="signal-detail-status-badge"
+                  testId="signal-detail-status-badge"
                 />
                 <span className="text-xs text-muted font-bold uppercase tracking-wide">
                   {t("signals.protocol_id")}: {signal.id.substring(0,8)}
@@ -275,11 +271,19 @@ export function SignalDetail() {
                     <div className="flex-grow-1">
                       <div className="flex justify-content-between align-items-start mb-2">
                         <div className="flex align-items-center gap-2">
-                          <CivicBadge
-                            label={entry.eventType === "ASSIGNED" ? (entry.assignedToUsername || t("signals.timeline_unassigned")) : statusLabel(entry.statusTo)}
-                            severity={entry.statusTo === 'RESOLVED' ? 'resolved' : 'progress'}
-                            data-testid={`signal-timeline-status-badge-${idx}`}
-                          />
+                          {entry.eventType === "ASSIGNED" ? (
+                            <CivicBadge
+                              label={entry.assignedToUsername || t("signals.timeline_unassigned")}
+                              severity="progress"
+                              data-testid={`signal-timeline-status-badge-${idx}`}
+                            />
+                          ) : (
+                            <StatusChip
+                              status={entry.statusTo}
+                              label={statusLabel(entry.statusTo)}
+                              testId={`signal-timeline-status-badge-${idx}`}
+                            />
+                          )}
                           <span className="text-xs font-bold text-muted">{renderTimelineLabel(entry)}</span>
                         </div>
                         <span className="text-xs text-muted">{formatStamp(entry.createdAt) ?? entry.createdAt}</span>
@@ -355,11 +359,22 @@ export function SignalDetail() {
               </div>
             </CivicCard>
 
-            <CivicCard className="text-center mb-8" variant="brand" title={t("signals.intel_index")}>
+            <CivicCard className="text-center mb-8" variant="brand" title={t("signals.intel_index")} data-testid="signal-detail-priority-card">
               <div className="text-8xl font-black text-main mb-2 tracking-tighter">
                 {signal.priorityScore?.toFixed(0)}
               </div>
-              <p className="text-muted text-sm font-bold mb-8 uppercase tracking-wide">{t("signals.priority_rank")}</p>
+              <p className="text-muted text-sm font-bold mb-4 uppercase tracking-wide">{t("signals.priority_rank")}</p>
+              {/*
+                The number alone is not a priority: the scale names the level and the help line
+                explains what it is anchored to, so the card cannot be read as a bare score.
+              */}
+              <div className="flex justify-content-center mb-3">
+                <PriorityScale
+                  score={signal.priorityScore ?? 0}
+                  testId="signal-detail-priority-scale"
+                />
+              </div>
+              <p className="text-xs text-muted m-0">{t("signals.priority_scale_help")}</p>
             </CivicCard>
 
             <PriorityRadar 

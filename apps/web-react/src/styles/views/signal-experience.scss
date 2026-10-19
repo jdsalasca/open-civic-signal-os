@@ -1,0 +1,13 @@
+// ---------------------------------------------------------------------------
+// Core Signal Experience stylesheet.
+//
+// One import from main.scss. Each partial owns one surface so the dashboard,
+// the list, the case, the report and the public backlog can evolve without
+// touching the tokens in theme.scss.
+// ---------------------------------------------------------------------------
+
+@use "signal-common";
+@use "signal-table";
+@use "signal-report";
+@use "signal-dashboard";
+@use "signal-public";
