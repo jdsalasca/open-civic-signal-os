@@ -234,13 +234,11 @@ export function CommunityMap() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <div className="flex flex-column lg:flex-row justify-content-between align-items-start gap-4 mb-8">
-          <CivicPageHeader
-            title={t("community_map.title", { community: activeMembership?.communityName ?? t("dashboard.community_default") })}
-            description={t("community_map.desc")}
-            className="mb-0"
-          />
-          <CivicActionBar className="w-full lg:w-auto" data-testid="community-map-actionbar">
+        <CivicPageHeader
+          title={t("community_map.title", { community: activeMembership?.communityName ?? t("dashboard.community_default") })}
+          description={t("community_map.desc")}
+          actions={
+            <CivicActionBar className="w-full lg:w-auto" data-testid="community-map-actionbar">
             <div className="u-pill" data-testid="community-map-freshness">
               <i className="pi pi-map text-brand-primary" />
               {communityMap?.freshness ?? heatMap?.freshness ?? t("dashboard.freshness_pending")}
@@ -252,8 +250,9 @@ export function CommunityMap() {
               variant="ghost"
               onClick={() => navigate("/communities")}
             />
-          </CivicActionBar>
-        </div>
+            </CivicActionBar>
+          }
+        />
 
         {!activeCommunityId ? (
           <CivicCard>

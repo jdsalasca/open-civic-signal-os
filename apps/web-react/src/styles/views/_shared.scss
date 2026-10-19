@@ -1,0 +1,78 @@
+// ---------------------------------------------------------------------------
+// Shared view-layer patterns for the Community area and its sibling pages.
+//
+// These extend the Paper Craft tokens declared in theme.scss and the primitives
+// in src/components/ui/ instead of restating per-view CSS. Loaded once from
+// src/styles/main.scss through `@use "views";`.
+// ---------------------------------------------------------------------------
+
+// Page header: title + subtitle on the left, an action cluster on the right.
+// A wrapping flex row (not a grid) so a wide action bar drops to its own line
+// instead of squeezing the title to zero width on smaller screens.
+//
+// Two classes on purpose: main.scss already styles `.civic-page-header` with a
+// 54rem measure, and both rules have the same specificity, so the doubled
+// selector is what lets the action layout widen the header again.
+.civic-page-header.civic-page-header-with-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
+  max-width: none;
+}
+
+.civic-page-header-main {
+  flex: 1 1 32rem;
+  min-width: 0;
+  max-width: 54rem;
+}
+
+.civic-page-header-actions {
+  flex: 0 1 auto;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.civic-page-header-actions > * {
+  min-width: 0;
+}
+
+// Comfortable reading measure for long-form content (blog posts, thread
+// bodies, governance documents). 44rem keeps line length near 70 characters
+// instead of stretching prose across the full 1300px app shell.
+.community-reading-width {
+  max-width: 44rem;
+  min-width: 0;
+}
+
+.community-reading-width > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 991px) {
+  .civic-page-header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .civic-page-header-actions .civic-action-bar,
+  .civic-page-header-actions .civic-toolbar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .civic-page-header-actions .community-home-action-copy,
+  .civic-page-header-actions .dashboard-action-cluster {
+    flex-basis: 100%;
+    width: 100%;
+  }
+
+  .civic-page-header-actions .dashboard-action-cluster > * {
+    flex: 1 1 100%;
+  }
+}

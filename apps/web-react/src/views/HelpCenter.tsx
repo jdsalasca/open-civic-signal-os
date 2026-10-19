@@ -183,7 +183,7 @@ export function HelpCenter() {
 
   return (
     <Layout>
-      <div className="animate-fade-up motion-page max-w-72rem mx-auto">
+      <div className="animate-fade-up motion-page help-center-shell">
         <CivicPageHeader title={t("help_center.title")} description={t("help_center.desc")} />
 
         <div className="grid mb-6">
