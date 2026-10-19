@@ -10,12 +10,17 @@ export function Unauthorized() {
 
   return (
     <Layout authMode>
-      <div className="min-h-screen flex justify-content-center align-items-center p-4">
+      <main className="min-h-screen flex justify-content-center align-items-center p-4">
         <CivicCard className="w-full max-w-30rem text-center animate-fade-up" padding="lg" data-testid="unauthorized-card">
+          <img
+            className="state-illustration state-illustration-wide"
+            data-testid="unauthorized-illustration"
+            src="/illustrations/city-403.svg"
+            alt={t("exceptions.403_illustration_alt")}
+            width={1200}
+            height={1200}
+          />
           <div className="mb-8">
-            <div className="inline-flex align-items-center justify-content-center p-4 bg-surface-soft border-round-3xl mb-6 border-1 border-subtle">
-              <i className="pi pi-lock text-5xl text-status-progress"></i>
-            </div>
             <h1 className="text-4xl font-black text-main m-0 tracking-tighter">{t('exceptions.403_subtitle')}</h1>
             <p className="text-secondary mt-4 mb-0 font-medium leading-relaxed">
               {t('exceptions.403_desc')}
@@ -44,7 +49,7 @@ export function Unauthorized() {
             />
           </div>
         </CivicCard>
-      </div>
+      </main>
     </Layout>
   );
 }

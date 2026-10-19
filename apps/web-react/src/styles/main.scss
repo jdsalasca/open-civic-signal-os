@@ -2,6 +2,7 @@
 @use "theme";
 @use "base/mixins" as *;
 @use "base/fonts";
+@use "views/public";
 
 // Fonts are self-hosted (public/fonts, Latin subset, ~39 KB total) so the app
 // owns its type at the same time it owns its palette. No Google Fonts import.

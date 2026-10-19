@@ -44,8 +44,8 @@ export function Login() {
 
   return (
     <Layout authMode>
-      <div className="min-h-screen flex justify-content-center align-items-center p-4">
-        <CivicCard className="w-full max-w-28rem animate-fade-up" padding="lg" data-testid="login-card">
+      <main className="min-h-screen flex justify-content-center align-items-center p-4">
+        <CivicCard className="auth-panel animate-fade-up" padding="lg" data-testid="login-card">
           <div className="text-center mb-8">
             <div className="inline-flex align-items-center justify-content-center p-3 bg-surface-soft border-round-2xl mb-4 border-1 border-subtle">
               <ShieldCheck size={48} className="text-brand-primary" />
@@ -82,6 +82,7 @@ export function Login() {
             <CivicField
               label={t('auth.password')}
               error={errors.password ? t('common.required') : undefined}
+              helpText={t('auth.login_password_hint')}
             >
               <Controller
                 name="password"
@@ -134,7 +135,7 @@ export function Login() {
             </Link>
           </div>
         </CivicCard>
-      </div>
+      </main>
     </Layout>
   );
 }
