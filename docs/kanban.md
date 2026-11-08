@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-11-08T19:36:41.805Z
+Last updated: 2026-11-08T19:51:08.495Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,7 +10,7 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-11-01T19:36:38.780Z)
+- Window: last 7 days (since 2026-11-01T19:51:05.087Z)
 - Throughput (issues closed): 0
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
@@ -80,12 +80,13 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 17
+- TODO: 18
 - IN_PROGRESS: 0
 - BLOCKED: 0
 - DONE: 109
 
 ### TODO
+- #144 Production image build runs the full Java suite on a 2-vCPU host
 - #142 Sidebar role pill breaks Coordinator mid-word
 - #140 Registration with verification disabled sends the user to an unused code screen
 - #138 Register cities, localities and neighborhoods with backend normalization
