@@ -8,5 +8,7 @@ public record CreateCommunityRequest(
     @NotBlank String name,
     @NotBlank String slug,
     String description,
+    String country,
+    String region,
     UUID parentCommunityId
 ) {}

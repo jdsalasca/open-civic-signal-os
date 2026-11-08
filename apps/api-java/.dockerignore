@@ -1,7 +1,16 @@
-target
+**/node_modules
+**/dist
+**/target
+**/logs
+**/coverage
+**/output
+**/test-results
+**/*.log
 .git
 .mvn
 .idea
 *.iml
 Dockerfile
 docker-compose*.yml
+.env
+.env.*

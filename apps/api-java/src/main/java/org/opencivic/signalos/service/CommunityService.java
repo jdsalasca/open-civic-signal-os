@@ -13,6 +13,7 @@ import org.opencivic.signalos.domain.CommunityMembershipAudit;
 import org.opencivic.signalos.domain.CommunityPermissionScope;
 import org.opencivic.signalos.domain.CommunityRole;
 import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.repository.CommunityMembershipAuditRepository;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
@@ -58,8 +59,26 @@ public class CommunityService {
     }
 
     public List<CommunityResponse> getAllCommunities() {
+        Map<UUID, Long> memberCounts = memberCountsByCommunity();
         return communityRepository.findAll().stream()
-            .map(this::toCommunityResponse)
+            .map(community -> toCommunityResponse(community, memberCounts.getOrDefault(community.getId(), 0L)))
+            .toList();
+    }
+
+    /**
+     * The public directory behind the landing page: every city, largest first.
+     *
+     * <p>Readable without a session on purpose. A person deciding whether registering is worth it
+     * needs to see the communities that already exist, not be told to sign up first. Sorted by size so
+     * the places with a community already forming are the ones a newcomer sees first.
+     */
+    public List<CommunityResponse> getPublicCities() {
+        Map<UUID, Long> memberCounts = memberCountsByCommunity();
+        return communityRepository.findAll().stream()
+            .map(community -> toCommunityResponse(community, memberCounts.getOrDefault(community.getId(), 0L)))
+            .sorted(Comparator
+                .comparingLong(CommunityResponse::memberCount).reversed()
+                .thenComparing(CommunityResponse::name, String.CASE_INSENSITIVE_ORDER))
             .toList();
     }
 
@@ -83,48 +102,143 @@ public class CommunityService {
         String name,
         String slug,
         String description,
+        String country,
+        String region,
         UUID parentCommunityId,
         String username
     ) {
         User user = accessService.getCurrentUser(username);
+        return createCommunityAndJoin(user.getId(), name, slug, description, country, region, parentCommunityId,
+            CommunityRole.COORDINATOR);
+    }
+
+    /**
+     * Founds a city for someone who has no session yet, which is what registration needs.
+     *
+     * <p>Separate from {@link #createCommunity} because that one resolves the founder from the
+     * authenticated principal, and at registration there is no principal: the person exists but has
+     * not verified or logged in. The registrant becomes COORDINATOR, the role the platform treats as
+     * the organizer accountable for a community.
+     */
+    @Transactional
+    public CommunityResponse createCommunityAndJoin(
+        UUID userId,
+        String name,
+        String slug,
+        String description,
+        String country,
+        String region,
+        UUID parentCommunityId,
+        CommunityRole role
+    ) {
+        return createCommunityAndJoin(
+            userId, name, slug, description, country, region, parentCommunityId,
+            null, null, null, role
+        );
+    }
+
+    /**
+     * Creates a community from a place: city, locality and neighborhood are normalized here, in the
+     * trust boundary, so the UI never decides what a duplicate is.
+     *
+     * <p>The visible name is the most specific level provided. The place key (city|locality|
+     * neighborhood, accent- and case-insensitive) makes a second community for the same place a
+     * 409 instead of a directory full of near-duplicates.
+     */
+    @Transactional
+    public CommunityResponse createCommunityAndJoin(
+        UUID userId,
+        String name,
+        String slug,
+        String description,
+        String country,
+        String region,
+        UUID parentCommunityId,
+        String city,
+        String locality,
+        String neighborhood,
+        CommunityRole role
+    ) {
+        String normalizedCity = PlaceNames.normalize(city);
+        String normalizedLocality = PlaceNames.normalize(locality);
+        String normalizedNeighborhood = PlaceNames.normalize(neighborhood);
+        String placeKey = PlaceNames.key(normalizedCity, normalizedLocality, normalizedNeighborhood);
+        if (placeKey != null) {
+            communityRepository.findByPlaceKey(placeKey).ifPresent(existing -> {
+                throw new ConflictException(
+                    "A community already exists for this place: " + existing.getName()
+                        + ". Join it from the directory instead of creating a duplicate."
+                );
+            });
+        }
+        String resolvedName = normalizedNeighborhood != null
+            ? normalizedNeighborhood
+            : normalizedLocality != null
+                ? normalizedLocality
+                : normalizedCity != null ? normalizedCity : trimToNull(name);
+        if (resolvedName == null) {
+            throw new IllegalArgumentException("Community name or city is required.");
+        }
+
         if (parentCommunityId != null) {
             communityRepository.findById(parentCommunityId)
                 .orElseThrow(() -> new ResourceNotFoundException("Parent community not found: " + parentCommunityId));
         }
         Community community = new Community();
-        community.setName(name);
-        community.setSlug(slug);
+        community.setName(resolvedName);
+        community.setSlug(resolveSlug(slug, resolvedName));
         community.setDescription(description);
+        community.setCountry(trimToNull(country));
+        community.setRegion(trimToNull(region));
+        community.setCity(normalizedCity);
+        community.setLocality(normalizedLocality);
+        community.setNeighborhood(normalizedNeighborhood);
+        community.setPlaceKey(placeKey);
         community.setParentCommunityId(parentCommunityId);
         Community savedCommunity = communityRepository.save(community);
 
         CommunityMembership membership = new CommunityMembership();
         membership.setCommunityId(savedCommunity.getId());
-        membership.setUserId(user.getId());
-        membership.setRole(CommunityRole.COORDINATOR);
-        membership.setCreatedBy(user.getId());
+        membership.setUserId(userId);
+        membership.setRole(role);
+        membership.setCreatedBy(userId);
         membershipRepository.save(membership);
-        saveAudit(savedCommunity.getId(), user.getId(), user.getId(), null, CommunityRole.COORDINATOR);
-        return toCommunityResponse(savedCommunity);
+        saveAudit(savedCommunity.getId(), userId, userId, null, role);
+        return toCommunityResponse(savedCommunity, 1L);
+    }
+
+    public Community requireCommunity(UUID communityId) {
+        return communityRepository.findById(communityId)
+            .orElseThrow(() -> new ResourceNotFoundException("Community not found: " + communityId));
     }
 
     @Transactional
     public CommunityMembershipResponse joinCommunity(UUID communityId, CommunityRole role, String username) {
         User user = accessService.getCurrentUser(username);
-        communityRepository.findById(communityId)
-            .orElseThrow(() -> new ResourceNotFoundException("Community not found: " + communityId));
+        return joinCommunityForUser(communityId, user.getId(), role);
+    }
+
+    /**
+     * Adds a membership for a user id, used by registration before a principal exists.
+     *
+     * <p>Idempotent: joining a city twice returns the existing membership instead of failing, so a
+     * retried registration or a double tap does not read as an error.
+     */
+    @Transactional
+    public CommunityMembershipResponse joinCommunityForUser(UUID communityId, UUID userId, CommunityRole role) {
+        requireCommunity(communityId);
         CommunityMembership membership = new CommunityMembership();
         membership.setCommunityId(communityId);
-        membership.setUserId(user.getId());
+        membership.setUserId(userId);
         membership.setRole(role);
-        membership.setCreatedBy(user.getId());
+        membership.setCreatedBy(userId);
         try {
             CommunityMembership saved = membershipRepository.save(membership);
-            saveAudit(communityId, user.getId(), user.getId(), null, role);
+            saveAudit(communityId, userId, userId, null, role);
             return toResponse(saved);
         } catch (DataIntegrityViolationException ex) {
             CommunityMembership existing = membershipRepository
-                .findByUserIdAndCommunityId(user.getId(), communityId)
+                .findByUserIdAndCommunityId(userId, communityId)
                 .orElseThrow(() -> ex);
             return toResponse(existing);
         }
@@ -151,6 +265,48 @@ public class CommunityService {
         CommunityMembership saved = membershipRepository.save(membership);
         saveAudit(communityId, targetUserId, actor.getId(), previousRole, role);
         return toResponse(saved);
+    }
+
+    private Map<UUID, Long> memberCountsByCommunity() {
+        return membershipRepository.countGroupedByCommunity().stream()
+            .collect(Collectors.toMap(
+                row -> (UUID) row[0],
+                row -> (Long) row[1]
+            ));
+    }
+
+    /**
+     * A slug for a city founded from its name alone.
+     *
+     * <p>The registration form asks for a name, not a slug, so one is derived: lowercased, accents
+     * folded, non-alphanumerics collapsed to single dashes. Uniqueness is enforced by suffixing,
+     * because two towns can share a name and a unique constraint should not turn that into a failed
+     * registration.
+     */
+    private String resolveSlug(String requestedSlug, String name) {
+        String base = slugify(requestedSlug == null || requestedSlug.isBlank() ? name : requestedSlug);
+        if (base.isBlank()) {
+            base = "community";
+        }
+        String candidate = base;
+        int suffix = 2;
+        while (communityRepository.findBySlug(candidate).isPresent()) {
+            candidate = base + "-" + suffix;
+            suffix++;
+        }
+        return candidate;
+    }
+
+    private String slugify(String value) {
+        return PlaceNames.slug(value);
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private void saveAudit(
@@ -198,13 +354,19 @@ public class CommunityService {
         );
     }
 
-    private CommunityResponse toCommunityResponse(Community community) {
+    private CommunityResponse toCommunityResponse(Community community, long memberCount) {
         return new CommunityResponse(
             community.getId(),
             community.getName(),
             community.getSlug(),
             community.getDescription(),
+            community.getCountry(),
+            community.getRegion(),
+            community.getCity(),
+            community.getLocality(),
+            community.getNeighborhood(),
             community.getParentCommunityId(),
+            memberCount,
             community.getCreatedAt()
         );
     }

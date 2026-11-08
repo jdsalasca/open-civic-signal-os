@@ -302,15 +302,13 @@ const formatDate = (value?: string | null) => formatDay(value) ?? t("community_d
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <div className="flex flex-column xl:flex-row justify-content-between align-items-start gap-4 mb-8">
-          <CivicPageHeader
+        <CivicPageHeader
             title={t("community_decisions.title")}
             description={t("community_decisions.desc", {
               community: activeMembership?.communityName ?? t("dashboard.community_default"),
             })}
-            className="mb-0"
-          />
-          <CivicActionBar className="w-full xl:w-auto">
+          actions={
+            <CivicActionBar className="w-full xl:w-auto">
             <div className="community-home-action-copy">
               <div className="u-eyebrow">{t("community_decisions.badge")}</div>
               <p className="u-section-copy text-sm m-0">{t("community_decisions.badge_desc")}</p>
@@ -320,8 +318,9 @@ const formatDate = (value?: string | null) => formatDay(value) ?? t("community_d
               <CivicButton type="button" icon="pi pi-briefcase" label={t("nav.community_projects")} variant="ghost" onClick={() => navigate("/communities/projects")} />
               <CivicButton type="button" icon="pi pi-book" label={t("nav.community_governance")} variant="ghost" onClick={() => navigate("/communities/governance")} />
             </div>
-          </CivicActionBar>
-        </div>
+            </CivicActionBar>
+          }
+        />
 
         {!activeCommunityId ? (
           <CivicCard>

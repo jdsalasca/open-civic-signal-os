@@ -190,7 +190,28 @@ export function Layout({ children, authMode = false }: Props) {
   const visibleMoreCount = [...collaborationNav, ...advancedNav].filter((item) => item.visible).length;
   const mobileNav = primaryNav.filter((item) => item.visible);
 
-  if (authMode) return <div className="auth-page min-h-screen">{children}</div>;
+  /*
+   * Public pages (landing, login, register, verify, backlog) skip the full shell, but the keyboard
+   * contract must not skip with it: the first Tab lands on the skip link and Enter moves focus into
+   * the main landmark, exactly as it does inside the authenticated layout.
+   */
+  if (authMode) {
+    return (
+      <div className="auth-page min-h-screen">
+        <a
+          href={`#${mainContentId}`}
+          className="skip-link"
+          data-testid="skip-to-content-link"
+          onClick={() => window.requestAnimationFrame(() => document.getElementById(mainContentId)?.focus())}
+        >
+          {t('nav.skip_to_content')}
+        </a>
+        <main id={mainContentId} tabIndex={-1} data-testid="main-content">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   const NavGroup = ({ title, items }: { title: string, items: NavItem[] }) => (
     <div className="mb-6">
@@ -309,6 +330,7 @@ export function Layout({ children, authMode = false }: Props) {
               </div>
             </div>
             <Button
+              type="button"
               label={t('nav.sign_out')}
               icon="pi pi-power-off"
               text
@@ -325,6 +347,7 @@ export function Layout({ children, authMode = false }: Props) {
         <header className="app-topbar min-h-6rem py-3 flex align-items-center justify-content-between px-4 lg:px-6 border-bottom-1 border-subtle z-1">
           <div className="flex align-items-center gap-4 flex-grow-1">
             <Button
+              type="button"
               icon="pi pi-bars"
               text
               className="lg:hidden text-main"

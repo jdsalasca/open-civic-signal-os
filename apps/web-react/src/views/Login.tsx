@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -12,6 +13,7 @@ import apiClient from "../api/axios";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicField } from "../components/ui/CivicField";
+import { GoogleSignIn } from "../components/GoogleSignIn";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -42,10 +44,22 @@ export function Login() {
     }
   };
 
+  const handleGoogleCredential = useCallback(async (credential: string) => {
+    try {
+      const res = await apiClient.post("auth/google", { credential });
+      setAuth(res.data);
+      toast.success(t('auth.login_success', { name: res.data.username }));
+      navigate("/");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('auth.invalid_credentials'));
+    }
+  }, [navigate, setAuth, t]);
+
   return (
     <Layout authMode>
       <div className="min-h-screen flex justify-content-center align-items-center p-4">
-        <CivicCard className="w-full max-w-28rem animate-fade-up" padding="lg" data-testid="login-card">
+        <CivicCard className="auth-panel animate-fade-up" padding="lg" data-testid="login-card">
           <div className="text-center mb-8">
             <div className="inline-flex align-items-center justify-content-center p-3 bg-surface-soft border-round-2xl mb-4 border-1 border-subtle">
               <ShieldCheck size={48} className="text-brand-primary" />
@@ -82,6 +96,7 @@ export function Login() {
             <CivicField
               label={t('auth.password')}
               error={errors.password ? t('common.required') : undefined}
+              helpText={t('auth.login_password_hint')}
             >
               <Controller
                 name="password"
@@ -111,6 +126,8 @@ export function Login() {
               glow
               data-testid="login-submit-button"
             />
+
+            <GoogleSignIn onCredential={handleGoogleCredential} />
 
             <div className="text-center mt-8 pt-6 border-top-1 border-surface-soft">
               <span className="text-secondary mr-2 font-medium">{t('auth.no_account')}</span>

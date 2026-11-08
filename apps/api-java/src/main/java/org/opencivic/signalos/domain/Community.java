@@ -53,6 +53,34 @@ public class Community {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    /**
+     * Where this community is. Optional, because a community can be a neighborhood, a building or a
+     * working group rather than a municipality, and forcing a country on those would be a lie. Kept on
+     * the entity rather than derived, so the public city directory can group and search without
+     * guessing from the free-text name.
+     */
+    @Column(length = 120)
+    private String country;
+
+    @Column(length = 120)
+    private String region;
+
+    @Column(length = 120)
+    private String city;
+
+    @Column(length = 120)
+    private String locality;
+
+    @Column(length = 120)
+    private String neighborhood;
+
+    /**
+     * Normalized city|locality|neighborhood, used only to reject a second community for the same
+     * place. Null for hubs and for communities created before this existed.
+     */
+    @Column(length = 400, unique = true)
+    private String placeKey;
+
     private UUID parentCommunityId;
 
     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
@@ -99,6 +127,54 @@ public class Community {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getLocality() {
+        return locality;
+    }
+
+    public void setLocality(String locality) {
+        this.locality = locality;
+    }
+
+    public String getNeighborhood() {
+        return neighborhood;
+    }
+
+    public void setNeighborhood(String neighborhood) {
+        this.neighborhood = neighborhood;
+    }
+
+    public String getPlaceKey() {
+        return placeKey;
+    }
+
+    public void setPlaceKey(String placeKey) {
+        this.placeKey = placeKey;
     }
 
     public UUID getParentCommunityId() {

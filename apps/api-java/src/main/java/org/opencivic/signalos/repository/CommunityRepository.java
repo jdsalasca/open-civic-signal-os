@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CommunityRepository extends JpaRepository<Community, UUID> {
     Optional<Community> findBySlug(String slug);
+    Optional<Community> findByPlaceKey(String placeKey);
 }

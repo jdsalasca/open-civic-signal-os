@@ -47,6 +47,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/actuator/health", "/actuator/health").permitAll()
                 .requestMatchers("/api/open-data/**").permitAll()
+                // The city directory is the landing page's content. Asking someone to register before
+                // they can see which cities exist is asking them to commit blind.
+                .requestMatchers(HttpMethod.GET, "/api/communities/public").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/signals/prioritized", "/api/signals/top-10", "/api/signals/meta", "/api/signals/formula").permitAll()
                 // A published backlog is a claim a visitor checks. A check only its publisher can run
                 // is not one a visitor can trust, so both the claim and the comparison are public.

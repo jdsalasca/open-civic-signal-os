@@ -239,15 +239,13 @@ export function CommunityGovernance() {
     <Layout>
       <div className="animate-fade-up motion-page">
         <ContextualHelpPanel surface="GOVERNANCE" className="mb-6" dataTestId="governance-contextual-help" />
-        <div className="flex flex-column xl:flex-row justify-content-between align-items-start gap-4 mb-8">
-          <CivicPageHeader
+        <CivicPageHeader
             title={t("community_governance.title")}
             description={t("community_governance.desc", {
               community: activeMembership?.communityName ?? t("dashboard.community_default"),
             })}
-            className="mb-0"
-          />
-          <CivicActionBar className="w-full xl:w-auto">
+          actions={
+            <CivicActionBar className="w-full xl:w-auto">
             <div className="community-home-action-copy">
               <div className="u-eyebrow">{t("community_governance.badge")}</div>
               <p className="u-section-copy text-sm m-0">{t("community_governance.badge_desc")}</p>
@@ -256,8 +254,9 @@ export function CommunityGovernance() {
               <CivicButton type="button" icon="pi pi-briefcase" label={t("nav.community_projects")} variant="ghost" onClick={() => navigate("/communities/projects")} />
               <CivicButton type="button" icon="pi pi-file-edit" label={t("community_proposals.open_hub")} variant="ghost" onClick={() => navigate("/communities/proposals")} />
             </div>
-          </CivicActionBar>
-        </div>
+            </CivicActionBar>
+          }
+        />
 
         {!activeCommunityId ? (
           <CivicCard>

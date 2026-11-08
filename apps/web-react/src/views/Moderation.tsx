@@ -18,6 +18,7 @@ import { CivicField } from "../components/ui/CivicField";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { StatusChip } from "../components/signalPrimitives";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useAuthStore } from "../store/useAuthStore";
 import type {
@@ -32,6 +33,17 @@ type ApiError = Error & { friendlyMessage?: string };
 
 const RESOLUTION_MIN = 8;
 const RESOLUTION_MAX = 2000;
+
+/**
+ * The queue speaks the same chip language as the signal surfaces. Moderation states reuse the
+ * lifecycle tones they resemble: open cases read like new work, actioned like work in progress,
+ * dismissed like a closed-out rejection.
+ */
+const MODERATION_STATUS_TONE: Record<string, string> = {
+  OPEN: "NEW",
+  ACTIONED: "IN_PROGRESS",
+  DISMISSED: "REJECTED",
+};
 
 export function Moderation() {
   const { t } = useTranslation();
@@ -277,9 +289,9 @@ export function Moderation() {
                             <h3 className="text-lg font-black text-main m-0 mt-2">{t(`moderation.reason_codes.${report.reasonCode}`)}</h3>
                             <p className="text-sm text-secondary mt-2 mb-0 line-height-3">{report.targetPreview}</p>
                           </div>
-                          <CivicBadge
+                          <StatusChip
+                            status={MODERATION_STATUS_TONE[report.status] ?? report.status}
                             label={t(`moderation.status.${report.status}`)}
-                            severity={report.status === "ACTIONED" ? "progress" : report.status === "DISMISSED" ? "neutral" : "rejected"}
                           />
                         </div>
                         <div className="u-meta-row mt-3">

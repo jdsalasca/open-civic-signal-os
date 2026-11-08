@@ -3,7 +3,9 @@ package org.opencivic.signalos.repository;
 import org.opencivic.signalos.domain.Signal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
@@ -49,6 +51,16 @@ public interface SignalRepository extends JpaRepository<Signal, UUID> {
         Pageable pageable
     );
     Optional<Signal> findByIdAndCommunityId(UUID id, UUID communityId);
+
+    // Votes update a counter that is read-modify-written. Two supporters voting at the same time
+    // used to lose one increment; the row lock serialises them instead.
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Signal s WHERE s.id = :id")
+    Optional<Signal> findByIdForUpdate(@Param("id") UUID id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Signal s WHERE s.id = :id AND s.communityId = :communityId")
+    Optional<Signal> findByIdAndCommunityIdForUpdate(@Param("id") UUID id, @Param("communityId") UUID communityId);
     List<Signal> findByCommunityId(UUID communityId);
     List<Signal> findByCommunityIdIn(Collection<UUID> communityIds);
     Page<Signal> findByCommunityIdOrderByCreatedAtDesc(UUID communityId, Pageable pageable);

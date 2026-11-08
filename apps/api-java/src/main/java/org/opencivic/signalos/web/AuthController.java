@@ -20,20 +20,26 @@ import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.EmailService;
 import org.opencivic.signalos.service.EmailDeliveryResult;
+import org.opencivic.signalos.service.GoogleAuthService;
+import org.opencivic.signalos.service.GoogleTokenVerifier;
 import org.opencivic.signalos.service.JwtService;
+import org.opencivic.signalos.service.CommunityService;
 import org.opencivic.signalos.service.PrivacyAccessLogService;
 import org.opencivic.signalos.web.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.SecureRandom;
@@ -56,6 +62,9 @@ public class AuthController {
     private final CommunityMembershipRepository membershipRepository;
     private final SignalRepository signalRepository;
     private final PrivacyAccessLogService privacyAccessLogService;
+    private final CommunityService communityService;
+    private final GoogleAuthService googleAuthService;
+    private final GoogleTokenVerifier googleTokenVerifier;
 
     private static final Set<String> ALLOWED_AVATAR_PRESETS = Set.of(
         "civic-sunrise",
@@ -76,6 +85,9 @@ public class AuthController {
     @Value("${support.contact.email:support@open-civic.local}")
     private String supportContactEmail;
 
+    @Value("${app.auth.require-email-verification:true}")
+    private boolean requireEmailVerification;
+
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, 
                           EmailService emailService, JwtService jwtService, 
                           AuthenticationManager authenticationManager,
@@ -83,7 +95,10 @@ public class AuthController {
                           RateLimitService rateLimitService,
                           CommunityMembershipRepository membershipRepository,
                           SignalRepository signalRepository,
-                          PrivacyAccessLogService privacyAccessLogService) {
+                          PrivacyAccessLogService privacyAccessLogService,
+                          CommunityService communityService,
+                          GoogleAuthService googleAuthService,
+                          GoogleTokenVerifier googleTokenVerifier) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -94,16 +109,39 @@ public class AuthController {
         this.membershipRepository = membershipRepository;
         this.signalRepository = signalRepository;
         this.privacyAccessLogService = privacyAccessLogService;
+        this.communityService = communityService;
+        this.googleAuthService = googleAuthService;
+        this.googleTokenVerifier = googleTokenVerifier;
     }
 
+    /**
+     * Creates the account and, when asked, attaches the new person to their city.
+     *
+     * <p>The whole method is one transaction because the account and its membership are a single
+     * outcome: a user row that exists while the membership it was supposed to create does not would
+     * leave the username taken and the person not in any city, with no way to finish registering.
+     */
     @PostMapping("/register")
+    @Transactional
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
+        if (!rateLimitService.tryAcquire("register:" + request.username())) {
+            return ResponseEntity.status(429).body(Map.of("message", "Too many registration attempts. Please wait."));
+        }
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new ConflictException("Username already exists in the registry.");
         }
 
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new ConflictException("Identity already registered with this email address.");
+        }
+
+        UUID joinCommunityId = request.communityId();
+        String newCityName = trimToNull(request.communityName());
+        String newCity = trimToNull(request.communityCity());
+        // Validate the chosen city before touching the users table: a bad choice must fail as a bad
+        // choice, not as an account that got created and then could not be attached.
+        if (joinCommunityId != null) {
+            communityService.requireCommunity(joinCommunityId);
         }
 
         User user = new User(
@@ -113,13 +151,45 @@ public class AuthController {
             "ROLE_CITIZEN"
         );
         
-        String verificationCode = String.format("%06d", secureRandom.nextInt(999999));
+        String verificationCode = String.format("%06d", secureRandom.nextInt(1_000_000));
         
         user.setVerificationCode(verificationCode);
         user.setVerified(false);
         user.setEnabled(false);
         
         userRepository.save(user);
+
+        if (joinCommunityId != null) {
+            communityService.joinCommunityForUser(joinCommunityId, user.getId(), CommunityRole.MEMBER);
+        } else if (newCityName != null || newCity != null) {
+            // The founder of a city is its organizer. A city with nobody accountable for it is not a
+            // community yet, and the person who created it is the one who can hand that on.
+            communityService.createCommunityAndJoin(
+                user.getId(),
+                newCityName,
+                null,
+                null,
+                request.communityCountry(),
+                request.communityRegion(),
+                null,
+                newCity,
+                request.communityLocality(),
+                request.communityNeighborhood(),
+                CommunityRole.COORDINATOR
+            );
+        }
+
+        if (!requireEmailVerification) {
+            user.setVerified(true);
+            user.setEnabled(true);
+            userRepository.save(user);
+            return ResponseEntity.ok(Map.of(
+                "message", "Registration successful. Your account is active.",
+                "username", user.getUsername(),
+                "emailDeliveryStatus", "SKIPPED",
+                "supportEmail", supportContactEmail
+            ));
+        }
 
         EmailDeliveryResult delivery = emailService.sendVerificationCode(user.getEmail(), user.getUsername(), verificationCode);
         if (delivery.delivered()) {
@@ -143,6 +213,9 @@ public class AuthController {
     @PostMapping("/resend-code")
     public ResponseEntity<Map<String, String>> resendCode(@Valid @RequestBody ResendCodeRequest request) {
         String username = request.username();
+        if (!rateLimitService.tryAcquire("resend:" + username)) {
+            return ResponseEntity.status(429).body(Map.of("message", "Too many resend attempts. Please wait."));
+        }
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedActionException("Identity not found."));
 
@@ -151,7 +224,7 @@ public class AuthController {
         }
 
         // Generate a NEW code for security on every resend
-        String code = String.format("%06d", secureRandom.nextInt(999999));
+        String code = String.format("%06d", secureRandom.nextInt(1_000_000));
         user.setVerificationCode(code);
         userRepository.save(user);
 
@@ -217,16 +290,22 @@ public class AuthController {
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new UnauthorizedActionException("Invalid credentials."));
 
-        if (!user.isVerified()) {
-            throw new UnauthorizedActionException("Account not verified. Please check your email.");
-        }
-
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
             rateLimitService.reset(request.username());
-        } catch (BadCredentialsException e) {
+        } catch (DisabledException e) {
+            // Spring rejects a disabled account before it checks the password, so the password is
+            // verified here: a wrong one must not reveal that the account exists or is unverified.
+            if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+                throw new UnauthorizedActionException("Invalid credentials provided.");
+            }
+            if (!user.isVerified()) {
+                throw new UnauthorizedActionException("Account not verified. Please check your email.");
+            }
+            throw new UnauthorizedActionException("Account is disabled.");
+        } catch (AuthenticationException e) {
             throw new UnauthorizedActionException("Invalid credentials provided.");
         }
 
@@ -251,7 +330,7 @@ public class AuthController {
             String username = jwtService.extractUsername(refreshToken);
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             
-            if (jwtService.isTokenValid(refreshToken, userDetails)) {
+            if (jwtService.isTokenValid(refreshToken, userDetails) && jwtService.isRefreshToken(refreshToken)) {
                 String accessToken = jwtService.generateToken(userDetails);
                 User user = userRepository.findByUsername(username).orElseThrow();
                 return ResponseEntity.ok(new AuthResponse(accessToken, null, user.getRoles(), user.getUsername()));
@@ -269,6 +348,28 @@ public class AuthController {
         return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
     }
 
+    @GetMapping("/google/config")
+    public Map<String, String> googleConfig() {
+        return Map.of("clientId", googleTokenVerifier.clientId());
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        if (!googleTokenVerifier.isConfigured()) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+        GoogleAuthService.GoogleSession session = googleAuthService.signIn(request.credential());
+        ResponseCookie cookie = createRefreshCookie(session.refreshToken(), 7 * 24 * 60 * 60);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new AuthResponse(
+                    session.accessToken(),
+                    null,
+                    session.user().getRoles(),
+                    session.user().getUsername()
+                ));
+    }
+
     private ResponseCookie createRefreshCookie(String value, long maxAge) {
         boolean isProd = "prod".equalsIgnoreCase(activeProfile);
         return ResponseCookie.from("refreshToken", value)
@@ -284,21 +385,23 @@ public class AuthController {
     public Map<String, Object> getCurrentUser(Authentication authentication) {
         if (authentication == null) return Map.of("role", "GUEST");
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        return Map.ofEntries(
-            Map.entry("username", user.getUsername()),
-            Map.entry("roles", user.getRoles()),
-            Map.entry("email", user.getEmail()),
-            Map.entry("verified", user.isVerified()),
-            Map.entry("displayName", displayNameFor(user)),
-            Map.entry("civicRole", user.getCivicRole()),
-            Map.entry("affiliations", user.getAffiliations()),
-            Map.entry("bio", user.getBio()),
-            Map.entry("profileVisibility", user.getProfileVisibility().name()),
-            Map.entry("affiliationVisibility", user.getAffiliationVisibility().name()),
-            Map.entry("activityVisibility", user.getActivityVisibility().name()),
-            Map.entry("interfaceMode", user.getInterfaceMode().name()),
-            Map.entry("avatarPreset", sanitizeAvatarPreset(user.getAvatarPreset()))
-        );
+        // A mutable map, not Map.ofEntries: civicRole and bio are legitimately null for accounts
+        // that never filled a profile, and Map.of* rejects null values with an NPE.
+        Map<String, Object> body = new java.util.LinkedHashMap<>();
+        body.put("username", user.getUsername());
+        body.put("roles", user.getRoles());
+        body.put("email", user.getEmail());
+        body.put("verified", user.isVerified());
+        body.put("displayName", displayNameFor(user));
+        body.put("civicRole", user.getCivicRole());
+        body.put("affiliations", user.getAffiliations());
+        body.put("bio", user.getBio());
+        body.put("profileVisibility", user.getProfileVisibility().name());
+        body.put("affiliationVisibility", user.getAffiliationVisibility().name());
+        body.put("activityVisibility", user.getActivityVisibility().name());
+        body.put("interfaceMode", user.getInterfaceMode().name());
+        body.put("avatarPreset", sanitizeAvatarPreset(user.getAvatarPreset()));
+        return body;
     }
 
     @GetMapping("/profile/me")

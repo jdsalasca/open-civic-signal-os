@@ -27,6 +27,8 @@
 ## Deployment
 
 - `docs/DOCKER_CLAUDE.md`
+- `docs/DEPLOY_PRODUCTION.md`
+- `docs/LAUNCH_CHECKLIST.md`
 - `CLAUDE.md`
 
 ## Excellence and Governance

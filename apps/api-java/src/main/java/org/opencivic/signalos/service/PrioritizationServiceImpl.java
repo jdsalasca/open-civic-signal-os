@@ -130,9 +130,8 @@ public PrioritizationServiceImpl(SignalRepository signalRepository,
 
     @Override
     @Transactional
-    public Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason) {
-        Signal signal = signalRepository.findById(signalId)
-            .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + signalId));
+    public Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason, UUID communityId) {
+        Signal signal = requireSignalInScope(signalId, communityId);
 
         User assignee = userRepository.findByUsername(assigneeUsername)
             .orElseThrow(() -> new ResourceNotFoundException("Assignee not found: " + assigneeUsername));
@@ -463,10 +462,9 @@ public double similarityScore(Signal s1, Signal s2) {
 
     @Override
     @Transactional
-    public Signal moderateSignal(UUID id, String action, String reason) {
+    public Signal moderateSignal(UUID id, String action, String reason, UUID communityId) {
         log.info("Moderating signal {}. Action: {}, Reason: {}", id, action, reason);
-        Signal signal = signalRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Signal not found for moderation: " + id));
+        Signal signal = requireSignalInScope(id, communityId);
         
         String oldStatus = signal.getStatus();
         if ("APPROVE".equalsIgnoreCase(action)) {
@@ -557,6 +555,15 @@ statusHistoryRepository.save(new SignalStatusEntry(
         return signalRepository.save(signal);
     }
 
+    // A mutation that omits the community header must not reach a signal that belongs to one:
+    // roles are global, so the header (checked against membership by the controller) is the only
+    // tenant boundary these endpoints have. 404 instead of 403 so the id is not confirmed.
+    private Signal requireSignalInScope(UUID id, UUID communityId) {
+        return signalRepository.findById(id)
+            .filter(signal -> signal.getCommunityId() == null || signal.getCommunityId().equals(communityId))
+            .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + id));
+    }
+
     @Override
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus) {
@@ -579,10 +586,7 @@ statusHistoryRepository.save(new SignalStatusEntry(
     @Transactional
     public Optional<Signal> updateStatus(UUID id, String newStatus, UUID communityId, String changedBy, String reason) {
         log.info("Updating status for signal {}. Target: {}", id, newStatus);
-        Signal signal = (communityId == null
-            ? signalRepository.findById(id)
-            : signalRepository.findByIdAndCommunityId(id, communityId))
-                .orElseThrow(() -> new ResourceNotFoundException("Signal not found."));
+        Signal signal = requireSignalInScope(id, communityId);
 
         String oldStatus = signal.getStatus();
         SignalStatus current = SignalStatus.valueOf(oldStatus);
@@ -621,9 +625,12 @@ statusHistoryRepository.save(new SignalStatusEntry(
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
 
         Signal signal = (communityId == null
-            ? signalRepository.findById(signalId)
-            : signalRepository.findByIdAndCommunityId(signalId, communityId))
+            ? signalRepository.findByIdForUpdate(signalId)
+            : signalRepository.findByIdAndCommunityIdForUpdate(signalId, communityId))
                 .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + signalId));
+        if (signal.getCommunityId() != null && !signal.getCommunityId().equals(communityId)) {
+            throw new ResourceNotFoundException("Signal not found: " + signalId);
+        }
 
         if (voteRepository.findByUserIdAndSignalId(user.getId(), signalId).isPresent()) {
             throw new ConflictException("User has already supported this community issue.");

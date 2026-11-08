@@ -22,6 +22,7 @@ const WeeklyDigestView = lazy(() => import("./views/WeeklyDigestView").then(m =>
 const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login })));
 const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
 const Communities = lazy(() => import("./views/Communities").then(m => ({ default: m.Communities })));
+const Landing = lazy(() => import("./views/Landing").then(m => ({ default: m.Landing })));
 const CommunityThreads = lazy(() => import("./views/CommunityThreads").then(m => ({ default: m.CommunityThreads })));
 const CommunityBlog = lazy(() => import("./views/CommunityBlog").then(m => ({ default: m.CommunityBlog })));
 const CommunityFeed = lazy(() => import("./views/CommunityFeed").then(m => ({ default: m.CommunityFeed })));
@@ -45,6 +46,23 @@ const LoadingFallback = () => (
   </div>
 );
 
+/**
+ * The root decides between the workspace and the public front door.
+ *
+ * <p>A logged-in visitor keeps seeing the dashboard at "/" exactly as before; a visitor with no
+ * session gets the city directory instead of a login wall, so the platform's first impression is
+ * what it is for rather than a form. It waits for rehydration like AuthGuard does, otherwise a
+ * signed-in person refreshing the page would see the public landing flash before their session is
+ * read back from storage.
+ */
+function HomeRoute() {
+  const { isLoggedIn, isHydrated } = useAuthStore();
+  if (!isHydrated) {
+    return <LoadingFallback />;
+  }
+  return isLoggedIn ? <Dashboard /> : <Landing />;
+}
+
 export function App() {
   const { isLoggedIn } = useAuthStore();
   const { theme, interfaceMode, setInterfaceMode } = useSettingsStore();
@@ -58,6 +76,9 @@ export function App() {
       html.classList.add('light-theme');
       html.classList.remove('dark-theme');
     }
+    // Mirrored as a data attribute so the CSS supports [data-theme] as well as
+    // the legacy classes; dropping both makes prefers-color-scheme decide.
+    html.dataset.theme = theme;
   }, [theme]);
 
   useEffect(() => {
@@ -104,13 +125,13 @@ export function App() {
           style: {
             background: 'var(--bg-nav)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid var(--glass-stroke)',
+            border: '1px solid var(--border-subtle)',
             color: 'var(--text-main)',
-            borderRadius: '16px',
+            borderRadius: 'var(--radius-paper-sm)',
             padding: '16px 24px',
             fontSize: '14px',
             fontWeight: '600',
-            boxShadow: 'var(--shadow-premium)',
+            boxShadow: 'var(--shadow-edge), var(--shadow-premium)',
             maxWidth: '400px',
           },
           success: {
@@ -145,9 +166,9 @@ export function App() {
               whether registering was worth it. Outside the AuthGuard on purpose.
             */}
             <Route path="/backlog" element={<PublicBacklog />} />
+            <Route path="/" element={<HomeRoute />} />
             
             <Route element={<AuthGuard />}>
-              <Route path="/" element={<Dashboard />} />
               <Route path="/report" element={<ReportSignal />} />
               <Route path="/signal/:id" element={<SignalDetail />} />
               <Route path="/mine" element={<MySignals />} />

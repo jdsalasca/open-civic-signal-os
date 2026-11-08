@@ -238,13 +238,11 @@ export function CommunityActivities() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <div className="flex flex-column xl:flex-row justify-content-between align-items-start gap-4 mb-8">
-          <CivicPageHeader
-            title={t("community_activities.title")}
-            description={t("community_activities.desc", { community: activeMembership.communityName })}
-            className="mb-0"
-          />
-          <CivicActionBar className="w-full xl:w-auto">
+        <CivicPageHeader
+          title={t("community_activities.title")}
+          description={t("community_activities.desc", { community: activeMembership.communityName })}
+          actions={
+            <CivicActionBar className="w-full xl:w-auto">
             <div className="community-home-action-copy">
               <div className="u-eyebrow">{t("community_activities.kicker")}</div>
               <p className="u-section-copy text-sm m-0">{t("community_activities.kicker_desc")}</p>
@@ -266,8 +264,9 @@ export function CommunityActivities() {
                 onClick={() => navigate("/communities/rooms")}
               />
             </div>
-          </CivicActionBar>
-        </div>
+            </CivicActionBar>
+          }
+        />
 
         <div className="civic-stat-grid civic-stat-grid-comfortable" data-testid="community-activities-stats-grid">
           <CivicStatCard compact label={t("community_activities.open_activities")} value={board?.openActivities ?? 0} supportingText={t("community_activities.stats_support")} />

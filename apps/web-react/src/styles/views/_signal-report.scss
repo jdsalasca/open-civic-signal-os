@@ -1,0 +1,140 @@
+// ---------------------------------------------------------------------------
+// Report wizard: a calm three-step intake.
+//
+// The steps are numbered, the current one is the only one with a filled card,
+// and the category is chosen from pictograms rather than a list of words.
+// ---------------------------------------------------------------------------
+
+.signal-wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.75rem;
+}
+
+.signal-wizard-step {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-paper);
+  border: 1px solid var(--surface-soft-border);
+  background: var(--surface-soft);
+  padding: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--motion-fast) var(--ease-paper), border-color var(--motion-fast) var(--ease-paper), background var(--motion-fast) var(--ease-paper);
+}
+
+.signal-wizard-step:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-primary);
+}
+
+.signal-wizard-step.is-active {
+  border-color: var(--brand-primary);
+  background: linear-gradient(180deg, var(--brand-primary-alpha-10), var(--surface-soft));
+  box-shadow: var(--shadow-edge);
+}
+
+.signal-wizard-step.is-done {
+  opacity: 0.72;
+}
+
+.signal-wizard-step__top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.signal-wizard-step__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 999px;
+  background: var(--brand-primary);
+  color: var(--on-brand);
+  font-size: 0.85rem;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.signal-wizard-step__label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-main);
+}
+
+.signal-wizard-step__desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.signal-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 6.5rem), 1fr));
+  gap: 0.6rem;
+}
+
+.signal-category-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 0.5rem;
+  border-radius: var(--radius-paper-chip);
+  border: 1px solid var(--surface-soft-border);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: center;
+  transition: transform var(--motion-fast) var(--ease-paper), border-color var(--motion-fast) var(--ease-paper), background var(--motion-fast) var(--ease-paper);
+  min-width: 0;
+}
+
+.signal-category-option:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-primary);
+  color: var(--text-main);
+}
+
+.signal-category-option.is-selected {
+  border-color: var(--brand-primary);
+  background: linear-gradient(180deg, var(--brand-primary-alpha-10), var(--surface-soft));
+  color: var(--text-main);
+  box-shadow: var(--shadow-edge);
+}
+
+.signal-category-option__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-paper-chip);
+  background: color-mix(in srgb, var(--brand-primary) 14%, transparent);
+  color: var(--brand-primary);
+}
+
+.signal-category-option.is-selected .signal-category-option__icon {
+  background: var(--brand-primary);
+  color: var(--on-brand);
+}
+
+.signal-category-option__label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.signal-scale-card {
+  border-radius: var(--radius-paper);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  padding: 1.1rem;
+}

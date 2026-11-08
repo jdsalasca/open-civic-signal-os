@@ -42,14 +42,11 @@ export function CommunityFeed() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-8 gap-4">
-          <CivicPageHeader
-            title={t("community_home.title", { community: activeCommunityName || t("dashboard.community_default") })}
-            description={t("community_home.desc")}
-            className="mb-0"
-          />
-
-          <CivicActionBar className="community-home-action-bar">
+        <CivicPageHeader
+          title={t("community_home.title", { community: activeCommunityName || t("dashboard.community_default") })}
+          description={t("community_home.desc")}
+          actions={
+            <CivicActionBar className="community-home-action-bar">
             <div className="community-home-action-copy">
               <div className="text-xs font-black uppercase tracking-wide text-muted">
                 {t("dashboard.freshness_label")}
@@ -117,8 +114,9 @@ export function CommunityFeed() {
                 onClick={() => navigate("/communities/blog")}
               />
             </div>
-          </CivicActionBar>
-        </div>
+            </CivicActionBar>
+          }
+        />
 
         {!activeCommunityId ? (
           <CivicCard>

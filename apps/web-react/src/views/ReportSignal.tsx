@@ -691,7 +691,7 @@ export function ReportSignal() {
             <div className="col-12 lg:col-8">
               <CivicCard className="mb-6">
                 <div className="flex flex-column gap-4">
-                  <div className="flex flex-wrap gap-3" aria-label={t("report.wizard_progress_label")}>
+                  <div className="signal-wizard-steps" aria-label={t("report.wizard_progress_label")}>
                     {stepDefinitions.map((step, index) => {
                       const isActive = index === currentStep;
                       const isComplete = index < currentStep;
@@ -699,28 +699,23 @@ export function ReportSignal() {
                         <button
                           key={step.key}
                           type="button"
-                          className={classNames("border-none bg-transparent p-0 text-left cursor-pointer flex-grow-1 min-w-0", { "opacity-60": !isActive && !isComplete })}
+                          className={classNames("signal-wizard-step", {
+                            "is-active": isActive,
+                            "is-done": isComplete,
+                          })}
                           onClick={() => {
                             if (index <= currentStep) setCurrentStep(index);
                           }}
                           aria-current={isActive ? "step" : undefined}
                           data-testid={`report-step-tab-${index + 1}`}
                         >
-                          <div className={classNames("p-3 border-round-2xl border-1 h-full", {
-                            "border-brand-primary bg-brand-primary-alpha-10": isActive,
-                            "border-surface-soft bg-surface-soft": !isActive,
-                          })}>
-                            <div className="flex align-items-center gap-2 mb-2">
-                              <span className={classNames("flex align-items-center justify-content-center border-circle font-black", {
-                                "bg-brand-primary text-on-brand": isActive || isComplete,
-                                "bg-surface-soft-strong text-main": !isActive && !isComplete,
-                              })} style={{ width: "2rem", height: "2rem" }}>
-                                {index + 1}
-                              </span>
-                              <span className="text-xs font-black uppercase tracking-widest text-main">{step.label}</span>
-                            </div>
-                            <p className="text-sm text-secondary m-0">{step.description}</p>
+                          <div className="signal-wizard-step__top">
+                            <span className="signal-wizard-step__badge">
+                              {isComplete ? <i className="pi pi-check text-xs" aria-hidden="true"></i> : index + 1}
+                            </span>
+                            <span className="signal-wizard-step__label">{step.label}</span>
                           </div>
+                          <p className="signal-wizard-step__desc">{step.description}</p>
                         </button>
                       );
                     })}

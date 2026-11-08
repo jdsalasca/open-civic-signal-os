@@ -325,7 +325,7 @@ export function CommunityThreads() {
             </div>
           </div>
 
-          <p className={`m-0 line-height-3 ${message.hidden ? "text-muted italic" : "text-secondary"}`}>
+          <p className={`m-0 line-height-3 community-reading-width ${message.hidden ? "text-muted italic" : "text-secondary"}`}>
             {message.hidden
               ? `[${t("community_threads.hidden_label")}: ${message.moderationReason}]`
               : stripMarkdownImages(message.content) || t("community_threads.image_only_message")}
@@ -539,7 +539,7 @@ export function CommunityThreads() {
                             <span className="u-pill">{t("community_threads.total_reactions", { count: thread.totalReactions })}</span>
                           </div>
 
-                          <p className="text-sm text-secondary m-0" data-testid={`thread-relevance-summary-${thread.id}`}>
+                          <p className="text-sm text-secondary m-0 community-reading-width" data-testid={`thread-relevance-summary-${thread.id}`}>
                             {thread.relevanceSummary}
                           </p>
 

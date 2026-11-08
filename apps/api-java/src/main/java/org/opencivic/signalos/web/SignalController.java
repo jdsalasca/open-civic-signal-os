@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.opencivic.signalos.domain.Signal;
@@ -167,8 +168,26 @@ public class SignalController {
         );
         try {
             String viewerUsername = resolveUsername(authentication);
-            Page<SignalResponse> response = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses, minScore)
-                .map(signal -> mapToResponse(signal, viewerUsername));
+            Page<Signal> page = prioritizationService.getPrioritizedSignals(sanitized, communityId, statuses, minScore);
+            // One batch for the viewer's reactions and one for assignees, instead of two queries
+            // per signal on a feed that is read on every dashboard visit.
+            Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
+                "SIGNAL",
+                page.getContent().stream().map(Signal::getId).toList(),
+                resolveViewerId(viewerUsername)
+            );
+            Map<UUID, String> assigneeNames = userRepository.findAllById(
+                page.getContent().stream()
+                    .map(Signal::getAssignedToUserId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList()
+            ).stream().collect(Collectors.toMap(User::getId, User::getUsername));
+            Page<SignalResponse> response = page.map(signal -> mapToResponse(
+                signal,
+                viewerReactions.get(signal.getId()),
+                signal.getAssignedToUserId() == null ? null : assigneeNames.get(signal.getAssignedToUserId())
+            ));
 
             meterRegistry.counter("signalos.prioritized.requests.total", "scope", scope).increment();
             DistributionSummary.builder("signalos.prioritized.result.size")
@@ -234,7 +253,7 @@ public class SignalController {
         validateCommunityScope(authentication, communityId);
         return ResponseEntity.ok(
             mapToResponse(
-                prioritizationService.assignSignal(id, request.assigneeUsername(), authentication.getName(), request.reason()),
+                prioritizationService.assignSignal(id, request.assigneeUsername(), authentication.getName(), request.reason(), communityId),
                 authentication.getName()
             )
         );
@@ -268,8 +287,17 @@ public class SignalController {
     }
 
     @PostMapping("/{id}/moderate")
-    public SignalResponse moderate(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-        return mapToResponse(prioritizationService.moderateSignal(id, body.get("action"), body.get("reason")), null);
+    public SignalResponse moderate(
+        @PathVariable UUID id,
+        @RequestBody Map<String, String> body,
+        @RequestHeader(value = "X-Community-Id", required = false) UUID communityId,
+        Authentication authentication
+    ) {
+        validateCommunityScope(authentication, communityId);
+        return mapToResponse(
+            prioritizationService.moderateSignal(id, body.get("action"), body.get("reason"), communityId),
+            null
+        );
     }
 
     @GetMapping("/export/csv")
@@ -464,13 +492,20 @@ request.latitude(),
     }
 
     private SignalResponse mapToResponse(Signal s, String username) {
-        UUID viewerId = resolveViewerId(username);
+        return mapToResponse(
+            s,
+            userReactionService.getViewerReaction("SIGNAL", s.getId(), resolveViewerId(username)),
+            resolveAssignedUsername(s)
+        );
+    }
+
+    private SignalResponse mapToResponse(Signal s, String viewerReaction, String assignedUsername) {
         return new SignalResponse(
             s.getId(),
             s.getTitle(),
             s.getDescription(),
             s.getImageUrl(),
-            resolveAssignedUsername(s),
+            assignedUsername,
             s.getLocationLabel(),
             s.getEvidenceUrls(),
             s.getCategory(),
@@ -479,7 +514,7 @@ request.latitude(),
             s.getScoreBreakdown(),
             s.getCommunityVotes(),
             s.getReactions(),
-            userReactionService.getViewerReaction("SIGNAL", s.getId(), viewerId),
+            viewerReaction,
             buildExplainabilitySummary(s),
             s.getLatitude(),
             s.getLongitude(),

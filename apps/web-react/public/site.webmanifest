@@ -1,0 +1,25 @@
+{
+  "name": "Open Civic Signal OS",
+  "short_name": "Signal OS",
+  "description": "Turn community feedback into a public, auditable backlog of priorities.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FBF1E2",
+  "theme_color": "#FBF1E2",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

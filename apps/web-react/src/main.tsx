@@ -1,15 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './App.tsx'
-import './styles/main.scss'
 import i18n from './i18n'
 import { useSettingsStore } from './store/useSettingsStore'
 
-// PrimeReact basic styles
+// PrimeReact base styles first, so the Paper Craft tokens and component
+// overrides in main.scss win the cascade without more !important.
 import "primereact/resources/themes/lara-dark-cyan/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
+
+import './styles/main.scss';
 
 // Initial Theme Application
 const initialSettings = useSettingsStore.getState();
@@ -20,6 +22,10 @@ if (initialTheme === 'dark') {
 } else {
   document.documentElement.classList.add('light-theme');
 }
+// The attribute mirrors the class: CSS understands both, and a future
+// "follow the system" mode can simply drop both and let prefers-color-scheme
+// decide.
+document.documentElement.dataset.theme = initialTheme;
 document.documentElement.classList.add(`interface-mode-${initialInterfaceMode}`);
 
 if (i18n.language !== initialSettings.language) {

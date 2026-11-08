@@ -22,7 +22,10 @@ $rose-500: #f43f5e;
 $amber-500: #f59e0b;
 
 // --- LAYOUT ---
-$radius-sm: 6px;
-$radius-md: 12px;
-$radius-lg: 20px;
-$radius-xl: 28px;
+// Paper Craft radii are cut, not rounded: the four corners differ on purpose.
+$radius-sm: 10px;
+$radius-md: 14px;
+$radius-lg: 24px;
+$radius-xl: 34px;
+$radius-paper: 30px 12px 28px 14px;
+$radius-paper-sm: 22px 12px 20px 14px;

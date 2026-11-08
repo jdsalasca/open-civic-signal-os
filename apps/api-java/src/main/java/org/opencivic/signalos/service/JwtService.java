@@ -21,6 +21,9 @@ public class JwtService {
 
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 8; // 8 Hours
     private static final long REFRESH_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24 * 7; // 7 Days
+    private static final String TOKEN_TYPE_CLAIM = "typ";
+    private static final String TOKEN_TYPE_ACCESS = "access";
+    private static final String TOKEN_TYPE_REFRESH = "refresh";
 
     private SecretKey getSignInKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
@@ -36,21 +39,32 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails, ACCESS_TOKEN_EXPIRATION);
+        return generateToken(new HashMap<>(), userDetails, ACCESS_TOKEN_EXPIRATION, TOKEN_TYPE_ACCESS);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails, REFRESH_TOKEN_EXPIRATION);
+        return generateToken(new HashMap<>(), userDetails, REFRESH_TOKEN_EXPIRATION, TOKEN_TYPE_REFRESH);
     }
 
-    private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+    private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration, String tokenType) {
         return Jwts.builder()
                 .claims(extraClaims)
+                .claim(TOKEN_TYPE_CLAIM, tokenType)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey())
                 .compact();
+    }
+
+    // Same key and subject for both tokens, so the type claim is what stops a 7-day refresh
+    // token from being replayed as an 8-hour access token.
+    public boolean isAccessToken(String token) {
+        return TOKEN_TYPE_ACCESS.equals(extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM, String.class)));
+    }
+
+    public boolean isRefreshToken(String token) {
+        return TOKEN_TYPE_REFRESH.equals(extractClaim(token, claims -> claims.get(TOKEN_TYPE_CLAIM, String.class)));
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
