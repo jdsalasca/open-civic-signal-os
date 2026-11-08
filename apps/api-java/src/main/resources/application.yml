@@ -57,6 +57,8 @@ app:
     # When false, registration marks the account verified immediately and no verification email is
     # required. Default true keeps the email-verification flow unchanged.
     require-email-verification: ${REQUIRE_EMAIL_VERIFICATION:true}
+    # Production keeps this false: the only way in is Google, so no password is ever stored.
+    password-login-enabled: ${PASSWORD_LOGIN_ENABLED:true}
     google:
       # Public OAuth client id. Empty hides the Google button and disables the endpoint.
       client-id: ${GOOGLE_CLIENT_ID:}

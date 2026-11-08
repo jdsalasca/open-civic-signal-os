@@ -11,6 +11,7 @@ import org.opencivic.signalos.web.dto.CreateCommunityRequest;
 import org.opencivic.signalos.web.dto.CommunityMembershipResponse;
 import org.opencivic.signalos.web.dto.CommunityResponse;
 import org.opencivic.signalos.web.dto.CommunityTreeNodeResponse;
+import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.web.dto.JoinCommunityRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityPermissionPoliciesRequest;
 import org.opencivic.signalos.web.dto.UpdateCommunityRoleRequest;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -62,6 +64,15 @@ public class CommunityController {
         return communityService.getCommunityTree();
     }
 
+    @GetMapping("/nearest")
+    public CommunityResponse nearestCity(
+        @RequestParam double latitude,
+        @RequestParam double longitude
+    ) {
+        return communityService.nearestCity(latitude, longitude)
+            .orElseThrow(() -> new ResourceNotFoundException("No city found near this location."));
+    }
+
     @GetMapping("/{communityId}/breadcrumb")
     public List<CommunityBreadcrumbItemResponse> getCommunityBreadcrumb(@PathVariable UUID communityId) {
         return communityService.getCommunityBreadcrumb(communityId);
@@ -79,6 +90,9 @@ public class CommunityController {
             request.country(),
             request.region(),
             request.parentCommunityId(),
+            request.city(),
+            request.locality(),
+            request.neighborhood(),
             principal.getName()
         );
     }

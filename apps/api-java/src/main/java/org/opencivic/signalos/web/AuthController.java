@@ -88,6 +88,9 @@ public class AuthController {
     @Value("${app.auth.require-email-verification:true}")
     private boolean requireEmailVerification;
 
+    @Value("${app.auth.password-login-enabled:true}")
+    private boolean passwordLoginEnabled;
+
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, 
                           EmailService emailService, JwtService jwtService, 
                           AuthenticationManager authenticationManager,
@@ -124,6 +127,7 @@ public class AuthController {
     @PostMapping("/register")
     @Transactional
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
+        requirePasswordLoginEnabled();
         if (!rateLimitService.tryAcquire("register:" + request.username())) {
             return ResponseEntity.status(429).body(Map.of("message", "Too many registration attempts. Please wait."));
         }
@@ -214,6 +218,7 @@ public class AuthController {
 
     @PostMapping("/resend-code")
     public ResponseEntity<Map<String, String>> resendCode(@Valid @RequestBody ResendCodeRequest request) {
+        requirePasswordLoginEnabled();
         String username = request.username();
         if (!rateLimitService.tryAcquire("resend:" + username)) {
             return ResponseEntity.status(429).body(Map.of("message", "Too many resend attempts. Please wait."));
@@ -249,6 +254,7 @@ public class AuthController {
 
     @PostMapping("/verify")
     public ResponseEntity<Map<String, String>> verify(@Valid @RequestBody VerifyAccountRequest request) {
+        requirePasswordLoginEnabled();
         String username = request.username();
         
         if (!rateLimitService.tryAcquire(username)) {
@@ -285,6 +291,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        requirePasswordLoginEnabled();
         if (!rateLimitService.tryAcquire(request.username())) {
             throw new UnauthorizedActionException("Too many login attempts. Please wait.");
         }
@@ -351,8 +358,11 @@ public class AuthController {
     }
 
     @GetMapping("/google/config")
-    public Map<String, String> googleConfig() {
-        return Map.of("clientId", googleTokenVerifier.clientId());
+    public Map<String, Object> googleConfig() {
+        return Map.of(
+            "clientId", googleTokenVerifier.clientId(),
+            "passwordLoginEnabled", passwordLoginEnabled
+        );
     }
 
     @PostMapping("/google")
@@ -370,6 +380,14 @@ public class AuthController {
                     session.user().getRoles(),
                     session.user().getUsername()
                 ));
+    }
+
+    private void requirePasswordLoginEnabled() {
+        if (!passwordLoginEnabled) {
+            throw new UnauthorizedActionException(
+                "Password sign-in is disabled. Continue with Google."
+            );
+        }
     }
 
     private ResponseCookie createRefreshCookie(String value, long maxAge) {
