@@ -288,14 +288,7 @@ public class CommunityService {
             ));
     }
 
-    /**
-     * A slug for a city founded from its name alone.
-     *
-     * <p>The registration form asks for a name, not a slug, so one is derived: lowercased, accents
-     * folded, non-alphanumerics collapsed to single dashes. Uniqueness is enforced by suffixing,
-     * because two towns can share a name and a unique constraint should not turn that into a failed
-     * registration.
-     */
+    /** The city entry for a barrio's tree; created once, without a member. */
     private Community ensureCity(String city, String country, String region) {
         String placeKey = PlaceNames.key(city, null, null);
         return communityRepository.findByPlaceKey(placeKey).orElseGet(() -> {
@@ -311,6 +304,14 @@ public class CommunityService {
         });
     }
 
+    /**
+     * A slug for a city founded from its name alone.
+     *
+     * <p>The registration form asks for a name, not a slug, so one is derived: lowercased, accents
+     * folded, non-alphanumerics collapsed to single dashes. Uniqueness is enforced by suffixing,
+     * because two towns can share a name and a unique constraint should not turn that into a failed
+     * registration.
+     */
     private String resolveSlug(String requestedSlug, String name) {
         String base = slugify(requestedSlug == null || requestedSlug.isBlank() ? name : requestedSlug);
         if (base.isBlank()) {
