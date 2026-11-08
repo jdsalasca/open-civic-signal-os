@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -12,6 +13,7 @@ import apiClient from "../api/axios";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicField } from "../components/ui/CivicField";
+import { GoogleSignIn } from "../components/GoogleSignIn";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -41,6 +43,18 @@ export function Login() {
       toast.error(apiErr.friendlyMessage || t('auth.invalid_credentials'));
     }
   };
+
+  const handleGoogleCredential = useCallback(async (credential: string) => {
+    try {
+      const res = await apiClient.post("auth/google", { credential });
+      setAuth(res.data);
+      toast.success(t('auth.login_success', { name: res.data.username }));
+      navigate("/");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('auth.invalid_credentials'));
+    }
+  }, [navigate, setAuth, t]);
 
   return (
     <Layout authMode>
@@ -112,6 +126,8 @@ export function Login() {
               glow
               data-testid="login-submit-button"
             />
+
+            <GoogleSignIn onCredential={handleGoogleCredential} />
 
             <div className="text-center mt-8 pt-6 border-top-1 border-surface-soft">
               <span className="text-secondary mr-2 font-medium">{t('auth.no_account')}</span>

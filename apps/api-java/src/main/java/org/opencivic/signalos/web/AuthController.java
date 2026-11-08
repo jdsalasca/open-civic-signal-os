@@ -20,12 +20,15 @@ import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.opencivic.signalos.service.EmailService;
 import org.opencivic.signalos.service.EmailDeliveryResult;
+import org.opencivic.signalos.service.GoogleAuthService;
+import org.opencivic.signalos.service.GoogleTokenVerifier;
 import org.opencivic.signalos.service.JwtService;
 import org.opencivic.signalos.service.CommunityService;
 import org.opencivic.signalos.service.PrivacyAccessLogService;
 import org.opencivic.signalos.web.dto.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -60,6 +63,8 @@ public class AuthController {
     private final SignalRepository signalRepository;
     private final PrivacyAccessLogService privacyAccessLogService;
     private final CommunityService communityService;
+    private final GoogleAuthService googleAuthService;
+    private final GoogleTokenVerifier googleTokenVerifier;
 
     private static final Set<String> ALLOWED_AVATAR_PRESETS = Set.of(
         "civic-sunrise",
@@ -91,7 +96,9 @@ public class AuthController {
                           CommunityMembershipRepository membershipRepository,
                           SignalRepository signalRepository,
                           PrivacyAccessLogService privacyAccessLogService,
-                          CommunityService communityService) {
+                          CommunityService communityService,
+                          GoogleAuthService googleAuthService,
+                          GoogleTokenVerifier googleTokenVerifier) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -103,6 +110,8 @@ public class AuthController {
         this.signalRepository = signalRepository;
         this.privacyAccessLogService = privacyAccessLogService;
         this.communityService = communityService;
+        this.googleAuthService = googleAuthService;
+        this.googleTokenVerifier = googleTokenVerifier;
     }
 
     /**
@@ -333,6 +342,28 @@ public class AuthController {
     public ResponseEntity<Void> logout() {
         ResponseCookie cookie = createRefreshCookie("", 0);
         return ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, cookie.toString()).build();
+    }
+
+    @GetMapping("/google/config")
+    public Map<String, String> googleConfig() {
+        return Map.of("clientId", googleTokenVerifier.clientId());
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
+        if (!googleTokenVerifier.isConfigured()) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+        GoogleAuthService.GoogleSession session = googleAuthService.signIn(request.credential());
+        ResponseCookie cookie = createRefreshCookie(session.refreshToken(), 7 * 24 * 60 * 60);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(new AuthResponse(
+                    session.accessToken(),
+                    null,
+                    session.user().getRoles(),
+                    session.user().getUsername()
+                ));
     }
 
     private ResponseCookie createRefreshCookie(String value, long maxAge) {

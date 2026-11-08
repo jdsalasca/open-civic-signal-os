@@ -36,6 +36,7 @@ Variables esperadas (los nombres exactos son los que aparecen en `infra/.env.pro
 | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` | SMTP opcional para correo real. |
 | `INTEGRATION_CREDENTIAL_KEY` | Clave para cifrar tokens de integraciones (recomendada si se usan bots). |
 | `REQUIRE_EMAIL_VERIFICATION` | `true` (default) exige verificación de email antes de login. `false` marca la cuenta verificada al registrarse (ver advertencia abajo). |
+| `GOOGLE_CLIENT_ID` | Client ID público del cliente OAuth "Web application". Vacío desactiva el botón de Google. |
 | `API_IMAGE`, `WEB_IMAGE` | Imágenes a desplegar (por tag/SHA, no `latest` en producción). |
 
 > **Advertencia:** con `REQUIRE_EMAIL_VERIFICATION=false`, cualquier persona puede registrarse con un email
@@ -44,6 +45,20 @@ Variables esperadas (los nombres exactos son los que aparecen en `infra/.env.pro
 > funcional, vuelve a `true`.
 
 `CORS_ALLOWED_ORIGINS` debe ser restrictivo: solo el origen público y, si aplica, el host local de administración.
+
+## Inicio de sesión con Google
+
+1. En Google Cloud Console → **Google Auth Platform → Clients**, crea un cliente de tipo
+   **Web application**.
+2. En **Authorized JavaScript origins** registra `http://localhost:5173` y
+   `https://open-comunity.eridu.top`. No hace falta redirect URI.
+3. Copia el **Client ID** en `GOOGLE_CLIENT_ID`. El client secret no se usa: el backend valida el
+   ID token contra el JWKS público de Google.
+4. Recrea el API (`docker compose -f infra/docker-compose.prod.yml up -d api`) y confirma que el
+   botón aparece en `/login`.
+
+La primera vez, una cuenta con el mismo email se vincula a la identidad de Google; si no existe, se
+crea como ciudadano verificado. El email debe venir verificado por Google.
 
 ## Despliegue inicial
 
