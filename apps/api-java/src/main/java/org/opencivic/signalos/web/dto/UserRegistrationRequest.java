@@ -19,5 +19,8 @@ public record UserRegistrationRequest(
     UUID communityId,
     @Size(max = 160) String communityName,
     @Size(max = 120) String communityCountry,
-    @Size(max = 120) String communityRegion
+    @Size(max = 120) String communityRegion,
+    @Size(max = 120) String communityCity,
+    @Size(max = 120) String communityLocality,
+    @Size(max = 120) String communityNeighborhood
 ) {}

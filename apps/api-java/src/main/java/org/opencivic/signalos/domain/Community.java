@@ -65,6 +65,22 @@ public class Community {
     @Column(length = 120)
     private String region;
 
+    @Column(length = 120)
+    private String city;
+
+    @Column(length = 120)
+    private String locality;
+
+    @Column(length = 120)
+    private String neighborhood;
+
+    /**
+     * Normalized city|locality|neighborhood, used only to reject a second community for the same
+     * place. Null for hubs and for communities created before this existed.
+     */
+    @Column(length = 400, unique = true)
+    private String placeKey;
+
     private UUID parentCommunityId;
 
     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
@@ -127,6 +143,38 @@ public class Community {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getLocality() {
+        return locality;
+    }
+
+    public void setLocality(String locality) {
+        this.locality = locality;
+    }
+
+    public String getNeighborhood() {
+        return neighborhood;
+    }
+
+    public void setNeighborhood(String neighborhood) {
+        this.neighborhood = neighborhood;
+    }
+
+    public String getPlaceKey() {
+        return placeKey;
+    }
+
+    public void setPlaceKey(String placeKey) {
+        this.placeKey = placeKey;
     }
 
     public UUID getParentCommunityId() {

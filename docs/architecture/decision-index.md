@@ -76,6 +76,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20260321-messaging-relay.md` (accepted)
 - `ADR-20260321-integration-credential-storage.md` (accepted)
 - `ADR-20260321-city-namespace-and-federated-backlog.md` (accepted)
+- `ADR-20261108-community-place-fields.md` (accepted)
 
 ## Review Rule
 

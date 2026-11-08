@@ -137,6 +137,7 @@ public class AuthController {
 
         UUID joinCommunityId = request.communityId();
         String newCityName = trimToNull(request.communityName());
+        String newCity = trimToNull(request.communityCity());
         // Validate the chosen city before touching the users table: a bad choice must fail as a bad
         // choice, not as an account that got created and then could not be attached.
         if (joinCommunityId != null) {
@@ -160,7 +161,7 @@ public class AuthController {
 
         if (joinCommunityId != null) {
             communityService.joinCommunityForUser(joinCommunityId, user.getId(), CommunityRole.MEMBER);
-        } else if (newCityName != null) {
+        } else if (newCityName != null || newCity != null) {
             // The founder of a city is its organizer. A city with nobody accountable for it is not a
             // community yet, and the person who created it is the one who can hand that on.
             communityService.createCommunityAndJoin(
@@ -171,6 +172,9 @@ public class AuthController {
                 request.communityCountry(),
                 request.communityRegion(),
                 null,
+                newCity,
+                request.communityLocality(),
+                request.communityNeighborhood(),
                 CommunityRole.COORDINATOR
             );
         }

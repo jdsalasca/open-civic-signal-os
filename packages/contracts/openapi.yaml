@@ -7877,6 +7877,15 @@ components:
         region:
           type: string
           nullable: true
+        city:
+          type: string
+          nullable: true
+        locality:
+          type: string
+          nullable: true
+        neighborhood:
+          type: string
+          nullable: true
         parentCommunityId:
           type: string
           format: uuid

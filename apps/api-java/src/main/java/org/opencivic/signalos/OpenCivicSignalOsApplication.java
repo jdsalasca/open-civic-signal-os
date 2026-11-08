@@ -1,5 +1,6 @@
 package org.opencivic.signalos;
 
+import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.domain.Community;
 import org.opencivic.signalos.domain.CommunityMembership;
@@ -8,6 +9,7 @@ import org.opencivic.signalos.domain.User;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
 import org.opencivic.signalos.repository.UserRepository;
+import org.opencivic.signalos.service.PlaceNames;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,6 +27,50 @@ public class OpenCivicSignalOsApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(OpenCivicSignalOsApplication.class, args);
 	}
+
+	/**
+	 * The city catalog every deployment starts with. Idempotent: an existing community with the
+	 * same place key (or slug) is completed, not duplicated. Neighborhoods registered later hang
+	 * off these cities through their own place key.
+	 */
+	@Bean
+	@Profile({"dev", "prod"})
+	public CommandLineRunner seedMainCities(CommunityRepository communityRepository) {
+		return args -> {
+			List<CitySeed> cities = List.of(
+				new CitySeed("Bogotá D.C.", "Cundinamarca"),
+				new CitySeed("Medellín", "Antioquia"),
+				new CitySeed("Cali", "Valle del Cauca"),
+				new CitySeed("Barranquilla", "Atlántico"),
+				new CitySeed("Cartagena", "Bolívar"),
+				new CitySeed("Bucaramanga", "Santander"),
+				new CitySeed("Pereira", "Risaralda"),
+				new CitySeed("Santa Marta", "Magdalena"),
+				new CitySeed("Manizales", "Caldas"),
+				new CitySeed("Cúcuta", "Norte de Santander")
+			);
+			for (CitySeed city : cities) {
+				String placeKey = PlaceNames.key(city.name(), null, null);
+				if (communityRepository.findByPlaceKey(placeKey).isPresent()) {
+					continue;
+				}
+				Community community = communityRepository.findBySlug(PlaceNames.slug(city.name()))
+					.orElseGet(Community::new);
+				community.setName(city.name());
+				community.setSlug(PlaceNames.slug(city.name()));
+				community.setCountry("Colombia");
+				community.setRegion(city.region());
+				community.setCity(city.name());
+				community.setPlaceKey(placeKey);
+				if (community.getDescription() == null || community.getDescription().isBlank()) {
+					community.setDescription("Espacio cívico de " + city.name() + ".");
+				}
+				communityRepository.save(community);
+			}
+		};
+	}
+
+	record CitySeed(String name, String region) {}
 
 	@Bean
 	@Profile({"dev", "test"})

@@ -1,10 +1,8 @@
 package org.opencivic.signalos.service;
 
-import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -15,6 +13,7 @@ import org.opencivic.signalos.domain.CommunityMembershipAudit;
 import org.opencivic.signalos.domain.CommunityPermissionScope;
 import org.opencivic.signalos.domain.CommunityRole;
 import org.opencivic.signalos.domain.User;
+import org.opencivic.signalos.exception.ConflictException;
 import org.opencivic.signalos.exception.ResourceNotFoundException;
 import org.opencivic.signalos.repository.CommunityMembershipAuditRepository;
 import org.opencivic.signalos.repository.CommunityMembershipRepository;
@@ -132,16 +131,69 @@ public class CommunityService {
         UUID parentCommunityId,
         CommunityRole role
     ) {
+        return createCommunityAndJoin(
+            userId, name, slug, description, country, region, parentCommunityId,
+            null, null, null, role
+        );
+    }
+
+    /**
+     * Creates a community from a place: city, locality and neighborhood are normalized here, in the
+     * trust boundary, so the UI never decides what a duplicate is.
+     *
+     * <p>The visible name is the most specific level provided. The place key (city|locality|
+     * neighborhood, accent- and case-insensitive) makes a second community for the same place a
+     * 409 instead of a directory full of near-duplicates.
+     */
+    @Transactional
+    public CommunityResponse createCommunityAndJoin(
+        UUID userId,
+        String name,
+        String slug,
+        String description,
+        String country,
+        String region,
+        UUID parentCommunityId,
+        String city,
+        String locality,
+        String neighborhood,
+        CommunityRole role
+    ) {
+        String normalizedCity = PlaceNames.normalize(city);
+        String normalizedLocality = PlaceNames.normalize(locality);
+        String normalizedNeighborhood = PlaceNames.normalize(neighborhood);
+        String placeKey = PlaceNames.key(normalizedCity, normalizedLocality, normalizedNeighborhood);
+        if (placeKey != null) {
+            communityRepository.findByPlaceKey(placeKey).ifPresent(existing -> {
+                throw new ConflictException(
+                    "A community already exists for this place: " + existing.getName()
+                        + ". Join it from the directory instead of creating a duplicate."
+                );
+            });
+        }
+        String resolvedName = normalizedNeighborhood != null
+            ? normalizedNeighborhood
+            : normalizedLocality != null
+                ? normalizedLocality
+                : normalizedCity != null ? normalizedCity : trimToNull(name);
+        if (resolvedName == null) {
+            throw new IllegalArgumentException("Community name or city is required.");
+        }
+
         if (parentCommunityId != null) {
             communityRepository.findById(parentCommunityId)
                 .orElseThrow(() -> new ResourceNotFoundException("Parent community not found: " + parentCommunityId));
         }
         Community community = new Community();
-        community.setName(name);
-        community.setSlug(resolveSlug(slug, name));
+        community.setName(resolvedName);
+        community.setSlug(resolveSlug(slug, resolvedName));
         community.setDescription(description);
         community.setCountry(trimToNull(country));
         community.setRegion(trimToNull(region));
+        community.setCity(normalizedCity);
+        community.setLocality(normalizedLocality);
+        community.setNeighborhood(normalizedNeighborhood);
+        community.setPlaceKey(placeKey);
         community.setParentCommunityId(parentCommunityId);
         Community savedCommunity = communityRepository.save(community);
 
@@ -246,13 +298,7 @@ public class CommunityService {
     }
 
     private String slugify(String value) {
-        if (value == null) {
-            return "";
-        }
-        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
-            .replaceAll("\\p{M}", "")
-            .toLowerCase(Locale.ROOT);
-        return normalized.replaceAll("[^a-z0-9]+", "-").replaceAll("(^-|-$)", "");
+        return PlaceNames.slug(value);
     }
 
     private String trimToNull(String value) {
@@ -316,6 +362,9 @@ public class CommunityService {
             community.getDescription(),
             community.getCountry(),
             community.getRegion(),
+            community.getCity(),
+            community.getLocality(),
+            community.getNeighborhood(),
             community.getParentCommunityId(),
             memberCount,
             community.getCreatedAt()
