@@ -277,12 +277,12 @@ export function Layout({ children, authMode = false }: Props) {
                   {activeBreadcrumb.map((item) => item.name).join(" / ")}
                 </p>
               )}
-              <div className="flex align-items-center gap-2 mt-3">
-                <span className="u-pill">
+              <div className="flex flex-wrap align-items-center gap-2 mt-3">
+                <span className="u-pill white-space-nowrap">
                   <i className="pi pi-users text-brand-primary"></i>
                   {toRoleLabel(activeMembership.role, t)}
                 </span>
-                <span className="u-pill" data-testid="interface-mode-badge">
+                <span className="u-pill white-space-nowrap" data-testid="interface-mode-badge">
                   <i className={`pi ${interfaceMode === "simple" ? "pi-sparkles" : "pi-sliders-h"} text-brand-primary`}></i>
                   {interfaceMode === "simple" ? t("settings.interface_modes.simple") : t("settings.interface_modes.advanced")}
                 </span>
