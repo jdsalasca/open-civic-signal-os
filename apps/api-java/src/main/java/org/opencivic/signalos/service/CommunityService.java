@@ -162,6 +162,11 @@ public class CommunityService {
         String normalizedCity = PlaceNames.normalize(city);
         String normalizedLocality = PlaceNames.normalize(locality);
         String normalizedNeighborhood = PlaceNames.normalize(neighborhood);
+        if (normalizedCity == null && (normalizedLocality != null || normalizedNeighborhood != null)) {
+            throw new IllegalArgumentException(
+                "City is required when a locality or neighborhood is provided."
+            );
+        }
         String placeKey = PlaceNames.key(normalizedCity, normalizedLocality, normalizedNeighborhood);
         if (placeKey != null) {
             communityRepository.findByPlaceKey(placeKey).ifPresent(existing -> {
@@ -180,9 +185,17 @@ public class CommunityService {
             throw new IllegalArgumentException("Community name or city is required.");
         }
 
-        if (parentCommunityId != null) {
-            communityRepository.findById(parentCommunityId)
-                .orElseThrow(() -> new ResourceNotFoundException("Parent community not found: " + parentCommunityId));
+        // A locality or barrio hangs from its city in the tree. The city is created once if the
+        // catalog does not have it yet, without a member: it is a directory entry, not a second
+        // community the registrant belongs to.
+        if (parentCommunityId == null && normalizedCity != null
+            && (normalizedLocality != null || normalizedNeighborhood != null)) {
+            parentCommunityId = ensureCity(normalizedCity, country, region).getId();
+        }
+        UUID resolvedParentId = parentCommunityId;
+        if (resolvedParentId != null) {
+            communityRepository.findById(resolvedParentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Parent community not found: " + resolvedParentId));
         }
         Community community = new Community();
         community.setName(resolvedName);
@@ -194,7 +207,7 @@ public class CommunityService {
         community.setLocality(normalizedLocality);
         community.setNeighborhood(normalizedNeighborhood);
         community.setPlaceKey(placeKey);
-        community.setParentCommunityId(parentCommunityId);
+        community.setParentCommunityId(resolvedParentId);
         Community savedCommunity = communityRepository.save(community);
 
         CommunityMembership membership = new CommunityMembership();
@@ -283,6 +296,21 @@ public class CommunityService {
      * because two towns can share a name and a unique constraint should not turn that into a failed
      * registration.
      */
+    private Community ensureCity(String city, String country, String region) {
+        String placeKey = PlaceNames.key(city, null, null);
+        return communityRepository.findByPlaceKey(placeKey).orElseGet(() -> {
+            Community community = new Community();
+            community.setName(city);
+            community.setSlug(resolveSlug(null, city));
+            community.setCountry(trimToNull(country));
+            community.setRegion(trimToNull(region));
+            community.setCity(city);
+            community.setPlaceKey(placeKey);
+            community.setDescription("Espacio cívico de " + city + ".");
+            return communityRepository.save(community);
+        });
+    }
+
     private String resolveSlug(String requestedSlug, String name) {
         String base = slugify(requestedSlug == null || requestedSlug.isBlank() ? name : requestedSlug);
         if (base.isBlank()) {

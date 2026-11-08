@@ -67,6 +67,18 @@ public class OpenCivicSignalOsApplication {
 				}
 				communityRepository.save(community);
 			}
+			// Places created before the hierarchy existed (or by an older flow) get their city as
+			// parent on the next start. Idempotent: already-linked places are skipped.
+			for (Community place : communityRepository.findAll()) {
+				if (place.getCity() != null && place.getParentCommunityId() == null
+					&& (place.getLocality() != null || place.getNeighborhood() != null)) {
+					communityRepository.findByPlaceKey(PlaceNames.key(place.getCity(), null, null))
+						.ifPresent(city -> {
+							place.setParentCommunityId(city.getId());
+							communityRepository.save(place);
+						});
+				}
+			}
 		};
 	}
 
