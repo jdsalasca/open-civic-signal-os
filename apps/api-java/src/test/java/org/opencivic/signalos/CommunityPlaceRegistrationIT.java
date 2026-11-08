@@ -43,6 +43,10 @@ class CommunityPlaceRegistrationIT {
         assertEquals("El Chicó", saved.getNeighborhood());
         assertEquals("El Chicó", saved.getName());
 
+        var city = communityRepository.findByPlaceKey("bogota||").orElseThrow();
+        assertEquals("Bogotá", city.getName());
+        assertEquals(city.getId(), saved.getParentCommunityId());
+
         register(
             "place_owner_2", "place2@example.com",
             """
@@ -71,6 +75,19 @@ class CommunityPlaceRegistrationIT {
                 "communityNeighborhood":"La Cabrera","communityCountry":"Colombia"
                 """
         ).andExpect(status().isOk());
+    }
+
+    @Test
+    void aLocalityWithoutACityIsRejected() throws Exception {
+        register(
+            "place_owner_6", "place6@example.com",
+            """
+                "communityLocality":"Chapinero","communityNeighborhood":"El Chicó",
+                "communityCountry":"Colombia"
+                """
+        )
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message", containsString("City is required")));
     }
 
     @Test

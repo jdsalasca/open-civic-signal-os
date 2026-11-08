@@ -241,6 +241,7 @@ export function Landing() {
                       <CivicButton
                         type="button"
                         label={t("landing.join_city")}
+                        aria-label={t("landing.join_community_aria", { name: city.name })}
                         icon="pi pi-arrow-right"
                         className="w-full"
                         onClick={() => navigate(`/register?communityId=${city.id}`)}
