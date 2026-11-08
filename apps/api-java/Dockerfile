@@ -2,10 +2,17 @@
 FROM maven:3.9.16-eclipse-temurin-21-noble AS build
 WORKDIR /app
 ENV MAVEN_OPTS="-Xmx768m -XX:ActiveProcessorCount=2"
+# The suite belongs to CI, which runs it on every PR. A small production host can set
+# RUN_TESTS=false to build the image from an already-validated commit without thrashing swap.
+ARG RUN_TESTS=true
 COPY pom.xml ./
 RUN mvn --batch-mode --no-transfer-progress dependency:go-offline
 COPY src/ ./src/
-RUN mvn --batch-mode --no-transfer-progress clean package
+RUN if [ "$RUN_TESTS" = "false" ]; then \
+        mvn --batch-mode --no-transfer-progress clean package -DskipTests; \
+    else \
+        mvn --batch-mode --no-transfer-progress clean package; \
+    fi
 
 # Stage 2: minimal non-root runtime with curl for the actuator health check.
 FROM eclipse-temurin:21.0.12.1_1-jre-noble AS runtime
