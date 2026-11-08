@@ -45,9 +45,16 @@ public class CivicEngagementService {
     }
 
     public List<CivicCommentResponse> getComments(UUID parentId, String parentType) {
-        return commentRepository.findByParentIdAndParentTypeOrderByCreatedAtAsc(parentId, parentType)
-                .stream()
-                .map(this::toCommentResponse)
+        List<CivicComment> comments = commentRepository.findByParentIdAndParentTypeOrderByCreatedAtAsc(parentId, parentType);
+        if (comments.isEmpty()) {
+            return List.of();
+        }
+        // One query for every author in the thread instead of one per comment.
+        Map<UUID, User> authors = userRepository.findAllById(
+            comments.stream().map(CivicComment::getAuthorId).distinct().toList()
+        ).stream().collect(Collectors.toMap(User::getId, user -> user));
+        return comments.stream()
+                .map(comment -> toCommentResponse(comment, authors.get(comment.getAuthorId())))
                 .collect(Collectors.toList());
     }
 
@@ -105,14 +112,21 @@ public class CivicEngagementService {
     }
 
     private CivicCommentResponse toCommentResponse(CivicComment comment) {
-        User author = userRepository.findById(comment.getAuthorId()).orElseThrow();
+        return toCommentResponse(comment, userRepository.findById(comment.getAuthorId()).orElse(null));
+    }
+
+    private CivicCommentResponse toCommentResponse(CivicComment comment, User author) {
+        // An author row can be gone (account deletion) while the comment stays in the record.
+        // That used to turn the whole thread into a 500.
+        String username = author == null ? "Deleted account" : author.getUsername();
+        String roles = author == null ? "" : author.getRoles();
         return new CivicCommentResponse(
             comment.getId(),
             comment.getParentId(),
             comment.getParentType(),
             comment.getAuthorId(),
-            author.getUsername(),
-            author.getRoles(),
+            username,
+            roles,
             comment.getContent(),
             comment.getCreatedAt()
         );

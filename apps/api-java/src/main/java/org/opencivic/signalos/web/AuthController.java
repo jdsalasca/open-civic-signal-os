@@ -29,7 +29,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -114,6 +115,9 @@ public class AuthController {
     @PostMapping("/register")
     @Transactional
     public ResponseEntity<Map<String, String>> register(@Valid @RequestBody UserRegistrationRequest request) {
+        if (!rateLimitService.tryAcquire("register:" + request.username())) {
+            return ResponseEntity.status(429).body(Map.of("message", "Too many registration attempts. Please wait."));
+        }
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new ConflictException("Username already exists in the registry.");
         }
@@ -137,7 +141,7 @@ public class AuthController {
             "ROLE_CITIZEN"
         );
         
-        String verificationCode = String.format("%06d", secureRandom.nextInt(999999));
+        String verificationCode = String.format("%06d", secureRandom.nextInt(1_000_000));
         
         user.setVerificationCode(verificationCode);
         user.setVerified(false);
@@ -196,6 +200,9 @@ public class AuthController {
     @PostMapping("/resend-code")
     public ResponseEntity<Map<String, String>> resendCode(@Valid @RequestBody ResendCodeRequest request) {
         String username = request.username();
+        if (!rateLimitService.tryAcquire("resend:" + username)) {
+            return ResponseEntity.status(429).body(Map.of("message", "Too many resend attempts. Please wait."));
+        }
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UnauthorizedActionException("Identity not found."));
 
@@ -204,7 +211,7 @@ public class AuthController {
         }
 
         // Generate a NEW code for security on every resend
-        String code = String.format("%06d", secureRandom.nextInt(999999));
+        String code = String.format("%06d", secureRandom.nextInt(1_000_000));
         user.setVerificationCode(code);
         userRepository.save(user);
 
@@ -270,16 +277,22 @@ public class AuthController {
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new UnauthorizedActionException("Invalid credentials."));
 
-        if (!user.isVerified()) {
-            throw new UnauthorizedActionException("Account not verified. Please check your email.");
-        }
-
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
             rateLimitService.reset(request.username());
-        } catch (BadCredentialsException e) {
+        } catch (DisabledException e) {
+            // Spring rejects a disabled account before it checks the password, so the password is
+            // verified here: a wrong one must not reveal that the account exists or is unverified.
+            if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+                throw new UnauthorizedActionException("Invalid credentials provided.");
+            }
+            if (!user.isVerified()) {
+                throw new UnauthorizedActionException("Account not verified. Please check your email.");
+            }
+            throw new UnauthorizedActionException("Account is disabled.");
+        } catch (AuthenticationException e) {
             throw new UnauthorizedActionException("Invalid credentials provided.");
         }
 
@@ -304,7 +317,7 @@ public class AuthController {
             String username = jwtService.extractUsername(refreshToken);
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             
-            if (jwtService.isTokenValid(refreshToken, userDetails)) {
+            if (jwtService.isTokenValid(refreshToken, userDetails) && jwtService.isRefreshToken(refreshToken)) {
                 String accessToken = jwtService.generateToken(userDetails);
                 User user = userRepository.findByUsername(username).orElseThrow();
                 return ResponseEntity.ok(new AuthResponse(accessToken, null, user.getRoles(), user.getUsername()));
@@ -337,21 +350,23 @@ public class AuthController {
     public Map<String, Object> getCurrentUser(Authentication authentication) {
         if (authentication == null) return Map.of("role", "GUEST");
         User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-        return Map.ofEntries(
-            Map.entry("username", user.getUsername()),
-            Map.entry("roles", user.getRoles()),
-            Map.entry("email", user.getEmail()),
-            Map.entry("verified", user.isVerified()),
-            Map.entry("displayName", displayNameFor(user)),
-            Map.entry("civicRole", user.getCivicRole()),
-            Map.entry("affiliations", user.getAffiliations()),
-            Map.entry("bio", user.getBio()),
-            Map.entry("profileVisibility", user.getProfileVisibility().name()),
-            Map.entry("affiliationVisibility", user.getAffiliationVisibility().name()),
-            Map.entry("activityVisibility", user.getActivityVisibility().name()),
-            Map.entry("interfaceMode", user.getInterfaceMode().name()),
-            Map.entry("avatarPreset", sanitizeAvatarPreset(user.getAvatarPreset()))
-        );
+        // A mutable map, not Map.ofEntries: civicRole and bio are legitimately null for accounts
+        // that never filled a profile, and Map.of* rejects null values with an NPE.
+        Map<String, Object> body = new java.util.LinkedHashMap<>();
+        body.put("username", user.getUsername());
+        body.put("roles", user.getRoles());
+        body.put("email", user.getEmail());
+        body.put("verified", user.isVerified());
+        body.put("displayName", displayNameFor(user));
+        body.put("civicRole", user.getCivicRole());
+        body.put("affiliations", user.getAffiliations());
+        body.put("bio", user.getBio());
+        body.put("profileVisibility", user.getProfileVisibility().name());
+        body.put("affiliationVisibility", user.getAffiliationVisibility().name());
+        body.put("activityVisibility", user.getActivityVisibility().name());
+        body.put("interfaceMode", user.getInterfaceMode().name());
+        body.put("avatarPreset", sanitizeAvatarPreset(user.getAvatarPreset()));
+        return body;
     }
 
     @GetMapping("/profile/me")

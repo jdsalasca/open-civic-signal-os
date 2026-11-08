@@ -330,6 +330,7 @@ export function Layout({ children, authMode = false }: Props) {
               </div>
             </div>
             <Button
+              type="button"
               label={t('nav.sign_out')}
               icon="pi pi-power-off"
               text
@@ -346,6 +347,7 @@ export function Layout({ children, authMode = false }: Props) {
         <header className="app-topbar min-h-6rem py-3 flex align-items-center justify-content-between px-4 lg:px-6 border-bottom-1 border-subtle z-1">
           <div className="flex align-items-center gap-4 flex-grow-1">
             <Button
+              type="button"
               icon="pi pi-bars"
               text
               className="lg:hidden text-main"

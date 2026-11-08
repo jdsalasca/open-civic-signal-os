@@ -112,10 +112,19 @@ class SignalScoreHistoryIT {
         User user = new User(voter, "encoded", voter + "@example.com", "ROLE_CITIZEN");
         user.setVerified(true);
         user.setEnabled(true);
-        userRepository.save(user);
+        user = userRepository.save(user);
 
+        CommunityMembership voterMembership = new CommunityMembership();
+        voterMembership.setCommunityId(communityId);
+        voterMembership.setUserId(user.getId());
+        voterMembership.setRole(CommunityRole.MEMBER);
+        voterMembership.setCreatedBy(user.getId());
+        membershipRepository.save(voterMembership);
+
+        // Voting is scoped to the signal's community, same as the other mutations.
         mockMvc.perform(post("/api/signals/{id}/vote", signalId)
                 .with(user(voter).roles("CITIZEN"))
+                .header("X-Community-Id", communityId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{}"))
             .andExpect(status().isOk());

@@ -42,7 +42,7 @@ public interface PrioritizationService {
     ScoreBreakdown getBreakdown(Signal signal);
     TrustPacket getTrustPacket(UUID signalId);
     java.util.List<org.opencivic.signalos.domain.SignalStatusEntry> getStatusHistory(UUID signalId);
-    Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason);
+    Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason, UUID communityId);
     java.util.Map<UUID, java.util.List<Signal>> findDuplicates();
     java.util.Map<UUID, java.util.List<Signal>> findDuplicates(UUID communityId);
 
@@ -58,7 +58,7 @@ public interface PrioritizationService {
     // P1-B: Paginated access to moderation queue
     Page<Signal> getFlaggedSignals(Pageable pageable);
     
-    Signal moderateSignal(UUID id, String action, String reason);
+    Signal moderateSignal(UUID id, String action, String reason, UUID communityId);
 Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String username);
     Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String username, UUID communityId);
     Signal createSignal(String title, String description, String category, int urgency, int impact, int affectedPeople, String imageUrl, String locationLabel, List<String> evidenceUrls, Double latitude, Double longitude, String sourceChannel, String sourceRef, String username, UUID communityId);
