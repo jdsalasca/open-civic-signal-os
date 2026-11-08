@@ -37,6 +37,7 @@ Variables esperadas (los nombres exactos son los que aparecen en `infra/.env.pro
 | `INTEGRATION_CREDENTIAL_KEY` | Clave para cifrar tokens de integraciones (recomendada si se usan bots). |
 | `REQUIRE_EMAIL_VERIFICATION` | `true` (default) exige verificación de email antes de login. `false` marca la cuenta verificada al registrarse (ver advertencia abajo). |
 | `GOOGLE_CLIENT_ID` | Client ID público del cliente OAuth "Web application". Vacío desactiva el botón de Google. |
+| `RUN_TESTS` | `true` (default) corre la suite Java dentro del build de la imagen. En hosts pequeños, `false` compila desde el commit ya validado por CI. |
 | `API_IMAGE`, `WEB_IMAGE` | Imágenes a desplegar (por tag/SHA, no `latest` en producción). |
 
 > **Advertencia:** con `REQUIRE_EMAIL_VERIFICATION=false`, cualquier persona puede registrarse con un email

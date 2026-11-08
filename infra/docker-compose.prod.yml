@@ -48,6 +48,9 @@ services:
     build:
       context: ../apps/api-java
       dockerfile: Dockerfile
+      args:
+        # CI runs the suite; set RUN_TESTS=false in .env.prod on a memory-constrained host.
+        RUN_TESTS: ${RUN_TESTS:-true}
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-signalos}
