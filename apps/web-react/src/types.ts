@@ -175,6 +175,9 @@ export type Community = {
   description?: string;
   country?: string | null;
   region?: string | null;
+  city?: string | null;
+  locality?: string | null;
+  neighborhood?: string | null;
   parentCommunityId?: string | null;
   memberCount?: number;
   createdAt?: string;

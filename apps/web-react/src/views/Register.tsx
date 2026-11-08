@@ -24,7 +24,9 @@ type RegisterForm = {
   password: string;
   confirmPassword: string;
   communityId: string;
-  communityName: string;
+  communityCity: string;
+  communityLocality: string;
+  communityNeighborhood: string;
   communityCountry: string;
   communityRegion: string;
 };
@@ -50,7 +52,9 @@ export function Register() {
       password: '',
       confirmPassword: '',
       communityId: searchParams.get('communityId') ?? '',
-      communityName: '',
+      communityCity: '',
+      communityLocality: '',
+      communityNeighborhood: '',
       communityCountry: '',
       communityRegion: '',
     }
@@ -83,12 +87,14 @@ export function Register() {
 
   const cityOptions = useMemo(
     () =>
-      cities.map((city) => ({
-        label: [city.name, [city.region, city.country].filter(Boolean).join(", ")]
-          .filter((part) => part && part.length > 0)
-          .join(" — "),
-        value: city.id,
-      })),
+      cities.map((city) => {
+        const place = [city.neighborhood, city.locality, city.city ?? city.name].filter(Boolean).join(" / ");
+        const admin = [city.region, city.country].filter(Boolean).join(", ");
+        return {
+          label: [place, admin].filter((part) => part && part.length > 0).join(" — "),
+          value: city.id,
+        };
+      }),
     [cities]
   );
 
@@ -102,10 +108,14 @@ export function Register() {
 
       if (cityMode === 'join' && data.communityId) {
         payload.communityId = data.communityId;
-      } else if (cityMode === 'create' && data.communityName.trim()) {
-        payload.communityName = data.communityName.trim();
-        if (data.communityCountry.trim()) {
-          payload.communityCountry = data.communityCountry.trim();
+      } else if (cityMode === 'create' && data.communityCity.trim()) {
+        payload.communityCity = data.communityCity.trim();
+        payload.communityCountry = data.communityCountry.trim();
+        if (data.communityLocality.trim()) {
+          payload.communityLocality = data.communityLocality.trim();
+        }
+        if (data.communityNeighborhood.trim()) {
+          payload.communityNeighborhood = data.communityNeighborhood.trim();
         }
         if (data.communityRegion.trim()) {
           payload.communityRegion = data.communityRegion.trim();
@@ -274,8 +284,8 @@ export function Register() {
                 </CivicField>
               ) : (
                 <div className="flex flex-column">
-                  <CivicField label={t('auth.city_name_label')} error={errors.communityName?.message}>
-                    <Controller name="communityName" control={control}
+                  <CivicField label={t('auth.city_name_label')} error={errors.communityCity?.message}>
+                    <Controller name="communityCity" control={control}
                       rules={{
                         validate: (value) =>
                           cityMode !== 'create' || (value && value.trim().length >= 2) || t('auth.city_name_required')
@@ -290,6 +300,34 @@ export function Register() {
                       )}
                     />
                   </CivicField>
+
+                  <CivicField label={t('auth.city_locality_label')}>
+                    <Controller name="communityLocality" control={control}
+                      render={({ field }) => (
+                        <InputText
+                          {...field}
+                          className="w-full"
+                          placeholder={t('auth.city_locality_placeholder')}
+                          data-testid="register-city-locality-input"
+                        />
+                      )}
+                    />
+                  </CivicField>
+
+                  <CivicField label={t('auth.city_neighborhood_label')}>
+                    <Controller name="communityNeighborhood" control={control}
+                      render={({ field }) => (
+                        <InputText
+                          {...field}
+                          className="w-full"
+                          placeholder={t('auth.city_neighborhood_placeholder')}
+                          data-testid="register-city-neighborhood-input"
+                        />
+                      )}
+                    />
+                  </CivicField>
+
+                  <p className="auth-city-help mb-3">{t('auth.city_place_hint')}</p>
 
                   <CivicField label={t('auth.city_country_label')} error={errors.communityCountry?.message}>
                     <Controller name="communityCountry" control={control}
