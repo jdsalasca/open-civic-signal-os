@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-11-08T12:35:52.024Z
+Last updated: 2026-11-08T19:24:07.438Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,7 +10,7 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-11-01T12:35:47.885Z)
+- Window: last 7 days (since 2026-11-01T19:24:04.138Z)
 - Throughput (issues closed): 0
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
@@ -80,12 +80,13 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 15
+- TODO: 16
 - IN_PROGRESS: 0
 - BLOCKED: 0
 - DONE: 109
 
 ### TODO
+- #140 Registration with verification disabled sends the user to an unused code screen
 - #138 Register cities, localities and neighborhoods with backend normalization
 - #136 Add Google sign-in for citizens
 - #134 Audit top-10: auth crash, token confusion and community scoping
