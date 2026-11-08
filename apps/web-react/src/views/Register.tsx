@@ -36,7 +36,7 @@ type CityMode = "join" | "create";
 type RegisterResponse = {
   message?: string;
   username?: string;
-  emailDeliveryStatus?: "SENT" | "FAILED";
+  emailDeliveryStatus?: "SENT" | "FAILED" | "SKIPPED";
   supportEmail?: string;
   deliveryFailureReason?: string;
 };
@@ -126,6 +126,13 @@ export function Register() {
 
       if (res.status === 200 || res.status === 201) {
         const emailDeliveryFailed = res.data?.emailDeliveryStatus === "FAILED";
+        // With email verification disabled the account is already active: sending the person to a
+        // code screen would ask for a code that was never issued.
+        if (res.data?.emailDeliveryStatus === "SKIPPED") {
+          toast.success(t('auth.register_active'));
+          navigate("/login");
+          return;
+        }
         if (emailDeliveryFailed) {
           toast.error(t('auth.register_email_degraded'));
         } else {
