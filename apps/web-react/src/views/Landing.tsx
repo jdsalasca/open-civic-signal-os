@@ -59,15 +59,22 @@ export function Landing() {
       return cities;
     }
     return cities.filter((city) =>
-      [city.name, city.country, city.region]
+      [city.name, city.neighborhood, city.locality, city.city, city.country, city.region]
         .filter(Boolean)
         .some((value) => (value as string).toLowerCase().includes(normalized))
     );
   }, [cities, query]);
 
   const locationLabel = (city: Community) => {
-    const parts = [city.region, city.country].filter((value) => value && value.trim().length > 0);
-    return parts.length > 0 ? parts.join(", ") : t("landing.location_unknown");
+    const placeParts = [city.neighborhood, city.locality, city.city ?? city.name]
+      .filter((value): value is string => Boolean(value && value.trim().length > 0));
+    // The card title already shows the most specific level; don't repeat it in the subtitle.
+    if (placeParts.length > 0 && placeParts[0].toLowerCase() === city.name.toLowerCase()) {
+      placeParts.shift();
+    }
+    const place = placeParts.join(" / ");
+    const admin = [city.region, city.country].filter((value) => value && value.trim().length > 0).join(", ");
+    return [place, admin].filter((value) => value && value.length > 0).join(" — ");
   };
 
   const steps = [
@@ -218,11 +225,14 @@ export function Landing() {
                     <div className="flex justify-content-between align-items-start gap-2">
                       <div className="min-w-0">
                         <div className="landing-city-name">{city.name}</div>
-                        <div className="landing-city-location">{locationLabel(city)}</div>
+                        {locationLabel(city) && (
+                          <div className="landing-city-location">{locationLabel(city)}</div>
+                        )}
                       </div>
                       <CivicBadge
                         label={t("landing.member_count", { count: city.memberCount ?? 0 })}
                         type="category"
+                        className="landing-city-members"
                         data-testid={`landing-city-members-${city.id}`}
                       />
                     </div>

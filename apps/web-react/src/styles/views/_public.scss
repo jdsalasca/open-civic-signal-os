@@ -321,6 +321,12 @@
   color: var(--text-muted);
   font-size: var(--text-xs);
   margin-top: 0.2rem;
+  text-wrap: pretty;
+}
+
+.landing-city-members {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .landing-city-desc {
