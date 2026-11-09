@@ -314,6 +314,45 @@
   --color-tape: rgba(242, 200, 121, 0.82);
 }
 
+// ---------- 3b. High contrast: same paper, more ink ------------------------
+@mixin papercraft-contrast-tokens {
+  @include papercraft-dark-tokens;
+
+  --bg-app: #0a0604;
+  --bg-nav: rgba(10, 6, 4, 0.96);
+  --bg-surface: #140d09;
+  --bg-card: #17100c;
+  --bg-elevated: #211711;
+  --bg-sidebar: #100a07;
+
+  --text-main: #ffffff;
+  --text-secondary: #f4e9dc;
+  --text-muted: #d8c7b6;
+
+  --border-subtle: #7f6a59;
+  --glass-stroke: rgba(255, 255, 255, 0.3);
+  --alpha-border-10: rgba(255, 255, 255, 0.3);
+  --alpha-border-20: rgba(255, 255, 255, 0.42);
+
+  --field-bg: #1b120c;
+  --field-text: #ffffff;
+  --field-border: #937b66;
+  --field-border-focus: #ffd479;
+
+  --brand-primary: #ffb98a;
+  --brand-primary-hover: #ffcda8;
+  --on-brand: #1a0f08;
+  --link-color: #ffc6a3;
+  --link-color-hover: #ffdcc4;
+  --focus-ring: rgba(255, 212, 121, 0.5);
+  --focus-ring-color: #ffd479;
+
+  --status-new: #a9d8f5;
+  --status-progress: #ffd479;
+  --status-resolved: #b5e3b1;
+  --status-rejected: #ffa294;
+}
+
 // ---------- 4. Apply: default light, class/attr overrides, OS preference ----
 :root {
   @include papercraft-shared-tokens;
@@ -333,10 +372,16 @@
   color-scheme: dark;
 }
 
+:root.contrast-theme,
+:root[data-theme="contrast"] {
+  @include papercraft-contrast-tokens;
+  color-scheme: dark;
+}
+
 // Unprefixed root follows the operating system, unless a theme was chosen
 // explicitly through either the legacy class or the data-theme attribute.
 @media (prefers-color-scheme: dark) {
-  :root:not(.light-theme):not(.dark-theme):not([data-theme="light"]):not([data-theme="dark"]) {
+  :root:not(.light-theme):not(.dark-theme):not(.contrast-theme):not([data-theme="light"]):not([data-theme="dark"]):not([data-theme="contrast"]) {
     @include papercraft-dark-tokens;
     color-scheme: dark;
   }

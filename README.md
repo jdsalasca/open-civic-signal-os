@@ -1,177 +1,145 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Open Civic Signal OS" width="760" />
+  <img src="assets/logo.svg" alt="Open Civic Signal OS" width="560" />
 </p>
 
-# Open Civic Signal OS
+<h1 align="center">Open Civic Signal OS</h1>
 
-Monorepo civic-tech platform that converts community signals into transparent public priorities.
+<p align="center">
+  <strong>Turn community feedback into a transparent, auditable public backlog.</strong><br />
+  Report a local problem, see why it ranks, and follow who responds.
+</p>
 
-## Live
+<p align="center">
+  <a href="https://open-comunity.eridu.top"><img alt="Live site" src="https://img.shields.io/badge/live-open--comunity.eridu.top-e9a987?style=for-the-badge" /></a>
+  <img alt="Java 21" src="https://img.shields.io/badge/Java-21-2f6e8c?style=for-the-badge" />
+  <img alt="React + Vite" src="https://img.shields.io/badge/React%20%2B%20Vite-61dafb?style=for-the-badge&logo=react&logoColor=1a1a1a" />
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql&logoColor=white" />
+</p>
 
-**https://open-comunity.eridu.top**
+<p align="center">
+  <a href="https://open-comunity.eridu.top"><strong>▶ Open the live site</strong></a>
+  ·
+  <a href="docs/DEPLOY_PRODUCTION.md">Deploy</a>
+  ·
+  <a href="https://github.com/jdsalasca/open-civic-signal-os/issues">Issues</a>
+  ·
+  <a href="docs/IMPLEMENTATION_PLAYBOOK.md">Playbook</a>
+</p>
 
-Sign in with Google, choose your city, locality and neighborhood (or create the barrio), report a
-problem and follow the public backlog. Production is Google-only: no password is stored. The
-interface starts in the browser's language (Spanish or English) and can be changed in Settings.
-Deployment notes: `docs/DEPLOY_PRODUCTION.md`.
+<p align="center">
+  <img src="assets/demo.gif" alt="Open Civic Signal OS demo" width="720" />
+</p>
 
-## Pitch (ES / EN)
+## Why this exists
 
-**ES:** Entra con Google, elige tu ciudad, localidad y barrio, y empieza a construir comunidad. Sin contraseñas. En producción: https://open-comunity.eridu.top
+Local problems repeat because the record is scattered: a chat, a form, a meeting, a promise. Open
+Civic Signal OS gives a community one shared, public backlog where every item is traceable and every
+priority can be explained.
 
-**EN:** Continue with Google, pick your city, locality and neighborhood, and start building community. No passwords. Live: https://open-comunity.eridu.top
+**The promise for a resident:** report a real problem, see why it was prioritized, and follow what
+changed and who responded. **For public servants:** reduce noise, act on what matters first, and
+justify the order with visible evidence.
 
-## Why this product exists
+## Try it
 
-Open Civic Signal OS helps communities turn repeated local problems into a public backlog that people can understand, trust, and act on.
+1. Open **https://open-comunity.eridu.top** and continue with Google. Production is Google-only; no
+   password is stored.
+2. Choose your city, locality and neighborhood (or create the barrio). You can use your location and
+   the closest city is proposed.
+3. Report a problem, support an existing one, and follow the public backlog. Proposals and votes let
+   the community decide together.
 
-For a citizen, the promise is simple:
+The interface starts in your browser's language (Spanish or English) and can be changed any time from
+the gear in the top bar or **Settings**. Three visual styles: light, dark and high contrast.
 
-1. Report a real local problem in plain language.
-2. See why it was prioritized.
-3. Follow what changed, who responded, and what is still pending.
+## What it does
 
-For public servants and community leaders, the product should reduce noise, surface what matters first, and keep evidence visible.
+| Capability | What the community gets |
+|---|---|
+| Public backlog | A ranked list readable without an account, with the formula and the last update time |
+| Explainable score | `(Urgency × 30) + (Impact × 25) + min(People/10, 30) + min(Votes/5, 15)` and per-item terms |
+| Places | City → locality → neighborhood, normalized in the backend; an empty barrio becomes inactive |
+| Reports | Evidence, location, urgency, impact, people affected, and an auditable timeline |
+| Proposals and votes | Structured proposals with YES/NO or 1–5 voting, eligibility rules and a tally |
+| Roles | Citizen, moderator, coordinator, public-servant liaison, super admin, with explicit boundaries |
+| Governance | Decision ledger, governance library, project boards, open-data exports and trust metrics |
+| Accessibility | Keyboard-first navigation, semantic landmarks, WCAG AA contrast in all three themes |
 
-## What users should understand in the first minute
+## Stack
 
-- What the product helps solve.
-- What the main action is right now.
-- What happens after a report is submitted.
-- Why some issues rank higher than others.
-- Where to return to track progress.
+- **Backend:** Java 21 + Spring Boot, PostgreSQL 15 + Flyway, JWT, Google Identity Services.
+- **Frontend:** React + TypeScript + Vite, PrimeReact, SCSS tokens, three themes.
+- **Contracts:** OpenAPI in `packages/contracts`.
+- **Runtime:** Docker Compose for dev and production.
 
-Current UX gap: the repo and app explain the technical platform well, but they still expose too many navigation and workflow choices too early for first-time users. Ongoing frontend work is focused on simplifying first-run experience, clarifying primary actions, and reducing cognitive load.
+## Monorepo layout
 
-## Core user journeys
-
-### Community member
-
-- Report a problem.
-- Support an existing issue instead of duplicating it.
-- Understand why a problem is high priority.
-- Track updates from the community or institution.
-
-### Community moderator or coordinator
-
-- Review community conversations.
-- Publish progress updates with clear role boundaries.
-- Keep discussion channels usable and auditable.
-
-### Public servant
-
-- Identify highest-priority problems fast.
-- Publish progress updates.
-- Use transparent evidence to justify action ordering.
-
-## Official Stack
-
-- Backend: Java 21 + Spring Boot
-- Frontend: React + TypeScript + Vite
-- Data: PostgreSQL 15 + Flyway
-- Auth: Google Identity Services + JWT (production is Google-only, no passwords stored)
-- Contracts: OpenAPI in `packages/contracts`
-
-## Monorepo Layout
-
-- `apps/api-java`: Spring Boot API and prioritization services
-- `apps/web-react`: public dashboard and operator console
-- `packages/contracts`: API contracts and shared schemas
-- `infra`: local environment and deployment assets
-- `docs`: strategy, ideas, architecture, and execution plans
+```
+apps/api-java       Spring Boot API, scoring, communities, moderation
+apps/web-react      Public landing, dashboard, operator console
+packages/contracts  OpenAPI contract
+infra               Compose files, deployment scripts, env examples
+docs                Strategy, architecture, ADRs, evidence
+scripts             Quality gates and operational tooling
+```
 
 ## Quick start
 
-### Canonical integrated dev runtime
-
-Use Docker for the full app. This is the required hot-reload path for frontend + backend together:
+The canonical integrated runtime is Docker (hot reload for web and API):
 
 ```bash
 npm run docker:dev:up
 ```
 
-Helpful runtime commands:
-
-```bash
-npm run docker:dev:doctor
-npm run docker:dev:ps
-npm run docker:dev:logs
-npm run docker:dev:down
-```
-
-If Docker is unavailable, treat that as a local environment blocker. Do not silently switch to ad-hoc non-Docker app startup when validating integrated behavior.
-
-### Current MVP scripts
-
-```bash
-npm install
-npm run prioritize
-```
-
-### Component-only fallback commands
-
-```bash
-cd apps/web-react
-npm install
-npm run dev
-```
-
-### Java API
-
-```bash
-cd apps/api-java
-./mvnw spring-boot:run
-```
-
-These direct commands are for isolated component work only. Agent-driven app validation should still use `npm run docker:dev:up`.
-
-## Launch resources
-
-- Demo GIF: `assets/demo.gif`
-- Architecture GIF: `assets/architecture.gif`\n- Architecture SVG: `assets/stack-map.svg`
-- Landing: `docs/index.html`
-- Execution ideas: `docs/ideas.md`
-- Agent playbook: `AGENTS.md`
-
-## Roadmap issues
-
-- https://github.com/jdsalasca/open-civic-signal-os/issues
-
-## Vision
-
-Community voice should become visible, measurable, and actionable.
-
-## Visual Assets
-
-- Brand kit: `assets/brand-kit.md`
-- Mark: `assets/logo-mark.svg`
-- Wordmark: `assets/logo-wordmark.svg`
-- Banner SVG: `assets/banner.svg`
-- Social card PNG: `assets/social-card.png`
-- Logo PNG: `assets/logo-512.png`
-
-## Docker Quickstart
-
-- Dev (hot reload): `npm run docker:dev:up`
-- Dev doctor: `npm run docker:dev:doctor`
-- Dev logs: `npm run docker:dev:logs`
-- Prod-like: `npm run docker:prod:up`
+- Web: http://localhost:5173 · API: http://localhost:8081 · Mailpit: http://localhost:8025
+- Doctor: `npm run docker:dev:doctor`
+- Logs: `npm run docker:dev:logs`
 - Stop: `npm run docker:dev:down`
 
-See full guide: `docs/DOCKER_CLAUDE.md` and `CLAUDE.md`.
+If Docker is unavailable, treat it as a blocker rather than silently switching to a non-Docker stack
+when validating integrated behavior.
 
-## Product direction
+### Quality gates
 
-Current product work is centered on:
+```bash
+npm run agent:preflight      # context, backlog, secrets, build, Java tests, contract parity
+npm test                     # deterministic ranking and ingest scripts
+npm run check:contrast       # 102 token pairs across the three themes (WCAG AA)
+cd apps/api-java && mvn test # 475 backend tests
+cd apps/web-react && npx playwright test
+```
 
-- simpler first-screen hierarchy
-- clearer primary calls to action
-- lower-friction onboarding and verification
-- accessible keyboard/mobile navigation
-- trust surfaces that explain ranking and progress without jargon
+## Engineering principles
 
-## GHCR Quickstart
+- Ranking is deterministic and backend-owned; the frontend only renders it.
+- Raw input and derived output are stored separately; scoring never mutates source records.
+- Every processing run is idempotent and fails fast on invalid input.
+- PII is minimized at ingest and anonymized before public dashboards.
+- Every ranked item exposes its inputs and the version of the rule that produced it.
+- Human-in-the-loop: the algorithm suggests, people decide.
 
-- Use prebuilt images: `npm run docker:ghcr:up`
-- Stop GHCR deployment: `npm run docker:ghcr:down`
-- CI image workflow: `.github/workflows/docker-images.yml`
+## Documentation
+
+- [Production deploy](docs/DEPLOY_PRODUCTION.md)
+- [Implementation playbook](docs/IMPLEMENTATION_PLAYBOOK.md)
+- [Definition of done](docs/DEFINITION_OF_DONE.md)
+- [Security baseline](docs/SECURITY_BASELINE.md)
+- [Architecture decisions](docs/architecture/decision-index.md)
+- [Community backlog](docs/community/issue-backlog.md)
+
+## Visual assets
+
+- Brand kit: `assets/brand-kit.md` · Mark: `assets/logo-mark.svg` · Wordmark: `assets/logo-wordmark.svg`
+- Banner: `assets/banner-1400x560.png` · Social card: `assets/social-card.png`
+- Architecture: `assets/architecture.gif` · Stack map: `assets/stack-map.svg`
+
+## Roadmap
+
+Open issues and milestones: https://github.com/jdsalasca/open-civic-signal-os/issues
+
+The current focus is a simpler first screen, clearer primary actions, lower-friction onboarding, and
+trust surfaces that explain ranking and progress without jargon.
+
+---
+
+<p align="center"><sub>Built for communities that want the record to stay public.</sub></p>
