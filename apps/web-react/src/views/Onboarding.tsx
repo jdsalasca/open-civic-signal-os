@@ -24,6 +24,13 @@ export function Onboarding() {
 
   const [geoState, setGeoState] = useState<GeoState>('idle');
   const [nearest, setNearest] = useState<Community | null>(null);
+  const [detected, setDetected] = useState<{
+    city?: string;
+    locality?: string;
+    neighborhood?: string;
+    country?: string;
+    region?: string;
+  } | null>(null);
 
   const [country, setCountry] = useState('Colombia');
   const [region, setRegion] = useState('');
@@ -88,17 +95,31 @@ export function Onboarding() {
     setGeoState('locating');
     navigator.geolocation.getCurrentPosition(
       async (position) => {
+        const params = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
         try {
-          const { data } = await apiClient.get<Community>('communities/nearest', {
-            params: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            }
-          });
+          const { data } = await apiClient.get<Community>('communities/nearest', { params });
           setNearest(data);
           setGeoState('found');
         } catch {
           setGeoState('error');
+        }
+        // OpenStreetMap resolves the barrio/locality for the create form; if it fails, the
+        // manual list and the nearest city are still there.
+        try {
+          const { data } = await apiClient.get<typeof detected>('places/reverse', { params });
+          if (data) {
+            setDetected(data);
+            if (data.city) setCity(data.city);
+            if (data.locality) setLocality(data.locality);
+            if (data.neighborhood) setNeighborhood(data.neighborhood);
+            if (data.country) setCountry(data.country);
+            if (data.region) setRegion(data.region);
+          }
+        } catch {
+          // Keep the manual form.
         }
       },
       (error) => {
@@ -176,6 +197,15 @@ export function Onboarding() {
                   onClick={() => join(nearest.id)}
                   loading={joiningId === nearest.id}
                 />
+                {detected && (
+                  <p className="text-xs text-muted m-0" data-testid="onboarding-detected-place">
+                    {t('onboarding.detected_place', {
+                      place: [detected.neighborhood, detected.locality, detected.city]
+                        .filter(Boolean)
+                        .join(' / ')
+                    })}
+                  </p>
+                )}
               </div>
             )}
           </CivicCard>
