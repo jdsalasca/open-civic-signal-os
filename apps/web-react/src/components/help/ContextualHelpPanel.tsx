@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-hot-toast";
+import { classNames } from "primereact/utils";
 import apiClient from "../../api/axios";
 import { CivicBadge } from "../ui/CivicBadge";
 import { CivicButton } from "../ui/CivicButton";
@@ -12,9 +13,11 @@ type Props = {
   surface: HelpSurface;
   dataTestId?: string;
   className?: string;
+  /** A slim tip bar for pages where the full guide card would dominate the workspace. */
+  compact?: boolean;
 };
 
-export function ContextualHelpPanel({ surface, dataTestId, className }: Props) {
+export function ContextualHelpPanel({ surface, dataTestId, className, compact = false }: Props) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [payload, setPayload] = useState<HelpCenterResponse | null>(null);
@@ -100,6 +103,47 @@ export function ContextualHelpPanel({ surface, dataTestId, className }: Props) {
 
   if (loading || visibleGuides.length === 0) {
     return null;
+  }
+
+  const compactGuide = visibleGuides[0];
+  if (compact) {
+    return (
+      <div className={classNames("civic-tip-bar", className)} data-testid={dataTestId}>
+        <div className="civic-tip-copy">
+          <span className="u-eyebrow">{t("help_center.contextual_title")}</span>
+          <p className="text-sm m-0 mt-1">
+            {compactGuide ? (
+              <>
+                <strong className="text-main">{compactGuide.title}.</strong>{" "}
+                <span className="text-secondary">{compactGuide.summary}</span>
+              </>
+            ) : (
+              <span className="text-secondary">{t("help_center.contextual_desc")}</span>
+            )}
+          </p>
+        </div>
+        {compactGuide && (
+          <CivicButton
+            type="button"
+            size="small"
+            variant="secondary"
+            label={t("help_center.open_full_guide")}
+            onClick={() => navigate(`/help?surface=${compactGuide.surface}&guide=${compactGuide.id}`)}
+          />
+        )}
+        {compactGuide?.dismissible && (
+          <CivicButton
+            type="button"
+            size="small"
+            variant="ghost"
+            icon="pi pi-times"
+            aria-label={t("help_center.dismiss_guide")}
+            loading={updatingGuideId === compactGuide.id}
+            onClick={() => handleDismiss(compactGuide)}
+          />
+        )}
+      </div>
+    );
   }
 
   return (

@@ -20,6 +20,7 @@ import { CivicSelect } from "../components/ui/CivicSelect";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
+import { CivicActionLinks } from "../components/ui/CivicActionLinks";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
 import { useTranslation } from "react-i18next";
@@ -358,9 +359,9 @@ export function Communities() {
     <Layout>
       <div className="animate-fade-up motion-page">
         <CivicPageHeader title={t('communities_hub.title')} description={t('communities_hub.desc')} />
-        <ContextualHelpPanel surface="COMMUNITIES" className="mb-6" dataTestId="communities-contextual-help" />
+        <ContextualHelpPanel surface="COMMUNITIES" className="mb-6" dataTestId="communities-contextual-help" compact />
         <CivicActionBar className="mb-6" data-testid="communities-map-entrybar">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 civic-action-bar-copy">
             <div className="u-eyebrow mb-1">
               {t("community_map.communities_entry_label")}
             </div>
@@ -376,8 +377,12 @@ export function Communities() {
             onClick={() => navigate("/communities/map")}
             data-testid="communities-open-map-button"
           />
+        </CivicActionBar>
+
+        <CivicActionLinks className="mb-6" aria-label={t("nav.group_collaboration")}>
           <CivicButton
             type="button"
+            size="small"
             icon="pi pi-sitemap"
             label={t("nav.community_decisions")}
             variant="ghost"
@@ -386,6 +391,7 @@ export function Communities() {
           />
           <CivicButton
             type="button"
+            size="small"
             icon="pi pi-chart-line"
             label={t("nav.community_trust")}
             variant="ghost"
@@ -394,6 +400,7 @@ export function Communities() {
           />
           <CivicButton
             type="button"
+            size="small"
             icon="pi pi-book"
             label={t("nav.community_governance")}
             variant="ghost"
@@ -403,6 +410,7 @@ export function Communities() {
           {canOpenDataWorkspace && (
             <CivicButton
               type="button"
+              size="small"
               icon="pi pi-database"
               label={t("nav.community_open_data")}
               variant="ghost"
@@ -412,6 +420,7 @@ export function Communities() {
           )}
           <CivicButton
             type="button"
+            size="small"
             icon="pi pi-briefcase"
             label={t("nav.community_projects")}
             variant="ghost"
@@ -420,13 +429,14 @@ export function Communities() {
           />
           <CivicButton
             type="button"
+            size="small"
             icon="pi pi-file-edit"
             label={t("community_proposals.open_hub")}
             variant="ghost"
             onClick={() => navigate("/communities/proposals")}
             data-testid="communities-open-proposals-button"
           />
-        </CivicActionBar>
+        </CivicActionLinks>
 
         <div className="grid">
           <div className="col-12 lg:col-7">
