@@ -85,8 +85,8 @@ function CommunityTreeBranch({
             >
               <div className="flex justify-content-between align-items-start gap-3 flex-wrap">
                 <div className="flex-1 min-w-0">
-                  <div className="flex align-items-center gap-2 flex-wrap">
-                    <span className="font-black text-main">{node.name}</span>
+                  <div className="flex align-items-center gap-2 flex-wrap community-tree-title">
+                    <span className="font-black text-main community-tree-name">{node.name}</span>
                     <CivicBadge label={node.slug} type="category" />
                     {isActive && <CivicBadge label={activeBadgeLabel} severity="progress" />}
                   </div>

@@ -172,17 +172,24 @@ function main() {
   const scss = readFileSync(THEME_SCSS, 'utf8');
   const light = parseMixin(scss, 'papercraft-light-tokens');
   const dark = parseMixin(scss, 'papercraft-dark-tokens');
+  const contrastOverrides = parseMixin(scss, 'papercraft-contrast-tokens');
+  // The contrast mixin includes the dark one and overrides a subset.
+  const contrast = new Map([...dark, ...contrastOverrides]);
 
-  if (light.size === 0 || dark.size === 0) {
+  if (light.size === 0 || dark.size === 0 || contrastOverrides.size === 0) {
     throw new Error('one of the theme mixins parsed to zero tokens');
   }
 
-  const results = [checkTheme('light', light), checkTheme('dark', dark)];
+  const results = [
+    checkTheme('light', light),
+    checkTheme('dark', dark),
+    checkTheme('contrast', contrast),
+  ];
   for (const { rows, failures } of results) {
     for (const row of rows) {
       const mark = row.ok ? 'PASS' : 'FAIL';
       console.log(
-        `[${mark}] ${row.themeName.padEnd(5)} ${row.fgToken} (${row.fg}) on ${row.bgToken} (${row.bg}) = ` +
+        `[${mark}] ${row.themeName.padEnd(8)} ${row.fgToken} (${row.fg}) on ${row.bgToken} (${row.bg}) = ` +
           `${row.ratio.toFixed(2)}:1 (min ${row.minimum}:1)`,
       );
     }

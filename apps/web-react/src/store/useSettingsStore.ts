@@ -21,11 +21,11 @@ function systemLanguage(): 'en' | 'es' {
 
 interface SettingsState {
   language: 'en' | 'es';
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'contrast';
   interfaceMode: 'simple' | 'advanced';
   dataMode: DataMode;
   setLanguage: (lang: 'en' | 'es') => void;
-  setTheme: (theme: 'light' | 'dark') => void;
+  setTheme: (theme: 'light' | 'dark' | 'contrast') => void;
   setInterfaceMode: (mode: 'simple' | 'advanced') => void;
   setDataMode: (mode: DataMode) => void;
 }

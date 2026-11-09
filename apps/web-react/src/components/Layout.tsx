@@ -8,6 +8,7 @@ import { useCommunityStore } from "../store/useCommunityStore";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 import { CivicSelect } from "./ui/CivicSelect";
+import { ThemeWheel } from "./ui/ThemeWheel";
 import { toRoleLabel } from "../constants/roleLabels";
 import { useSettingsStore } from "../store/useSettingsStore";
 
@@ -344,7 +345,7 @@ export function Layout({ children, authMode = false }: Props) {
 
       {/* VIEW AREA */}
       <div className="flex flex-column flex-grow-1 overflow-hidden relative">
-        <header className="app-topbar min-h-6rem py-3 flex align-items-center justify-content-between px-4 lg:px-6 border-bottom-1 border-subtle z-1">
+        <header className="app-topbar min-h-6rem py-3 flex align-items-center justify-content-between px-4 lg:px-6 border-bottom-1 border-subtle z-5">
           <div className="flex align-items-center gap-4 flex-grow-1">
             <Button
               type="button"
@@ -406,6 +407,8 @@ export function Layout({ children, authMode = false }: Props) {
                 <span className="text-xs font-black text-main uppercase tracking-widest">{t('nav.core_active')}</span>
               </div>
             )}
+
+            <ThemeWheel />
 
             <Button
               type="button"

@@ -38,7 +38,7 @@ import { toRoleLabel } from "../constants/roleLabels";
 
 interface ThemeOption {
   label: string;
-  value: 'dark' | 'light';
+  value: 'dark' | 'light' | 'contrast';
   icon: string;
 }
 
@@ -114,7 +114,8 @@ export function Settings() {
 
   const themeOptions: ThemeOption[] = [
     { label: t('settings.dark'), value: 'dark', icon: 'pi pi-moon' },
-    { label: t('settings.light'), value: 'light', icon: 'pi pi-sun' }
+    { label: t('settings.light'), value: 'light', icon: 'pi pi-sun' },
+    { label: t('settings.contrast'), value: 'contrast', icon: 'pi pi-bolt' }
   ];
   const interfaceModeOptions: InterfaceModeOption[] = [
     { label: t('settings.interface_modes.simple'), value: 'simple', icon: 'pi pi-sparkles' },
@@ -258,10 +259,10 @@ export function Settings() {
   };
 
   const handleThemeChange = (e: SelectButtonChangeEvent) => {
-    const nextTheme = e.value as 'dark' | 'light';
+    const nextTheme = e.value as 'dark' | 'light' | 'contrast';
     if (nextTheme) {
       setTheme(nextTheme);
-      document.documentElement.classList.remove('dark-theme', 'light-theme');
+      document.documentElement.classList.remove('dark-theme', 'light-theme', 'contrast-theme');
       document.documentElement.classList.add(`${nextTheme}-theme`);
     }
   };
