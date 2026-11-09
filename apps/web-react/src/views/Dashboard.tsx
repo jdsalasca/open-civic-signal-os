@@ -477,6 +477,16 @@ export function Dashboard() {
                 role: activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback"),
               })}
             </p>
+            {!activeMembership && (
+              <CivicButton
+                type="button"
+                label={t("onboarding.title")}
+                icon="pi pi-map-marker"
+                className="mt-4"
+                onClick={() => navigate("/onboarding")}
+                data-testid="dashboard-choose-place"
+              />
+            )}
             <div className="dashboard-community-summary-grid mt-4" data-testid="dashboard-community-summary">
               <CivicStatCard
                 label={t("dashboard.community_hub.path_label")}

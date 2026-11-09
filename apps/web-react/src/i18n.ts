@@ -151,6 +151,30 @@ const resources = {
         "mobile_drawer_guidance": "Use the bottom bar for the main path. Open more only for updates, conversations, and workspace controls.",
         "more_short": "More"
       },
+      "onboarding": {
+        "eyebrow": "One last step",
+        "title": "Choose your place",
+        "subtitle": "Join the city where you live or create your neighborhood space. You can change it later.",
+        "location_title": "Use my location",
+        "location_desc": "If you allow it, we look for the closest city in the catalog and propose it. We do not store the coordinates.",
+        "location_button": "Find my city",
+        "location_nearest": "Closest city",
+        "join_city": "Join {{name}}",
+        "location_denied": "Location was denied. Choose a city from the list or create your neighborhood.",
+        "location_error": "We could not find a city near you. Choose one below.",
+        "cities_title": "Join a community",
+        "cities_desc": "Pick your city or neighborhood. You will be a member and can report, vote and follow the backlog.",
+        "search_placeholder": "Search by city, region or country",
+        "join": "Join",
+        "no_results": "No cities match that search.",
+        "create_title": "Create your neighborhood",
+        "create_desc": "If your barrio is not here yet, register it. You will be its coordinator.",
+        "create_button": "Create and join",
+        "join_success": "Welcome to your community.",
+        "join_error": "Could not join this community.",
+        "create_success": "Neighborhood created. Welcome.",
+        "create_error": "Could not create the neighborhood."
+      },
       "landing": {
         "title": "Find your city",
         "subtitle": "Open Civic Signal OS turns community feedback into a public, auditable backlog. Pick your city or neighborhood to join, or start one if it is not here yet.",
@@ -204,6 +228,9 @@ const resources = {
         "password_too_short": "Password must be at least 8 characters.",
         "passwords_mismatch": "Passwords must match.",
         "sign_in_button": "Sign In to OS",
+        "or_continue_with": "or continue with",
+        "google_only_hint": "Use your Google account to enter. No password to remember.",
+        "no_password_note": "We only keep your name, email and the place you join.",
         "no_account": "Don't have an account?",
         "create_one": "Create one",
         "join_title": "Join Signal OS",
@@ -2375,6 +2402,30 @@ const resources = {
         "mobile_drawer_guidance": "Use la barra inferior para la ruta principal. Abra más solo para actualizaciones, conversaciones y controles del espacio.",
         "more_short": "Más"
       },
+      "onboarding": {
+        "eyebrow": "Un último paso",
+        "title": "Elige tu lugar",
+        "subtitle": "Únete a la ciudad donde vives o crea el espacio de tu barrio. Puedes cambiarlo después.",
+        "location_title": "Usar mi ubicación",
+        "location_desc": "Si lo permites, buscamos la ciudad más cercana del catálogo y te la proponemos. No guardamos las coordenadas.",
+        "location_button": "Encontrar mi ciudad",
+        "location_nearest": "Ciudad más cercana",
+        "join_city": "Unirme a {{name}}",
+        "location_denied": "La ubicación fue negada. Elige una ciudad de la lista o crea tu barrio.",
+        "location_error": "No encontramos una ciudad cerca. Elige una abajo.",
+        "cities_title": "Únete a una comunidad",
+        "cities_desc": "Elige tu ciudad o barrio. Serás miembro y podrás reportar, votar y seguir el backlog.",
+        "search_placeholder": "Busca por ciudad, región o país",
+        "join": "Unirme",
+        "no_results": "Ninguna ciudad coincide con la búsqueda.",
+        "create_title": "Crea tu barrio",
+        "create_desc": "Si tu barrio aún no está, regístralo. Serás su coordinador.",
+        "create_button": "Crear y unirme",
+        "join_success": "Bienvenido a tu comunidad.",
+        "join_error": "No se pudo unir a esta comunidad.",
+        "create_success": "Barrio creado. Bienvenido.",
+        "create_error": "No se pudo crear el barrio."
+      },
       "landing": {
         "title": "Encuentra tu ciudad",
         "subtitle": "Open Civic Signal OS convierte los aportes de la comunidad en una lista pública y auditable. Elige tu ciudad o barrio para unirte o crea uno si aún no está.",
@@ -2428,6 +2479,9 @@ const resources = {
         "password_too_short": "La contraseña debe tener al menos 8 caracteres.",
         "passwords_mismatch": "Las contraseñas deben coincidir.",
         "sign_in_button": "Entrar al OS",
+        "or_continue_with": "o continúa con",
+        "google_only_hint": "Entra con tu cuenta de Google. Sin contraseñas que recordar.",
+        "no_password_note": "Solo guardamos tu nombre, correo y el lugar al que te unes.",
         "no_account": "¿No tiene una cuenta?",
         "create_one": "Cree una",
         "join_title": "Unirse a Signal OS",
@@ -4458,7 +4512,15 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
+    // The browser locale is the default ("es-CO" resolves to "es"); a saved choice in
+    // localStorage wins, and English is the fallback.
+    supportedLngs: ['en', 'es'],
+    load: 'languageOnly',
     fallbackLng: 'en',
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage']
+    },
     interpolation: {
       escapeValue: false
     }

@@ -11,6 +11,14 @@ import { persist } from "zustand/middleware";
  */
 export type DataMode = "full" | "field";
 
+/** The browser locale decides the first language; a saved choice in Settings always wins. */
+function systemLanguage(): 'en' | 'es' {
+  if (typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('es')) {
+    return 'es';
+  }
+  return 'en';
+}
+
 interface SettingsState {
   language: 'en' | 'es';
   theme: 'light' | 'dark';
@@ -25,7 +33,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      language: 'en',
+      language: systemLanguage(),
       theme: 'dark',
       interfaceMode: 'simple',
       // Defaults to full: a field mode that silently reduced what everyone sees would be a change

@@ -81,6 +81,13 @@ public class Community {
     @Column(length = 400, unique = true)
     private String placeKey;
 
+    private Double latitude;
+    private Double longitude;
+
+    /** False when a neighbourhood or locality has no members left; city entries stay true. */
+    @Column(nullable = false)
+    private boolean active = true;
+
     private UUID parentCommunityId;
 
     @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
@@ -175,6 +182,30 @@ public class Community {
 
     public void setPlaceKey(String placeKey) {
         this.placeKey = placeKey;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public UUID getParentCommunityId() {

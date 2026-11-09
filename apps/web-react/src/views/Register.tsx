@@ -68,6 +68,29 @@ export function Register() {
 
   useEffect(() => {
     let cancelled = false;
+    apiClient
+      .get<{ passwordLoginEnabled?: boolean }>('auth/google/config')
+      .then(({ data }) => {
+        if (!cancelled && data?.passwordLoginEnabled === false) {
+          // Google-only deployment: keep the community the visitor picked, then let the login
+          // page join it after the Google round-trip.
+          const pending = searchParams.get('communityId');
+          if (pending) {
+            sessionStorage.setItem('pendingCommunityId', pending);
+          }
+          navigate('/login');
+        }
+      })
+      .catch(() => {
+        // Keep the form when the config cannot be read (dev/offline).
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, searchParams]);
+
+  useEffect(() => {
+    let cancelled = false;
     const loadCities = async () => {
       try {
         const response = await apiClient.get<Community[]>("communities/public");
