@@ -76,13 +76,7 @@ export function Layout({ children, authMode = false }: Props) {
       try {
         const res = await apiClient.get("communities/my");
         if (!cancelled && res.status === 200) {
-          const memberships = res.data || [];
-          setMemberships(memberships);
-          // A person with no place is not in a community yet; the dashboard would be an empty
-          // shell, so send them to the place picker once.
-          if (memberships.length === 0 && location.pathname === "/") {
-            navigate("/onboarding");
-          }
+          setMemberships(res.data || []);
         }
       } catch (err) {
         console.warn("Failed to load community memberships", err);
@@ -92,7 +86,7 @@ export function Layout({ children, authMode = false }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [isLoggedIn, setMemberships, shouldRefreshMemberships, location.pathname, navigate]);
+  }, [isLoggedIn, setMemberships, shouldRefreshMemberships]);
 
   const handleLogout = async () => {
     try {
