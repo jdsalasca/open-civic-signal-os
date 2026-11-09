@@ -463,37 +463,30 @@ export function Communities() {
                   />
                 </div>
 
-                <CivicActionBar className="mb-4 p-4">
-                  <div className="flex-1 min-w-0" style={{ minWidth: "14rem" }}>
-                    <CivicSelect
-                      value={selectedCommunityId}
-                      options={unjoinedCommunityOptions}
-                      onChange={(e) => setSelectedCommunityId(e.value)}
-                      placeholder={t('communities_hub.select_placeholder')}
-                      className="w-full"
-                      data-testid="join-community-dropdown"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0" style={{ minWidth: "12rem" }}>
-                    <CivicSelect
-                      value={joinRole}
-                      options={roleOptions}
-                      onChange={(e) => setJoinRole(e.value)}
-                      className="w-full"
-                      data-testid="join-role-dropdown"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0" style={{ minWidth: "10rem" }}>
-                    <CivicButton
-                      label={t('communities_hub.join_action')}
-                      icon="pi pi-user-plus"
-                      onClick={handleJoin}
-                      disabled={!selectedCommunityId}
-                      className="w-full"
-                      glow
-                      data-testid="join-community-button"
-                    />
-                  </div>
+                <CivicActionBar className="mb-4 p-4 communities-join-bar">
+                  <CivicSelect
+                    value={selectedCommunityId}
+                    options={unjoinedCommunityOptions}
+                    onChange={(e) => setSelectedCommunityId(e.value)}
+                    placeholder={t('communities_hub.select_placeholder')}
+                    className="w-full"
+                    data-testid="join-community-dropdown"
+                  />
+                  <CivicSelect
+                    value={joinRole}
+                    options={roleOptions}
+                    onChange={(e) => setJoinRole(e.value)}
+                    className="w-full"
+                    data-testid="join-role-dropdown"
+                  />
+                  <CivicButton
+                    label={t('communities_hub.join_action')}
+                    icon="pi pi-user-plus"
+                    onClick={handleJoin}
+                    disabled={!selectedCommunityId}
+                    glow
+                    data-testid="join-community-button"
+                  />
                 </CivicActionBar>
 
                 <div className="flex flex-column gap-3">
