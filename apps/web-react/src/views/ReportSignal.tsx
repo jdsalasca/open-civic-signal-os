@@ -113,6 +113,17 @@ export function ReportSignal() {
       label: t("report.template_lighting_label"),
     },
     {
+      key: "accident",
+      title: t("report.template_accident_title"),
+      description: t("report.template_accident_desc"),
+      category: "safety",
+      urgency: 5,
+      impact: 4,
+      affectedPeople: 30,
+      locationLabel: t("report.template_accident_location"),
+      label: t("report.template_accident_label"),
+    },
+    {
       key: "waste",
       title: t("report.template_waste_title"),
       description: t("report.template_waste_desc"),
