@@ -13,6 +13,60 @@ html {
   scroll-behavior: smooth;
 }
 
+// A lazy route should feel like the app is opening, not like a blank page with a line.
+.app-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 100vh;
+  background: var(--bg-app);
+  color: var(--text-main);
+}
+
+.app-loading-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.app-loading-dot {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  box-shadow: 0 0 0 6px var(--brand-primary-alpha-10);
+}
+
+.app-loading-track {
+  width: min(16rem, 60vw);
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+
+.app-loading-track span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand-primary);
+  animation: app-loading-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes app-loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
 body {
   margin: 0;
   font-family: var(--font-body);
@@ -564,6 +618,75 @@ a:hover {
   }
 }
 
+.theme-wheel {
+  position: relative;
+}
+
+.theme-wheel-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--ease-paper);
+}
+
+.theme-wheel-trigger:hover {
+  background: var(--surface-soft-hover);
+}
+
+.theme-wheel-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 10030;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 12.5rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-paper-sm);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+}
+
+.theme-wheel-panel button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-wheel-panel button:hover {
+  background: var(--surface-soft);
+  color: var(--text-main);
+}
+
+.theme-wheel-panel button.is-active {
+  background: var(--brand-primary);
+  color: var(--on-brand);
+}
+
+.theme-wheel-panel .theme-wheel-check {
+  margin-left: auto;
+}
+
 .civic-tip-bar {
   display: flex;
   flex-wrap: wrap;
@@ -818,6 +941,16 @@ a:hover {
   padding: 0.95rem 1rem;
 }
 
+.community-tree-name {
+  flex: 1 1 12rem;
+  min-width: 9rem;
+  overflow-wrap: break-word;
+}
+
+.community-tree-title {
+  min-width: 0;
+}
+
 .community-membership-row:hover,
 .community-policy-row:hover,
 .community-tree-card:hover {
@@ -830,12 +963,15 @@ a:hover {
   flex-wrap: wrap;
 }
 
-.u-pill,
+.u-pill {
+  overflow-wrap: anywhere;
+}
+
 .u-section-title,
 .text-muted,
 .text-secondary,
 .text-main {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 @media (max-width: 768px) {

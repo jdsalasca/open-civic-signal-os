@@ -1,7 +1,6 @@
 import { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { ProgressBar } from "primereact/progressbar";
 import { useAuthStore } from "./store/useAuthStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { AuthGuard } from "./components/AuthGuard";
@@ -42,8 +41,15 @@ const NotFound = lazy(() => import("./views/NotFound").then(m => ({ default: m.N
 const Unauthorized = lazy(() => import("./views/Unauthorized").then(m => ({ default: m.Unauthorized })));
 
 const LoadingFallback = () => (
-  <div className="fixed top-0 left-0 w-full z-5">
-    <ProgressBar mode="indeterminate" style={{ height: '3px' }} />
+  <div className="app-loading" role="status" aria-live="polite" data-testid="app-loading">
+    <div className="app-loading-brand">
+      <span className="app-loading-dot" aria-hidden="true" />
+      <span>Open Civic Signal OS</span>
+    </div>
+    <div className="app-loading-track" aria-hidden="true">
+      <span />
+    </div>
+    <span className="sr-only">Loading…</span>
   </div>
 );
 
@@ -70,13 +76,8 @@ export function App() {
 
   useEffect(() => {
     const html = document.documentElement;
-    if (theme === 'dark') {
-      html.classList.add('dark-theme');
-      html.classList.remove('light-theme');
-    } else {
-      html.classList.add('light-theme');
-      html.classList.remove('dark-theme');
-    }
+    html.classList.remove('light-theme', 'dark-theme', 'contrast-theme');
+    html.classList.add(`${theme}-theme`);
     // Mirrored as a data attribute so the CSS supports [data-theme] as well as
     // the legacy classes; dropping both makes prefers-color-scheme decide.
     html.dataset.theme = theme;

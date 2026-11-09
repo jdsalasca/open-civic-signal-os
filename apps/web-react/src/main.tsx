@@ -17,11 +17,7 @@ import './styles/main.scss';
 const initialSettings = useSettingsStore.getState();
 const initialTheme = initialSettings.theme;
 const initialInterfaceMode = initialSettings.interfaceMode;
-if (initialTheme === 'dark') {
-  document.documentElement.classList.add('dark-theme');
-} else {
-  document.documentElement.classList.add('light-theme');
-}
+document.documentElement.classList.add(`${initialTheme}-theme`);
 // The attribute mirrors the class: CSS understands both, and a future
 // "follow the system" mode can simply drop both and let prefers-color-scheme
 // decide.
