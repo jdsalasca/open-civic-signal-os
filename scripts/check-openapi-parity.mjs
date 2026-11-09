@@ -26,6 +26,7 @@ const INTENTIONALLY_UNDOCUMENTED = new Map([
   ["/api/auth/profile/me", "authentication handshake, not part of the civic contract"],
   ["/api/auth/google", "authentication handshake, not part of the civic contract"],
   ["/api/auth/google/config", "public client id for the authentication handshake, not civic data"],
+  ["/api/places/reverse", "external OpenStreetMap lookup for onboarding, not civic data"],
   ["/api/test/email", "local-only email probe, never exposed in a deployment"],
 ]);
 
