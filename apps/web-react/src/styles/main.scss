@@ -531,6 +531,48 @@ a:hover {
   flex-wrap: wrap;
 }
 
+// The copy keeps a readable measure. Without this it shrinks to zero while the
+// action buttons keep their width, and every word lands on its own line.
+.civic-action-bar-copy {
+  flex: 1 1 22rem;
+  min-width: 16rem;
+}
+
+.civic-action-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.civic-action-links .civic-button-base {
+  min-height: 2.15rem;
+  padding: 0.35rem 0.7rem;
+}
+
+.civic-tip-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-paper);
+  background: var(--surface-soft);
+}
+
+.civic-tip-copy {
+  flex: 1 1 24rem;
+  min-width: 14rem;
+}
+
+@media (max-width: 640px) {
+  .civic-action-bar-copy {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+}
+
 .civic-button-base {
   min-height: 2.8rem;
   max-width: 100%;
