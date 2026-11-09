@@ -371,6 +371,106 @@
   }
 }
 
+// ---------- Onboarding (Google-only sign-up) -------------------------------
+.onboarding-page {
+  width: 100%;
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+}
+
+.onboarding-hero {
+  max-width: 46rem;
+  margin-bottom: var(--space-6);
+
+  h1 {
+    margin: 0.35rem 0 0.5rem;
+    font-size: clamp(2rem, 4vw, 3.1rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+  }
+}
+
+.onboarding-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--space-4);
+}
+
+.onboarding-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.onboarding-nearest {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-paper-sm);
+  background: var(--surface-soft);
+}
+
+.onboarding-city-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 18rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-paper-sm);
+    background: var(--surface-soft);
+  }
+
+  button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  strong {
+    display: block;
+  }
+}
+
+.onboarding-create {
+  margin-top: var(--space-4);
+}
+
+.onboarding-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+}
+
 // ---------- Auth form polish ------------------------------------------------
 .auth-panel {
   width: 100%;
@@ -379,6 +479,39 @@
 
 .auth-panel-wide {
   max-width: 34rem;
+}
+
+.google-signin-slot {
+  display: flex;
+  justify-content: center;
+  min-height: 2.75rem;
+  width: 100%;
+}
+
+.google-only-panel {
+  padding: 0.5rem 0 0.25rem;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+
+  span {
+    white-space: nowrap;
+  }
 }
 
 // The icon-led fields inside the auth panels share the search field's rule: the

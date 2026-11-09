@@ -10,15 +10,16 @@ Monorepo civic-tech platform that converts community signals into transparent pu
 
 **https://open-comunity.eridu.top**
 
-Register your city, locality and neighborhood (or join an existing community), report a problem and
-follow the public backlog. You can sign in with email/password or with Google. Deployment notes:
-`docs/DEPLOY_PRODUCTION.md`.
+Sign in with Google, choose your city, locality and neighborhood (or create the barrio), report a
+problem and follow the public backlog. Production is Google-only: no password is stored. The
+interface starts in the browser's language (Spanish or English) and can be changed in Settings.
+Deployment notes: `docs/DEPLOY_PRODUCTION.md`.
 
 ## Pitch (ES / EN)
 
-**ES:** Regístrate con tu ciudad, localidad y barrio, o entra con Google, y empieza a construir comunidad. En producción: https://open-comunity.eridu.top
+**ES:** Entra con Google, elige tu ciudad, localidad y barrio, y empieza a construir comunidad. Sin contraseñas. En producción: https://open-comunity.eridu.top
 
-**EN:** Register your city, locality and neighborhood, or continue with Google, and start building community. Live: https://open-comunity.eridu.top
+**EN:** Continue with Google, pick your city, locality and neighborhood, and start building community. No passwords. Live: https://open-comunity.eridu.top
 
 ## Why this product exists
 
@@ -68,7 +69,7 @@ Current UX gap: the repo and app explain the technical platform well, but they s
 - Backend: Java 21 + Spring Boot
 - Frontend: React + TypeScript + Vite
 - Data: PostgreSQL 15 + Flyway
-- Auth: email/password with JWT + Google Identity Services
+- Auth: Google Identity Services + JWT (production is Google-only, no passwords stored)
 - Contracts: OpenAPI in `packages/contracts`
 
 ## Monorepo Layout

@@ -23,6 +23,7 @@ const Login = lazy(() => import("./views/Login").then(m => ({ default: m.Login }
 const Moderation = lazy(() => import("./views/Moderation").then(m => ({ default: m.Moderation })));
 const Communities = lazy(() => import("./views/Communities").then(m => ({ default: m.Communities })));
 const Landing = lazy(() => import("./views/Landing").then(m => ({ default: m.Landing })));
+const Onboarding = lazy(() => import("./views/Onboarding").then(m => ({ default: m.Onboarding })));
 const CommunityThreads = lazy(() => import("./views/CommunityThreads").then(m => ({ default: m.CommunityThreads })));
 const CommunityBlog = lazy(() => import("./views/CommunityBlog").then(m => ({ default: m.CommunityBlog })));
 const CommunityFeed = lazy(() => import("./views/CommunityFeed").then(m => ({ default: m.CommunityFeed })));
@@ -169,6 +170,7 @@ export function App() {
             <Route path="/" element={<HomeRoute />} />
             
             <Route element={<AuthGuard />}>
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/report" element={<ReportSignal />} />
               <Route path="/signal/:id" element={<SignalDetail />} />
               <Route path="/mine" element={<MySignals />} />

@@ -38,30 +38,32 @@ public class OpenCivicSignalOsApplication {
 	public CommandLineRunner seedMainCities(CommunityRepository communityRepository) {
 		return args -> {
 			List<CitySeed> cities = List.of(
-				new CitySeed("Bogotá D.C.", "Cundinamarca"),
-				new CitySeed("Medellín", "Antioquia"),
-				new CitySeed("Cali", "Valle del Cauca"),
-				new CitySeed("Barranquilla", "Atlántico"),
-				new CitySeed("Cartagena", "Bolívar"),
-				new CitySeed("Bucaramanga", "Santander"),
-				new CitySeed("Pereira", "Risaralda"),
-				new CitySeed("Santa Marta", "Magdalena"),
-				new CitySeed("Manizales", "Caldas"),
-				new CitySeed("Cúcuta", "Norte de Santander")
+				new CitySeed("Bogotá D.C.", "Cundinamarca", "Colombia", 4.7110, -74.0721),
+				new CitySeed("Medellín", "Antioquia", "Colombia", 6.2442, -75.5812),
+				new CitySeed("Cali", "Valle del Cauca", "Colombia", 3.4516, -76.5320),
+				new CitySeed("Barranquilla", "Atlántico", "Colombia", 10.9685, -74.7813),
+				new CitySeed("Cartagena", "Bolívar", "Colombia", 10.3910, -75.4794),
+				new CitySeed("Bucaramanga", "Santander", "Colombia", 7.1193, -73.1227),
+				new CitySeed("Pereira", "Risaralda", "Colombia", 4.8133, -75.6961),
+				new CitySeed("Santa Marta", "Magdalena", "Colombia", 11.2408, -74.1990),
+				new CitySeed("Manizales", "Caldas", "Colombia", 5.0703, -75.5138),
+				new CitySeed("Cúcuta", "Norte de Santander", "Colombia", 7.8939, -72.5078),
+				new CitySeed("Santiago", "Región Metropolitana", "Chile", -33.4489, -70.6693)
 			);
 			for (CitySeed city : cities) {
 				String placeKey = PlaceNames.key(city.name(), null, null);
-				if (communityRepository.findByPlaceKey(placeKey).isPresent()) {
-					continue;
-				}
-				Community community = communityRepository.findBySlug(PlaceNames.slug(city.name()))
+				Community community = communityRepository.findByPlaceKey(placeKey)
+					.or(() -> communityRepository.findBySlug(PlaceNames.slug(city.name())))
 					.orElseGet(Community::new);
 				community.setName(city.name());
 				community.setSlug(PlaceNames.slug(city.name()));
-				community.setCountry("Colombia");
+				community.setCountry(city.country());
 				community.setRegion(city.region());
 				community.setCity(city.name());
 				community.setPlaceKey(placeKey);
+				community.setLatitude(city.latitude());
+				community.setLongitude(city.longitude());
+				community.setActive(true);
 				if (community.getDescription() == null || community.getDescription().isBlank()) {
 					community.setDescription("Espacio cívico de " + city.name() + ".");
 				}
@@ -82,7 +84,7 @@ public class OpenCivicSignalOsApplication {
 		};
 	}
 
-	record CitySeed(String name, String region) {}
+	record CitySeed(String name, String region, String country, double latitude, double longitude) {}
 
 	@Bean
 	@Profile({"dev", "test"})

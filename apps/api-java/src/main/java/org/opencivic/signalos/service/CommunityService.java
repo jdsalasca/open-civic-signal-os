@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ import org.opencivic.signalos.web.dto.CommunityMembershipResponse;
 import org.opencivic.signalos.web.dto.CommunityResponse;
 import org.opencivic.signalos.web.dto.CommunityTreeNodeResponse;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,11 +77,53 @@ public class CommunityService {
     public List<CommunityResponse> getPublicCities() {
         Map<UUID, Long> memberCounts = memberCountsByCommunity();
         return communityRepository.findAll().stream()
+            // A neighbourhood that emptied out is inactive; city entries stay listed so a new
+            // person can still open one.
+            .filter(community -> community.isActive()
+                || (community.getLocality() == null && community.getNeighborhood() == null))
             .map(community -> toCommunityResponse(community, memberCounts.getOrDefault(community.getId(), 0L)))
             .sorted(Comparator
                 .comparingLong(CommunityResponse::memberCount).reversed()
                 .thenComparing(CommunityResponse::name, String.CASE_INSENSITIVE_ORDER))
             .toList();
+    }
+
+    /** The closest active city entry, used by the "use my location" onboarding step. */
+    public Optional<CommunityResponse> nearestCity(double latitude, double longitude) {
+        Map<UUID, Long> memberCounts = memberCountsByCommunity();
+        return communityRepository.findAll().stream()
+            .filter(Community::isActive)
+            .filter(c -> c.getCity() != null && c.getLocality() == null && c.getNeighborhood() == null)
+            .filter(c -> c.getLatitude() != null && c.getLongitude() != null)
+            .min(Comparator.comparingDouble(c -> distanceSquared(c, latitude, longitude)))
+            .map(c -> toCommunityResponse(c, memberCounts.getOrDefault(c.getId(), 0L)));
+    }
+
+    private double distanceSquared(Community community, double latitude, double longitude) {
+        double deltaLat = community.getLatitude() - latitude;
+        double deltaLon = (community.getLongitude() - longitude) * Math.cos(Math.toRadians(latitude));
+        return deltaLat * deltaLat + deltaLon * deltaLon;
+    }
+
+    /**
+     * A locality or neighbourhood with no members is inactive. Runs at startup and hourly; city
+     * entries are the catalog and are never deactivated.
+     */
+    @Scheduled(fixedDelayString = "${app.communities.lifecycle-sweep-ms:3600000}")
+    @Transactional
+    public void deactivateEmptyPlaces() {
+        Map<UUID, Long> memberCounts = memberCountsByCommunity();
+        for (Community community : communityRepository.findAll()) {
+            boolean isCity = community.getLocality() == null && community.getNeighborhood() == null;
+            if (isCity) {
+                continue;
+            }
+            boolean shouldBeActive = memberCounts.getOrDefault(community.getId(), 0L) > 0;
+            if (community.isActive() != shouldBeActive) {
+                community.setActive(shouldBeActive);
+                communityRepository.save(community);
+            }
+        }
     }
 
     public List<CommunityTreeNodeResponse> getCommunityTree() {
@@ -107,9 +151,29 @@ public class CommunityService {
         UUID parentCommunityId,
         String username
     ) {
+        return createCommunity(
+            name, slug, description, country, region, parentCommunityId,
+            null, null, null, username
+        );
+    }
+
+    public CommunityResponse createCommunity(
+        String name,
+        String slug,
+        String description,
+        String country,
+        String region,
+        UUID parentCommunityId,
+        String city,
+        String locality,
+        String neighborhood,
+        String username
+    ) {
         User user = accessService.getCurrentUser(username);
-        return createCommunityAndJoin(user.getId(), name, slug, description, country, region, parentCommunityId,
-            CommunityRole.COORDINATOR);
+        return createCommunityAndJoin(
+            user.getId(), name, slug, description, country, region, parentCommunityId,
+            city, locality, neighborhood, CommunityRole.COORDINATOR
+        );
     }
 
     /**
@@ -239,7 +303,11 @@ public class CommunityService {
      */
     @Transactional
     public CommunityMembershipResponse joinCommunityForUser(UUID communityId, UUID userId, CommunityRole role) {
-        requireCommunity(communityId);
+        Community community = requireCommunity(communityId);
+        if (!community.isActive()) {
+            community.setActive(true);
+            communityRepository.save(community);
+        }
         CommunityMembership membership = new CommunityMembership();
         membership.setCommunityId(communityId);
         membership.setUserId(userId);

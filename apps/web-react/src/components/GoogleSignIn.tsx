@@ -1,38 +1,26 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import apiClient from '../api/axios';
+import { useCallback, useEffect, useRef } from 'react';
 
 const GIS_SCRIPT = 'https://accounts.google.com/gsi/client';
 
 /**
- * Renders Google's own button. The client id comes from the API at runtime so the web image does
- * not need to be rebuilt when the credential changes. Without a configured client id the component
- * renders nothing and the password form stays the only way in.
+ * Renders Google's own button. The client id arrives from the login page, which reads it from the
+ * API at runtime, so the web image does not need a rebuild when the credential changes. Without a
+ * configured client id the component renders nothing and the password form (dev only) stays the
+ * only way in.
  */
-export function GoogleSignIn({ onCredential }: { onCredential: (credential: string) => void }) {
+export function GoogleSignIn({
+  clientId,
+  onCredential
+}: {
+  clientId: string;
+  onCredential: (credential: string) => void;
+}) {
   const container = useRef<HTMLDivElement>(null);
-  const [clientId, setClientId] = useState<string | null>(null);
 
   const handleCredential = useCallback(
     (response: { credential: string }) => onCredential(response.credential),
     [onCredential]
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    apiClient
-      .get<{ clientId: string }>('auth/google/config')
-      .then(({ data }) => {
-        if (!cancelled && data?.clientId) {
-          setClientId(data.clientId);
-        }
-      })
-      .catch(() => {
-        // Google sign-in is optional; the password form still works.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     if (!clientId || !container.current) {
@@ -42,13 +30,16 @@ export function GoogleSignIn({ onCredential }: { onCredential: (credential: stri
       if (!window.google || !container.current) {
         return;
       }
+      const width = Math.min(360, Math.max(240, container.current.clientWidth || 320));
       window.google.accounts.id.initialize({ client_id: clientId, callback: handleCredential });
       container.current.innerHTML = '';
       window.google.accounts.id.renderButton(container.current, {
         theme: 'outline',
         size: 'large',
+        shape: 'pill',
         text: 'continue_with',
-        width: 320
+        logo_alignment: 'left',
+        width
       });
     };
 
@@ -73,5 +64,5 @@ export function GoogleSignIn({ onCredential }: { onCredential: (credential: stri
   if (!clientId) {
     return null;
   }
-  return <div ref={container} className="flex justify-content-center mt-4" data-testid="google-signin" />;
+  return <div ref={container} className="google-signin-slot" data-testid="google-signin" />;
 }

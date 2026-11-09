@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -40,6 +40,23 @@ export function Verify() {
   
   const { control, handleSubmit, formState: { isSubmitting, errors } } = useForm<VerifyForm>();
   const canResend = resendCooldownSeconds === 0;
+
+  useEffect(() => {
+    let cancelled = false;
+    apiClient
+      .get<{ passwordLoginEnabled?: boolean }>('auth/google/config')
+      .then(({ data }) => {
+        if (!cancelled && data?.passwordLoginEnabled === false) {
+          navigate('/login');
+        }
+      })
+      .catch(() => {
+        // Keep the page when the config cannot be read (dev/offline).
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   const resendLabel = useMemo(() => {
     if (resendCooldownSeconds === 0) {
