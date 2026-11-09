@@ -84,13 +84,25 @@ public class GeocodingService {
         JsonNode root = objectMapper.readTree(body);
         JsonNode address = root.path("address");
         return new PlaceSuggestion(
-            firstOf(address, "city", "town", "municipality", "county", "state"),
-            firstOf(address, "suburb", "city_district", "district", "county"),
-            firstOf(address, "neighbourhood", "quarter", "suburb", "city_district"),
+            clean(firstOf(address, "city", "town", "municipality", "county", "state")),
+            clean(firstOf(address, "suburb", "city_district", "district", "county")),
+            clean(firstOf(address, "neighbourhood", "quarter", "suburb", "city_district")),
             firstOf(address, "country"),
             firstOf(address, "state", "region"),
             text(root, "display_name")
         );
+    }
+
+    /** "Localidad Teusaquillo" -> "Teusaquillo"; "Bogotá ciudad" -> "Bogotá". */
+    private String clean(String value) {
+        if (value == null) {
+            return null;
+        }
+        String cleaned = value
+            .replaceFirst("(?i)^(localidad|comuna|municipio de|upzs? de)\\s+", "")
+            .replaceFirst("(?i)\\s+ciudad$", "")
+            .trim();
+        return cleaned.isEmpty() ? value : cleaned;
     }
 
     private String firstOf(JsonNode node, String... fields) {

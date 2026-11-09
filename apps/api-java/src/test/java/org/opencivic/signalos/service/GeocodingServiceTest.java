@@ -31,6 +31,26 @@ class GeocodingServiceTest {
     }
 
     @Test
+    void stripsAdministrativePrefixesFromOsmValues() throws Exception {
+        String body = """
+            {
+              "address": {
+                "city": "Bogotá ciudad",
+                "suburb": "Localidad Teusaquillo",
+                "neighbourhood": "UPZs de Bogotá",
+                "country": "Colombia"
+              }
+            }
+            """;
+
+        GeocodingService.PlaceSuggestion place = new GeocodingService().parse(body);
+
+        assertEquals("Bogotá", place.city());
+        assertEquals("Teusaquillo", place.locality());
+        assertEquals("Bogotá", place.neighborhood());
+    }
+
+    @Test
     void fallsBackToTownAndMunicipalityWhenCityIsMissing() throws Exception {
         String body = """
             {
