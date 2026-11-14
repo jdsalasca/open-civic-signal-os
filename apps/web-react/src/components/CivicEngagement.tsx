@@ -173,7 +173,7 @@ export function CivicEngagement({
               comments.map((comment) => (
                 <div key={comment.id} className="bg-surface p-5 hover:bg-surface-soft transition-colors">
                   <div className="flex align-items-center gap-3 mb-3">
-                    <Avatar label={comment.authorUsername[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white" />
+                    <Avatar label={comment.authorUsername[0].toUpperCase()} shape="circle" className="bg-brand-primary text-on-brand" />
                     <div className="flex flex-column">
                       <span className="text-sm font-black text-main">{comment.authorUsername}</span>
                       <span className="text-xs font-bold text-muted uppercase tracking-widest">{toRoleListLabel(comment.authorRole, t)}</span>
