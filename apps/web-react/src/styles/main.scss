@@ -1856,6 +1856,194 @@ select:focus-visible,
   text-wrap: pretty;
 }
 
+// PrimeReact's compiled theme hardcodes a cyan accent on these states. They are
+// bridged here so a control cannot keep cyan while the rest of the app changes.
+.p-selectbutton .p-button:not(.p-highlight) {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--text-secondary) !important;
+
+  .p-button-label,
+  .p-button-icon {
+    color: var(--text-secondary) !important;
+  }
+
+  &:hover {
+    background: var(--surface-soft-hover) !important;
+    color: var(--text-main) !important;
+
+    .p-button-label,
+    .p-button-icon {
+      color: var(--text-main) !important;
+    }
+  }
+}
+
+.p-selectbutton .p-button.p-highlight,
+.p-selectbutton .p-button.p-highlight:hover,
+.p-togglebutton.p-highlight .p-button,
+.p-togglebutton:not(.p-disabled):has(.p-togglebutton-input:hover).p-highlight .p-button {
+  background: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--on-brand) !important;
+
+  .p-button-label,
+  .p-button-icon {
+    color: var(--on-brand) !important;
+  }
+}
+
+.p-checkbox.p-highlight .p-checkbox-box {
+  background: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+
+  .p-checkbox-icon {
+    color: var(--on-brand) !important;
+  }
+}
+
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box,
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:focus-visible) .p-checkbox-box,
+.p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:hover) .p-radiobutton-box,
+.p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:focus-visible) .p-radiobutton-box {
+  border-color: var(--brand-primary) !important;
+}
+
+.p-radiobutton.p-highlight .p-radiobutton-box {
+  background: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+
+  .p-radiobutton-icon {
+    background: var(--on-brand) !important;
+  }
+}
+
+.p-inputswitch.p-highlight .p-inputswitch-slider {
+  background: var(--brand-primary) !important;
+}
+
+.p-slider .p-slider-range {
+  background: var(--brand-primary) !important;
+}
+
+.p-slider .p-slider-handle {
+  border-color: var(--brand-primary) !important;
+  background: var(--bg-card) !important;
+}
+
+.p-progressbar .p-progressbar-value {
+  background: var(--brand-primary) !important;
+}
+
+.p-rating .p-rating-item.p-rating-item-active .p-rating-icon,
+.p-rating:not(.p-disabled):not(.p-readonly) .p-rating-item:hover .p-rating-icon {
+  color: var(--brand-primary) !important;
+}
+
+.p-datepicker {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-paper-sm) !important;
+  box-shadow: var(--shadow-edge), var(--shadow-premium) !important;
+  color: var(--text-main) !important;
+}
+
+.p-datepicker .p-datepicker-header {
+  background: transparent !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+  color: var(--text-main) !important;
+
+  .p-datepicker-title,
+  .p-datepicker-title button {
+    color: var(--text-main) !important;
+  }
+
+  .p-datepicker-prev,
+  .p-datepicker-next {
+    color: var(--text-muted) !important;
+
+    &:hover {
+      background: var(--surface-soft) !important;
+      color: var(--text-main) !important;
+    }
+  }
+}
+
+.p-datepicker table th {
+  color: var(--text-muted) !important;
+}
+
+.p-datepicker table td > span,
+.p-datepicker table td > a {
+  color: var(--text-secondary) !important;
+}
+
+.p-datepicker table td > span.p-highlight,
+.p-datepicker table td > a.p-highlight {
+  background: var(--brand-primary) !important;
+  color: var(--on-brand) !important;
+}
+
+.p-datepicker table td.p-datepicker-other-month > span {
+  color: var(--text-muted) !important;
+  opacity: 0.55;
+}
+
+.p-datepicker table td.p-datepicker-today > span {
+  background: var(--brand-primary-alpha-10) !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--text-main) !important;
+}
+
+.p-datepicker .p-timepicker {
+  border-top: 1px solid var(--border-subtle) !important;
+  color: var(--text-main) !important;
+
+  button {
+    color: var(--text-muted) !important;
+
+    &:hover {
+      background: var(--surface-soft) !important;
+      color: var(--text-main) !important;
+    }
+  }
+}
+
+.p-datepicker .p-datepicker-buttonbar {
+  border-top: 1px solid var(--border-subtle) !important;
+}
+
+.p-calendar .p-datepicker-trigger,
+.p-datepicker-trigger.p-button {
+  background: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--on-brand) !important;
+
+  &:hover {
+    background: var(--brand-primary-hover) !important;
+    border-color: var(--brand-primary-hover) !important;
+  }
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  border-color: var(--brand-primary) !important;
+  color: var(--text-main) !important;
+}
+
+.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+  color: var(--brand-primary) !important;
+}
+
+.p-timeline .p-timeline-event-marker {
+  border-color: var(--brand-primary) !important;
+}
+
+.p-tag,
+.p-badge {
+  background: var(--brand-primary) !important;
+  color: var(--on-brand) !important;
+}
+
 .app-mobile-nav a,
 .app-mobile-nav button {
   min-width: 0;
