@@ -322,7 +322,7 @@ export function Layout({ children, authMode = false }: Props) {
         <div className="mt-auto p-4 border-top-1 border-subtle bg-surface">
           <div className="flex flex-column gap-4">
             <div className="flex align-items-center gap-3 px-2">
-              <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
+              <Avatar label={userName?.[0].toUpperCase()} shape="circle" className="bg-brand-primary text-on-brand font-bold" />
               <div className="flex flex-column overflow-hidden">
                 <span className="text-sm font-black text-main app-user-name">{userName}</span>
                 <span className="text-xs font-bold text-muted nav-clearance-label app-user-role">

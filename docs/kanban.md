@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-11-09T01:35:28.835Z
+Last updated: 2026-11-09T02:09:29.149Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,7 +10,7 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-11-02T01:35:25.827Z)
+- Window: last 7 days (since 2026-11-02T02:09:25.340Z)
 - Throughput (issues closed): 0
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
@@ -80,12 +80,13 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 22
+- TODO: 23
 - IN_PROGRESS: 0
 - BLOCKED: 0
 - DONE: 109
 
 ### TODO
+- #154 Registry cards break names into one letter per line; no quick way to switch interface styles
 - #152 Place dropdowns collapse into one letter per line and the selected option has low contrast
 - #150 Community hub action bar collapses the geospatial copy into one word per line
 - #148 Google-only sign-in with place onboarding, location and system locale

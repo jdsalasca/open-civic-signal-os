@@ -361,7 +361,7 @@ export function Communities() {
         <CivicPageHeader title={t('communities_hub.title')} description={t('communities_hub.desc')} />
         <ContextualHelpPanel surface="COMMUNITIES" className="mb-6" dataTestId="communities-contextual-help" compact />
         <CivicActionBar className="mb-6" data-testid="communities-map-entrybar">
-          <div className="flex-1 min-w-0 civic-action-bar-copy">
+          <div className="civic-action-bar-copy">
             <div className="u-eyebrow mb-1">
               {t("community_map.communities_entry_label")}
             </div>

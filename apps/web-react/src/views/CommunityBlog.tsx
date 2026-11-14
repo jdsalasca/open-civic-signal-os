@@ -237,7 +237,7 @@ export function CommunityBlog() {
         <div className="p-5 md:p-6 flex flex-column gap-4 h-full">
           <header className="u-card-split-header">
             <div className="flex align-items-center gap-3 u-card-copy">
-              <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-white font-bold" />
+              <Avatar label={post.authorUsername?.[0]?.toUpperCase()} shape="circle" className="bg-brand-primary text-on-brand font-bold" />
               <div className="flex flex-column u-card-copy">
                 <span className="text-sm font-bold text-main">{post.authorUsername}</span>
                 <span className="text-xs text-muted">{toRoleListLabel(post.authorRole, t)}</span>

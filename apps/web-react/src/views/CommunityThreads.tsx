@@ -276,7 +276,7 @@ export function CommunityThreads() {
         <div className={`u-card-surface-block ${depth === 0 ? "bg-surface border-subtle" : "bg-surface-soft border-surface-soft"} ${message.hidden ? "opacity-60" : ""}`}>
           <div className="u-card-split-header mb-3">
             <div className="flex align-items-center gap-3 u-card-copy">
-              <Avatar label={depth === 0 ? "OP" : "R"} shape="circle" className="bg-brand-primary text-white font-bold text-xs" />
+              <Avatar label={depth === 0 ? "OP" : "R"} shape="circle" className="bg-brand-primary text-on-brand font-bold text-xs" />
               <div className="flex flex-column u-card-copy">
                 <span className="text-sm font-black text-main">
                   {t("community_threads.member_id", { id: message.authorId.slice(0, 4) })}
