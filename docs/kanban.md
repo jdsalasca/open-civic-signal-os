@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-11-14T12:49:56.115Z
+Last updated: 2026-11-14T20:51:21.809Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-11-07T12:49:52.659Z)
-- Throughput (issues closed): 0
+- Window: last 7 days (since 2026-11-07T20:51:18.323Z)
+- Throughput (issues closed): 1
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -80,15 +80,14 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 25
+- TODO: 24
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 109
+- DONE: 110
 
 ### TODO
 - #157 Current Sprint Focus 2026-W46
 - #156 Agent Quality Review 2026-W46
-- #154 Registry cards break names into one letter per line; no quick way to switch interface styles
 - #152 Place dropdowns collapse into one letter per line and the selected option has low contrast
 - #150 Community hub action bar collapses the geospatial copy into one word per line
 - #148 Google-only sign-in with place onboarding, location and system locale
@@ -119,6 +118,7 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #154 Registry cards break names into one letter per line; no quick way to switch interface styles
 - #119 Current Sprint Focus 2026-W39
 - #118 Agent Quality Review 2026-W39
 - #117 Current Sprint Focus 2026-W38
