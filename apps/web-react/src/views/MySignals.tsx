@@ -13,7 +13,7 @@ import { CivicEmptyState } from "../components/ui/CivicEmptyState";
 import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { PriorityScale, StatusChip } from "../components/signalPrimitives";
-import { useSignalStatusLabel } from "../utils/signalStatus";
+import { useCategoryLabel, useSignalStatusLabel } from "../utils/signalStatus";
 
 /**
  * My contributions, in the same visual language as the central signal surfaces: the big number
@@ -23,6 +23,7 @@ import { useSignalStatusLabel } from "../utils/signalStatus";
 export function MySignals() {
   const { t } = useTranslation();
   const statusLabel = useSignalStatusLabel();
+  const categoryLabel = useCategoryLabel();
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -100,7 +101,7 @@ export function MySignals() {
     ) : (
       <span className="signal-status-chip" data-status={rowData.category}>
         <span className="signal-status-chip__dot" aria-hidden="true" style={{ background: "var(--chart-4)" }} />
-        <span>{t(`categories.${rowData.category}`)}</span>
+        <span>{categoryLabel(rowData.category)}</span>
       </span>
     );
 

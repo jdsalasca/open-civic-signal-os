@@ -3063,12 +3063,12 @@ select:focus-visible,
   min-width: 0;
 }
 
-.social-feed-alerts-row strong {
+.social-feed-alerts-row > div > strong {
   color: var(--text-main);
   font-size: 0.85rem;
 }
 
-.social-feed-alerts-row span {
+.social-feed-alerts-row > div > span {
   color: var(--text-muted);
   font-size: 0.78rem;
   line-height: 1.4;

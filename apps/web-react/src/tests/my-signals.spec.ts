@@ -31,6 +31,8 @@ test.describe('My reports', () => {
 
     await expect(page.getByTestId('mine-signals-table')).toContainText('Report a');
     await expect(page.getByTestId('mine-signals-table')).toContainText('Report b');
+    await expect(page.getByTestId('mine-signals-table')).toContainText('Public Safety');
+    await expect(page.getByTestId('mine-signals-table')).not.toContainText('categories.SAFETY');
     await expect(page.getByTestId('mine-metric-total')).toContainText('2');
     await expect(page.getByTestId('mine-metric-resolved')).toContainText('1');
     await expect(page.getByTestId('mine-metric-votes')).toContainText('7');

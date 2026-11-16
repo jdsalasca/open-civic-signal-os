@@ -6,7 +6,7 @@ import { Signal } from "../types";
 import { PriorityScale, SignalEmpty, StatusChip } from "./signalPrimitives";
 import { CivicButton } from "./ui/CivicButton";
 import { LinkifiedText } from "./ui/LinkifiedText";
-import { useSignalStatusLabel } from "../utils/signalStatus";
+import { useCategoryLabel, useSignalStatusLabel } from "../utils/signalStatus";
 import { formatStamp } from "../utils/formatStamp";
 
 type Props = {
@@ -41,6 +41,7 @@ export function SignalFeedList({
 }: Props) {
   const { t } = useTranslation();
   const statusLabel = useSignalStatusLabel();
+  const categoryLabel = useCategoryLabel();
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -158,9 +159,9 @@ export function SignalFeedList({
                   <LinkifiedText text={preview(signal)} />
                 </p>
                 <div className="signal-feed-card__meta">
-                  <span className="signal-status-chip" data-status={t(`categories.${signal.category}`)}>
+                  <span className="signal-status-chip" data-status={categoryLabel(signal.category)}>
                     <span className="signal-status-chip__dot" aria-hidden="true" style={{ background: "var(--brand-accent)" }} />
-                    <span>{t(`categories.${signal.category}`)}</span>
+                    <span>{categoryLabel(signal.category)}</span>
                   </span>
                   <StatusChip status={signal.status} label={statusLabel(signal.status)} />
                   <PriorityScale

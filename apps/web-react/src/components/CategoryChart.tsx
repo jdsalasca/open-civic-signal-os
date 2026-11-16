@@ -112,7 +112,7 @@ export function CategoryChart({ signals }: Props) {
     const ordered = Object.entries(categories).sort((a, b) => b[1] - a[1]);
 
     return {
-      labels: ordered.map(([category]) => t(`categories.${category}`)),
+      labels: ordered.map(([category]) => t(`categories.${category.toLowerCase()}`, { defaultValue: category })),
       datasets: [
         {
           label: t("dashboard.distribution_title"),

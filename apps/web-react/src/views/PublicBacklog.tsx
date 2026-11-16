@@ -10,7 +10,7 @@ import { PriorityScale, StatusChip } from "../components/signalPrimitives";
 import apiClient from "../api/axios";
 import type { PrioritizationFormula, Signal, SignalMeta } from "../types";
 import { formatStamp } from "../utils/formatStamp";
-import { useSignalStatusLabel } from "../utils/signalStatus";
+import { useCategoryLabel, useSignalStatusLabel } from "../utils/signalStatus";
 
 /**
  * The backlog, readable without an account.
@@ -31,6 +31,7 @@ import { useSignalStatusLabel } from "../utils/signalStatus";
 export function PublicBacklog() {
   const { t } = useTranslation();
   const statusLabel = useSignalStatusLabel();
+  const categoryLabel = useCategoryLabel();
   const [signals, setSignals] = useState<Signal[]>([]);
   const [meta, setMeta] = useState<SignalMeta | null>(null);
   const [formula, setFormula] = useState<PrioritizationFormula | null>(null);
@@ -139,7 +140,7 @@ export function PublicBacklog() {
                     <div className="signal-backlog-item__meta">
                       <span className="signal-status-chip" data-status={signal.category}>
                         <span className="signal-status-chip__dot" aria-hidden="true" style={{ background: "var(--chart-4)" }} />
-                        <span>{t(`categories.${signal.category}`)}</span>
+                        <span>{categoryLabel(signal.category)}</span>
                       </span>
                       {signal.locationLabel && (
                         <span className="signal-status-chip">

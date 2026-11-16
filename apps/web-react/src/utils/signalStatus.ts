@@ -21,3 +21,13 @@ export function useSignalStatusLabel(): (status?: string | null) => string {
   return (status) =>
     t(status ? (STATUS_LABEL_KEYS[status] ?? "signals.status_unknown") : "signals.status_unknown");
 }
+
+/**
+ * Category values arrive in either case (`safety` from the report wizard, `SAFETY` from older
+ * seeds), and the translation keys are lowercase. Without this, the UI leaks `categories.SAFETY`.
+ */
+export function useCategoryLabel(): (category?: string | null) => string {
+  const { t } = useTranslation();
+  return (category) =>
+    category ? t(`categories.${category.toLowerCase()}`, { defaultValue: category }) : "";
+}
