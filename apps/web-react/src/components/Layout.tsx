@@ -262,9 +262,6 @@ export function Layout({ children, authMode = false }: Props) {
                 <span className="app-brand-title text-2xl">SignalOS</span>
               </div>
             </div>
-            <p className="app-brand-copy m-0">
-              {t("dashboard.guided_home.citizen.hero_subtitle")}
-            </p>
           </div>
         </div>
 
@@ -306,9 +303,7 @@ export function Layout({ children, authMode = false }: Props) {
                 </span>
                 <span className="text-xs text-muted">{visibleMoreCount}</span>
               </button>
-              <p className="text-xs text-muted mt-2 mb-0 px-2" data-testid="desktop-more-hint">
-                {t('nav.more_tools_hint')}
-              </p>
+
             </div>
             {desktopMoreVisible && (
               <div className="mt-4" data-testid="desktop-more-panel">
@@ -419,18 +414,6 @@ export function Layout({ children, authMode = false }: Props) {
               onClick={() => navigate('/report')}
               data-testid="header-primary-report"
             />
-
-            {activeMembership && location.pathname !== "/communities" && (
-              <Button
-                type="button"
-                icon="pi pi-globe"
-                label={t("nav.open_community_hub")}
-                text
-                className="hidden lg:flex u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
-                onClick={() => navigate('/communities')}
-                data-testid="header-community-hub"
-              />
-            )}
 
             {interfaceMode === "advanced" && (
               <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />

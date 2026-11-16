@@ -9,12 +9,13 @@ import { CivicButton } from '../components/ui/CivicButton';
 import { CivicCard } from '../components/ui/CivicCard';
 import { CivicField } from '../components/ui/CivicField';
 import { useCommunityStore } from '../store/useCommunityStore';
+import { languageForCountry, useSettingsStore } from '../store/useSettingsStore';
 import { Community } from '../types';
 
 type GeoState = 'idle' | 'locating' | 'found' | 'denied' | 'error';
 
 export function Onboarding() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const markMembershipsStale = useCommunityStore((state) => state.markMembershipsStale);
 
@@ -117,6 +118,12 @@ export function Onboarding() {
             if (data.neighborhood) setNeighborhood(data.neighborhood);
             if (data.country) setCountry(data.country);
             if (data.region) setRegion(data.region);
+            const countryLanguage = languageForCountry(data.country);
+            const settings = useSettingsStore.getState();
+            if (countryLanguage && !settings.languageExplicit) {
+              settings.setDetectedLanguage(countryLanguage);
+              i18n.changeLanguage(countryLanguage);
+            }
           }
         } catch {
           // Keep the manual form.
@@ -128,6 +135,17 @@ export function Onboarding() {
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
     );
   };
+
+  // Take the person to their own city first: one attempt per tab. If permission is denied, the
+  // manual list and the locate button are still there, so nothing is blocked.
+  useEffect(() => {
+    if (sessionStorage.getItem('onboarding-auto-locate') === '1') {
+      return;
+    }
+    sessionStorage.setItem('onboarding-auto-locate', '1');
+    locate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const createPlace = async () => {
     if (!city.trim()) {

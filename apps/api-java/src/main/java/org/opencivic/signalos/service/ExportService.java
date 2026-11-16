@@ -31,7 +31,7 @@ public class ExportService {
             writer.println("ID,Title,Category,Status,PriorityScore,Score_Urgency,Score_Impact,Score_People,Score_Votes,VerificationHash,CreatedAt");
 
             for (Signal s : signals) {
-                TrustPacket packet = prioritizationService.getTrustPacket(s.getId());
+                TrustPacket packet = prioritizationService.getTrustPacket(s);
                 
                 List<String> data = Arrays.asList(
                     s.getId().toString(),

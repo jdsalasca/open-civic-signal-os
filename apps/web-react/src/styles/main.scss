@@ -687,6 +687,42 @@ a:hover {
   margin-left: auto;
 }
 
+.theme-wheel-divider {
+  height: 1px;
+  margin: 0.3rem 0;
+  background: var(--border-subtle);
+}
+
+.theme-wheel-label {
+  padding: 0.25rem 0.65rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.theme-wheel-languages {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0 0.15rem 0.15rem;
+}
+
+.theme-wheel-languages button {
+  justify-content: center;
+  padding: 0.45rem;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.theme-wheel-languages button.is-active {
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
+  color: var(--on-brand);
+}
+
 .civic-tip-bar {
   display: flex;
   flex-wrap: wrap;
@@ -1413,8 +1449,69 @@ a:hover {
 
 .dashboard-hero-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(19rem, 0.95fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
+}
+
+// The home opens with the feed, not a billboard. The welcome keeps only identity, place,
+// freshness and one action, so the first screen answers "what is happening here?".
+.dashboard-welcome-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-welcome-action {
+  flex: 0 0 auto;
+}
+
+.dashboard-attention-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-paper-sm);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+
+  i {
+    color: var(--status-resolved);
+    font-size: 1.2rem;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  strong {
+    color: var(--text-main);
+    font-size: 0.9rem;
+  }
+
+  span {
+    font-size: 0.8rem;
+  }
+}
+
+.dashboard-community-hub-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-community-hub-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  min-width: min(100%, 15rem);
 }
 
 .dashboard-story-card {

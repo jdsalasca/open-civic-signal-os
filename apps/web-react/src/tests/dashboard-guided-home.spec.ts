@@ -15,7 +15,7 @@ test.describe('Dashboard guided home by role', () => {
 
     await expect(page.getByTestId('dashboard-guided-persona')).toContainText('Citizen path');
     await expect(page.getByTestId('dashboard-active-community-pill')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Report one local issue clearly' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /What is happening in/ })).toBeVisible();
     await expect(page.getByTestId('dashboard-action-report')).toContainText('Report a local issue');
     await expect(page.getByTestId('dashboard-community-hub-card')).toContainText('Your place in the community');
     await expect(page.getByTestId('dashboard-community-action-blog')).toContainText('Official updates');
@@ -26,7 +26,7 @@ test.describe('Dashboard guided home by role', () => {
     await login(page, 'admin', 'admin12345');
 
     await expect(page.getByTestId('dashboard-guided-persona')).toContainText('Public servant path');
-    await expect(page.getByRole('heading', { name: 'Move one priority forward today' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /What is happening in/ })).toBeVisible();
     await expect(page.getByTestId('dashboard-action-report')).toContainText('Publish a progress update');
     await expect(page.getByTestId('dashboard-community-hub-card')).toContainText('Your place in the community');
     await expect(page.getByTestId('dashboard-community-open-hub')).toContainText('Open communities hub');
@@ -42,7 +42,7 @@ test.describe('Dashboard guided home by role', () => {
 
     await page.goto('/');
     await expect(page.getByTestId('dashboard-guided-persona')).toContainText('Moderator path');
-    await expect(page.getByRole('heading', { name: 'Keep community conversations usable' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /What is happening in/ })).toBeVisible();
     await expect(page.getByTestId('dashboard-action-report')).toContainText('Review community dialogues');
     await expect(page.getByTestId('dashboard-guided-home-description')).toContainText('Los rosales');
     await expect(page.getByTestId('dashboard-community-summary')).toContainText('Los Rosales');

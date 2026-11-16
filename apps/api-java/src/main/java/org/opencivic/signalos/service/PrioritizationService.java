@@ -41,6 +41,15 @@ public interface PrioritizationService {
     double calculateScore(Signal signal);
     ScoreBreakdown getBreakdown(Signal signal);
     TrustPacket getTrustPacket(UUID signalId);
+
+    /**
+     * Builds the packet from an entity already in memory.
+     *
+     * <p>Batch readers (the CSV export) already hold the signal; going back to the repository for
+     * each row turns one read into N + 1. The packet is a pure function of the entity and the
+     * formula, so there is no reason to re-read it.
+     */
+    TrustPacket getTrustPacket(Signal signal);
     java.util.List<org.opencivic.signalos.domain.SignalStatusEntry> getStatusHistory(UUID signalId);
     Signal assignSignal(UUID signalId, String assigneeUsername, String changedBy, String reason, UUID communityId);
     java.util.Map<UUID, java.util.List<Signal>> findDuplicates();

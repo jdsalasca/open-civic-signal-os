@@ -104,7 +104,11 @@ public PrioritizationServiceImpl(SignalRepository signalRepository,
     public TrustPacket getTrustPacket(UUID signalId) {
         Signal signal = signalRepository.findById(signalId)
                 .orElseThrow(() -> new ResourceNotFoundException("Signal not found: " + signalId));
-        
+        return getTrustPacket(signal);
+    }
+
+    @Override
+    public TrustPacket getTrustPacket(Signal signal) {
         ScoreBreakdown breakdown = getBreakdown(signal);
         double score = calculateScore(signal);
         
