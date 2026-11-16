@@ -1,13 +1,11 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, lazy, Suspense } from "react";
 import { toast } from "react-hot-toast";
 import { Signal, Notification, SignalMeta, SignalAging } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
-import { SignalTable } from "../components/SignalTable";
-import type { DataTablePageEvent } from "primereact/datatable";
+import { SignalFeedList } from "../components/SignalFeedList";
 import { PriorityScale, StatusChip } from "../components/signalPrimitives";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
-import { CategoryChart } from "../components/CategoryChart";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { Layout } from "../components/Layout";
@@ -27,6 +25,12 @@ import { useCommunityStore } from "../store/useCommunityStore";
 import { useSettingsStore, PAGE_SIZE_BY_DATA_MODE } from "../store/useSettingsStore";
 import { toRoleLabel } from "../constants/roleLabels";
 import { useSignalStatusLabel } from "../utils/signalStatus";
+
+// Chart.js is 60 KB compressed and only advanced/staff users see this rail. Keeping it out of the
+// dashboard chunk means a citizen never downloads a chart they cannot see.
+const CategoryChart = lazy(() =>
+  import("../components/CategoryChart").then((module) => ({ default: module.CategoryChart }))
+);
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -53,6 +57,9 @@ type DashboardCachePayload = {
 };
 
 const dashboardCache = new Map<string, { timestamp: number; data: DashboardCachePayload }>();
+// Meta does not depend on the page or the filter. Keeping it in its own cache means changing a
+// filter costs one request instead of two.
+const metaCache = new Map<string, { timestamp: number; data: SignalMeta }>();
 
 export function Dashboard() {
   const { t } = useTranslation();
@@ -70,6 +77,7 @@ export function Dashboard() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [meta, setMeta] = useState<SignalMeta | null>(null);
   // Server-published threshold, with a bootstrap fallback only for the first paint before /meta
   // resolves. Once meta arrives this is the platform's number, not a local copy.
@@ -92,6 +100,7 @@ export function Dashboard() {
   }, [dataMode]);
 
   const loadData = useCallback(async (signal?: AbortSignal, force = false) => {
+    setLoadError(false);
     const cacheKey = [
       activeCommunityId || "global",
       activeRole,
@@ -130,9 +139,16 @@ export function Dashboard() {
       }
       const prioritizedQuery = `signals/prioritized?${prioritizedParams.toString()}`;
 
+      const metaKey = activeCommunityId || "global";
+      const cachedMeta = metaCache.get(metaKey);
+      const metaFresh = !force && cachedMeta && Date.now() - cachedMeta.timestamp < DASHBOARD_CACHE_TTL_MS;
+      const metaRequest = metaFresh
+        ? Promise.resolve({ status: 200, data: cachedMeta.data })
+        : apiClient.get("signals/meta", { signal });
+
       const [signalsRes, metaRes, notificationsRes, duplicatesRes] = await Promise.all([
         apiClient.get(prioritizedQuery, { signal }),
-        apiClient.get("signals/meta", { signal }),
+        metaRequest,
         // Field mode skips the optional panels entirely. Hiding them after fetching would still
         // pay for the bytes, which is the whole cost being avoided.
         (staffRole && !fieldMode)
@@ -150,6 +166,9 @@ export function Dashboard() {
 
       if (metaRes.status === 200) {
         setMeta(metaRes.data);
+        if (!metaFresh) {
+          metaCache.set(metaKey, { timestamp: Date.now(), data: metaRes.data });
+        }
       }
       
       if (notificationsRes && notificationsRes.status === 200) {
@@ -178,6 +197,7 @@ export function Dashboard() {
     } catch (err) {
       const apiErr = err as ApiError & { name?: string };
       if (apiErr.name === 'CanceledError' || apiErr.name === 'AbortError') return;
+      setLoadError(true);
       toast.error(apiErr.friendlyMessage || t('dashboard.sync_error'));
     } finally {
       setLoading(false);
@@ -190,8 +210,8 @@ export function Dashboard() {
     return () => controller.abort();
   }, [loadData]);
 
-  const onPage = (event: DataTablePageEvent) => {
-    setLazyState({ first: event.first, rows: event.rows, page: event.page ?? 0 });
+  const onPage = (event: { first: number; rows: number }) => {
+    setLazyState({ first: event.first, rows: event.rows, page: Math.floor(event.first / event.rows) });
   };
 
   const handleFilterChange = (value: string) => {
@@ -276,7 +296,7 @@ export function Dashboard() {
         // Aging is an additive panel; a failure must not break the dashboard.
       });
     return () => controller.abort();
-  }, [isStaff, activeCommunityId, totalRecords, fieldMode]);
+  }, [isStaff, activeCommunityId, fieldMode]);
 
   const guidedHome = useMemo(() => {
     if (isStaff) {
@@ -527,6 +547,7 @@ export function Dashboard() {
                     type="button"
                     onClick={() => handleFilterChange(f.value)}
                     data-testid={`dashboard-filter-${f.value.toLowerCase()}`}
+                    aria-pressed={activeFilter === f.value}
                     className={`u-filter-chip cursor-pointer whitespace-nowrap ${activeFilter === f.value ? 'is-active' : ''}`}
                   >
                     <i className={`pi ${f.icon}`}></i>
@@ -540,14 +561,16 @@ export function Dashboard() {
               <CivicSkeleton type="table-row" count={8} />
             ) : (
               <CivicCard padding="none" className="border-round-3xl">
-                <SignalTable 
-                  signals={displayedSignals} 
-                  loading={loading} 
+                <SignalFeedList
+                  signals={displayedSignals}
+                  loading={loading}
                   totalRecords={visibleRecords}
                   rows={lazyState.rows}
                   first={lazyState.first}
                   onPage={onPage}
                   criticalThreshold={criticalThreshold}
+                  error={loadError}
+                  onRetry={() => { void loadData(undefined, true); }}
                 />
               </CivicCard>
             )}
@@ -561,7 +584,9 @@ export function Dashboard() {
                 ) : (
                   <>
                     {interfaceMode === "advanced" && displayedSignals.length > 0 && (
-                      <CategoryChart signals={displayedSignals} />
+                      <Suspense fallback={<CivicSkeleton type="text" count={3} />}>
+                        <CategoryChart signals={displayedSignals} />
+                      </Suspense>
                     )}
                     {interfaceMode === "advanced" && <OnboardingChecklist />}
                   {loading ? (

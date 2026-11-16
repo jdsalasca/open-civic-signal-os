@@ -165,3 +165,38 @@
   background: color-mix(in srgb, var(--bg-card) 94%, transparent);
   padding: 1.1rem;
 }
+
+// The optional fast path: a quiet text action, not a fifth button in the footer.
+.report-fast-path {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.report-fast-path__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0.25rem 0.4rem;
+  border: 0;
+  background: transparent;
+  color: var(--brand-primary);
+  font-family: var(--font-body);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.report-fast-path__link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.report-fast-path__link:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

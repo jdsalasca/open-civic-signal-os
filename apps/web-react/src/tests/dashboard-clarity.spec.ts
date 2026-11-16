@@ -51,4 +51,25 @@ test.describe('Dashboard clarity hierarchy', () => {
     await expect(secondarySurface.getByTestId('dashboard-action-blog')).toBeVisible();
     await expect(secondarySurface.getByTestId('dashboard-action-mine')).toBeVisible();
   });
+
+  test('a failed feed load shows a retry card instead of an empty neighbourhood', async ({ page }) => {
+    await page.route('**/api/signals/prioritized*', (route) => route.abort('failed'));
+    await page.route('**/api/signals/meta', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ totalSignals: 4, unresolvedSignals: 2, lastUpdatedAt: null, criticalScoreThreshold: 220 }),
+      }));
+    await page.route('**/api/notifications/recent', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/signals/duplicates', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await seedAuthenticatedApp(page, 'CITIZEN');
+    await mockDashboardRoutes(page);
+
+    await page.goto('/');
+    await expect(page.getByTestId('signals-feed-retry')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('signals-empty-state')).toHaveCount(0);
+  });
 });

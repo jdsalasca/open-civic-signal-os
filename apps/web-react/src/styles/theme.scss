@@ -392,6 +392,8 @@
 // matter which stylesheet the bundler places last.
 html:root {
   --font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-feature-settings: normal;
   --primary-color: var(--brand-primary);
   --primary-color-text: var(--on-brand);
   --surface-ground: var(--bg-app);

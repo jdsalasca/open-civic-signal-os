@@ -92,6 +92,7 @@ jobs:
           src/tests/onboarding-checklist.spec.ts
           src/tests/pwa.spec.ts
           src/tests/report-draft.spec.ts
+          src/tests/report-fast-path.spec.ts
           src/tests/community-decisions.spec.ts
           src/tests/community-governance.spec.ts
           src/tests/community-integrations.spec.ts

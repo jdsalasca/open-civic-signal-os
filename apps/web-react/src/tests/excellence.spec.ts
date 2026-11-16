@@ -54,7 +54,7 @@ test.describe('Signal OS - High Quality E2E Suite', () => {
 
     // Dashboard Integrity
     await expect(page.locator('[data-testid="dashboard-hero"]')).toBeVisible({ timeout: 15000 });
-    const table = page.locator('[data-testid="signals-datatable"]');
+    const table = page.locator('[data-testid="signals-feed"]');
     await expect(table).toBeVisible();
     await expect(page.locator('.p-skeleton')).toHaveCount(0, { timeout: 10000 });
 
