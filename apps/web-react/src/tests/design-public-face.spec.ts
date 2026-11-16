@@ -93,7 +93,10 @@ test.describe('Public landing', () => {
   test('serves the Spanish front door when the visitor chose Spanish', async ({ page }) => {
     await mockCityDirectory(page);
     await page.addInitScript(() =>
-      window.localStorage.setItem('settings-storage', JSON.stringify({ state: { language: 'es' }, version: 0 })),
+      window.localStorage.setItem(
+        'settings-storage',
+        JSON.stringify({ state: { language: 'es', languageExplicit: true }, version: 0 }),
+      ),
     );
     await page.goto('/');
 

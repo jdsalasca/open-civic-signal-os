@@ -50,6 +50,7 @@ type FocusState = {
   label: string;
   outlineVisible: boolean;
   boxShadowVisible: boolean;
+  outline: string;
 };
 
 async function readFocusState(page: Page): Promise<FocusState | null> {
@@ -67,6 +68,7 @@ async function readFocusState(page: Page): Promise<FocusState | null> {
       outlineVisible: style.outlineStyle !== 'none' && outlineWidth > 0,
       // PrimeReact components draw their focus ring as a box-shadow and zero the outline.
       boxShadowVisible: style.boxShadow !== 'none' && style.boxShadow.length > 0,
+      outline: style.outline,
     };
   });
 }
@@ -124,6 +126,7 @@ test.describe('Landing page keyboard accessibility', () => {
     const stops: FocusState[] = [];
     for (let stop = 0; stop < 14; stop += 1) {
       await page.keyboard.press('Tab');
+      await page.waitForTimeout(50);
       const state = await readFocusState(page);
       if (!state) {
         // Focus left the document and moved to the browser chrome: the page has no more stops.
@@ -132,7 +135,7 @@ test.describe('Landing page keyboard accessibility', () => {
       stops.push(state);
       expect(
         state.outlineVisible || state.boxShadowVisible,
-        `tab stop ${stop + 1} (${state.tag} ${state.testId ?? state.label}) shows no focus indicator`
+        `tab stop ${stop + 1} (${state.tag} ${state.testId ?? state.label}) shows no focus indicator (outline=${state.outline})`
       ).toBe(true);
     }
 
