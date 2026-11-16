@@ -328,47 +328,70 @@ public class CommunityCollaborationService {
         User user = accessService.getCurrentUser(username);
         accessService.requireMembership(user.getId(), communityId);
         LocalDateTime since = LocalDateTime.now().minusDays(Math.max(1, days));
-
-        List<CommunityFeedItemResponse> items = new ArrayList<>();
         PageRequest limited = PageRequest.of(0, 50);
 
-        signalRepository.findByCommunityIdOrderByCreatedAtDesc(communityId, limited).stream()
-            .filter(signal -> signal.getCreatedAt() != null && signal.getCreatedAt().isAfter(since))
-            .forEach(signal -> items.add(
-                new CommunityFeedItemResponse(
-                    "signal",
-                    signal.getId(),
-                    communityId,
-                    signal.getTitle(),
-                    signal.getLocationLabel(),
-                    signal.getCreatedAt(),
-                    freshness(signal.getCreatedAt())
-                )
-            ));
+        List<CommunityFeedItemResponse> items = new ArrayList<>();
+        items.addAll(signalFeedItems(communityId, since, limited));
+        items.addAll(blogFeedItems(communityId, since, limited));
+        items.addAll(threadFeedItems(communityId, since, limited));
 
-        blogPostRepository.findActiveOfficialTimeline(communityId).stream()
+        return items.stream()
+            .sorted(Comparator.comparing(CommunityFeedItemResponse::happenedAt).reversed())
+            .limit(100)
+            .toList();
+    }
+
+    private List<CommunityFeedItemResponse> signalFeedItems(
+        UUID communityId,
+        LocalDateTime since,
+        PageRequest limited
+    ) {
+        return signalRepository.findByCommunityIdOrderByCreatedAtDesc(communityId, limited).stream()
+            .filter(signal -> signal.getCreatedAt() != null && signal.getCreatedAt().isAfter(since))
+            .map(signal -> new CommunityFeedItemResponse(
+                "signal",
+                signal.getId(),
+                communityId,
+                signal.getTitle(),
+                signal.getLocationLabel(),
+                signal.getCreatedAt(),
+                freshness(signal.getCreatedAt())
+            ))
+            .toList();
+    }
+
+    private List<CommunityFeedItemResponse> blogFeedItems(
+        UUID communityId,
+        LocalDateTime since,
+        PageRequest limited
+    ) {
+        return blogPostRepository.findActiveOfficialTimeline(communityId).stream()
             .filter(post -> post.getPublishedAt() != null && post.getPublishedAt().isAfter(since))
             .limit(limited.getPageSize())
-            .forEach(post -> items.add(
-                new CommunityFeedItemResponse(
-                    "blog",
-                    post.getId(),
-                    communityId,
-                    post.getTitle(),
-                    summarizeText(post.getContent()),
-                    post.getPublishedAt(),
-                    freshness(post.getPublishedAt())
-                )
-            ));
+            .map(post -> new CommunityFeedItemResponse(
+                "blog",
+                post.getId(),
+                communityId,
+                post.getTitle(),
+                summarizeText(post.getContent()),
+                post.getPublishedAt(),
+                freshness(post.getPublishedAt())
+            ))
+            .toList();
+    }
 
+    private List<CommunityFeedItemResponse> threadFeedItems(
+        UUID communityId,
+        LocalDateTime since,
+        PageRequest limited
+    ) {
         List<CommunityThread> threads = threadRepository
             .findBySourceCommunityIdOrTargetCommunityIdOrderByUpdatedAtDesc(communityId, communityId, limited)
             .stream()
             .filter(thread -> thread.getUpdatedAt() != null && thread.getUpdatedAt().isAfter(since))
             .toList();
         // One query for every thread in the page, not one per thread. The first message is the post
-        // body a reader expects under the title; the old summary was the literal
-        // "cross-community update", which described the plumbing instead of the conversation.
+        // body a reader expects under the title.
         Map<UUID, String> firstMessageByThread = messageRepository
             .findByThreadIdInOrderByThreadIdAscCreatedAtAsc(threads.stream().map(CommunityThread::getId).toList())
             .stream()
@@ -377,8 +400,8 @@ public class CommunityCollaborationService {
                 CommunityThreadMessage::getContent,
                 (first, ignored) -> first
             ));
-        threads.forEach(thread -> items.add(
-            new CommunityFeedItemResponse(
+        return threads.stream()
+            .map(thread -> new CommunityFeedItemResponse(
                 "thread-update",
                 thread.getId(),
                 communityId,
@@ -386,12 +409,7 @@ public class CommunityCollaborationService {
                 summarizeText(firstMessageByThread.get(thread.getId())),
                 thread.getUpdatedAt(),
                 freshness(thread.getUpdatedAt())
-            )
-        ));
-
-        return items.stream()
-            .sorted(Comparator.comparing(CommunityFeedItemResponse::happenedAt).reversed())
-            .limit(100)
+            ))
             .toList();
     }
 
