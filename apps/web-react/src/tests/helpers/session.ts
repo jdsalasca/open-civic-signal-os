@@ -133,6 +133,10 @@ export async function mockAppBootstrap(
   // otherwise picks the first membership, so returning one is what makes a community-scoped view
   // render anything at all.
   await page.route('**/api/communities/my', (route) => route.fulfill(json(memberships)));
+  // The shell now owns a personal notification bell; an unmocked count would 401 and wipe the
+  // seeded session before the view under test renders.
+  await page.route('**/api/notifications/unread-count', (route) => route.fulfill(json({ unread: 0 })));
+  await page.route('**/api/notifications/inbox', (route) => route.fulfill(json([])));
 }
 
 /** Seed a session and answer the bootstrap routes: the one-liner a spec needs to reach its view. */

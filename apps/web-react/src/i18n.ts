@@ -99,6 +99,20 @@ const resources = {
         "title": "Title",
         "workspace_context": "Community workspace"
       },
+      "notifications": {
+        "title": "Notifications",
+        "mark_all": "Mark all read",
+        "empty": "No notifications yet",
+        "loading": "Loading notifications…",
+        "just_now": "just now",
+        "minutes": "{{count}}m ago",
+        "hours": "{{count}}h ago",
+        "someone": "Someone",
+        "thread_reply": "{{actor}} replied in \"{{title}}\"",
+        "signal_support": "{{actor}} supported \"{{title}}\"",
+        "signal_status": "The status of \"{{title}}\" changed",
+        "fallback": "There is activity in \"{{title}}\""
+      },
       "nav": {
         "insights": "Home",
         "case_detail": "Case detail",
@@ -2398,6 +2412,20 @@ const resources = {
         "description": "Descripción",
         "title": "Título",
         "workspace_context": "Espacio comunitario"
+      },
+      "notifications": {
+        "title": "Notificaciones",
+        "mark_all": "Marcar todas leídas",
+        "empty": "Aún no tienes notificaciones",
+        "loading": "Cargando notificaciones…",
+        "just_now": "ahora",
+        "minutes": "hace {{count}} min",
+        "hours": "hace {{count}} h",
+        "someone": "Alguien",
+        "thread_reply": "{{actor}} respondió en \"{{title}}\"",
+        "signal_support": "{{actor}} apoyó \"{{title}}\"",
+        "signal_status": "El estado de \"{{title}}\" cambió",
+        "fallback": "Hay actividad en \"{{title}}\""
       },
       "nav": {
         "insights": "Inicio",

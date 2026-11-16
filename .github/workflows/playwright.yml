@@ -88,6 +88,7 @@ jobs:
           src/tests/accessibility-text-scale.spec.ts
           src/tests/community-activities.spec.ts
           src/tests/community-feed.spec.ts
+          src/tests/notifications.spec.ts
           src/tests/community-decisions.spec.ts
           src/tests/community-governance.spec.ts
           src/tests/community-integrations.spec.ts

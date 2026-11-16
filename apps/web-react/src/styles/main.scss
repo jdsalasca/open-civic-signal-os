@@ -637,6 +637,137 @@ a:hover {
   }
 }
 
+// ---------- Personal notifications ---------------------------------------
+.notification-bell {
+  position: relative;
+}
+
+.notification-bell-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.notification-bell-trigger:hover {
+  background: var(--surface-soft-hover);
+}
+
+.notification-badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  display: grid;
+  place-items: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.2rem;
+  border-radius: 999px;
+  background: var(--status-rejected);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.notification-panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 10030;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(60vh, 30rem);
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-paper-sm);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+}
+
+.notification-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
+}
+
+.notification-panel-head button {
+  border: 0;
+  background: transparent;
+  color: var(--brand-primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.55rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-item:hover,
+.notification-item.is-unread {
+  background: var(--surface-soft);
+}
+
+.notification-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.notification-copy small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.notification-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: 0.3rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--brand-primary);
+}
+
+.notification-empty {
+  padding: 1.2rem 0.8rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
 .theme-wheel {
   position: relative;
 }
