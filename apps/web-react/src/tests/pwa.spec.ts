@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { seedAuthenticatedApp } from './helpers/session';
+import { DEFAULT_COMMUNITY_ID, seedAuthenticatedApp } from './helpers/session';
 
 test.describe('Offline support', () => {
   test('registers the worker, caches the shell and warns while offline', async ({ page, context }) => {
-    await seedAuthenticatedApp(page, 'CITIZEN');
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: DEFAULT_COMMUNITY_ID });
     await page.goto('/');
 
     const hasActiveWorker = await page.evaluate(async () => {
@@ -14,7 +14,9 @@ test.describe('Offline support', () => {
     expect(hasActiveWorker).toBe(true);
 
     // The reload is the navigation the worker intercepts, and therefore the one that stores the shell.
-    await page.reload();
+    // Waiting for network idle lets the lazy feed chunks finish before the worker is asked to serve
+    // the same route offline.
+    await page.reload({ waitUntil: 'networkidle' });
     const cachedPaths = await page.evaluate(async () => {
       const paths: string[] = [];
       for (const key of await caches.keys()) {

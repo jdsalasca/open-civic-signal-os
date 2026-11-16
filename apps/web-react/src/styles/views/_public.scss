@@ -612,3 +612,38 @@
   outline: 3px solid var(--focus-ring-color);
   outline-offset: 3px;
 }
+
+.onboarding-hierarchy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.onboarding-hierarchy span {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.onboarding-hierarchy small {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.onboarding-near-badge {
+  width: fit-content;
+  margin-top: 0.25rem;
+  font-size: 0.65rem;
+  color: var(--brand-primary);
+}

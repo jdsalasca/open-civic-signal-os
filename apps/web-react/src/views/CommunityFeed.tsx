@@ -13,7 +13,6 @@ import { useSettingsStore } from '../store/useSettingsStore';
 import apiClient from '../api/axios';
 import { CivicCard } from '../components/ui/CivicCard';
 import { CivicEmptyState } from '../components/ui/CivicEmptyState';
-import { CivicPageHeader } from '../components/ui/CivicPageHeader';
 import { CivicButton } from '../components/ui/CivicButton';
 import { LinkifiedText } from '../components/ui/LinkifiedText';
 import { OnboardingChecklist } from '../components/OnboardingChecklist';
@@ -30,6 +29,9 @@ const TITLE_LIMIT = 120;
 const BODY_LIMIT = 2000;
 
 const commentKey = (item: CommunityFeedItem) => `${item.type}:${item.id}`;
+
+const reactionTotal = (item: CommunityFeedItem) =>
+  Object.values(item.reactions ?? {}).reduce((sum, value) => sum + value, 0);
 
 const itemHref = (item: CommunityFeedItem) => {
   if (item.type === 'signal') return `/signal/${item.id}`;
@@ -132,6 +134,15 @@ export function CommunityFeed() {
   );
 
   const newest = feed[0];
+
+  const trending = useMemo(
+    () =>
+      [...feed]
+        .filter((item) => reactionTotal(item) > 0)
+        .sort((a, b) => reactionTotal(b) - reactionTotal(a))
+        .slice(0, 3),
+    [feed]
+  );
 
   const loadComments = async (item: CommunityFeedItem) => {
     const key = commentKey(item);
@@ -348,21 +359,22 @@ export function CommunityFeed() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <CivicPageHeader
-          title={t('community_feed.title', {
-            community: activeCommunityName || t('dashboard.community_default')
-          })}
-          description={t('community_feed.desc')}
-          actions={
-            <CivicButton
-              type="button"
-              icon="pi pi-plus-circle"
-              label={t('community_feed.report_action')}
-              onClick={() => navigate('/report')}
-              data-testid="community-feed-report"
-            />
-          }
-        />
+        <header className="social-feed-page-head">
+          <div className="min-w-0">
+            <h1 className="social-feed-page-title">
+              {t('community_feed.title', {
+                community: activeCommunityName || t('dashboard.community_default')
+              })}
+            </h1>
+          </div>
+          <CivicButton
+            type="button"
+            icon="pi pi-plus-circle"
+            label={t('community_feed.report_action')}
+            onClick={() => navigate('/report')}
+            data-testid="community-feed-report"
+          />
+        </header>
 
         <OnboardingChecklist />
 
@@ -444,6 +456,13 @@ export function CommunityFeed() {
                     <span className="social-composer-count">
                       {body.length}/{BODY_LIMIT}
                     </span>
+
+                    <p className="social-composer-guidance">
+                      {t('community_feed.guidance')}{' '}
+                      <Link to="/help" className="civic-inline-link">
+                        {t('community_feed.norms')}
+                      </Link>
+                    </p>
 
                     <div className="social-composer-actions">
                       <CivicButton
@@ -741,19 +760,38 @@ export function CommunityFeed() {
                     </>
                   )}
                 </div>
+                <div className="social-feed-alerts-row">
+                  <div>
+                    <strong>{t('community_feed.alerts_title')}</strong>
+                    <span>{t('community_feed.alerts_desc')}</span>
+                  </div>
+                  <CivicButton
+                    type="button"
+                    icon={alertsOn ? 'pi pi-check' : 'pi pi-bell'}
+                    variant={alertsOn ? 'secondary' : 'primary'}
+                    size="small"
+                    label={alertsOn ? t('community_feed.alerts_on') : t('community_feed.alerts_off')}
+                    onClick={toggleAlerts}
+                    data-testid="community-alerts-toggle"
+                  />
+                </div>
               </CivicCard>
 
-              <CivicCard title={t('community_feed.alerts_title')} className="mt-4">
-                <p className="text-sm text-secondary mt-2 mb-3">{t('community_feed.alerts_desc')}</p>
-                <CivicButton
-                  type="button"
-                  icon={alertsOn ? 'pi pi-check' : 'pi pi-bell'}
-                  variant={alertsOn ? 'secondary' : 'primary'}
-                  label={alertsOn ? t('community_feed.alerts_on') : t('community_feed.alerts_off')}
-                  onClick={toggleAlerts}
-                  className="w-full"
-                  data-testid="community-alerts-toggle"
-                />
+              <CivicCard title={t('community_feed.trending')} className="mt-4">
+                {trending.length > 0 ? (
+                  <ul className="social-feed-trending">
+                    {trending.map((item) => (
+                      <li key={`${item.type}-${item.id}`}>
+                        <Link to={itemHref(item)}>{item.title}</Link>
+                        <span>
+                          <i className="pi pi-heart" aria-hidden="true" /> {reactionTotal(item)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted m-0">{t('community_feed.trending_empty')}</p>
+                )}
               </CivicCard>
             </aside>
           </div>

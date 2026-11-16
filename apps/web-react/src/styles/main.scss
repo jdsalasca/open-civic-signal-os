@@ -3005,3 +3005,140 @@ select:focus-visible,
     transform: none !important;
   }
 }
+
+// Compact feed chrome: the page title and the one action, then content.
+.social-feed-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.social-feed-page-title {
+  margin: 0;
+  color: var(--text-main);
+  font-size: clamp(1.35rem, 1.1rem + 1.2vw, 1.9rem);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.social-feed-alerts-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.social-feed-alerts-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.social-feed-alerts-row strong {
+  color: var(--text-main);
+  font-size: 0.85rem;
+}
+
+.social-feed-alerts-row span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.social-feed-trending {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.social-feed-trending li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.social-feed-trending li:last-child {
+  border-bottom: 0;
+}
+
+.social-feed-trending a {
+  color: var(--text-main);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.social-feed-trending a:hover,
+.social-feed-trending a:focus-visible {
+  color: var(--brand-primary);
+  text-decoration: underline;
+}
+
+.social-feed-trending li > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 0 0 auto;
+  color: var(--brand-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.social-composer-guidance {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.social-feed-item {
+  padding: 0.9rem;
+}
+
+.social-feed-list {
+  gap: 0.6rem;
+}
+
+.social-feed-title {
+  font-size: 1.05rem;
+}
+
+.social-feed-summary {
+  font-size: 0.92rem;
+}
+
+.social-feed-meta {
+  font-size: 0.78rem;
+}
+
+.social-feed-actions button {
+  font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+  .social-feed-page-head {
+    align-items: flex-start;
+  }
+
+  .social-feed-page-title {
+    font-size: 1.35rem;
+  }
+}

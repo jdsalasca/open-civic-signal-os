@@ -90,6 +90,7 @@ jobs:
           src/tests/community-feed.spec.ts
           src/tests/notifications.spec.ts
           src/tests/onboarding-checklist.spec.ts
+          src/tests/location-onboarding.spec.ts
           src/tests/pwa.spec.ts
           src/tests/report-draft.spec.ts
           src/tests/report-fast-path.spec.ts
