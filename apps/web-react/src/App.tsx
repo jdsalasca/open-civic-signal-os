@@ -1,8 +1,8 @@
-import { Suspense, lazy, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Suspense, lazy, useEffect } from "react";import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/useAuthStore";
 import { useSettingsStore } from "./store/useSettingsStore";
+import { useCommunityStore } from "./store/useCommunityStore";
 import { AuthGuard } from "./components/AuthGuard";
 import { ChunkErrorBoundary } from "./components/ChunkErrorBoundary";
 
@@ -62,8 +62,32 @@ const LoadingFallback = () => (
  */
 function HomeRoute() {
   const { isLoggedIn, isHydrated } = useAuthStore();
-  if (!isHydrated) {
+  const { memberships, membershipsLoadedAt, setMemberships } = useCommunityStore();
+
+  // The layout also refreshes memberships, but the root has to know whether this is a new account
+  // before it can decide between the feed and the location onboarding. Waiting for the first load
+  // avoids sending an existing member to onboarding just because the store is still empty.
+  useEffect(() => {
+    if (!isLoggedIn || membershipsLoadedAt !== null) return;
+    let cancelled = false;
+    import("./api/axios")
+      .then(({ default: api }) => api.get("communities/my"))
+      .then(({ data }) => {
+        if (!cancelled) setMemberships(data ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setMemberships([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, membershipsLoadedAt, setMemberships]);
+
+  if (!isHydrated || (isLoggedIn && membershipsLoadedAt === null)) {
     return <LoadingFallback />;
+  }
+  if (isLoggedIn && memberships.length === 0) {
+    return <Navigate to="/onboarding" replace />;
   }
   return isLoggedIn ? <CommunityFeed /> : <Landing />;
 }

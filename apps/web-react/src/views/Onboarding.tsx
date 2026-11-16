@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { InputText } from 'primereact/inputtext';
@@ -10,7 +10,7 @@ import { CivicCard } from '../components/ui/CivicCard';
 import { CivicField } from '../components/ui/CivicField';
 import { useCommunityStore } from '../store/useCommunityStore';
 import { languageForCountry, useSettingsStore } from '../store/useSettingsStore';
-import { Community } from '../types';
+import { Community, CommunityMembership } from '../types';
 
 type GeoState = 'idle' | 'locating' | 'found' | 'denied' | 'error';
 
@@ -18,6 +18,7 @@ export function Onboarding() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const markMembershipsStale = useCommunityStore((state) => state.markMembershipsStale);
+  const setMemberships = useCommunityStore((state) => state.setMemberships);
 
   const [places, setPlaces] = useState<Community[]>([]);
   const [query, setQuery] = useState('');
@@ -57,19 +58,44 @@ export function Onboarding() {
     };
   }, []);
 
+  const placeRelevance = useCallback((place: Community) => {
+    if (!detected) return 0;
+    const pairs: Array<[string | null | undefined, string | null | undefined]> = [
+      [place.neighborhood, detected.neighborhood],
+      [place.locality, detected.locality],
+      [place.city, detected.city],
+      [place.region, detected.region],
+      [place.country, detected.country],
+    ];
+    return pairs.reduce(
+      (score, [left, right]) =>
+        left && right && left.trim().toLowerCase() === right.trim().toLowerCase() ? score + 1 : score,
+      0
+    );
+  }, [detected]);
+
   const filteredPlaces = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) {
-      return places;
+      return detected
+        ? [...places].sort((a, b) => placeRelevance(b) - placeRelevance(a))
+        : places;
     }
-    return places.filter((place) =>
+    const matches = places.filter((place) =>
       [place.name, place.neighborhood, place.locality, place.city, place.region, place.country]
         .filter(Boolean)
         .some((value) => (value as string).toLowerCase().includes(normalized))
     );
-  }, [places, query]);
+    return detected ? matches.sort((a, b) => placeRelevance(b) - placeRelevance(a)) : matches;
+  }, [places, query, detected, placeRelevance]);
 
-  const finish = () => {
+  const finish = async () => {
+    try {
+      const { data } = await apiClient.get<CommunityMembership[]>('communities/my');
+      setMemberships(data ?? []);
+    } catch {
+      // The layout will refresh memberships; the person still reaches the app.
+    }
     markMembershipsStale();
     navigate('/');
   };
@@ -79,7 +105,7 @@ export function Onboarding() {
     try {
       await apiClient.post(`communities/${communityId}/join`, { role: 'MEMBER' });
       toast.success(t('onboarding.join_success'));
-      finish();
+      await finish();
     } catch (err) {
       const apiErr = err as { friendlyMessage?: string };
       toast.error(apiErr.friendlyMessage || t('onboarding.join_error'));
@@ -164,7 +190,7 @@ export function Onboarding() {
         neighborhood: neighborhood.trim()
       });
       toast.success(t('onboarding.create_success'));
-      finish();
+      await finish();
     } catch (err) {
       const apiErr = err as { friendlyMessage?: string };
       toast.error(apiErr.friendlyMessage || t('onboarding.create_error'));
@@ -214,15 +240,41 @@ export function Onboarding() {
                   label={t('onboarding.join_city', { name: nearest.name })}
                   onClick={() => join(nearest.id)}
                   loading={joiningId === nearest.id}
+                  data-testid={`onboarding-join-nearest-${nearest.id}`}
                 />
                 {detected && (
-                  <p className="text-xs text-muted m-0" data-testid="onboarding-detected-place">
-                    {t('onboarding.detected_place', {
-                      place: [detected.neighborhood, detected.locality, detected.city]
-                        .filter(Boolean)
-                        .join(' / ')
-                    })}
-                  </p>
+                  <div className="onboarding-hierarchy" data-testid="onboarding-detected-place">
+                    {detected.neighborhood && (
+                      <span>
+                        <small>{t('onboarding.neighborhood')}</small>
+                        {detected.neighborhood}
+                      </span>
+                    )}
+                    {detected.locality && (
+                      <span>
+                        <small>{t('onboarding.locality')}</small>
+                        {detected.locality}
+                      </span>
+                    )}
+                    {detected.city && (
+                      <span>
+                        <small>{t('onboarding.municipality')}</small>
+                        {detected.city}
+                      </span>
+                    )}
+                    {detected.region && (
+                      <span>
+                        <small>{t('onboarding.department')}</small>
+                        {detected.region}
+                      </span>
+                    )}
+                    {detected.country && (
+                      <span>
+                        <small>{t('onboarding.country')}</small>
+                        {detected.country}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -246,6 +298,9 @@ export function Onboarding() {
                 <li key={place.id}>
                   <div>
                     <strong>{place.name}</strong>
+                    {placeRelevance(place) > 0 && (
+                      <span className="u-pill onboarding-near-badge">{t('onboarding.near_you')}</span>
+                    )}
                     <span className="text-muted text-xs">
                       {[place.locality, place.city, place.region, place.country]
                         .filter(Boolean)
