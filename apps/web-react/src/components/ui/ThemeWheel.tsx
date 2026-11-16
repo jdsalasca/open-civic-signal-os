@@ -12,7 +12,7 @@ const ICONS: Record<(typeof THEMES)[number], string> = {
 /** One gear in the top bar for the three interface styles; Settings has the same control. */
 export function ThemeWheel() {
   const { t, i18n } = useTranslation();
-  const { theme, language, setTheme, setLanguage } = useSettingsStore();
+  const { theme, language, textScale, setTheme, setLanguage, setTextScale } = useSettingsStore();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -78,6 +78,22 @@ export function ThemeWheel() {
                 data-testid={`language-wheel-${lang}`}
               >
                 {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <div className="theme-wheel-divider" role="separator" />
+          <span className="theme-wheel-label">{t('settings.text_scale')}</span>
+          <div className="theme-wheel-languages">
+            {(['normal', 'large'] as const).map((scale) => (
+              <button
+                key={scale}
+                type="button"
+                aria-pressed={textScale === scale}
+                className={textScale === scale ? 'is-active' : undefined}
+                onClick={() => setTextScale(scale)}
+                data-testid={`text-scale-${scale}`}
+              >
+                {scale === 'normal' ? 'A' : 'A+'}
               </button>
             ))}
           </div>

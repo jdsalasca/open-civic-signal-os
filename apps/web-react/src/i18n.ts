@@ -2116,6 +2116,7 @@ const resources = {
         "community_privacy_locked_desc": "If you coordinate this community or serve as its public liaison, the backend will expose publication controls and recent community-sensitive access here.",
         "identity_role_fallback": "No civic role set",
         "language": "Language",
+        "text_scale": "Text size",
         "language_help": "Localization for all system notifications and UI elements.",
         "languages": {
           "en": "English",
@@ -4415,6 +4416,7 @@ const resources = {
         "community_privacy_locked_desc": "Si usted coordina esta comunidad o actua como enlace publico, el backend mostrara aqui los controles de publicacion y el acceso sensible reciente.",
         "identity_role_fallback": "Sin rol civico definido",
         "language": "Idioma",
+        "text_scale": "Tamaño del texto",
         "language_help": "Localización para todas las notificaciones y elementos de interfaz.",
         "languages": {
           "en": "Inglés",

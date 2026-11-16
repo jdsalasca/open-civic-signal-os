@@ -17,6 +17,7 @@ import './styles/main.scss';
 const initialSettings = useSettingsStore.getState();
 const initialTheme = initialSettings.theme;
 const initialInterfaceMode = initialSettings.interfaceMode;
+document.documentElement.dataset.textScale = initialSettings.textScale ?? 'normal';
 document.documentElement.classList.add(`${initialTheme}-theme`);
 // The attribute mirrors the class: CSS understands both, and a future
 // "follow the system" mode can simply drop both and let prefers-color-scheme

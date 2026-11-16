@@ -13,6 +13,25 @@ html {
   scroll-behavior: smooth;
 }
 
+// Comfortable reading: every rem-based size grows together, no per-component forks.
+html[data-text-scale="large"] {
+  font-size: 112.5%;
+}
+
+// Toasts live above the mobile bottom nav and below the top bar; they must never cover the
+// preferences wheel, a form field, or a navigation control.
+.app-toaster {
+  bottom: 5.5rem !important;
+  right: 1rem !important;
+  left: auto !important;
+}
+
+@media (min-width: 1024px) {
+  .app-toaster {
+    bottom: 1.5rem !important;
+  }
+}
+
 // A lazy route should feel like the app is opening, not like a blank page with a line.
 .app-loading {
   display: flex;
@@ -1566,6 +1585,7 @@ a:hover {
 
 .social-feed-filters button {
   flex: 0 0 auto;
+  min-height: 2.75rem;
   white-space: nowrap;
 }
 
@@ -1659,6 +1679,7 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  min-height: 2.75rem;
   border: 1px solid var(--border-subtle);
   border-radius: 999px;
   background: transparent;
@@ -2415,6 +2436,7 @@ select:focus-visible,
 .app-mobile-nav a,
 .app-mobile-nav button {
   min-width: 0;
+  min-height: 2.75rem;
 }
 
 .mobile-nav-label {
