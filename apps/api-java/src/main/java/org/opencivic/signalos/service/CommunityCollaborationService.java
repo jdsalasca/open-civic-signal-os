@@ -340,7 +340,7 @@ public class CommunityCollaborationService {
                     signal.getId(),
                     communityId,
                     signal.getTitle(),
-                    signal.getStatus(),
+                    signal.getLocationLabel(),
                     signal.getCreatedAt(),
                     freshness(signal.getCreatedAt())
                 )
@@ -355,25 +355,39 @@ public class CommunityCollaborationService {
                     post.getId(),
                     communityId,
                     post.getTitle(),
-                    post.getStatusTag(),
+                    summarizeText(post.getContent()),
                     post.getPublishedAt(),
                     freshness(post.getPublishedAt())
                 )
             ));
 
-        threadRepository.findBySourceCommunityIdOrTargetCommunityIdOrderByUpdatedAtDesc(communityId, communityId, limited).stream()
+        List<CommunityThread> threads = threadRepository
+            .findBySourceCommunityIdOrTargetCommunityIdOrderByUpdatedAtDesc(communityId, communityId, limited)
+            .stream()
             .filter(thread -> thread.getUpdatedAt() != null && thread.getUpdatedAt().isAfter(since))
-            .forEach(thread -> items.add(
-                new CommunityFeedItemResponse(
-                    "thread-update",
-                    thread.getId(),
-                    communityId,
-                    thread.getTitle(),
-                    "cross-community update",
-                    thread.getUpdatedAt(),
-                    freshness(thread.getUpdatedAt())
-                )
+            .toList();
+        // One query for every thread in the page, not one per thread. The first message is the post
+        // body a reader expects under the title; the old summary was the literal
+        // "cross-community update", which described the plumbing instead of the conversation.
+        Map<UUID, String> firstMessageByThread = messageRepository
+            .findByThreadIdInOrderByThreadIdAscCreatedAtAsc(threads.stream().map(CommunityThread::getId).toList())
+            .stream()
+            .collect(Collectors.toMap(
+                CommunityThreadMessage::getThreadId,
+                CommunityThreadMessage::getContent,
+                (first, ignored) -> first
             ));
+        threads.forEach(thread -> items.add(
+            new CommunityFeedItemResponse(
+                "thread-update",
+                thread.getId(),
+                communityId,
+                thread.getTitle(),
+                summarizeText(firstMessageByThread.get(thread.getId())),
+                thread.getUpdatedAt(),
+                freshness(thread.getUpdatedAt())
+            )
+        ));
 
         return items.stream()
             .sorted(Comparator.comparing(CommunityFeedItemResponse::happenedAt).reversed())
@@ -595,6 +609,15 @@ public class CommunityCollaborationService {
             return "updated " + hours + "h ago";
         }
         return "updated " + (hours / 24) + "d ago";
+    }
+
+    /** A feed summary is a preview, not the whole message: one line, bounded, no raw newlines. */
+    private String summarizeText(String content) {
+        if (content == null || content.isBlank()) {
+            return "";
+        }
+        String clean = content.replaceAll("\\s+", " ").trim();
+        return clean.length() <= 180 ? clean : clean.substring(0, 177) + "...";
     }
 
     private String normalizeThreadStatusFilter(String statusFilter) {

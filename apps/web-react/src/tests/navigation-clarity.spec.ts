@@ -19,12 +19,12 @@ test.describe('Navigation clarity', () => {
     await expect(aside.getByRole('link', { name: 'Home' })).toBeVisible();
     await expect(aside.getByRole('link', { name: 'Report' })).toBeVisible();
     await expect(aside.getByRole('link', { name: 'My Activity' })).toBeVisible();
+    await expect(aside.getByRole('link', { name: 'Shared Updates' })).toBeVisible();
     await expect(page.getByTestId('desktop-more-toggle')).toBeVisible();
     await expect(page.getByTestId('desktop-more-panel')).toHaveCount(0);
 
     await page.getByTestId('desktop-more-toggle').click();
     await expect(page.getByTestId('desktop-more-panel')).toBeVisible();
-    await expect(aside.getByRole('link', { name: 'Shared Updates' })).toBeVisible();
     await expect(aside.getByRole('link', { name: 'Open Data' })).toBeVisible();
     await expect(aside.getByRole('link', { name: 'Official Updates' })).toBeVisible();
     await expect(aside.getByRole('link', { name: 'Community Talks' })).toBeVisible();
@@ -39,6 +39,7 @@ test.describe('Navigation clarity', () => {
     await expect(bottomNav.getByLabel('Home')).toBeVisible();
     await expect(bottomNav.getByLabel('Report')).toBeVisible();
     await expect(bottomNav.getByLabel('My Activity')).toBeVisible();
+    await expect(bottomNav.getByLabel('Shared Updates')).toBeVisible();
     await expect(page.getByTestId('mobile-more-toggle')).toBeVisible();
     await expect(bottomNav.getByLabel('Official Updates')).toHaveCount(0);
 
@@ -46,7 +47,6 @@ test.describe('Navigation clarity', () => {
     const drawer = page.locator('.p-sidebar');
     await expect(drawer).toBeVisible();
     await expect(page.getByTestId('mobile-drawer-guidance')).toBeVisible();
-    await expect(drawer.getByRole('link', { name: 'Shared Updates' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Open Data' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Official Updates' })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'Community Talks' })).toBeVisible();

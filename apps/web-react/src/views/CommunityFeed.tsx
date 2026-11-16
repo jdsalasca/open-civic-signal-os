@@ -1,120 +1,168 @@
-import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
-import { useTranslation } from "react-i18next";
-import { CommunityHome } from "../types";
-import { Layout } from "../components/Layout";
-import { useCommunityStore } from "../store/useCommunityStore";
-import apiClient from "../api/axios";
-import { CivicCard } from "../components/ui/CivicCard";
-import { CivicEmptyState } from "../components/ui/CivicEmptyState";
-import { CivicPageHeader } from "../components/ui/CivicPageHeader";
-import { CivicActionBar } from "../components/ui/CivicActionBar";
-import { CivicButton } from "../components/ui/CivicButton";
-import { CivicBadge } from "../components/ui/CivicBadge";
-import { CivicStatCard } from "../components/ui/CivicStatCard";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import { Avatar } from 'primereact/avatar';
+import { InputText } from 'primereact/inputtext';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { CommunityFeedItem } from '../types';
+import { Layout } from '../components/Layout';
+import { useCommunityStore } from '../store/useCommunityStore';
+import { useAuthStore } from '../store/useAuthStore';
+import apiClient from '../api/axios';
+import { CivicCard } from '../components/ui/CivicCard';
+import { CivicEmptyState } from '../components/ui/CivicEmptyState';
+import { CivicPageHeader } from '../components/ui/CivicPageHeader';
+import { CivicButton } from '../components/ui/CivicButton';
+import { toRoleLabel } from '../constants/roleLabels';
 
 type ApiError = Error & { friendlyMessage?: string };
+type FeedFilter = 'all' | CommunityFeedItem['type'];
 
+const TITLE_LIMIT = 120;
+const BODY_LIMIT = 2000;
+
+/**
+ * Community feed, in the shape people already know from social products: one composer, one
+ * reverse-chronological timeline, and the action that matters on each card. It reads the existing
+ * `/api/community/feed` endpoint, which already mixed reports, announcements and conversations but
+ * had no screen using it.
+ */
 export function CommunityFeed() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeCommunityId, memberships } = useCommunityStore();
-  const [home, setHome] = useState<CommunityHome | null>(null);
+  const userName = useAuthStore((state) => state.userName);
+
+  const [feed, setFeed] = useState<CommunityFeedItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<FeedFilter>('all');
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [publishing, setPublishing] = useState(false);
+  const [supported, setSupported] = useState<Set<string>>(() => new Set());
 
   const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
+  const activeRole = memberships.find((m) => m.communityId === activeCommunityId)?.role;
 
-  const loadHome = useCallback(async () => {
-    if (!activeCommunityId) return;
+  const loadFeed = useCallback(async () => {
+    if (!activeCommunityId) {
+      setFeed([]);
+      setLoading(false);
+      return;
+    }
     try {
-      const res = await apiClient.get<CommunityHome>(`community/home?communityId=${activeCommunityId}`);
-      setHome(res.data);
+      setLoading(true);
+      const res = await apiClient.get<CommunityFeedItem[]>(
+        `community/feed?communityId=${activeCommunityId}&days=30`
+      );
+      setFeed(res.data ?? []);
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t("community_home.load_error"));
+      toast.error(apiErr.friendlyMessage || t('community_feed.load_error'));
+    } finally {
+      setLoading(false);
     }
   }, [activeCommunityId, t]);
 
   useEffect(() => {
-    loadHome();
-  }, [loadHome]);
+    void loadFeed();
+  }, [loadFeed]);
+
+  const visibleItems = useMemo(
+    () => (filter === 'all' ? feed : feed.filter((item) => item.type === filter)),
+    [feed, filter]
+  );
+
+  const newest = feed[0];
+
+  const openItem = (item: CommunityFeedItem) => {
+    if (item.type === 'signal') {
+      navigate(`/signal/${item.id}`);
+    } else if (item.type === 'blog') {
+      navigate('/communities/blog');
+    } else {
+      navigate('/communities/threads');
+    }
+  };
+
+  const support = async (item: CommunityFeedItem) => {
+    try {
+      await apiClient.post(`signals/${item.id}/vote`);
+      setSupported((current) => new Set(current).add(item.id));
+      toast.success(t('community_feed.support_success'));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('community_feed.support_error'));
+    }
+  };
+
+  const publish = async () => {
+    if (!activeCommunityId || !title.trim()) {
+      return;
+    }
+    setPublishing(true);
+    try {
+      const thread = await apiClient.post<{ id: string }>('community/threads', {
+        sourceCommunityId: activeCommunityId,
+        targetCommunityId: activeCommunityId,
+        title: title.trim()
+      });
+      if (body.trim()) {
+        await apiClient.post(`community/threads/${thread.data.id}/messages`, {
+          sourceCommunityId: activeCommunityId,
+          content: body.trim()
+        });
+      }
+      setTitle('');
+      setBody('');
+      setComposerOpen(false);
+      await loadFeed();
+      toast.success(t('community_feed.published'));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('community_feed.publish_error'));
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const filterOptions: Array<{ key: FeedFilter; label: string; icon: string }> = [
+    { key: 'all', label: t('community_feed.filter_all'), icon: 'pi pi-list' },
+    { key: 'signal', label: t('community_feed.filter_signal'), icon: 'pi pi-bolt' },
+    { key: 'blog', label: t('community_feed.filter_blog'), icon: 'pi pi-megaphone' },
+    { key: 'thread-update', label: t('community_feed.filter_thread'), icon: 'pi pi-comments' }
+  ];
+
+  const itemLabel = (type: CommunityFeedItem['type']) => {
+    if (type === 'signal') return t('community_feed.type_signal');
+    if (type === 'blog') return t('community_feed.type_blog');
+    return t('community_feed.type_thread');
+  };
+
+  const itemIcon = (type: CommunityFeedItem['type']) => {
+    if (type === 'signal') return 'pi pi-bolt';
+    if (type === 'blog') return 'pi pi-megaphone';
+    return 'pi pi-comments';
+  };
 
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
         <CivicPageHeader
-          title={t("community_home.title", { community: activeCommunityName || t("dashboard.community_default") })}
-          description={t("community_home.desc")}
+          title={t('community_feed.title', {
+            community: activeCommunityName || t('dashboard.community_default')
+          })}
+          description={t('community_feed.desc')}
           actions={
-            <CivicActionBar className="community-home-action-bar">
-            <div className="community-home-action-copy">
-              <div className="text-xs font-black uppercase tracking-wide text-muted">
-                {t("dashboard.freshness_label")}
-              </div>
-              <div className="u-pill mt-2" data-testid="community-home-freshness">
-                <i className="pi pi-clock text-brand-primary"></i>
-                {home?.freshness || t("dashboard.freshness_pending")}
-              </div>
-            </div>
-            <div className="dashboard-action-cluster">
-              <CivicButton
-                type="button"
-                icon="pi pi-file-edit"
-                label={t("community_proposals.open_hub")}
-                variant="ghost"
-                onClick={() => navigate("/communities/proposals")}
-              />
-              <CivicButton
-                type="button"
-                icon="pi pi-map"
-                label={t("community_map.open_map")}
-                variant="secondary"
-                onClick={() => navigate("/communities/map")}
-              />
-              <CivicButton
-                type="button"
-                icon="pi pi-chart-line"
-                label={t("nav.community_trust")}
-                variant="ghost"
-                onClick={() => navigate("/communities/trust")}
-              />
-              <CivicButton
-                type="button"
-                icon="pi pi-sitemap"
-                label={t("nav.community_decisions")}
-                variant="ghost"
-                onClick={() => navigate("/communities/decisions")}
-              />
-              <CivicButton
-                type="button"
-                icon="pi pi-book"
-                label={t("nav.community_governance")}
-                variant="ghost"
-                onClick={() => navigate("/communities/governance")}
-              />
-              <CivicButton
-                type="button"
-                icon="pi pi-briefcase"
-                label={t("nav.community_projects")}
-                variant="ghost"
-                onClick={() => navigate("/communities/projects")}
-              />
-              <CivicButton
-                type="button"
-                icon="pi pi-comments"
-                label={t("nav.dialogues")}
-                variant="ghost"
-                onClick={() => navigate("/communities/threads")}
-              />
-              <CivicButton
-                type="button"
-                icon="pi pi-megaphone"
-                label={t("nav.public_blog")}
-                variant="ghost"
-                onClick={() => navigate("/communities/blog")}
-              />
-            </div>
-            </CivicActionBar>
+            <CivicButton
+              type="button"
+              icon="pi pi-plus"
+              label={t('community_feed.new_post')}
+              onClick={() => setComposerOpen(true)}
+              data-testid="community-feed-new-post"
+            />
           }
         />
 
@@ -122,230 +170,224 @@ export function CommunityFeed() {
           <CivicCard>
             <CivicEmptyState
               icon="pi-map-marker"
-              title={t("community_home.no_context_title")}
-              description={t("community_home.no_context_desc")}
-              actionLabel={t("nav.communities")}
-              onAction={() => navigate("/communities")}
+              title={t('community_home.no_context_title')}
+              description={t('community_home.no_context_desc')}
+              actionLabel={t('nav.communities')}
+              onAction={() => navigate('/communities')}
             />
           </CivicCard>
         ) : (
-          <div className="grid">
-            <div className="col-12 xl:col-8">
-              <CivicCard className="mb-6" data-testid="community-home-overview">
-                <div className="flex flex-column lg:flex-row justify-content-between gap-4">
-                  <div className="flex flex-column gap-2">
-                    <span className="text-xs font-black uppercase tracking-wide text-muted">
-                      {t("community_home.kicker")}
+          <div className="social-feed-grid">
+            <div className="social-feed-main">
+              <CivicCard className="social-composer-card" padding="md" data-testid="community-feed-composer">
+                {!composerOpen ? (
+                  <button
+                    type="button"
+                    className="social-composer-trigger"
+                    onClick={() => setComposerOpen(true)}
+                  >
+                    <Avatar
+                      label={userName?.[0]?.toUpperCase() ?? '?'}
+                      shape="circle"
+                      className="bg-brand-primary text-on-brand font-bold"
+                    />
+                    <span className="social-composer-placeholder">
+                      {t('community_feed.composer_placeholder', { community: activeCommunityName })}
                     </span>
-                    <h2 className="text-3xl font-black text-main m-0">{activeCommunityName}</h2>
-                    <p className="text-secondary m-0">{t("community_home.overview_desc")}</p>
-                  </div>
-                </div>
-                <div className="civic-stat-grid civic-stat-grid-comfortable mt-4" data-testid="community-home-overview-stats">
-                  <CivicStatCard
-                    label={t("community_home.rooms_count", { count: home?.activeRoomsCount ?? 0 })}
-                    value={home?.activeRoomsCount ?? 0}
-                    supportingText={t("nav.dialogues")}
-                    compact
-                  />
-                  <CivicStatCard
-                    label={t("community_home.official_count", { count: home?.officialUpdates.length ?? 0 })}
-                    value={home?.officialUpdates.length ?? 0}
-                    supportingText={t("community_blog.channel_badge")}
-                    compact
-                  />
-                  <CivicStatCard
-                    label={t("community_home.threads_count", { count: home?.hotThreads.length ?? 0 })}
-                    value={home?.hotThreads.length ?? 0}
-                    supportingText={t("nav.dialogues")}
-                    compact
-                  />
-                  <CivicStatCard
-                    label={t("community_home.signals_count", { count: home?.topSignals.length ?? 0 })}
-                    value={home?.topSignals.length ?? 0}
-                    supportingText={t("nav.report")}
-                    compact
-                  />
-                </div>
-                <CivicActionBar className="mt-4 community-home-overview-actions">
-                  <div className="community-home-action-copy">
-                    <div className="text-xs font-black uppercase tracking-wide text-muted">
-                      {t("community_home.actions_label")}
-                    </div>
-                    <p className="text-sm text-secondary m-0">
-                      {t("community_home.actions_desc")}
-                    </p>
-                  </div>
-                  <div className="dashboard-action-cluster">
-                  <CivicButton
-                    type="button"
-                    label={t("community_proposals.open_hub")}
-                    icon="pi pi-file-edit"
-                    variant="ghost"
-                    onClick={() => navigate("/communities/proposals")}
-                  />
-                  <CivicButton
-                    type="button"
-                    label={t("nav.community_trust")}
-                    icon="pi pi-chart-line"
-                    variant="ghost"
-                    onClick={() => navigate("/communities/trust")}
-                  />
-                  <CivicButton
-                    type="button"
-                    label={t("nav.community_decisions")}
-                    icon="pi pi-sitemap"
-                    variant="ghost"
-                    onClick={() => navigate("/communities/decisions")}
-                  />
-                  <CivicButton
-                    type="button"
-                    label={t("nav.community_governance")}
-                    icon="pi pi-book"
-                    variant="ghost"
-                    onClick={() => navigate("/communities/governance")}
-                  />
-                  <CivicButton
-                    type="button"
-                    label={t("nav.community_projects")}
-                    icon="pi pi-briefcase"
-                    variant="ghost"
-                    onClick={() => navigate("/communities/projects")}
-                  />
-                  <CivicButton
-                    type="button"
-                    label={t("nav.public_blog")}
-                    icon="pi pi-megaphone"
-                    variant="ghost"
-                      onClick={() => navigate("/communities/blog")}
-                    />
-                    <CivicButton
-                      type="button"
-                      label={t("nav.dialogues")}
-                      icon="pi pi-comments"
-                      variant="ghost"
-                      onClick={() => navigate("/communities/threads")}
-                    />
-                  </div>
-                </CivicActionBar>
-              </CivicCard>
-
-              <div className="grid">
-                <div className="col-12 lg:col-6">
-                  <CivicCard title={t("community_home.official_title")} className="h-full" data-testid="community-home-official">
-                    {home && home.officialUpdates.length > 0 ? (
-                      <div className="flex flex-column gap-4">
-                        {home.officialUpdates.map((post) => (
-                          <button
-                            key={post.id}
-                            type="button"
-                            className="text-left border-none bg-transparent p-0 cursor-pointer"
-                            onClick={() => navigate("/communities/blog")}
-                          >
-                            <div className="community-feed-list-card">
-                              <div className="flex justify-content-between gap-3 align-items-start">
-                                <div>
-                                  <h3 className="text-lg font-black text-main m-0">{post.title}</h3>
-                                  <p className="text-sm text-secondary mt-2 mb-0 line-height-3">{post.statusTag}</p>
-                                </div>
-                                <CivicBadge label={t("community_blog.official_badge")} severity="progress" />
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <CivicEmptyState
-                        icon="pi-megaphone"
-                        title={t("community_home.official_empty_title")}
-                        description={t("community_home.official_empty_desc")}
-                        actionLabel={t("nav.public_blog")}
-                        onAction={() => navigate("/communities/blog")}
-                      />
-                    )}
-                  </CivicCard>
-                </div>
-
-                <div className="col-12 lg:col-6">
-                  <CivicCard title={t("community_home.threads_title")} className="h-full" data-testid="community-home-threads">
-                    {home && home.hotThreads.length > 0 ? (
-                      <div className="flex flex-column gap-4">
-                        {home.hotThreads.map((thread) => (
-                          <button
-                            key={thread.id}
-                            type="button"
-                            className="text-left border-none bg-transparent p-0 cursor-pointer"
-                            onClick={() => navigate("/communities/threads")}
-                          >
-                            <div className="community-feed-list-card">
-                              <div className="flex justify-content-between gap-3 align-items-start">
-                                <div>
-                                  <h3 className="text-lg font-black text-main m-0">{thread.title}</h3>
-                                  <p className="text-sm text-secondary mt-2 mb-0 line-height-3">{thread.relevanceSummary}</p>
-                                </div>
-                                <CivicBadge label={t("community_threads.relevance_score")} severity="neutral" />
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <CivicEmptyState
-                        icon="pi-comments"
-                        title={t("community_home.threads_empty_title")}
-                        description={t("community_home.threads_empty_desc")}
-                        actionLabel={t("nav.dialogues")}
-                        onAction={() => navigate("/communities/threads")}
-                      />
-                    )}
-                  </CivicCard>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-12 xl:col-4">
-              <CivicCard title={t("community_home.signals_title")} data-testid="community-home-signals">
-                {home && home.topSignals.length > 0 ? (
-                  <div className="flex flex-column gap-4">
-                    {home.topSignals.map((signal) => (
-                      <button
-                        key={signal.id}
-                        type="button"
-                        className="text-left border-none bg-transparent p-0 cursor-pointer"
-                        onClick={() => navigate(`/signal/${signal.id}`)}
-                      >
-                        <div className="community-feed-list-card">
-                          <div className="flex justify-content-between align-items-start gap-3">
-                            <div>
-                              <h3 className="text-base font-black text-main m-0">{signal.title}</h3>
-                              <p className="text-sm text-secondary mt-2 mb-0">
-                                {t("common.status")}: {signal.status}
-                              </p>
-                            </div>
-                            <span className="u-pill">{Math.round(signal.priorityScore ?? 0)}</span>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                    <CivicButton
-                      type="button"
-                      label={t("community_home.signals_action")}
-                      icon="pi pi-arrow-right"
-                      variant="ghost"
-                      onClick={() => navigate("/")}
-                    />
-                  </div>
+                    <span className="social-composer-plus" aria-hidden="true">
+                      <i className="pi pi-plus" />
+                    </span>
+                  </button>
                 ) : (
-                  <CivicEmptyState
-                    icon="pi-bolt"
-                    title={t("community_home.signals_empty_title")}
-                    description={t("community_home.signals_empty_desc")}
-                    actionLabel={t("nav.report")}
-                    onAction={() => navigate("/report")}
-                  />
+                  <div className="social-composer-form">
+                    <div className="flex align-items-center gap-3 mb-3">
+                      <Avatar
+                        label={userName?.[0]?.toUpperCase() ?? '?'}
+                        shape="circle"
+                        className="bg-brand-primary text-on-brand font-bold"
+                      />
+                      <div className="flex flex-column">
+                        <strong className="text-main">{userName}</strong>
+                        <span className="text-xs text-muted">
+                          {t('community_feed.composer_audience', { community: activeCommunityName })}
+                        </span>
+                      </div>
+                    </div>
+
+                    <label className="social-composer-label" htmlFor="feed-post-title">
+                      {t('community_feed.composer_title')}
+                    </label>
+                    <InputText
+                      id="feed-post-title"
+                      value={title}
+                      maxLength={TITLE_LIMIT}
+                      onChange={(event) => setTitle(event.target.value)}
+                      placeholder={t('community_feed.composer_title_placeholder')}
+                      className="w-full"
+                    />
+                    <span className="social-composer-count">
+                      {title.length}/{TITLE_LIMIT}
+                    </span>
+
+                    <label className="social-composer-label mt-3" htmlFor="feed-post-body">
+                      {t('community_feed.composer_body')}
+                    </label>
+                    <InputTextarea
+                      id="feed-post-body"
+                      value={body}
+                      rows={4}
+                      maxLength={BODY_LIMIT}
+                      onChange={(event) => setBody(event.target.value)}
+                      placeholder={t('community_feed.composer_body_placeholder')}
+                      className="w-full"
+                    />
+                    <span className="social-composer-count">
+                      {body.length}/{BODY_LIMIT}
+                    </span>
+
+                    <div className="social-composer-actions">
+                      <CivicButton
+                        type="button"
+                        variant="ghost"
+                        label={t('community_feed.composer_cancel')}
+                        onClick={() => setComposerOpen(false)}
+                      />
+                      <CivicButton
+                        type="button"
+                        label={t('community_feed.composer_publish')}
+                        icon="pi pi-send"
+                        loading={publishing}
+                        disabled={!title.trim() || publishing}
+                        onClick={publish}
+                        data-testid="community-feed-publish"
+                      />
+                    </div>
+                  </div>
                 )}
               </CivicCard>
+
+              <div className="social-feed-toolbar">
+                <div className="social-feed-filters">
+                  {filterOptions.map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      className={`u-filter-chip ${filter === option.key ? 'is-active' : ''}`}
+                      onClick={() => setFilter(option.key)}
+                      data-testid={`community-feed-filter-${option.key}`}
+                    >
+                      <i className={option.icon} aria-hidden="true" />
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                {newest && (
+                  <span className="social-feed-freshness">
+                    <i className="pi pi-clock" aria-hidden="true" />
+                    {newest.freshness}
+                  </span>
+                )}
+              </div>
+
+              {loading ? (
+                <div className="social-feed-skeleton" aria-hidden="true">
+                  {[0, 1, 2].map((row) => (
+                    <div key={row} className="social-feed-skeleton-row" />
+                  ))}
+                </div>
+              ) : visibleItems.length === 0 ? (
+                <CivicCard data-testid="community-feed-empty">
+                  <CivicEmptyState
+                    icon="pi-comments"
+                    title={t('community_feed.empty_title')}
+                    description={t('community_feed.empty_desc')}
+                    actionLabel={t('community_feed.empty_action')}
+                    onAction={() => setComposerOpen(true)}
+                  />
+                </CivicCard>
+              ) : (
+                <div className="social-feed-list" data-testid="community-feed-timeline">
+                  {visibleItems.map((item) => (
+                    <article
+                      key={`${item.type}-${item.id}`}
+                      className="social-feed-item"
+                      data-testid={`community-feed-item-${item.type}`}
+                    >
+                      <div className="social-feed-icon" aria-hidden="true">
+                        <i className={itemIcon(item.type)} />
+                      </div>
+                      <div className="social-feed-copy">
+                        <div className="social-feed-meta">
+                          <span className="social-feed-type">{itemLabel(item.type)}</span>
+                          <span className="social-feed-time">{item.freshness}</span>
+                        </div>
+                        <h3 className="social-feed-title">{item.title}</h3>
+                        {item.summary && <p className="social-feed-summary">{item.summary}</p>}
+                        <div className="social-feed-actions">
+                          <button type="button" onClick={() => openItem(item)}>
+                            <i className="pi pi-arrow-right" aria-hidden="true" />
+                            {t('community_feed.open')}
+                          </button>
+                          {item.type === 'signal' && (
+                            <button
+                              type="button"
+                              onClick={() => support(item)}
+                              disabled={supported.has(item.id)}
+                            >
+                              <i className="pi pi-heart" aria-hidden="true" />
+                              {supported.has(item.id)
+                                ? t('community_feed.supported')
+                                : t('community_feed.support')}
+                            </button>
+                          )}
+                          {(item.type === 'thread-update' || item.type === 'blog') && (
+                            <button type="button" onClick={() => openItem(item)}>
+                              <i className="pi pi-comment" aria-hidden="true" />
+                              {t('community_feed.reply')}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
             </div>
+
+            <aside className="social-feed-aside">
+              <CivicCard title={t('community_feed.your_community')} variant="brand">
+                <div className="flex flex-column gap-2">
+                  <strong className="text-xl text-main">{activeCommunityName}</strong>
+                  {activeRole && (
+                    <span className="u-pill align-self-start">
+                      <i className="pi pi-users text-brand-primary" aria-hidden="true" />
+                      {toRoleLabel(activeRole, t)}
+                    </span>
+                  )}
+                  <span className="text-sm text-secondary mt-2">
+                    {t('community_feed.your_community_desc')}
+                  </span>
+                </div>
+                <div className="social-feed-aside-links mt-4">
+                  <button type="button" onClick={() => navigate('/communities/map')}>
+                    <i className="pi pi-map" aria-hidden="true" />
+                    {t('community_feed.explore_map')}
+                  </button>
+                  <button type="button" onClick={() => navigate('/communities/proposals')}>
+                    <i className="pi pi-file-edit" aria-hidden="true" />
+                    {t('community_feed.explore_proposals')}
+                  </button>
+                  <button type="button" onClick={() => navigate('/communities/projects')}>
+                    <i className="pi pi-briefcase" aria-hidden="true" />
+                    {t('community_feed.explore_projects')}
+                  </button>
+                  <button type="button" onClick={() => navigate('/communities/governance')}>
+                    <i className="pi pi-book" aria-hidden="true" />
+                    {t('community_feed.explore_governance')}
+                  </button>
+                </div>
+              </CivicCard>
+            </aside>
           </div>
         )}
       </div>

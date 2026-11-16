@@ -133,11 +133,11 @@ export function Layout({ children, authMode = false }: Props) {
     activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
   const primaryNav: NavItem[] = [
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
+    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
     { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
   ];
   const collaborationNav: NavItem[] = [
-    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
       { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn },
       { label: t('nav.community_merge_review'), to: '/communities/merge-review', icon: 'pi pi-clone', visible: isLoggedIn },
       { label: t('nav.community_weekly_digest'), to: '/communities/weekly-digest', icon: 'pi pi-envelope', visible: isLoggedIn },
@@ -183,9 +183,11 @@ export function Layout({ children, authMode = false }: Props) {
    * nothing, so the framing line is rendered only where it actually frames something.
    */
   const topbarEyebrow = isSectionRoute
-    ? activeMembership && location.pathname === "/"
-      ? t("nav.community_home_label")
-      : t("dashboard.focus_today")
+    ? location.pathname === "/communities/feed"
+      ? t("community_feed.kicker")
+      : activeMembership && location.pathname === "/"
+        ? t("nav.community_home_label")
+        : t("dashboard.focus_today")
     : null;
 
   const visibleMoreCount = [...collaborationNav, ...advancedNav].filter((item) => item.visible).length;

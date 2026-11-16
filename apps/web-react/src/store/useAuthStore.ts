@@ -27,6 +27,9 @@ export const useAuthStore = create<AuthState>()(
       isLoggedIn: false,
       isHydrated: false,
       setAuth: (data) => {
+        // A new session never inherits another person's community context. Without this, logging
+        // in after a manual storage clear kept the previous memberships and showed the wrong role.
+        useCommunityStore.getState().clear();
         // Aligned with Backend AuthResponse record: accessToken, username, role
         const roles = (data.role || 'ROLE_CITIZEN')
           .split(',')
