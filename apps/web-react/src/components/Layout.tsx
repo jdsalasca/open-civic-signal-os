@@ -34,8 +34,9 @@ const SECTION_FOR_DETAIL_ROUTES: Record<string, string> = {
   "/signal/": "nav.case_detail",
 };
 
+const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
+
 export function Layout({ children, authMode = false }: Props) {
-  const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
   const mainContentId = "main-content";
   const mobileNavId = "mobile-navigation-drawer";
   const { t } = useTranslation();

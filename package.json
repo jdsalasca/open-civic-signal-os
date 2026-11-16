@@ -13,6 +13,7 @@
     "ingest": "node src/ingest.mjs",
     "dev:web": "npm --workspace apps/web-react run dev",
     "build:web": "npm --workspace apps/web-react run build",
+    "lint:web": "npm --workspace @open-civic/web-react run lint",
     "preview:web": "npm --workspace apps/web-react run preview",
     "agent:gate": "node scripts/agent-gate.mjs",
     "check:contrast": "node scripts/check-design-contrast.mjs",

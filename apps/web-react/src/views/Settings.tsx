@@ -91,6 +91,11 @@ const EMPTY_PROFILE_FORM: ProfileFormState = {
   avatarPreset: AVATAR_PRESETS[0].id
 };
 
+const sanitizeAffiliationTag = (value: string) => value.trim().replace(/\s+/g, ' ');
+
+const mergeAffiliationTags = (items: string[]) =>
+  Array.from(new Set(items.map(sanitizeAffiliationTag).filter(Boolean))).slice(0, 8);
+
 export function Settings() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -140,11 +145,6 @@ export function Settings() {
     { label: t('settings.visibility.COMMUNITY'), value: 'COMMUNITY' },
     { label: t('settings.visibility.ADMINS'), value: 'ADMINS' }
   ];
-
-  const sanitizeAffiliationTag = (value: string) => value.trim().replace(/\s+/g, ' ');
-
-  const mergeAffiliationTags = (items: string[]) =>
-    Array.from(new Set(items.map(sanitizeAffiliationTag).filter(Boolean))).slice(0, 8);
 
   useEffect(() => {
     let mounted = true;

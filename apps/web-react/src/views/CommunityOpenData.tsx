@@ -79,7 +79,7 @@ export function CommunityOpenData() {
   const canManageOpenData = Boolean(
     activeMembership && openDataPolicy?.allowedRoles.includes(activeMembership.role)
   );
-  const datasets = center?.datasets ?? [];
+  const datasets = useMemo(() => center?.datasets ?? [], [center]);
   const scopeOptions = useMemo(
     () =>
       datasets.map((dataset) => ({

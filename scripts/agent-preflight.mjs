@@ -83,6 +83,7 @@ const controllerChanged = files.some((file) =>
 );
 
 if (frontendChanged) {
+  run("npm run lint:web");
   run("npm run build:web");
   console.log("\nPlaywright evidence reminder:");
   console.log("Run: npm run agent:ux:pw -- open http://localhost:5173 --headed");

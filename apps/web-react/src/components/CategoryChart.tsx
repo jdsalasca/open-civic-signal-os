@@ -100,6 +100,7 @@ export function CategoryChart({ signals }: Props) {
       tooltipBg: token("--tooltip-bg", "#4a3a32"),
       tooltipText: token("--tooltip-text", "#fbf1e2"),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- theme invalidates the CSS token reads
   }, [theme]);
 
   const chartData = useMemo(() => {

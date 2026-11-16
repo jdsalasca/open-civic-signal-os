@@ -39,7 +39,9 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
     const mask = page.locator('.p-sidebar-mask');
     await expect(mask).toBeVisible();
     const backdropFilter = await mask.evaluate((el) => {
-      const style = window.getComputedStyle(el) as any;
+      const style = window.getComputedStyle(el) as CSSStyleDeclaration & {
+        webkitBackdropFilter?: string;
+      };
       return style.backdropFilter || style.webkitBackdropFilter;
     });
     expect(backdropFilter).toContain('blur(12px)');

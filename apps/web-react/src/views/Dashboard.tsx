@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 import { Signal, Notification, SignalMeta, SignalAging } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
 import { SignalTable } from "../components/SignalTable";
+import type { DataTablePageEvent } from "primereact/datatable";
 import { PriorityScale, StatusChip } from "../components/signalPrimitives";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
@@ -173,14 +174,14 @@ export function Dashboard() {
         },
       });
       
-    } catch (err: any) {
-      if (err.name === 'CanceledError' || err.name === 'AbortError') return;
-      const apiErr = err as ApiError;
+    } catch (err) {
+      const apiErr = err as ApiError & { name?: string };
+      if (apiErr.name === 'CanceledError' || apiErr.name === 'AbortError') return;
       toast.error(apiErr.friendlyMessage || t('dashboard.sync_error'));
     } finally {
       setLoading(false);
     }
-  }, [activeRole, t, lazyState, activeFilter, activeCommunityId, criticalThreshold]);
+  }, [activeRole, t, lazyState, activeFilter, activeCommunityId, criticalThreshold, fieldMode, staffRole]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -188,8 +189,8 @@ export function Dashboard() {
     return () => controller.abort();
   }, [loadData]);
 
-  const onPage = (event: any) => {
-    setLazyState(event);
+  const onPage = (event: DataTablePageEvent) => {
+    setLazyState({ first: event.first, rows: event.rows, page: event.page ?? 0 });
   };
 
   const handleFilterChange = (value: string) => {
@@ -274,7 +275,7 @@ export function Dashboard() {
         // Aging is an additive panel; a failure must not break the dashboard.
       });
     return () => controller.abort();
-  }, [isStaff, activeCommunityId, totalRecords]);
+  }, [isStaff, activeCommunityId, totalRecords, fieldMode]);
 
   const guidedHome = useMemo(() => {
     if (isStaff) {
