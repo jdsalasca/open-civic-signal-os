@@ -389,6 +389,22 @@ a:hover {
   z-index: 1;
 }
 
+.offline-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1.5rem;
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.offline-banner i {
+  color: var(--brand-primary);
+}
+
 .civic-card {
   border-radius: var(--radius-paper) !important;
 }

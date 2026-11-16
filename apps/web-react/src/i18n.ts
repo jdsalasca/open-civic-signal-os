@@ -106,6 +106,9 @@ const resources = {
         "contribute": "Report or support a case",
         "follow": "Follow a topic"
       },
+      "offline": {
+        "banner": "You are offline. You can keep reading; your report draft stays on this device."
+      },
       "notifications": {
         "title": "Notifications",
         "mark_all": "Mark all read",
@@ -533,6 +536,8 @@ const resources = {
         "detecting_coordinates": "Detecting Coordinates...",
         "coordinates_secured": "Coordinates Secured",
         "detect_location_auto": "Detect Location Automatically (GPS)",
+        "draft_restored": "We restored the draft you had on this device.",
+        "draft_discard": "Discard draft",
         "detected_coordinates_label": "GPS point {{latitude}}, {{longitude}}",
         "coordinates_value": "Lat {{latitude}} · Lng {{longitude}}",
         "geolocation_title": "Optional geolocation",
@@ -2455,6 +2460,9 @@ const resources = {
         "contribute": "Reporta o apoya un caso",
         "follow": "Sigue un tema"
       },
+      "offline": {
+        "banner": "Estás sin conexión. Puedes seguir leyendo; tu borrador queda guardado en este dispositivo."
+      },
       "notifications": {
         "title": "Notificaciones",
         "mark_all": "Marcar todas leídas",
@@ -2882,6 +2890,8 @@ const resources = {
         "detecting_coordinates": "Detectando coordenadas...",
         "coordinates_secured": "Coordenadas capturadas",
         "detect_location_auto": "Detectar ubicación automáticamente (GPS)",
+        "draft_restored": "Recuperamos el borrador que tenías en este dispositivo.",
+        "draft_discard": "Descartar borrador",
         "detected_coordinates_label": "Punto GPS {{latitude}}, {{longitude}}",
         "coordinates_value": "Lat {{latitude}} · Lng {{longitude}}",
         "geolocation_title": "Geolocalización opcional",

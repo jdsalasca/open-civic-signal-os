@@ -37,6 +37,17 @@ if (i18n.language !== initialLanguage) {
   i18n.changeLanguage(initialLanguage);
 }
 
+// Field use means flaky mobile networks. The production build registers a service worker that keeps
+// the shell and hashed assets, so reopening the app offline lands on the form instead of a browser
+// error. Development is excluded: a cached shell would serve yesterday's code after every edit.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // A missing worker only costs offline support; the app itself still works.
+    });
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
