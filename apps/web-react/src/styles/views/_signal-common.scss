@@ -191,7 +191,10 @@
   font-weight: 800;
   letter-spacing: 0.02em;
   line-height: 1.25;
-  white-space: nowrap;
+  // Long public location labels must wrap: nowrap pushed the mobile backlog
+  // sideways, because the chip is wider than the column.
+  white-space: normal;
+  text-align: left;
   max-width: 100%;
   overflow-wrap: anywhere;
 }
