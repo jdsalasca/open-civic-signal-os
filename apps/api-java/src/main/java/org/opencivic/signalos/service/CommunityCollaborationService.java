@@ -48,6 +48,7 @@ public class CommunityCollaborationService {
     private final SignalRepository signalRepository;
     private final UserRepository userRepository;
     private final UserReactionService userReactionService;
+    private final UserNotificationService userNotificationService;
 
     public CommunityCollaborationService(
         CommunityAccessService accessService,
@@ -56,7 +57,8 @@ public class CommunityCollaborationService {
         CommunityBlogPostRepository blogPostRepository,
         SignalRepository signalRepository,
         UserRepository userRepository,
-        UserReactionService userReactionService
+        UserReactionService userReactionService,
+        UserNotificationService userNotificationService
     ) {
         this.accessService = accessService;
         this.threadRepository = threadRepository;
@@ -65,6 +67,7 @@ public class CommunityCollaborationService {
         this.signalRepository = signalRepository;
         this.userRepository = userRepository;
         this.userReactionService = userReactionService;
+        this.userNotificationService = userNotificationService;
     }
 
     public Page<CommunityThreadResponse> getThreads(
@@ -180,6 +183,16 @@ public class CommunityCollaborationService {
         CommunityThreadMessage saved = messageRepository.save(message);
         thread.setUpdatedAt(LocalDateTime.now());
         threadRepository.save(thread);
+        userNotificationService.notifyUser(
+            thread.getCreatedBy(),
+            user.getId(),
+            user.getUsername(),
+            "THREAD_REPLY",
+            "THREAD",
+            thread.getId(),
+            thread.getTitle(),
+            sourceCommunityId
+        );
         return toMessageResponse(saved, null, resolveThreadMessageDepth(saved), 0);
     }
 

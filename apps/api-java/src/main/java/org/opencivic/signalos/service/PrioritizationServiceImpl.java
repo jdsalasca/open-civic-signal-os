@@ -59,17 +59,20 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     private final UserRepository userRepository;
     private final SignalStatusEntryRepository statusHistoryRepository;
   private final SignalScoreEntryRepository scoreEntryRepository;
+  private final UserNotificationService userNotificationService;
 
 public PrioritizationServiceImpl(SignalRepository signalRepository,
     VoteRepository voteRepository,
     UserRepository userRepository,
     SignalStatusEntryRepository statusHistoryRepository,
-    SignalScoreEntryRepository scoreEntryRepository) {
+    SignalScoreEntryRepository scoreEntryRepository,
+    UserNotificationService userNotificationService) {
   this.signalRepository = signalRepository;
   this.voteRepository = voteRepository;
   this.userRepository = userRepository;
   this.statusHistoryRepository = statusHistoryRepository;
   this.scoreEntryRepository = scoreEntryRepository;
+  this.userNotificationService = userNotificationService;
   }
 
   /**
@@ -612,6 +615,19 @@ statusHistoryRepository.save(new SignalStatusEntry(
             reason == null || reason.isBlank() ? "Standard lifecycle transition" : reason,
             null
         ));
+        UUID actorId = changedBy == null
+            ? null
+            : userRepository.findByUsername(changedBy).map(User::getId).orElse(null);
+        userNotificationService.notifyUser(
+            signal.getAuthorId(),
+            actorId,
+            changedBy,
+            "SIGNAL_STATUS",
+            "SIGNAL",
+            signal.getId(),
+            signal.getTitle(),
+            signal.getCommunityId()
+        );
         
         return Optional.of(saved);
     }
@@ -646,6 +662,16 @@ statusHistoryRepository.save(new SignalStatusEntry(
             signal.setPriorityScore(calculateScore(signal));
             Signal rescored = signalRepository.save(signal);
             recordScore(rescored, SignalScoreEntry.Cause.SUPPORT_VOTE);
+            userNotificationService.notifyUser(
+                signal.getAuthorId(),
+                user.getId(),
+                user.getUsername(),
+                "SIGNAL_SUPPORT",
+                "SIGNAL",
+                signal.getId(),
+                signal.getTitle(),
+                signal.getCommunityId()
+            );
             return rescored;
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Concurrent support attempt detected and rejected.");
