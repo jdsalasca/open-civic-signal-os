@@ -86,6 +86,7 @@ jobs:
         run: >
           npx playwright test
           src/tests/community-activities.spec.ts
+          src/tests/community-feed.spec.ts
           src/tests/community-decisions.spec.ts
           src/tests/community-governance.spec.ts
           src/tests/community-integrations.spec.ts

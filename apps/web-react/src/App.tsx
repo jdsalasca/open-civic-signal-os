@@ -121,9 +121,12 @@ export function App() {
   return (
     <BrowserRouter>
       <Toaster 
-        position="top-center"
+        position="top-right"
         containerStyle={{
-          top: '1rem',
+          // Below the sticky top bar: a toast must never cover the page title or a form field.
+          top: '6.5rem',
+          right: '1rem',
+          left: 'auto',
           zIndex: 99999,
         }}
         gutter={12}
