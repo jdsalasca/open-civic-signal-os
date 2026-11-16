@@ -71,7 +71,7 @@ test.describe('Dashboard filters change the query', () => {
 
     await seedAuthenticatedApp(page);
     await mockDashboardRoutes(page);
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
 
     // The unfiltered page must not send a threshold.
@@ -123,7 +123,7 @@ test.describe('Dashboard filters change the query', () => {
 
     await seedAuthenticatedApp(page);
     await mockDashboardRoutes(page);
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
 
     await page.getByTestId('dashboard-filter-in_progress').click();

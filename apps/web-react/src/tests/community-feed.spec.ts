@@ -40,8 +40,6 @@ const feed = [
 
 test.describe('Community social feed', () => {
   test('shows one timeline, filters it and publishes from the composer', async ({ page }) => {
-    await page.route('**/api/community/feed*', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
     await page.route('**/api/community/threads', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'new-thread' }) }));
     await page.route('**/api/community/threads/new-thread/messages', (route) =>
@@ -54,6 +52,8 @@ test.describe('Community social feed', () => {
     await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
     await mockDashboardRoutes(page);
     // After the shared helper so these payloads win.
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
     await page.route('**/api/follows/**', (route) =>
       route.fulfill({
         status: 200,
@@ -101,5 +101,25 @@ test.describe('Community social feed', () => {
     await page.getByTestId('community-feed-reply-input-thread-1').fill('I will bring gloves.');
     await page.getByTestId('community-feed-reply-send-thread-1').click();
     await expect(page.getByText('Reply published.')).toBeVisible();
+  });
+
+  test('the citizen home is the community feed with report and opinion side by side', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+
+    await page.goto('/');
+    await expect(page.getByTestId('community-feed-composer')).toBeVisible();
+    await expect(page.getByTestId('community-feed-report')).toBeVisible();
+    await expect(page.getByTestId('community-feed-timeline')).toBeVisible();
+  });
+
+  test('a failed feed load shows a retry card, not an empty community', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) => route.abort('failed'));
+
+    await page.goto('/');
+    await expect(page.getByTestId('community-feed-error')).toBeVisible();
+    await expect(page.getByTestId('community-feed-empty')).toHaveCount(0);
   });
 });

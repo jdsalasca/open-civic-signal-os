@@ -397,7 +397,7 @@ export function ReportSignal() {
             </div>
           </div>
 
-          <CivicField label={t("report.issue_title")} error={errors.title?.message} helpText={t("report.issue_title_help")}>
+          <CivicField label={t("report.issue_title")} htmlFor="report-title" error={errors.title?.message} helpText={t("report.issue_title_help")}>
             <Controller
               name="title"
               control={control}
@@ -422,7 +422,7 @@ export function ReportSignal() {
             />
           </CivicField>
 
-          <CivicField label={t("common.category")} error={errors.category?.message} helpText={t("report.category_help")}>
+          <CivicField label={t("common.category")} htmlFor="report-category" error={errors.category?.message} helpText={t("report.category_help")}>
             <Controller
               name="category"
               control={control}
@@ -447,7 +447,7 @@ export function ReportSignal() {
             />
           </CivicField>
 
-          <CivicField label={t("report.location_label")} error={errors.locationLabel?.message} helpText={t("report.location_help")}>
+          <CivicField label={t("report.location_label")} htmlFor="report-location-label" error={errors.locationLabel?.message} helpText={t("report.location_help")}>
             <Controller
               name="locationLabel"
               control={control}
@@ -477,7 +477,7 @@ export function ReportSignal() {
     if (currentStep === 1) {
       return (
         <div className="flex flex-column gap-4" data-testid="report-wizard-step-2">
-          <CivicField label={t("report.context")} error={errors.description?.message} helpText={t("report.context_help")}>
+          <CivicField label={t("report.context")} htmlFor="report-description" error={errors.description?.message} helpText={t("report.context_help")}>
             <Controller
               name="description"
               control={control}
@@ -519,6 +519,7 @@ export function ReportSignal() {
                 <CivicField
                   key={item.id}
                   label={t("report.evidence_item_label", { index: index + 1 })}
+                  htmlFor={`report-evidence-${index}`}
                   error={errors.evidenceItems?.[index]?.url?.message}
                   helpText={index === 0 ? t("report.image_url_help") : undefined}
                   className="mb-0"
@@ -541,6 +542,7 @@ export function ReportSignal() {
                         <InputText
                           {...field}
                           value={field.value || ""}
+                          id={`report-evidence-${index}`}
                           onChange={(e) => field.onChange(e.target.value)}
                           className={classNames("w-full", { "p-invalid": fieldState.error })}
                           placeholder={t("report.image_url_placeholder")}

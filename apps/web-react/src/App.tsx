@@ -54,20 +54,18 @@ const LoadingFallback = () => (
 );
 
 /**
- * The root decides between the workspace and the public front door.
+ * The root decides between the community feed and the public front door.
  *
- * <p>A logged-in visitor keeps seeing the dashboard at "/" exactly as before; a visitor with no
- * session gets the city directory instead of a login wall, so the platform's first impression is
- * what it is for rather than a form. It waits for rehydration like AuthGuard does, otherwise a
- * signed-in person refreshing the page would see the public landing flash before their session is
- * read back from storage.
+ * <p>A logged-in visitor lands on the one feed where reports, announcements and conversations live:
+ * reading, opining and reporting are the same route. The analytics dashboard moved to "/dashboard"
+ * for staff and advanced users, so the citizen no longer has to choose between two homes.
  */
 function HomeRoute() {
   const { isLoggedIn, isHydrated } = useAuthStore();
   if (!isHydrated) {
     return <LoadingFallback />;
   }
-  return isLoggedIn ? <Dashboard /> : <Landing />;
+  return isLoggedIn ? <CommunityFeed /> : <Landing />;
 }
 
 export function App() {
@@ -182,6 +180,7 @@ export function App() {
             <Route element={<AuthGuard />}>
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/report" element={<ReportSignal />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/signal/:id" element={<SignalDetail />} />
               <Route path="/mine" element={<MySignals />} />
               <Route path="/settings" element={<Settings />} />

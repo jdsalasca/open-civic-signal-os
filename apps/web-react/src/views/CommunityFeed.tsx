@@ -9,11 +9,13 @@ import { CommunityFeedItem } from '../types';
 import { Layout } from '../components/Layout';
 import { useCommunityStore } from '../store/useCommunityStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { useSettingsStore } from '../store/useSettingsStore';
 import apiClient from '../api/axios';
 import { CivicCard } from '../components/ui/CivicCard';
 import { CivicEmptyState } from '../components/ui/CivicEmptyState';
 import { CivicPageHeader } from '../components/ui/CivicPageHeader';
 import { CivicButton } from '../components/ui/CivicButton';
+import { OnboardingChecklist } from '../components/OnboardingChecklist';
 import { toRoleLabel } from '../constants/roleLabels';
 
 type ApiError = Error & { friendlyMessage?: string };
@@ -45,25 +47,32 @@ export function CommunityFeed() {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [replySending, setReplySending] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [alertsOn, setAlertsOn] = useState(false);
 
   const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
   const activeRole = memberships.find((m) => m.communityId === activeCommunityId)?.role;
+  const interfaceMode = useSettingsStore((state) => state.interfaceMode);
 
-  const loadFeed = useCallback(async () => {
+  const loadFeed = useCallback(async (signal?: AbortSignal) => {
     if (!activeCommunityId) {
       setFeed([]);
       setLoading(false);
+      setLoadError(false);
       return;
     }
     try {
       setLoading(true);
+      setLoadError(false);
       const res = await apiClient.get<CommunityFeedItem[]>(
-        `community/feed?communityId=${activeCommunityId}&days=30`
+        `community/feed?communityId=${activeCommunityId}&days=30`,
+        { signal }
       );
       setFeed(res.data ?? []);
     } catch (err) {
-      const apiErr = err as ApiError;
+      const apiErr = err as ApiError & { name?: string };
+      if (apiErr.name === 'CanceledError' || apiErr.name === 'AbortError') return;
+      setLoadError(true);
       toast.error(apiErr.friendlyMessage || t('community_feed.load_error'));
     } finally {
       setLoading(false);
@@ -71,7 +80,9 @@ export function CommunityFeed() {
   }, [activeCommunityId, t]);
 
   useEffect(() => {
-    void loadFeed();
+    const controller = new AbortController();
+    void loadFeed(controller.signal);
+    return () => controller.abort();
   }, [loadFeed]);
 
   useEffect(() => {
@@ -266,6 +277,8 @@ export function CommunityFeed() {
           }
         />
 
+        <OnboardingChecklist />
+
         {!activeCommunityId ? (
           <CivicCard>
             <CivicEmptyState
@@ -374,6 +387,7 @@ export function CommunityFeed() {
                       type="button"
                       className={`u-filter-chip ${filter === option.key ? 'is-active' : ''}`}
                       onClick={() => setFilter(option.key)}
+                      aria-pressed={filter === option.key}
                       data-testid={`community-feed-filter-${option.key}`}
                     >
                       <i className={option.icon} aria-hidden="true" />
@@ -389,7 +403,24 @@ export function CommunityFeed() {
                 )}
               </div>
 
-              {loading ? (
+              {loadError ? (
+                <CivicCard data-testid="community-feed-error">
+                  <div className="signal-feed-error" role="alert">
+                    <i className="pi pi-exclamation-circle" aria-hidden="true" />
+                    <div className="signal-feed-error__copy">
+                      <strong>{t('community_feed.load_error')}</strong>
+                      <span>{t('community_feed.load_error_hint')}</span>
+                    </div>
+                    <CivicButton
+                      type="button"
+                      variant="secondary"
+                      size="small"
+                      label={t('common.retry')}
+                      onClick={() => void loadFeed()}
+                    />
+                  </div>
+                </CivicCard>
+              ) : loading ? (
                 <div className="social-feed-skeleton" aria-hidden="true">
                   {[0, 1, 2].map((row) => (
                     <div key={row} className="social-feed-skeleton-row" />
@@ -421,13 +452,17 @@ export function CommunityFeed() {
                           <span className="social-feed-type">{itemLabel(item.type)}</span>
                           <span className="social-feed-time">{item.freshness}</span>
                         </div>
-                        <h3 className="social-feed-title">{item.title}</h3>
+                        <h3 className="social-feed-title">
+                          <button
+                            type="button"
+                            className="social-feed-title__link"
+                            onClick={() => openItem(item)}
+                          >
+                            {item.title}
+                          </button>
+                        </h3>
                         {item.summary && <p className="social-feed-summary">{item.summary}</p>}
                         <div className="social-feed-actions">
-                          <button type="button" onClick={() => openItem(item)}>
-                            <i className="pi pi-arrow-right" aria-hidden="true" />
-                            {t('community_feed.open')}
-                          </button>
                           {item.type === 'signal' && (
                             <button
                               type="button"
@@ -493,9 +528,11 @@ export function CommunityFeed() {
                               autoResize
                               onChange={(event) => setReplyText(event.target.value)}
                               placeholder={t('community_feed.reply_placeholder')}
+                              aria-label={t('community_feed.reply')}
                               className="w-full"
                               data-testid={`community-feed-reply-input-${item.id}`}
                             />
+                            <span className="social-composer-count">{replyText.length}/1000</span>
                             <div className="social-feed-reply-actions">
                               <CivicButton
                                 type="button"
@@ -537,22 +574,26 @@ export function CommunityFeed() {
                   </span>
                 </div>
                 <div className="social-feed-aside-links mt-4">
-                  <button type="button" onClick={() => navigate('/communities/map')}>
-                    <i className="pi pi-map" aria-hidden="true" />
-                    {t('community_feed.explore_map')}
-                  </button>
-                  <button type="button" onClick={() => navigate('/communities/proposals')}>
-                    <i className="pi pi-file-edit" aria-hidden="true" />
-                    {t('community_feed.explore_proposals')}
-                  </button>
-                  <button type="button" onClick={() => navigate('/communities/projects')}>
-                    <i className="pi pi-briefcase" aria-hidden="true" />
-                    {t('community_feed.explore_projects')}
-                  </button>
-                  <button type="button" onClick={() => navigate('/communities/governance')}>
-                    <i className="pi pi-book" aria-hidden="true" />
-                    {t('community_feed.explore_governance')}
-                  </button>
+                  {interfaceMode === 'advanced' && (
+                    <>
+                      <button type="button" onClick={() => navigate('/communities/map')}>
+                        <i className="pi pi-map" aria-hidden="true" />
+                        {t('community_feed.explore_map')}
+                      </button>
+                      <button type="button" onClick={() => navigate('/communities/proposals')}>
+                        <i className="pi pi-file-edit" aria-hidden="true" />
+                        {t('community_feed.explore_proposals')}
+                      </button>
+                      <button type="button" onClick={() => navigate('/communities/projects')}>
+                        <i className="pi pi-briefcase" aria-hidden="true" />
+                        {t('community_feed.explore_projects')}
+                      </button>
+                      <button type="button" onClick={() => navigate('/communities/governance')}>
+                        <i className="pi pi-book" aria-hidden="true" />
+                        {t('community_feed.explore_governance')}
+                      </button>
+                    </>
+                  )}
                 </div>
               </CivicCard>
 

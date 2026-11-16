@@ -29,7 +29,7 @@ test.describe('Language follows the place, not the installer', () => {
     await seedAuthenticatedApp(page);
     await mockDashboardRoutes(page);
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Lo que pasa en');
 

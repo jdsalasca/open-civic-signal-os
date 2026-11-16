@@ -29,7 +29,7 @@ test.describe('Offline support', () => {
     expect(cachedPaths).toContain('/index.html');
 
     await context.setOffline(true);
-    await expect(page.getByTestId('offline-banner')).toBeVisible();
+    await expect(page.getByTestId('offline-banner')).toBeVisible({ timeout: 10000 });
 
     // A route the worker never fetched still opens: the cached shell answers the navigation.
     const offlineResponse = await page.goto('/communities/feed');

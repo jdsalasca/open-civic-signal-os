@@ -18,7 +18,7 @@ test.describe('Theme Consistency (P1)', () => {
       page.evaluate(() => document.documentElement.classList.contains('light-theme'))
     ).toBeTruthy();
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
     const lightCardBg = await page.locator('[data-testid="dashboard-hero"]').evaluate((el) => {
       const style = getComputedStyle(el);
@@ -33,7 +33,7 @@ test.describe('Theme Consistency (P1)', () => {
       page.evaluate(() => document.documentElement.classList.contains('dark-theme'))
     ).toBeTruthy();
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('signals-feed')).toBeVisible();
     await expect(page.getByTestId('dashboard-freshness-badge')).toBeVisible();
   });

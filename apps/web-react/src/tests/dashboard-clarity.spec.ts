@@ -34,7 +34,7 @@ test.describe('Dashboard clarity hierarchy', () => {
     await seedAuthenticatedApp(page);
     await mockDashboardRoutes(page);
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
 
     await expect(page.getByTestId('dashboard-action-report')).toBeVisible();
@@ -68,7 +68,7 @@ test.describe('Dashboard clarity hierarchy', () => {
     await seedAuthenticatedApp(page, 'CITIZEN');
     await mockDashboardRoutes(page);
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('signals-feed-retry')).toBeVisible({ timeout: 30000 });
     await expect(page.getByTestId('signals-empty-state')).toHaveCount(0);
   });

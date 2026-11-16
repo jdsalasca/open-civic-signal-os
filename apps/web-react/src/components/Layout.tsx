@@ -138,6 +138,9 @@ export function Layout({ children, authMode = false }: Props) {
     memberships[0] ??
     null;
   const isStaff = activeRole === "PUBLIC_SERVANT" || activeRole === "SUPER_ADMIN";
+  // Citizens in simple mode get the community essentials; the administrative and analytical tools
+  // stay behind the progressive "More options" panel or the advanced mode.
+  const showAdvancedTools = isStaff || interfaceMode === "advanced";
   const canAccessModeration =
     isStaff ||
     activeMembership?.role === "MODERATOR" ||
@@ -149,26 +152,26 @@ export function Layout({ children, authMode = false }: Props) {
     activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
   const primaryNav: NavItem[] = [
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
-    { label: t('nav.live_feed'), to: '/communities/feed', icon: 'pi pi-bolt', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
     { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
   ];
   const collaborationNav: NavItem[] = [
-      { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn },
-      { label: t('nav.community_merge_review'), to: '/communities/merge-review', icon: 'pi pi-clone', visible: isLoggedIn },
-      { label: t('nav.community_weekly_digest'), to: '/communities/weekly-digest', icon: 'pi pi-envelope', visible: isLoggedIn },
-    { label: t('nav.community_decisions'), to: '/communities/decisions', icon: 'pi pi-sitemap', visible: isLoggedIn },
-    { label: t('nav.community_projects'), to: '/communities/projects', icon: 'pi pi-briefcase', visible: isLoggedIn },
-    { label: t('nav.community_governance'), to: '/communities/governance', icon: 'pi pi-book', visible: isLoggedIn },
-    { label: t('nav.community_open_data'), to: '/communities/open-data', icon: 'pi pi-database', visible: isLoggedIn && Boolean(canAccessOpenData) },
+      { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn && showAdvancedTools },
+      { label: t('nav.community_merge_review'), to: '/communities/merge-review', icon: 'pi pi-clone', visible: isLoggedIn && showAdvancedTools },
+      { label: t('nav.community_weekly_digest'), to: '/communities/weekly-digest', icon: 'pi pi-envelope', visible: isLoggedIn && showAdvancedTools },
+    { label: t('nav.community_decisions'), to: '/communities/decisions', icon: 'pi pi-sitemap', visible: isLoggedIn && showAdvancedTools },
+    { label: t('nav.community_projects'), to: '/communities/projects', icon: 'pi pi-briefcase', visible: isLoggedIn && showAdvancedTools },
+    { label: t('nav.community_governance'), to: '/communities/governance', icon: 'pi pi-book', visible: isLoggedIn && showAdvancedTools },
+    { label: t('nav.community_open_data'), to: '/communities/open-data', icon: 'pi pi-database', visible: isLoggedIn && showAdvancedTools && Boolean(canAccessOpenData) },
     { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
     { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
-    { label: t('nav.community_rooms'), to: '/communities/rooms', icon: 'pi pi-comments', visible: isLoggedIn },
+    { label: t('nav.community_rooms'), to: '/communities/rooms', icon: 'pi pi-comments', visible: isLoggedIn && showAdvancedTools },
     { label: t('nav.community_activities'), to: '/communities/activities', icon: 'pi pi-calendar', visible: isLoggedIn },
-    { label: t('nav.community_resources'), to: '/communities/resources', icon: 'pi pi-building', visible: isLoggedIn },
-    { label: t('nav.community_integrations'), to: '/communities/integrations', icon: 'pi pi-send', visible: isLoggedIn && Boolean(canAccessOpenData) },
+    { label: t('nav.community_resources'), to: '/communities/resources', icon: 'pi pi-building', visible: isLoggedIn && showAdvancedTools },
+    { label: t('nav.community_integrations'), to: '/communities/integrations', icon: 'pi pi-send', visible: isLoggedIn && showAdvancedTools && Boolean(canAccessOpenData) },
   ];
   const advancedNav: NavItem[] = [
+    { label: t('nav.overview'), to: '/dashboard', icon: 'pi pi-chart-bar', visible: isLoggedIn && showAdvancedTools },
     { label: t('nav.moderation'), to: '/moderation', icon: 'pi pi-shield', visible: isLoggedIn && Boolean(canAccessModeration) },
     { label: t('nav.communities'), to: '/communities', icon: 'pi pi-globe', visible: isLoggedIn },
     { label: t('nav.help_center'), to: '/help', icon: 'pi pi-question-circle', visible: isLoggedIn },
@@ -199,11 +202,9 @@ export function Layout({ children, authMode = false }: Props) {
    * nothing, so the framing line is rendered only where it actually frames something.
    */
   const topbarEyebrow = isSectionRoute
-    ? location.pathname === "/communities/feed"
+    ? location.pathname === "/" || location.pathname === "/communities/feed"
       ? t("community_feed.kicker")
-      : activeMembership && location.pathname === "/"
-        ? t("nav.community_home_label")
-        : t("dashboard.focus_today")
+      : t("dashboard.focus_today")
     : null;
 
   const visibleMoreCount = [...collaborationNav, ...advancedNav].filter((item) => item.visible).length;

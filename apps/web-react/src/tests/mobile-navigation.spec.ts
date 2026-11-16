@@ -11,7 +11,7 @@ test.describe('Mobile Navigation Integrity (P0)', () => {
     await page.getByTestId('login-submit-button').click();
 
     await page.waitForURL('**/');
-    await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('app-topbar-title')).toBeVisible({ timeout: 30000 });
 
     // Open Drawer
     const menuButton = page.getByTestId('mobile-more-toggle');

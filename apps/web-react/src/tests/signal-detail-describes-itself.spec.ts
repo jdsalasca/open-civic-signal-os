@@ -90,9 +90,9 @@ test('the dashboard keeps its "what needs attention today" framing', async ({ pa
     // dashboard in a remount loop, so this is load-bearing rather than tidy.
     await mockDashboardRoutes(page);
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('app-topbar-label')).toBeVisible({ timeout: 30000 });
     await expect(page.getByTestId('app-topbar-label')).toContainText('What needs attention today');
-    await expect(page.getByTestId('app-topbar-title')).toHaveText('Home');
+    await expect(page.getByTestId('app-topbar-title')).toHaveText('Overview');
   });
 });

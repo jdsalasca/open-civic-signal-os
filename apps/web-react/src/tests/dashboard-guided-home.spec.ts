@@ -6,6 +6,7 @@ async function login(page: import('@playwright/test').Page, username: string, pa
   await page.getByTestId('login-password-input').fill(password);
   await page.getByTestId('login-submit-button').click();
   await page.waitForURL('**/');
+  await page.goto('/dashboard');
   await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
 }
 
@@ -40,7 +41,7 @@ test.describe('Dashboard guided home by role', () => {
     await page.getByText('Citizen', { exact: true }).click();
     await expect(page.getByText('Active role switched to Citizen.')).toBeVisible();
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-guided-persona')).toContainText('Moderator path');
     await expect(page.getByRole('heading', { name: /What is happening in/ })).toBeVisible();
     await expect(page.getByTestId('dashboard-action-report')).toContainText('Review community dialogues');

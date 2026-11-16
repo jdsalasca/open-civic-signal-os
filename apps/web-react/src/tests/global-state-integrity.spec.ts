@@ -29,7 +29,7 @@ test.describe('Global State Integrity (P0)', () => {
     await page.goto('/report');
     await page.getByRole('button', { name: 'Descartar' }).click();
     await expect(page).toHaveURL(/.*\/$/);
-    await expect(page.getByTestId('welcome-message')).toBeVisible();
+    await expect(page.getByTestId('app-topbar-title')).toBeVisible();
 
     await page.goto('/settings');
     await expect(page.getByText('Configuración del Sistema')).toBeVisible();
