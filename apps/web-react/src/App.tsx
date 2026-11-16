@@ -72,7 +72,7 @@ function HomeRoute() {
 
 export function App() {
   const { isLoggedIn } = useAuthStore();
-  const { theme, language, interfaceMode, setInterfaceMode } = useSettingsStore();
+  const { theme, language, textScale, interfaceMode, setInterfaceMode } = useSettingsStore();
 
   useEffect(() => {
     const html = document.documentElement;
@@ -88,6 +88,11 @@ export function App() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  // The comfortable-reading switch changes the root font size; every rem-based size follows.
+  useEffect(() => {
+    document.documentElement.dataset.textScale = textScale;
+  }, [textScale]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -121,14 +126,9 @@ export function App() {
   return (
     <BrowserRouter>
       <Toaster 
-        position="top-right"
-        containerStyle={{
-          // Below the sticky top bar: a toast must never cover the page title or a form field.
-          top: '6.5rem',
-          right: '1rem',
-          left: 'auto',
-          zIndex: 99999,
-        }}
+        position="bottom-right"
+        containerClassName="app-toaster"
+        containerStyle={{ zIndex: 99999 }}
         gutter={12}
         toastOptions={{
           duration: 5000,

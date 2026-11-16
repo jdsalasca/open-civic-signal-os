@@ -10,6 +10,7 @@ import { persist } from "zustand/middleware";
  * simple layout, and someone on a slow one may still want every panel.
  */
 export type DataMode = "full" | "field";
+export type TextScale = "normal" | "large";
 
 /**
  * The browser locale decides the first language; a saved choice always wins.
@@ -60,12 +61,15 @@ interface SettingsState {
   theme: 'light' | 'dark' | 'contrast';
   interfaceMode: 'simple' | 'advanced';
   dataMode: DataMode;
+  /** A single comfortable-reading switch: rem-based sizes scale together. */
+  textScale: TextScale;
   setLanguage: (lang: 'en' | 'es') => void;
   /** Applies a language inferred from the country without turning it into a manual choice. */
   setDetectedLanguage: (lang: 'en' | 'es') => void;
   setTheme: (theme: 'light' | 'dark' | 'contrast') => void;
   setInterfaceMode: (mode: 'simple' | 'advanced') => void;
   setDataMode: (mode: DataMode) => void;
+  setTextScale: (scale: TextScale) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -78,12 +82,14 @@ export const useSettingsStore = create<SettingsState>()(
       // Defaults to full: a field mode that silently reduced what everyone sees would be a change
       // nobody asked for. It is opt-in, and the setting says what it drops.
       dataMode: 'full',
+      textScale: 'normal',
       setLanguage: (language) => set({ language, languageExplicit: true }),
       setDetectedLanguage: (language) =>
         set((state) => (state.languageExplicit ? state : { language })),
       setTheme: (theme) => set({ theme }),
       setInterfaceMode: (interfaceMode) => set({ interfaceMode }),
-      setDataMode: (dataMode) => set({ dataMode })
+      setDataMode: (dataMode) => set({ dataMode }),
+      setTextScale: (textScale) => set({ textScale })
     }),
     {
       name: 'settings-storage'

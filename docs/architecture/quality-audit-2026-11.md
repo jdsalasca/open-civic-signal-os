@@ -34,6 +34,16 @@ Gate added:
 - Runs in `agent:preflight` whenever frontend files change.
 - Runs in the `node-check` CI job.
 
+### Readability for all ages
+
+- A **Text size** switch (Normal / A+) in the preferences wheel scales the root font from 16px to
+  18px; every rem-based size follows, so there are no per-screen font forks.
+- Mobile navigation, feed filters, feed actions and community links have a **44px minimum touch
+  target**.
+- Toasts moved to the bottom-right (above the mobile nav, below the top bar) so they never cover
+  the preferences wheel, a form field or a navigation control.
+- New Playwright spec `accessibility-text-scale.spec.ts` proves the scale and its persistence.
+
 Still to ratchet:
 
 - 38 `style={{...}}` usages. Most are dynamic (chart height, progress width, map position) or
@@ -53,7 +63,7 @@ Inventory: **427 files**, **31,340 lines**.
 | Measurement | Before | After |
 |---|---:|---:|
 | Methods ≥ 40 lines or > 4 params | 25+ (top 25 listed) | 23 |
-| Largest method | 184 lines (`buildTrustMetrics`) | 100 lines (`onboardingStepsFor`) |
+| Largest method | 184 lines (`buildTrustMetrics`) | 99 lines (`recordBatchHandoff`) |
 | Feed method | 70 lines (`getCommunityFeed`) | split into 4 methods |
 | Empty catches | 0 | 0 |
 | Broad `catch (Exception/Throwable)` | 19 across 8 files | unchanged |
@@ -68,16 +78,16 @@ Refactored in this round:
 - `CommunityCollaborationService.getCommunityFeed` (70 lines) split into
   `signalFeedItems`, `blogFeedItems` and `threadFeedItems`.
   `CommunityHomeIT` covers the combined order and summaries.
+- `HelpCenterService.onboardingStepsFor` (100 lines) split into `representativeSteps`,
+  `moderatorSteps` and `citizenSteps`; `HelpCenterIT` stays green.
 
 Remaining hotspots (next ratchet):
 
-1. `HelpCenterService.onboardingStepsFor` — 100 lines; mostly a switch over content. Extract one
-   method per persona/surface.
-2. `InstitutionalActionBridgeService.recordBatchHandoff` — 99 lines; split validation, entity
+1. `InstitutionalActionBridgeService.recordBatchHandoff` — 99 lines; split validation, entity
    creation and response mapping.
-3. `BiasDiagnosticService.buildReport` — 91 lines.
-4. `AuthController.register` — 89 lines; split city resolution, user creation and welcome email.
-5. `CommunityService` — 8 `findAll()` calls on the catalog; replace with a projection or a
+2. `BiasDiagnosticService.buildReport` — 91 lines.
+3. `AuthController.register` — 89 lines; split city resolution, user creation and welcome email.
+4. `CommunityService` — 8 `findAll()` calls on the catalog; replace with a projection or a
    versioned cache.
 6. `CommunityOpenDataService` (757 lines), `CommunityCollaborationService` (708),
    `AuthController` (664), `PrioritizationServiceImpl` (655), `SignalController` (614) — split by

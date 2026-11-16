@@ -350,103 +350,115 @@ public class HelpCenterService {
 
     private List<OnboardingStepDefinition> onboardingStepsFor(HelpAudience persona, String language) {
         return switch (persona) {
-            case REPRESENTATIVE -> List.of(
-                step(
-                    "representative-review-trust",
-                    localized("Review trust metrics", "Revise metricas de confianza"),
-                    localized(
-                        "Start by checking what the community can already see about freshness, participation, and execution.",
-                        "Empiece revisando lo que la comunidad ya puede ver sobre frescura, participacion y ejecucion."
-                    ),
-                    localized("Open trust metrics", "Abrir metricas"),
-                    "/communities/trust"
-                ),
-                step(
-                    "representative-publish-update",
-                    localized("Publish one official update", "Publique una actualizacion oficial"),
-                    localized(
-                        "Reduce confusion by publishing one visible update tied to a real issue, proposal, or decision.",
-                        "Reduzca confusion publicando una actualizacion visible ligada a un problema, propuesta o decision real."
-                    ),
-                    localized("Open official updates", "Abrir actualizaciones"),
-                    "/communities/blog"
-                ),
-                step(
-                    "representative-link-decision",
-                    localized("Connect decisions to execution", "Conecte decisiones con ejecucion"),
-                    localized(
-                        "Use the decision ledger and project boards so the public can trace what was approved and who owns delivery.",
-                        "Use el libro de decisiones y los tableros de proyecto para que el publico rastree que se aprobo y quien posee la entrega."
-                    ),
-                    localized("Open decision ledger", "Abrir decisiones"),
-                    "/communities/decisions"
-                )
-            );
-            case MODERATOR -> List.of(
-                step(
-                    "moderator-confirm-context",
-                    localized("Confirm your active community", "Confirme su comunidad activa"),
-                    localized(
-                        "Moderation and collaboration rules change with community context, so confirm the current space first.",
-                        "Las reglas de moderacion y colaboracion cambian con el contexto comunitario, asi que confirme primero el espacio actual."
-                    ),
-                    localized("Open communities hub", "Abrir comunidades"),
-                    "/communities"
-                ),
-                step(
-                    "moderator-guide-dialogue",
-                    localized("Guide one high-signal discussion", "Guie una discusion de alta senal"),
-                    localized(
-                        "Use threads and proposals to redirect members toward evidence and policy-backed reasoning.",
-                        "Use hilos y propuestas para redirigir a los miembros hacia evidencia y razonamiento respaldado por politica."
-                    ),
-                    localized("Open community talks", "Abrir conversaciones"),
-                    "/communities/threads"
-                ),
-                step(
-                    "moderator-review-safety",
-                    localized("Review the moderation queue", "Revise la cola de moderacion"),
-                    localized(
-                        "Hide or sanction only when the policy reason is clear and traceable.",
-                        "Oculte o sancione solo cuando la razon de politica sea clara y trazable."
-                    ),
-                    localized("Open moderation queue", "Abrir moderacion"),
-                    "/moderation"
-                )
-            );
-            case CITIZEN -> List.of(
-                step(
-                    "citizen-choose-community",
-                    localized("Choose your active community", "Elija su comunidad activa"),
-                    localized(
-                        "Set the right community first so your reports, votes, and conversations stay in the right civic context.",
-                        "Defina primero la comunidad correcta para que sus reportes, votos y conversaciones queden en el contexto civico correcto."
-                    ),
-                    localized("Open communities hub", "Abrir comunidades"),
-                    "/communities"
-                ),
-                step(
-                    "citizen-create-report",
-                    localized("Create one clear civic report", "Cree un reporte civico claro"),
-                    localized(
-                        "Use the guided report flow to describe what happened, where, and why it matters.",
-                        "Use el flujo guiado de reporte para describir que paso, donde y por que importa."
-                    ),
-                    localized("Open report flow", "Abrir reporte"),
-                    "/report"
-                ),
-                step(
-                    "citizen-follow-progress",
-                    localized("Follow public progress", "Siga el progreso publico"),
-                    localized(
-                        "Return to your activity, decision ledger, and trust surfaces so you can see what changed after you participated.",
-                        "Vuelva a su actividad, al libro de decisiones y a las superficies de confianza para ver que cambio despues de participar."
-                    ),
-                    localized("Open my activity", "Abrir mi actividad"),
-                    "/mine"
-                )
-            );
+            case REPRESENTATIVE -> representativeSteps();
+            case MODERATOR -> moderatorSteps();
+            case CITIZEN -> citizenSteps();
         };
+    }
+
+    private List<OnboardingStepDefinition> representativeSteps() {
+        return List.of(
+            step(
+                "representative-review-trust",
+                localized("Review trust metrics", "Revise metricas de confianza"),
+                localized(
+                    "Start by checking what the community can already see about freshness, participation, and execution.",
+                    "Empiece revisando lo que la comunidad ya puede ver sobre frescura, participacion y ejecucion."
+                ),
+                localized("Open trust metrics", "Abrir metricas"),
+                "/communities/trust"
+            ),
+            step(
+                "representative-publish-update",
+                localized("Publish one official update", "Publique una actualizacion oficial"),
+                localized(
+                    "Reduce confusion by publishing one visible update tied to a real issue, proposal, or decision.",
+                    "Reduzca confusion publicando una actualizacion visible ligada a un problema, propuesta o decision real."
+                ),
+                localized("Open official updates", "Abrir actualizaciones"),
+                "/communities/blog"
+            ),
+            step(
+                "representative-link-decision",
+                localized("Connect decisions to execution", "Conecte decisiones con ejecucion"),
+                localized(
+                    "Use the decision ledger and project boards so the public can trace what was approved and who owns delivery.",
+                    "Use el libro de decisiones y los tableros de proyecto para que el publico rastree que se aprobo y quien posee la entrega."
+                ),
+                localized("Open decision ledger", "Abrir decisiones"),
+                "/communities/decisions"
+            )
+        );
+    }
+
+    private List<OnboardingStepDefinition> moderatorSteps() {
+        return List.of(
+            step(
+                "moderator-confirm-context",
+                localized("Confirm your active community", "Confirme su comunidad activa"),
+                localized(
+                    "Moderation and collaboration rules change with community context, so confirm the current space first.",
+                    "Las reglas de moderacion y colaboracion cambian con el contexto comunitario, asi que confirme primero el espacio actual."
+                ),
+                localized("Open communities hub", "Abrir comunidades"),
+                "/communities"
+            ),
+            step(
+                "moderator-guide-dialogue",
+                localized("Guide one high-signal discussion", "Guie una discusion de alta senal"),
+                localized(
+                    "Use threads and proposals to redirect members toward evidence and policy-backed reasoning.",
+                    "Use hilos y propuestas para redirigir a los miembros hacia evidencia y razonamiento respaldado por politica."
+                ),
+                localized("Open community talks", "Abrir conversaciones"),
+                "/communities/threads"
+            ),
+            step(
+                "moderator-review-safety",
+                localized("Review the moderation queue", "Revise la cola de moderacion"),
+                localized(
+                    "Hide or sanction only when the policy reason is clear and traceable.",
+                    "Oculte o sancione solo cuando la razon de politica sea clara y trazable."
+                ),
+                localized("Open moderation queue", "Abrir moderacion"),
+                "/moderation"
+            )
+        );
+    }
+
+    private List<OnboardingStepDefinition> citizenSteps() {
+        return List.of(
+            step(
+                "citizen-choose-community",
+                localized("Choose your active community", "Elija su comunidad activa"),
+                localized(
+                    "Set the right community first so your reports, votes, and conversations stay in the right civic context.",
+                    "Defina primero la comunidad correcta para que sus reportes, votos y conversaciones queden en el contexto civico correcto."
+                ),
+                localized("Open communities hub", "Abrir comunidades"),
+                "/communities"
+            ),
+            step(
+                "citizen-create-report",
+                localized("Create one clear civic report", "Cree un reporte civico claro"),
+                localized(
+                    "Use the guided report flow to describe what happened, where, and why it matters.",
+                    "Use el flujo guiado de reporte para describir que paso, donde y por que importa."
+                ),
+                localized("Open report flow", "Abrir reporte"),
+                "/report"
+            ),
+            step(
+                "citizen-follow-progress",
+                localized("Follow public progress", "Siga el progreso publico"),
+                localized(
+                    "Return to your activity, decision ledger, and trust surfaces so you can see what changed after you participated.",
+                    "Vuelva a su actividad, al libro de decisiones y a las superficies de confianza para ver que cambio despues de participar."
+                ),
+                localized("Open my activity", "Abrir mi actividad"),
+                "/mine"
+            )
+        );
     }
 
     private static GuideDefinition guide(

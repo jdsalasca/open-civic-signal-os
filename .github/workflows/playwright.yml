@@ -85,6 +85,7 @@ jobs:
         working-directory: apps/web-react
         run: >
           npx playwright test
+          src/tests/accessibility-text-scale.spec.ts
           src/tests/community-activities.spec.ts
           src/tests/community-feed.spec.ts
           src/tests/community-decisions.spec.ts
