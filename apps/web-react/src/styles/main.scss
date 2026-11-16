@@ -1833,6 +1833,47 @@ a:hover {
   cursor: default;
 }
 
+.onboarding-checklist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.onboarding-checklist-step {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.onboarding-checklist-step i {
+  color: var(--brand-primary);
+}
+
+.onboarding-checklist-step:hover {
+  background: var(--surface-soft);
+}
+
+.onboarding-checklist-step.is-done {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.onboarding-checklist-step.is-done i {
+  color: var(--status-resolved);
+}
+
 .social-feed-reply {
   margin-top: 0.75rem;
   padding: 0.75rem;

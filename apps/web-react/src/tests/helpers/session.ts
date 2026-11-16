@@ -137,6 +137,14 @@ export async function mockAppBootstrap(
   // seeded session before the view under test renders.
   await page.route('**/api/notifications/unread-count', (route) => route.fulfill(json({ unread: 0 })));
   await page.route('**/api/notifications/inbox', (route) => route.fulfill(json([])));
+  // The home checklist, the feed alert toggle and the report trust bar also load on first paint.
+  // Leaving one unmocked would reach the real API, 401, and wipe the seeded session.
+  await page.route('**/api/onboarding/checklist', (route) =>
+    route.fulfill(json({ joinedCommunity: true, contributed: true, followingContent: true, allComplete: true })));
+  await page.route('**/api/communities/*/alerts', (route) => route.fulfill(json({ subscribed: false })));
+  await page.route('**/api/signals/*/confirmations', (route) =>
+    route.fulfill(json({ signalId: '', count: 0, confirmedByViewer: false })));
+  await page.route('**/api/follows/**', (route) => route.fulfill(json({ following: false })));
 }
 
 /** Seed a session and answer the bootstrap routes: the one-liner a spec needs to reach its view. */

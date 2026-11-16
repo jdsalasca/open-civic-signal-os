@@ -72,6 +72,10 @@ export function NotificationBell() {
     setOpen(false);
     if (item.targetType === 'SIGNAL') {
       navigate(`/signal/${item.targetId}`);
+    } else if (item.targetType === 'ACTIVITY') {
+      navigate('/communities/activities');
+    } else if (item.targetType === 'BLOG') {
+      navigate('/communities/blog');
     } else {
       navigate('/communities/threads');
     }
@@ -101,6 +105,15 @@ export function NotificationBell() {
     }
     if (item.type === 'SIGNAL_CONFIRMATION') {
       return t('notifications.signal_confirmation', { actor, title });
+    }
+    if (item.type === 'NEIGHBOURHOOD_SIGNAL') {
+      return t('notifications.neighbourhood_signal', { title });
+    }
+    if (item.type === 'NEIGHBOURHOOD_EVENT') {
+      return t('notifications.neighbourhood_event', { title });
+    }
+    if (item.type === 'ACTIVITY_REMINDER') {
+      return t('notifications.activity_reminder', { title });
     }
     return t('notifications.fallback', { title });
   };

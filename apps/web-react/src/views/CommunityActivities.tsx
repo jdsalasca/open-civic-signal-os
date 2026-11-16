@@ -168,6 +168,28 @@ export function CommunityActivities() {
     }
   };
 
+  const onAddToCalendar = async (activity: CommunityActivity) => {
+    if (!activeCommunityId) return;
+    try {
+      const response = await apiClient.get(
+        `community/activities/${activity.id}/calendar`,
+        { params: { communityId: activeCommunityId }, responseType: "blob" }
+      );
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${activity.title.replace(/[^\w]+/g, "-").toLowerCase()}.ics`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success(t("community_activities.calendar_success"));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_activities.calendar_error"));
+    }
+  };
+
   const onRecordAttendance = async (activity: CommunityActivity, signupId: string, attended: boolean) => {
     if (!activeCommunityId) return;
     setBusyActivityId(activity.id);
@@ -331,8 +353,8 @@ export function CommunityActivities() {
                         <span className="text-xs text-muted">{activity.locationLabel}</span>
                       </div>
 
-                      {canJoin && (
-                        <div className="mt-3">
+                      <div className="mt-3 flex gap-2 flex-wrap">
+                        {canJoin && (
                           <CivicButton
                             type="button"
                             icon={activity.currentVolunteerStatus === "CONFIRMED" ? "pi pi-times" : "pi pi-check"}
@@ -347,8 +369,16 @@ export function CommunityActivities() {
                             onClick={() => onToggleSignup(activity)}
                             data-testid={`community-activity-signup-${activity.id}`}
                           />
-                        </div>
-                      )}
+                        )}
+                        <CivicButton
+                          type="button"
+                          icon="pi pi-calendar-plus"
+                          label={t("community_activities.add_to_calendar")}
+                          variant="ghost"
+                          onClick={() => onAddToCalendar(activity)}
+                          data-testid={`community-activity-calendar-${activity.id}`}
+                        />
+                      </div>
 
                       {activity.roster.length > 0 && (
                         <div className="mt-4" data-testid={`community-activity-roster-${activity.id}`}>
