@@ -3,7 +3,12 @@
 ## Unreleased
 
 ### Changed
+- **Feed Cards and a Lighter Home Path**: The citizen home now renders reports as readable cards instead of a wide DataTable, so the table chunk is no longer downloaded on the main route. Chart.js is lazy-loaded only for the advanced analytics rail, `signals/meta` is cached by community instead of refetched on every filter/page, and aging is no longer refetched when a filter changes. The PrimeReact Inter font is no longer used, removing roughly 700 KB of font transfer from a first visit. (`story:OCS-P1-055`)
+- **Faster Report Path**: The report wizard now offers a quiet **Send with suggested priority** action on the evidence step, so a person can submit after describing the problem without tuning the score. (`story:OCS-P1-055`)
 - **Civic Daylight Palette and Feed-First Home**: Replaced the warm cream/terracotta interface with a cool civic palette (white and light neutrals, deep ink, teal action, blue community data, amber attention), made light the default theme, and retuned dark to cool navy + mint. In simple mode the home now opens with one plain identity line, one **Report a problem** action and the report feed; the analytics rail is hidden for citizens, attention cards move below the feed, and the mobile filters became one swipeable row. Table headers and row actions were rewritten in plain language. (`story:OCS-P1-054`)
+
+### Fixed
+- **Post-report detail link, error states and mobile toasts**: The success screen's **View detail** action now opens `/signal/:id` instead of a non-existent `/signals/:id`; a failed feed request shows a persistent **Retry** card instead of an empty-neighbourhood message; mobile toasts span the viewport instead of a narrow column over the profile card; and the report/report buttons no longer squeeze their labels in the footer. (`story:OCS-P1-055`)
 
 ### Added
 - **Offline-Ready Field Reporting (PWA)**: Production builds now register a service worker that caches the app shell and hashed assets (API responses are never cached), with a bilingual offline page and a non-blocking offline banner. Report drafts are stored per user on the device, restored after a reload, and cleared on submit or discard so field reporting survives a dropped connection. (`story:OCS-P1-053`)
