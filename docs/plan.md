@@ -1,7 +1,7 @@
 # Plan de rondas
 
 Estado real del repositorio y proximas rondas. El tablero operativo vive en
-`docs/kanban.md` (lo refresca un bot) y el historico en `docs/metrics-history.md`. Este archivo
+`docs/kanban.md` (instantánea manual) y el historico en `docs/metrics-history.md`. Este archivo
 es el plan de trabajo con criterios verificables.
 
 ## Estado
