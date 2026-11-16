@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-11-16T01:11:24.050Z
+Last updated: 2026-11-16T01:15:07.761Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,7 +10,7 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-11-09T01:11:20.160Z)
+- Window: last 7 days (since 2026-11-09T01:15:03.832Z)
 - Throughput (issues closed): 2
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
@@ -80,12 +80,13 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 25
+- TODO: 26
 - IN_PROGRESS: 0
 - BLOCKED: 0
 - DONE: 111
 
 ### TODO
+- #163 Backend: flat service layer and full-scan read paths need bounded contexts
 - #161 Home is a wall of buttons, no clear feed, English in Colombia, and region not applied
 - #157 Current Sprint Focus 2026-W46
 - #156 Agent Quality Review 2026-W46
