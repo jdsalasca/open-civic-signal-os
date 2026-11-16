@@ -22,6 +22,7 @@ import org.opencivic.signalos.repository.CommunityMembershipRepository;
 import org.opencivic.signalos.repository.CommunityRepository;
 import org.opencivic.signalos.repository.CommunityThreadMessageRepository;
 import org.opencivic.signalos.repository.CommunityThreadRepository;
+import org.opencivic.signalos.repository.UserNotificationRepository;
 import org.opencivic.signalos.repository.SignalRepository;
 import org.opencivic.signalos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.opencivic.signalos.service.CommunityCollaborationService;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:communityhomeitdb;DB_CLOSE_DELAY=-1")
 @AutoConfigureMockMvc
@@ -62,8 +65,15 @@ class CommunityHomeIT {
     @Autowired
     private SignalRepository signalRepository;
 
+    @Autowired
+    private CommunityCollaborationService collaborationService;
+
+    @Autowired
+    private UserNotificationRepository notificationRepository;
+
     private UUID communityId;
     private UUID userId;
+    private UUID threadId;
 
     @BeforeEach
     void setUp() {
@@ -87,6 +97,17 @@ class CommunityHomeIT {
         membership.setCreatedBy(userId);
         membershipRepository.save(membership);
 
+        User replier = new User("thread_replier", "{noop}pw", "thread-replier@test.dev", "ROLE_CITIZEN");
+        replier.setEnabled(true);
+        replier.setVerified(true);
+        replier = userRepository.save(replier);
+        CommunityMembership replierMembership = new CommunityMembership();
+        replierMembership.setCommunityId(communityId);
+        replierMembership.setUserId(replier.getId());
+        replierMembership.setRole(CommunityRole.MEMBER);
+        replierMembership.setCreatedBy(userId);
+        membershipRepository.save(replierMembership);
+
         CommunityBlogPost post = new CommunityBlogPost();
         post.setCommunityId(communityId);
         post.setAuthorId(userId);
@@ -107,6 +128,7 @@ class CommunityHomeIT {
         thread.setCreatedAt(LocalDateTime.now().minusHours(4));
         thread.setUpdatedAt(LocalDateTime.now().minusMinutes(30));
         thread = threadRepository.save(thread);
+        threadId = thread.getId();
 
         CommunityThreadMessage root = new CommunityThreadMessage();
         root.setThreadId(thread.getId());
@@ -173,5 +195,15 @@ class CommunityHomeIT {
             .andExpect(jsonPath("$[1].summary").value("Work starts this week"))
             .andExpect(jsonPath("$[2].type").value("signal"))
             .andExpect(jsonPath("$[2].summary").value("Main crosswalk"));
+    }
+
+    @Test
+    @WithMockUser(username = "community_home_user", roles = {"CITIZEN"})
+    void replyingToAThreadNotifiesItsCreator() {
+        collaborationService.addMessage(threadId, communityId, "A new reply", null, "thread_replier");
+
+        assertThat(notificationRepository.findTop50ByUserIdOrderByCreatedAtDesc(userId))
+            .anyMatch(notification -> "THREAD_REPLY".equals(notification.getType())
+                && threadId.equals(notification.getTargetId()));
     }
 }

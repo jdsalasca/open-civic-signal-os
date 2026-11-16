@@ -1254,6 +1254,54 @@ paths:
             text/csv:
               schema:
                 type: string
+  /api/notifications/inbox:
+    get:
+      summary: List the personal notifications of the authenticated user
+      responses:
+        '200':
+          description: Latest 50 personal notifications, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserNotification'
+  /api/notifications/unread-count:
+    get:
+      summary: Count unread personal notifications for the authenticated user
+      responses:
+        '200':
+          description: Unread counter
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [unread]
+                properties:
+                  unread:
+                    type: integer
+                    minimum: 0
+  /api/notifications/{notificationId}/read:
+    post:
+      summary: Mark one personal notification as read
+      parameters:
+        - in: path
+          name: notificationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Notification marked as read
+        '404':
+          description: Notification does not belong to the authenticated user
+  /api/notifications/read-all:
+    post:
+      summary: Mark every unread personal notification of the authenticated user as read
+      responses:
+        '200':
+          description: All notifications marked as read
   /api/notifications/recent:
     get:
       summary: Get recent outgoing notification relays
@@ -7165,6 +7213,39 @@ components:
           format: date-time
         recipientGroup:
           type: string
+    UserNotification:
+      type: object
+      required: [id, type, targetType, targetId, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [THREAD_REPLY, SIGNAL_SUPPORT, SIGNAL_STATUS]
+        actorName:
+          type: string
+          nullable: true
+        targetType:
+          type: string
+          enum: [SIGNAL, THREAD]
+        targetId:
+          type: string
+          format: uuid
+        targetTitle:
+          type: string
+          nullable: true
+        communityId:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
     ScoreBreakdown:
       type: object
       required:

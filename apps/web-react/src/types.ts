@@ -114,6 +114,18 @@ export type SignalAging = {
   trend: SignalAgingTrendPoint[];
 };
 
+export type UserNotification = {
+  id: string;
+  type: "THREAD_REPLY" | "SIGNAL_SUPPORT" | "SIGNAL_STATUS" | string;
+  actorName?: string | null;
+  targetType: "SIGNAL" | "THREAD" | string;
+  targetId: string;
+  targetTitle?: string | null;
+  communityId?: string | null;
+  createdAt: string;
+  readAt?: string | null;
+};
+
 export type Notification = {
   id: string;
   channel: string;

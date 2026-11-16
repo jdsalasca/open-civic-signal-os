@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 import { CivicSelect } from "./ui/CivicSelect";
 import { ThemeWheel } from "./ui/ThemeWheel";
+import { NotificationBell } from "./ui/NotificationBell";
 import { toRoleLabel } from "../constants/roleLabels";
 import { useSettingsStore } from "../store/useSettingsStore";
 
@@ -406,6 +407,7 @@ export function Layout({ children, authMode = false }: Props) {
               </div>
             )}
 
+            <NotificationBell />
             <ThemeWheel />
 
             <Button
@@ -418,9 +420,6 @@ export function Layout({ children, authMode = false }: Props) {
               data-testid="header-primary-report"
             />
 
-            {interfaceMode === "advanced" && (
-              <Button icon="pi pi-bell" text rounded className="text-muted hover:text-main" badge="3" />
-            )}
           </div>
         </header>
 
