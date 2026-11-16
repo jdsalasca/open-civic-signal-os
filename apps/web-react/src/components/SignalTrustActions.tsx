@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import apiClient from '../api/axios';
@@ -6,31 +6,46 @@ import { SignalConfirmationState } from '../types';
 
 type Props = { signalId: string };
 
-/** Neighbour evidence and follow state for one report. */
+/**
+ * Neighbour evidence and follow state for one report.
+ *
+ * The follow flag has three states, not two: until the server answers, "not following" is a guess,
+ * and a failed lookup used to leave the button claiming the case was not followed. The button stays
+ * disabled while loading and becomes a retry after an error.
+ */
 export function SignalTrustActions({ signalId }: Props) {
   const { t } = useTranslation();
   const [confirmation, setConfirmation] = useState<SignalConfirmationState | null>(null);
   const [following, setFollowing] = useState(false);
+  const [followStatus, setFollowStatus] = useState<'loading' | 'known' | 'error'>('loading');
   const [busy, setBusy] = useState(false);
+
+  const loadFollow = useCallback(async () => {
+    setFollowStatus('loading');
+    try {
+      const { data } = await apiClient.get<{ following: boolean }>(`follows/SIGNAL/${signalId}`);
+      setFollowing(Boolean(data.following));
+      setFollowStatus('known');
+    } catch {
+      setFollowStatus('error');
+    }
+  }, [signalId]);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.allSettled([
-      apiClient.get<SignalConfirmationState>(`signals/${signalId}/confirmations`),
-      apiClient.get<{ following: boolean }>(`follows/SIGNAL/${signalId}`)
-    ]).then(([confirmationResult, followResult]) => {
-      if (cancelled) return;
-      if (confirmationResult.status === 'fulfilled') {
-        setConfirmation(confirmationResult.value.data);
-      }
-      if (followResult.status === 'fulfilled') {
-        setFollowing(Boolean(followResult.value.data.following));
-      }
-    });
+    apiClient
+      .get<SignalConfirmationState>(`signals/${signalId}/confirmations`)
+      .then(({ data }) => {
+        if (!cancelled) setConfirmation(data);
+      })
+      .catch(() => {
+        // The confirmation count is additive context; the follow state has its own retry.
+      });
+    void loadFollow();
     return () => {
       cancelled = true;
     };
-  }, [signalId]);
+  }, [signalId, loadFollow]);
 
   const toggleConfirmation = async () => {
     setBusy(true);
@@ -57,6 +72,7 @@ export function SignalTrustActions({ signalId }: Props) {
         method: following ? 'delete' : 'post'
       });
       setFollowing((current) => !current);
+      setFollowStatus('known');
       toast.success(following ? t('community_feed.unfollow_success') : t('community_feed.follow_success'));
     } catch {
       toast.error(t('community_feed.follow_error'));
@@ -80,13 +96,22 @@ export function SignalTrustActions({ signalId }: Props) {
       </button>
       <button
         type="button"
-        onClick={toggleFollow}
-        disabled={busy}
-        aria-pressed={following}
+        onClick={followStatus === 'error' ? () => void loadFollow() : toggleFollow}
+        disabled={busy || followStatus === 'loading'}
+        aria-pressed={followStatus === 'known' ? following : undefined}
         data-testid="signal-follow-button"
       >
-        <i className={following ? 'pi pi-check' : 'pi pi-bell'} aria-hidden="true" />
-        {following ? t('community_feed.following') : t('community_feed.follow')}
+        <i
+          className={
+            followStatus === 'error' ? 'pi pi-refresh' : following ? 'pi pi-check' : 'pi pi-bell'
+          }
+          aria-hidden="true"
+        />
+        {followStatus === 'error'
+          ? t('community_feed.follow_retry')
+          : following
+            ? t('community_feed.following')
+            : t('community_feed.follow')}
       </button>
     </div>
   );

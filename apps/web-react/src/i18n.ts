@@ -80,6 +80,14 @@ const resources = {
         "unavailable_title": "Backlog temporarily unavailable",
         "unavailable_desc": "The platform could not be reached. Please try again shortly."
       },
+      "errors": {
+        "network": "No connection. Check your internet and try again.",
+        "auth_required": "Your session expired. Sign in again.",
+        "clearance_denied": "You do not have permission for this action.",
+        "not_found": "The requested item no longer exists.",
+        "conflict": "This action conflicts with the current state. Reload and try again.",
+        "server": "The service had a problem. Try again in a moment."
+      },
       "common": {
         "loading": "Loading...",
         "error": "Error",
@@ -822,6 +830,7 @@ const resources = {
         "someone": "Neighbor",
         "updated": "Updated {{time}}",
         "follow": "Follow",
+        "follow_retry": "Retry follow",
         "following": "Following",
         "follow_success": "You will receive updates.",
         "unfollow_success": "Updates stopped.",
@@ -2480,6 +2489,14 @@ const resources = {
         "unavailable_title": "Lista no disponible temporalmente",
         "unavailable_desc": "No se pudo conectar con la plataforma. Probá de nuevo en unos minutos."
       },
+      "errors": {
+        "network": "Sin conexión. Revisá tu internet e intentá de nuevo.",
+        "auth_required": "Tu sesión expiró. Iniciá sesión de nuevo.",
+        "clearance_denied": "No tenés permiso para esta acción.",
+        "not_found": "El elemento solicitado ya no existe.",
+        "conflict": "Esta acción choca con el estado actual. Recargá e intentá de nuevo.",
+        "server": "El servicio tuvo un problema. Intentá de nuevo en un momento."
+      },
       "common": {
         "loading": "Cargando...",
         "error": "Error",
@@ -3222,6 +3239,7 @@ const resources = {
         "someone": "Vecino",
         "updated": "Actualizado {{time}}",
         "follow": "Seguir",
+        "follow_retry": "Reintentar seguimiento",
         "following": "Siguiendo",
         "follow_success": "Recibirás novedades.",
         "unfollow_success": "Dejarás de recibir novedades.",

@@ -279,7 +279,7 @@ export function CommunityThreads() {
               <Avatar label={depth === 0 ? "OP" : "R"} shape="circle" className="bg-brand-primary text-on-brand font-bold text-xs" />
               <div className="flex flex-column u-card-copy">
                 <span className="text-sm font-black text-main">
-                  {t("community_threads.member_id", { id: message.authorId.slice(0, 4) })}
+                  {message.authorName ?? t("community_threads.member_id", { id: message.authorId.slice(0, 4) })}
                 </span>
                 <span className="text-xs text-muted">{formatStamp(message.createdAt) ?? "-"}</span>
               </div>
@@ -557,7 +557,9 @@ export function CommunityThreads() {
                             {replyTarget && (
                               <div className="mb-3 flex align-items-center justify-content-between gap-3 bg-brand-primary-alpha-10 border-1 border-brand-primary-alpha-20 border-round-xl px-3 py-2">
                                 <span className="text-sm text-main">
-                                  {t("community_threads.replying_to", { id: replyTarget.authorId.slice(0, 4) })}
+                                  {t("community_threads.replying_to", {
+                                    id: replyTarget.authorName ?? replyTarget.authorId.slice(0, 4)
+                                  })}
                                 </span>
                                 <CivicButton
                                   type="button"

@@ -55,6 +55,27 @@ test.describe('Community social feed', () => {
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
     await page.route('**/api/community/threads/thread-1/messages', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+    await page.route('**/api/community/threads/thread-1?*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'thread-1',
+          title: feed[0].title,
+          messages: [
+            {
+              id: 'm1', threadId: 'thread-1', authorId: 'u-sofia', authorName: 'Sofía Ramírez',
+              sourceCommunityId: cid, content: feed[0].summary, depth: 0, directReplyCount: 1,
+              hidden: false, createdAt: '2026-11-15T20:50:00', reactions: {},
+            },
+            {
+              id: 'm2', threadId: 'thread-1', authorId: 'u-carlos', authorName: 'Carlos Ruiz',
+              sourceCommunityId: cid, parentMessageId: 'm1', content: 'I can bring bags.',
+              depth: 1, directReplyCount: 0, hidden: false, createdAt: '2026-11-15T21:05:00', reactions: {},
+            },
+          ],
+        }),
+      }));
     await page.route('**/api/community/threads?*', (route) =>
       route.fulfill({
         status: 200,
@@ -121,7 +142,10 @@ test.describe('Community social feed', () => {
     await expect(signalCard.getByText(/Confirmed · 1/)).toBeVisible();
 
     const threadCard = page.locator('.social-feed-item').filter({ hasText: 'clean the park' });
-    await threadCard.getByRole('button', { name: 'Comment' }).click();
+    await threadCard.getByTestId('community-feed-comment-thread-1').click();
+    // The thread is read by id, so replies keep their authors instead of a generic label.
+    await expect(threadCard.getByText('Carlos Ruiz')).toBeVisible();
+    await expect(threadCard.getByText('I can bring bags.')).toBeVisible();
     await page.getByTestId('community-feed-reply-input-thread-1').fill('I will bring gloves.');
     await page.getByTestId('community-feed-reply-send-thread-1').click();
     await expect(page.getByText('Comment published.')).toBeVisible();
@@ -205,6 +229,17 @@ test.describe('Community social feed', () => {
     const link = page.getByRole('link', { name: 'https://example.com/cleanup' });
     await expect(link).toHaveAttribute('href', 'https://example.com/cleanup');
     await expect(link).toHaveAttribute('rel', /noopener/);
+  });
+
+  test('a network failure speaks the reader language instead of technical jargon', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+    await page.route('**/api/signals/signal-1/react', (route) => route.abort('failed'));
+
+    await page.goto('/communities/feed');
+    await page.getByTestId('community-feed-react-like-signal-1').click();
+    await expect(page.getByText('No connection. Check your internet and try again.')).toBeVisible();
   });
 
   test('likes a report from the feed and updates the count', async ({ page }) => {
