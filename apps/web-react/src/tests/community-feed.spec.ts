@@ -13,6 +13,7 @@ const feed = [
     summary: 'Meet at 8 a.m. at the entrance. I bring bags and gloves.',
     happenedAt: '2026-11-15T20:50:00',
     freshness: 'updated 7m ago',
+    following: false,
   },
   {
     type: 'signal',
@@ -22,6 +23,9 @@ const feed = [
     summary: 'Main Avenue and 3rd Street',
     happenedAt: '2026-11-15T18:00:00',
     freshness: 'updated 2h ago',
+    confirmationCount: 0,
+    viewerConfirmed: false,
+    following: false,
   },
   {
     type: 'blog',
@@ -42,6 +46,20 @@ test.describe('Community social feed', () => {
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'new-thread' }) }));
     await page.route('**/api/community/threads/new-thread/messages', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+    await page.route('**/api/community/threads/thread-1/messages', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+    await page.route('**/api/follows/**', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ following: route.request().method() !== 'DELETE' }),
+      }));
+    await page.route('**/api/signals/signal-1/confirmations', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ signalId: 'signal-1', count: 1, confirmedByViewer: true }),
+      }));
     await page.route('**/api/notifications/recent', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
 
@@ -67,5 +85,18 @@ test.describe('Community social feed', () => {
     await expect(page.getByText('Published in the community feed.')).toBeVisible();
     await expect(page.locator('#feed-post-title')).toHaveCount(0);
     await expect(page.locator('.social-feed-item')).toHaveCount(3);
+
+    // Follow a report, confirm it and reply to a conversation from the feed itself.
+    const signalCard = page.locator('.social-feed-item').filter({ hasText: 'Unsafe crosswalk' });
+    await signalCard.getByTestId('community-feed-follow-signal-1').click();
+    await expect(signalCard.getByTestId('community-feed-follow-signal-1')).toContainText('Following');
+    await signalCard.getByText('I saw it too').click();
+    await expect(signalCard.getByText(/Confirmed · 1/)).toBeVisible();
+
+    const threadCard = page.locator('.social-feed-item').filter({ hasText: 'clean the park' });
+    await threadCard.getByText('Reply').click();
+    await page.getByTestId('community-feed-reply-input-thread-1').fill('I will bring gloves.');
+    await page.getByTestId('community-feed-reply-send-thread-1').click();
+    await expect(page.getByText('Reply published.')).toBeVisible();
   });
 });

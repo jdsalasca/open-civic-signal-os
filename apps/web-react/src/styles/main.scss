@@ -1833,6 +1833,58 @@ a:hover {
   cursor: default;
 }
 
+.social-feed-reply {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-paper-sm);
+  background: var(--surface-soft);
+}
+
+.social-feed-reply-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.signal-trust-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.signal-trust-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.signal-trust-actions button:hover,
+.signal-trust-actions button[aria-pressed="true"] {
+  background: var(--brand-primary-alpha-10);
+  border-color: var(--brand-primary);
+  color: var(--text-main);
+}
+
+.signal-trust-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 .social-feed-aside-links {
   display: flex;
   flex-direction: column;

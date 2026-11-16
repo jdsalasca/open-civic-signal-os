@@ -1053,6 +1053,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SignalResponse'
+  /api/signals/{id}/confirmations:
+    get:
+      summary: Get neighbour confirmations for one report
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Confirmation count and whether the caller confirmed it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalConfirmationState'
+    post:
+      summary: Confirm that the caller also saw this report
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  maxLength: 500
+      responses:
+        '200':
+          description: Updated confirmation state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalConfirmationState'
+    delete:
+      summary: Remove the caller's confirmation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Updated confirmation state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignalConfirmationState'
   /api/signals/{id}/history:
     get:
       summary: Get status transition history for one signal
@@ -1254,6 +1313,69 @@ paths:
             text/csv:
               schema:
                 type: string
+  /api/follows/{targetType}/{targetId}:
+    get:
+      summary: Check whether the caller follows a report, conversation or announcement
+      parameters:
+        - in: path
+          name: targetType
+          required: true
+          schema:
+            type: string
+            enum: [SIGNAL, THREAD, BLOG]
+        - in: path
+          name: targetId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Follow state
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [following]
+                properties:
+                  following:
+                    type: boolean
+    post:
+      summary: Follow a report, conversation or announcement
+      parameters:
+        - in: path
+          name: targetType
+          required: true
+          schema:
+            type: string
+            enum: [SIGNAL, THREAD, BLOG]
+        - in: path
+          name: targetId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Following
+    delete:
+      summary: Stop following a report, conversation or announcement
+      parameters:
+        - in: path
+          name: targetType
+          required: true
+          schema:
+            type: string
+            enum: [SIGNAL, THREAD, BLOG]
+        - in: path
+          name: targetId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Not following
   /api/notifications/inbox:
     get:
       summary: List the personal notifications of the authenticated user
@@ -8270,6 +8392,27 @@ components:
           format: date-time
         freshness:
           type: string
+        confirmationCount:
+          type: integer
+          nullable: true
+        viewerConfirmed:
+          type: boolean
+          nullable: true
+        following:
+          type: boolean
+          nullable: true
+    SignalConfirmationState:
+      type: object
+      required: [signalId, count, confirmedByViewer]
+      properties:
+        signalId:
+          type: string
+          format: uuid
+        count:
+          type: integer
+          minimum: 0
+        confirmedByViewer:
+          type: boolean
     CommunityHomeSignal:
       type: object
       properties:

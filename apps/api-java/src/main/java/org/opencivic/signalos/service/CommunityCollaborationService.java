@@ -49,6 +49,8 @@ public class CommunityCollaborationService {
     private final UserRepository userRepository;
     private final UserReactionService userReactionService;
     private final UserNotificationService userNotificationService;
+    private final ContentFollowService contentFollowService;
+    private final SignalConfirmationService signalConfirmationService;
 
     public CommunityCollaborationService(
         CommunityAccessService accessService,
@@ -58,7 +60,9 @@ public class CommunityCollaborationService {
         SignalRepository signalRepository,
         UserRepository userRepository,
         UserReactionService userReactionService,
-        UserNotificationService userNotificationService
+        UserNotificationService userNotificationService,
+        ContentFollowService contentFollowService,
+        SignalConfirmationService signalConfirmationService
     ) {
         this.accessService = accessService;
         this.threadRepository = threadRepository;
@@ -68,6 +72,8 @@ public class CommunityCollaborationService {
         this.userRepository = userRepository;
         this.userReactionService = userReactionService;
         this.userNotificationService = userNotificationService;
+        this.contentFollowService = contentFollowService;
+        this.signalConfirmationService = signalConfirmationService;
     }
 
     public Page<CommunityThreadResponse> getThreads(
@@ -183,16 +189,21 @@ public class CommunityCollaborationService {
         CommunityThreadMessage saved = messageRepository.save(message);
         thread.setUpdatedAt(LocalDateTime.now());
         threadRepository.save(thread);
-        userNotificationService.notifyUser(
-            thread.getCreatedBy(),
-            user.getId(),
-            user.getUsername(),
-            "THREAD_REPLY",
-            "THREAD",
-            thread.getId(),
-            thread.getTitle(),
-            sourceCommunityId
-        );
+        Set<UUID> recipients = new java.util.HashSet<>();
+        recipients.add(thread.getCreatedBy());
+        recipients.addAll(contentFollowService.followerIds("THREAD", thread.getId()));
+        for (UUID recipient : recipients) {
+            userNotificationService.notifyUser(
+                recipient,
+                user.getId(),
+                user.getUsername(),
+                "THREAD_REPLY",
+                "THREAD",
+                thread.getId(),
+                thread.getTitle(),
+                sourceCommunityId
+            );
+        }
         return toMessageResponse(saved, null, resolveThreadMessageDepth(saved), 0);
     }
 
@@ -344,9 +355,9 @@ public class CommunityCollaborationService {
         PageRequest limited = PageRequest.of(0, 50);
 
         List<CommunityFeedItemResponse> items = new ArrayList<>();
-        items.addAll(signalFeedItems(communityId, since, limited));
-        items.addAll(blogFeedItems(communityId, since, limited));
-        items.addAll(threadFeedItems(communityId, since, limited));
+        items.addAll(signalFeedItems(communityId, since, limited, user.getId()));
+        items.addAll(blogFeedItems(communityId, since, limited, user.getId()));
+        items.addAll(threadFeedItems(communityId, since, limited, user.getId()));
 
         return items.stream()
             .sorted(Comparator.comparing(CommunityFeedItemResponse::happenedAt).reversed())
@@ -357,10 +368,17 @@ public class CommunityCollaborationService {
     private List<CommunityFeedItemResponse> signalFeedItems(
         UUID communityId,
         LocalDateTime since,
-        PageRequest limited
+        PageRequest limited,
+        UUID viewerId
     ) {
-        return signalRepository.findByCommunityIdOrderByCreatedAtDesc(communityId, limited).stream()
+        List<Signal> signals = signalRepository.findByCommunityIdOrderByCreatedAtDesc(communityId, limited).stream()
             .filter(signal -> signal.getCreatedAt() != null && signal.getCreatedAt().isAfter(since))
+            .toList();
+        List<UUID> ids = signals.stream().map(Signal::getId).toList();
+        Set<UUID> following = contentFollowService.followedIds(viewerId, "SIGNAL", ids);
+        Set<UUID> confirmed = signalConfirmationService.confirmedByViewer(viewerId, ids);
+        Map<UUID, Long> counts = signalConfirmationService.countsFor(ids);
+        return signals.stream()
             .map(signal -> new CommunityFeedItemResponse(
                 "signal",
                 signal.getId(),
@@ -368,7 +386,10 @@ public class CommunityCollaborationService {
                 signal.getTitle(),
                 signal.getLocationLabel(),
                 signal.getCreatedAt(),
-                freshness(signal.getCreatedAt())
+                freshness(signal.getCreatedAt()),
+                counts.getOrDefault(signal.getId(), 0L),
+                confirmed.contains(signal.getId()),
+                following.contains(signal.getId())
             ))
             .toList();
     }
@@ -376,11 +397,19 @@ public class CommunityCollaborationService {
     private List<CommunityFeedItemResponse> blogFeedItems(
         UUID communityId,
         LocalDateTime since,
-        PageRequest limited
+        PageRequest limited,
+        UUID viewerId
     ) {
-        return blogPostRepository.findActiveOfficialTimeline(communityId).stream()
+        List<CommunityBlogPost> posts = blogPostRepository.findActiveOfficialTimeline(communityId).stream()
             .filter(post -> post.getPublishedAt() != null && post.getPublishedAt().isAfter(since))
             .limit(limited.getPageSize())
+            .toList();
+        Set<UUID> following = contentFollowService.followedIds(
+            viewerId,
+            "BLOG",
+            posts.stream().map(CommunityBlogPost::getId).toList()
+        );
+        return posts.stream()
             .map(post -> new CommunityFeedItemResponse(
                 "blog",
                 post.getId(),
@@ -388,7 +417,10 @@ public class CommunityCollaborationService {
                 post.getTitle(),
                 summarizeText(post.getContent()),
                 post.getPublishedAt(),
-                freshness(post.getPublishedAt())
+                freshness(post.getPublishedAt()),
+                null,
+                null,
+                following.contains(post.getId())
             ))
             .toList();
     }
@@ -396,7 +428,8 @@ public class CommunityCollaborationService {
     private List<CommunityFeedItemResponse> threadFeedItems(
         UUID communityId,
         LocalDateTime since,
-        PageRequest limited
+        PageRequest limited,
+        UUID viewerId
     ) {
         List<CommunityThread> threads = threadRepository
             .findBySourceCommunityIdOrTargetCommunityIdOrderByUpdatedAtDesc(communityId, communityId, limited)
@@ -413,6 +446,11 @@ public class CommunityCollaborationService {
                 CommunityThreadMessage::getContent,
                 (first, ignored) -> first
             ));
+        Set<UUID> following = contentFollowService.followedIds(
+            viewerId,
+            "THREAD",
+            threads.stream().map(CommunityThread::getId).toList()
+        );
         return threads.stream()
             .map(thread -> new CommunityFeedItemResponse(
                 "thread-update",
@@ -421,7 +459,10 @@ public class CommunityCollaborationService {
                 thread.getTitle(),
                 summarizeText(firstMessageByThread.get(thread.getId())),
                 thread.getUpdatedAt(),
-                freshness(thread.getUpdatedAt())
+                freshness(thread.getUpdatedAt()),
+                null,
+                null,
+                following.contains(thread.getId())
             ))
             .toList();
     }
