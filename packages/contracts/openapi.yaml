@@ -8479,6 +8479,13 @@ components:
         following:
           type: boolean
           nullable: true
+        reactions:
+          type: object
+          additionalProperties:
+            type: integer
+        viewerReaction:
+          type: string
+          nullable: true
     OnboardingChecklist:
       type: object
       required: [joinedCommunity, contributed, followingContent, allComplete]

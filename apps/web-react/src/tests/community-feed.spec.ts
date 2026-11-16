@@ -186,4 +186,24 @@ test.describe('Community social feed', () => {
     await expect(link).toHaveAttribute('href', 'https://example.com/cleanup');
     await expect(link).toHaveAttribute('rel', /noopener/);
   });
+
+  test('likes a report from the feed and updates the count', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+    await page.route('**/api/signals/signal-1/react', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ reactions: { LIKE: 3 }, viewerReaction: 'LIKE' }),
+      }));
+
+    await page.goto('/communities/feed');
+    const card = page.locator('.social-feed-item').filter({ hasText: 'Unsafe crosswalk' });
+    const like = card.getByTestId('community-feed-react-like-signal-1');
+    await expect(like).toContainText('Like');
+    await like.click();
+    await expect(like).toContainText('· 3');
+    await expect(like).toHaveAttribute('aria-pressed', 'true');
+  });
 });

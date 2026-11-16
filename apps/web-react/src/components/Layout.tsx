@@ -152,6 +152,7 @@ export function Layout({ children, authMode = false }: Props) {
     activeMembership?.role === "PUBLIC_SERVANT_LIAISON";
   const primaryNav: NavItem[] = [
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
+    { label: t('nav.chat'), to: '/communities/rooms', icon: 'pi pi-comments', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
     { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
   ];
@@ -165,7 +166,6 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.community_open_data'), to: '/communities/open-data', icon: 'pi pi-database', visible: isLoggedIn && showAdvancedTools && Boolean(canAccessOpenData) },
     { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
     { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
-    { label: t('nav.community_rooms'), to: '/communities/rooms', icon: 'pi pi-comments', visible: isLoggedIn && showAdvancedTools },
     { label: t('nav.community_activities'), to: '/communities/activities', icon: 'pi pi-calendar', visible: isLoggedIn },
     { label: t('nav.community_resources'), to: '/communities/resources', icon: 'pi pi-building', visible: isLoggedIn && showAdvancedTools },
     { label: t('nav.community_integrations'), to: '/communities/integrations', icon: 'pi pi-send', visible: isLoggedIn && showAdvancedTools && Boolean(canAccessOpenData) },

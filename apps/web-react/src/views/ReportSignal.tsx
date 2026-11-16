@@ -697,19 +697,30 @@ export function ReportSignal() {
               type="button"
               variant={locationFound ? "primary" : "secondary"}
               icon={isLocating ? "pi pi-spin pi-spinner" : locationFound ? "pi pi-check" : "pi pi-map-marker"}
-              label={isLocating ? t("report.detecting_coordinates") : locationFound ? t("report.coordinates_secured") : t("report.detect_location_auto")}
+              label={isLocating ? t("report.detecting_coordinates") : locationFound ? t("report.update_location") : t("report.detect_location_auto")}
               onClick={detectLocation}
               className="w-full py-3"
               data-testid="report-detect-location-button"
             />
-            {(watch("latitude") || watch("longitude")) && (
-              <div className="u-pill w-fit" data-testid="report-location-coordinates">
-                <i className="pi pi-compass text-brand-primary"></i>
-                {t("report.coordinates_value", {
-                  latitude: watch("latitude")?.toFixed(5),
-                  longitude: watch("longitude")?.toFixed(5),
-                })}
-              </div>
+            {watch("latitude") != null && watch("longitude") != null && (
+              <>
+                <div className="u-pill w-fit" data-testid="report-location-coordinates">
+                  <i className="pi pi-compass text-brand-primary" aria-hidden="true"></i>
+                  {t("report.coordinates_value", {
+                    latitude: watch("latitude")?.toFixed(5),
+                    longitude: watch("longitude")?.toFixed(5),
+                  })}
+                </div>
+                <a
+                  className="civic-inline-link text-sm w-fit"
+                  href={`https://www.openstreetmap.org/?mlat=${watch("latitude")}&mlon=${watch("longitude")}#map=17/${watch("latitude")}/${watch("longitude")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-testid="report-open-map"
+                >
+                  <i className="pi pi-map" aria-hidden="true" /> {t("report.open_in_map")}
+                </a>
+              </>
             )}
           </div>
         </CivicCard>
