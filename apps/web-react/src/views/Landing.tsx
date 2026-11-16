@@ -153,6 +153,10 @@ export function Landing() {
                 data-testid="landing-find-city"
               />
             </div>
+            <Link to="/backlog" className="landing-public-link" data-testid="landing-public-feed">
+              <i className="pi pi-list" aria-hidden="true" />
+              {t("landing.public_feed_cta")}
+            </Link>
           </div>
           <div className="landing-hero-art">
             <img

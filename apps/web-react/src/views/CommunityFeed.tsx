@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { Avatar } from 'primereact/avatar';
@@ -15,14 +15,27 @@ import { CivicCard } from '../components/ui/CivicCard';
 import { CivicEmptyState } from '../components/ui/CivicEmptyState';
 import { CivicPageHeader } from '../components/ui/CivicPageHeader';
 import { CivicButton } from '../components/ui/CivicButton';
+import { LinkifiedText } from '../components/ui/LinkifiedText';
 import { OnboardingChecklist } from '../components/OnboardingChecklist';
 import { toRoleLabel } from '../constants/roleLabels';
+import { formatRelativeTime } from '../utils/formatRelativeTime';
 
 type ApiError = Error & { friendlyMessage?: string };
 type FeedFilter = 'all' | CommunityFeedItem['type'];
+type FeedComment = { id: string; author: string; content: string; createdAt?: string };
+type CommentResponse = { id: string; authorUsername: string; content: string; createdAt: string };
+type ThreadMessageResponse = { id: string; content: string; createdAt: string; hidden?: boolean };
 
 const TITLE_LIMIT = 120;
 const BODY_LIMIT = 2000;
+
+const commentKey = (item: CommunityFeedItem) => `${item.type}:${item.id}`;
+
+const itemHref = (item: CommunityFeedItem) => {
+  if (item.type === 'signal') return `/signal/${item.id}`;
+  if (item.type === 'blog') return `/communities/blog#blog-post-${item.id}`;
+  return `/communities/threads#thread-${item.id}`;
+};
 
 /**
  * Community feed, in the shape people already know from social products: one composer, one
@@ -32,7 +45,7 @@ const BODY_LIMIT = 2000;
  */
 export function CommunityFeed() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { activeCommunityId, memberships } = useCommunityStore();
   const userName = useAuthStore((state) => state.userName);
 
@@ -47,6 +60,9 @@ export function CommunityFeed() {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [replySending, setReplySending] = useState(false);
+  const [comments, setComments] = useState<Record<string, FeedComment[]>>({});
+  const [commentsLoading, setCommentsLoading] = useState<string | null>(null);
+  const [commentsError, setCommentsError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [alertsOn, setAlertsOn] = useState(false);
 
@@ -118,13 +134,61 @@ export function CommunityFeed() {
 
   const newest = feed[0];
 
-  const openItem = (item: CommunityFeedItem) => {
-    if (item.type === 'signal') {
-      navigate(`/signal/${item.id}`);
-    } else if (item.type === 'blog') {
-      navigate('/communities/blog');
-    } else {
-      navigate('/communities/threads');
+  const loadComments = async (item: CommunityFeedItem) => {
+    const key = commentKey(item);
+    setCommentsLoading(key);
+    setCommentsError(null);
+    try {
+      let next: FeedComment[] = [];
+      if (item.type === 'signal') {
+        const { data } = await apiClient.get<CommentResponse[]>(`signals/${item.id}/comments`);
+        next = data.map((comment) => ({
+          id: comment.id,
+          author: comment.authorUsername,
+          content: comment.content,
+          createdAt: comment.createdAt,
+        }));
+      } else if (item.type === 'blog') {
+        const { data } = await apiClient.get<CommentResponse[]>(`community/blog/${item.id}/comments`);
+        next = data.map((comment) => ({
+          id: comment.id,
+          author: comment.authorUsername,
+          content: comment.content,
+          createdAt: comment.createdAt,
+        }));
+      } else if (activeCommunityId) {
+        const { data } = await apiClient.get<{
+          content?: Array<{ id: string; messages?: ThreadMessageResponse[] }>;
+        }>(`community/threads?communityId=${activeCommunityId}&size=100`);
+        const thread = (data.content ?? []).find((candidate) => candidate.id === item.id);
+        next = (thread?.messages ?? [])
+          .filter((message) => !message.hidden)
+          .slice(1)
+          .map((message) => ({
+            id: message.id,
+            author: t('community_feed.someone'),
+            content: message.content,
+            createdAt: message.createdAt,
+          }));
+      }
+      setComments((current) => ({ ...current, [key]: next }));
+    } catch {
+      setCommentsError(key);
+    } finally {
+      setCommentsLoading(null);
+    }
+  };
+
+  const toggleComments = (item: CommunityFeedItem) => {
+    const key = commentKey(item);
+    if (replyingTo === key) {
+      setReplyingTo(null);
+      return;
+    }
+    setReplyingTo(key);
+    setReplyText('');
+    if (!comments[key] && commentsLoading !== key) {
+      void loadComments(item);
     }
   };
 
@@ -153,7 +217,9 @@ export function CommunityFeed() {
         method: next ? 'post' : 'delete'
       });
       setFeed((current) =>
-        current.map((entry) => (entry.id === item.id ? { ...entry, following: next } : entry))
+        current.map((entry) =>
+          entry.id === item.id && entry.type === item.type ? { ...entry, following: next } : entry
+        )
       );
       toast.success(next ? t('community_feed.follow_success') : t('community_feed.unfollow_success'));
     } catch (err) {
@@ -170,7 +236,7 @@ export function CommunityFeed() {
       });
       setFeed((current) =>
         current.map((entry) =>
-          entry.id === item.id
+          entry.id === item.id && entry.type === item.type
             ? { ...entry, confirmationCount: data.count, viewerConfirmed: data.confirmedByViewer }
             : entry
         )
@@ -183,22 +249,33 @@ export function CommunityFeed() {
   };
 
   const sendReply = async (item: CommunityFeedItem) => {
-    if (!activeCommunityId || !replyText.trim()) {
+    const content = replyText.trim();
+    if (!activeCommunityId || !content) {
       return;
     }
+    const key = commentKey(item);
     setReplySending(true);
     try {
-      if (item.type === 'thread-update') {
-        await apiClient.post(`community/threads/${item.id}/messages`, {
-          sourceCommunityId: activeCommunityId,
-          content: replyText.trim()
-        });
+      let created: FeedComment;
+      if (item.type === 'signal') {
+        const { data } = await apiClient.post<CommentResponse>(`signals/${item.id}/comments`, { content });
+        created = { id: data.id, author: data.authorUsername, content: data.content, createdAt: data.createdAt };
+      } else if (item.type === 'blog') {
+        const { data } = await apiClient.post<CommentResponse>(`community/blog/${item.id}/comments`, { content });
+        created = { id: data.id, author: data.authorUsername, content: data.content, createdAt: data.createdAt };
       } else {
-        await apiClient.post(`community/blog/${item.id}/comments`, {
-          content: replyText.trim()
+        const { data } = await apiClient.post<ThreadMessageResponse>(`community/threads/${item.id}/messages`, {
+          sourceCommunityId: activeCommunityId,
+          content
         });
+        created = {
+          id: data.id,
+          author: userName ?? t('community_feed.someone'),
+          content,
+          createdAt: data.createdAt
+        };
       }
-      setReplyingTo(null);
+      setComments((current) => ({ ...current, [key]: [...(current[key] ?? []), created] }));
       setReplyText('');
       toast.success(t('community_feed.reply_success'));
     } catch (err) {
@@ -398,7 +475,7 @@ export function CommunityFeed() {
                 {newest && (
                   <span className="social-feed-freshness">
                     <i className="pi pi-clock" aria-hidden="true" />
-                    {newest.freshness}
+                    {t('community_feed.updated', { time: formatRelativeTime(newest.happenedAt, i18n.language) })}
                   </span>
                 )}
               </div>
@@ -430,10 +507,22 @@ export function CommunityFeed() {
                 <CivicCard data-testid="community-feed-empty">
                   <CivicEmptyState
                     icon="pi-comments"
-                    title={t('community_feed.empty_title')}
-                    description={t('community_feed.empty_desc')}
-                    actionLabel={t('community_feed.empty_action')}
-                    onAction={() => setComposerOpen(true)}
+                    title={
+                      feed.length > 0
+                        ? t('community_feed.empty_filter_title')
+                        : t('community_feed.empty_title')
+                    }
+                    description={
+                      feed.length > 0
+                        ? t('community_feed.empty_filter_desc')
+                        : t('community_feed.empty_desc')
+                    }
+                    actionLabel={
+                      feed.length > 0
+                        ? t('community_feed.empty_filter_action')
+                        : t('community_feed.empty_action')
+                    }
+                    onAction={() => (feed.length > 0 ? setFilter('all') : setComposerOpen(true))}
                   />
                 </CivicCard>
               ) : (
@@ -450,18 +539,20 @@ export function CommunityFeed() {
                       <div className="social-feed-copy">
                         <div className="social-feed-meta">
                           <span className="social-feed-type">{itemLabel(item.type)}</span>
-                          <span className="social-feed-time">{item.freshness}</span>
+                          <span className="social-feed-time">
+                            {formatRelativeTime(item.happenedAt, i18n.language)}
+                          </span>
                         </div>
                         <h3 className="social-feed-title">
-                          <button
-                            type="button"
-                            className="social-feed-title__link"
-                            onClick={() => openItem(item)}
-                          >
+                          <Link to={itemHref(item)} className="social-feed-title__link">
                             {item.title}
-                          </button>
+                          </Link>
                         </h3>
-                        {item.summary && <p className="social-feed-summary">{item.summary}</p>}
+                        {item.summary && (
+                          <p className="social-feed-summary">
+                            <LinkifiedText text={item.summary} />
+                          </p>
+                        )}
                         <div className="social-feed-actions">
                           {item.type === 'signal' && (
                             <button
@@ -490,19 +581,15 @@ export function CommunityFeed() {
                                 : ''}
                             </button>
                           )}
-                          {(item.type === 'thread-update' || item.type === 'blog') && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setReplyingTo(replyingTo === item.id ? null : item.id);
-                                setReplyText('');
-                              }}
-                              aria-expanded={replyingTo === item.id}
-                            >
-                              <i className="pi pi-comment" aria-hidden="true" />
-                              {t('community_feed.reply')}
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => toggleComments(item)}
+                            aria-expanded={replyingTo === commentKey(item)}
+                            data-testid={`community-feed-comment-${item.id}`}
+                          >
+                            <i className="pi pi-comment" aria-hidden="true" />
+                            {t('community_feed.comment')}
+                          </button>
                           <button
                             type="button"
                             onClick={() => toggleFollow(item)}
@@ -519,8 +606,43 @@ export function CommunityFeed() {
                           </button>
                         </div>
 
-                        {replyingTo === item.id && (
+                        {replyingTo === commentKey(item) && (
                           <div className="social-feed-reply">
+                            <strong className="social-feed-comments-title">
+                              {t('community_feed.comments')}
+                            </strong>
+                            {commentsLoading === commentKey(item) ? (
+                              <p className="social-feed-comments-status" role="status">
+                                {t('common.loading')}
+                              </p>
+                            ) : commentsError === commentKey(item) ? (
+                              <div className="social-feed-comments-status" role="alert">
+                                <span>{t('community_feed.comments_error')}</span>
+                                <button type="button" onClick={() => void loadComments(item)}>
+                                  {t('common.retry')}
+                                </button>
+                              </div>
+                            ) : comments[commentKey(item)]?.length ? (
+                              <ul className="social-feed-comments" aria-live="polite">
+                                {comments[commentKey(item)].slice(-3).map((comment) => (
+                                  <li key={comment.id}>
+                                    <div className="social-feed-comment-meta">
+                                      <strong>{comment.author}</strong>
+                                      {comment.createdAt && (
+                                        <time>{formatRelativeTime(comment.createdAt, i18n.language)}</time>
+                                      )}
+                                    </div>
+                                    <p className="social-feed-comment-body">
+                                      <LinkifiedText text={comment.content} />
+                                    </p>
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="social-feed-comments-status">
+                                {t('community_feed.comments_empty')}
+                              </p>
+                            )}
                             <InputTextarea
                               value={replyText}
                               rows={2}
@@ -528,7 +650,7 @@ export function CommunityFeed() {
                               autoResize
                               onChange={(event) => setReplyText(event.target.value)}
                               placeholder={t('community_feed.reply_placeholder')}
-                              aria-label={t('community_feed.reply')}
+                              aria-label={t('community_feed.comment')}
                               className="w-full"
                               data-testid={`community-feed-reply-input-${item.id}`}
                             />

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Signal } from "../types";
 import { PriorityScale, SignalEmpty, StatusChip } from "./signalPrimitives";
 import { CivicButton } from "./ui/CivicButton";
+import { LinkifiedText } from "./ui/LinkifiedText";
 import { useSignalStatusLabel } from "../utils/signalStatus";
 import { formatStamp } from "../utils/formatStamp";
 
@@ -153,7 +154,9 @@ export function SignalFeedList({
                     <i className="pi pi-arrow-right" aria-hidden="true" />
                   </span>
                 </div>
-                <p className="signal-feed-card__summary">{preview(signal)}</p>
+                <p className="signal-feed-card__summary">
+                  <LinkifiedText text={preview(signal)} />
+                </p>
                 <div className="signal-feed-card__meta">
                   <span className="signal-status-chip" data-status={t(`categories.${signal.category}`)}>
                     <span className="signal-status-chip__dot" aria-hidden="true" style={{ background: "var(--brand-accent)" }} />

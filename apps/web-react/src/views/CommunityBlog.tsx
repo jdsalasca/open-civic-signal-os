@@ -221,6 +221,7 @@ export function CommunityBlog() {
     return (
       <article
         key={post.id}
+        id={`blog-post-${post.id}`}
         className={`glass-panel border-round-3xl overflow-hidden h-full ${post.pinned && !archived ? "border-2 border-brand-primary" : ""}`}
         data-testid={archived ? `archived-blog-post-${post.id}` : `blog-post-${post.id}`}
       >

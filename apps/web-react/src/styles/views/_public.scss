@@ -591,3 +591,24 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.landing-public-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  color: var(--link-color);
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.landing-public-link:hover,
+.landing-public-link:focus-visible {
+  color: var(--link-color-hover);
+}
+
+.landing-public-link:focus-visible {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 3px;
+}

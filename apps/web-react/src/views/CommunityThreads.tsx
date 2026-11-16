@@ -511,7 +511,7 @@ export function CommunityThreads() {
                       const canSend = draft.trim().length >= FORM_LIMITS.threads.messageMin && hasValidDraftImage;
 
                       return (
-                        <div key={thread.id} className="bg-surface p-5 md:p-6 flex flex-column gap-4">
+                        <div key={thread.id} id={`thread-${thread.id}`} className="bg-surface p-5 md:p-6 flex flex-column gap-4">
                           <div className="u-card-split-header">
                             <div className="u-card-title-wrap">
                               <h3 className="text-xl md:text-2xl font-black text-main m-0 mb-2 u-card-title-xl">{thread.title}</h3>
