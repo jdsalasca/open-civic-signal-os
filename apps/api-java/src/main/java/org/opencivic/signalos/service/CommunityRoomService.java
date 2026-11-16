@@ -110,7 +110,13 @@ public class CommunityRoomService {
     }
 
     @Transactional(readOnly = true)
-    public CommunityRoomDetailResponse getRoom(UUID communityId, UUID roomId, String username, Integer limit) {
+    public CommunityRoomDetailResponse getRoom(
+        UUID communityId,
+        UUID roomId,
+        String username,
+        Integer limit,
+        LocalDateTime before
+    ) {
         User user = communityAccessService.getCurrentUser(username);
         communityAccessService.requireMembership(user.getId(), communityId);
         CommunityRoom room = requireRoom(communityId, roomId);
@@ -123,8 +129,13 @@ public class CommunityRoomService {
         // response and nothing else: the row count a busy room costs stays the same no matter how few
         // messages the caller asked for.
         int effectiveLimit = CommunityListLimits.resolveLimit(limit);
-        List<CommunityRoomMessage> messages = messageRepository
-            .findByRoomIdOrderByCreatedAtDescIdDesc(roomId, PageRequest.of(0, effectiveLimit));
+        // One extra row tells the caller whether another page exists without a second count query.
+        PageRequest page = PageRequest.of(0, effectiveLimit + 1);
+        List<CommunityRoomMessage> rows = before == null
+            ? messageRepository.findByRoomIdOrderByCreatedAtDescIdDesc(roomId, page)
+            : messageRepository.findByRoomIdAndCreatedAtBeforeOrderByCreatedAtDescIdDesc(roomId, before, page);
+        boolean hasMoreMessages = rows.size() > effectiveLimit;
+        List<CommunityRoomMessage> messages = hasMoreMessages ? rows.subList(0, effectiveLimit) : rows;
         long totalMessages = messageRepository.countByRoomId(roomId);
         List<UUID> messageIds = messages.stream().map(CommunityRoomMessage::getId).toList();
         Map<UUID, List<CommunityRoomMention>> mentionsByMessage = mentionsByMessage(messageIds);
@@ -164,7 +175,7 @@ public class CommunityRoomService {
             // The true total, not the capped page size, so a reader can tell a quiet room from a
             // truncated one.
             totalMessages,
-            totalMessages > messages.size(),
+            hasMoreMessages,
             mentionRepository.countByRoomIdAndMentionedUserIdAndReadAtIsNull(roomId, user.getId()),
             payload
         );

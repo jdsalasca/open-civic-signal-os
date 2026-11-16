@@ -23,5 +23,11 @@ public interface CommunityRoomMessageRepository extends JpaRepository<CommunityR
      */
     List<CommunityRoomMessage> findByRoomIdOrderByCreatedAtDescIdDesc(UUID roomId, Pageable pageable);
 
+    List<CommunityRoomMessage> findByRoomIdAndCreatedAtBeforeOrderByCreatedAtDescIdDesc(
+        UUID roomId,
+        java.time.LocalDateTime before,
+        Pageable pageable
+    );
+
     long countByRoomId(UUID roomId);
 }

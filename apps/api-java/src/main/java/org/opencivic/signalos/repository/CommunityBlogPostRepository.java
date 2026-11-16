@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.domain.CommunityBlogPost;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +17,21 @@ public interface CommunityBlogPostRepository extends JpaRepository<CommunityBlog
         order by p.pinned desc, p.publishedAt desc
     """)
     List<CommunityBlogPost> findActiveOfficialTimeline(@Param("communityId") UUID communityId);
+
+    @Query("""
+        select p from CommunityBlogPost p
+        where p.communityId = :communityId
+          and p.archivedAt is null
+          and p.publishedAt >= :since
+          and p.publishedAt < :before
+        order by p.publishedAt desc
+    """)
+    List<CommunityBlogPost> findFeedPage(
+        @Param("communityId") UUID communityId,
+        @Param("since") LocalDateTime since,
+        @Param("before") LocalDateTime before,
+        Pageable pageable
+    );
 
     @Query("""
         select p from CommunityBlogPost p
