@@ -66,6 +66,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20261116-civic-daylight-palette.md` (accepted)
 - `ADR-20261116-one-feed-home-and-flat-style.md` (accepted)
 - `ADR-20261116-feed-reactions-chat-location.md` (accepted)
+- `ADR-20261116-location-first-compact-home.md` (accepted)
 - `ADR-20260321-duplicate-clustering-human-approval.md` (accepted)
 - `ADR-20260321-bias-diagnostics.md` (accepted)
 - `ADR-20260321-weekly-digest-snapshot.md` (accepted)
