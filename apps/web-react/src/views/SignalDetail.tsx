@@ -13,6 +13,7 @@ import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { CivicEngagement } from "../components/CivicEngagement";
+import { SignalTrustActions } from "../components/SignalTrustActions";
 import { PriorityRadar } from "../components/PriorityRadar";
 import { PriorityScale, StatusChip } from "../components/signalPrimitives";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
@@ -307,6 +308,8 @@ export function SignalDetail() {
                 ))}
               </div>
             </CivicCard>
+
+            <SignalTrustActions signalId={signal.id} />
 
             <CivicEngagement 
               parentId={signal.id} 

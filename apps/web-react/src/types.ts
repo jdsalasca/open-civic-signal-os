@@ -116,7 +116,7 @@ export type SignalAging = {
 
 export type UserNotification = {
   id: string;
-  type: "THREAD_REPLY" | "SIGNAL_SUPPORT" | "SIGNAL_STATUS" | string;
+  type: "THREAD_REPLY" | "SIGNAL_SUPPORT" | "SIGNAL_STATUS" | "SIGNAL_CONFIRMATION" | string;
   actorName?: string | null;
   targetType: "SIGNAL" | "THREAD" | string;
   targetId: string;
@@ -557,6 +557,15 @@ export type CommunityFeedItem = {
   summary: string;
   happenedAt: string;
   freshness: string;
+  confirmationCount?: number | null;
+  viewerConfirmed?: boolean | null;
+  following?: boolean | null;
+};
+
+export type SignalConfirmationState = {
+  signalId: string;
+  count: number;
+  confirmedByViewer: boolean;
 };
 
 export type CommunityProposal = {

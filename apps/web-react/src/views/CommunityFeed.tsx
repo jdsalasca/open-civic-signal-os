@@ -42,6 +42,9 @@ export function CommunityFeed() {
   const [body, setBody] = useState('');
   const [publishing, setPublishing] = useState(false);
   const [supported, setSupported] = useState<Set<string>>(() => new Set());
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [replySending, setReplySending] = useState(false);
 
   const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
   const activeRole = memberships.find((m) => m.communityId === activeCommunityId)?.role;
@@ -95,6 +98,76 @@ export function CommunityFeed() {
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('community_feed.support_error'));
+    }
+  };
+
+  const followType = (item: CommunityFeedItem) => {
+    if (item.type === 'signal') return 'SIGNAL';
+    if (item.type === 'blog') return 'BLOG';
+    return 'THREAD';
+  };
+
+  const toggleFollow = async (item: CommunityFeedItem) => {
+    const next = !item.following;
+    try {
+      await apiClient.request({
+        url: `follows/${followType(item)}/${item.id}`,
+        method: next ? 'post' : 'delete'
+      });
+      setFeed((current) =>
+        current.map((entry) => (entry.id === item.id ? { ...entry, following: next } : entry))
+      );
+      toast.success(next ? t('community_feed.follow_success') : t('community_feed.unfollow_success'));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('community_feed.follow_error'));
+    }
+  };
+
+  const confirmSignal = async (item: CommunityFeedItem) => {
+    try {
+      const { data } = await apiClient.request<{ count: number; confirmedByViewer: boolean }>({
+        url: `signals/${item.id}/confirmations`,
+        method: item.viewerConfirmed ? 'delete' : 'post'
+      });
+      setFeed((current) =>
+        current.map((entry) =>
+          entry.id === item.id
+            ? { ...entry, confirmationCount: data.count, viewerConfirmed: data.confirmedByViewer }
+            : entry
+        )
+      );
+      toast.success(data.confirmedByViewer ? t('community_feed.confirmed') : t('community_feed.unconfirmed'));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('community_feed.confirm_error'));
+    }
+  };
+
+  const sendReply = async (item: CommunityFeedItem) => {
+    if (!activeCommunityId || !replyText.trim()) {
+      return;
+    }
+    setReplySending(true);
+    try {
+      if (item.type === 'thread-update') {
+        await apiClient.post(`community/threads/${item.id}/messages`, {
+          sourceCommunityId: activeCommunityId,
+          content: replyText.trim()
+        });
+      } else {
+        await apiClient.post(`community/blog/${item.id}/comments`, {
+          content: replyText.trim()
+        });
+      }
+      setReplyingTo(null);
+      setReplyText('');
+      toast.success(t('community_feed.reply_success'));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('community_feed.reply_error'));
+    } finally {
+      setReplySending(false);
     }
   };
 
@@ -340,13 +413,81 @@ export function CommunityFeed() {
                                 : t('community_feed.support')}
                             </button>
                           )}
+                          {item.type === 'signal' && (
+                            <button
+                              type="button"
+                              onClick={() => confirmSignal(item)}
+                              aria-pressed={Boolean(item.viewerConfirmed)}
+                            >
+                              <i className="pi pi-eye" aria-hidden="true" />
+                              {item.viewerConfirmed
+                                ? t('community_feed.confirmed')
+                                : t('community_feed.confirm')}
+                              {typeof item.confirmationCount === 'number' && item.confirmationCount > 0
+                                ? ` · ${item.confirmationCount}`
+                                : ''}
+                            </button>
+                          )}
                           {(item.type === 'thread-update' || item.type === 'blog') && (
-                            <button type="button" onClick={() => openItem(item)}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingTo(replyingTo === item.id ? null : item.id);
+                                setReplyText('');
+                              }}
+                              aria-expanded={replyingTo === item.id}
+                            >
                               <i className="pi pi-comment" aria-hidden="true" />
                               {t('community_feed.reply')}
                             </button>
                           )}
+                          <button
+                            type="button"
+                            onClick={() => toggleFollow(item)}
+                            aria-pressed={Boolean(item.following)}
+                            data-testid={`community-feed-follow-${item.id}`}
+                          >
+                            <i
+                              className={item.following ? 'pi pi-check' : 'pi pi-bell'}
+                              aria-hidden="true"
+                            />
+                            {item.following
+                              ? t('community_feed.following')
+                              : t('community_feed.follow')}
+                          </button>
                         </div>
+
+                        {replyingTo === item.id && (
+                          <div className="social-feed-reply">
+                            <InputTextarea
+                              value={replyText}
+                              rows={2}
+                              maxLength={1000}
+                              autoResize
+                              onChange={(event) => setReplyText(event.target.value)}
+                              placeholder={t('community_feed.reply_placeholder')}
+                              className="w-full"
+                              data-testid={`community-feed-reply-input-${item.id}`}
+                            />
+                            <div className="social-feed-reply-actions">
+                              <CivicButton
+                                type="button"
+                                variant="ghost"
+                                label={t('community_feed.reply_cancel')}
+                                onClick={() => setReplyingTo(null)}
+                              />
+                              <CivicButton
+                                type="button"
+                                label={t('community_feed.reply_send')}
+                                icon="pi pi-send"
+                                loading={replySending}
+                                disabled={!replyText.trim() || replySending}
+                                onClick={() => sendReply(item)}
+                                data-testid={`community-feed-reply-send-${item.id}`}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </article>
                   ))}

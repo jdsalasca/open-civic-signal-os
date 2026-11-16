@@ -99,6 +99,9 @@ export function NotificationBell() {
     if (item.type === 'SIGNAL_STATUS') {
       return t('notifications.signal_status', { title });
     }
+    if (item.type === 'SIGNAL_CONFIRMATION') {
+      return t('notifications.signal_confirmation', { actor, title });
+    }
     return t('notifications.fallback', { title });
   };
 
