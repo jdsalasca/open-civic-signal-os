@@ -297,6 +297,15 @@ export function CommunityFeed() {
         };
       }
       setComments((current) => ({ ...current, [key]: [...(current[key] ?? []), created] }));
+      if (item.type !== 'thread-update') {
+        setFeed((current) =>
+          current.map((entry) =>
+            entry.id === item.id && entry.type === item.type
+              ? { ...entry, commentCount: (entry.commentCount ?? 0) + 1 }
+              : entry
+          )
+        );
+      }
       setReplyText('');
       toast.success(t('community_feed.reply_success'));
     } catch (err) {
@@ -568,6 +577,14 @@ export function CommunityFeed() {
                       <div className="social-feed-copy">
                         <div className="social-feed-meta">
                           <span className="social-feed-type">{itemLabel(item.type)}</span>
+                          {item.authorName && (
+                            <span className="social-feed-author">
+                              {t('community_feed.by_author', { name: item.authorName })}
+                              {item.authorRole === 'PUBLIC_SERVANT' && (
+                                <span className="social-feed-official">{t('community_feed.official')}</span>
+                              )}
+                            </span>
+                          )}
                           <span className="social-feed-time">
                             {formatRelativeTime(item.happenedAt, i18n.language)}
                           </span>
@@ -628,6 +645,9 @@ export function CommunityFeed() {
                           >
                             <i className="pi pi-comment" aria-hidden="true" />
                             {t('community_feed.comment')}
+                            {typeof item.commentCount === 'number' && item.commentCount > 0
+                              ? ` · ${item.commentCount}`
+                              : ''}
                           </button>
                           <button
                             type="button"

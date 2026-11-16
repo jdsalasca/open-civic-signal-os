@@ -118,7 +118,11 @@ export function CommunityRooms() {
         `community/rooms/workspace?communityId=${activeCommunityId}`
       );
       setWorkspace(response.data);
-      setActiveRoomId((current) => current ?? response.data.rooms[0]?.id ?? null);
+      setActiveRoomId((current) =>
+        current && response.data.rooms.some((candidate) => candidate.id === current)
+          ? current
+          : response.data.rooms[0]?.id ?? null
+      );
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t("community_rooms.load_error"));
@@ -171,31 +175,65 @@ export function CommunityRooms() {
     }
     const base = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "/api";
     const controller = new AbortController();
+    let reconnects = 0;
+
+    // The server closes the stream after 30 minutes and a phone loses the network when it locks,
+    // so the stream is treated as something to reopen, not something that lives until navigation.
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        const timer = setTimeout(resolve, ms);
+        controller.signal.addEventListener(
+          "abort",
+          () => {
+            clearTimeout(timer);
+            resolve();
+          },
+          { once: true }
+        );
+      });
 
     (async () => {
-      try {
-        const response = await fetch(
-          `${base}/community/rooms/${activeRoomId}/stream?communityId=${activeCommunityId}`,
-          { headers: { Authorization: `Bearer ${accessToken}`, Accept: "text/event-stream" }, signal: controller.signal }
-        );
-        if (!response.ok || !response.body) {
+      while (!controller.signal.aborted) {
+        const reconnecting = reconnects > 0;
+        try {
+          const response = await fetch(
+            `${base}/community/rooms/${activeRoomId}/stream?communityId=${activeCommunityId}`,
+            { headers: { Authorization: `Bearer ${accessToken}`, Accept: "text/event-stream" }, signal: controller.signal }
+          );
+          // A missing session or membership does not heal by retrying.
+          if (response.status === 401 || response.status === 403) {
+            return;
+          }
+          if (!response.ok || !response.body) {
+            throw new Error("stream unavailable");
+          }
+          setLive(true);
+          reconnects = 0;
+          if (reconnecting) {
+            // Messages sent while the stream was down are not replayed by the broker.
+            await loadRoom();
+            await loadWorkspace();
+          }
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (decoder.decode(value).includes("room-message")) {
+              loadRoom();
+              loadWorkspace();
+            }
+          }
+        } catch {
+          // Network drop or server-side stream timeout: the loop reopens below.
+        } finally {
+          setLive(false);
+        }
+        if (controller.signal.aborted) {
           return;
         }
-        setLive(true);
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (decoder.decode(value).includes("room-message")) {
-            loadRoom();
-            loadWorkspace();
-          }
-        }
-      } catch {
-        // Stream closed by navigation or network drop; polling state stays truthful.
-      } finally {
-        setLive(false);
+        reconnects += 1;
+        await wait(Math.min(2000 * 2 ** (reconnects - 1), 30000));
       }
     })();
 

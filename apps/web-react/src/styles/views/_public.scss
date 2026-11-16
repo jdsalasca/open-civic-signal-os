@@ -430,6 +430,28 @@
   background: var(--surface-soft);
 }
 
+.onboarding-search-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.onboarding-places-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem;
+  border: 1px solid var(--status-rejected);
+  border-radius: var(--radius-paper-sm);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
 .onboarding-city-list {
   display: flex;
   flex-direction: column;

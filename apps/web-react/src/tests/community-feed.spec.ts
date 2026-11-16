@@ -14,6 +14,9 @@ const feed = [
     happenedAt: '2026-11-15T20:50:00',
     freshness: 'updated 7m ago',
     following: false,
+    authorName: 'Sofía Ramírez',
+    authorRole: 'CITIZEN',
+    commentCount: null,
   },
   {
     type: 'signal',
@@ -26,6 +29,9 @@ const feed = [
     confirmationCount: 0,
     viewerConfirmed: false,
     following: false,
+    authorName: 'María Pérez',
+    authorRole: 'CITIZEN',
+    commentCount: 2,
   },
   {
     type: 'blog',
@@ -35,6 +41,9 @@ const feed = [
     summary: 'The city will install 12 lamps this week.',
     happenedAt: '2026-11-14T09:00:00',
     freshness: 'updated 1d ago',
+    authorName: 'Equipo de la Alcaldía',
+    authorRole: 'PUBLIC_SERVANT',
+    commentCount: 1,
   },
 ];
 
@@ -78,6 +87,15 @@ test.describe('Community social feed', () => {
     await expect(page.getByTestId('community-feed-timeline')).toBeVisible();
     await expect(page.locator('.social-feed-item')).toHaveCount(3);
     await expect(page.locator('.social-feed-item').first()).toContainText(feed[0].summary);
+
+    // The card says who posted and how many comments it has, and official posts are marked.
+    await expect(page.locator('.social-feed-item').filter({ hasText: 'Unsafe crosswalk' })).toContainText(
+      'By María Pérez'
+    );
+    await expect(page.locator('.social-feed-item').filter({ hasText: 'New lighting' })).toContainText(
+      'Equipo de la Alcaldía'
+    );
+    await expect(page.locator('.social-feed-item').filter({ hasText: 'New lighting' })).toContainText('Official');
 
     await page.getByTestId('community-feed-filter-signal').click();
     await expect(page.locator('.social-feed-item')).toHaveCount(1);
@@ -157,13 +175,15 @@ test.describe('Community social feed', () => {
 
     await page.goto('/communities/feed');
     const card = page.locator('.social-feed-item').filter({ hasText: 'Unsafe crosswalk' });
-    await card.getByRole('button', { name: 'Comment' }).click();
+    await expect(card.getByRole('button', { name: /Comment · 2/ })).toBeVisible();
+    await card.getByTestId('community-feed-comment-signal-1').click();
     await expect(card.getByText('Same here.')).toBeVisible();
 
     await card.getByTestId('community-feed-reply-input-signal-1').fill('I walk there every day.');
     await card.getByTestId('community-feed-reply-send-signal-1').click();
     await expect(page.getByText('Comment published.')).toBeVisible();
     await expect(card.getByText('I walk there every day.')).toBeVisible();
+    await expect(card.getByRole('button', { name: /Comment · 3/ })).toBeVisible();
   });
 
   test('turns a URL in a summary into a safe link', async ({ page }) => {

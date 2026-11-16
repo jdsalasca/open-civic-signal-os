@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { useCallback, useEffect, useState } from "react";
 import { Signal } from "../types";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -26,21 +25,40 @@ export function MySignals() {
   const statusLabel = useSignalStatusLabel();
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchMySignals = async () => {
-      try {
-        const res = await apiClient.get("signals/mine");
-        setSignals(res.data.content || res.data); // Handle both paginated and list
-      } catch (err) {
-        toast.error(t('common.error'));
-      } finally {
-        setLoading(false);
+  const fetchMySignals = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      // The endpoint paginates; reading every page keeps the metrics honest and makes the whole
+      // contribution history reachable, which the first page alone did not.
+      // shortcut: stop at 2,000 reports, add a server-side summary if a citizen ever exceeds it.
+      const MAX_PAGES = 20;
+      const collected: Signal[] = [];
+      let page = 0;
+      let last = false;
+      while (!last && page < MAX_PAGES) {
+        const res = await apiClient.get<{
+          content?: Signal[];
+          last?: boolean;
+        }>("signals/mine", { params: { page, size: 100 } });
+        collected.push(...(res.data.content ?? []));
+        last = res.data.last ?? true;
+        page += 1;
       }
-    };
-    fetchMySignals();
-  }, [t]);
+      setSignals(collected);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchMySignals();
+  }, [fetchMySignals]);
 
   const totalVotes = signals.reduce((acc, s) => acc + (s.communityVotes || 0), 0);
   const resolvedCount = signals.filter((s) => s.status === "RESOLVED").length;
@@ -114,13 +132,24 @@ export function MySignals() {
             value={signals}
             loading={loading}
             emptyMessage={
-              <CivicEmptyState
-                icon="pi-file-edit"
-                title={t('my_contributions.empty_title')}
-                description={t('my_contributions.empty_desc')}
-                actionLabel={t('my_contributions.empty_action')}
-                onAction={() => navigate("/report")}
-              />
+              loadError ? (
+                <CivicEmptyState
+                  icon="pi-exclamation-circle"
+                  title={t('my_contributions.error_title')}
+                  description={t('my_contributions.error_desc')}
+                  actionLabel={t('common.retry')}
+                  onAction={() => void fetchMySignals()}
+                  data-testid="mine-signals-error"
+                />
+              ) : (
+                <CivicEmptyState
+                  icon="pi-file-edit"
+                  title={t('my_contributions.empty_title')}
+                  description={t('my_contributions.empty_desc')}
+                  actionLabel={t('my_contributions.empty_action')}
+                  onAction={() => navigate("/report")}
+                />
+              )
             }
             onRowClick={(e) => navigate(`/signal/${e.data.id}`)}
             rowClassName={() => 'cursor-pointer group'}

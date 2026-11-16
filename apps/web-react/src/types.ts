@@ -562,6 +562,9 @@ export type CommunityFeedItem = {
   following?: boolean | null;
   reactions?: Record<string, number> | null;
   viewerReaction?: string | null;
+  authorName?: string | null;
+  authorRole?: string | null;
+  commentCount?: number | null;
 };
 
 export type SignalConfirmationState = {
