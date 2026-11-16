@@ -8,7 +8,7 @@ test.describe('Accessibility keyboard baseline', () => {
     await page.getByTestId('login-submit-button').click();
 
     await page.waitForURL('**/');
-    await expect(page.getByTestId('welcome-message')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('app-topbar-title')).toBeVisible({ timeout: 30000 });
 
     await page.keyboard.press('Tab');
     await expect(page.getByTestId('skip-to-content-link')).toBeFocused();

@@ -109,7 +109,7 @@ test.describe("Dashboard case aging and SLA risk", () => {
       });
     });
 
-    await page.goto("/");
+    await page.goto('/dashboard');
 
     const panel = page.getByTestId("dashboard-aging-panel");
     await expect(panel).toBeVisible();
@@ -152,7 +152,7 @@ test.describe("Dashboard case aging and SLA risk", () => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
     });
 
-    await page.goto("/");
+    await page.goto('/dashboard');
     await expect(page.getByTestId("dashboard-aging-panel")).toHaveCount(0);
     expect(agingCalls).toBe(0);
   });

@@ -61,6 +61,7 @@ export function SignalFeedList({
   const preview = (signal: Signal) => {
     const factors = signal.explainabilitySummary?.topFactors ?? [];
     if (signal.explainabilitySummary?.summary) return signal.explainabilitySummary.summary;
+    if (factors.length === 0) return t("signals.explanation_unavailable");
     if (factors.length > 1) {
       return t("signals.why_ranked_preview", {
         primary: t(`signals.factor_keys.${factors[0].key}`),
@@ -76,7 +77,6 @@ export function SignalFeedList({
       primary: t("signals.factor_keys.urgency"),
     });
   };
-
   return (
     <section className="signal-feed" data-testid="signals-feed">
       <header className="signal-feed-header">

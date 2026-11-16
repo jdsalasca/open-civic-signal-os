@@ -24,7 +24,7 @@ test.describe('Comfortable reading', () => {
     await seedAuthenticatedApp(page, 'CITIZEN');
     await mockDashboardRoutes(page);
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible();
 
     const baseSize = await page.evaluate(() => getComputedStyle(document.documentElement).fontSize);

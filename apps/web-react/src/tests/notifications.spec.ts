@@ -55,7 +55,7 @@ test.describe('Personal notifications', () => {
     await page.route('**/api/notifications/read-all', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible();
 
     await expect(page.getByTestId('notification-badge')).toHaveText('2');

@@ -98,7 +98,7 @@ test.describe('Field data mode', () => {
     await page.route("**/api/communities/*/privacy*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ communityId: "11111111-2222-3333-4444-555555555555", openDataPolicy: "RESTRICTED" }) }));
     await stubDashboard(page, requested);
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
     await expect.poll(() => requested.includes('aging'), { timeout: 15000 }).toBe(true);
 
@@ -117,7 +117,7 @@ test.describe('Field data mode', () => {
     await page.route("**/api/communities/*/privacy*", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ communityId: "11111111-2222-3333-4444-555555555555", openDataPolicy: "RESTRICTED" }) }));
     await stubDashboard(page, requested);
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
     // Give the optional fetches a chance to happen if they were going to.
     await page.waitForTimeout(2500);
@@ -155,7 +155,7 @@ test.describe('Field data mode', () => {
       });
     });
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.getByTestId('dashboard-hero')).toBeVisible({ timeout: 30000 });
     await expect.poll(() => sizes.length > 0, { timeout: 15000 }).toBe(true);
 

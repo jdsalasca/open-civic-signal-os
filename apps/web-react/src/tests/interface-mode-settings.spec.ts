@@ -17,7 +17,7 @@ test.describe('Interface Mode Settings', () => {
     await page.getByTestId('save-profile-button').click();
     await expect(page.getByText('Public identity updated.')).toBeVisible();
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.locator('html')).toHaveClass(/interface-mode-simple/);
     await expect(page.getByTestId('dashboard-secondary-actions')).toHaveCount(0);
     await expect(page.getByTestId('interface-mode-badge')).toContainText('Simple Mode');
@@ -27,7 +27,7 @@ test.describe('Interface Mode Settings', () => {
     await page.getByTestId('save-profile-button').click();
     await expect(page.getByText('Public identity updated.')).toBeVisible();
 
-    await page.goto('/');
+    await page.goto('/dashboard');
     await expect(page.locator('html')).toHaveClass(/interface-mode-advanced/);
     await expect(page.getByTestId('dashboard-secondary-actions')).toBeVisible();
     await expect(page.getByTestId('interface-mode-badge')).toContainText('Advanced Mode');

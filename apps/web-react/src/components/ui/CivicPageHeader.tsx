@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 import { classNames } from "primereact/utils";
 
 interface CivicPageHeaderProps {
@@ -29,27 +28,28 @@ export function CivicPageHeader({
   actions,
   actionsClassName,
 }: CivicPageHeaderProps) {
-  const { t } = useTranslation();
   return (
     <header
-      className={classNames("civic-page-header", className ?? "mb-8", {
+      className={classNames("civic-page-header", className ?? "mb-6", {
         "civic-page-header-with-actions": Boolean(actions),
       })}
       data-testid="civic-page-header"
     >
       <div className="civic-page-header-main">
-        <div className="u-pill mb-4">
-          <i className="pi pi-sparkles text-brand-primary"></i>
-          <span className="u-eyebrow" data-testid="page-header-eyebrow">
-            {eyebrow ?? t("common.workspace_context")}
-          </span>
-        </div>
-        <h1 className="u-page-title civic-page-title text-4xl md:text-6xl font-black mb-3" data-testid="page-header-title">
+        {eyebrow && (
+          <div className="u-pill mb-3">
+            <i className="pi pi-sparkles text-brand-primary"></i>
+            <span className="u-eyebrow" data-testid="page-header-eyebrow">
+              {eyebrow}
+            </span>
+          </div>
+        )}
+        <h1 className="u-page-title civic-page-title text-3xl md:text-4xl font-black mb-2" data-testid="page-header-title">
           {title}
         </h1>
         {description && (
           <p
-            className="u-page-subtitle civic-page-subtitle text-lg font-medium line-height-3"
+            className="u-page-subtitle civic-page-subtitle text-base font-medium line-height-3"
             data-testid="page-header-description"
           >
             {description}

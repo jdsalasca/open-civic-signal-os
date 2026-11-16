@@ -3,16 +3,17 @@ import { classNames } from 'primereact/utils';
 
 interface CivicFieldProps {
   label: string;
+  htmlFor?: string;
   error?: string;
   children: ReactNode;
   className?: string;
   helpText?: string;
 }
 
-export function CivicField({ label, error, children, className, helpText }: CivicFieldProps) {
+export function CivicField({ label, htmlFor, error, children, className, helpText }: CivicFieldProps) {
   return (
     <div className={classNames('flex flex-column gap-2 mb-4', className)}>
-      <label className="text-xs font-bold uppercase tracking-wide text-muted ml-1">
+      <label htmlFor={htmlFor} className="text-xs font-bold uppercase tracking-wide text-muted ml-1">
         {label}
       </label>
       <div className="relative">

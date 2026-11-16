@@ -21,7 +21,7 @@ test.describe('First-action checklist', () => {
     await page.route('**/api/signals/duplicates', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
 
-    await seedAuthenticatedApp(page, 'CITIZEN');
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: '11111111-1111-1111-1111-111111111111' });
     await mockDashboardRoutes(page);
     // Registered after the shared helper so it wins.
     await page.route('**/api/onboarding/checklist', (route) =>

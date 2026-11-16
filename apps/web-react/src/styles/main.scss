@@ -246,22 +246,12 @@ a:hover {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   box-shadow: var(--shadow-edge), var(--shadow-premium);
-  transform: rotate(-0.6deg);
   min-width: 0;
 }
 
-// Washi tape holding the brand sheet down: the Paper Craft signature.
+// The brand sheet is a plain card now; the washi tape belonged to the old paper metaphor.
 .app-brand-panel::before {
-  content: "";
-  position: absolute;
-  top: -0.8rem;
-  left: 50%;
-  width: 7.5rem;
-  height: 2rem;
-  transform: translateX(-50%) rotate(-5deg);
-  z-index: 2;
-  pointer-events: none;
-  @include paper-tape;
+  content: none;
 }
 
 .app-brand-kicker {
@@ -455,7 +445,7 @@ a:hover {
 }
 
 .civic-card-header {
-  background: linear-gradient(180deg, var(--alpha-surface-10), transparent);
+  background: transparent;
 }
 
 .civic-card-header-row {
@@ -1794,13 +1784,11 @@ a:hover {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-paper);
   background: var(--bg-card);
-  box-shadow: var(--shadow-edge);
-  transition: border-color var(--motion-fast) var(--ease-paper), transform var(--motion-fast) var(--ease-paper);
+  transition: border-color var(--motion-fast) var(--ease-paper);
 }
 
 .social-feed-item:hover {
   border-color: var(--brand-primary);
-  transform: translateY(-1px);
 }
 
 .social-feed-icon {
@@ -1819,12 +1807,12 @@ a:hover {
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  font-size: 0.7rem;
+  font-size: 0.78rem;
 }
 
 .social-feed-type {
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -1840,6 +1828,23 @@ a:hover {
   line-height: 1.35;
   color: var(--text-main);
   overflow-wrap: break-word;
+}
+
+.social-feed-title__link {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.social-feed-title__link:hover,
+.social-feed-title__link:focus-visible {
+  color: var(--brand-primary);
 }
 
 .social-feed-summary {
@@ -1863,14 +1868,14 @@ a:hover {
   align-items: center;
   gap: 0.35rem;
   min-height: 2.75rem;
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
+  border: 0;
+  border-radius: 0.5rem;
   background: transparent;
   color: var(--text-secondary);
-  padding: 0.32rem 0.7rem;
+  padding: 0.3rem 0.45rem;
   font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.78rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
@@ -2314,12 +2319,11 @@ select:focus-visible,
     background: var(--brand-primary) !important;
     color: var(--on-brand) !important;
     border: none !important;
-    box-shadow: var(--shadow-edge), 0 12px 20px -14px var(--brand-primary-glow-strong) !important;
+    box-shadow: none !important;
 
     &:hover {
       background: var(--brand-primary-hover) !important;
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-edge), 0 18px 28px -16px var(--brand-primary-glow-strong) !important;
+      box-shadow: none !important;
     }
   }
 

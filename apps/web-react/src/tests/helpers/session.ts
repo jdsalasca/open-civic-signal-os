@@ -144,6 +144,7 @@ export async function mockAppBootstrap(
   await page.route('**/api/communities/*/alerts', (route) => route.fulfill(json({ subscribed: false })));
   await page.route('**/api/signals/*/confirmations', (route) =>
     route.fulfill(json({ signalId: '', count: 0, confirmedByViewer: false })));
+  await page.route('**/api/community/feed*', (route) => route.fulfill(json([])));
   await page.route('**/api/follows/**', (route) => route.fulfill(json({ following: false })));
 }
 

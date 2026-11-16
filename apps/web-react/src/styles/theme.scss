@@ -14,7 +14,7 @@
 
 // ---------- 1. Theme-independent tokens: type, spacing, radii, motion -------
 @mixin papercraft-shared-tokens {
-  --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-display: "Nunito Sans", "Segoe UI", "Trebuchet MS", sans-serif;
   --font-body: "Nunito Sans", "Segoe UI", "Trebuchet MS", sans-serif;
   // Paper Craft forbids monospace on the page; data stays in the body face.
   --font-mono: "Nunito Sans", "Segoe UI", sans-serif;
@@ -47,12 +47,11 @@
   --radius-md: 0.9rem;
   --radius-lg: 1.5rem;
   --radius-xl: 2.1rem;
-  // Cut-paper corners: a visible delta between the four corners, never a
-  // perfect rounded rectangle.
-  --radius-paper: 30px 12px 28px 14px;
-  --radius-paper-sm: 22px 12px 20px 14px;
-  --radius-paper-lg: 38px 12px 34px 16px;
-  --radius-paper-chip: 18px 10px 16px 12px;
+  // Consistent civic radii: no cut-paper asymmetry, no rotated sheets.
+  --radius-paper: 1rem;
+  --radius-paper-sm: 0.75rem;
+  --radius-paper-lg: 1.25rem;
+  --radius-paper-chip: 999px;
   --radius-pill: 999px;
 
   --motion-fast: 180ms;
@@ -79,11 +78,11 @@
   --border-subtle: #d9e2e8;
   --glass-stroke: rgba(16, 32, 43, 0.1);
 
-  --shadow-premium: 0 2px 2px rgba(16, 32, 43, 0.1), 0 18px 32px rgba(16, 32, 43, 0.16);
-  --shadow-lift: 0 3px 4px rgba(16, 32, 43, 0.12), 0 26px 44px rgba(16, 32, 43, 0.2);
+  --shadow-premium: 0 1px 2px rgba(16, 32, 43, 0.05), 0 6px 18px -14px rgba(16, 32, 43, 0.16);
+  --shadow-lift: 0 2px 4px rgba(16, 32, 43, 0.06), 0 14px 26px -18px rgba(16, 32, 43, 0.2);
   --shadow-paper: var(--shadow-premium);
   --shadow-paper-lift: var(--shadow-lift);
-  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(16, 32, 43, 0.06);
+  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 
   --mesh-gradient-1: rgba(15, 118, 110, 0.1);
   --mesh-gradient-2: rgba(37, 99, 235, 0.1);
@@ -206,11 +205,11 @@
   --border-subtle: #2a3a4f;
   --glass-stroke: rgba(238, 244, 249, 0.1);
 
-  --shadow-premium: 0 2px 2px rgba(0, 6, 14, 0.3), 0 18px 32px rgba(0, 6, 14, 0.44);
-  --shadow-lift: 0 3px 4px rgba(0, 6, 14, 0.34), 0 26px 44px rgba(0, 6, 14, 0.52);
+  --shadow-premium: 0 1px 2px rgba(0, 6, 14, 0.35), 0 8px 22px -18px rgba(0, 6, 14, 0.6);
+  --shadow-lift: 0 2px 6px rgba(0, 6, 14, 0.4), 0 18px 30px -22px rgba(0, 6, 14, 0.7);
   --shadow-paper: var(--shadow-premium);
   --shadow-paper-lift: var(--shadow-lift);
-  --shadow-edge: inset 0 1px 0 rgba(238, 244, 249, 0.06), inset 0 -2px 0 rgba(0, 6, 14, 0.3);
+  --shadow-edge: inset 0 1px 0 rgba(238, 244, 249, 0.04);
 
   --mesh-gradient-1: rgba(94, 234, 212, 0.12);
   --mesh-gradient-2: rgba(96, 165, 250, 0.08);
@@ -459,7 +458,6 @@ html:root {
   background: var(--logo-surface) !important;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-paper-sm) !important;
-  transform: rotate(-2deg);
 }
 
 .u-logo-icon {
