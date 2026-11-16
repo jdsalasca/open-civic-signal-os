@@ -48,6 +48,12 @@ test.describe('Community social feed', () => {
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
     await page.route('**/api/community/threads/thread-1/messages', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+    await page.route('**/api/notifications/recent', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await mockDashboardRoutes(page);
+    // After the shared helper so these payloads win.
     await page.route('**/api/follows/**', (route) =>
       route.fulfill({
         status: 200,
@@ -60,11 +66,6 @@ test.describe('Community social feed', () => {
         contentType: 'application/json',
         body: JSON.stringify({ signalId: 'signal-1', count: 1, confirmedByViewer: true }),
       }));
-    await page.route('**/api/notifications/recent', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
-
-    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
-    await mockDashboardRoutes(page);
     await page.goto('/communities/feed');
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Los Rosales');
@@ -77,6 +78,8 @@ test.describe('Community social feed', () => {
     await expect(page.locator('.social-feed-type')).toHaveText('Report');
 
     await page.getByTestId('community-feed-filter-all').click();
+    await page.getByTestId('community-alerts-toggle').click();
+    await expect(page.getByTestId('community-alerts-toggle')).toContainText('Alerts on');
     await page.getByTestId('community-feed-composer').locator('button').first().click();
     await page.locator('#feed-post-title').fill('A new community question');
     await page.locator('#feed-post-body').fill('This is the message body.');

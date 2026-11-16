@@ -22,6 +22,7 @@ import { CivicActionBar } from "../components/ui/CivicActionBar";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { CivicBadge } from "../components/ui/CivicBadge";
 import { ContextualHelpPanel } from "../components/help/ContextualHelpPanel";
+import { OnboardingChecklist } from "../components/OnboardingChecklist";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useSettingsStore, PAGE_SIZE_BY_DATA_MODE } from "../store/useSettingsStore";
 import { toRoleLabel } from "../constants/roleLabels";
@@ -546,6 +547,7 @@ export function Dashboard() {
                   {interfaceMode === "advanced" && displayedSignals.length > 0 && (
                     <CategoryChart signals={displayedSignals} />
                   )}
+                  <OnboardingChecklist />
                   {loading ? (
                     <CivicSkeleton type="metric" count={4} />
                   ) : (

@@ -1491,6 +1491,61 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Community'
+  /api/communities/{communityId}/alerts:
+    get:
+      summary: Check whether the caller receives neighbourhood alerts for a community
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alert subscription state
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [subscribed]
+                properties:
+                  subscribed:
+                    type: boolean
+    post:
+      summary: Subscribe to new reports and events in a community
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alerts enabled
+    delete:
+      summary: Stop neighbourhood alerts for a community
+      parameters:
+        - in: path
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alerts disabled
+  /api/onboarding/checklist:
+    get:
+      summary: First-action checklist for the authenticated user
+      responses:
+        '200':
+          description: Checklist state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingChecklist'
   /api/communities/nearest:
     get:
       summary: Find the closest active city for a coordinate
@@ -4720,6 +4775,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/activities/{activityId}/calendar:
+    get:
+      summary: Download one community activity as an iCalendar file
+      parameters:
+        - in: path
+          name: activityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: iCalendar file
+          content:
+            text/calendar:
+              schema:
+                type: string
   /api/community/activities/{activityId}/signups:
     post:
       summary: Take a confirmed spot in a volunteer activity
@@ -8401,6 +8479,18 @@ components:
         following:
           type: boolean
           nullable: true
+    OnboardingChecklist:
+      type: object
+      required: [joinedCommunity, contributed, followingContent, allComplete]
+      properties:
+        joinedCommunity:
+          type: boolean
+        contributed:
+          type: boolean
+        followingContent:
+          type: boolean
+        allComplete:
+          type: boolean
     SignalConfirmationState:
       type: object
       required: [signalId, count, confirmedByViewer]

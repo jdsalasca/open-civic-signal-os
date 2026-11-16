@@ -45,6 +45,7 @@ export function CommunityFeed() {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [replySending, setReplySending] = useState(false);
+  const [alertsOn, setAlertsOn] = useState(false);
 
   const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
   const activeRole = memberships.find((m) => m.communityId === activeCommunityId)?.role;
@@ -72,6 +73,32 @@ export function CommunityFeed() {
   useEffect(() => {
     void loadFeed();
   }, [loadFeed]);
+
+  useEffect(() => {
+    if (!activeCommunityId) {
+      setAlertsOn(false);
+      return;
+    }
+    apiClient
+      .get<{ subscribed: boolean }>(`communities/${activeCommunityId}/alerts`)
+      .then(({ data }) => setAlertsOn(Boolean(data.subscribed)))
+      .catch(() => setAlertsOn(false));
+  }, [activeCommunityId]);
+
+  const toggleAlerts = async () => {
+    if (!activeCommunityId) return;
+    try {
+      const next = !alertsOn;
+      await apiClient.request({
+        url: `communities/${activeCommunityId}/alerts`,
+        method: next ? 'post' : 'delete'
+      });
+      setAlertsOn(next);
+      toast.success(next ? t('community_feed.alerts_on_success') : t('community_feed.alerts_off_success'));
+    } catch {
+      toast.error(t('community_feed.alerts_error'));
+    }
+  };
 
   const visibleItems = useMemo(
     () => (filter === 'all' ? feed : feed.filter((item) => item.type === filter)),
@@ -527,6 +554,19 @@ export function CommunityFeed() {
                     {t('community_feed.explore_governance')}
                   </button>
                 </div>
+              </CivicCard>
+
+              <CivicCard title={t('community_feed.alerts_title')} className="mt-4">
+                <p className="text-sm text-secondary mt-2 mb-3">{t('community_feed.alerts_desc')}</p>
+                <CivicButton
+                  type="button"
+                  icon={alertsOn ? 'pi pi-check' : 'pi pi-bell'}
+                  variant={alertsOn ? 'secondary' : 'primary'}
+                  label={alertsOn ? t('community_feed.alerts_on') : t('community_feed.alerts_off')}
+                  onClick={toggleAlerts}
+                  className="w-full"
+                  data-testid="community-alerts-toggle"
+                />
               </CivicCard>
             </aside>
           </div>

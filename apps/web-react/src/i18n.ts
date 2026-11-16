@@ -99,6 +99,13 @@ const resources = {
         "title": "Title",
         "workspace_context": "Community workspace"
       },
+      "onboarding_checklist": {
+        "title": "Your first three actions",
+        "progress": "{{completed}} of {{total}} completed",
+        "join": "Choose your community",
+        "contribute": "Report or support a case",
+        "follow": "Follow a topic"
+      },
       "notifications": {
         "title": "Notifications",
         "mark_all": "Mark all read",
@@ -112,6 +119,9 @@ const resources = {
         "signal_support": "{{actor}} supported \"{{title}}\"",
         "signal_status": "The status of \"{{title}}\" changed",
         "signal_confirmation": "{{actor}} also saw \"{{title}}\"",
+        "neighbourhood_signal": "New report in your neighbourhood: \"{{title}}\"",
+        "neighbourhood_event": "New activity in your neighbourhood: \"{{title}}\"",
+        "activity_reminder": "Reminder: \"{{title}}\" starts soon",
         "fallback": "There is activity in \"{{title}}\""
       },
       "nav": {
@@ -777,6 +787,13 @@ const resources = {
         "confirmed": "Confirmed",
         "unconfirmed": "Confirmation removed.",
         "confirm_error": "Could not record your confirmation.",
+        "alerts_title": "Neighbourhood alerts",
+        "alerts_desc": "Get an in-app notice when your community publishes a new report or event.",
+        "alerts_on": "Alerts on",
+        "alerts_off": "Turn on alerts",
+        "alerts_on_success": "You will get neighbourhood alerts.",
+        "alerts_off_success": "Neighbourhood alerts turned off.",
+        "alerts_error": "Could not update neighbourhood alerts.",
         "your_community": "Your community",
         "your_community_desc": "This feed only shows what happens inside your active community.",
         "explore_map": "Map",
@@ -1737,6 +1754,9 @@ const resources = {
         "join_error": "We could not confirm your spot.",
         "leave_success": "Your spot was released.",
         "leave_error": "We could not release your spot.",
+        "add_to_calendar": "Add to my calendar",
+        "calendar_success": "Calendar file downloaded.",
+        "calendar_error": "Could not download the calendar file.",
         "capacity_full": "This activity already reached its published capacity.",
         "window_not_open": "Signups for this activity are not open yet.",
         "window_closed": "Signups for this activity are closed.",
@@ -2428,6 +2448,13 @@ const resources = {
         "title": "Título",
         "workspace_context": "Espacio comunitario"
       },
+      "onboarding_checklist": {
+        "title": "Tus primeros tres pasos",
+        "progress": "{{completed}} de {{total}} completados",
+        "join": "Elige tu comunidad",
+        "contribute": "Reporta o apoya un caso",
+        "follow": "Sigue un tema"
+      },
       "notifications": {
         "title": "Notificaciones",
         "mark_all": "Marcar todas leídas",
@@ -2441,6 +2468,9 @@ const resources = {
         "signal_support": "{{actor}} apoyó \"{{title}}\"",
         "signal_status": "El estado de \"{{title}}\" cambió",
         "signal_confirmation": "{{actor}} también vio \"{{title}}\"",
+        "neighbourhood_signal": "Nuevo reporte en tu barrio: \"{{title}}\"",
+        "neighbourhood_event": "Nueva actividad en tu barrio: \"{{title}}\"",
+        "activity_reminder": "Recordatorio: \"{{title}}\" empieza pronto",
         "fallback": "Hay actividad en \"{{title}}\""
       },
       "nav": {
@@ -3106,6 +3136,13 @@ const resources = {
         "confirmed": "Confirmado",
         "unconfirmed": "Confirmación retirada.",
         "confirm_error": "No se pudo registrar tu confirmación.",
+        "alerts_title": "Alertas del barrio",
+        "alerts_desc": "Recibe un aviso en la app cuando tu comunidad publique un reporte o evento nuevo.",
+        "alerts_on": "Alertas activas",
+        "alerts_off": "Activar alertas",
+        "alerts_on_success": "Recibirás alertas del barrio.",
+        "alerts_off_success": "Alertas del barrio desactivadas.",
+        "alerts_error": "No se pudieron actualizar las alertas del barrio.",
         "your_community": "Tu comunidad",
         "your_community_desc": "Este feed solo muestra lo que pasa dentro de tu comunidad activa.",
         "explore_map": "Mapa",
@@ -4066,6 +4103,9 @@ const resources = {
         "join_error": "No se pudo confirmar tu cupo.",
         "leave_success": "Tu cupo fue liberado.",
         "leave_error": "No se pudo liberar tu cupo.",
+        "add_to_calendar": "Agregar a mi calendario",
+        "calendar_success": "Archivo de calendario descargado.",
+        "calendar_error": "No se pudo descargar el calendario.",
         "capacity_full": "Esta actividad ya alcanzo la capacidad publicada.",
         "window_not_open": "Las inscripciones de esta actividad aun no abren.",
         "window_closed": "Las inscripciones de esta actividad estan cerradas.",
