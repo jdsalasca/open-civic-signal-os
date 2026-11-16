@@ -424,15 +424,17 @@ export function Layout({ children, authMode = false }: Props) {
             <NotificationBell />
             <ThemeWheel />
 
-            <Button
-              type="button"
-              icon="pi pi-plus-circle"
-              label={t('nav.report')}
-              text
-              className="hidden lg:flex u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
-              onClick={() => navigate('/report')}
-              data-testid="header-primary-report"
-            />
+            {interfaceMode === "advanced" && (
+              <Button
+                type="button"
+                icon="pi pi-plus-circle"
+                label={t('nav.report')}
+                text
+                className="hidden lg:flex u-surface-chip u-surface-chip-compact px-3 py-2 text-xs font-black"
+                onClick={() => navigate('/report')}
+                data-testid="header-primary-report"
+              />
+            )}
 
           </div>
         </header>

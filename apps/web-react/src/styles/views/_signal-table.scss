@@ -133,3 +133,29 @@
     justify-content: center;
   }
 }
+
+// A row action reads as a link, not a fifth button competing with the report itself.
+.signal-table-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--brand-primary);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.signal-table-view:hover,
+.signal-table-view:focus-visible {
+  background: var(--brand-primary-alpha-10);
+}
+
+.signal-table-view i {
+  font-size: 0.7rem;
+}

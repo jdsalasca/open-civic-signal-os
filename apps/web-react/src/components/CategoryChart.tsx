@@ -93,12 +93,12 @@ export function CategoryChart({ signals }: Props) {
     const styles = getComputedStyle(document.documentElement);
     const token = (name: string, fallback: string) => styles.getPropertyValue(name).trim() || fallback;
     return {
-      colors: CHART_TOKENS.map((name, index) => token(name, ["#b53328", "#2a7f7a", "#a8721a", "#7c5a72", "#2f6e8c", "#7a6d5e"][index])),
-      textMuted: token("--text-muted", "#64748b"),
-      textMain: token("--text-main", "#2a1d16"),
+      colors: CHART_TOKENS.map((name, index) => token(name, ["#0f766e", "#2563eb", "#b45309", "#6d28d9", "#1d4ed8", "#64748b"][index])),
+      textMuted: token("--text-muted", "#5f7280"),
+      textMain: token("--text-main", "#10202b"),
       grid: token("--border-subtle", "rgba(148, 163, 184, 0.35)"),
-      tooltipBg: token("--tooltip-bg", "#4a3a32"),
-      tooltipText: token("--tooltip-text", "#fbf1e2"),
+      tooltipBg: token("--tooltip-bg", "#10202b"),
+      tooltipText: token("--tooltip-text", "#ffffff"),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- theme invalidates the CSS token reads
   }, [theme]);

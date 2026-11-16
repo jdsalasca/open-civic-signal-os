@@ -390,6 +390,66 @@ export function Dashboard() {
     [activeCommunityName, activeCommunityRoleLabel, memberships.length, navigate, t]
   );
 
+  /*
+   * The same attention cards serve both modes; simple mode reads the feed first and keeps these
+   * below it, so the first screen is content instead of a second dashboard header.
+   */
+  const attentionSection = (
+    <section className="mb-6" data-testid="dashboard-attention">
+      <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
+        <div className="flex flex-column gap-1 min-w-0">
+          <span className="signal-kicker">
+            <i className="pi pi-bolt" aria-hidden="true"></i>
+            {t("dashboard.attention_title")}
+          </span>
+          <p className="signal-copy text-sm m-0">{t("dashboard.attention_desc")}</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="signal-skeleton" aria-hidden="true">
+          {[0, 1, 2].map((row) => (
+            <div key={row} className="signal-skeleton__row" style={{ height: "4.75rem" }} />
+          ))}
+        </div>
+      ) : attentionSignals.length === 0 ? (
+        <div className="dashboard-attention-empty" data-testid="dashboard-attention-empty">
+          <i className="pi pi-check-circle" aria-hidden="true" />
+          <div>
+            <strong>{t("dashboard.attention_empty_title")}</strong>
+            <span>{t("dashboard.attention_empty_desc")}</span>
+          </div>
+        </div>
+      ) : (
+        <div className="signal-attention" data-testid="dashboard-attention-list">
+          {attentionSignals.map((signal, index) => (
+            <button
+              key={signal.id}
+              type="button"
+              className="signal-attention-card"
+              onClick={() => navigate(`/signal/${signal.id}`)}
+              data-testid={`dashboard-attention-card-${index + 1}`}
+            >
+              <span className="signal-attention-card__copy">
+                <span className="signal-attention-card__title">{signal.title}</span>
+                <span className="signal-attention-card__meta">
+                  <PriorityScale
+                    score={signal.priorityScore}
+                    threshold={criticalThreshold}
+                    compact
+                    testId={`dashboard-attention-priority-${index + 1}`}
+                  />
+                  <StatusChip status={signal.status} label={statusLabel(signal.status)} />
+                </span>
+              </span>
+              <i className="pi pi-arrow-right signal-attention-card__arrow" aria-hidden="true"></i>
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
@@ -397,24 +457,35 @@ export function Dashboard() {
           <CivicCard className="dashboard-story-card" padding="md">
             <div className="dashboard-welcome-row">
               <div className="min-w-0">
-                <div className="flex align-items-center flex-wrap gap-2 mb-2">
-                  <div className="u-pill" data-testid="welcome-message">
-                    <i className="pi pi-user text-brand-primary"></i>
-                    {userName}
+                {interfaceMode === "simple" ? (
+                  <div className="dashboard-hero-meta mb-2">
+                    <span data-testid="welcome-message">{userName}</span>
+                    <span data-testid="dashboard-guided-persona">{guidedHome.personaLabel}</span>
+                    <span data-testid="dashboard-active-community-pill">{activeCommunityName}</span>
+                    <span data-testid="dashboard-freshness-badge">
+                      {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
+                    </span>
                   </div>
-                  <div className="u-pill" data-testid="dashboard-guided-persona">
-                    <i className="pi pi-compass text-brand-primary"></i>
-                    {guidedHome.personaLabel}
+                ) : (
+                  <div className="flex align-items-center flex-wrap gap-2 mb-2">
+                    <div className="u-pill" data-testid="welcome-message">
+                      <i className="pi pi-user text-brand-primary"></i>
+                      {userName}
+                    </div>
+                    <div className="u-pill" data-testid="dashboard-guided-persona">
+                      <i className="pi pi-compass text-brand-primary"></i>
+                      {guidedHome.personaLabel}
+                    </div>
+                    <div className="u-pill" data-testid="dashboard-active-community-pill">
+                      <i className="pi pi-globe text-brand-primary"></i>
+                      {activeCommunityName}
+                    </div>
+                    <div className="u-pill" data-testid="dashboard-freshness-badge">
+                      <i className="pi pi-clock text-brand-primary"></i>
+                      {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
+                    </div>
                   </div>
-                  <div className="u-pill" data-testid="dashboard-active-community-pill">
-                    <i className="pi pi-globe text-brand-primary"></i>
-                    {activeCommunityName}
-                  </div>
-                  <div className="u-pill" data-testid="dashboard-freshness-badge">
-                    <i className="pi pi-clock text-brand-primary"></i>
-                    {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
-                  </div>
-                </div>
+                )}
                 <h1 className="u-page-title text-2xl md:text-3xl font-black m-0">
                   {t('dashboard.home_title', { community: activeCommunityName })}
                 </h1>
@@ -434,68 +505,12 @@ export function Dashboard() {
           </CivicCard>
         </section>
 
-        {/*
-          Attention first. Before the community surfaces and the numbers, the dashboard answers the
-          only question a visitor has on arrival: what here cannot wait. The three cards are the head
-          of the backend's own ranking, with the same priority scale and lifecycle chip used across
-          the product.
-        */}
-        <section className="mb-6" data-testid="dashboard-attention">
-          <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
-            <div className="flex flex-column gap-1 min-w-0">
-              <span className="signal-kicker">
-                <i className="pi pi-bolt" aria-hidden="true"></i>
-                {t("dashboard.attention_title")}
-              </span>
-              <p className="signal-copy text-sm m-0">{t("dashboard.attention_desc")}</p>
-            </div>
-          </div>
+        {interfaceMode === "advanced" && attentionSection}
 
-          {loading ? (
-            <div className="signal-skeleton" aria-hidden="true">
-              {[0, 1, 2].map((row) => (
-                <div key={row} className="signal-skeleton__row" style={{ height: "4.75rem" }} />
-              ))}
-            </div>
-          ) : attentionSignals.length === 0 ? (
-            <div className="dashboard-attention-empty" data-testid="dashboard-attention-empty">
-              <i className="pi pi-check-circle" aria-hidden="true" />
-              <div>
-                <strong>{t("dashboard.attention_empty_title")}</strong>
-                <span>{t("dashboard.attention_empty_desc")}</span>
-              </div>
-            </div>
-          ) : (
-            <div className="signal-attention" data-testid="dashboard-attention-list">
-              {attentionSignals.map((signal, index) => (
-                <button
-                  key={signal.id}
-                  type="button"
-                  className="signal-attention-card"
-                  onClick={() => navigate(`/signal/${signal.id}`)}
-                  data-testid={`dashboard-attention-card-${index + 1}`}
-                >
-                  <span className="signal-attention-card__copy">
-                    <span className="signal-attention-card__title">{signal.title}</span>
-                    <span className="signal-attention-card__meta">
-                      <PriorityScale
-                        score={signal.priorityScore}
-                        threshold={criticalThreshold}
-                        compact
-                        testId={`dashboard-attention-priority-${index + 1}`}
-                      />
-                      <StatusChip status={signal.status} label={statusLabel(signal.status)} />
-                    </span>
-                  </span>
-                  <i className="pi pi-arrow-right signal-attention-card__arrow" aria-hidden="true"></i>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
+        {interfaceMode === "simple" && <OnboardingChecklist />}
 
         <div className="grid">
-          <div className="col-12 xl:col-9">
+          <div className={interfaceMode === "advanced" ? "col-12 xl:col-9" : "col-12"}>
             <div className="flex align-items-center justify-content-between gap-3 mb-4 px-2 flex-wrap">
               <div className="flex flex-column gap-1 min-w-0">
                 <span className="text-xs font-black uppercase tracking-wide text-muted">
@@ -505,7 +520,7 @@ export function Dashboard() {
                   {t('dashboard.feed_heading')}
                 </h2>
               </div>
-              <CivicToolbar className="overflow-x-auto pb-2 scrollbar-hidden">
+              <CivicToolbar className="dashboard-feed-filters overflow-x-auto pb-2 scrollbar-hidden">
                 {quickFilters.map(f => (
                   <button
                     key={f.value}
@@ -538,16 +553,17 @@ export function Dashboard() {
             )}
           </div>
 
-          <div className="col-12 xl:col-3">
-            <div className="flex flex-column gap-6">
-              {loading ? (
-                <CivicSkeleton type="text" count={3} />
-              ) : (
-                <>
-                  {interfaceMode === "advanced" && displayedSignals.length > 0 && (
-                    <CategoryChart signals={displayedSignals} />
-                  )}
-                  <OnboardingChecklist />
+          {(interfaceMode === "advanced" || isStaff) && (
+            <div className="col-12 xl:col-3">
+              <div className="flex flex-column gap-6">
+                {loading ? (
+                  <CivicSkeleton type="text" count={3} />
+                ) : (
+                  <>
+                    {interfaceMode === "advanced" && displayedSignals.length > 0 && (
+                      <CategoryChart signals={displayedSignals} />
+                    )}
+                    {interfaceMode === "advanced" && <OnboardingChecklist />}
                   {loading ? (
                     <CivicSkeleton type="metric" count={4} />
                   ) : (
@@ -659,7 +675,10 @@ export function Dashboard() {
               )}
             </div>
           </div>
+          )}
         </div>
+
+        {interfaceMode === "simple" && <div className="mt-8">{attentionSection}</div>}
 
         <CivicCard className="mb-6" data-testid="dashboard-community-hub-card">
           <div className="dashboard-community-hub-row">

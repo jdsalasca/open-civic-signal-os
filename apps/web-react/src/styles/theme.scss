@@ -1,13 +1,13 @@
 // ---------------------------------------------------------------------------
-// Paper Craft design tokens (primary language), with Isotype reserved for
-// data chart series. Source of the language: sibling harness open-beauty-site
-//   node dist/cli.js guide papercraft --json
-// Hard tokens: cream #FBF1E2 table, paper #FFF8EA sheet, ink #4A3A32 pen,
-// terracotta #CE7256 / sage #A9C3A0 / sky #B8D4E0 / butter #F2C879 sheets,
-// plum #7C5A72 tiny accent, warm-brown soft shadows, cut-paper radii
-// (30px 12px 28px 14px), 480ms cubic-bezier(.22,.9,.24,1) motion.
-// Paper Craft never: 0px corners, dashed stitching, 3px black borders, acid
-// colours, monospace type, rounded-sans displays, hard shadows.
+// Civic daylight design tokens (primary language), with Isotype reserved for
+// data chart series. The cut-paper geometry stays; the palette is now cool and
+// civic rather than warm and brown.
+// Hard tokens: daylight #F4F7F9 table, white #FFFFFF sheet, ink #10202B pen,
+// teal #0F766E action, blue #2563EB community data, amber #F59E0B attention,
+// soft shadows, cut-paper radii (30px 12px 28px 14px), 480ms
+// cubic-bezier(.22,.9,.24,1) motion.
+// Never: 0px corners, dashed stitching, 3px black borders, acid colours,
+// monospace type, rounded-sans displays, hard shadows.
 // Contrast pairs are enforced by scripts/check-design-contrast.mjs
 // (npm run check:contrast); every declared text pair must reach WCAG AA 4.5:1.
 // ---------------------------------------------------------------------------
@@ -63,294 +63,294 @@
   --ease-paper: cubic-bezier(0.22, 0.9, 0.24, 1);
 }
 
-// ---------- 2. Light theme: the paper table --------------------------------
+// ---------- 2. Light theme: civic daylight ---------------------------------
 @mixin papercraft-light-tokens {
-  --bg-app: #f7f2e9;
-  --bg-nav: rgba(247, 242, 233, 0.9);
-  --bg-surface: #fffbf5;
-  --bg-card: #fffdf9;
-  --bg-elevated: #f1e8db;
-  --bg-sidebar: rgba(255, 251, 245, 0.95);
+  --bg-app: #f4f7f9;
+  --bg-nav: rgba(244, 247, 249, 0.9);
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-elevated: #eef3f6;
+  --bg-sidebar: rgba(255, 255, 255, 0.95);
 
-  --text-main: #2f2620;
-  --text-secondary: #4f4239;
-  --text-muted: #746558;
+  --text-main: #10202b;
+  --text-secondary: #3c4d5a;
+  --text-muted: #556875;
 
-  --border-subtle: #ddcfbd;
-  --glass-stroke: rgba(47, 38, 32, 0.1);
+  --border-subtle: #d9e2e8;
+  --glass-stroke: rgba(16, 32, 43, 0.1);
 
-  --shadow-premium: 0 2px 2px rgba(47, 38, 32, 0.1), 0 18px 32px rgba(47, 38, 32, 0.16);
-  --shadow-lift: 0 3px 4px rgba(47, 38, 32, 0.12), 0 26px 44px rgba(47, 38, 32, 0.2);
+  --shadow-premium: 0 2px 2px rgba(16, 32, 43, 0.1), 0 18px 32px rgba(16, 32, 43, 0.16);
+  --shadow-lift: 0 3px 4px rgba(16, 32, 43, 0.12), 0 26px 44px rgba(16, 32, 43, 0.2);
   --shadow-paper: var(--shadow-premium);
   --shadow-paper-lift: var(--shadow-lift);
-  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(47, 38, 32, 0.06);
+  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(16, 32, 43, 0.06);
 
-  --mesh-gradient-1: rgba(163, 74, 47, 0.1);
-  --mesh-gradient-2: rgba(63, 110, 99, 0.1);
-  --mesh-gradient-3: rgba(230, 180, 95, 0.14);
+  --mesh-gradient-1: rgba(15, 118, 110, 0.1);
+  --mesh-gradient-2: rgba(37, 99, 235, 0.1);
+  --mesh-gradient-3: rgba(251, 191, 36, 0.14);
 
-  --scrollbar-thumb: #d5c3ae;
-  --tooltip-bg: #2f2620;
-  --tooltip-text: #fff7ed;
-  --tooltip-shadow: 0 18px 32px -18px rgba(47, 38, 32, 0.45);
+  --scrollbar-thumb: #c9d6de;
+  --tooltip-bg: #10202b;
+  --tooltip-text: #ffffff;
+  --tooltip-shadow: 0 18px 32px -18px rgba(16, 32, 43, 0.45);
 
-  --field-bg: #fffdf9;
+  --field-bg: #ffffff;
   --field-bg-focus: #ffffff;
-  --field-text: #2f2620;
-  --field-border: #d5c3ae;
-  --field-border-focus: #a34a2f;
+  --field-text: #10202b;
+  --field-border: #c9d6de;
+  --field-border-focus: #0f766e;
 
-  --surface-hover: rgba(163, 74, 47, 0.08);
-  --table-row-hover: rgba(163, 74, 47, 0.05);
-  --focus-ring: rgba(163, 74, 47, 0.25);
-  --focus-ring-color: #a34a2f;
-  --shimmer-highlight: rgba(163, 74, 47, 0.12);
+  --surface-hover: rgba(15, 118, 110, 0.08);
+  --table-row-hover: rgba(15, 118, 110, 0.05);
+  --focus-ring: rgba(15, 118, 110, 0.25);
+  --focus-ring-color: #0f766e;
+  --shimmer-highlight: rgba(15, 118, 110, 0.12);
 
-  --pill-bg: rgba(47, 38, 32, 0.05);
-  --pill-border: rgba(47, 38, 32, 0.14);
-  --pill-hover: rgba(47, 38, 32, 0.1);
-  --panel-soft-bg: rgba(163, 74, 47, 0.05);
-  --surface-soft: rgba(47, 38, 32, 0.045);
-  --surface-soft-strong: rgba(47, 38, 32, 0.08);
-  --surface-soft-hover: rgba(47, 38, 32, 0.1);
-  --surface-soft-border: rgba(47, 38, 32, 0.14);
+  --pill-bg: rgba(16, 32, 43, 0.05);
+  --pill-border: rgba(16, 32, 43, 0.14);
+  --pill-hover: rgba(16, 32, 43, 0.1);
+  --panel-soft-bg: rgba(15, 118, 110, 0.05);
+  --surface-soft: rgba(16, 32, 43, 0.045);
+  --surface-soft-strong: rgba(16, 32, 43, 0.08);
+  --surface-soft-hover: rgba(16, 32, 43, 0.1);
+  --surface-soft-border: rgba(16, 32, 43, 0.14);
 
-  --interactive-neutral-bg: #f3e8da;
-  --interactive-neutral-hover: #eadcc9;
-  --interactive-neutral-border: #d5c3ae;
-  --interactive-neutral-text: #2f2620;
+  --interactive-neutral-bg: #eaf1f4;
+  --interactive-neutral-hover: #dfe9ee;
+  --interactive-neutral-border: #c9d6de;
+  --interactive-neutral-text: #10202b;
 
-  --logo-surface: #a34a2f;
-  --logo-icon: #fff7ed;
+  --logo-surface: #0f766e;
+  --logo-icon: #ffffff;
 
-  --alpha-surface-05: rgba(47, 38, 32, 0.04);
-  --alpha-surface-10: rgba(47, 38, 32, 0.08);
-  --alpha-border-05: rgba(47, 38, 32, 0.06);
-  --alpha-border-10: rgba(47, 38, 32, 0.12);
-  --alpha-border-20: rgba(47, 38, 32, 0.2);
-  --alpha-border-30: rgba(47, 38, 32, 0.28);
-  --alpha-overlay-20: rgba(247, 242, 233, 0.72);
-  --alpha-overlay-30: rgba(247, 242, 233, 0.82);
-  --alpha-overlay-40: rgba(247, 242, 233, 0.9);
-  --alpha-overlay-80: rgba(247, 242, 233, 0.96);
+  --alpha-surface-05: rgba(16, 32, 43, 0.04);
+  --alpha-surface-10: rgba(16, 32, 43, 0.08);
+  --alpha-border-05: rgba(16, 32, 43, 0.06);
+  --alpha-border-10: rgba(16, 32, 43, 0.12);
+  --alpha-border-20: rgba(16, 32, 43, 0.2);
+  --alpha-border-30: rgba(16, 32, 43, 0.28);
+  --alpha-overlay-20: rgba(244, 247, 249, 0.72);
+  --alpha-overlay-30: rgba(244, 247, 249, 0.82);
+  --alpha-overlay-40: rgba(244, 247, 249, 0.9);
+  --alpha-overlay-80: rgba(244, 247, 249, 0.96);
 
-  // Interactive ink: terracotta carries action; teal and sage carry community data.
-  --brand-primary: #a34a2f;
-  --brand-primary-hover: #8b3d25;
-  --brand-primary-glow: rgba(163, 74, 47, 0.26);
-  --brand-primary-glow-strong: rgba(163, 74, 47, 0.42);
-  --brand-accent: #3f6e63;
-  --brand-accent-soft: rgba(63, 110, 99, 0.2);
-  --brand-ink: #2f2620;
-  --brand-sun: #e8b65f;
-  --on-brand: #fff7ed;
-  --on-surface-strong: #fff7ed;
-  --link-color: #9e4a30;
-  --link-color-hover: #7c3a26;
+  // Interactive ink: teal carries action; blue carries community data.
+  --brand-primary: #0f766e;
+  --brand-primary-hover: #0b5d57;
+  --brand-primary-glow: rgba(15, 118, 110, 0.26);
+  --brand-primary-glow-strong: rgba(15, 118, 110, 0.42);
+  --brand-accent: #2563eb;
+  --brand-accent-soft: rgba(37, 99, 235, 0.2);
+  --brand-ink: #10202b;
+  --brand-sun: #f59e0b;
+  --on-brand: #ffffff;
+  --on-surface-strong: #ffffff;
+  --link-color: #0f766e;
+  --link-color-hover: #0b5d57;
 
-  --status-new: #2f6e8c;
-  --status-progress: #8a5a00;
-  --status-resolved: #3f6e3f;
-  --status-rejected: #a63a2e;
-  --status-rejected-glow: rgba(166, 58, 46, 0.34);
+  --status-new: #1d4ed8;
+  --status-progress: #b45309;
+  --status-resolved: #15803d;
+  --status-rejected: #b91c1c;
+  --status-rejected-glow: rgba(185, 28, 28, 0.34);
 
-  --brand-primary-alpha-10: rgba(163, 74, 47, 0.1);
-  --brand-primary-alpha-20: rgba(163, 74, 47, 0.18);
-  --brand-primary-alpha-30: rgba(163, 74, 47, 0.26);
-  --status-progress-alpha-10: rgba(138, 90, 0, 0.12);
-  --status-progress-alpha-20: rgba(138, 90, 0, 0.22);
-  --status-resolved-alpha-10: rgba(63, 110, 63, 0.12);
-  --status-rejected-alpha-10: rgba(166, 58, 46, 0.12);
-  --status-rejected-alpha-20: rgba(166, 58, 46, 0.22);
+  --brand-primary-alpha-10: rgba(15, 118, 110, 0.1);
+  --brand-primary-alpha-20: rgba(15, 118, 110, 0.18);
+  --brand-primary-alpha-30: rgba(15, 118, 110, 0.26);
+  --status-progress-alpha-10: rgba(180, 83, 9, 0.12);
+  --status-progress-alpha-20: rgba(180, 83, 9, 0.22);
+  --status-resolved-alpha-10: rgba(21, 128, 61, 0.12);
+  --status-rejected-alpha-10: rgba(185, 28, 28, 0.12);
+  --status-rejected-alpha-20: rgba(185, 28, 28, 0.22);
 
   // Data charts borrow Isotype, not Paper Craft: pictogram colours, no
   // decoration. Adjusted to keep >= 3:1 against paper.
-  --chart-1: #b53328;
-  --chart-2: #2a7f7a;
-  --chart-3: #a8721a;
-  --chart-4: #7c5a72;
-  --chart-5: #2f6e8c;
-  --chart-6: #7a6d5e;
+  --chart-1: #0f766e;
+  --chart-2: #2563eb;
+  --chart-3: #b45309;
+  --chart-4: #6d28d9;
+  --chart-5: #1d4ed8;
+  --chart-6: #64748b;
 
   // Semantic aliases (names other code can adopt without knowing the theme).
   --color-surface: var(--bg-surface);
   --color-surface-2: var(--bg-elevated);
   --color-text: var(--text-main);
   --color-muted: var(--text-muted);
-  --color-accent: #a34a2f;
-  --color-accent-deco: #ce7256;
-  --color-accent-soft: rgba(206, 114, 86, 0.18);
+  --color-accent: #0f766e;
+  --color-accent-deco: #14b8a6;
+  --color-accent-soft: rgba(20, 184, 166, 0.16);
   --color-danger: var(--status-rejected);
   --color-warn: var(--status-progress);
   --color-ok: var(--status-resolved);
-  --color-plum: #7c5a72;
-  --color-sage: #a9c3a0;
-  --color-sky: #b8d4e0;
-  --color-butter: #f2c879;
-  --color-tape: rgba(232, 182, 95, 0.82);
+  --color-plum: #6d28d9;
+  --color-sage: #86efac;
+  --color-sky: #7dd3fc;
+  --color-butter: #fbbf24;
+  --color-tape: rgba(251, 191, 36, 0.82);
 }
 
-// ---------- 3. Dark theme: the paper table at night ------------------------
+// ---------- 3. Dark theme: civic night -------------------------------------
 @mixin papercraft-dark-tokens {
-  --bg-app: #171614;
-  --bg-nav: rgba(23, 22, 20, 0.9);
-  --bg-surface: #201f1c;
-  --bg-card: #262420;
-  --bg-elevated: #302d28;
-  --bg-sidebar: rgba(26, 25, 22, 0.96);
+  --bg-app: #0b1220;
+  --bg-nav: rgba(11, 18, 32, 0.9);
+  --bg-surface: #111a29;
+  --bg-card: #151f30;
+  --bg-elevated: #1c2940;
+  --bg-sidebar: rgba(13, 21, 35, 0.96);
 
-  --text-main: #f6efe6;
-  --text-secondary: #d9cdbf;
-  --text-muted: #a99a8a;
+  --text-main: #eef4f9;
+  --text-secondary: #c3d0dd;
+  --text-muted: #94a6b8;
 
-  --border-subtle: #4a443c;
-  --glass-stroke: rgba(246, 239, 230, 0.1);
+  --border-subtle: #2a3a4f;
+  --glass-stroke: rgba(238, 244, 249, 0.1);
 
-  --shadow-premium: 0 2px 2px rgba(8, 7, 6, 0.3), 0 18px 32px rgba(8, 7, 6, 0.44);
-  --shadow-lift: 0 3px 4px rgba(8, 7, 6, 0.34), 0 26px 44px rgba(8, 7, 6, 0.52);
+  --shadow-premium: 0 2px 2px rgba(0, 6, 14, 0.3), 0 18px 32px rgba(0, 6, 14, 0.44);
+  --shadow-lift: 0 3px 4px rgba(0, 6, 14, 0.34), 0 26px 44px rgba(0, 6, 14, 0.52);
   --shadow-paper: var(--shadow-premium);
   --shadow-paper-lift: var(--shadow-lift);
-  --shadow-edge: inset 0 1px 0 rgba(246, 239, 230, 0.06), inset 0 -2px 0 rgba(8, 7, 6, 0.3);
+  --shadow-edge: inset 0 1px 0 rgba(238, 244, 249, 0.06), inset 0 -2px 0 rgba(0, 6, 14, 0.3);
 
-  --mesh-gradient-1: rgba(224, 138, 108, 0.12);
-  --mesh-gradient-2: rgba(143, 191, 174, 0.08);
-  --mesh-gradient-3: rgba(242, 200, 121, 0.07);
+  --mesh-gradient-1: rgba(94, 234, 212, 0.12);
+  --mesh-gradient-2: rgba(96, 165, 250, 0.08);
+  --mesh-gradient-3: rgba(251, 191, 36, 0.07);
 
-  --scrollbar-thumb: #5c554c;
-  --tooltip-bg: #f6efe6;
-  --tooltip-text: #201f1c;
+  --scrollbar-thumb: #3b4f66;
+  --tooltip-bg: #eef4f9;
+  --tooltip-text: #111a29;
   --tooltip-shadow: 0 18px 32px -18px rgba(0, 0, 0, 0.6);
 
-  --field-bg: #1d1b18;
-  --field-bg-focus: #262420;
-  --field-text: #f6efe6;
-  --field-border: #554e45;
-  --field-border-focus: #f0a882;
+  --field-bg: #0f1826;
+  --field-bg-focus: #151f30;
+  --field-text: #eef4f9;
+  --field-border: #32455d;
+  --field-border-focus: #5eead4;
 
-  --surface-hover: rgba(233, 169, 135, 0.1);
-  --table-row-hover: rgba(233, 169, 135, 0.06);
-  --focus-ring: rgba(242, 200, 121, 0.3);
-  --focus-ring-color: #f2c879;
-  --shimmer-highlight: rgba(233, 169, 135, 0.14);
+  --surface-hover: rgba(94, 234, 212, 0.1);
+  --table-row-hover: rgba(94, 234, 212, 0.06);
+  --focus-ring: rgba(94, 234, 212, 0.3);
+  --focus-ring-color: #fbbf24;
+  --shimmer-highlight: rgba(94, 234, 212, 0.14);
 
-  --pill-bg: rgba(247, 235, 221, 0.06);
-  --pill-border: rgba(247, 235, 221, 0.14);
-  --pill-hover: rgba(247, 235, 221, 0.11);
-  --panel-soft-bg: rgba(233, 169, 135, 0.07);
-  --surface-soft: rgba(247, 235, 221, 0.05);
-  --surface-soft-strong: rgba(12, 8, 6, 0.3);
-  --surface-soft-hover: rgba(247, 235, 221, 0.1);
-  --surface-soft-border: rgba(247, 235, 221, 0.13);
+  --pill-bg: rgba(230, 240, 248, 0.06);
+  --pill-border: rgba(230, 240, 248, 0.14);
+  --pill-hover: rgba(230, 240, 248, 0.11);
+  --panel-soft-bg: rgba(94, 234, 212, 0.07);
+  --surface-soft: rgba(230, 240, 248, 0.05);
+  --surface-soft-strong: rgba(3, 10, 20, 0.3);
+  --surface-soft-hover: rgba(230, 240, 248, 0.1);
+  --surface-soft-border: rgba(230, 240, 248, 0.13);
 
-  --interactive-neutral-bg: rgba(247, 235, 221, 0.08);
-  --interactive-neutral-hover: rgba(247, 235, 221, 0.14);
-  --interactive-neutral-border: rgba(247, 235, 221, 0.16);
-  --interactive-neutral-text: #f7ebdd;
+  --interactive-neutral-bg: rgba(230, 240, 248, 0.08);
+  --interactive-neutral-hover: rgba(230, 240, 248, 0.14);
+  --interactive-neutral-border: rgba(230, 240, 248, 0.16);
+  --interactive-neutral-text: #e6f0f8;
 
-  --logo-surface: #f2c879;
-  --logo-icon: #241a15;
+  --logo-surface: #5eead4;
+  --logo-icon: #062a26;
 
-  --alpha-surface-05: rgba(247, 235, 221, 0.04);
-  --alpha-surface-10: rgba(247, 235, 221, 0.08);
-  --alpha-border-05: rgba(247, 235, 221, 0.08);
-  --alpha-border-10: rgba(247, 235, 221, 0.14);
-  --alpha-border-20: rgba(247, 235, 221, 0.22);
-  --alpha-border-30: rgba(247, 235, 221, 0.32);
-  --alpha-overlay-20: rgba(32, 24, 20, 0.3);
-  --alpha-overlay-30: rgba(32, 24, 20, 0.42);
-  --alpha-overlay-40: rgba(32, 24, 20, 0.56);
-  --alpha-overlay-80: rgba(32, 24, 20, 0.84);
+  --alpha-surface-05: rgba(230, 240, 248, 0.04);
+  --alpha-surface-10: rgba(230, 240, 248, 0.08);
+  --alpha-border-05: rgba(230, 240, 248, 0.08);
+  --alpha-border-10: rgba(230, 240, 248, 0.14);
+  --alpha-border-20: rgba(230, 240, 248, 0.22);
+  --alpha-border-30: rgba(230, 240, 248, 0.32);
+  --alpha-overlay-20: rgba(11, 18, 32, 0.3);
+  --alpha-overlay-30: rgba(11, 18, 32, 0.42);
+  --alpha-overlay-40: rgba(11, 18, 32, 0.56);
+  --alpha-overlay-80: rgba(11, 18, 32, 0.84);
 
-  // Warm terracotta out of the night: light enough to stay readable on card.
-  --brand-primary: #e9a987;
-  --brand-primary-hover: #f2bc9f;
-  --brand-primary-glow: rgba(233, 169, 135, 0.3);
-  --brand-primary-glow-strong: rgba(233, 169, 135, 0.46);
-  --brand-accent: #b7d3ae;
-  --brand-accent-soft: rgba(183, 211, 174, 0.2);
-  --brand-ink: #f7ebdd;
-  --brand-sun: #f2c879;
-  --on-brand: #241a15;
-  --on-surface-strong: #241a15;
-  --link-color: #f0b092;
-  --link-color-hover: #f6c6ae;
+  // Mint teal out of the night: light enough to stay readable on card.
+  --brand-primary: #5eead4;
+  --brand-primary-hover: #99f6e4;
+  --brand-primary-glow: rgba(94, 234, 212, 0.3);
+  --brand-primary-glow-strong: rgba(94, 234, 212, 0.46);
+  --brand-accent: #93c5fd;
+  --brand-accent-soft: rgba(147, 197, 253, 0.18);
+  --brand-ink: #e6f0f8;
+  --brand-sun: #fbbf24;
+  --on-brand: #062a26;
+  --on-surface-strong: #062a26;
+  --link-color: #7dd3fc;
+  --link-color-hover: #bae6fd;
 
-  --status-new: #8fc0e0;
-  --status-progress: #e9c46a;
-  --status-resolved: #9cc79a;
-  --status-rejected: #e08a7a;
-  --status-rejected-glow: rgba(224, 138, 122, 0.34);
+  --status-new: #93c5fd;
+  --status-progress: #fbbf24;
+  --status-resolved: #86efac;
+  --status-rejected: #fca5a5;
+  --status-rejected-glow: rgba(252, 165, 165, 0.34);
 
-  --brand-primary-alpha-10: rgba(233, 169, 135, 0.12);
-  --brand-primary-alpha-20: rgba(233, 169, 135, 0.2);
-  --brand-primary-alpha-30: rgba(233, 169, 135, 0.3);
-  --status-progress-alpha-10: rgba(233, 196, 106, 0.14);
-  --status-progress-alpha-20: rgba(233, 196, 106, 0.24);
-  --status-resolved-alpha-10: rgba(156, 199, 154, 0.14);
-  --status-rejected-alpha-10: rgba(224, 138, 122, 0.14);
-  --status-rejected-alpha-20: rgba(224, 138, 122, 0.24);
+  --brand-primary-alpha-10: rgba(94, 234, 212, 0.12);
+  --brand-primary-alpha-20: rgba(94, 234, 212, 0.2);
+  --brand-primary-alpha-30: rgba(94, 234, 212, 0.3);
+  --status-progress-alpha-10: rgba(251, 191, 36, 0.14);
+  --status-progress-alpha-20: rgba(251, 191, 36, 0.24);
+  --status-resolved-alpha-10: rgba(134, 239, 172, 0.14);
+  --status-rejected-alpha-10: rgba(252, 165, 165, 0.14);
+  --status-rejected-alpha-20: rgba(252, 165, 165, 0.24);
 
-  --chart-1: #d96a55;
-  --chart-2: #5fb3ad;
-  --chart-3: #e4b95c;
-  --chart-4: #c9a3c0;
-  --chart-5: #7fb6d9;
-  --chart-6: #9a9a9a;
+  --chart-1: #2dd4bf;
+  --chart-2: #60a5fa;
+  --chart-3: #fbbf24;
+  --chart-4: #c4b5fd;
+  --chart-5: #38bdf8;
+  --chart-6: #94a3b8;
 
   --color-surface: var(--bg-surface);
   --color-surface-2: var(--bg-elevated);
   --color-text: var(--text-main);
   --color-muted: var(--text-muted);
-  --color-accent: #f0b092;
-  --color-accent-deco: #e0956f;
-  --color-accent-soft: rgba(233, 169, 135, 0.16);
+  --color-accent: #5eead4;
+  --color-accent-deco: #2dd4bf;
+  --color-accent-soft: rgba(94, 234, 212, 0.16);
   --color-danger: var(--status-rejected);
   --color-warn: var(--status-progress);
   --color-ok: var(--status-resolved);
-  --color-plum: #c9a3c0;
-  --color-sage: #b7d3ae;
-  --color-sky: #8fc0e0;
-  --color-butter: #f2c879;
-  --color-tape: rgba(242, 200, 121, 0.82);
+  --color-plum: #c4b5fd;
+  --color-sage: #86efac;
+  --color-sky: #7dd3fc;
+  --color-butter: #fbbf24;
+  --color-tape: rgba(251, 191, 36, 0.82);
 }
 
 // ---------- 3b. High contrast: same paper, more ink ------------------------
 @mixin papercraft-contrast-tokens {
   @include papercraft-dark-tokens;
 
-  --bg-app: #0a0604;
-  --bg-nav: rgba(10, 6, 4, 0.96);
-  --bg-surface: #140d09;
-  --bg-card: #17100c;
-  --bg-elevated: #211711;
-  --bg-sidebar: #100a07;
+  --bg-app: #05080d;
+  --bg-nav: rgba(5, 8, 13, 0.96);
+  --bg-surface: #0a1018;
+  --bg-card: #0d1520;
+  --bg-elevated: #131d2c;
+  --bg-sidebar: #070c14;
 
   --text-main: #ffffff;
   --text-secondary: #f4e9dc;
   --text-muted: #d8c7b6;
 
-  --border-subtle: #7f6a59;
+  --border-subtle: #5b7188;
   --glass-stroke: rgba(255, 255, 255, 0.3);
   --alpha-border-10: rgba(255, 255, 255, 0.3);
   --alpha-border-20: rgba(255, 255, 255, 0.42);
 
-  --field-bg: #1b120c;
+  --field-bg: #0b1420;
   --field-text: #ffffff;
-  --field-border: #937b66;
-  --field-border-focus: #ffd479;
+  --field-border: #6b8299;
+  --field-border-focus: #fde68a;
 
-  --brand-primary: #ffb98a;
-  --brand-primary-hover: #ffcda8;
-  --on-brand: #1a0f08;
-  --link-color: #ffc6a3;
-  --link-color-hover: #ffdcc4;
-  --focus-ring: rgba(255, 212, 121, 0.5);
-  --focus-ring-color: #ffd479;
+  --brand-primary: #99f6e4;
+  --brand-primary-hover: #ccfbf1;
+  --on-brand: #04201c;
+  --link-color: #a5f3fc;
+  --link-color-hover: #cffafe;
+  --focus-ring: rgba(253, 230, 138, 0.5);
+  --focus-ring-color: #fde68a;
 
-  --status-new: #a9d8f5;
-  --status-progress: #ffd479;
-  --status-resolved: #b5e3b1;
-  --status-rejected: #ffa294;
+  --status-new: #bfdbfe;
+  --status-progress: #fde68a;
+  --status-resolved: #bbf7d0;
+  --status-rejected: #fecaca;
 }
 
 // ---------- 4. Apply: default light, class/attr overrides, OS preference ----
@@ -552,7 +552,7 @@ html:root {
   from {
     opacity: 0;
     transform: translateY(calc(var(--motion-distance) * -0.6)) rotate(-1.2deg);
-    box-shadow: var(--shadow-edge), 0 4px 8px rgba(74, 58, 50, 0.08);
+    box-shadow: var(--shadow-edge), 0 4px 8px rgba(16, 32, 43, 0.08);
   }
   to {
     opacity: 1;

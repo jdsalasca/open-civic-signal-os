@@ -325,7 +325,7 @@ a:hover {
   border-color: var(--alpha-border-10);
   background: var(--alpha-surface-05);
   color: var(--text-main);
-  box-shadow: var(--shadow-edge), 0 10px 18px -14px rgba(74, 58, 50, 0.4);
+  box-shadow: var(--shadow-edge), 0 10px 18px -14px rgba(16, 32, 43, 0.4);
 }
 
 .app-nav-link.is-active {
@@ -356,7 +356,7 @@ a:hover {
   background: color-mix(in srgb, var(--bg-nav) 92%, transparent);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 2px 2px rgba(74, 58, 50, 0.06);
+  box-shadow: 0 2px 2px rgba(16, 32, 43, 0.06);
 }
 
 .app-topbar-intro {
@@ -1035,8 +1035,8 @@ a:hover {
   width: var(--point-size, 16px);
   height: var(--point-size, 16px);
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0, rgba(255, 255, 255, 0.95) 18%, var(--brand-primary) 20%, rgba(222, 98, 44, 0.22) 100%);
-  box-shadow: 0 0 0 10px rgba(222, 98, 44, 0.12);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0, rgba(255, 255, 255, 0.95) 18%, var(--brand-primary) 20%, rgba(15, 118, 110, 0.22) 100%);
+  box-shadow: 0 0 0 10px rgba(15, 118, 110, 0.12);
 }
 
 .community-heat-node-core {
@@ -1044,8 +1044,8 @@ a:hover {
   width: var(--heat-size, 24px);
   height: var(--heat-size, 24px);
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 244, 222, 1) 0, rgba(255, 208, 122, 0.92) 35%, rgba(216, 84, 26, 0.86) 100%);
-  box-shadow: 0 0 0 18px rgba(216, 84, 26, 0.12);
+  background: radial-gradient(circle, rgba(254, 240, 138, 1) 0, rgba(251, 191, 36, 0.92) 35%, rgba(245, 158, 11, 0.86) 100%);
+  box-shadow: 0 0 0 18px rgba(245, 158, 11, 0.12);
 }
 
 .community-heat-node-label {
@@ -1633,6 +1633,23 @@ a:hover {
   flex: 0 0 auto;
 }
 
+// Simple mode: identity, place and freshness read as one quiet line, not four buttons.
+.dashboard-hero-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.dashboard-hero-meta > span + span::before {
+  content: "·";
+  margin-right: 0.45rem;
+  opacity: 0.6;
+}
+
 // ---------- Social community feed -------------------------------------------
 // One composer and one timeline. The old screen stacked eight navigation buttons before the
 // first post, which is the opposite of a feed.
@@ -2183,7 +2200,7 @@ a:hover {
 .app-mobile-nav {
   background: color-mix(in srgb, var(--bg-nav) 94%, transparent);
   backdrop-filter: blur(16px);
-  box-shadow: 0 -3px 12px -8px rgba(74, 58, 50, 0.5);
+  box-shadow: 0 -3px 12px -8px rgba(16, 32, 43, 0.5);
 }
 
 .animate-fade-up {
@@ -2816,6 +2833,17 @@ select:focus-visible,
 @media (max-width: 640px) {
   .civic-toolbar {
     width: 100%;
+  }
+
+  // One swipeable row of filters instead of three stacked rows above the feed.
+  .dashboard-feed-filters {
+    flex-wrap: nowrap !important;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .dashboard-feed-filters .u-filter-chip {
+    flex: 0 0 auto;
   }
 
   .civic-stat-grid,
