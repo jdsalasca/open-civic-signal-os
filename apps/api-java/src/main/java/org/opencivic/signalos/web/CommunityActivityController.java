@@ -2,6 +2,7 @@ package org.opencivic.signalos.web;
 
 import java.security.Principal;
 import java.util.UUID;
+import org.opencivic.signalos.service.ActivityCalendarService;
 import org.opencivic.signalos.service.CommunityActivityService;
 import org.opencivic.signalos.web.dto.CommunityActivityBoardResponse;
 import org.opencivic.signalos.web.dto.CommunityActivitySignupResponse;
@@ -21,9 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/community/activities")
 public class CommunityActivityController {
     private final CommunityActivityService activityService;
+    private final ActivityCalendarService calendarService;
 
-    public CommunityActivityController(CommunityActivityService activityService) {
+    public CommunityActivityController(
+        CommunityActivityService activityService,
+        ActivityCalendarService calendarService
+    ) {
         this.activityService = activityService;
+        this.calendarService = calendarService;
     }
 
     @GetMapping("/board")
@@ -41,6 +47,21 @@ public class CommunityActivityController {
         Principal principal
     ) {
         return activityService.createActivity(request, principal.getName());
+    }
+
+    @GetMapping(value = "/{activityId}/calendar", produces = "text/calendar")
+    public org.springframework.http.ResponseEntity<byte[]> calendar(
+        @PathVariable UUID activityId,
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        String body = calendarService.calendar(communityId, activityId, principal.getName());
+        return org.springframework.http.ResponseEntity.ok()
+            .header(
+                org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"activity-" + activityId + ".ics\""
+            )
+            .body(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
     @PostMapping("/{activityId}/signups")

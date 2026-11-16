@@ -61,6 +61,7 @@ public class PrioritizationServiceImpl implements PrioritizationService {
   private final SignalScoreEntryRepository scoreEntryRepository;
   private final UserNotificationService userNotificationService;
   private final ContentFollowService contentFollowService;
+  private final CommunityAlertService communityAlertService;
 
 public PrioritizationServiceImpl(SignalRepository signalRepository,
     VoteRepository voteRepository,
@@ -68,7 +69,8 @@ public PrioritizationServiceImpl(SignalRepository signalRepository,
     SignalStatusEntryRepository statusHistoryRepository,
     SignalScoreEntryRepository scoreEntryRepository,
     UserNotificationService userNotificationService,
-    ContentFollowService contentFollowService) {
+    ContentFollowService contentFollowService,
+    CommunityAlertService communityAlertService) {
   this.signalRepository = signalRepository;
   this.voteRepository = voteRepository;
   this.userRepository = userRepository;
@@ -76,6 +78,7 @@ public PrioritizationServiceImpl(SignalRepository signalRepository,
   this.scoreEntryRepository = scoreEntryRepository;
   this.userNotificationService = userNotificationService;
   this.contentFollowService = contentFollowService;
+  this.communityAlertService = communityAlertService;
   }
 
   /**
@@ -552,6 +555,20 @@ statusHistoryRepository.save(new SignalStatusEntry(
             saved.getId(), "NONE", "NEW", "CREATED", username, "Initial report submission", null
         ));
         recordScore(saved, SignalScoreEntry.Cause.INGEST);
+        if (saved.getCommunityId() != null) {
+            for (UUID recipient : communityAlertService.subscriberIds(saved.getCommunityId())) {
+                userNotificationService.notifyUser(
+                    recipient,
+                    author.getId(),
+                    author.getUsername(),
+                    "NEIGHBOURHOOD_SIGNAL",
+                    "SIGNAL",
+                    saved.getId(),
+                    saved.getTitle(),
+                    saved.getCommunityId()
+                );
+            }
+        }
         return saved;
     }
 

@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface VoteRepository extends JpaRepository<Vote, UUID> {
     Optional<Vote> findByUserIdAndSignalId(UUID userId, UUID signalId);
     long countBySignalId(UUID signalId);
+    long countByUserId(UUID userId);
 }

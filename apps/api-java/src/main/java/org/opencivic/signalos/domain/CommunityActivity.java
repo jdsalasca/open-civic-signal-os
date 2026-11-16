@@ -54,6 +54,8 @@ public class CommunityActivity {
     @Column(nullable = false)
     private boolean cancelled = false;
 
+    private LocalDateTime reminderSentAt;
+
     public UUID getId() { return id; }
     public UUID getCommunityId() { return communityId; }
     public void setCommunityId(UUID communityId) { this.communityId = communityId; }
@@ -79,4 +81,6 @@ public class CommunityActivity {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public boolean isCancelled() { return cancelled; }
     public void setCancelled(boolean cancelled) { this.cancelled = cancelled; }
+    public LocalDateTime getReminderSentAt() { return reminderSentAt; }
+    public void setReminderSentAt(LocalDateTime reminderSentAt) { this.reminderSentAt = reminderSentAt; }
 }

@@ -36,19 +36,25 @@ public class CommunityActivityService {
     private final UserRepository userRepository;
     private final CommunityActivityRepository activityRepository;
     private final CommunityActivitySignupRepository signupRepository;
+    private final CommunityAlertService communityAlertService;
+    private final UserNotificationService userNotificationService;
 
     public CommunityActivityService(
         CommunityAccessService communityAccessService,
         CommunityRepository communityRepository,
         UserRepository userRepository,
         CommunityActivityRepository activityRepository,
-        CommunityActivitySignupRepository signupRepository
+        CommunityActivitySignupRepository signupRepository,
+        CommunityAlertService communityAlertService,
+        UserNotificationService userNotificationService
     ) {
         this.communityAccessService = communityAccessService;
         this.communityRepository = communityRepository;
         this.userRepository = userRepository;
         this.activityRepository = activityRepository;
         this.signupRepository = signupRepository;
+        this.communityAlertService = communityAlertService;
+        this.userNotificationService = userNotificationService;
     }
 
     @Transactional(readOnly = true)
@@ -100,7 +106,19 @@ public class CommunityActivityService {
         activity.setSignupClosesAt(request.signupClosesAt());
         activity.setSignupCapacity(request.signupCapacity());
         activity.setOrganizerId(user.getId());
-        activityRepository.save(activity);
+        activity = activityRepository.save(activity);
+        for (UUID recipient : communityAlertService.subscriberIds(request.communityId())) {
+            userNotificationService.notifyUser(
+                recipient,
+                user.getId(),
+                user.getUsername(),
+                "NEIGHBOURHOOD_EVENT",
+                "ACTIVITY",
+                activity.getId(),
+                activity.getTitle(),
+                request.communityId()
+            );
+        }
 
         return getBoard(request.communityId(), username, null);
     }

@@ -19,4 +19,6 @@ public interface ContentFollowRepository extends JpaRepository<ContentFollow, UU
     );
 
     void deleteByUserIdAndTargetTypeAndTargetId(UUID userId, String targetType, UUID targetId);
+
+    long countByUserId(UUID userId);
 }
