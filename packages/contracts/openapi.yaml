@@ -8486,6 +8486,19 @@ components:
         viewerReaction:
           type: string
           nullable: true
+        authorName:
+          type: string
+          nullable: true
+          description: Display name of the author, or the username when no display name is set.
+        authorRole:
+          type: string
+          nullable: true
+          enum: [CITIZEN, PUBLIC_SERVANT]
+          description: PUBLIC_SERVANT when the author holds an institutional role.
+        commentCount:
+          type: integer
+          nullable: true
+          description: Number of comments on a signal or official post; null for thread entries.
     OnboardingChecklist:
       type: object
       required: [joinedCommunity, contributed, followingContent, allComplete]
