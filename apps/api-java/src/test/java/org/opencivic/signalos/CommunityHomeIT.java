@@ -130,6 +130,7 @@ class CommunityHomeIT {
         signal.setDescription("Crosswalk light is off during peak hours.");
         signal.setCategory("INFRASTRUCTURE");
         signal.setStatus("NEW");
+        signal.setLocationLabel("Main crosswalk");
         signal.setCommunityId(communityId);
         signal.setAuthorId(userId);
         signal.setCreatedAt(LocalDateTime.now().minusHours(3));
@@ -155,5 +156,22 @@ class CommunityHomeIT {
             .andExpect(jsonPath("$.hotThreads[0].relevanceScore").isNumber())
             .andExpect(jsonPath("$.topSignals.length()").value(1))
             .andExpect(jsonPath("$.topSignals[0].title").value("Broken crosswalk light"));
+    }
+
+    @Test
+    @WithMockUser(username = "community_home_user", roles = {"CITIZEN"})
+    void feedUsesReadableSummaries() throws Exception {
+        mockMvc.perform(
+                get("/api/community/feed")
+                    .param("communityId", communityId.toString())
+                    .param("days", "7")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].type").value("thread-update"))
+            .andExpect(jsonPath("$[0].summary").value("Need better lighting near the stop"))
+            .andExpect(jsonPath("$[1].type").value("blog"))
+            .andExpect(jsonPath("$[1].summary").value("Work starts this week"))
+            .andExpect(jsonPath("$[2].type").value("signal"))
+            .andExpect(jsonPath("$[2].summary").value("Main crosswalk"));
     }
 }
