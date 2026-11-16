@@ -19,16 +19,31 @@ html[data-text-scale="large"] {
 }
 
 // Toasts live above the mobile bottom nav and below the top bar; they must never cover the
-// preferences wheel, a form field, or a navigation control.
+// preferences wheel, a form field, or a navigation control. On phones they span the viewport so
+// a long error reads in one or two lines instead of a narrow column over the profile card.
 .app-toaster {
   bottom: 5.5rem !important;
   right: 1rem !important;
-  left: auto !important;
+  left: 1rem !important;
+  width: auto !important;
+}
+
+.app-toaster > div {
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 @media (min-width: 1024px) {
   .app-toaster {
     bottom: 1.5rem !important;
+    left: auto !important;
+    right: 1.5rem !important;
+    width: auto !important;
+  }
+
+  .app-toaster > div {
+    width: auto !important;
+    max-width: 400px !important;
   }
 }
 
@@ -372,6 +387,10 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: var(--tracking-label);
   font-weight: 800;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-topbar-title {

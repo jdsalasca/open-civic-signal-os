@@ -34,7 +34,7 @@ test.describe('Theme Consistency (P1)', () => {
     ).toBeTruthy();
 
     await page.goto('/');
-    await expect(page.getByTestId('signals-datatable')).toBeVisible();
+    await expect(page.getByTestId('signals-feed')).toBeVisible();
     await expect(page.getByTestId('dashboard-freshness-badge')).toBeVisible();
   });
 });

@@ -772,7 +772,7 @@ export function ReportSignal() {
               </div>
               <div className="flex flex-column md:flex-row gap-3">
                 <CivicButton type="button" label={t("report.success_cta_my_reports")} icon="pi pi-user" onClick={() => navigate("/mine")} data-testid="report-success-go-mine" />
-                <CivicButton type="button" label={t("report.success_cta_view_detail")} icon="pi pi-arrow-right" variant="secondary" onClick={() => navigate(`/signals/${submittedSignal.id}`)} data-testid="report-success-go-detail" />
+                <CivicButton type="button" label={t("report.success_cta_view_detail")} icon="pi pi-arrow-right" variant="secondary" onClick={() => navigate(`/signal/${submittedSignal.id}`)} data-testid="report-success-go-detail" />
                 <CivicButton type="button" label={t("report.success_cta_backlog")} icon="pi pi-list" variant="ghost" onClick={() => navigate("/")} data-testid="report-success-go-dashboard" />
               </div>
             </div>
@@ -846,16 +846,32 @@ export function ReportSignal() {
 
                   {renderStepContent()}
 
+                  {currentStep === 1 && (
+                    <div className="report-fast-path">
+                      <span>{t("report.fast_path_hint")}</span>
+                      <button
+                        type="button"
+                        className="report-fast-path__link"
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={isSubmitting}
+                        data-testid="report-submit-with-suggested"
+                      >
+                        <i className="pi pi-bolt" aria-hidden="true" />
+                        {t("report.submit_with_suggested")}
+                      </button>
+                    </div>
+                  )}
+
                   <div className="flex flex-column md:flex-row justify-content-between gap-3 pt-3 border-top-1 border-subtle">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap flex-shrink-0">
                       {currentStep > 0 && (
-                        <CivicButton type="button" variant="ghost" icon="pi pi-arrow-left" label={t("report.back_step")} onClick={goToPreviousStep} data-testid="report-back-button" />
+                        <CivicButton type="button" variant="ghost" icon="pi pi-arrow-left" label={t("report.back_step")} onClick={goToPreviousStep} className="white-space-nowrap" data-testid="report-back-button" />
                       )}
+                      <CivicButton type="button" label={t("common.discard")} variant="secondary" onClick={handleDiscard} className="white-space-nowrap" data-testid="report-discard-button" />
                     </div>
                     <div className="flex gap-2 flex-wrap justify-content-end">
-                      <CivicButton type="button" label={t("common.discard")} variant="secondary" onClick={handleDiscard} data-testid="report-discard-button" />
                       {currentStep < stepDefinitions.length - 1 ? (
-                        <CivicButton type="button" label={t("report.next_step")} icon="pi pi-arrow-right" iconPos="right" onClick={goToNextStep} data-testid="report-next-button" />
+                        <CivicButton type="button" label={t("report.next_step")} icon="pi pi-arrow-right" iconPos="right" onClick={goToNextStep} className="white-space-nowrap" data-testid="report-next-button" />
                       ) : (
                         <CivicButton type="submit" label={t("report.submit")} icon="pi pi-bolt" loading={isSubmitting} glow data-testid="report-submit-button" />
                       )}

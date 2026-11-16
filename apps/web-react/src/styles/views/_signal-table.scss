@@ -134,28 +134,215 @@
   }
 }
 
-// A row action reads as a link, not a fifth button competing with the report itself.
-.signal-table-view {
+// ---------------------------------------------------------------------------
+// Neighbourhood feed: one card per report, readable on a phone without a
+// horizontal table. The DataTable remains for the personal contributions list.
+// ---------------------------------------------------------------------------
+
+.signal-feed {
+  border-radius: var(--radius-paper-lg);
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-card) 96%, transparent);
+  box-shadow: var(--shadow-edge), var(--shadow-premium);
+  overflow: hidden;
+}
+
+.signal-feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.signal-feed-header__copy {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.signal-feed-header__icon {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  min-height: 2.75rem;
-  padding: 0.35rem 0.5rem;
-  border: 0;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: var(--brand-primary);
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.signal-table-view:hover,
-.signal-table-view:focus-visible {
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
   background: var(--brand-primary-alpha-10);
+  color: var(--brand-primary);
 }
 
-.signal-table-view i {
+.signal-feed-header__count {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.signal-feed-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.signal-feed-list > li + li {
+  border-top: 1px solid var(--alpha-border-05);
+}
+
+.signal-feed-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1rem 1.1rem;
+  color: inherit;
+  text-decoration: none;
+  transition: background var(--motion-fast) var(--ease-paper);
+}
+
+.signal-feed-card:hover,
+.signal-feed-card:focus-visible {
+  background: var(--surface-soft);
+}
+
+.signal-feed-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.signal-feed-card__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-main);
+  font-size: 1.02rem;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.signal-feed-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+  color: var(--brand-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.signal-feed-card__summary {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.signal-feed-card__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.8rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.signal-feed-card__date,
+.signal-feed-card__place {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.signal-feed-card__place {
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.signal-feed-card.is-skeleton {
+  min-height: 7.5rem;
+  background: linear-gradient(90deg, var(--surface-soft), var(--surface-soft-hover), var(--surface-soft));
+  background-size: 200% 100%;
+  animation: signal-feed-shimmer 1.6s linear infinite;
+}
+
+@keyframes signal-feed-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.signal-feed-empty {
+  padding: 1.25rem;
+}
+
+.signal-feed-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.9rem 1.1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.signal-feed-pager__status {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .signal-feed-card__cta {
+    align-self: flex-start;
+    padding-top: 0.15rem;
+  }
+}
+
+// A failed load is a state of its own: it must not read as "the neighbourhood has no reports".
+.signal-feed-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 1.1rem;
+  background: color-mix(in srgb, var(--status-rejected) 7%, var(--bg-card));
+}
+
+.signal-feed-error > i {
+  color: var(--status-rejected);
+  font-size: 1.2rem;
+}
+
+.signal-feed-error__copy {
+  flex: 1 1 14rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.signal-feed-error__copy strong {
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.signal-feed-header__note {
+  color: var(--text-muted);
   font-size: 0.7rem;
+  line-height: 1.4;
 }

@@ -69,7 +69,7 @@ test('signal detail shows assignee and timeline events', async ({ page }) => {
   await page.getByTestId('login-submit-button').click();
   await page.waitForURL('**/');
 
-  await page.goto(`/signals/${signalId}`);
+  await page.goto(`/signal/${signalId}`);
   await expect(page.getByTestId('signal-detail-assignment-card')).toBeVisible();
   await expect(page.getByTestId('signal-assignee-current')).toContainText('liaison');
   await expect(page.getByTestId('signal-detail-timeline')).toBeVisible();

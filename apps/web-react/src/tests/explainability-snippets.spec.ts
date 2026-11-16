@@ -75,12 +75,12 @@ test.describe('Explainability snippets in dashboard list', () => {
     await page.getByTestId('login-submit-button').click();
 
     await page.waitForSelector('[data-testid="auth-loading"]', { state: 'detached' }).catch(() => {});
-    await expect(page.getByTestId('signals-datatable')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('signals-feed')).toBeVisible({ timeout: 30000 });
 
     const explainabilitySnippet = page.locator('[data-testid^="signal-explainability-"]').first();
     await expect(explainabilitySnippet).toBeVisible();
 
-    await page.locator('.p-datatable-tbody tr').first().click();
+    await page.locator('.signal-feed-card').first().click();
     await expect(page).toHaveURL(/\/signal\//);
     await expect(page.getByTestId('signal-detail-why-ranked')).toBeVisible();
   });
