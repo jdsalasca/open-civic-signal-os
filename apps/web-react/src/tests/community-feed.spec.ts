@@ -242,6 +242,49 @@ test.describe('Community social feed', () => {
     await expect(page.getByText('No connection. Check your internet and try again.')).toBeVisible();
   });
 
+  test('loads older posts with a cursor instead of stopping at the first page', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    const pageOf = (start: number) =>
+      Array.from({ length: 20 }, (_, index) => ({
+        type: 'signal',
+        id: `paged-${start + index}`,
+        communityId: cid,
+        title: `Paged report ${start + index}`,
+        summary: 'Summary',
+        happenedAt: new Date(Date.UTC(2026, 10, 16, 20, 0, 0) - (start + index) * 60000)
+          .toISOString()
+          .slice(0, 19),
+        freshness: '',
+        confirmationCount: 0,
+        viewerConfirmed: false,
+        following: false,
+        reactions: {},
+        viewerReaction: null,
+        authorName: 'Vecino',
+        authorRole: 'CITIZEN',
+        commentCount: 0,
+      }));
+    const firstPage = pageOf(0);
+    let beforeParam: string | null = null;
+    await page.route('**/api/community/feed*', (route) => {
+      const before = new URL(route.request().url()).searchParams.get('before');
+      beforeParam = before;
+      const data = before ? pageOf(20).slice(0, 2) : firstPage;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(data) });
+    });
+
+    await page.goto('/communities/feed');
+    await expect(page.getByText('This feed shows the last 30 days of community activity.')).toBeVisible();
+    await expect(page.getByTestId('community-feed-load-more')).toBeVisible();
+    await expect(page.locator('.social-feed-item')).toHaveCount(20);
+
+    await page.getByTestId('community-feed-load-more').click();
+    await expect(page.locator('.social-feed-item')).toHaveCount(22);
+    await expect.poll(() => beforeParam).toBe(firstPage[19].happenedAt);
+    // A short page is the end of the feed, so the control disappears instead of lying.
+    await expect(page.getByTestId('community-feed-load-more')).toHaveCount(0);
+  });
+
   test('likes a report from the feed and updates the count', async ({ page }) => {
     await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
     await page.route('**/api/community/feed*', (route) =>

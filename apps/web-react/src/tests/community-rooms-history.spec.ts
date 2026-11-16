@@ -16,17 +16,22 @@ const communityId = "11111111-1111-1111-1111-111111111111";
 const roomId = "55555555-5555-5555-5555-555555555555";
 const userId = "33333333-3333-3333-3333-333333333333";
 
-function message(index: number) {
+function message(index: number, createdAt = "2026-03-20T10:00:00") {
   return {
     id: `message-${index}`,
     roomId,
     authorId: userId,
     authorName: "coordinator",
     body: `Field note ${index}`,
-    createdAt: "2026-03-20T10:00:00",
+    createdAt,
     mentionedUserIds: [],
     mentionsCurrentUser: false,
   };
+}
+
+/** LocalDateTime shape the API sends: no zone and no milliseconds. */
+function time(index: number) {
+  return new Date(Date.UTC(2026, 2, 20, 12, 0, 0) - index * 60000).toISOString().slice(0, 19);
 }
 
 /**
@@ -165,20 +170,20 @@ test.describe("A truncated room history says so", () => {
       }),
     );
 
-    let requestedLimit: string | null = null;
+    let requestedBefore: string | null = null;
+    const firstPage = Array.from({ length: 50 }, (_, index) => message(index, time(index)));
+    const secondPage = Array.from({ length: 50 }, (_, index) => message(50 + index, time(50 + index)));
     await page.route(`**/api/community/rooms/${roomId}?communityId=**`, (route) => {
       const url = new URL(route.request().url());
-      requestedLimit = url.searchParams.get("limit");
-      const limit = Number(requestedLimit ?? 50);
-      const total = 1204;
+      requestedBefore = url.searchParams.get("before");
       return route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify(
           detail({
-            messageCount: total,
-            hasMoreMessages: limit < total,
-            messages: Array.from({ length: Math.min(limit, total) }, (_, index) => message(index)),
+            messageCount: 1204,
+            hasMoreMessages: true,
+            messages: requestedBefore ? secondPage : firstPage,
           }),
         ),
       });
@@ -189,10 +194,11 @@ test.describe("A truncated room history says so", () => {
     await expect(page.getByTestId("community-rooms-load-older")).toBeVisible({ timeout: 30000 });
     await page.getByTestId("community-rooms-load-older").click();
 
-    // The request must actually raise the limit; a button that re-fetches the same page is a control
-    // that lies.
-    await expect.poll(() => requestedLimit).not.toBe("50");
-    await expect.poll(() => Number(requestedLimit ?? 0)).toBeGreaterThan(50);
+    // The second request is a cursor on the oldest loaded message, not a bigger refetch of the newest.
+    await expect.poll(() => requestedBefore).toBe(firstPage[49].createdAt);
+    await expect(page.getByTestId("community-rooms-message-list")).toContainText("Field note 99");
+    await expect(page.getByTestId("community-rooms-message-list").locator("> div")).toHaveCount(100);
+    await expect(page.getByTestId("community-rooms-history-note")).toContainText("100");
   });
 
   test("says nothing about paging when the whole room is loaded", async ({ page }) => {
