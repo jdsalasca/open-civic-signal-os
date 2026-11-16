@@ -378,6 +378,7 @@ public class CommunityCollaborationService {
         Set<UUID> following = contentFollowService.followedIds(viewerId, "SIGNAL", ids);
         Set<UUID> confirmed = signalConfirmationService.confirmedByViewer(viewerId, ids);
         Map<UUID, Long> counts = signalConfirmationService.countsFor(ids);
+        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions("SIGNAL", ids, viewerId);
         return signals.stream()
             .map(signal -> new CommunityFeedItemResponse(
                 "signal",
@@ -389,7 +390,9 @@ public class CommunityCollaborationService {
                 freshness(signal.getCreatedAt()),
                 counts.getOrDefault(signal.getId(), 0L),
                 confirmed.contains(signal.getId()),
-                following.contains(signal.getId())
+                following.contains(signal.getId()),
+                signal.getReactions(),
+                viewerReactions.get(signal.getId())
             ))
             .toList();
     }
@@ -409,6 +412,11 @@ public class CommunityCollaborationService {
             "BLOG",
             posts.stream().map(CommunityBlogPost::getId).toList()
         );
+        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
+            "BLOG",
+            posts.stream().map(CommunityBlogPost::getId).toList(),
+            viewerId
+        );
         return posts.stream()
             .map(post -> new CommunityFeedItemResponse(
                 "blog",
@@ -420,7 +428,9 @@ public class CommunityCollaborationService {
                 freshness(post.getPublishedAt()),
                 null,
                 null,
-                following.contains(post.getId())
+                following.contains(post.getId()),
+                post.getReactions(),
+                viewerReactions.get(post.getId())
             ))
             .toList();
     }
@@ -462,7 +472,9 @@ public class CommunityCollaborationService {
                 freshness(thread.getUpdatedAt()),
                 null,
                 null,
-                following.contains(thread.getId())
+                following.contains(thread.getId()),
+                Map.of(),
+                null
             ))
             .toList();
     }

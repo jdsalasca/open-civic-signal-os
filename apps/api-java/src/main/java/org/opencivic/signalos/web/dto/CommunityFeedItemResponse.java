@@ -1,6 +1,7 @@
 package org.opencivic.signalos.web.dto;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 public record CommunityFeedItemResponse(
@@ -13,5 +14,7 @@ public record CommunityFeedItemResponse(
     String freshness,
     Long confirmationCount,
     Boolean viewerConfirmed,
-    Boolean following
+    Boolean following,
+    Map<String, Integer> reactions,
+    String viewerReaction
 ) {}
