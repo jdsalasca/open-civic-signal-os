@@ -105,3 +105,4 @@ jobs:
           src/tests/public-backlog.spec.ts
           src/tests/signal-detail-lifecycle.spec.ts
           src/tests/signal-detail-describes-itself.spec.ts
+          src/tests/settings-language.spec.ts

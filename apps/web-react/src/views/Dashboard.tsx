@@ -3,7 +3,7 @@ import { toast } from "react-hot-toast";
 import { Signal, Notification, SignalMeta, SignalAging } from "../types";
 import { MetricsGrid } from "../components/MetricsGrid";
 import { SignalTable } from "../components/SignalTable";
-import { PriorityScale, SignalEmpty, StatusChip } from "../components/signalPrimitives";
+import { PriorityScale, StatusChip } from "../components/signalPrimitives";
 import { DigestSidebar } from "../components/DigestSidebar";
 import { NotificationSidebar } from "../components/NotificationSidebar";
 import { CategoryChart } from "../components/CategoryChart";
@@ -215,14 +215,6 @@ export function Dashboard() {
   // With the filter pushed into the query, the visible count is the backend total. Counting
   // critical rows client-side would report "how many of this page" instead of "how many exist".
   const visibleRecords = totalRecords;
-  const criticalCount = useMemo(
-    () => (activeFilter === "CRITICAL" ? totalRecords : signals.filter((s) => (s.priorityScore ?? 0) >= criticalThreshold).length),
-    [totalRecords, signals, activeFilter, criticalThreshold]
-  );
-  const newCount = useMemo(
-    () => signals.filter((s) => s.status === "NEW").length,
-    [signals]
-  );
   const formatLastUpdated = (isoDate: string | null) => {
     if (!isoDate) return t('dashboard.freshness_pending');
     const date = new Date(isoDate);
@@ -231,24 +223,6 @@ export function Dashboard() {
     if (diffMinutes < 60) return t('dashboard.freshness_minutes', { count: diffMinutes });
     return t('dashboard.freshness_hours', { count: Math.floor(diffMinutes / 60) });
   };
-  const heroStats = useMemo(
-    () => [
-      {
-        label: t("dashboard.priority_strip_critical", { count: criticalCount }),
-        value: criticalCount.toString(),
-      },
-      {
-        label: t("dashboard.priority_strip_new", { count: newCount }),
-        value: newCount.toString(),
-      },
-      {
-        label: t("dashboard.freshness_label"),
-        value: formatLastUpdated(meta?.lastUpdatedAt ?? null),
-      },
-    ],
-    [criticalCount, meta?.lastUpdatedAt, newCount, t]
-  );
-
   const handleRelay = async () => {
     try {
       const res = await apiClient.post("notifications/relay/top-10");
@@ -418,120 +392,42 @@ export function Dashboard() {
     <Layout>
       <div className="animate-fade-up motion-page">
         <section className="dashboard-hero-shell mb-8" data-testid="dashboard-hero">
-          <CivicCard className="dashboard-story-card" padding="lg">
-            <div className="flex align-items-center flex-wrap gap-3 mb-4">
-              <div className="u-pill" data-testid="welcome-message">
-                <i className="pi pi-user text-brand-primary"></i>
-                {userName}
+          <CivicCard className="dashboard-story-card" padding="md">
+            <div className="dashboard-welcome-row">
+              <div className="min-w-0">
+                <div className="flex align-items-center flex-wrap gap-2 mb-2">
+                  <div className="u-pill" data-testid="welcome-message">
+                    <i className="pi pi-user text-brand-primary"></i>
+                    {userName}
+                  </div>
+                  <div className="u-pill" data-testid="dashboard-guided-persona">
+                    <i className="pi pi-compass text-brand-primary"></i>
+                    {guidedHome.personaLabel}
+                  </div>
+                  <div className="u-pill" data-testid="dashboard-active-community-pill">
+                    <i className="pi pi-globe text-brand-primary"></i>
+                    {activeCommunityName}
+                  </div>
+                  <div className="u-pill" data-testid="dashboard-freshness-badge">
+                    <i className="pi pi-clock text-brand-primary"></i>
+                    {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
+                  </div>
+                </div>
+                <h1 className="u-page-title text-2xl md:text-3xl font-black m-0">
+                  {t('dashboard.home_title', { community: activeCommunityName })}
+                </h1>
+                <p className="text-sm text-muted mt-2 mb-0" data-testid="dashboard-primary-guidance">
+                  {guidedHome.heroGuidance}
+                </p>
               </div>
-              <div className="u-pill" data-testid="dashboard-guided-persona">
-                <i className="pi pi-compass text-brand-primary"></i>
-                {guidedHome.personaLabel}
-              </div>
-              <div className="u-pill" data-testid="dashboard-active-community-pill">
-                <i className="pi pi-globe text-brand-primary"></i>
-                {activeCommunityName}
-              </div>
-              <div className="u-pill" data-testid="dashboard-freshness-badge">
-                <i className="pi pi-clock text-brand-primary"></i>
-                {formatLastUpdated(meta?.lastUpdatedAt ?? null)}
-              </div>
-            </div>
-            <h1 className="u-page-title text-4xl md:text-5xl font-black m-0 line-height-2">
-              {guidedHome.heroTitle}
-            </h1>
-            <p className="text-secondary text-lg mt-3 mb-0 font-medium max-w-30rem">
-              {guidedHome.heroSubtitle}
-            </p>
-            <p className="text-sm text-muted mt-3 mb-0 max-w-28rem" data-testid="dashboard-primary-guidance">
-              {guidedHome.heroGuidance}
-            </p>
-            <div className="dashboard-story-grid mt-5">
-              {heroStats.map((item) => (
-                <CivicStatCard
-                  key={item.label}
-                  label={item.label}
-                  value={item.value}
-                  compact
-                  tone="brand"
-                />
-              ))}
-            </div>
-            <CivicActionBar className="dashboard-hero-actions mt-5">
               <CivicButton
                 type="button"
                 label={guidedHome.primaryActionLabel}
                 icon={guidedHome.primaryActionIcon}
                 onClick={guidedHome.primaryAction}
-                className="shadow-xl"
+                className="dashboard-welcome-action"
                 data-testid="dashboard-action-report"
               />
-            </CivicActionBar>
-          </CivicCard>
-          <CivicCard variant="brand" padding="lg" data-testid="dashboard-community-hub-card">
-            <span className="u-section-title text-xs">{t("dashboard.community_hub.title")}</span>
-            <h2 className="text-xl font-black text-main mt-3 mb-0">{activeCommunityName}</h2>
-            <p className="text-secondary text-sm mt-3 mb-0" data-testid="dashboard-guided-home-description">
-              {t("dashboard.community_hub.desc", {
-                community: activeCommunityName,
-                role: activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback"),
-              })}
-            </p>
-            {!activeMembership && (
-              <CivicButton
-                type="button"
-                label={t("onboarding.title")}
-                icon="pi pi-map-marker"
-                className="mt-4"
-                onClick={() => navigate("/onboarding")}
-                data-testid="dashboard-choose-place"
-              />
-            )}
-            <div className="dashboard-community-summary-grid mt-4" data-testid="dashboard-community-summary">
-              <CivicStatCard
-                label={t("dashboard.community_hub.path_label")}
-                value={activeCommunityName}
-                supportingText={activeCommunityPath}
-                compact
-                data-testid="dashboard-community-summary-path"
-              />
-              <CivicStatCard
-                label={t("dashboard.community_hub.role_label")}
-                value={activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback")}
-                supportingText={guidedHome.personaLabel}
-                compact
-                data-testid="dashboard-community-summary-role"
-              />
-              <CivicStatCard
-                label={t("dashboard.community_hub.memberships_label")}
-                value={memberships.length}
-                supportingText={t("settings.community_membership_title")}
-                compact
-                data-testid="dashboard-community-summary-memberships"
-              />
-            </div>
-            <div className="mt-5 pt-4 border-top-1 border-surface-soft">
-              <span className="text-xs font-black uppercase tracking-wide text-muted">
-                {t("dashboard.community_hub.next_actions_label")}
-              </span>
-              <div className="dashboard-action-cluster mt-3">
-                <CivicButton
-                  type="button"
-                  label={t("dashboard.community_hub.action_hub")}
-                  icon="pi pi-globe"
-                  variant="ghost"
-                  onClick={() => navigate("/communities")}
-                  data-testid="dashboard-community-open-hub"
-                />
-                <CivicButton
-                  type="button"
-                  label={t("dashboard.track_contributions")}
-                  icon="pi pi-user"
-                  variant="ghost"
-                  onClick={() => navigate("/mine")}
-                  data-testid="dashboard-hero-action-mine"
-                />
-              </div>
             </div>
           </CivicCard>
         </section>
@@ -551,19 +447,6 @@ export function Dashboard() {
               </span>
               <p className="signal-copy text-sm m-0">{t("dashboard.attention_desc")}</p>
             </div>
-            <CivicButton
-              type="button"
-              variant="ghost"
-              size="small"
-              label={t("dashboard.attention_open_feed")}
-              icon="pi pi-arrow-down"
-              onClick={() =>
-                document
-                  .querySelector('[data-testid="signals-datatable"]')
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
-              }
-              data-testid="dashboard-attention-open-feed"
-            />
           </div>
 
           {loading ? (
@@ -573,12 +456,13 @@ export function Dashboard() {
               ))}
             </div>
           ) : attentionSignals.length === 0 ? (
-            <SignalEmpty
-              icon="pi pi-check-circle"
-              title={t("dashboard.attention_empty_title")}
-              description={t("dashboard.attention_empty_desc")}
-              testId="dashboard-attention-empty"
-            />
+            <div className="dashboard-attention-empty" data-testid="dashboard-attention-empty">
+              <i className="pi pi-check-circle" aria-hidden="true" />
+              <div>
+                <strong>{t("dashboard.attention_empty_title")}</strong>
+                <span>{t("dashboard.attention_empty_desc")}</span>
+              </div>
+            </div>
           ) : (
             <div className="signal-attention" data-testid="dashboard-attention-list">
               {attentionSignals.map((signal, index) => (
@@ -608,154 +492,17 @@ export function Dashboard() {
           )}
         </section>
 
-        <CivicCard className="mb-6" data-testid="dashboard-community-focus">
-          <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
-            <div className="flex flex-column gap-1">
-              <span className="text-xs font-black uppercase tracking-wide text-muted">
-                {t("dashboard.community_surface.kicker")}
-              </span>
-              <h2 className="text-2xl font-black text-main m-0">{t("dashboard.community_surface.title", { community: activeCommunityName })}</h2>
-              <p className="text-sm text-secondary m-0">{t("dashboard.community_surface.desc")}</p>
-            </div>
-            {interfaceMode === "simple" && (
-              <div className="u-pill" data-testid="dashboard-community-mode-hint">
-                <i className="pi pi-sparkles text-brand-primary"></i>
-                {t("dashboard.community_surface.simple_mode_hint")}
-              </div>
-            )}
-          </div>
-          <div className="dashboard-community-surface-grid">
-            {communityActionCards.map((card) => (
-              <div key={card.title} className="dashboard-community-surface-card" data-testid={card.testId}>
-                <div className="flex align-items-start justify-content-between gap-3">
-                  <div className="flex-1">
-                    <div className="dashboard-story-metric-label">{card.title}</div>
-                    <p className="text-sm text-secondary mt-3 mb-0 line-height-3">{card.description}</p>
-                  </div>
-                  <div className="u-pill">
-                    <i className={`${card.icon} text-brand-primary`}></i>
-                  </div>
-                </div>
-                <div className="mt-4">
-                  <CivicButton
-                    type="button"
-                    label={card.actionLabel}
-                    icon="pi pi-arrow-right"
-                    variant="ghost"
-                    onClick={card.action}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CivicCard>
-
-        <ContextualHelpPanel surface="DASHBOARD" className="mb-6" dataTestId="dashboard-contextual-help" />
-
-        {interfaceMode === "advanced" && (
-          <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
-            <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
-              <div className="flex flex-column gap-1">
-                <span className="text-xs font-black uppercase tracking-wide text-muted">
-                  {t("dashboard.secondary_actions_title")}
-                </span>
-                <span className="text-sm text-secondary">
-                  {t("dashboard.secondary_actions_desc")}
-                </span>
-              </div>
-              <CivicActionBar className="dashboard-secondary-action-bar">
-                <div className="dashboard-action-cluster">
-                  <CivicButton
-                    type="button"
-                    label={t('nav.public_blog')}
-                    icon="pi pi-megaphone"
-                    variant="ghost"
-                    onClick={() => navigate("/communities/blog")}
-                    data-testid="dashboard-action-blog"
-                  />
-                  <CivicButton
-                    type="button"
-                    label={t('nav.dialogues')}
-                    icon="pi pi-comments"
-                    variant="ghost"
-                    onClick={() => navigate("/communities/threads")}
-                    data-testid="dashboard-action-threads"
-                  />
-                  <CivicButton
-                    type="button"
-                    label={t('dashboard.track_contributions')}
-                    icon="pi pi-user"
-                    variant="ghost"
-                    onClick={() => navigate("/mine")}
-                    data-testid="dashboard-action-mine"
-                  />
-                </div>
-                {isStaff && (
-                  <CivicButton
-                    type="button"
-                    label={t('dashboard.broadcast')}
-                    icon="pi pi-bolt"
-                    variant="secondary"
-                    onClick={handleRelay}
-                    data-testid="dashboard-action-broadcast"
-                  />
-                )}
-              </CivicActionBar>
-            </div>
-          </CivicCard>
-        )}
-
-        <CivicCard className="mb-6" variant="brand">
-          <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
-            <div className="flex flex-column gap-1">
-                <span className="text-xs font-black uppercase tracking-wide text-muted">{t("dashboard.priority_strip_title")}</span>
-                <span className="text-sm text-secondary">{t("dashboard.priority_strip_desc")}</span>
-              </div>
-            <div className="dashboard-action-cluster">
-              <CivicButton
-                type="button"
-                size="small"
-                variant={activeFilter === "CRITICAL" ? "primary" : "ghost"}
-                label={t("dashboard.priority_strip_critical", { count: criticalCount })}
-                icon="pi pi-exclamation-triangle"
-                onClick={() => handleFilterChange("CRITICAL")}
-                data-testid="dashboard-priority-critical"
-              />
-              <CivicButton
-                type="button"
-                size="small"
-                variant={activeFilter === "NEW" ? "primary" : "ghost"}
-                label={t("dashboard.priority_strip_new", { count: newCount })}
-                icon="pi pi-clock"
-                onClick={() => handleFilterChange("NEW")}
-                data-testid="dashboard-priority-new"
-              />
-              {isStaff && (
-                <CivicButton
-                  type="button"
-                  size="small"
-                  variant="ghost"
-                  label={t("dashboard.priority_strip_review_queue")}
-                  icon="pi pi-shield"
-                  onClick={() => navigate("/moderation")}
-                  data-testid="dashboard-priority-moderation"
-                />
-              )}
-            </div>
-          </div>
-        </CivicCard>
-
-        <div className="mb-8">
-          {loading ? (
-            <CivicSkeleton type="metric" count={4} />
-          ) : (
-            <MetricsGrid signals={displayedSignals} onMetricSelect={handleMetricSelect} />
-          )}
-        </div>
-
         <div className="grid">
           <div className="col-12 xl:col-9">
-            <div className="flex align-items-center justify-content-between mb-4 px-2">
+            <div className="flex align-items-center justify-content-between gap-3 mb-4 px-2 flex-wrap">
+              <div className="flex flex-column gap-1 min-w-0">
+                <span className="text-xs font-black uppercase tracking-wide text-muted">
+                  {t('dashboard.feed_kicker')}
+                </span>
+                <h2 className="text-xl font-black text-main m-0">
+                  {t('dashboard.feed_heading')}
+                </h2>
+              </div>
               <CivicToolbar className="overflow-x-auto pb-2 scrollbar-hidden">
                 {quickFilters.map(f => (
                   <button
@@ -798,20 +545,10 @@ export function Dashboard() {
                   {interfaceMode === "advanced" && displayedSignals.length > 0 && (
                     <CategoryChart signals={displayedSignals} />
                   )}
-                  {!isStaff && (
-                    <CivicCard title={t('dashboard.quickstart_title')} variant="brand">
-                      <p className="text-secondary text-sm m-0 mb-4">{t('dashboard.quickstart_desc')}</p>
-                      <ul className="m-0 p-0 list-none flex flex-column gap-2 text-sm text-secondary">
-                        <li className="line-height-3">1. {t('dashboard.quickstart_step_1')}</li>
-                        <li className="line-height-3">2. {t('dashboard.quickstart_step_2')}</li>
-                        <li className="line-height-3">3. {t('dashboard.quickstart_step_3')}</li>
-                      </ul>
-                      <CivicActionBar className="dashboard-quickstart-actions mt-4">
-                        <CivicButton label={t('dashboard.quickstart_report')} onClick={() => navigate('/report')} />
-                        <CivicButton label={t('dashboard.quickstart_forums')} variant="secondary" onClick={() => navigate('/communities/threads')} />
-                        <CivicButton label={t('dashboard.quickstart_contributions')} variant="ghost" onClick={() => navigate('/mine')} />
-                      </CivicActionBar>
-                    </CivicCard>
+                  {loading ? (
+                    <CivicSkeleton type="metric" count={4} />
+                  ) : (
+                    <MetricsGrid signals={displayedSignals} onMetricSelect={handleMetricSelect} />
                   )}
                   <DigestSidebar signals={displayedSignals} criticalThreshold={criticalThreshold} />
                   {isStaff && aging && (
@@ -920,6 +657,169 @@ export function Dashboard() {
             </div>
           </div>
         </div>
+
+        <CivicCard className="mb-6" data-testid="dashboard-community-hub-card">
+          <div className="dashboard-community-hub-row">
+            <div className="min-w-0">
+              <span className="u-section-title text-xs">{t("dashboard.community_hub.title")}</span>
+              <h2 className="text-xl font-black text-main mt-2 mb-0">{activeCommunityName}</h2>
+              <p className="text-secondary text-sm mt-2 mb-0" data-testid="dashboard-guided-home-description">
+                {t("dashboard.community_hub.desc", {
+                  community: activeCommunityName,
+                  role: activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback"),
+                })}
+              </p>
+              <div className="dashboard-community-summary-grid mt-4" data-testid="dashboard-community-summary">
+                <CivicStatCard
+                  label={t("dashboard.community_hub.path_label")}
+                  value={activeCommunityName}
+                  supportingText={activeCommunityPath}
+                  compact
+                  data-testid="dashboard-community-summary-path"
+                />
+                <CivicStatCard
+                  label={t("dashboard.community_hub.role_label")}
+                  value={activeCommunityRoleLabel ?? t("dashboard.community_hub.role_fallback")}
+                  supportingText={guidedHome.personaLabel}
+                  compact
+                  data-testid="dashboard-community-summary-role"
+                />
+                <CivicStatCard
+                  label={t("dashboard.community_hub.memberships_label")}
+                  value={memberships.length}
+                  supportingText={t("settings.community_membership_title")}
+                  compact
+                  data-testid="dashboard-community-summary-memberships"
+                />
+              </div>
+            </div>
+            <div className="dashboard-community-hub-actions">
+              {!activeMembership && (
+                <CivicButton
+                  type="button"
+                  label={t("onboarding.title")}
+                  icon="pi pi-map-marker"
+                  onClick={() => navigate("/onboarding")}
+                  data-testid="dashboard-choose-place"
+                />
+              )}
+              <CivicButton
+                type="button"
+                label={t("dashboard.community_hub.action_hub")}
+                icon="pi pi-globe"
+                variant="ghost"
+                onClick={() => navigate("/communities")}
+                data-testid="dashboard-community-open-hub"
+              />
+              <CivicButton
+                type="button"
+                label={t("dashboard.track_contributions")}
+                icon="pi pi-user"
+                variant="ghost"
+                onClick={() => navigate("/mine")}
+                data-testid="dashboard-hero-action-mine"
+              />
+            </div>
+          </div>
+        </CivicCard>
+
+        <CivicCard className="mb-6" data-testid="dashboard-community-focus">
+          <div className="flex flex-column lg:flex-row lg:align-items-end justify-content-between gap-3 mb-4">
+            <div className="flex flex-column gap-1">
+              <span className="text-xs font-black uppercase tracking-wide text-muted">
+                {t("dashboard.community_surface.kicker")}
+              </span>
+              <h2 className="text-2xl font-black text-main m-0">{t("dashboard.community_surface.title", { community: activeCommunityName })}</h2>
+              <p className="text-sm text-secondary m-0">{t("dashboard.community_surface.desc")}</p>
+            </div>
+            {interfaceMode === "simple" && (
+              <div className="u-pill" data-testid="dashboard-community-mode-hint">
+                <i className="pi pi-sparkles text-brand-primary"></i>
+                {t("dashboard.community_surface.simple_mode_hint")}
+              </div>
+            )}
+          </div>
+          <div className="dashboard-community-surface-grid">
+            {communityActionCards.map((card) => (
+              <div key={card.title} className="dashboard-community-surface-card" data-testid={card.testId}>
+                <div className="flex align-items-start justify-content-between gap-3">
+                  <div className="flex-1">
+                    <div className="dashboard-story-metric-label">{card.title}</div>
+                    <p className="text-sm text-secondary mt-3 mb-0 line-height-3">{card.description}</p>
+                  </div>
+                  <div className="u-pill">
+                    <i className={`${card.icon} text-brand-primary`}></i>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <CivicButton
+                    type="button"
+                    label={card.actionLabel}
+                    icon="pi pi-arrow-right"
+                    variant="ghost"
+                    onClick={card.action}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CivicCard>
+
+        <ContextualHelpPanel surface="DASHBOARD" className="mb-6" dataTestId="dashboard-contextual-help" />
+
+        {interfaceMode === "advanced" && (
+          <CivicCard className="mb-6" data-testid="dashboard-secondary-actions">
+            <div className="flex flex-column lg:flex-row lg:align-items-center justify-content-between gap-3">
+              <div className="flex flex-column gap-1">
+                <span className="text-xs font-black uppercase tracking-wide text-muted">
+                  {t("dashboard.secondary_actions_title")}
+                </span>
+                <span className="text-sm text-secondary">
+                  {t("dashboard.secondary_actions_desc")}
+                </span>
+              </div>
+              <CivicActionBar className="dashboard-secondary-action-bar">
+                <div className="dashboard-action-cluster">
+                  <CivicButton
+                    type="button"
+                    label={t('nav.public_blog')}
+                    icon="pi pi-megaphone"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/blog")}
+                    data-testid="dashboard-action-blog"
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t('nav.dialogues')}
+                    icon="pi pi-comments"
+                    variant="ghost"
+                    onClick={() => navigate("/communities/threads")}
+                    data-testid="dashboard-action-threads"
+                  />
+                  <CivicButton
+                    type="button"
+                    label={t('dashboard.track_contributions')}
+                    icon="pi pi-user"
+                    variant="ghost"
+                    onClick={() => navigate("/mine")}
+                    data-testid="dashboard-action-mine"
+                  />
+                </div>
+                {isStaff && (
+                  <CivicButton
+                    type="button"
+                    label={t('dashboard.broadcast')}
+                    icon="pi pi-bolt"
+                    variant="secondary"
+                    onClick={handleRelay}
+                    data-testid="dashboard-action-broadcast"
+                  />
+                )}
+              </CivicActionBar>
+            </div>
+          </CivicCard>
+        )}
+
       </div>
     </Layout>
   );

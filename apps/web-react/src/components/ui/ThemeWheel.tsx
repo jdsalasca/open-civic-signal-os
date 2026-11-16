@@ -11,8 +11,8 @@ const ICONS: Record<(typeof THEMES)[number], string> = {
 
 /** One gear in the top bar for the three interface styles; Settings has the same control. */
 export function ThemeWheel() {
-  const { t } = useTranslation();
-  const { theme, setTheme } = useSettingsStore();
+  const { t, i18n } = useTranslation();
+  const { theme, language, setTheme, setLanguage } = useSettingsStore();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +62,25 @@ export function ThemeWheel() {
               {theme === mode && <i className="pi pi-check theme-wheel-check" aria-hidden="true" />}
             </button>
           ))}
+          <div className="theme-wheel-divider" role="separator" />
+          <span className="theme-wheel-label">{t('settings.language')}</span>
+          <div className="theme-wheel-languages">
+            {(['es', 'en'] as const).map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                aria-pressed={language === lang}
+                className={language === lang ? 'is-active' : undefined}
+                onClick={() => {
+                  setLanguage(lang);
+                  i18n.changeLanguage(lang);
+                }}
+                data-testid={`language-wheel-${lang}`}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

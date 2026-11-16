@@ -65,86 +65,86 @@
 
 // ---------- 2. Light theme: the paper table --------------------------------
 @mixin papercraft-light-tokens {
-  --bg-app: #fbf1e2;
-  --bg-nav: rgba(251, 241, 226, 0.88);
-  --bg-surface: #fff8ea;
-  --bg-card: #fff8ea;
-  --bg-elevated: #f6e8d5;
-  --bg-sidebar: rgba(255, 248, 234, 0.94);
+  --bg-app: #f7f2e9;
+  --bg-nav: rgba(247, 242, 233, 0.9);
+  --bg-surface: #fffbf5;
+  --bg-card: #fffdf9;
+  --bg-elevated: #f1e8db;
+  --bg-sidebar: rgba(255, 251, 245, 0.95);
 
-  --text-main: #4a3a32;
-  --text-secondary: #5c453a;
-  --text-muted: #7a5f50;
+  --text-main: #2f2620;
+  --text-secondary: #4f4239;
+  --text-muted: #746558;
 
-  --border-subtle: #e2d0b8;
-  --glass-stroke: rgba(74, 58, 50, 0.1);
+  --border-subtle: #ddcfbd;
+  --glass-stroke: rgba(47, 38, 32, 0.1);
 
-  --shadow-premium: 0 2px 2px rgba(74, 58, 50, 0.1), 0 18px 32px rgba(74, 58, 50, 0.16);
-  --shadow-lift: 0 3px 4px rgba(74, 58, 50, 0.12), 0 26px 44px rgba(74, 58, 50, 0.2);
+  --shadow-premium: 0 2px 2px rgba(47, 38, 32, 0.1), 0 18px 32px rgba(47, 38, 32, 0.16);
+  --shadow-lift: 0 3px 4px rgba(47, 38, 32, 0.12), 0 26px 44px rgba(47, 38, 32, 0.2);
   --shadow-paper: var(--shadow-premium);
   --shadow-paper-lift: var(--shadow-lift);
-  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(74, 58, 50, 0.06);
+  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(47, 38, 32, 0.06);
 
-  --mesh-gradient-1: rgba(180, 90, 60, 0.1);
-  --mesh-gradient-2: rgba(90, 140, 110, 0.1);
+  --mesh-gradient-1: rgba(163, 74, 47, 0.1);
+  --mesh-gradient-2: rgba(63, 110, 99, 0.1);
   --mesh-gradient-3: rgba(230, 180, 95, 0.14);
 
-  --scrollbar-thumb: #d9c6ae;
-  --tooltip-bg: #4a3a32;
-  --tooltip-text: #fbf1e2;
-  --tooltip-shadow: 0 18px 32px -18px rgba(74, 58, 50, 0.45);
+  --scrollbar-thumb: #d5c3ae;
+  --tooltip-bg: #2f2620;
+  --tooltip-text: #fff7ed;
+  --tooltip-shadow: 0 18px 32px -18px rgba(47, 38, 32, 0.45);
 
-  --field-bg: #fff8ea;
-  --field-bg-focus: #fffdf7;
-  --field-text: #4a3a32;
-  --field-border: #d9c6ae;
+  --field-bg: #fffdf9;
+  --field-bg-focus: #ffffff;
+  --field-text: #2f2620;
+  --field-border: #d5c3ae;
   --field-border-focus: #a34a2f;
 
   --surface-hover: rgba(163, 74, 47, 0.08);
   --table-row-hover: rgba(163, 74, 47, 0.05);
-  --focus-ring: rgba(74, 58, 50, 0.2);
-  --focus-ring-color: #4a3a32;
+  --focus-ring: rgba(163, 74, 47, 0.25);
+  --focus-ring-color: #a34a2f;
   --shimmer-highlight: rgba(163, 74, 47, 0.12);
 
-  --pill-bg: rgba(74, 58, 50, 0.05);
-  --pill-border: rgba(74, 58, 50, 0.14);
-  --pill-hover: rgba(74, 58, 50, 0.1);
+  --pill-bg: rgba(47, 38, 32, 0.05);
+  --pill-border: rgba(47, 38, 32, 0.14);
+  --pill-hover: rgba(47, 38, 32, 0.1);
   --panel-soft-bg: rgba(163, 74, 47, 0.05);
-  --surface-soft: rgba(74, 58, 50, 0.045);
-  --surface-soft-strong: rgba(74, 58, 50, 0.08);
-  --surface-soft-hover: rgba(74, 58, 50, 0.1);
-  --surface-soft-border: rgba(74, 58, 50, 0.14);
+  --surface-soft: rgba(47, 38, 32, 0.045);
+  --surface-soft-strong: rgba(47, 38, 32, 0.08);
+  --surface-soft-hover: rgba(47, 38, 32, 0.1);
+  --surface-soft-border: rgba(47, 38, 32, 0.14);
 
-  --interactive-neutral-bg: #f3e6d2;
-  --interactive-neutral-hover: #ebd9bf;
-  --interactive-neutral-border: #d9c6ae;
-  --interactive-neutral-text: #4a3a32;
+  --interactive-neutral-bg: #f3e8da;
+  --interactive-neutral-hover: #eadcc9;
+  --interactive-neutral-border: #d5c3ae;
+  --interactive-neutral-text: #2f2620;
 
-  --logo-surface: #4a3a32;
-  --logo-icon: #fbf1e2;
+  --logo-surface: #a34a2f;
+  --logo-icon: #fff7ed;
 
-  --alpha-surface-05: rgba(74, 58, 50, 0.04);
-  --alpha-surface-10: rgba(74, 58, 50, 0.08);
-  --alpha-border-05: rgba(74, 58, 50, 0.06);
-  --alpha-border-10: rgba(74, 58, 50, 0.12);
-  --alpha-border-20: rgba(74, 58, 50, 0.2);
-  --alpha-border-30: rgba(74, 58, 50, 0.28);
-  --alpha-overlay-20: rgba(251, 241, 226, 0.72);
-  --alpha-overlay-30: rgba(251, 241, 226, 0.82);
-  --alpha-overlay-40: rgba(251, 241, 226, 0.9);
-  --alpha-overlay-80: rgba(251, 241, 226, 0.96);
+  --alpha-surface-05: rgba(47, 38, 32, 0.04);
+  --alpha-surface-10: rgba(47, 38, 32, 0.08);
+  --alpha-border-05: rgba(47, 38, 32, 0.06);
+  --alpha-border-10: rgba(47, 38, 32, 0.12);
+  --alpha-border-20: rgba(47, 38, 32, 0.2);
+  --alpha-border-30: rgba(47, 38, 32, 0.28);
+  --alpha-overlay-20: rgba(247, 242, 233, 0.72);
+  --alpha-overlay-30: rgba(247, 242, 233, 0.82);
+  --alpha-overlay-40: rgba(247, 242, 233, 0.9);
+  --alpha-overlay-80: rgba(247, 242, 233, 0.96);
 
-  // Interactive ink: buttons are ink with cream text (Paper Craft signature).
-  --brand-primary: #4a3a32;
-  --brand-primary-hover: #33261f;
-  --brand-primary-glow: rgba(74, 58, 50, 0.28);
-  --brand-primary-glow-strong: rgba(74, 58, 50, 0.44);
-  --brand-accent: #4e744e;
-  --brand-accent-soft: rgba(169, 195, 160, 0.32);
-  --brand-ink: #4a3a32;
+  // Interactive ink: terracotta carries action; teal and sage carry community data.
+  --brand-primary: #a34a2f;
+  --brand-primary-hover: #8b3d25;
+  --brand-primary-glow: rgba(163, 74, 47, 0.26);
+  --brand-primary-glow-strong: rgba(163, 74, 47, 0.42);
+  --brand-accent: #3f6e63;
+  --brand-accent-soft: rgba(63, 110, 99, 0.2);
+  --brand-ink: #2f2620;
   --brand-sun: #e8b65f;
-  --on-brand: #fbf1e2;
-  --on-surface-strong: #fbf1e2;
+  --on-brand: #fff7ed;
+  --on-surface-strong: #fff7ed;
   --link-color: #9e4a30;
   --link-color-hover: #7c3a26;
 
@@ -154,9 +154,9 @@
   --status-rejected: #a63a2e;
   --status-rejected-glow: rgba(166, 58, 46, 0.34);
 
-  --brand-primary-alpha-10: rgba(74, 58, 50, 0.08);
-  --brand-primary-alpha-20: rgba(74, 58, 50, 0.16);
-  --brand-primary-alpha-30: rgba(74, 58, 50, 0.24);
+  --brand-primary-alpha-10: rgba(163, 74, 47, 0.1);
+  --brand-primary-alpha-20: rgba(163, 74, 47, 0.18);
+  --brand-primary-alpha-30: rgba(163, 74, 47, 0.26);
   --status-progress-alpha-10: rgba(138, 90, 0, 0.12);
   --status-progress-alpha-20: rgba(138, 90, 0, 0.22);
   --status-resolved-alpha-10: rgba(63, 110, 63, 0.12);
@@ -192,40 +192,40 @@
 
 // ---------- 3. Dark theme: the paper table at night ------------------------
 @mixin papercraft-dark-tokens {
-  --bg-app: #201814;
-  --bg-nav: rgba(32, 24, 20, 0.88);
-  --bg-surface: #2a211b;
-  --bg-card: #2f251f;
-  --bg-elevated: #3a2e27;
-  --bg-sidebar: rgba(38, 29, 23, 0.95);
+  --bg-app: #171614;
+  --bg-nav: rgba(23, 22, 20, 0.9);
+  --bg-surface: #201f1c;
+  --bg-card: #262420;
+  --bg-elevated: #302d28;
+  --bg-sidebar: rgba(26, 25, 22, 0.96);
 
-  --text-main: #f7ebdd;
-  --text-secondary: #e4d3c2;
-  --text-muted: #c0a892;
+  --text-main: #f6efe6;
+  --text-secondary: #d9cdbf;
+  --text-muted: #a99a8a;
 
-  --border-subtle: #4b3b31;
-  --glass-stroke: rgba(247, 235, 221, 0.1);
+  --border-subtle: #4a443c;
+  --glass-stroke: rgba(246, 239, 230, 0.1);
 
-  --shadow-premium: 0 2px 2px rgba(12, 8, 6, 0.28), 0 18px 32px rgba(12, 8, 6, 0.4);
-  --shadow-lift: 0 3px 4px rgba(12, 8, 6, 0.32), 0 26px 44px rgba(12, 8, 6, 0.48);
+  --shadow-premium: 0 2px 2px rgba(8, 7, 6, 0.3), 0 18px 32px rgba(8, 7, 6, 0.44);
+  --shadow-lift: 0 3px 4px rgba(8, 7, 6, 0.34), 0 26px 44px rgba(8, 7, 6, 0.52);
   --shadow-paper: var(--shadow-premium);
   --shadow-paper-lift: var(--shadow-lift);
-  --shadow-edge: inset 0 1px 0 rgba(247, 235, 221, 0.06), inset 0 -2px 0 rgba(12, 8, 6, 0.28);
+  --shadow-edge: inset 0 1px 0 rgba(246, 239, 230, 0.06), inset 0 -2px 0 rgba(8, 7, 6, 0.3);
 
-  --mesh-gradient-1: rgba(224, 138, 108, 0.1);
-  --mesh-gradient-2: rgba(140, 175, 120, 0.08);
+  --mesh-gradient-1: rgba(224, 138, 108, 0.12);
+  --mesh-gradient-2: rgba(143, 191, 174, 0.08);
   --mesh-gradient-3: rgba(242, 200, 121, 0.07);
 
-  --scrollbar-thumb: #5c493c;
-  --tooltip-bg: #f7ebdd;
-  --tooltip-text: #2a1d16;
+  --scrollbar-thumb: #5c554c;
+  --tooltip-bg: #f6efe6;
+  --tooltip-text: #201f1c;
   --tooltip-shadow: 0 18px 32px -18px rgba(0, 0, 0, 0.6);
 
-  --field-bg: #251c17;
-  --field-bg-focus: #2e241e;
-  --field-text: #f7ebdd;
-  --field-border: #55443a;
-  --field-border-focus: #e9a987;
+  --field-bg: #1d1b18;
+  --field-bg-focus: #262420;
+  --field-text: #f6efe6;
+  --field-border: #554e45;
+  --field-border-focus: #f0a882;
 
   --surface-hover: rgba(233, 169, 135, 0.1);
   --table-row-hover: rgba(233, 169, 135, 0.06);

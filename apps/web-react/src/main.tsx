@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './App.tsx'
 import i18n from './i18n'
-import { useSettingsStore } from './store/useSettingsStore'
+import { detectSystemLanguage, useSettingsStore } from './store/useSettingsStore'
 
 // PrimeReact base styles first, so the Paper Craft tokens and component
 // overrides in main.scss win the cascade without more !important.
@@ -24,8 +24,16 @@ document.documentElement.classList.add(`${initialTheme}-theme`);
 document.documentElement.dataset.theme = initialTheme;
 document.documentElement.classList.add(`interface-mode-${initialInterfaceMode}`);
 
-if (i18n.language !== initialSettings.language) {
-  i18n.changeLanguage(initialSettings.language);
+// A language the person never picked is only a guess: recompute it from the device and the
+// timezone, so an English browser installed in Colombia does not persist an English UI forever.
+const initialLanguage = initialSettings.languageExplicit
+  ? initialSettings.language
+  : detectSystemLanguage();
+if (initialLanguage !== initialSettings.language) {
+  useSettingsStore.setState({ language: initialLanguage });
+}
+if (i18n.language !== initialLanguage) {
+  i18n.changeLanguage(initialLanguage);
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

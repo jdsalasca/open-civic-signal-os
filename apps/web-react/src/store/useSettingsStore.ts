@@ -11,20 +11,58 @@ import { persist } from "zustand/middleware";
  */
 export type DataMode = "full" | "field";
 
-/** The browser locale decides the first language; a saved choice in Settings always wins. */
-function systemLanguage(): 'en' | 'es' {
-  if (typeof navigator !== 'undefined' && navigator.language.toLowerCase().startsWith('es')) {
-    return 'es';
+/**
+ * The browser locale decides the first language; a saved choice always wins.
+ *
+ * <p>Chrome in Colombia often reports `en-US` because the browser UI was installed in English,
+ * while the person reads Spanish and lives in a Spanish-speaking timezone. Checking every
+ * preferred language first and the operating-system timezone second keeps the app in the language
+ * of the place, not of the installer. A location lookup can refine this later; an explicit choice
+ * in the preferences wheel is never overridden.
+ */
+const SPANISH_TIMEZONES =
+  /^(America\/(Bogota|Mexico_City|Cancun|Merida|Monterrey|Guatemala|El_Salvador|Tegucigalpa|Managua|Costa_Rica|Panama|Havana|Santo_Domingo|Puerto_Rico|Caracas|Lima|Guayaquil|La_Paz|Santiago|Asuncion|Montevideo|Argentina\/|Easter)|Atlantic\/Canary|Europe\/Madrid|Africa\/Ceuta)$/i;
+
+const SPANISH_COUNTRIES = new Set([
+  'colombia', 'méxico', 'mexico', 'guatemala', 'el salvador', 'honduras', 'nicaragua',
+  'costa rica', 'panamá', 'panama', 'cuba', 'república dominicana', 'republica dominicana',
+  'puerto rico', 'venezuela', 'perú', 'peru', 'ecuador', 'bolivia', 'chile', 'paraguay',
+  'uruguay', 'argentina', 'españa', 'espana', 'spain'
+]);
+
+/** A country only ever adds Spanish; it never forces English over a person's device. */
+export function languageForCountry(country?: string | null): 'es' | null {
+  return country && SPANISH_COUNTRIES.has(country.trim().toLowerCase()) ? 'es' : null;
+}
+
+export function detectSystemLanguage(): 'en' | 'es' {
+  if (typeof navigator !== 'undefined') {
+    const preferred = [navigator.language, ...(navigator.languages ?? [])].filter(Boolean);
+    if (preferred.some((lang) => lang.toLowerCase().startsWith('es'))) {
+      return 'es';
+    }
+  }
+  try {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? '';
+    if (SPANISH_TIMEZONES.test(timeZone)) {
+      return 'es';
+    }
+  } catch {
+    // Older engines without Intl fall through to English.
   }
   return 'en';
 }
 
 interface SettingsState {
   language: 'en' | 'es';
+  /** True only after the person picked a language; auto-detection is allowed to change the rest. */
+  languageExplicit: boolean;
   theme: 'light' | 'dark' | 'contrast';
   interfaceMode: 'simple' | 'advanced';
   dataMode: DataMode;
   setLanguage: (lang: 'en' | 'es') => void;
+  /** Applies a language inferred from the country without turning it into a manual choice. */
+  setDetectedLanguage: (lang: 'en' | 'es') => void;
   setTheme: (theme: 'light' | 'dark' | 'contrast') => void;
   setInterfaceMode: (mode: 'simple' | 'advanced') => void;
   setDataMode: (mode: DataMode) => void;
@@ -33,13 +71,16 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      language: systemLanguage(),
+      language: detectSystemLanguage(),
+      languageExplicit: false,
       theme: 'dark',
       interfaceMode: 'simple',
       // Defaults to full: a field mode that silently reduced what everyone sees would be a change
       // nobody asked for. It is opt-in, and the setting says what it drops.
       dataMode: 'full',
-      setLanguage: (language) => set({ language }),
+      setLanguage: (language) => set({ language, languageExplicit: true }),
+      setDetectedLanguage: (language) =>
+        set((state) => (state.languageExplicit ? state : { language })),
       setTheme: (theme) => set({ theme }),
       setInterfaceMode: (interfaceMode) => set({ interfaceMode }),
       setDataMode: (dataMode) => set({ dataMode })

@@ -16,6 +16,10 @@ export default defineConfig({
   reporter: [['html', { outputFolder: '../../output/playwright-report' }]],
   use: {
     baseURL: process.env.BASE_URL || `http://localhost:${WEB_PORT}`,
+    // Mirror the CI runner: a local America/Bogota timezone would auto-select Spanish and make
+    // English copy assertions fail only on the developer machine.
+    locale: 'en-US',
+    timezoneId: 'UTC',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
