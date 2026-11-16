@@ -56,7 +56,6 @@ export function CommunityFeed() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [publishing, setPublishing] = useState(false);
-  const [supported, setSupported] = useState<Set<string>>(() => new Set());
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [replySending, setReplySending] = useState(false);
@@ -192,17 +191,28 @@ export function CommunityFeed() {
     }
   };
 
-  const support = async (item: CommunityFeedItem) => {
+  const react = async (item: CommunityFeedItem, reaction: 'LIKE' | 'CELEBRATE') => {
+    if (item.type !== 'signal' && item.type !== 'blog') return;
     try {
-      await apiClient.post(`signals/${item.id}/vote`);
-      setSupported((current) => new Set(current).add(item.id));
-      toast.success(t('community_feed.support_success'));
+      const endpoint = item.type === 'signal'
+        ? `signals/${item.id}/react`
+        : `community/blog/${item.id}/react`;
+      const { data } = await apiClient.post<{ reactions: Record<string, number>; viewerReaction: string | null }>(
+        endpoint,
+        { type: reaction }
+      );
+      setFeed((current) =>
+        current.map((entry) =>
+          entry.id === item.id && entry.type === item.type
+            ? { ...entry, reactions: data.reactions, viewerReaction: data.viewerReaction }
+            : entry
+        )
+      );
     } catch (err) {
       const apiErr = err as ApiError;
-      toast.error(apiErr.friendlyMessage || t('community_feed.support_error'));
+      toast.error(apiErr.friendlyMessage || t('community_feed.reaction_error'));
     }
   };
-
   const followType = (item: CommunityFeedItem) => {
     if (item.type === 'signal') return 'SIGNAL';
     if (item.type === 'blog') return 'BLOG';
@@ -554,18 +564,28 @@ export function CommunityFeed() {
                           </p>
                         )}
                         <div className="social-feed-actions">
-                          {item.type === 'signal' && (
-                            <button
-                              type="button"
-                              onClick={() => support(item)}
-                              disabled={supported.has(item.id)}
-                            >
-                              <i className="pi pi-heart" aria-hidden="true" />
-                              {supported.has(item.id)
-                                ? t('community_feed.supported')
-                                : t('community_feed.support')}
-                            </button>
-                          )}
+                          {(item.type === 'signal' || item.type === 'blog') &&
+                            (['LIKE', 'CELEBRATE'] as const).map((reaction) => {
+                              const count = item.reactions?.[reaction] ?? 0;
+                              const active = item.viewerReaction === reaction;
+                              return (
+                                <button
+                                  key={reaction}
+                                  type="button"
+                                  onClick={() => react(item, reaction)}
+                                  aria-pressed={active}
+                                  className={active ? 'is-active' : undefined}
+                                  data-testid={`community-feed-react-${reaction.toLowerCase()}-${item.id}`}
+                                >
+                                  <i
+                                    className={reaction === 'LIKE' ? 'pi pi-heart' : 'pi pi-star'}
+                                    aria-hidden="true"
+                                  />
+                                  {t(reaction === 'LIKE' ? 'community_feed.like' : 'community_feed.celebrate')}
+                                  {count > 0 ? ` · ${count}` : ''}
+                                </button>
+                              );
+                            })}
                           {item.type === 'signal' && (
                             <button
                               type="button"
@@ -696,6 +716,10 @@ export function CommunityFeed() {
                   </span>
                 </div>
                 <div className="social-feed-aside-links mt-4">
+                  <button type="button" onClick={() => navigate('/communities/rooms')}>
+                    <i className="pi pi-comments" aria-hidden="true" />
+                    {t('community_feed.chat')}
+                  </button>
                   {interfaceMode === 'advanced' && (
                     <>
                       <button type="button" onClick={() => navigate('/communities/map')}>

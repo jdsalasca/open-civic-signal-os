@@ -560,6 +560,8 @@ export type CommunityFeedItem = {
   confirmationCount?: number | null;
   viewerConfirmed?: boolean | null;
   following?: boolean | null;
+  reactions?: Record<string, number> | null;
+  viewerReaction?: string | null;
 };
 
 export type SignalConfirmationState = {
