@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-11-16T01:15:07.761Z
+Last updated: 2026-11-16T01:35:38.168Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,8 +10,8 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-11-09T01:15:03.832Z)
-- Throughput (issues closed): 2
+- Window: last 7 days (since 2026-11-09T01:35:34.371Z)
+- Throughput (issues closed): 4
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
 
@@ -80,14 +80,12 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 26
+- TODO: 24
 - IN_PROGRESS: 0
 - BLOCKED: 0
-- DONE: 111
+- DONE: 113
 
 ### TODO
-- #163 Backend: flat service layer and full-scan read paths need bounded contexts
-- #161 Home is a wall of buttons, no clear feed, English in Colombia, and region not applied
 - #157 Current Sprint Focus 2026-W46
 - #156 Agent Quality Review 2026-W46
 - #152 Place dropdowns collapse into one letter per line and the selected option has low contrast
@@ -120,6 +118,8 @@ Status labels used by this board:
 - _No issues_
 
 ### DONE
+- #163 Backend: flat service layer and full-scan read paths need bounded contexts
+- #161 Home is a wall of buttons, no clear feed, English in Colombia, and region not applied
 - #159 Public backlog overflows sideways on mobile with long location labels
 - #154 Registry cards break names into one letter per line; no quick way to switch interface styles
 - #119 Current Sprint Focus 2026-W39
