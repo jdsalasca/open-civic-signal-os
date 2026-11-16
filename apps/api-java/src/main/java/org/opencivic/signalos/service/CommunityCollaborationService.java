@@ -124,6 +124,23 @@ public class CommunityCollaborationService {
         return new PageImpl<>(sortedResponses.subList(fromIndex, toIndex), pageable, sortedResponses.size());
     }
 
+    public CommunityThreadResponse getThread(UUID communityId, UUID threadId, String username) {
+        User user = accessService.getCurrentUser(username);
+        accessService.requireMembership(user.getId(), communityId);
+        CommunityThread thread = threadRepository.findById(threadId)
+            .orElseThrow(() -> new ResourceNotFoundException("Thread not found: " + threadId));
+        if (!communityId.equals(thread.getSourceCommunityId()) && !communityId.equals(thread.getTargetCommunityId())) {
+            throw new ResourceNotFoundException("Thread not found: " + threadId);
+        }
+        List<CommunityThreadMessage> messages = messageRepository.findByThreadIdOrderByCreatedAtAsc(threadId);
+        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
+            "THREAD_MESSAGE",
+            messages.stream().map(CommunityThreadMessage::getId).toList(),
+            user.getId()
+        );
+        return toThreadResponse(thread, messages, viewerReactions);
+    }
+
     @Transactional
     public CommunityThreadResponse createThread(
         UUID sourceCommunityId,
@@ -565,13 +582,17 @@ public class CommunityCollaborationService {
         Map<UUID, String> viewerReactions
     ) {
         Map<UUID, Integer> directReplyCounts = buildDirectReplyCountMap(threadMessages);
+        Map<UUID, User> authors = authorsById(
+            threadMessages.stream().map(CommunityThreadMessage::getAuthorId).toList()
+        );
         List<CommunityThreadMessageResponse> messages = threadMessages
             .stream()
             .map(message -> toMessageResponse(
                 message,
                 viewerReactions.get(message.getId()),
                 resolveThreadMessageDepth(message),
-                directReplyCounts.getOrDefault(message.getId(), 0)
+                directReplyCounts.getOrDefault(message.getId(), 0),
+                authors
             ))
             .toList();
         int totalMessages = threadMessages.size();
@@ -643,10 +664,23 @@ public class CommunityCollaborationService {
         int depth,
         int directReplyCount
     ) {
+        return toMessageResponse(message, viewerReaction, depth, directReplyCount,
+            authorsById(List.of(message.getAuthorId())));
+    }
+
+    private CommunityThreadMessageResponse toMessageResponse(
+        CommunityThreadMessage message,
+        String viewerReaction,
+        int depth,
+        int directReplyCount,
+        Map<UUID, User> authors
+    ) {
+        User author = authors.get(message.getAuthorId());
         return new CommunityThreadMessageResponse(
             message.getId(),
             message.getThreadId(),
             message.getAuthorId(),
+            authorName(author),
             message.getSourceCommunityId(),
             message.getParentMessageId(),
             depth,

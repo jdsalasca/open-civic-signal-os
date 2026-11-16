@@ -143,6 +143,15 @@ public class CommunityCollaborationController {
         );
     }
 
+    @GetMapping("/threads/{threadId}")
+    public CommunityThreadResponse getThread(
+        @PathVariable UUID threadId,
+        @RequestParam UUID communityId,
+        Principal principal
+    ) {
+        return collaborationService.getThread(communityId, threadId, principal.getName());
+    }
+
     @PostMapping("/threads")
     public CommunityThreadResponse createThread(
         @Valid @RequestBody CreateCommunityThreadRequest request,
