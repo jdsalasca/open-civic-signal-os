@@ -41,6 +41,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommunityTrustMetricsService {
     private static final Set<String> RESOLVED_SIGNAL_STATUSES = Set.of("RESOLVED", "REJECTED");
+    private static final String NOT_ENOUGH_ACTIVITY =
+        "Not enough reporting, decision, or execution activity was recorded in this period to infer trend strength yet.";
 
     private final CommunityAccessService communityAccessService;
     private final CommunityRepository communityRepository;
@@ -88,15 +90,50 @@ public class CommunityTrustMetricsService {
         Community community = communityRepository.findById(communityId)
             .orElseThrow(() -> new ResourceNotFoundException("Community not found for trust metrics: " + communityId));
         MetricsPeriod period = MetricsPeriod.from(periodKey);
-        LocalDate today = LocalDate.now();
-        LocalDate startDate = today.minusDays(period.days() - 1L);
-        LocalDateTime startInclusive = startDate.atStartOfDay();
-        LocalDateTime endExclusive = today.plusDays(1).atStartOfDay();
-        LocalDateTime generatedAt = LocalDateTime.now();
+        MetricsWindow window = MetricsWindow.of(period);
+        MetricsData data = loadData(communityId, window);
 
+        long resolvedSignalsCount = data.signalsInPeriod().stream()
+            .filter(signal -> RESOLVED_SIGNAL_STATUSES.contains(signal.getStatus()))
+            .count();
+        long completedTasksCount = data.tasksInPeriod().stream()
+            .filter(task -> task.getStatus() == CommunityProjectStatus.DONE)
+            .count();
+        List<Long> resolutionHours = resolutionHours(data.resolutionEventsInPeriod(), data.signalsById());
+        boolean lowData = data.signalsInPeriod().isEmpty()
+            && data.decisionsInPeriod().isEmpty()
+            && data.tasksInPeriod().isEmpty();
+        LocalDateTime lastUpdatedAt = latestTimestamp(
+            window.generatedAt(),
+            data.allSignals().stream().map(Signal::getCreatedAt).toList(),
+            data.allStatusEntries().stream().map(SignalStatusEntry::getCreatedAt).toList(),
+            data.proposalsInPeriod().stream().map(CommunityProposal::getUpdatedAt).toList(),
+            data.decisionsInPeriod().stream().map(CommunityDecision::getUpdatedAt).toList(),
+            data.boards().stream().map(CommunityProjectBoard::getUpdatedAt).toList(),
+            data.allTasks().stream().map(CommunityProjectTask::getUpdatedAt).toList()
+        );
+
+        return new CommunityTrustMetricsResponse(
+            community.getId(),
+            community.getName(),
+            community.getSlug(),
+            period.key(),
+            window.startDate(),
+            window.today(),
+            window.generatedAt(),
+            lastUpdatedAt,
+            freshness(lastUpdatedAt, window.generatedAt()),
+            lowData,
+            lowData ? NOT_ENOUGH_ACTIVITY : null,
+            buildCards(data, resolvedSignalsCount, completedTasksCount, resolutionHours),
+            buildBreakdowns(data)
+        );
+    }
+
+    private MetricsData loadData(UUID communityId, MetricsWindow window) {
         List<Signal> allSignals = signalRepository.findByCommunityId(communityId);
         List<Signal> signalsInPeriod = allSignals.stream()
-            .filter(signal -> isWithin(signal.getCreatedAt(), startInclusive, endExclusive))
+            .filter(signal -> isWithin(signal.getCreatedAt(), window.startInclusive(), window.endExclusive()))
             .toList();
         List<SignalStatusEntry> allStatusEntries = allSignals.isEmpty()
             ? List.of()
@@ -105,20 +142,24 @@ public class CommunityTrustMetricsService {
             );
         List<SignalStatusEntry> resolutionEventsInPeriod = allStatusEntries.stream()
             .filter(entry -> RESOLVED_SIGNAL_STATUSES.contains(entry.getStatusTo()))
-            .filter(entry -> isWithin(entry.getCreatedAt(), startInclusive, endExclusive))
+            .filter(entry -> isWithin(entry.getCreatedAt(), window.startInclusive(), window.endExclusive()))
             .toList();
         Map<UUID, Signal> signalsById = allSignals.stream()
             .collect(Collectors.toMap(Signal::getId, signal -> signal));
 
-        List<CommunityProposal> proposalsInPeriod = proposalRepository.findByCommunityIdOrderByUpdatedAtDescCreatedAtDesc(communityId).stream()
-            .filter(proposal -> isWithin(proposal.getCreatedAt(), startInclusive, endExclusive))
+        List<CommunityProposal> proposalsInPeriod = proposalRepository
+            .findByCommunityIdOrderByUpdatedAtDescCreatedAtDesc(communityId).stream()
+            .filter(proposal -> isWithin(proposal.getCreatedAt(), window.startInclusive(), window.endExclusive()))
             .toList();
-        List<CommunityDecision> decisionsInPeriod = decisionRepository.findByCommunityIdOrderByDecidedAtDescUpdatedAtDesc(communityId).stream()
-            .filter(decision -> isWithin(decision.getDecidedAt(), startInclusive, endExclusive))
+        List<CommunityDecision> decisionsInPeriod = decisionRepository
+            .findByCommunityIdOrderByDecidedAtDescUpdatedAtDesc(communityId).stream()
+            .filter(decision -> isWithin(decision.getDecidedAt(), window.startInclusive(), window.endExclusive()))
             .toList();
-        List<CommunityProjectBoard> boards = projectBoardRepository.findByCommunityIdOrderByUpdatedAtDescCreatedAtDesc(communityId);
+        List<CommunityProjectBoard> boards = projectBoardRepository
+            .findByCommunityIdOrderByUpdatedAtDescCreatedAtDesc(communityId);
         List<CommunityProjectBoard> boardsInPeriod = boards.stream()
-            .filter(board -> isWithin(board.getCreatedAt(), startInclusive, endExclusive) || isWithin(board.getUpdatedAt(), startInclusive, endExclusive))
+            .filter(board -> isWithin(board.getCreatedAt(), window.startInclusive(), window.endExclusive())
+                || isWithin(board.getUpdatedAt(), window.startInclusive(), window.endExclusive()))
             .toList();
         List<CommunityProjectTask> allTasks = boards.isEmpty()
             ? List.of()
@@ -127,145 +168,155 @@ public class CommunityTrustMetricsService {
             .collect(Collectors.toMap(CommunityProjectBoard::getId, CommunityProjectBoard::getCommunityId));
         List<CommunityProjectTask> tasksInPeriod = allTasks.stream()
             .filter(task -> boardCommunityById.containsKey(task.getProjectBoardId()))
-            .filter(task -> isWithin(task.getCreatedAt(), startInclusive, endExclusive) || isWithin(task.getUpdatedAt(), startInclusive, endExclusive))
+            .filter(task -> isWithin(task.getCreatedAt(), window.startInclusive(), window.endExclusive())
+                || isWithin(task.getUpdatedAt(), window.startInclusive(), window.endExclusive()))
             .toList();
 
-        long membershipCount = membershipRepository.countByCommunityId(communityId);
-        Set<UUID> activeContributors = new java.util.LinkedHashSet<>();
-        signalsInPeriod.stream().map(Signal::getAuthorId).filter(java.util.Objects::nonNull).forEach(activeContributors::add);
-        proposalsInPeriod.stream().map(CommunityProposal::getAuthorId).filter(java.util.Objects::nonNull).forEach(activeContributors::add);
-        decisionsInPeriod.stream().map(CommunityDecision::getDecidedBy).filter(java.util.Objects::nonNull).forEach(activeContributors::add);
-        decisionsInPeriod.stream().map(CommunityDecision::getExecutionOwnerId).filter(java.util.Objects::nonNull).forEach(activeContributors::add);
-        boardsInPeriod.stream().map(CommunityProjectBoard::getOwnerId).filter(java.util.Objects::nonNull).forEach(activeContributors::add);
-        tasksInPeriod.stream().map(CommunityProjectTask::getAssigneeId).filter(java.util.Objects::nonNull).forEach(activeContributors::add);
+        Set<UUID> activeContributors = activeContributors(
+            signalsInPeriod, proposalsInPeriod, decisionsInPeriod, boardsInPeriod, tasksInPeriod
+        );
+        return new MetricsData(
+            allSignals,
+            signalsInPeriod,
+            allStatusEntries,
+            resolutionEventsInPeriod,
+            signalsById,
+            proposalsInPeriod,
+            decisionsInPeriod,
+            boards,
+            boardsInPeriod,
+            allTasks,
+            tasksInPeriod,
+            membershipRepository.countByCommunityId(communityId),
+            activeContributors
+        );
+    }
 
-        long resolvedSignalsCount = signalsInPeriod.stream()
-            .filter(signal -> RESOLVED_SIGNAL_STATUSES.contains(signal.getStatus()))
-            .count();
-        long completedTasksCount = tasksInPeriod.stream()
-            .filter(task -> task.getStatus() == CommunityProjectStatus.DONE)
-            .count();
+    private Set<UUID> activeContributors(
+        List<Signal> signals,
+        List<CommunityProposal> proposals,
+        List<CommunityDecision> decisions,
+        List<CommunityProjectBoard> boards,
+        List<CommunityProjectTask> tasks
+    ) {
+        Set<UUID> contributors = new java.util.LinkedHashSet<>();
+        signals.stream().map(Signal::getAuthorId).filter(java.util.Objects::nonNull).forEach(contributors::add);
+        proposals.stream().map(CommunityProposal::getAuthorId).filter(java.util.Objects::nonNull).forEach(contributors::add);
+        decisions.stream().map(CommunityDecision::getDecidedBy).filter(java.util.Objects::nonNull).forEach(contributors::add);
+        decisions.stream().map(CommunityDecision::getExecutionOwnerId).filter(java.util.Objects::nonNull).forEach(contributors::add);
+        boards.stream().map(CommunityProjectBoard::getOwnerId).filter(java.util.Objects::nonNull).forEach(contributors::add);
+        tasks.stream().map(CommunityProjectTask::getAssigneeId).filter(java.util.Objects::nonNull).forEach(contributors::add);
+        return contributors;
+    }
 
-        List<Long> resolutionHours = resolutionEventsInPeriod.stream()
+    private List<Long> resolutionHours(List<SignalStatusEntry> events, Map<UUID, Signal> signalsById) {
+        return events.stream()
             .map(entry -> {
-                Signal sourceSignal = signalsById.get(entry.getSignalId());
-                if (sourceSignal == null || sourceSignal.getCreatedAt() == null) {
+                Signal source = signalsById.get(entry.getSignalId());
+                if (source == null || source.getCreatedAt() == null) {
                     return null;
                 }
-                return ChronoUnit.HOURS.between(sourceSignal.getCreatedAt(), entry.getCreatedAt());
+                return ChronoUnit.HOURS.between(source.getCreatedAt(), entry.getCreatedAt());
             })
             .filter(java.util.Objects::nonNull)
             .sorted()
             .toList();
+    }
 
-        String resolutionRateValue = percentageValue(resolvedSignalsCount, signalsInPeriod.size());
-        String participationValue = percentageValue(activeContributors.size(), membershipCount);
-        String executionValue = percentageValue(completedTasksCount, tasksInPeriod.size());
-        String medianResolutionValue = resolutionHours.isEmpty()
-            ? "0"
-            : Long.toString(median(resolutionHours));
-
-        boolean lowData = signalsInPeriod.isEmpty() && decisionsInPeriod.isEmpty() && tasksInPeriod.isEmpty();
-        String lowDataReason = lowData
-            ? "Not enough reporting, decision, or execution activity was recorded in this period to infer trend strength yet."
-            : null;
-
-        LocalDateTime lastUpdatedAt = latestTimestamp(
-            generatedAt,
-            allSignals.stream().map(Signal::getCreatedAt).toList(),
-            allStatusEntries.stream().map(SignalStatusEntry::getCreatedAt).toList(),
-            proposalsInPeriod.stream().map(CommunityProposal::getUpdatedAt).toList(),
-            decisionsInPeriod.stream().map(CommunityDecision::getUpdatedAt).toList(),
-            boards.stream().map(CommunityProjectBoard::getUpdatedAt).toList(),
-            allTasks.stream().map(CommunityProjectTask::getUpdatedAt).toList()
+    private List<TrustMetricCardResponse> buildCards(
+        MetricsData data,
+        long resolvedSignalsCount,
+        long completedTasksCount,
+        List<Long> resolutionHours
+    ) {
+        return List.of(
+            resolutionCard(resolvedSignalsCount, data.signalsInPeriod().size()),
+            participationCard(data.activeContributors().size(), data.membershipCount()),
+            executionCard(completedTasksCount, data.tasksInPeriod().size()),
+            resolutionTimeCard(resolutionHours)
         );
+    }
 
-        List<TrustMetricCardResponse> cards = List.of(
-            new TrustMetricCardResponse(
-                "resolution_rate",
-                "Case closure rate",
-                resolutionRateValue,
-                "percentage",
-                "Share of issues reported during the selected period that are already closed or rejected.",
-                "resolved_or_rejected_signals_created_in_period / total_signals_created_in_period",
-                resolvedSignalsCount + " of " + signalsInPeriod.size() + " reported issues have already reached a closed state."
-            ),
-            new TrustMetricCardResponse(
-                "participation_coverage",
-                "Participation coverage",
-                participationValue,
-                "percentage",
-                "Share of community members who created reports, proposals, decisions, or execution work in the selected period.",
-                "distinct_active_contributors_in_period / total_community_members",
-                activeContributors.size() + " of " + membershipCount + " known community members left a traceable contribution in this period."
-            ),
-            new TrustMetricCardResponse(
-                "execution_completion_rate",
-                "Execution completion",
-                executionValue,
-                "percentage",
-                "Share of project tasks touched in this period that are already marked done.",
-                "done_tasks_touched_in_period / total_tasks_touched_in_period",
-                completedTasksCount + " of " + tasksInPeriod.size() + " execution tasks active in this period are marked done."
-            ),
-            new TrustMetricCardResponse(
-                "median_resolution_hours",
-                "Median resolution time",
-                medianResolutionValue,
-                "hours",
-                "Median hours between issue reporting and the first closed-state transition recorded during this period.",
-                "median(hours_between_signal_created_at_and_first_resolved_or_rejected_event_in_period)",
-                resolutionHours.isEmpty()
-                    ? "No resolved cases were recorded in this period yet."
-                    : "Computed from " + resolutionHours.size() + " resolved-case history entries."
-            )
+    private TrustMetricCardResponse resolutionCard(long resolved, long total) {
+        return new TrustMetricCardResponse(
+            "resolution_rate",
+            "Case closure rate",
+            percentageValue(resolved, total),
+            "percentage",
+            "Share of issues reported during the selected period that are already closed or rejected.",
+            "resolved_or_rejected_signals_created_in_period / total_signals_created_in_period",
+            resolved + " of " + total + " reported issues have already reached a closed state."
         );
+    }
 
-        List<TrustMetricBreakdownResponse> breakdowns = List.of(
+    private TrustMetricCardResponse participationCard(long active, long members) {
+        return new TrustMetricCardResponse(
+            "participation_coverage",
+            "Participation coverage",
+            percentageValue(active, members),
+            "percentage",
+            "Share of community members who created reports, proposals, decisions, or execution work in the selected period.",
+            "distinct_active_contributors_in_period / total_community_members",
+            active + " of " + members + " known community members left a traceable contribution in this period."
+        );
+    }
+
+    private TrustMetricCardResponse executionCard(long completed, long total) {
+        return new TrustMetricCardResponse(
+            "execution_completion_rate",
+            "Execution completion",
+            percentageValue(completed, total),
+            "percentage",
+            "Share of project tasks touched in this period that are already marked done.",
+            "done_tasks_touched_in_period / total_tasks_touched_in_period",
+            completed + " of " + total + " execution tasks active in this period are marked done."
+        );
+    }
+
+    private TrustMetricCardResponse resolutionTimeCard(List<Long> resolutionHours) {
+        return new TrustMetricCardResponse(
+            "median_resolution_hours",
+            "Median resolution time",
+            resolutionHours.isEmpty() ? "0" : Long.toString(median(resolutionHours)),
+            "hours",
+            "Median hours between issue reporting and the first closed-state transition recorded during this period.",
+            "median(hours_between_signal_created_at_and_first_resolved_or_rejected_event_in_period)",
+            resolutionHours.isEmpty()
+                ? "No resolved cases were recorded in this period yet."
+                : "Computed from " + resolutionHours.size() + " resolved-case history entries."
+        );
+    }
+
+    private List<TrustMetricBreakdownResponse> buildBreakdowns(MetricsData data) {
+        return List.of(
             buildBreakdown(
                 "signals_by_status",
                 "Issue outcomes in this period",
                 "How newly reported issues are distributed across current lifecycle states.",
-                signalsInPeriod,
+                data.signalsInPeriod(),
                 signal -> signal.getStatus().replace('_', ' ')
             ),
             buildBreakdown(
                 "decisions_by_status",
                 "Decisions recorded in this period",
                 "How formal community decisions are distributed across their current execution states.",
-                decisionsInPeriod,
+                data.decisionsInPeriod(),
                 decision -> decision.getDecisionStatus().name().replace('_', ' ')
             ),
             buildBreakdown(
                 "tasks_by_stage",
                 "Execution tasks touched in this period",
                 "How active board tasks are distributed across TODO, IN PROGRESS, and DONE.",
-                tasksInPeriod,
+                data.tasksInPeriod(),
                 task -> task.getStatus().name().replace('_', ' ')
             ),
             buildBreakdown(
                 "issue_categories",
                 "Top issue categories",
                 "Which issue categories generated the most reporting volume during the selected period.",
-                signalsInPeriod,
+                data.signalsInPeriod(),
                 Signal::getCategory
             )
-        );
-
-        return new CommunityTrustMetricsResponse(
-            community.getId(),
-            community.getName(),
-            community.getSlug(),
-            period.key(),
-            startDate,
-            today,
-            generatedAt,
-            lastUpdatedAt,
-            freshness(lastUpdatedAt, generatedAt),
-            lowData,
-            lowDataReason,
-            cards,
-            breakdowns
         );
     }
 
@@ -370,6 +421,44 @@ public class CommunityTrustMetricsService {
             .divide(BigDecimal.valueOf(total), 1, RoundingMode.HALF_UP)
             .doubleValue();
     }
+
+    private record MetricsWindow(
+        MetricsPeriod period,
+        LocalDate startDate,
+        LocalDate today,
+        LocalDateTime startInclusive,
+        LocalDateTime endExclusive,
+        LocalDateTime generatedAt
+    ) {
+        static MetricsWindow of(MetricsPeriod period) {
+            LocalDate today = LocalDate.now();
+            LocalDate startDate = today.minusDays(period.days() - 1L);
+            return new MetricsWindow(
+                period,
+                startDate,
+                today,
+                startDate.atStartOfDay(),
+                today.plusDays(1).atStartOfDay(),
+                LocalDateTime.now()
+            );
+        }
+    }
+
+    private record MetricsData(
+        List<Signal> allSignals,
+        List<Signal> signalsInPeriod,
+        List<SignalStatusEntry> allStatusEntries,
+        List<SignalStatusEntry> resolutionEventsInPeriod,
+        Map<UUID, Signal> signalsById,
+        List<CommunityProposal> proposalsInPeriod,
+        List<CommunityDecision> decisionsInPeriod,
+        List<CommunityProjectBoard> boards,
+        List<CommunityProjectBoard> boardsInPeriod,
+        List<CommunityProjectTask> allTasks,
+        List<CommunityProjectTask> tasksInPeriod,
+        long membershipCount,
+        Set<UUID> activeContributors
+    ) {}
 
     private record MetricsPeriod(String key, int days) {
         static MetricsPeriod from(String raw) {

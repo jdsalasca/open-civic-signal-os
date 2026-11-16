@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { DataTable } from "primereact/datatable";
+import { DataTable, type DataTablePageEvent } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
@@ -16,7 +16,7 @@ type Props = {
   totalRecords?: number;
   rows?: number;
   first?: number;
-  onPage?: (event: any) => void;
+  onPage?: (event: DataTablePageEvent) => void;
   /** Backend threshold used to align the visual priority scale with the CRITICAL filter. */
   criticalThreshold?: number;
 };

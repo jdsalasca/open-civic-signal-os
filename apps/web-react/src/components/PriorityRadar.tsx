@@ -7,6 +7,7 @@ import {
   Filler,
   Tooltip,
   Legend,
+  type ChartOptions,
   type TooltipItem,
 } from "chart.js";
 import { CivicCard } from "./ui/CivicCard";
@@ -53,6 +54,7 @@ export function PriorityRadar({ urgency, impact, votes, people }: PriorityRadarP
       tooltipText: token("--tooltip-text", "#ffffff"),
       onBrand: token("--on-brand", "#f8fafc"),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- theme invalidates the CSS token reads
   }, [theme]);
 
   const factorRows = [
@@ -81,7 +83,7 @@ export function PriorityRadar({ urgency, impact, votes, people }: PriorityRadarP
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"radar"> = {
     scales: {
       r: {
         angleLines: { color: palette.grid },
@@ -94,7 +96,7 @@ export function PriorityRadar({ urgency, impact, votes, people }: PriorityRadarP
         suggestedMin: 0,
         suggestedMax: 100,
       },
-    } as any,
+    },
     plugins: {
       legend: { display: false },
       tooltip: {

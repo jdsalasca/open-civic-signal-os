@@ -16,6 +16,7 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npm run prioritize
+      - run: npm run lint:web
 
   java-check:
     runs-on: ubuntu-latest

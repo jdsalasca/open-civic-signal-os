@@ -7,7 +7,7 @@ const communityId = "11111111-1111-1111-1111-111111111111";
 
 test.describe("Community trust metrics dashboard", () => {
   test("shows explainable trust cards and degrades cleanly for low-data communities", async ({ page }) => {
-    let requestedPeriods: string[] = [];
+    const requestedPeriods: string[] = [];
 
     await page.addInitScript((activeCommunityId) => {
       window.localStorage.setItem(

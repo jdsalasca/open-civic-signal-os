@@ -1321,6 +1321,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Community'
+  /api/communities/nearest:
+    get:
+      summary: Find the closest active city for a coordinate
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+      responses:
+        '200':
+          description: Closest active city
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Community'
+        '404':
+          description: No active city exists near this location
   /api/communities/tree:
     get:
       summary: List communities as a hierarchical tree
