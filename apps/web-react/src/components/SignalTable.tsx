@@ -6,7 +6,6 @@ import { Skeleton } from "primereact/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ExplainabilityFactor, Signal } from "../types";
-import { CivicButton } from "./ui/CivicButton";
 import { PriorityScale, SignalEmpty, StatusChip } from "./signalPrimitives";
 import { useSignalStatusLabel } from "../utils/signalStatus";
 
@@ -112,9 +111,6 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
         <span className="u-list-item-title text-sm mb-1 group-hover:text-brand-primary transition-colors">
           {rowData.title}
         </span>
-        <div className="u-card-meta-row">
-          <span className="text-xs text-muted u-meta-value">SIG-ID: {rowData.id?.substring(0,8)}</span>
-        </div>
         {previewText && (
           <span
             className="u-list-item-copy text-xs mt-2 line-height-3"
@@ -210,17 +206,17 @@ export function SignalTable({ signals, loading, totalRecords, rows, first, onPag
             }
             const signal = d as Signal;
             return (
-              <CivicButton
+              <button
                 type="button"
-                variant="ghost"
-                size="small"
-                label={t('signals.view_details')}
-                icon="pi pi-arrow-right"
+                className="signal-table-view"
                 onClick={(event) => {
                   event.stopPropagation();
                   navigate(`/signal/${signal.id}`);
                 }}
-              />
+              >
+                {t('signals.view_details')}
+                <i className="pi pi-arrow-right" aria-hidden="true" />
+              </button>
             );
           }}
         />

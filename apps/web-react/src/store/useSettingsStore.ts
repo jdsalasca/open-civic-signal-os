@@ -77,7 +77,7 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       language: detectSystemLanguage(),
       languageExplicit: false,
-      theme: 'dark',
+      theme: 'light',
       interfaceMode: 'simple',
       // Defaults to full: a field mode that silently reduced what everyone sees would be a change
       // nobody asked for. It is opt-in, and the setting says what it drops.

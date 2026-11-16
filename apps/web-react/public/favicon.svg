@@ -23,13 +23,13 @@
   @media (prefers-reduced-motion:reduce){.ca-anim,.ca-drift,.ca-float,.ca-sway,.ca-spin,.ca-breathe,.ca-pulse,.ca-reveal,.ca-draw{animation:none!important;transform:none!important;opacity:1!important;stroke-dashoffset:0!important}}</style>
   <defs><filter id="ca-paper" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.5"/></filter><filter id="ca-grain"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" seed="7"/><feColorMatrix type="saturate" values="0"/></filter></defs>
   <rect width="1200" height="1200" fill="transparent"/>
-  <g><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1" opacity="0.9"><rect x="88" y="64" width="1024" height="1024" rx="236" fill="#F2C879"/></g>
-<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="104" y="92" width="1024" height="1024" rx="236" fill="#FFF8EA"/></g>
-<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><circle cx="616" cy="700" r="330" fill="#F2C879"/></g>
-<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M 126 760 A 490 490 0 0 1 1106 760" fill="none" stroke="#4A3A32" stroke-width="56"/></g>
-<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M 256 760 A 360 360 0 0 1 976 760" fill="none" stroke="#4A3A32" stroke-width="56"/></g>
-<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M 386 760 A 230 230 0 0 1 846 760" fill="none" stroke="#4A3A32" stroke-width="56"/></g>
-<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><circle cx="616" cy="760" r="96" fill="#CE7256"/></g></g>
+  <g><g class="ca-anim" style="--ca-delay:0s;--ca-speed:1" opacity="0.9"><rect x="88" y="64" width="1024" height="1024" rx="236" fill="#5EEAD4"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><rect x="104" y="92" width="1024" height="1024" rx="236" fill="#FFFFFF"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><circle cx="616" cy="700" r="330" fill="#5EEAD4"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M 126 760 A 490 490 0 0 1 1106 760" fill="none" stroke="#10202B" stroke-width="56"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M 256 760 A 360 360 0 0 1 976 760" fill="none" stroke="#10202B" stroke-width="56"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><path d="M 386 760 A 230 230 0 0 1 846 760" fill="none" stroke="#10202B" stroke-width="56"/></g>
+<g class="ca-anim" style="--ca-delay:0s;--ca-speed:1"><circle cx="616" cy="760" r="96" fill="#0F766E"/></g></g>
   
   
 </svg>

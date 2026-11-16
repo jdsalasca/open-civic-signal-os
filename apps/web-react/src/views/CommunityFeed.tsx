@@ -258,10 +258,10 @@ export function CommunityFeed() {
           actions={
             <CivicButton
               type="button"
-              icon="pi pi-plus"
-              label={t('community_feed.new_post')}
-              onClick={() => setComposerOpen(true)}
-              data-testid="community-feed-new-post"
+              icon="pi pi-plus-circle"
+              label={t('community_feed.report_action')}
+              onClick={() => navigate('/report')}
+              data-testid="community-feed-report"
             />
           }
         />
