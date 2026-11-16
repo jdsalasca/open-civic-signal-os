@@ -8,6 +8,7 @@ public record CommunityThreadMessageResponse(
     UUID id,
     UUID threadId,
     UUID authorId,
+    String authorName,
     UUID sourceCommunityId,
     UUID parentMessageId,
     int depth,

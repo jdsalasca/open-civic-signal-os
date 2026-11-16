@@ -1,4 +1,5 @@
 import axios from 'axios';
+import i18n from '../i18n';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCommunityStore } from '../store/useCommunityStore';
 
@@ -59,20 +60,21 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // UX-005: Map specific error messages by root cause
+    // UX-005: Map specific error messages by root cause. The copy comes from the active language,
+    // not from a fixed English string, because views prefer friendlyMessage over their own key.
     if (!error.response) {
-      error.friendlyMessage = "Civic API Unreachable: Check connection.";
+      error.friendlyMessage = i18n.t('errors.network');
     } else {
       const backendMessage = error.response.data?.message;
       if (backendMessage) {
         error.friendlyMessage = backendMessage;
       } else {
         switch (error.response.status) {
-          case 401: error.friendlyMessage = "Authentication Required."; break;
-          case 403: error.friendlyMessage = "Clearance Denied."; break;
-          case 404: error.friendlyMessage = "Resource not found."; break;
-          case 409: error.friendlyMessage = "State Conflict detected."; break;
-          case 500: error.friendlyMessage = "Internal System Synchronization Failure."; break;
+          case 401: error.friendlyMessage = i18n.t('errors.auth_required'); break;
+          case 403: error.friendlyMessage = i18n.t('errors.clearance_denied'); break;
+          case 404: error.friendlyMessage = i18n.t('errors.not_found'); break;
+          case 409: error.friendlyMessage = i18n.t('errors.conflict'); break;
+          case 500: error.friendlyMessage = i18n.t('errors.server'); break;
         }
       }
     }

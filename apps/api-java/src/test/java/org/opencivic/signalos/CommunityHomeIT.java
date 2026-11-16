@@ -203,6 +203,20 @@ class CommunityHomeIT {
 
     @Test
     @WithMockUser(username = "community_home_user", roles = {"CITIZEN"})
+    void threadByIdKeepsTheAuthorOfEveryMessage() throws Exception {
+        mockMvc.perform(
+                get("/api/community/threads/" + threadId)
+                    .param("communityId", communityId.toString())
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.messages.length()").value(2))
+            .andExpect(jsonPath("$.messages[0].content").value("Need better lighting near the stop"))
+            .andExpect(jsonPath("$.messages[0].authorName").value("community_home_user"))
+            .andExpect(jsonPath("$.messages[1].authorName").value("community_home_user"));
+    }
+
+    @Test
+    @WithMockUser(username = "community_home_user", roles = {"CITIZEN"})
     void replyingToAThreadNotifiesItsCreator() {
         collaborationService.addMessage(threadId, communityId, "A new reply", null, "thread_replier");
 

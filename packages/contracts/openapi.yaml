@@ -1856,6 +1856,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommunityPermissionDeniedError'
+  /api/community/threads/{threadId}:
+    get:
+      summary: Read one thread with the author of every message
+      parameters:
+        - in: path
+          name: threadId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: communityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The thread and its messages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunityThreadResponse'
+        '404':
+          description: The thread does not belong to this community
   /api/community/threads/{threadId}/messages:
     post:
       summary: Add message to thread
@@ -8306,6 +8331,10 @@ components:
         authorId:
           type: string
           format: uuid
+        authorName:
+          type: string
+          nullable: true
+          description: Display name, or username when the account has no display name.
         sourceCommunityId:
           type: string
           format: uuid

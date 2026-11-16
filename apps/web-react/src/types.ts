@@ -489,6 +489,7 @@ export type CommunityThreadMessage = {
   id: string;
   threadId: string;
   authorId: string;
+  authorName?: string | null;
   sourceCommunityId: string;
   parentMessageId?: string;
   depth: number;

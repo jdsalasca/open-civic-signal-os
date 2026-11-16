@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from 'primereact/avatar';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { CommunityFeedItem } from '../types';
+import { CommunityFeedItem, CommunityThread } from '../types';
 import { Layout } from '../components/Layout';
 import { useCommunityStore } from '../store/useCommunityStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -23,7 +23,7 @@ type ApiError = Error & { friendlyMessage?: string };
 type FeedFilter = 'all' | CommunityFeedItem['type'];
 type FeedComment = { id: string; author: string; content: string; createdAt?: string };
 type CommentResponse = { id: string; authorUsername: string; content: string; createdAt: string };
-type ThreadMessageResponse = { id: string; content: string; createdAt: string; hidden?: boolean };
+type ThreadMessageResponse = { id: string; content: string; createdAt: string; hidden?: boolean; authorName?: string | null };
 
 const TITLE_LIMIT = 120;
 const BODY_LIMIT = 2000;
@@ -167,16 +167,16 @@ export function CommunityFeed() {
           createdAt: comment.createdAt,
         }));
       } else if (activeCommunityId) {
-        const { data } = await apiClient.get<{
-          content?: Array<{ id: string; messages?: ThreadMessageResponse[] }>;
-        }>(`community/threads?communityId=${activeCommunityId}&size=100`);
-        const thread = (data.content ?? []).find((candidate) => candidate.id === item.id);
-        next = (thread?.messages ?? [])
-          .filter((message) => !message.hidden)
-          .slice(1)
+        const { data } = await apiClient.get<CommunityThread>(
+          `community/threads/${item.id}?communityId=${activeCommunityId}`
+        );
+        // The first message is the post body already shown above, so only replies are listed here.
+        const rootId = data.messages.find((message) => !message.parentMessageId)?.id;
+        next = data.messages
+          .filter((message) => !message.hidden && message.id !== rootId)
           .map((message) => ({
             id: message.id,
-            author: t('community_feed.someone'),
+            author: message.authorName ?? t('community_feed.someone'),
             content: message.content,
             createdAt: message.createdAt,
           }));
@@ -291,7 +291,7 @@ export function CommunityFeed() {
         });
         created = {
           id: data.id,
-          author: userName ?? t('community_feed.someone'),
+          author: data.authorName ?? userName ?? t('community_feed.someone'),
           content,
           createdAt: data.createdAt
         };
