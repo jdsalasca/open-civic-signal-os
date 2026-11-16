@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFieldArray, useForm, Controller, type FieldPath } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -11,6 +11,7 @@ import { Layout } from "../components/Layout";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
 import { useCommunityStore } from "../store/useCommunityStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { CivicButton } from "../components/ui/CivicButton";
 import { CivicCard } from "../components/ui/CivicCard";
 import { CivicField } from "../components/ui/CivicField";
@@ -46,29 +47,82 @@ type ReportForm = {
 
 type WizardStepKey = "basics" | "evidence" | "impact";
 
+const REPORT_DRAFT_KEY = "signalos:report-draft";
+
+const EMPTY_REPORT: ReportForm = {
+  title: "",
+  description: "",
+  category: "safety",
+  locationLabel: "",
+  evidenceItems: [{ url: "" }],
+  urgency: 3,
+  impact: 3,
+  affectedPeople: 10,
+};
+
+const emptyReport = (): ReportForm => ({ ...EMPTY_REPORT, evidenceItems: [{ url: "" }] });
+
+/*
+ * Scoped per user: community centres share devices, and one neighbour's half-written report is not
+ * another neighbour's business. Private mode throws on every localStorage call, so a draft is always
+ * an enhancement, never a requirement.
+ */
+const draftKey = (userName: string | null) => `${REPORT_DRAFT_KEY}:${userName ?? "anon"}`;
+
+const toScale = (value: unknown, fallback: number, min: number, max: number) =>
+  typeof value === "number" && Number.isFinite(value)
+    ? Math.min(max, Math.max(min, Math.round(value)))
+    : fallback;
+
+function loadReportDraft(userName: string | null): ReportForm | null {
+  try {
+    const raw = window.localStorage.getItem(draftKey(userName));
+    if (!raw) return null;
+    const draft = JSON.parse(raw) as Partial<ReportForm>;
+    const evidenceItems = Array.isArray(draft.evidenceItems)
+      ? draft.evidenceItems
+          .filter((item) => item && typeof item.url === "string")
+          .slice(0, FORM_LIMITS.report.evidenceMax)
+      : [];
+    const restored: ReportForm = {
+      title: typeof draft.title === "string" ? draft.title : "",
+      description: typeof draft.description === "string" ? draft.description : "",
+      category: typeof draft.category === "string" ? draft.category : EMPTY_REPORT.category,
+      locationLabel: typeof draft.locationLabel === "string" ? draft.locationLabel : "",
+      evidenceItems: evidenceItems.length > 0 ? evidenceItems : EMPTY_REPORT.evidenceItems,
+      urgency: toScale(draft.urgency, EMPTY_REPORT.urgency, 1, 5),
+      impact: toScale(draft.impact, EMPTY_REPORT.impact, 1, 5),
+      affectedPeople: toScale(draft.affectedPeople, EMPTY_REPORT.affectedPeople, 1, 1000),
+      latitude: typeof draft.latitude === "number" ? draft.latitude : undefined,
+      longitude: typeof draft.longitude === "number" ? draft.longitude : undefined,
+    };
+    const hasContent =
+      restored.title.trim() !== "" ||
+      restored.description.trim() !== "" ||
+      restored.locationLabel.trim() !== "";
+    return hasContent ? restored : null;
+  } catch {
+    return null;
+  }
+}
+
 export function ReportSignal() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { activeCommunityId } = useCommunityStore();
+  const userName = useAuthStore((state) => state.userName);
+  const [restoredDraft] = useState(() => loadReportDraft(userName));
   const {
     control,
     handleSubmit,
     watch,
     setValue,
     trigger,
+    reset,
     formState: { isSubmitting, errors },
   } = useForm<ReportForm>({
     mode: "onChange",
-    defaultValues: {
-      title: "",
-      description: "",
-      category: "safety",
-      locationLabel: "",
-      evidenceItems: [{ url: "" }],
-      urgency: 3,
-      impact: 3,
-      affectedPeople: 10,
-    },
+    defaultValues: restoredDraft ?? emptyReport(),
   });
   const { fields: evidenceFields, append, remove } = useFieldArray({
     control,
@@ -79,6 +133,41 @@ export function ReportSignal() {
   const [isLocating, setIsLocating] = useState(false);
   const [locationFound, setLocationFound] = useState(false);
   const [submittedSignal, setSubmittedSignal] = useState<Signal | null>(null);
+  const [hasDraft, setHasDraft] = useState(Boolean(restoredDraft));
+
+  const clearDraft = () => {
+    try {
+      window.localStorage.removeItem(draftKey(userName));
+    } catch {
+      // Nothing to clear when storage is unavailable.
+    }
+  };
+
+  useEffect(() => {
+    const subscription = watch((values) => {
+      const hasContent =
+        (values.title ?? "").trim() !== "" ||
+        (values.description ?? "").trim() !== "" ||
+        (values.locationLabel ?? "").trim() !== "";
+      try {
+        if (!hasContent) {
+          window.localStorage.removeItem(draftKey(userName));
+          return;
+        }
+        window.localStorage.setItem(draftKey(userName), JSON.stringify(values));
+      } catch {
+        // Private mode or a full quota: losing the draft beats breaking the form.
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, userName]);
+
+  const discardDraft = () => {
+    clearDraft();
+    reset(emptyReport());
+    setCurrentStep(0);
+    setHasDraft(false);
+  };
 
   const categories = [
     { label: t("categories.safety"), value: "safety", icon: "pi-shield" },
@@ -251,6 +340,7 @@ export function ReportSignal() {
   };
 
   const handleDiscard = () => {
+    clearDraft();
     navigate("/");
   };
 
@@ -280,6 +370,7 @@ export function ReportSignal() {
         longitude: data.longitude,
       });
       setSubmittedSignal(response.data);
+      clearDraft();
       toast.success(t("report.success"));
     } catch (err) {
       const apiErr = err as ApiError;
@@ -696,6 +787,21 @@ export function ReportSignal() {
       <div className="animate-fade-up max-w-70rem mx-auto pb-8">
         <CivicPageHeader title={t("report.title")} description={t("report.desc")} />
         <ContextualHelpPanel surface="REPORT" className="mb-6" dataTestId="report-contextual-help" />
+
+        {hasDraft && (
+          <div className="report-draft-notice" role="status" data-testid="report-draft-notice">
+            <i className="pi pi-save" aria-hidden="true" />
+            <span>{t("report.draft_restored")}</span>
+            <CivicButton
+              type="button"
+              variant="ghost"
+              size="small"
+              label={t("report.draft_discard")}
+              onClick={discardDraft}
+              data-testid="report-draft-discard"
+            />
+          </div>
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid">

@@ -5,6 +5,33 @@
 // and the category is chosen from pictograms rather than a list of words.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Report draft: restored from this device after a lost connection or a reload.
+// ---------------------------------------------------------------------------
+
+.report-draft-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--surface-soft-border);
+  border-radius: var(--radius-paper);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.report-draft-notice i {
+  color: var(--brand-primary);
+}
+
+.report-draft-notice span {
+  flex: 1 1 14rem;
+}
+
 .signal-wizard-steps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));

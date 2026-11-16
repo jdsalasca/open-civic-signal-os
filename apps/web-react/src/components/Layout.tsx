@@ -54,7 +54,21 @@ export function Layout({ children, authMode = false }: Props) {
   } = useCommunityStore();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [desktopMoreVisible, setDesktopMoreVisible] = useState(interfaceMode === "advanced");
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator === "undefined" ? true : navigator.onLine
+  );
   const mainContentRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true);
+    const goOffline = () => setIsOnline(false);
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
 
   const focusMainContentTarget = () => {
     const mainElement = mainContentRef.current;
@@ -422,6 +436,13 @@ export function Layout({ children, authMode = false }: Props) {
 
           </div>
         </header>
+
+        {!isOnline && (
+          <div className="offline-banner" role="status" data-testid="offline-banner">
+            <i className="pi pi-cloud" aria-hidden="true" />
+            <span>{t("offline.banner")}</span>
+          </div>
+        )}
 
         <main
           id={mainContentId}
