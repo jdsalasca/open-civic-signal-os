@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-11-16T01:35:38.168Z
+Last updated: 2026-11-16T02:03:47.427Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,7 +10,7 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-11-09T01:35:34.371Z)
+- Window: last 7 days (since 2026-11-09T02:03:43.701Z)
 - Throughput (issues closed): 4
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
@@ -80,12 +80,13 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 24
+- TODO: 25
 - IN_PROGRESS: 0
 - BLOCKED: 0
 - DONE: 113
 
 ### TODO
+- #165 Community updates should feel like a social feed, not a control panel
 - #157 Current Sprint Focus 2026-W46
 - #156 Agent Quality Review 2026-W46
 - #152 Place dropdowns collapse into one letter per line and the selected option has low contrast
