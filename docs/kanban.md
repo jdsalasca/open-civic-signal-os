@@ -1,6 +1,6 @@
 # Kanban by Milestone
 
-Last updated: 2026-11-15T22:22:47.486Z
+Last updated: 2026-11-16T00:27:20.561Z
 
 Status labels used by this board:
 - `status:todo`
@@ -10,7 +10,7 @@ Status labels used by this board:
 
 ## Weekly Delivery Metrics
 
-- Window: last 7 days (since 2026-11-08T22:22:43.711Z)
+- Window: last 7 days (since 2026-11-09T00:27:16.886Z)
 - Throughput (issues closed): 1
 - Blockers currently open: 0
 - Rework signal (issues reopened): 0
@@ -80,12 +80,13 @@ Status labels used by this board:
 
 ## No Milestone
 
-- TODO: 24
+- TODO: 25
 - IN_PROGRESS: 0
 - BLOCKED: 0
 - DONE: 110
 
 ### TODO
+- #159 Public backlog overflows sideways on mobile with long location labels
 - #157 Current Sprint Focus 2026-W46
 - #156 Agent Quality Review 2026-W46
 - #152 Place dropdowns collapse into one letter per line and the selected option has low contrast
