@@ -1818,6 +1818,25 @@ a:hover {
   color: var(--text-muted);
 }
 
+.social-feed-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.social-feed-official {
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--brand-primary);
+  border-radius: 999px;
+  color: var(--brand-primary);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .social-feed-title {
   margin: 0.35rem 0 0;
   font-size: 1.15rem;
@@ -3044,12 +3063,12 @@ select:focus-visible,
   min-width: 0;
 }
 
-.social-feed-alerts-row strong {
+.social-feed-alerts-row > div > strong {
   color: var(--text-main);
   font-size: 0.85rem;
 }
 
-.social-feed-alerts-row span {
+.social-feed-alerts-row > div > span {
   color: var(--text-muted);
   font-size: 0.78rem;
   line-height: 1.4;

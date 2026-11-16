@@ -16,5 +16,8 @@ public record CommunityFeedItemResponse(
     Boolean viewerConfirmed,
     Boolean following,
     Map<String, Integer> reactions,
-    String viewerReaction
+    String viewerReaction,
+    String authorName,
+    String authorRole,
+    Long commentCount
 ) {}

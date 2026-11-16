@@ -51,6 +51,7 @@ public class CommunityCollaborationService {
     private final UserNotificationService userNotificationService;
     private final ContentFollowService contentFollowService;
     private final SignalConfirmationService signalConfirmationService;
+    private final CivicEngagementService engagementService;
 
     public CommunityCollaborationService(
         CommunityAccessService accessService,
@@ -62,7 +63,8 @@ public class CommunityCollaborationService {
         UserReactionService userReactionService,
         UserNotificationService userNotificationService,
         ContentFollowService contentFollowService,
-        SignalConfirmationService signalConfirmationService
+        SignalConfirmationService signalConfirmationService,
+        CivicEngagementService engagementService
     ) {
         this.accessService = accessService;
         this.threadRepository = threadRepository;
@@ -74,6 +76,7 @@ public class CommunityCollaborationService {
         this.userNotificationService = userNotificationService;
         this.contentFollowService = contentFollowService;
         this.signalConfirmationService = signalConfirmationService;
+        this.engagementService = engagementService;
     }
 
     public Page<CommunityThreadResponse> getThreads(
@@ -379,6 +382,8 @@ public class CommunityCollaborationService {
         Set<UUID> confirmed = signalConfirmationService.confirmedByViewer(viewerId, ids);
         Map<UUID, Long> counts = signalConfirmationService.countsFor(ids);
         Map<UUID, String> viewerReactions = userReactionService.getViewerReactions("SIGNAL", ids, viewerId);
+        Map<UUID, User> authors = authorsById(signals.stream().map(Signal::getAuthorId).toList());
+        Map<UUID, Long> commentCounts = engagementService.getCommentCounts(ids, "SIGNAL");
         return signals.stream()
             .map(signal -> new CommunityFeedItemResponse(
                 "signal",
@@ -392,7 +397,10 @@ public class CommunityCollaborationService {
                 confirmed.contains(signal.getId()),
                 following.contains(signal.getId()),
                 signal.getReactions(),
-                viewerReactions.get(signal.getId())
+                viewerReactions.get(signal.getId()),
+                authorName(authors.get(signal.getAuthorId())),
+                authorRole(authors.get(signal.getAuthorId())),
+                commentCounts.getOrDefault(signal.getId(), 0L)
             ))
             .toList();
     }
@@ -407,16 +415,11 @@ public class CommunityCollaborationService {
             .filter(post -> post.getPublishedAt() != null && post.getPublishedAt().isAfter(since))
             .limit(limited.getPageSize())
             .toList();
-        Set<UUID> following = contentFollowService.followedIds(
-            viewerId,
-            "BLOG",
-            posts.stream().map(CommunityBlogPost::getId).toList()
-        );
-        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions(
-            "BLOG",
-            posts.stream().map(CommunityBlogPost::getId).toList(),
-            viewerId
-        );
+        List<UUID> ids = posts.stream().map(CommunityBlogPost::getId).toList();
+        Set<UUID> following = contentFollowService.followedIds(viewerId, "BLOG", ids);
+        Map<UUID, String> viewerReactions = userReactionService.getViewerReactions("BLOG", ids, viewerId);
+        Map<UUID, User> authors = authorsById(posts.stream().map(CommunityBlogPost::getAuthorId).toList());
+        Map<UUID, Long> commentCounts = engagementService.getCommentCounts(ids, "BLOG");
         return posts.stream()
             .map(post -> new CommunityFeedItemResponse(
                 "blog",
@@ -430,7 +433,10 @@ public class CommunityCollaborationService {
                 null,
                 following.contains(post.getId()),
                 post.getReactions(),
-                viewerReactions.get(post.getId())
+                viewerReactions.get(post.getId()),
+                authorName(authors.get(post.getAuthorId())),
+                authorRole(authors.get(post.getAuthorId())),
+                commentCounts.getOrDefault(post.getId(), 0L)
             ))
             .toList();
     }
@@ -461,6 +467,7 @@ public class CommunityCollaborationService {
             "THREAD",
             threads.stream().map(CommunityThread::getId).toList()
         );
+        Map<UUID, User> authors = authorsById(threads.stream().map(CommunityThread::getCreatedBy).toList());
         return threads.stream()
             .map(thread -> new CommunityFeedItemResponse(
                 "thread-update",
@@ -474,6 +481,9 @@ public class CommunityCollaborationService {
                 null,
                 following.contains(thread.getId()),
                 Map.of(),
+                null,
+                authorName(authors.get(thread.getCreatedBy())),
+                authorRole(authors.get(thread.getCreatedBy())),
                 null
             ))
             .toList();
@@ -680,8 +690,32 @@ public class CommunityCollaborationService {
         return toBlogResponse(post, author, null);
     }
 
-    private String freshness(LocalDateTime timestamp) {
-        long minutes = ChronoUnit.MINUTES.between(timestamp, LocalDateTime.now());
+    private Map<UUID, User> authorsById(List<UUID> ids) {
+        List<UUID> authorIds = ids.stream().filter(java.util.Objects::nonNull).distinct().toList();
+        return userRepository.findAllById(authorIds).stream()
+            .collect(Collectors.toMap(User::getId, Function.identity()));
+    }
+
+    private String authorName(User user) {
+        if (user == null) {
+            return null;
+        }
+        String displayName = user.getDisplayName();
+        return displayName != null && !displayName.isBlank() ? displayName : user.getUsername();
+    }
+
+    private String authorRole(User user) {
+        if (user == null) {
+            return null;
+        }
+        String roles = user.getRoles();
+        if (roles != null && (roles.contains("PUBLIC_SERVANT") || roles.contains("SUPER_ADMIN") || roles.contains("ADMIN"))) {
+            return "PUBLIC_SERVANT";
+        }
+        return "CITIZEN";
+    }
+
+    private String freshness(LocalDateTime timestamp) {        long minutes = ChronoUnit.MINUTES.between(timestamp, LocalDateTime.now());
         if (minutes < 1) {
             return "updated just now";
         }

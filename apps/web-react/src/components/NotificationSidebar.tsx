@@ -16,7 +16,7 @@ export function NotificationSidebar({ notifications }: Props) {
   const groupLabel = (group: string) =>
     t(`dashboard.alerts_groups.${group}`, { defaultValue: group });
   const categoryLabel = (category: string) =>
-    t(`categories.${category}`, { defaultValue: category });
+    t(`categories.${category.toLowerCase()}`, { defaultValue: category });
 
   const parseAlertMessage = (msg: string) => {
     if (!msg.startsWith("Top unresolved community issues:")) {

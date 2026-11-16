@@ -58,6 +58,7 @@ test.describe('Location-first onboarding', () => {
 
     await page.goto('/');
     await expect(page).toHaveURL(/\/onboarding/);
+    await expect(page.getByLabel('Buscar comunidades')).toBeVisible();
     await expect(page.getByTestId('onboarding-nearest')).toContainText('Bogotá');
     const hierarchy = page.getByTestId('onboarding-detected-place');
     await expect(hierarchy).toContainText('Barrio');
@@ -71,5 +72,22 @@ test.describe('Location-first onboarding', () => {
     await page.getByTestId('onboarding-join-nearest-city-bogota').click();
     await expect(page).toHaveURL(/\/$/);
     await expect(page.getByTestId('community-feed-composer')).toBeVisible();
+  });
+
+  test('a failed community list is an error with retry, not "no results"', async ({ page }) => {
+    let failing = true;
+    await seedAuthenticatedApp(page, 'CITIZEN');
+    await page.route('**/api/communities/public', (route) =>
+      failing ? route.abort('failed') : route.fulfill(json([city])));
+
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/onboarding/);
+    const error = page.getByTestId('onboarding-places-error');
+    await expect(error).toBeVisible();
+    await expect(page.getByText('Ninguna ciudad coincide con la búsqueda.')).toHaveCount(0);
+
+    failing = false;
+    await error.getByRole('button', { name: /Retry|Reintentar/ }).click();
+    await expect(page.getByTestId('onboarding-join-city-bogota')).toBeVisible();
   });
 });

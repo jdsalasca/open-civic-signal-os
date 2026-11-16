@@ -21,6 +21,7 @@ export function Onboarding() {
   const setMemberships = useCommunityStore((state) => state.setMemberships);
 
   const [places, setPlaces] = useState<Community[]>([]);
+  const [placesError, setPlacesError] = useState(false);
   const [query, setQuery] = useState('');
   const [joiningId, setJoiningId] = useState<string | null>(null);
 
@@ -41,22 +42,21 @@ export function Onboarding() {
   const [neighborhood, setNeighborhood] = useState('');
   const [creating, setCreating] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    apiClient
-      .get<Community[]>('communities/public')
-      .then(({ data }) => {
-        if (!cancelled) {
-          setPlaces(data ?? []);
-        }
-      })
-      .catch(() => {
-        // The manual list is optional; the location and create paths still work.
-      });
-    return () => {
-      cancelled = true;
-    };
+  const loadPlaces = useCallback(async () => {
+    setPlacesError(false);
+    try {
+      const { data } = await apiClient.get<Community[]>('communities/public');
+      setPlaces(data ?? []);
+    } catch {
+      // The location path and the create form still work; the list offers a retry instead of
+      // pretending there are no communities.
+      setPlacesError(true);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadPlaces();
+  }, [loadPlaces]);
 
   const placeRelevance = useCallback((place: Community) => {
     if (!detected) return 0;
@@ -283,9 +283,13 @@ export function Onboarding() {
           <CivicCard padding="lg" className="onboarding-card">
             <h2>{t('onboarding.cities_title')}</h2>
             <p className="text-secondary text-sm">{t('onboarding.cities_desc')}</p>
+            <label className="onboarding-search-label" htmlFor="onboarding-city-search">
+              {t('onboarding.search_label')}
+            </label>
             <span className="p-input-icon-left w-full mb-3">
               <i className="pi pi-search text-muted" />
               <InputText
+                id="onboarding-city-search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={t('onboarding.search_placeholder')}
@@ -293,7 +297,19 @@ export function Onboarding() {
                 data-testid="onboarding-city-search"
               />
             </span>
-            <ul className="onboarding-city-list">
+            {placesError ? (
+              <div className="onboarding-places-error" role="alert" data-testid="onboarding-places-error">
+                <span>{t('onboarding.places_error')}</span>
+                <CivicButton
+                  type="button"
+                  label={t('common.retry')}
+                  variant="secondary"
+                  size="small"
+                  onClick={() => void loadPlaces()}
+                />
+              </div>
+            ) : (
+              <ul className="onboarding-city-list">
               {filteredPlaces.map((place) => (
                 <li key={place.id}>
                   <div>
@@ -321,7 +337,8 @@ export function Onboarding() {
               {filteredPlaces.length === 0 && (
                 <li className="text-muted text-sm">{t('onboarding.no_results')}</li>
               )}
-            </ul>
+              </ul>
+            )}
           </CivicCard>
         </div>
 

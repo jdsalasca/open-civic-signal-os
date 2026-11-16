@@ -19,7 +19,7 @@ import { PriorityScale, StatusChip } from "../components/signalPrimitives";
 import { CivicPageHeader } from "../components/ui/CivicPageHeader";
 import { CivicStatCard } from "../components/ui/CivicStatCard";
 import { formatStamp } from "../utils/formatStamp";
-import { useSignalStatusLabel } from "../utils/signalStatus";
+import { useCategoryLabel, useSignalStatusLabel } from "../utils/signalStatus";
 
 interface ApiError extends Error {
   friendlyMessage?: string;
@@ -28,6 +28,7 @@ interface ApiError extends Error {
 export function SignalDetail() {
   const { t } = useTranslation();
   const statusLabel = useSignalStatusLabel();
+  const categoryLabel = useCategoryLabel();
   const { id } = useParams();
   const navigate = useNavigate();
   const { activeRole } = useAuthStore();
@@ -173,7 +174,7 @@ export function SignalDetail() {
                      here says it. No subtitle at all, because "Intelligence Context" is the title of
                      the first card underneath and every fact one could carry is already in a labelled
                      card or a badge. */
-                  eyebrow={t(`categories.${signal.category}`)}
+                  eyebrow={categoryLabel(signal.category)}
                 />
             </div>
           </div>
@@ -246,7 +247,7 @@ export function SignalDetail() {
                 />
                 <CivicStatCard
                   label={t("signals.civic_category")}
-                  value={t(`categories.${signal.category}`)}
+                  value={categoryLabel(signal.category)}
                   supportingText={t("signals.classification_summary")}
                   icon={<i className="pi pi-tag text-status-progress"></i>}
                 />

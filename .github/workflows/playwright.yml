@@ -88,6 +88,9 @@ jobs:
           src/tests/accessibility-text-scale.spec.ts
           src/tests/community-activities.spec.ts
           src/tests/community-feed.spec.ts
+          src/tests/community-rooms.spec.ts
+          src/tests/community-rooms-history.spec.ts
+          src/tests/my-signals.spec.ts
           src/tests/notifications.spec.ts
           src/tests/onboarding-checklist.spec.ts
           src/tests/location-onboarding.spec.ts

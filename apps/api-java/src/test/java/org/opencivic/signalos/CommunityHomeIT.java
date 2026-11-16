@@ -191,10 +191,14 @@ class CommunityHomeIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].type").value("thread-update"))
             .andExpect(jsonPath("$[0].summary").value("Need better lighting near the stop"))
+            .andExpect(jsonPath("$[0].authorName").value("community_home_user"))
+            .andExpect(jsonPath("$[0].authorRole").value("CITIZEN"))
             .andExpect(jsonPath("$[1].type").value("blog"))
             .andExpect(jsonPath("$[1].summary").value("Work starts this week"))
+            .andExpect(jsonPath("$[1].commentCount").value(0))
             .andExpect(jsonPath("$[2].type").value("signal"))
-            .andExpect(jsonPath("$[2].summary").value("Main crosswalk"));
+            .andExpect(jsonPath("$[2].summary").value("Main crosswalk"))
+            .andExpect(jsonPath("$[2].commentCount").value(0));
     }
 
     @Test

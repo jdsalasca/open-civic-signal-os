@@ -110,6 +110,17 @@ test.describe("Community coordination rooms", () => {
 
     let messagePayload: Record<string, unknown> | null = null;
     let muteCalls = 0;
+    let streamRequests = 0;
+
+    // Each stream closes right away, like the server's 30-minute limit, so the view has to reopen it.
+    await page.route(`**/api/community/rooms/${roomId}/stream?**`, async (route) => {
+      streamRequests += 1;
+      await route.fulfill({
+        status: 200,
+        headers: { "content-type": "text/event-stream" },
+        body: "event: ready\ndata: {}\n\n",
+      });
+    });
 
     await page.route(`**/api/communities/${communityId}/permissions`, async (route) => {
       await route.fulfill({
@@ -224,5 +235,8 @@ test.describe("Community coordination rooms", () => {
     await page.getByTestId("community-rooms-name").fill("Bridge inspection");
     await page.getByTestId("community-rooms-topic").fill("Coordinate the bridge safety audit");
     await expect(page.getByTestId("community-rooms-create-card")).toBeVisible();
+
+    // The live connection is reopened after the stream ends instead of staying disconnected.
+    await expect.poll(() => streamRequests, { timeout: 15000 }).toBeGreaterThan(1);
   });
 });

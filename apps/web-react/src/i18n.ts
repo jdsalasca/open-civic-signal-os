@@ -203,6 +203,8 @@ const resources = {
         "cities_title": "Join a community",
         "cities_desc": "Pick your city or neighborhood. You will be a member and can report, vote and follow the backlog.",
         "search_placeholder": "Search by city, region or country",
+        "search_label": "Search communities",
+        "places_error": "The community list could not load. You can retry, use your location or create your neighborhood.",
         "join": "Join",
         "no_results": "No cities match that search.",
         "create_title": "Create your neighborhood",
@@ -787,6 +789,8 @@ const resources = {
         "empty_filter_action": "Show all",
         "guidance": "Be respectful. Do not publish other people's personal data, addresses or phone numbers.",
         "norms": "Community norms",
+        "by_author": "By {{name}}",
+        "official": "Official",
         "trending": "Trending",
         "trending_empty": "No reactions yet. Like a post to start a trend.",
         "filter_all": "All",
@@ -1055,7 +1059,9 @@ const resources = {
         "empty": "You haven't reported any issues yet.",
         "empty_title": "You have not submitted any reports yet",
         "empty_desc": "Start with one issue you know well. Once you report it, this page becomes your trail for follow-up and outcomes.",
-        "empty_action": "Report your first issue"
+        "empty_action": "Report your first issue",
+        "error_title": "Your reports could not load",
+        "error_desc": "The connection failed, so this is not an empty history. Retry to see your reports and their status."
       },
       "communities_hub": {
         "title": "Community Hub",
@@ -2597,6 +2603,8 @@ const resources = {
         "cities_title": "Únete a una comunidad",
         "cities_desc": "Elige tu ciudad o barrio. Serás miembro y podrás reportar, votar y seguir el backlog.",
         "search_placeholder": "Busca por ciudad, región o país",
+        "search_label": "Buscar comunidades",
+        "places_error": "No se pudo cargar la lista de comunidades. Puedes reintentar, usar tu ubicación o crear tu barrio.",
         "join": "Unirme",
         "no_results": "Ninguna ciudad coincide con la búsqueda.",
         "create_title": "Crea tu barrio",
@@ -3181,6 +3189,8 @@ const resources = {
         "empty_filter_action": "Ver todo",
         "guidance": "Sé respetuoso. No publiques datos personales, direcciones ni teléfonos de otras personas.",
         "norms": "Normas de la comunidad",
+        "by_author": "Por {{name}}",
+        "official": "Oficial",
         "trending": "Tendencias",
         "trending_empty": "Aún no hay reacciones. Da Me gusta a una publicación para empezar una tendencia.",
         "filter_all": "Todo",
@@ -3449,7 +3459,9 @@ const resources = {
         "empty": "Aún no ha reportado ningún problema.",
         "empty_title": "Todavía no ha enviado reportes",
         "empty_desc": "Empiece con un problema que conozca bien. Cuando lo reporte, esta página se vuelve su rastro para seguimiento y resultados.",
-        "empty_action": "Reportar primer problema"
+        "empty_action": "Reportar primer problema",
+        "error_title": "No se pudieron cargar sus reportes",
+        "error_desc": "La conexión falló, así que este no es un historial vacío. Reintente para ver sus reportes y su estado."
       },
       "communities_hub": {
         "title": "Centro de Comunidades",
