@@ -10,5 +10,8 @@ public record CommunityFeedItemResponse(
     String title,
     String summary,
     LocalDateTime happenedAt,
-    String freshness
+    String freshness,
+    Long confirmationCount,
+    Boolean viewerConfirmed,
+    Boolean following
 ) {}

@@ -60,19 +60,22 @@ public class PrioritizationServiceImpl implements PrioritizationService {
     private final SignalStatusEntryRepository statusHistoryRepository;
   private final SignalScoreEntryRepository scoreEntryRepository;
   private final UserNotificationService userNotificationService;
+  private final ContentFollowService contentFollowService;
 
 public PrioritizationServiceImpl(SignalRepository signalRepository,
     VoteRepository voteRepository,
     UserRepository userRepository,
     SignalStatusEntryRepository statusHistoryRepository,
     SignalScoreEntryRepository scoreEntryRepository,
-    UserNotificationService userNotificationService) {
+    UserNotificationService userNotificationService,
+    ContentFollowService contentFollowService) {
   this.signalRepository = signalRepository;
   this.voteRepository = voteRepository;
   this.userRepository = userRepository;
   this.statusHistoryRepository = statusHistoryRepository;
   this.scoreEntryRepository = scoreEntryRepository;
   this.userNotificationService = userNotificationService;
+  this.contentFollowService = contentFollowService;
   }
 
   /**
@@ -618,16 +621,23 @@ statusHistoryRepository.save(new SignalStatusEntry(
         UUID actorId = changedBy == null
             ? null
             : userRepository.findByUsername(changedBy).map(User::getId).orElse(null);
-        userNotificationService.notifyUser(
-            signal.getAuthorId(),
-            actorId,
-            changedBy,
-            "SIGNAL_STATUS",
-            "SIGNAL",
-            signal.getId(),
-            signal.getTitle(),
-            signal.getCommunityId()
-        );
+        Set<UUID> recipients = new java.util.HashSet<>();
+        if (signal.getAuthorId() != null) {
+            recipients.add(signal.getAuthorId());
+        }
+        recipients.addAll(contentFollowService.followerIds("SIGNAL", signal.getId()));
+        for (UUID recipient : recipients) {
+            userNotificationService.notifyUser(
+                recipient,
+                actorId,
+                changedBy,
+                "SIGNAL_STATUS",
+                "SIGNAL",
+                signal.getId(),
+                signal.getTitle(),
+                signal.getCommunityId()
+            );
+        }
         
         return Optional.of(saved);
     }
