@@ -72,7 +72,7 @@ function HomeRoute() {
 
 export function App() {
   const { isLoggedIn } = useAuthStore();
-  const { theme, interfaceMode, setInterfaceMode } = useSettingsStore();
+  const { theme, language, interfaceMode, setInterfaceMode } = useSettingsStore();
 
   useEffect(() => {
     const html = document.documentElement;
@@ -82,6 +82,12 @@ export function App() {
     // the legacy classes; dropping both makes prefers-color-scheme decide.
     html.dataset.theme = theme;
   }, [theme]);
+
+  // The lang attribute drives screen-reader pronunciation; it must follow the language the
+  // person actually sees, not the one the browser was installed with.
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   useEffect(() => {
     const html = document.documentElement;
