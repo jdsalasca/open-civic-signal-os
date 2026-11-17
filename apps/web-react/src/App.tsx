@@ -1,4 +1,5 @@
-import { Suspense, lazy, useEffect } from "react";import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Suspense, lazy, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAuthStore } from "./store/useAuthStore";
 import { useSettingsStore } from "./store/useSettingsStore";
@@ -115,6 +116,18 @@ export function App() {
   useEffect(() => {
     document.documentElement.dataset.textScale = textScale;
   }, [textScale]);
+
+  // Warm the chunks behind the actions a reader is most likely to take next, so the first click on
+  // Reportar, a case or Mi Actividad does not wait for a network round trip.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void import("./views/ReportSignal");
+      void import("./views/SignalDetail");
+      void import("./views/MySignals");
+      void import("./views/CommunityRooms");
+    }, 1500);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const html = document.documentElement;

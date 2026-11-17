@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -73,6 +73,7 @@ export function CommunityFeed() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [pendingActions, setPendingActions] = useState<Record<string, boolean>>({});
+  const scrollRestored = useRef(false);
   const [alertsOn, setAlertsOn] = useState(false);
   const [place, setPlace] = useState<DetectedPlace | null>(null);
   const [nearest, setNearest] = useState<Community | null>(null);
@@ -150,6 +151,31 @@ export function CommunityFeed() {
     void loadFeed(controller.signal);
     return () => controller.abort();
   }, [loadFeed]);
+
+  // Opening a case and coming back should not send the reader to the top of the feed again.
+  // The scroll container belongs to the shared layout, hence the explicit lookup.
+  useEffect(() => {
+    const key = `feed-scroll:${activeCommunityId ?? 'none'}`;
+    scrollRestored.current = false;
+    const scroller = document.querySelector('.app-main') as HTMLElement | null;
+    return () => {
+      if (scroller) {
+        sessionStorage.setItem(key, String(scroller.scrollTop));
+      }
+    };
+  }, [activeCommunityId]);
+
+  useEffect(() => {
+    if (loading || scrollRestored.current) return;
+    const scroller = document.querySelector('.app-main') as HTMLElement | null;
+    const saved = sessionStorage.getItem(`feed-scroll:${activeCommunityId ?? 'none'}`);
+    if (scroller && saved) {
+      requestAnimationFrame(() => {
+        scroller.scrollTop = Number(saved);
+      });
+    }
+    scrollRestored.current = true;
+  }, [loading, activeCommunityId]);
 
   const loadMore = async () => {
     if (!activeCommunityId || !feed.length || loadingMore || !hasMore) {
@@ -678,7 +704,19 @@ export function CommunityFeed() {
                     </span>
                   </button>
                 ) : (
-                  <div className="social-composer-form">
+                  <div
+                    className="social-composer-form"
+                    onKeyDown={(event) => {
+                      if (event.key === 'Escape' && !publishing) {
+                        setComposerOpen(false);
+                        return;
+                      }
+                      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                        event.preventDefault();
+                        void publish();
+                      }
+                    }}
+                  >
                     <div className="flex align-items-center gap-3 mb-3">
                       <Avatar
                         label={userName?.[0]?.toUpperCase() ?? '?'}
@@ -700,6 +738,7 @@ export function CommunityFeed() {
                       id="feed-post-title"
                       value={title}
                       maxLength={TITLE_LIMIT}
+                      autoFocus
                       onChange={(event) => setTitle(event.target.value)}
                       placeholder={t('community_feed.composer_title_placeholder')}
                       className="w-full"
@@ -839,6 +878,11 @@ export function CommunityFeed() {
                       key={`${item.type}-${item.id}`}
                       className="social-feed-item"
                       data-testid={`community-feed-item-${item.type}`}
+                      style={{ cursor: 'pointer' }}
+                      onClick={(event) => {
+                        if ((event.target as HTMLElement).closest('button, a, input, textarea, select')) return;
+                        navigate(itemHref(item));
+                      }}
                     >
                       <div className="social-feed-copy">
                         <div className="social-feed-meta">
@@ -969,7 +1013,14 @@ export function CommunityFeed() {
                               rows={2}
                               maxLength={1000}
                               autoResize
+                              autoFocus
                               onChange={(event) => setReplyText(event.target.value)}
+                              onKeyDown={(event) => {
+                                if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                                  event.preventDefault();
+                                  void sendReply(item);
+                                }
+                              }}
                               placeholder={t('community_feed.reply_placeholder')}
                               aria-label={t('community_feed.comment')}
                               className="w-full"
