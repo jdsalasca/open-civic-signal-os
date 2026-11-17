@@ -350,17 +350,12 @@ export function CommunityFeed() {
     }
     setPublishing(true);
     try {
-      const thread = await apiClient.post<{ id: string }>('community/threads', {
+      await apiClient.post('community/threads', {
         sourceCommunityId: activeCommunityId,
         targetCommunityId: activeCommunityId,
-        title: title.trim()
+        title: title.trim(),
+        initialMessage: body.trim()
       });
-      if (body.trim()) {
-        await apiClient.post(`community/threads/${thread.data.id}/messages`, {
-          sourceCommunityId: activeCommunityId,
-          content: body.trim()
-        });
-      }
       setTitle('');
       setBody('');
       setComposerOpen(false);

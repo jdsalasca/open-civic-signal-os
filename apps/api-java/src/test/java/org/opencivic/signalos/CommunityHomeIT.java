@@ -1,6 +1,7 @@
 package org.opencivic.signalos;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,6 +30,7 @@ import org.opencivic.signalos.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -252,6 +254,28 @@ class CommunityHomeIT {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].type").value("blog"));
+    }
+
+    @Test
+    @WithMockUser(username = "community_home_user", roles = {"CITIZEN"})
+    void creatingAThreadWithItsBodyLeavesOneCompleteThread() throws Exception {
+        mockMvc.perform(
+                post("/api/community/threads")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("""
+                        {
+                          "sourceCommunityId": "%s",
+                          "targetCommunityId": "%s",
+                          "title": "Saturday cleanup",
+                          "initialMessage": "Meet at 8 a.m. at the entrance."
+                        }
+                        """.formatted(communityId, communityId))
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.title").value("Saturday cleanup"))
+            .andExpect(jsonPath("$.messages.length()").value(1))
+            .andExpect(jsonPath("$.messages[0].content").value("Meet at 8 a.m. at the entrance."))
+            .andExpect(jsonPath("$.messages[0].authorName").value("community_home_user"));
     }
 
     @Test

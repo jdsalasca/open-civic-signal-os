@@ -164,6 +164,7 @@ public class CommunityCollaborationController {
             request.targetCommunityId(),
             request.relatedSignalId(),
             request.title(),
+            request.initialMessage(),
             principal.getName()
         );
     }

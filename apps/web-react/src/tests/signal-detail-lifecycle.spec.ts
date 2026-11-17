@@ -1,6 +1,24 @@
 import { expect, test } from '@playwright/test';
 import { mockSignalDetail, signalId } from './helpers/signalDetailFixture';
 
+const json = (body: unknown) => ({
+  status: 200,
+  contentType: 'application/json',
+  body: JSON.stringify(body),
+});
+
+const historyEntry = {
+  id: '44444444-4444-4444-4444-444444444444',
+  signalId,
+  eventType: 'STATUS_CHANGED',
+  statusFrom: 'NEW',
+  statusTo: 'IN_PROGRESS',
+  changedBy: 'staff',
+  assignedToUsername: null,
+  reason: 'Inspection started this morning',
+  createdAt: '2026-04-01T10:00:00',
+};
+
 /**
  * The signal detail screen is where a resident follows one case over time, so it is the screen
  * where machine vocabulary hurts most: the header badge, the timeline badge and the transition
@@ -30,6 +48,22 @@ test.describe('Signal detail speaks plain language', () => {
 
     await expect(page.getByTestId('signal-timeline-entry-0')).toContainText('From New to In progress');
     await expect(page.getByTestId('signal-timeline-entry-0')).not.toContainText('IN_PROGRESS');
+  });
+
+  test('a failed timeline keeps the case visible and offers a retry', async ({ page }) => {
+    let failing = true;
+    await mockSignalDetail(page);
+    await page.route(`**/api/signals/${signalId}/history`, (route) =>
+      failing ? route.abort('failed') : route.fulfill(json([historyEntry])));
+
+    await page.goto(`/signal/${signalId}`);
+    await expect(page.getByTestId('signal-detail-location-label')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('signal-history-error')).toBeVisible();
+    expect(new URL(page.url()).pathname).toBe(`/signal/${signalId}`);
+
+    failing = false;
+    await page.getByTestId('signal-history-error').getByRole('button', { name: 'Retry' }).click();
+    await expect(page.getByTestId('signal-timeline-entry-0')).toBeVisible();
   });
 });
 
