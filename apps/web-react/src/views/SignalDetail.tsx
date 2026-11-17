@@ -36,6 +36,7 @@ export function SignalDetail() {
   const [formula, setFormula] = useState<PrioritizationFormula | null>(null);
   const [history, setHistory] = useState<SignalStatusEntry[]>([]);
   const [historyError, setHistoryError] = useState(false);
+  const [formulaError, setFormulaError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
   const [assignmentUser, setAssignmentUser] = useState("");
@@ -69,6 +70,9 @@ export function SignalDetail() {
     }
     if (formulaRes.status === "fulfilled") {
       setFormula(formulaRes.value.data);
+      setFormulaError(false);
+    } else {
+      setFormulaError(true);
     }
     setLoading(false);
   }, [id, navigate, t]);
@@ -415,6 +419,22 @@ export function SignalDetail() {
               <p className="text-sm text-secondary mt-0 mb-5 leading-relaxed">
                 {t('signals.formula_desc')}
               </p>
+              {formulaError && (
+                <div className="signal-feed-error mb-4" role="alert" data-testid="signal-formula-error">
+                  <i className="pi pi-exclamation-circle" aria-hidden="true" />
+                  <div className="signal-feed-error__copy">
+                    <strong>{t("signals.formula_error_title")}</strong>
+                    <span>{t("signals.formula_error_desc")}</span>
+                  </div>
+                  <CivicButton
+                    type="button"
+                    variant="secondary"
+                    size="small"
+                    label={t("common.retry")}
+                    onClick={() => void fetchData()}
+                  />
+                </div>
+              )}
 <div className="flex flex-column gap-4" data-testid="signal-detail-formula-weights">
                 {(formula?.weights ?? []).map((weight) => {
                   const capped = formula?.cappedFactors.includes(weight.factor);

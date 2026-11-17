@@ -23,6 +23,7 @@ export function Onboarding() {
 
   const [places, setPlaces] = useState<Community[]>([]);
   const [placesError, setPlacesError] = useState(false);
+  const [placesLoading, setPlacesLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [joiningId, setJoiningId] = useState<string | null>(null);
 
@@ -44,6 +45,7 @@ export function Onboarding() {
   const [creating, setCreating] = useState(false);
 
   const loadPlaces = useCallback(async () => {
+    setPlacesLoading(true);
     setPlacesError(false);
     try {
       const { data } = await apiClient.get<Community[]>('communities/public');
@@ -52,6 +54,8 @@ export function Onboarding() {
       // The location path and the create form still work; the list offers a retry instead of
       // pretending there are no communities.
       setPlacesError(true);
+    } finally {
+      setPlacesLoading(false);
     }
   }, []);
 
@@ -301,7 +305,9 @@ export function Onboarding() {
                 data-testid="onboarding-city-search"
               />
             </span>
-            {placesError ? (
+            {placesLoading ? (
+              <p className="text-sm text-muted" role="status">{t('common.loading')}</p>
+            ) : placesError ? (
               <div className="onboarding-places-error" role="alert" data-testid="onboarding-places-error">
                 <span>{t('onboarding.places_error')}</span>
                 <CivicButton

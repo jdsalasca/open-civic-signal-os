@@ -584,6 +584,36 @@ a:hover {
   }
 }
 
+.mobile-community-switch {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.6rem;
+  background: var(--bg-surface);
+}
+
+.mobile-community-switch span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mobile-community-switch select {
+  width: 100%;
+  padding: 0.45rem 0.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .app-main {
   position: relative;
   z-index: 1;

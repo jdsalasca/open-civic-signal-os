@@ -74,6 +74,8 @@ export function CommunityFeed() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [pendingActions, setPendingActions] = useState<Record<string, boolean>>({});
   const scrollRestored = useRef(false);
+  const publishingRef = useRef(false);
+  const replySendingRef = useRef(false);
   const [alertsOn, setAlertsOn] = useState(false);
   const [place, setPlace] = useState<DetectedPlace | null>(null);
   const [nearest, setNearest] = useState<Community | null>(null);
@@ -139,7 +141,11 @@ export function CommunityFeed() {
     } catch (err) {
       const apiErr = err as ApiError & { name?: string };
       if (apiErr.name === 'CanceledError' || apiErr.name === 'AbortError') return;
-      setLoadError(true);
+      // A failed refresh keeps the cached page on screen; replacing it with an error card would
+      // throw away content the reader can still use.
+      if (!cached?.length) {
+        setLoadError(true);
+      }
       toast.error(apiErr.friendlyMessage || t('community_feed.load_error'));
     } finally {
       setLoading(false);
@@ -503,10 +509,11 @@ export function CommunityFeed() {
 
   const sendReply = async (item: CommunityFeedItem) => {
     const content = replyText.trim();
-    if (!activeCommunityId || !content) {
+    if (!activeCommunityId || !content || replySendingRef.current) {
       return;
     }
     const key = commentKey(item);
+    replySendingRef.current = true;
     setReplySending(true);
     try {
       let created: FeedComment;
@@ -544,14 +551,16 @@ export function CommunityFeed() {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('community_feed.reply_error'));
     } finally {
+      replySendingRef.current = false;
       setReplySending(false);
     }
   };
 
   const publish = async () => {
-    if (!activeCommunityId || !title.trim()) {
+    if (!activeCommunityId || !title.trim() || publishingRef.current) {
       return;
     }
+    publishingRef.current = true;
     setPublishing(true);
     try {
       const { data } = await apiClient.post<CommunityThread>('community/threads', {
@@ -591,6 +600,7 @@ export function CommunityFeed() {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('community_feed.publish_error'));
     } finally {
+      publishingRef.current = false;
       setPublishing(false);
     }
   };
@@ -871,8 +881,7 @@ export function CommunityFeed() {
                   />
                 </CivicCard>
               ) : (
-                <>
-                  <div className="social-feed-list" data-testid="community-feed-timeline">
+                <div className="social-feed-list" data-testid="community-feed-timeline">
                     {visibleItems.map((item) => (
                     <article
                       key={`${item.type}-${item.id}`}
@@ -880,6 +889,7 @@ export function CommunityFeed() {
                       data-testid={`community-feed-item-${item.type}`}
                       style={{ cursor: 'pointer' }}
                       onClick={(event) => {
+                        if (window.getSelection()?.toString()) return;
                         if ((event.target as HTMLElement).closest('button, a, input, textarea, select')) return;
                         navigate(itemHref(item));
                       }}
@@ -1050,20 +1060,21 @@ export function CommunityFeed() {
                     </article>
                   ))}
                   </div>
-                  {hasMore && (
-                    <div className="social-feed-load-more">
-                      <CivicButton
-                        type="button"
-                        variant="secondary"
-                        label={t('community_feed.load_more')}
-                        loading={loadingMore}
-                        onClick={() => void loadMore()}
-                        data-testid="community-feed-load-more"
-                      />
-                    </div>
-                  )}
-                  <p className="social-feed-window-note">{t('community_feed.window_note')}</p>
-                </>
+              )}
+              {!loading && !loadError && hasMore && (
+                <div className="social-feed-load-more">
+                  <CivicButton
+                    type="button"
+                    variant="secondary"
+                    label={t('community_feed.load_more')}
+                    loading={loadingMore}
+                    onClick={() => void loadMore()}
+                    data-testid="community-feed-load-more"
+                  />
+                </div>
+              )}
+              {!loading && !loadError && feed.length > 0 && (
+                <p className="social-feed-window-note">{t('community_feed.window_note')}</p>
               )}
               {trending.length > 0 && (
                 <CivicCard title={t('community_feed.trending')} className="social-feed-trends-card">

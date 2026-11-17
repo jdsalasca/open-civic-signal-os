@@ -343,6 +343,12 @@ test.describe('Community social feed', () => {
     await expect(page.getByTestId('community-feed-load-more')).toBeVisible();
     await expect(page.locator('.social-feed-item')).toHaveCount(20);
 
+    // A filter with no matches in the first page is not the end of the feed: pagination stays.
+    await page.getByTestId('community-feed-filter').selectOption('blog');
+    await expect(page.getByTestId('community-feed-empty')).toBeVisible();
+    await expect(page.getByTestId('community-feed-load-more')).toBeVisible();
+    await page.getByTestId('community-feed-filter').selectOption('all');
+
     await page.getByTestId('community-feed-load-more').click();
     await expect(page.locator('.social-feed-item')).toHaveCount(22);
     await expect.poll(() => beforeParam).toBe(firstPage[19].happenedAt);
@@ -478,11 +484,18 @@ test.describe('Community social feed', () => {
     release();
   });
 
-  test('focuses the composer and publishes with Control+Enter', async ({ page }) => {
+  test('focuses the composer and publishes once with Control+Enter', async ({ page }) => {
     await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    let calls = 0;
     let payload: Record<string, unknown> | null = null;
-    await page.route('**/api/community/threads', (route) => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route('**/api/community/threads', async (route) => {
+      calls += 1;
       payload = route.request().postDataJSON() as Record<string, unknown>;
+      await gate;
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -499,7 +512,11 @@ test.describe('Community social feed', () => {
     await page.locator('#feed-post-title').fill('Keyboard post');
     await page.locator('#feed-post-body').fill('Sent with Control and Enter.');
     await page.locator('#feed-post-body').press('Control+Enter');
+    await page.locator('#feed-post-body').press('Control+Enter');
 
+    // The second shortcut lands while the first request is still open and must be ignored.
+    await expect.poll(() => calls).toBe(1);
+    release();
     await expect(page.getByText('Published in the community feed.')).toBeVisible();
     expect(payload).toMatchObject({ title: 'Keyboard post', initialMessage: 'Sent with Control and Enter.' });
   });

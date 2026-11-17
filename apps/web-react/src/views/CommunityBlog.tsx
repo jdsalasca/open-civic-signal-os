@@ -6,6 +6,7 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Checkbox } from "primereact/checkbox";
 import { Avatar } from "primereact/avatar";
 import { useTranslation } from "react-i18next";
+import { useHashTarget } from "../utils/useHashTarget";
 import { CommunityBlogPost } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
@@ -59,6 +60,7 @@ export function CommunityBlog() {
   const [archiveDateTo, setArchiveDateTo] = useState("");
   const [loadingArchive, setLoadingArchive] = useState(false);
   const [commentCountsByPost, setCommentCountsByPost] = useState<Record<string, number>>({});
+  useHashTarget(posts.length > 0);
   const timelineLoadInFlightRef = useRef<string | null>(null);
 
   const activeMembership = memberships.find((m) => m.communityId === activeCommunityId);
