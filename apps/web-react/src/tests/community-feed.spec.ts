@@ -478,6 +478,81 @@ test.describe('Community social feed', () => {
     release();
   });
 
+  test('focuses the composer and publishes with Control+Enter', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    let payload: Record<string, unknown> | null = null;
+    await page.route('**/api/community/threads', (route) => {
+      payload = route.request().postDataJSON() as Record<string, unknown>;
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 'keyboard-thread', title: 'Keyboard post', updatedAt: '2026-11-17T10:00:00', messages: [] }),
+      });
+    });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+
+    await page.goto('/communities/feed');
+    await page.getByTestId('community-feed-composer').locator('button').first().click();
+    await expect(page.locator('#feed-post-title')).toBeFocused();
+
+    await page.locator('#feed-post-title').fill('Keyboard post');
+    await page.locator('#feed-post-body').fill('Sent with Control and Enter.');
+    await page.locator('#feed-post-body').press('Control+Enter');
+
+    await expect(page.getByText('Published in the community feed.')).toBeVisible();
+    expect(payload).toMatchObject({ title: 'Keyboard post', initialMessage: 'Sent with Control and Enter.' });
+  });
+
+  test('returns to the same feed position after visiting Mi Actividad', async ({ page }) => {
+    const items = Array.from({ length: 20 }, (_, index) => ({
+      type: 'signal',
+      id: `scroll-${index}`,
+      communityId: cid,
+      title: `Scroll report ${index}`,
+      summary: 'Summary',
+      happenedAt: new Date(Date.UTC(2026, 10, 17, 10, 0, 0) - index * 60000).toISOString().slice(0, 19),
+      freshness: '',
+      confirmationCount: 0,
+      viewerConfirmed: false,
+      following: false,
+      reactions: {},
+      viewerReaction: null,
+      authorName: 'Vecino',
+      authorRole: 'CITIZEN',
+      commentCount: 0,
+    }));
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(items) }));
+    await page.route('**/api/signals/mine*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0, last: true }),
+      }));
+
+    await page.goto('/communities/feed');
+    await expect(page.locator('.social-feed-item')).toHaveCount(20);
+    await page.evaluate(() => {
+      const scroller = document.querySelector('.app-main');
+      if (scroller) scroller.scrollTop = 800;
+    });
+    await expect
+      .poll(() => page.evaluate(() => document.querySelector('.app-main')?.scrollTop ?? 0))
+      .toBeGreaterThan(700);
+
+    await page.getByTestId('user-menu-toggle').click();
+    await page.locator('.app-user-menu a[href="/mine"]').click();
+    await expect(page).toHaveURL(/\/mine/);
+    await page.goBack();
+
+    await expect(page.locator('.social-feed-item')).toHaveCount(20);
+    await expect
+      .poll(() => page.evaluate(() => document.querySelector('.app-main')?.scrollTop ?? 0))
+      .toBeGreaterThan(700);
+  });
+
   test('likes a report from the feed and updates the count', async ({ page }) => {
     await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
     await page.route('**/api/community/feed*', (route) =>
