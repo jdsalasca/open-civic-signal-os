@@ -13,6 +13,9 @@
 ### Fixed
 - **Post-report detail link, error states and mobile toasts**: The success screen's **View detail** action now opens `/signal/:id` instead of a non-existent `/signals/:id`; a failed feed request shows a persistent **Retry** card instead of an empty-neighbourhood message; mobile toasts span the viewport instead of a narrow column over the profile card; and the report/report buttons no longer squeeze their labels in the footer. (`story:OCS-P1-055`)
 
+### Fixed
+- **Past Posts Shown in the Future**: API `LocalDateTime` values are UTC, but the browser parsed them as local time, so a post from five hours earlier read "in five hours" in UTC-5. A shared `parseApiDate` now treats offset-less date-times as UTC (date-only values stay local), fixing relative times, case timelines, comments and notifications. (`story:OCS-P1-071`)
+
 ### Added
 - **Votes and Five-Emoji Reactions**: Every feed card now shows UPVOTE/DOWNVOTE counts and a reaction picker with 👍 ❤️ 😂 😮 😢, stored through the existing reaction service with one reaction per person. The same votes appear next to each message on the thread screen, the comment box uses the full card width with three rows, and trending counts reactions but not votes. (`story:OCS-P1-071`)
 - **Audit Polish for the Redesigned Flow**: Publish and comment shortcuts are guarded against duplicate sends, **Load older** stays available when a filter has no matches on the first page, fragment links resolve after the target list loads, the **Más**/profile menus close on outside click and Escape with `aria-pressed` states, a failed priority formula shows an inline retry, onboarding announces loading before "no results", and the mobile drawer gains a labelled community selector. (`story:OCS-P1-070`)

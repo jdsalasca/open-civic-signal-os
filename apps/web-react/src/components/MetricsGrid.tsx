@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Signal } from "../types";
 import { useTranslation } from "react-i18next";
 import { Sparkline } from "./signalPrimitives";
+import { parseApiDate } from "../utils/parseApiDate";
 
 type MetricId = "total" | "new" | "analysis" | "avg";
 
@@ -27,8 +28,8 @@ function dailyTrend(signals: Signal[]): number[] {
 
   signals.forEach((signal) => {
     if (!signal.createdAt) return;
-    const created = new Date(signal.createdAt);
-    if (Number.isNaN(created.getTime())) return;
+    const created = parseApiDate(signal.createdAt);
+    if (!created) return;
     created.setHours(0, 0, 0, 0);
     const offset = Math.round((created.getTime() - start.getTime()) / 86_400_000);
     if (offset >= 0 && offset < TREND_DAYS) {

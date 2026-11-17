@@ -7,18 +7,17 @@
  * worse on its own: with no locale argument it drops the meridiem, so 6 PM renders as "18:00" in one
  * browser and "6:00" in another, which is not a time at all.
  *
- * Fixed ISO-like output is unambiguous in English and Spanish and sorts correctly. It is built from
- * local date components rather than a locale lookup, which preserves the existing semantics: a
- * `LocalDateTime` on the wire carries no offset, so none is invented here.
+ * Fixed ISO-like output is unambiguous in English and Spanish and sorts correctly. The wire value
+ * is a UTC LocalDateTime, parsed as UTC and rendered in the reader's timezone.
  *
  * All three return `undefined` for missing or unparseable input, so callers keep their own fallback
  * rather than rendering "Invalid Date" the way `new Date(x).toLocaleString()` does.
  */
 
+import { parseApiDate } from "./parseApiDate";
+
 function parts(value?: string | null): Date | undefined {
-  if (!value) return undefined;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? undefined : date;
+  return parseApiDate(value) ?? undefined;
 }
 
 const pad = (part: number) => String(part).padStart(2, "0");
