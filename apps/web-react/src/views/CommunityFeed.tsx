@@ -13,6 +13,7 @@ import apiClient from '../api/axios';
 import { CivicCard } from '../components/ui/CivicCard';
 import { CivicEmptyState } from '../components/ui/CivicEmptyState';
 import { CivicButton } from '../components/ui/CivicButton';
+import { CivicPageHeader } from '../components/ui/CivicPageHeader';
 import { LinkifiedText } from '../components/ui/LinkifiedText';
 import { OnboardingChecklist } from '../components/OnboardingChecklist';
 import { formatRelativeTime } from '../utils/formatRelativeTime';
@@ -584,22 +585,22 @@ export function CommunityFeed() {
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
-        <header className="social-feed-page-head">
-          <div className="min-w-0">
-            <h1 className="social-feed-page-title">
-              {t('community_feed.title', {
-                community: activeCommunityName || t('dashboard.community_default')
-              })}
-            </h1>
-          </div>
-          <CivicButton
-            type="button"
-            icon="pi pi-plus-circle"
-            label={t('community_feed.report_action')}
-            onClick={() => navigate('/report')}
-            data-testid="community-feed-report"
-          />
-        </header>
+        <CivicPageHeader
+          compact
+          title={t('community_feed.title', {
+            community: activeCommunityName || t('dashboard.community_default')
+          })}
+          className="mb-4"
+          actions={
+            <CivicButton
+              type="button"
+              icon="pi pi-plus-circle"
+              label={t('community_feed.report_action')}
+              onClick={() => navigate('/report')}
+              data-testid="community-feed-report"
+            />
+          }
+        />
 
         {place && placeLabel && (
           <div className="social-feed-place" data-testid="community-feed-place">

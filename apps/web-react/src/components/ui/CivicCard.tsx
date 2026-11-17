@@ -42,7 +42,7 @@ export function CivicCard({
 
   return (
     <div className={classNames(
-      'glass-panel u-card-surface motion-card motion-card-hover rounded-3xl overflow-hidden civic-card',
+      'glass-panel u-card-surface motion-card motion-card-hover overflow-hidden civic-card',
       { 'h-full': fullHeight },
       variantClasses[variant],
       className

@@ -18,6 +18,8 @@ interface CivicPageHeaderProps {
    */
   actions?: ReactNode;
   actionsClassName?: string;
+  /** One-line page heading for feed-style screens. */
+  compact?: boolean;
 }
 
 export function CivicPageHeader({
@@ -27,31 +29,27 @@ export function CivicPageHeader({
   eyebrow,
   actions,
   actionsClassName,
+  compact = false,
 }: CivicPageHeaderProps) {
   return (
     <header
-      className={classNames("civic-page-header", className ?? "mb-6", {
+      className={classNames("civic-page-header", className ?? "mb-5", {
         "civic-page-header-with-actions": Boolean(actions),
+        "civic-page-header-compact": compact,
       })}
       data-testid="civic-page-header"
     >
       <div className="civic-page-header-main">
         {eyebrow && (
-          <div className="u-pill mb-3">
-            <i className="pi pi-sparkles text-brand-primary"></i>
-            <span className="u-eyebrow" data-testid="page-header-eyebrow">
-              {eyebrow}
-            </span>
-          </div>
+          <span className="u-eyebrow civic-page-eyebrow" data-testid="page-header-eyebrow">
+            {eyebrow}
+          </span>
         )}
-        <h1 className="u-page-title civic-page-title text-3xl md:text-4xl font-black mb-2" data-testid="page-header-title">
+        <h1 className="u-page-title civic-page-title" data-testid="page-header-title">
           {title}
         </h1>
         {description && (
-          <p
-            className="u-page-subtitle civic-page-subtitle text-base font-medium line-height-3"
-            data-testid="page-header-description"
-          >
+          <p className="u-page-subtitle civic-page-subtitle" data-testid="page-header-description">
             {description}
           </p>
         )}
