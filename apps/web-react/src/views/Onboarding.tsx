@@ -19,6 +19,7 @@ export function Onboarding() {
   const navigate = useNavigate();
   const markMembershipsStale = useCommunityStore((state) => state.markMembershipsStale);
   const setMemberships = useCommunityStore((state) => state.setMemberships);
+  const setActiveCommunityId = useCommunityStore((state) => state.setActiveCommunityId);
 
   const [places, setPlaces] = useState<Community[]>([]);
   const [placesError, setPlacesError] = useState(false);
@@ -89,10 +90,13 @@ export function Onboarding() {
     return detected ? matches.sort((a, b) => placeRelevance(b) - placeRelevance(a)) : matches;
   }, [places, query, detected, placeRelevance]);
 
-  const finish = async () => {
+  const finish = async (communityId?: string) => {
     try {
       const { data } = await apiClient.get<CommunityMembership[]>('communities/my');
       setMemberships(data ?? []);
+      if (communityId && (data ?? []).some((membership) => membership.communityId === communityId)) {
+        setActiveCommunityId(communityId);
+      }
     } catch {
       // The layout will refresh memberships; the person still reaches the app.
     }
@@ -105,7 +109,7 @@ export function Onboarding() {
     try {
       await apiClient.post(`communities/${communityId}/join`, { role: 'MEMBER' });
       toast.success(t('onboarding.join_success'));
-      await finish();
+      await finish(communityId);
     } catch (err) {
       const apiErr = err as { friendlyMessage?: string };
       toast.error(apiErr.friendlyMessage || t('onboarding.join_error'));
@@ -180,7 +184,7 @@ export function Onboarding() {
     }
     setCreating(true);
     try {
-      await apiClient.post('communities', {
+      const { data } = await apiClient.post<Community>('communities', {
         name: (neighborhood || locality || city).trim(),
         slug: '',
         country: country.trim(),
@@ -190,7 +194,7 @@ export function Onboarding() {
         neighborhood: neighborhood.trim()
       });
       toast.success(t('onboarding.create_success'));
-      await finish();
+      await finish(data?.id);
     } catch (err) {
       const apiErr = err as { friendlyMessage?: string };
       toast.error(apiErr.friendlyMessage || t('onboarding.create_error'));

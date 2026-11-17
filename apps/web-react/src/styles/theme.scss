@@ -144,6 +144,9 @@
   --brand-sun: #f59e0b;
   --on-brand: #ffffff;
   --on-surface-strong: #ffffff;
+  --brand-fill: var(--brand-primary);
+  --on-brand-fill: var(--on-brand);
+  --brand-fill-hover: var(--brand-primary-hover);
   --link-color: #0f766e;
   --link-color-hover: #0b5d57;
 
@@ -211,7 +214,7 @@
   --shadow-paper-lift: var(--shadow-lift);
   --shadow-edge: inset 0 1px 0 rgba(238, 244, 249, 0.04);
 
-  --mesh-gradient-1: rgba(94, 234, 212, 0.12);
+  --mesh-gradient-1: rgba(79, 209, 197, 0.1);
   --mesh-gradient-2: rgba(96, 165, 250, 0.08);
   --mesh-gradient-3: rgba(251, 191, 36, 0.07);
 
@@ -224,18 +227,18 @@
   --field-bg-focus: #151f30;
   --field-text: #eef4f9;
   --field-border: #32455d;
-  --field-border-focus: #5eead4;
+  --field-border-focus: #4fd1c5;
 
-  --surface-hover: rgba(94, 234, 212, 0.1);
-  --table-row-hover: rgba(94, 234, 212, 0.06);
-  --focus-ring: rgba(94, 234, 212, 0.3);
+  --surface-hover: rgba(79, 209, 197, 0.08);
+  --table-row-hover: rgba(79, 209, 197, 0.05);
+  --focus-ring: rgba(79, 209, 197, 0.28);
   --focus-ring-color: #fbbf24;
-  --shimmer-highlight: rgba(94, 234, 212, 0.14);
+  --shimmer-highlight: rgba(79, 209, 197, 0.12);
 
   --pill-bg: rgba(230, 240, 248, 0.06);
   --pill-border: rgba(230, 240, 248, 0.14);
   --pill-hover: rgba(230, 240, 248, 0.11);
-  --panel-soft-bg: rgba(94, 234, 212, 0.07);
+  --panel-soft-bg: rgba(79, 209, 197, 0.06);
   --surface-soft: rgba(230, 240, 248, 0.05);
   --surface-soft-strong: rgba(3, 10, 20, 0.3);
   --surface-soft-hover: rgba(230, 240, 248, 0.1);
@@ -246,7 +249,7 @@
   --interactive-neutral-border: rgba(230, 240, 248, 0.16);
   --interactive-neutral-text: #e6f0f8;
 
-  --logo-surface: #5eead4;
+  --logo-surface: #4fd1c5;
   --logo-icon: #062a26;
 
   --alpha-surface-05: rgba(230, 240, 248, 0.04);
@@ -260,17 +263,21 @@
   --alpha-overlay-40: rgba(11, 18, 32, 0.56);
   --alpha-overlay-80: rgba(11, 18, 32, 0.84);
 
-  // Mint teal out of the night: light enough to stay readable on card.
-  --brand-primary: #5eead4;
-  --brand-primary-hover: #99f6e4;
-  --brand-primary-glow: rgba(94, 234, 212, 0.3);
-  --brand-primary-glow-strong: rgba(94, 234, 212, 0.46);
+  // Soft aqua: readable as text and calm as a filled button with dark ink.
+  --brand-primary: #4fd1c5;
+  --brand-primary-hover: #5eead4;
+  --brand-primary-glow: rgba(79, 209, 197, 0.28);
+  --brand-primary-glow-strong: rgba(79, 209, 197, 0.42);
   --brand-accent: #93c5fd;
   --brand-accent-soft: rgba(147, 197, 253, 0.18);
   --brand-ink: #e6f0f8;
   --brand-sun: #fbbf24;
   --on-brand: #062a26;
   --on-surface-strong: #062a26;
+  // Solid primary controls use deep teal with white text; the aqua stays for icons and accents.
+  --brand-fill: #0f766e;
+  --on-brand-fill: #ffffff;
+  --brand-fill-hover: #115e59;
   --link-color: #7dd3fc;
   --link-color-hover: #bae6fd;
 
@@ -280,9 +287,9 @@
   --status-rejected: #fca5a5;
   --status-rejected-glow: rgba(252, 165, 165, 0.34);
 
-  --brand-primary-alpha-10: rgba(94, 234, 212, 0.12);
-  --brand-primary-alpha-20: rgba(94, 234, 212, 0.2);
-  --brand-primary-alpha-30: rgba(94, 234, 212, 0.3);
+  --brand-primary-alpha-10: rgba(79, 209, 197, 0.1);
+  --brand-primary-alpha-20: rgba(79, 209, 197, 0.18);
+  --brand-primary-alpha-30: rgba(79, 209, 197, 0.26);
   --status-progress-alpha-10: rgba(251, 191, 36, 0.14);
   --status-progress-alpha-20: rgba(251, 191, 36, 0.24);
   --status-resolved-alpha-10: rgba(134, 239, 172, 0.14);
@@ -300,9 +307,9 @@
   --color-surface-2: var(--bg-elevated);
   --color-text: var(--text-main);
   --color-muted: var(--text-muted);
-  --color-accent: #5eead4;
+  --color-accent: #4fd1c5;
   --color-accent-deco: #2dd4bf;
-  --color-accent-soft: rgba(94, 234, 212, 0.16);
+  --color-accent-soft: rgba(79, 209, 197, 0.14);
   --color-danger: var(--status-rejected);
   --color-warn: var(--status-progress);
   --color-ok: var(--status-resolved);
@@ -341,6 +348,9 @@
   --brand-primary: #99f6e4;
   --brand-primary-hover: #ccfbf1;
   --on-brand: #04201c;
+  --brand-fill: #99f6e4;
+  --on-brand-fill: #04201c;
+  --brand-fill-hover: #ccfbf1;
   --link-color: #a5f3fc;
   --link-color-hover: #cffafe;
   --focus-ring: rgba(253, 230, 138, 0.5);
@@ -393,8 +403,8 @@ html:root {
   --font-family: var(--font-body), "Segoe UI", sans-serif;
   font-family: var(--font-body), "Segoe UI", sans-serif;
   font-feature-settings: normal;
-  --primary-color: var(--brand-primary);
-  --primary-color-text: var(--on-brand);
+  --primary-color: var(--brand-fill);
+  --primary-color-text: var(--on-brand-fill);
   --surface-ground: var(--bg-app);
   --surface-card: var(--bg-card);
   --surface-border: var(--border-subtle);

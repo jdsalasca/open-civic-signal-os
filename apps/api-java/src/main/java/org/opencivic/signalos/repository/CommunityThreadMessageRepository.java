@@ -12,6 +12,19 @@ public interface CommunityThreadMessageRepository extends JpaRepository<Communit
     List<CommunityThreadMessage> findByThreadIdOrderByCreatedAtAsc(UUID threadId);
     List<CommunityThreadMessage> findByThreadIdInOrderByThreadIdAscCreatedAtAsc(Collection<UUID> threadIds);
 
+    @Query("""
+        select m.threadId as threadId, count(m) as total
+        from CommunityThreadMessage m
+        where m.threadId in :threadIds
+        group by m.threadId
+    """)
+    List<ThreadMessageCount> countByThreadIds(@Param("threadIds") Collection<UUID> threadIds);
+
+    interface ThreadMessageCount {
+        UUID getThreadId();
+        long getTotal();
+    }
+
     /**
      * Only the earliest message of each thread, for the feed summary. Loading every message of every
      * thread on the page and keeping the first one costs the whole history for a preview line.

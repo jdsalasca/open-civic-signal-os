@@ -566,6 +566,7 @@ export type CommunityFeedItem = {
   authorName?: string | null;
   authorRole?: string | null;
   commentCount?: number | null;
+  rootMessageId?: string | null;
 };
 
 export type SignalConfirmationState = {

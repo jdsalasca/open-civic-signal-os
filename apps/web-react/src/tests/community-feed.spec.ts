@@ -14,9 +14,12 @@ const feed = [
     happenedAt: '2026-11-15T20:50:00',
     freshness: 'updated 7m ago',
     following: false,
+    reactions: { '👍': 2 },
+    viewerReaction: null,
     authorName: 'Sofía Ramírez',
     authorRole: 'CITIZEN',
-    commentCount: null,
+    commentCount: 1,
+    rootMessageId: 'm1',
   },
   {
     type: 'signal',
@@ -123,6 +126,9 @@ test.describe('Community social feed', () => {
       'Equipo de la Alcaldía'
     );
     await expect(page.locator('.social-feed-item').filter({ hasText: 'New lighting' })).toContainText('Official');
+    await expect(page.locator('.social-feed-item').filter({ hasText: 'clean the park' })).toContainText(
+      'Comment · 1'
+    );
 
     await page.getByTestId('community-feed-filter-signal').click();
     await expect(page.locator('.social-feed-item')).toHaveCount(1);
@@ -295,6 +301,56 @@ test.describe('Community social feed', () => {
     await expect.poll(() => beforeParam).toBe(firstPage[19].happenedAt);
     // A short page is the end of the feed, so the control disappears instead of lying.
     await expect(page.getByTestId('community-feed-load-more')).toHaveCount(0);
+  });
+
+  test('shows the detected place and offers a change when the active community is elsewhere', async ({ page, context }) => {
+    await context.grantPermissions(['geolocation']);
+    await context.setGeolocation({ latitude: 5.5353, longitude: -73.3678 });
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/places/reverse*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          neighborhood: 'Barrio Las Nieves',
+          locality: 'Tunja',
+          city: 'Tunja',
+          region: 'Boyacá',
+          country: 'Colombia',
+        }),
+      }));
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+
+    await page.goto('/communities/feed');
+    await expect(page.getByTestId('community-feed-place')).toContainText('Barrio Las Nieves');
+    await expect(page.getByTestId('community-feed-place')).toContainText('Tunja');
+
+    const banner = page.getByTestId('community-feed-location-mismatch');
+    await expect(banner).toContainText('You are in Tunja');
+    await expect(banner).toContainText('Los Rosales');
+    await banner.getByRole('button', { name: 'Hide location notice' }).click();
+    await expect(banner).toHaveCount(0);
+  });
+
+  test('reacts to a conversation from the feed', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+    await page.route('**/api/community/threads/thread-1/messages/m1/react', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ reactions: { '👍': 3 }, viewerReaction: '👍' }),
+      }));
+
+    await page.goto('/communities/feed');
+    const card = page.locator('.social-feed-item').filter({ hasText: 'clean the park' });
+    const like = card.getByTestId('community-feed-react-like-thread-1');
+    await expect(like).toContainText('· 2');
+    await like.click();
+    await expect(like).toContainText('· 3');
+    await expect(like).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('likes a report from the feed and updates the count', async ({ page }) => {

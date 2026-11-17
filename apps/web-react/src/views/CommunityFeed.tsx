@@ -9,20 +9,19 @@ import { CommunityFeedItem, CommunityThread } from '../types';
 import { Layout } from '../components/Layout';
 import { useCommunityStore } from '../store/useCommunityStore';
 import { useAuthStore } from '../store/useAuthStore';
-import { useSettingsStore } from '../store/useSettingsStore';
 import apiClient from '../api/axios';
 import { CivicCard } from '../components/ui/CivicCard';
 import { CivicEmptyState } from '../components/ui/CivicEmptyState';
 import { CivicButton } from '../components/ui/CivicButton';
 import { LinkifiedText } from '../components/ui/LinkifiedText';
 import { OnboardingChecklist } from '../components/OnboardingChecklist';
-import { toRoleLabel } from '../constants/roleLabels';
 import { formatRelativeTime } from '../utils/formatRelativeTime';
 
 type ApiError = Error & { friendlyMessage?: string };
 type FeedFilter = 'all' | CommunityFeedItem['type'];
 type FeedComment = { id: string; author: string; content: string; createdAt?: string };
 type CommentResponse = { id: string; authorUsername: string; content: string; createdAt: string };
+type DetectedPlace = { city?: string; locality?: string; neighborhood?: string; region?: string; country?: string };
 type ThreadMessageResponse = { id: string; content: string; createdAt: string; hidden?: boolean; authorName?: string | null };
 
 const TITLE_LIMIT = 120;
@@ -69,10 +68,31 @@ export function CommunityFeed() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [alertsOn, setAlertsOn] = useState(false);
+  const [place, setPlace] = useState<DetectedPlace | null>(null);
+  const [locationDismissed, setLocationDismissed] = useState(
+    () => sessionStorage.getItem('civic-location-dismissed') === '1'
+  );
 
   const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
-  const activeRole = memberships.find((m) => m.communityId === activeCommunityId)?.role;
-  const interfaceMode = useSettingsStore((state) => state.interfaceMode);
+  const activeMembership = memberships.find((m) => m.communityId === activeCommunityId);
+  const placeLabel = place
+    ? Array.from(
+        new Set([place.neighborhood, place.locality, place.city].filter(Boolean))
+      ).join(' · ')
+    : '';
+  const activePlaceText = [
+    activeCommunityName,
+    ...(activeMembership?.breadcrumb ?? []).map((item) => item.name),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  const placeMismatch = Boolean(
+    place?.city &&
+      activeCommunityName &&
+      !activePlaceText.includes(place.city.toLowerCase()) &&
+      !locationDismissed
+  );
 
   const loadFeed = useCallback(async (signal?: AbortSignal) => {
     if (!activeCommunityId) {
@@ -140,6 +160,33 @@ export function CommunityFeed() {
       .then(({ data }) => setAlertsOn(Boolean(data.subscribed)))
       .catch(() => setAlertsOn(false));
   }, [activeCommunityId]);
+
+  // The feed asks for the place once per tab so the person can see where the app thinks they are
+  // without a prompt on every navigation. A denied permission leaves the feed untouched.
+  useEffect(() => {
+    if (!navigator.geolocation || sessionStorage.getItem('civic-location-asked') === '1') {
+      return;
+    }
+    sessionStorage.setItem('civic-location-asked', '1');
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { data } = await apiClient.get<DetectedPlace>('places/reverse', {
+            params: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            },
+          });
+          setPlace(data);
+        } catch {
+          // The location hint is optional context, not a blocker for the feed.
+        }
+      },
+      () => {
+        // Denied or unavailable: keep the feed as it is.
+      }
+    );
+  }, []);
 
   const toggleAlerts = async () => {
     if (!activeCommunityId) return;
@@ -231,14 +278,18 @@ export function CommunityFeed() {
   };
 
   const react = async (item: CommunityFeedItem, reaction: 'LIKE' | 'CELEBRATE') => {
-    if (item.type !== 'signal' && item.type !== 'blog') return;
+    if (item.type === 'thread-update' && !item.rootMessageId) return;
     try {
-      const endpoint = item.type === 'signal'
-        ? `signals/${item.id}/react`
-        : `community/blog/${item.id}/react`;
+      const endpoint =
+        item.type === 'signal'
+          ? `signals/${item.id}/react`
+          : item.type === 'blog'
+            ? `community/blog/${item.id}/react`
+            : `community/threads/${item.id}/messages/${item.rootMessageId}/react`;
       const { data } = await apiClient.post<{ reactions: Record<string, number>; viewerReaction: string | null }>(
         endpoint,
-        { type: reaction }
+        // Thread messages keep emoji keys; signals and posts use the LIKE/CELEBRATE vocabulary.
+        { type: item.type === 'thread-update' ? (reaction === 'LIKE' ? '👍' : '🙌') : reaction }
       );
       setFeed((current) =>
         current.map((entry) =>
@@ -408,6 +459,38 @@ export function CommunityFeed() {
           />
         </header>
 
+        {place && placeLabel && (
+          <div className="social-feed-place" data-testid="community-feed-place">
+            <i className="pi pi-map-marker" aria-hidden="true" />
+            <span>{t('community_feed.location_here', { place: placeLabel })}</span>
+          </div>
+        )}
+        {placeMismatch && place?.city && (
+          <div className="social-feed-location-banner" role="status" data-testid="community-feed-location-mismatch">
+            <div className="social-feed-location-copy">
+              <strong>{t('community_feed.location_mismatch_title', { city: place.city })}</strong>
+              <span>{t('community_feed.location_mismatch_desc', { community: activeCommunityName })}</span>
+            </div>
+            <CivicButton
+              type="button"
+              size="small"
+              label={t('community_feed.location_change')}
+              onClick={() => navigate('/onboarding')}
+            />
+            <button
+              type="button"
+              className="social-feed-location-dismiss"
+              aria-label={t('community_feed.location_dismiss')}
+              onClick={() => {
+                sessionStorage.setItem('civic-location-dismissed', '1');
+                setLocationDismissed(true);
+              }}
+            >
+              <i className="pi pi-times" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
         <OnboardingChecklist />
 
         {!activeCommunityId ? (
@@ -533,12 +616,23 @@ export function CommunityFeed() {
                     </button>
                   ))}
                 </div>
-                {newest && (
-                  <span className="social-feed-freshness">
-                    <i className="pi pi-clock" aria-hidden="true" />
-                    {t('community_feed.updated', { time: formatRelativeTime(newest.happenedAt, i18n.language) })}
-                  </span>
-                )}
+                <div className="social-feed-toolbar-actions">
+                  {newest && (
+                    <span className="social-feed-freshness">
+                      <i className="pi pi-clock" aria-hidden="true" />
+                      {t('community_feed.updated', { time: formatRelativeTime(newest.happenedAt, i18n.language) })}
+                    </span>
+                  )}
+                  <CivicButton
+                    type="button"
+                    size="small"
+                    variant={alertsOn ? 'secondary' : 'ghost'}
+                    icon={alertsOn ? 'pi pi-check' : 'pi pi-bell'}
+                    label={alertsOn ? t('community_feed.alerts_on') : t('community_feed.alerts_off')}
+                    onClick={toggleAlerts}
+                    data-testid="community-alerts-toggle"
+                  />
+                </div>
               </div>
 
               {loadError ? (
@@ -624,28 +718,33 @@ export function CommunityFeed() {
                           </p>
                         )}
                         <div className="social-feed-actions">
-                          {(item.type === 'signal' || item.type === 'blog') &&
-                            (['LIKE', 'CELEBRATE'] as const).map((reaction) => {
-                              const count = item.reactions?.[reaction] ?? 0;
-                              const active = item.viewerReaction === reaction;
-                              return (
-                                <button
-                                  key={reaction}
-                                  type="button"
-                                  onClick={() => react(item, reaction)}
-                                  aria-pressed={active}
-                                  className={active ? 'is-active' : undefined}
-                                  data-testid={`community-feed-react-${reaction.toLowerCase()}-${item.id}`}
-                                >
-                                  <i
-                                    className={reaction === 'LIKE' ? 'pi pi-heart' : 'pi pi-star'}
-                                    aria-hidden="true"
-                                  />
-                                  {t(reaction === 'LIKE' ? 'community_feed.like' : 'community_feed.celebrate')}
-                                  {count > 0 ? ` · ${count}` : ''}
-                                </button>
-                              );
-                            })}
+                          {(['LIKE', 'CELEBRATE'] as const).map((reaction) => {
+                            const key =
+                              item.type === 'thread-update'
+                                ? reaction === 'LIKE'
+                                  ? '👍'
+                                  : '🙌'
+                                : reaction;
+                            const count = item.reactions?.[key] ?? 0;
+                            const active = item.viewerReaction === key;
+                            return (
+                              <button
+                                key={reaction}
+                                type="button"
+                                onClick={() => react(item, reaction)}
+                                aria-pressed={active}
+                                className={active ? 'is-active' : undefined}
+                                data-testid={`community-feed-react-${reaction.toLowerCase()}-${item.id}`}
+                              >
+                                <i
+                                  className={reaction === 'LIKE' ? 'pi pi-heart' : 'pi pi-star'}
+                                  aria-hidden="true"
+                                />
+                                {t(reaction === 'LIKE' ? 'community_feed.like' : 'community_feed.celebrate')}
+                                {count > 0 ? ` · ${count}` : ''}
+                              </button>
+                            );
+                          })}
                           {item.type === 'signal' && (
                             <button
                               type="button"
@@ -776,68 +875,9 @@ export function CommunityFeed() {
                   <p className="social-feed-window-note">{t('community_feed.window_note')}</p>
                 </>
               )}
-            </div>
-
-            <aside className="social-feed-aside">
-              <CivicCard title={t('community_feed.your_community')} variant="brand">
-                <div className="flex flex-column gap-2">
-                  <strong className="text-xl text-main">{activeCommunityName}</strong>
-                  {activeRole && (
-                    <span className="u-pill align-self-start">
-                      <i className="pi pi-users text-brand-primary" aria-hidden="true" />
-                      {toRoleLabel(activeRole, t)}
-                    </span>
-                  )}
-                  <span className="text-sm text-secondary mt-2">
-                    {t('community_feed.your_community_desc')}
-                  </span>
-                </div>
-                <div className="social-feed-aside-links mt-4">
-                  <button type="button" onClick={() => navigate('/communities/rooms')}>
-                    <i className="pi pi-comments" aria-hidden="true" />
-                    {t('community_feed.chat')}
-                  </button>
-                  {interfaceMode === 'advanced' && (
-                    <>
-                      <button type="button" onClick={() => navigate('/communities/map')}>
-                        <i className="pi pi-map" aria-hidden="true" />
-                        {t('community_feed.explore_map')}
-                      </button>
-                      <button type="button" onClick={() => navigate('/communities/proposals')}>
-                        <i className="pi pi-file-edit" aria-hidden="true" />
-                        {t('community_feed.explore_proposals')}
-                      </button>
-                      <button type="button" onClick={() => navigate('/communities/projects')}>
-                        <i className="pi pi-briefcase" aria-hidden="true" />
-                        {t('community_feed.explore_projects')}
-                      </button>
-                      <button type="button" onClick={() => navigate('/communities/governance')}>
-                        <i className="pi pi-book" aria-hidden="true" />
-                        {t('community_feed.explore_governance')}
-                      </button>
-                    </>
-                  )}
-                </div>
-                <div className="social-feed-alerts-row">
-                  <div>
-                    <strong>{t('community_feed.alerts_title')}</strong>
-                    <span>{t('community_feed.alerts_desc')}</span>
-                  </div>
-                  <CivicButton
-                    type="button"
-                    icon={alertsOn ? 'pi pi-check' : 'pi pi-bell'}
-                    variant={alertsOn ? 'secondary' : 'primary'}
-                    size="small"
-                    label={alertsOn ? t('community_feed.alerts_on') : t('community_feed.alerts_off')}
-                    onClick={toggleAlerts}
-                    data-testid="community-alerts-toggle"
-                  />
-                </div>
-              </CivicCard>
-
-              <CivicCard title={t('community_feed.trending')} className="mt-4">
-                {trending.length > 0 ? (
-                  <ul className="social-feed-trending">
+              {trending.length > 0 && (
+                <CivicCard title={t('community_feed.trending')} className="social-feed-trends-card">
+                  <ul className="social-feed-trending social-feed-trending-inline">
                     {trending.map((item) => (
                       <li key={`${item.type}-${item.id}`}>
                         <Link to={itemHref(item)}>{item.title}</Link>
@@ -847,11 +887,9 @@ export function CommunityFeed() {
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  <p className="text-sm text-muted m-0">{t('community_feed.trending_empty')}</p>
-                )}
-              </CivicCard>
-            </aside>
+                </CivicCard>
+              )}
+            </div>
           </div>
         )}
       </div>

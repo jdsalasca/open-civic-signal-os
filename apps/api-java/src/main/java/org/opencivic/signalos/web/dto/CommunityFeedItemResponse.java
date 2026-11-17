@@ -19,5 +19,6 @@ public record CommunityFeedItemResponse(
     String viewerReaction,
     String authorName,
     String authorRole,
-    Long commentCount
+    Long commentCount,
+    UUID rootMessageId
 ) {}

@@ -8548,7 +8548,12 @@ components:
         commentCount:
           type: integer
           nullable: true
-          description: Number of comments on a signal or official post; null for thread entries.
+          description: Number of comments on a signal or official post, or replies in a thread entry.
+        rootMessageId:
+          type: string
+          format: uuid
+          nullable: true
+          description: First message of a thread entry, used for message-level reactions.
     OnboardingChecklist:
       type: object
       required: [joinedCommunity, contributed, followingContent, allComplete]
