@@ -64,91 +64,91 @@
 
 // ---------- 2. Light theme: civic daylight ---------------------------------
 @mixin papercraft-light-tokens {
-  --bg-app: #f4f7f9;
-  --bg-nav: rgba(244, 247, 249, 0.9);
+  --bg-app: #f5f5f5;
+  --bg-nav: rgba(255, 255, 255, 0.92);
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
-  --bg-elevated: #eef3f6;
-  --bg-sidebar: rgba(255, 255, 255, 0.95);
+  --bg-elevated: #efefef;
+  --bg-sidebar: rgba(255, 255, 255, 0.96);
 
-  --text-main: #10202b;
-  --text-secondary: #3c4d5a;
-  --text-muted: #556875;
+  --text-main: #111111;
+  --text-secondary: #404040;
+  --text-muted: #666666;
 
-  --border-subtle: #d9e2e8;
-  --glass-stroke: rgba(16, 32, 43, 0.1);
+  --border-subtle: #dedede;
+  --glass-stroke: rgba(0, 0, 0, 0.1);
 
-  --shadow-premium: 0 1px 2px rgba(16, 32, 43, 0.05), 0 6px 18px -14px rgba(16, 32, 43, 0.16);
-  --shadow-lift: 0 2px 4px rgba(16, 32, 43, 0.06), 0 14px 26px -18px rgba(16, 32, 43, 0.2);
+  --shadow-premium: 0 1px 2px rgba(0, 0, 0, 0.05), 0 6px 18px -14px rgba(0, 0, 0, 0.16);
+  --shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.06), 0 14px 26px -18px rgba(0, 0, 0, 0.2);
   --shadow-paper: var(--shadow-premium);
   --shadow-paper-lift: var(--shadow-lift);
-  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
-  --mesh-gradient-1: rgba(15, 118, 110, 0.1);
-  --mesh-gradient-2: rgba(37, 99, 235, 0.1);
-  --mesh-gradient-3: rgba(251, 191, 36, 0.14);
+  --mesh-gradient-1: rgba(0, 0, 0, 0.03);
+  --mesh-gradient-2: rgba(0, 0, 0, 0.02);
+  --mesh-gradient-3: rgba(0, 0, 0, 0.02);
 
-  --scrollbar-thumb: #c9d6de;
-  --tooltip-bg: #10202b;
+  --scrollbar-thumb: #c4c4c4;
+  --tooltip-bg: #111111;
   --tooltip-text: #ffffff;
-  --tooltip-shadow: 0 18px 32px -18px rgba(16, 32, 43, 0.45);
+  --tooltip-shadow: 0 18px 32px -18px rgba(0, 0, 0, 0.45);
 
   --field-bg: #ffffff;
   --field-bg-focus: #ffffff;
-  --field-text: #10202b;
-  --field-border: #c9d6de;
-  --field-border-focus: #0f766e;
+  --field-text: #111111;
+  --field-border: #cfcfcf;
+  --field-border-focus: #111111;
 
-  --surface-hover: rgba(15, 118, 110, 0.08);
-  --table-row-hover: rgba(15, 118, 110, 0.05);
-  --focus-ring: rgba(15, 118, 110, 0.25);
-  --focus-ring-color: #0f766e;
-  --shimmer-highlight: rgba(15, 118, 110, 0.12);
+  --surface-hover: rgba(0, 0, 0, 0.05);
+  --table-row-hover: rgba(0, 0, 0, 0.03);
+  --focus-ring: rgba(0, 0, 0, 0.2);
+  --focus-ring-color: #111111;
+  --shimmer-highlight: rgba(0, 0, 0, 0.08);
 
-  --pill-bg: rgba(16, 32, 43, 0.05);
-  --pill-border: rgba(16, 32, 43, 0.14);
-  --pill-hover: rgba(16, 32, 43, 0.1);
-  --panel-soft-bg: rgba(15, 118, 110, 0.05);
-  --surface-soft: rgba(16, 32, 43, 0.045);
-  --surface-soft-strong: rgba(16, 32, 43, 0.08);
-  --surface-soft-hover: rgba(16, 32, 43, 0.1);
-  --surface-soft-border: rgba(16, 32, 43, 0.14);
+  --pill-bg: rgba(0, 0, 0, 0.04);
+  --pill-border: rgba(0, 0, 0, 0.12);
+  --pill-hover: rgba(0, 0, 0, 0.08);
+  --panel-soft-bg: rgba(0, 0, 0, 0.03);
+  --surface-soft: rgba(0, 0, 0, 0.04);
+  --surface-soft-strong: rgba(0, 0, 0, 0.07);
+  --surface-soft-hover: rgba(0, 0, 0, 0.08);
+  --surface-soft-border: rgba(0, 0, 0, 0.12);
 
-  --interactive-neutral-bg: #eaf1f4;
-  --interactive-neutral-hover: #dfe9ee;
-  --interactive-neutral-border: #c9d6de;
-  --interactive-neutral-text: #10202b;
+  --interactive-neutral-bg: #ececec;
+  --interactive-neutral-hover: #e0e0e0;
+  --interactive-neutral-border: #d4d4d4;
+  --interactive-neutral-text: #111111;
 
-  --logo-surface: #0f766e;
+  --logo-surface: #111111;
   --logo-icon: #ffffff;
 
-  --alpha-surface-05: rgba(16, 32, 43, 0.04);
-  --alpha-surface-10: rgba(16, 32, 43, 0.08);
-  --alpha-border-05: rgba(16, 32, 43, 0.06);
-  --alpha-border-10: rgba(16, 32, 43, 0.12);
-  --alpha-border-20: rgba(16, 32, 43, 0.2);
-  --alpha-border-30: rgba(16, 32, 43, 0.28);
-  --alpha-overlay-20: rgba(244, 247, 249, 0.72);
-  --alpha-overlay-30: rgba(244, 247, 249, 0.82);
-  --alpha-overlay-40: rgba(244, 247, 249, 0.9);
-  --alpha-overlay-80: rgba(244, 247, 249, 0.96);
+  --alpha-surface-05: rgba(0, 0, 0, 0.04);
+  --alpha-surface-10: rgba(0, 0, 0, 0.08);
+  --alpha-border-05: rgba(0, 0, 0, 0.06);
+  --alpha-border-10: rgba(0, 0, 0, 0.12);
+  --alpha-border-20: rgba(0, 0, 0, 0.2);
+  --alpha-border-30: rgba(0, 0, 0, 0.28);
+  --alpha-overlay-20: rgba(245, 245, 245, 0.72);
+  --alpha-overlay-30: rgba(245, 245, 245, 0.82);
+  --alpha-overlay-40: rgba(245, 245, 245, 0.9);
+  --alpha-overlay-80: rgba(245, 245, 245, 0.96);
 
-  // Interactive ink: teal carries action; blue carries community data.
-  --brand-primary: #0f766e;
-  --brand-primary-hover: #0b5d57;
-  --brand-primary-glow: rgba(15, 118, 110, 0.26);
-  --brand-primary-glow-strong: rgba(15, 118, 110, 0.42);
-  --brand-accent: #2563eb;
-  --brand-accent-soft: rgba(37, 99, 235, 0.2);
-  --brand-ink: #10202b;
-  --brand-sun: #f59e0b;
+  // Monochrome chrome: black carries action; colour is reserved for status and data.
+  --brand-primary: #111111;
+  --brand-primary-hover: #333333;
+  --brand-primary-glow: rgba(0, 0, 0, 0.2);
+  --brand-primary-glow-strong: rgba(0, 0, 0, 0.3);
+  --brand-accent: #52525b;
+  --brand-accent-soft: rgba(82, 82, 91, 0.15);
+  --brand-ink: #111111;
+  --brand-sun: #a16207;
   --on-brand: #ffffff;
   --on-surface-strong: #ffffff;
-  --brand-fill: var(--brand-primary);
-  --on-brand-fill: var(--on-brand);
-  --brand-fill-hover: var(--brand-primary-hover);
-  --link-color: #0f766e;
-  --link-color-hover: #0b5d57;
+  --brand-fill: #111111;
+  --on-brand-fill: #ffffff;
+  --brand-fill-hover: #333333;
+  --link-color: #111111;
+  --link-color-hover: #000000;
 
   --status-new: #1d4ed8;
   --status-progress: #b45309;
@@ -156,9 +156,9 @@
   --status-rejected: #b91c1c;
   --status-rejected-glow: rgba(185, 28, 28, 0.34);
 
-  --brand-primary-alpha-10: rgba(15, 118, 110, 0.1);
-  --brand-primary-alpha-20: rgba(15, 118, 110, 0.18);
-  --brand-primary-alpha-30: rgba(15, 118, 110, 0.26);
+  --brand-primary-alpha-10: rgba(0, 0, 0, 0.06);
+  --brand-primary-alpha-20: rgba(0, 0, 0, 0.1);
+  --brand-primary-alpha-30: rgba(0, 0, 0, 0.14);
   --status-progress-alpha-10: rgba(180, 83, 9, 0.12);
   --status-progress-alpha-20: rgba(180, 83, 9, 0.22);
   --status-resolved-alpha-10: rgba(21, 128, 61, 0.12);
@@ -179,9 +179,9 @@
   --color-surface-2: var(--bg-elevated);
   --color-text: var(--text-main);
   --color-muted: var(--text-muted);
-  --color-accent: #0f766e;
-  --color-accent-deco: #14b8a6;
-  --color-accent-soft: rgba(20, 184, 166, 0.16);
+  --color-accent: #111111;
+  --color-accent-deco: #52525b;
+  --color-accent-soft: rgba(0, 0, 0, 0.08);
   --color-danger: var(--status-rejected);
   --color-warn: var(--status-progress);
   --color-ok: var(--status-resolved);
@@ -194,92 +194,91 @@
 
 // ---------- 3. Dark theme: civic night -------------------------------------
 @mixin papercraft-dark-tokens {
-  --bg-app: #0b1220;
-  --bg-nav: rgba(11, 18, 32, 0.9);
-  --bg-surface: #111a29;
-  --bg-card: #151f30;
-  --bg-elevated: #1c2940;
-  --bg-sidebar: rgba(13, 21, 35, 0.96);
+  --bg-app: #000000;
+  --bg-nav: rgba(0, 0, 0, 0.9);
+  --bg-surface: #0a0a0a;
+  --bg-card: #111111;
+  --bg-elevated: #181818;
+  --bg-sidebar: rgba(0, 0, 0, 0.96);
 
-  --text-main: #eef4f9;
-  --text-secondary: #c3d0dd;
-  --text-muted: #94a6b8;
+  --text-main: #f5f5f5;
+  --text-secondary: #d4d4d4;
+  --text-muted: #a3a3a3;
 
-  --border-subtle: #2a3a4f;
-  --glass-stroke: rgba(238, 244, 249, 0.1);
+  --border-subtle: #2a2a2a;
+  --glass-stroke: rgba(255, 255, 255, 0.1);
 
-  --shadow-premium: 0 1px 2px rgba(0, 6, 14, 0.35), 0 8px 22px -18px rgba(0, 6, 14, 0.6);
-  --shadow-lift: 0 2px 6px rgba(0, 6, 14, 0.4), 0 18px 30px -22px rgba(0, 6, 14, 0.7);
+  --shadow-premium: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 22px -18px rgba(0, 0, 0, 0.8);
+  --shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.55), 0 18px 30px -22px rgba(0, 0, 0, 0.85);
   --shadow-paper: var(--shadow-premium);
   --shadow-paper-lift: var(--shadow-lift);
-  --shadow-edge: inset 0 1px 0 rgba(238, 244, 249, 0.04);
+  --shadow-edge: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-  --mesh-gradient-1: rgba(79, 209, 197, 0.1);
-  --mesh-gradient-2: rgba(96, 165, 250, 0.08);
-  --mesh-gradient-3: rgba(251, 191, 36, 0.07);
+  --mesh-gradient-1: rgba(255, 255, 255, 0.03);
+  --mesh-gradient-2: rgba(255, 255, 255, 0.02);
+  --mesh-gradient-3: rgba(255, 255, 255, 0.02);
 
-  --scrollbar-thumb: #3b4f66;
-  --tooltip-bg: #eef4f9;
-  --tooltip-text: #111a29;
-  --tooltip-shadow: 0 18px 32px -18px rgba(0, 0, 0, 0.6);
+  --scrollbar-thumb: #3a3a3a;
+  --tooltip-bg: #f5f5f5;
+  --tooltip-text: #000000;
+  --tooltip-shadow: 0 18px 32px -18px rgba(0, 0, 0, 0.8);
 
-  --field-bg: #0f1826;
-  --field-bg-focus: #151f30;
-  --field-text: #eef4f9;
-  --field-border: #32455d;
-  --field-border-focus: #4fd1c5;
+  --field-bg: #0d0d0d;
+  --field-bg-focus: #151515;
+  --field-text: #f5f5f5;
+  --field-border: #333333;
+  --field-border-focus: #f5f5f5;
 
-  --surface-hover: rgba(79, 209, 197, 0.08);
-  --table-row-hover: rgba(79, 209, 197, 0.05);
-  --focus-ring: rgba(79, 209, 197, 0.28);
-  --focus-ring-color: #fbbf24;
-  --shimmer-highlight: rgba(79, 209, 197, 0.12);
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --table-row-hover: rgba(255, 255, 255, 0.03);
+  --focus-ring: rgba(255, 255, 255, 0.25);
+  --focus-ring-color: #ffffff;
+  --shimmer-highlight: rgba(255, 255, 255, 0.08);
 
-  --pill-bg: rgba(230, 240, 248, 0.06);
-  --pill-border: rgba(230, 240, 248, 0.14);
-  --pill-hover: rgba(230, 240, 248, 0.11);
-  --panel-soft-bg: rgba(79, 209, 197, 0.06);
-  --surface-soft: rgba(230, 240, 248, 0.05);
-  --surface-soft-strong: rgba(3, 10, 20, 0.3);
-  --surface-soft-hover: rgba(230, 240, 248, 0.1);
-  --surface-soft-border: rgba(230, 240, 248, 0.13);
+  --pill-bg: rgba(255, 255, 255, 0.05);
+  --pill-border: rgba(255, 255, 255, 0.14);
+  --pill-hover: rgba(255, 255, 255, 0.1);
+  --panel-soft-bg: rgba(255, 255, 255, 0.03);
+  --surface-soft: rgba(255, 255, 255, 0.04);
+  --surface-soft-strong: rgba(0, 0, 0, 0.4);
+  --surface-soft-hover: rgba(255, 255, 255, 0.08);
+  --surface-soft-border: rgba(255, 255, 255, 0.14);
 
-  --interactive-neutral-bg: rgba(230, 240, 248, 0.08);
-  --interactive-neutral-hover: rgba(230, 240, 248, 0.14);
-  --interactive-neutral-border: rgba(230, 240, 248, 0.16);
-  --interactive-neutral-text: #e6f0f8;
+  --interactive-neutral-bg: rgba(255, 255, 255, 0.07);
+  --interactive-neutral-hover: rgba(255, 255, 255, 0.12);
+  --interactive-neutral-border: rgba(255, 255, 255, 0.16);
+  --interactive-neutral-text: #f5f5f5;
 
-  --logo-surface: #4fd1c5;
-  --logo-icon: #062a26;
+  --logo-surface: #f5f5f5;
+  --logo-icon: #000000;
 
-  --alpha-surface-05: rgba(230, 240, 248, 0.04);
-  --alpha-surface-10: rgba(230, 240, 248, 0.08);
-  --alpha-border-05: rgba(230, 240, 248, 0.08);
-  --alpha-border-10: rgba(230, 240, 248, 0.14);
-  --alpha-border-20: rgba(230, 240, 248, 0.22);
-  --alpha-border-30: rgba(230, 240, 248, 0.32);
-  --alpha-overlay-20: rgba(11, 18, 32, 0.3);
-  --alpha-overlay-30: rgba(11, 18, 32, 0.42);
-  --alpha-overlay-40: rgba(11, 18, 32, 0.56);
-  --alpha-overlay-80: rgba(11, 18, 32, 0.84);
+  --alpha-surface-05: rgba(255, 255, 255, 0.04);
+  --alpha-surface-10: rgba(255, 255, 255, 0.08);
+  --alpha-border-05: rgba(255, 255, 255, 0.08);
+  --alpha-border-10: rgba(255, 255, 255, 0.14);
+  --alpha-border-20: rgba(255, 255, 255, 0.22);
+  --alpha-border-30: rgba(255, 255, 255, 0.32);
+  --alpha-overlay-20: rgba(0, 0, 0, 0.3);
+  --alpha-overlay-30: rgba(0, 0, 0, 0.42);
+  --alpha-overlay-40: rgba(0, 0, 0, 0.56);
+  --alpha-overlay-80: rgba(0, 0, 0, 0.84);
 
-  // Soft aqua: readable as text and calm as a filled button with dark ink.
-  --brand-primary: #4fd1c5;
-  --brand-primary-hover: #5eead4;
-  --brand-primary-glow: rgba(79, 209, 197, 0.28);
-  --brand-primary-glow-strong: rgba(79, 209, 197, 0.42);
-  --brand-accent: #93c5fd;
-  --brand-accent-soft: rgba(147, 197, 253, 0.18);
-  --brand-ink: #e6f0f8;
+  // Monochrome night: white carries action, grey carries structure.
+  --brand-primary: #f5f5f5;
+  --brand-primary-hover: #ffffff;
+  --brand-primary-glow: rgba(255, 255, 255, 0.2);
+  --brand-primary-glow-strong: rgba(255, 255, 255, 0.3);
+  --brand-accent: #a3a3a3;
+  --brand-accent-soft: rgba(163, 163, 163, 0.15);
+  --brand-ink: #f5f5f5;
   --brand-sun: #fbbf24;
-  --on-brand: #062a26;
-  --on-surface-strong: #062a26;
-  // Solid primary controls use deep teal with white text; the aqua stays for icons and accents.
-  --brand-fill: #0f766e;
-  --on-brand-fill: #ffffff;
-  --brand-fill-hover: #115e59;
-  --link-color: #7dd3fc;
-  --link-color-hover: #bae6fd;
+  --on-brand: #111111;
+  --on-surface-strong: #111111;
+  --brand-fill: #f5f5f5;
+  --on-brand-fill: #111111;
+  --brand-fill-hover: #ffffff;
+  --link-color: #f5f5f5;
+  --link-color-hover: #d4d4d4;
 
   --status-new: #93c5fd;
   --status-progress: #fbbf24;
@@ -287,9 +286,9 @@
   --status-rejected: #fca5a5;
   --status-rejected-glow: rgba(252, 165, 165, 0.34);
 
-  --brand-primary-alpha-10: rgba(79, 209, 197, 0.1);
-  --brand-primary-alpha-20: rgba(79, 209, 197, 0.18);
-  --brand-primary-alpha-30: rgba(79, 209, 197, 0.26);
+  --brand-primary-alpha-10: rgba(255, 255, 255, 0.08);
+  --brand-primary-alpha-20: rgba(255, 255, 255, 0.14);
+  --brand-primary-alpha-30: rgba(255, 255, 255, 0.2);
   --status-progress-alpha-10: rgba(251, 191, 36, 0.14);
   --status-progress-alpha-20: rgba(251, 191, 36, 0.24);
   --status-resolved-alpha-10: rgba(134, 239, 172, 0.14);
@@ -307,9 +306,9 @@
   --color-surface-2: var(--bg-elevated);
   --color-text: var(--text-main);
   --color-muted: var(--text-muted);
-  --color-accent: #4fd1c5;
-  --color-accent-deco: #2dd4bf;
-  --color-accent-soft: rgba(79, 209, 197, 0.14);
+  --color-accent: #f5f5f5;
+  --color-accent-deco: #a3a3a3;
+  --color-accent-soft: rgba(245, 245, 245, 0.1);
   --color-danger: var(--status-rejected);
   --color-warn: var(--status-progress);
   --color-ok: var(--status-resolved);
@@ -324,35 +323,35 @@
 @mixin papercraft-contrast-tokens {
   @include papercraft-dark-tokens;
 
-  --bg-app: #05080d;
-  --bg-nav: rgba(5, 8, 13, 0.96);
-  --bg-surface: #0a1018;
-  --bg-card: #0d1520;
-  --bg-elevated: #131d2c;
-  --bg-sidebar: #070c14;
+  --bg-app: #000000;
+  --bg-nav: rgba(0, 0, 0, 0.96);
+  --bg-surface: #0a0a0a;
+  --bg-card: #111111;
+  --bg-elevated: #191919;
+  --bg-sidebar: #000000;
 
   --text-main: #ffffff;
-  --text-secondary: #f4e9dc;
-  --text-muted: #d8c7b6;
+  --text-secondary: #e5e5e5;
+  --text-muted: #c4c4c4;
 
-  --border-subtle: #5b7188;
+  --border-subtle: #666666;
   --glass-stroke: rgba(255, 255, 255, 0.3);
   --alpha-border-10: rgba(255, 255, 255, 0.3);
   --alpha-border-20: rgba(255, 255, 255, 0.42);
 
-  --field-bg: #0b1420;
+  --field-bg: #0d0d0d;
   --field-text: #ffffff;
-  --field-border: #6b8299;
+  --field-border: #666666;
   --field-border-focus: #fde68a;
 
-  --brand-primary: #99f6e4;
-  --brand-primary-hover: #ccfbf1;
-  --on-brand: #04201c;
-  --brand-fill: #99f6e4;
-  --on-brand-fill: #04201c;
-  --brand-fill-hover: #ccfbf1;
-  --link-color: #a5f3fc;
-  --link-color-hover: #cffafe;
+  --brand-primary: #ffffff;
+  --brand-primary-hover: #ffffff;
+  --on-brand: #000000;
+  --brand-fill: #ffffff;
+  --on-brand-fill: #000000;
+  --brand-fill-hover: #ffffff;
+  --link-color: #ffffff;
+  --link-color-hover: #e5e5e5;
   --focus-ring: rgba(253, 230, 138, 0.5);
   --focus-ring-color: #fde68a;
 

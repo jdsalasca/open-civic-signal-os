@@ -303,10 +303,22 @@ test.describe('Community social feed', () => {
     await expect(page.getByTestId('community-feed-load-more')).toHaveCount(0);
   });
 
-  test('shows the detected place and offers a change when the active community is elsewhere', async ({ page, context }) => {
+  test('shows the detected place and joins the nearby community in one click', async ({ page, context }) => {
     await context.grantPermissions(['geolocation']);
     await context.setGeolocation({ latitude: 5.5353, longitude: -73.3678 });
     await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    let joined = false;
+    const nearby = {
+      id: 'city-tunja',
+      name: 'Tunja',
+      slug: 'tunja',
+      city: 'Tunja',
+      region: 'Boyacá',
+      country: 'Colombia',
+      locality: null,
+      neighborhood: null,
+      memberCount: 4,
+    };
     await page.route('**/api/places/reverse*', (route) =>
       route.fulfill({
         status: 200,
@@ -319,6 +331,43 @@ test.describe('Community social feed', () => {
           country: 'Colombia',
         }),
       }));
+    await page.route('**/api/communities/nearest*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(nearby) }));
+    await page.route('**/api/communities/my', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            userId: 'u1',
+            communityId: cid,
+            communityName: 'Los Rosales',
+            communitySlug: 'los-rosales',
+            parentCommunityId: null,
+            breadcrumb: [{ id: cid, name: 'Los Rosales', slug: 'los-rosales' }],
+            role: 'MEMBER',
+            createdBy: 'u1',
+            createdAt: '2026-11-01T10:00:00',
+          },
+          ...(joined
+            ? [{
+                userId: 'u1',
+                communityId: nearby.id,
+                communityName: nearby.name,
+                communitySlug: nearby.slug,
+                parentCommunityId: null,
+                breadcrumb: [{ id: nearby.id, name: nearby.name, slug: nearby.slug }],
+                role: 'MEMBER',
+                createdBy: 'u1',
+                createdAt: '2026-11-16T10:00:00',
+              }]
+            : []),
+        ]),
+      }));
+    await page.route('**/api/communities/city-tunja/join', (route) => {
+      joined = true;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: nearby.id }) });
+    });
     await page.route('**/api/community/feed*', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
 
@@ -329,8 +378,11 @@ test.describe('Community social feed', () => {
     const banner = page.getByTestId('community-feed-location-mismatch');
     await expect(banner).toContainText('You are in Tunja');
     await expect(banner).toContainText('Los Rosales');
-    await banner.getByRole('button', { name: 'Hide location notice' }).click();
-    await expect(banner).toHaveCount(0);
+    await banner.getByTestId('community-location-join').click();
+
+    // Joining from the banner is one click and leaves the nearby community active.
+    await expect(page.getByTestId('community-feed-location-mismatch')).toHaveCount(0);
+    await expect(page.getByTestId('community-switch-dropdown')).toContainText('Tunja');
   });
 
   test('reacts to a conversation from the feed', async ({ page }) => {

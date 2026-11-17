@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from 'primereact/avatar';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { CommunityFeedItem, CommunityThread } from '../types';
+import { Community, CommunityFeedItem, CommunityMembership, CommunityThread } from '../types';
 import { Layout } from '../components/Layout';
 import { useCommunityStore } from '../store/useCommunityStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -48,7 +48,7 @@ const itemHref = (item: CommunityFeedItem) => {
 export function CommunityFeed() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { activeCommunityId, memberships } = useCommunityStore();
+  const { activeCommunityId, memberships, setMemberships, setActiveCommunityId } = useCommunityStore();
   const userName = useAuthStore((state) => state.userName);
 
   const [feed, setFeed] = useState<CommunityFeedItem[]>([]);
@@ -69,6 +69,8 @@ export function CommunityFeed() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [alertsOn, setAlertsOn] = useState(false);
   const [place, setPlace] = useState<DetectedPlace | null>(null);
+  const [nearest, setNearest] = useState<Community | null>(null);
+  const [joiningNearby, setJoiningNearby] = useState(false);
   const [locationDismissed, setLocationDismissed] = useState(
     () => sessionStorage.getItem('civic-location-dismissed') === '1'
   );
@@ -92,6 +94,15 @@ export function CommunityFeed() {
       activeCommunityName &&
       !activePlaceText.includes(place.city.toLowerCase()) &&
       !locationDismissed
+  );
+  const nearestMatches = Boolean(
+    nearest &&
+      place?.city &&
+      [nearest.name, nearest.city, nearest.locality, nearest.neighborhood]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(place.city.toLowerCase())
   );
 
   const loadFeed = useCallback(async (signal?: AbortSignal) => {
@@ -170,16 +181,19 @@ export function CommunityFeed() {
     sessionStorage.setItem('civic-location-asked', '1');
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        try {
-          const { data } = await apiClient.get<DetectedPlace>('places/reverse', {
-            params: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            },
-          });
-          setPlace(data);
-        } catch {
-          // The location hint is optional context, not a blocker for the feed.
+        const params = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        const [placeResult, nearestResult] = await Promise.allSettled([
+          apiClient.get<DetectedPlace>('places/reverse', { params }),
+          apiClient.get<Community>('communities/nearest', { params }),
+        ]);
+        if (placeResult.status === 'fulfilled') {
+          setPlace(placeResult.value.data);
+        }
+        if (nearestResult.status === 'fulfilled') {
+          setNearest(nearestResult.value.data);
         }
       },
       () => {
@@ -187,6 +201,24 @@ export function CommunityFeed() {
       }
     );
   }, []);
+
+  const joinNearby = async () => {
+    if (!nearest) return;
+    setJoiningNearby(true);
+    try {
+      await apiClient.post(`communities/${nearest.id}/join`, { role: 'MEMBER' });
+      const { data } = await apiClient.get<CommunityMembership[]>('communities/my');
+      setMemberships(data ?? []);
+      setActiveCommunityId(nearest.id);
+      setNearest(null);
+      toast.success(t('community_feed.location_joined', { community: nearest.name }));
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('onboarding.join_error'));
+    } finally {
+      setJoiningNearby(false);
+    }
+  };
 
   const toggleAlerts = async () => {
     if (!activeCommunityId) return;
@@ -471,12 +503,23 @@ export function CommunityFeed() {
               <strong>{t('community_feed.location_mismatch_title', { city: place.city })}</strong>
               <span>{t('community_feed.location_mismatch_desc', { community: activeCommunityName })}</span>
             </div>
-            <CivicButton
-              type="button"
-              size="small"
-              label={t('community_feed.location_change')}
-              onClick={() => navigate('/onboarding')}
-            />
+            {nearest && nearest.id !== activeCommunityId && nearestMatches ? (
+              <CivicButton
+                type="button"
+                size="small"
+                label={t('community_feed.location_join', { community: nearest.name })}
+                loading={joiningNearby}
+                onClick={() => void joinNearby()}
+                data-testid="community-location-join"
+              />
+            ) : (
+              <CivicButton
+                type="button"
+                size="small"
+                label={t('community_feed.location_change')}
+                onClick={() => navigate('/onboarding')}
+              />
+            )}
             <button
               type="button"
               className="social-feed-location-dismiss"
@@ -490,8 +533,6 @@ export function CommunityFeed() {
             </button>
           </div>
         )}
-
-        <OnboardingChecklist />
 
         {!activeCommunityId ? (
           <CivicCard>
@@ -889,6 +930,7 @@ export function CommunityFeed() {
                   </ul>
                 </CivicCard>
               )}
+              <OnboardingChecklist />
             </div>
           </div>
         )}
