@@ -39,7 +39,6 @@ test.describe('First-action checklist', () => {
     await page.goto('/');
     await expect(page.getByTestId('onboarding-checklist')).toBeVisible();
     await expect(page.getByTestId('onboarding-checklist')).toContainText('1 of 3');
-    await expect(page.getByTestId('onboarding-step-joinedCommunity')).toBeDisabled();
 
     await page.getByTestId('onboarding-step-contributed').click();
     await expect(page).toHaveURL(/\/report/);

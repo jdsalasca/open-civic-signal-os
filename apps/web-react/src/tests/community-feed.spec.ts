@@ -130,13 +130,13 @@ test.describe('Community social feed', () => {
       'Comment · 1'
     );
 
-    await page.getByTestId('community-feed-filter-signal').click();
+    await page.getByTestId('community-feed-filter').selectOption('signal');
     await expect(page.locator('.social-feed-item')).toHaveCount(1);
     await expect(page.locator('.social-feed-type')).toHaveText('Report');
 
-    await page.getByTestId('community-feed-filter-all').click();
+    await page.getByTestId('community-feed-filter').selectOption('all');
     await page.getByTestId('community-alerts-toggle').click();
-    await expect(page.getByTestId('community-alerts-toggle')).toContainText('Alerts on');
+    await expect(page.getByTestId('community-alerts-toggle')).toHaveAttribute('aria-pressed', 'true');
     await page.getByTestId('community-feed-composer').locator('button').first().click();
     await page.locator('#feed-post-title').fill('A new community question');
     await page.locator('#feed-post-body').fill('This is the message body.');
@@ -155,9 +155,10 @@ test.describe('Community social feed', () => {
     // Follow a report, confirm it and reply to a conversation from the feed itself.
     const signalCard = page.locator('.social-feed-item').filter({ hasText: 'Unsafe crosswalk' });
     await signalCard.getByTestId('community-feed-follow-signal-1').click();
-    await expect(signalCard.getByTestId('community-feed-follow-signal-1')).toContainText('Following');
-    await signalCard.getByText('I saw it too').click();
-    await expect(signalCard.getByText(/Confirmed · 1/)).toBeVisible();
+    await expect(signalCard.getByTestId('community-feed-follow-signal-1')).toHaveAttribute('aria-pressed', 'true');
+    await signalCard.getByTestId('community-feed-confirm-signal-1').click();
+    await expect(signalCard.getByTestId('community-feed-confirm-signal-1')).toHaveAttribute('aria-pressed', 'true');
+    await expect(signalCard.getByTestId('community-feed-confirm-signal-1')).toContainText('1');
 
     const threadCard = page.locator('.social-feed-item').filter({ hasText: 'clean the park' });
     await threadCard.getByTestId('community-feed-comment-thread-1').click();

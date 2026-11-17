@@ -30,7 +30,7 @@ test.describe('Comfortable reading', () => {
     const baseSize = await page.evaluate(() => getComputedStyle(document.documentElement).fontSize);
     expect(baseSize).toBe('16px');
 
-    await page.getByTestId('theme-wheel-trigger').click();
+    await page.getByTestId('user-menu-toggle').click();
     await page.getByTestId('text-scale-large').click();
     await expect
       .poll(() => page.evaluate(() => getComputedStyle(document.documentElement).fontSize))

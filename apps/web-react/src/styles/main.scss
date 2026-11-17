@@ -507,6 +507,47 @@ a:hover {
   color: var(--text-main);
 }
 
+.app-user-menu-theme {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.45rem 0.1rem;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.app-user-menu-theme > span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.app-user-menu-theme > div {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.app-user-menu-theme button {
+  flex: 1;
+  padding: 0.35rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.app-user-menu-theme button.is-active {
+  background: var(--brand-fill);
+  border-color: var(--brand-fill);
+  color: var(--on-brand-fill);
+}
+
 .app-page-context {
   display: flex;
   align-items: baseline;
@@ -1909,6 +1950,62 @@ a:hover {
   padding-bottom: 0.2rem;
 }
 
+.social-feed-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.social-feed-filter select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.social-feed-alert-button {
+  display: inline-grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.social-feed-alert-button:hover {
+  background: var(--surface-soft);
+  color: var(--text-main);
+}
+
+.social-feed-alert-button.is-active {
+  background: var(--brand-fill);
+  border-color: var(--brand-fill);
+  color: var(--on-brand-fill);
+}
+
+.social-feed-actions .is-icon-only {
+  justify-content: center;
+  width: 2.75rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.social-feed-actions .is-icon-only span {
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .social-feed-filters button {
   flex: 0 0 auto;
   min-height: 2.75rem;
@@ -2230,6 +2327,46 @@ a:hover {
 .civic-inline-link:hover,
 .civic-inline-link:focus-visible {
   color: var(--link-color-hover);
+}
+
+.onboarding-checklist-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.65rem;
+  background: var(--bg-surface);
+}
+
+.onboarding-checklist-progress {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.onboarding-checklist-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.onboarding-checklist-next:hover {
+  background: var(--surface-soft);
 }
 
 .onboarding-checklist-list {

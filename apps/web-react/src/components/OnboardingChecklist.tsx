@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import apiClient from '../api/axios';
-import { CivicCard } from '../components/ui/CivicCard';
 
 type Checklist = {
   joinedCommunity: boolean;
@@ -57,31 +56,24 @@ export function OnboardingChecklist() {
     }
   ];
   const completed = steps.filter((step) => step.done).length;
+  const nextStep = steps.find((step) => !step.done);
 
   return (
-    <CivicCard
-      title={t('onboarding_checklist.title')}
-      className="mb-6"
-      data-testid="onboarding-checklist"
-    >
-      <p className="text-sm text-secondary m-0 mb-3">
+    <div className="onboarding-checklist-compact" data-testid="onboarding-checklist">
+      <span className="onboarding-checklist-progress">
         {t('onboarding_checklist.progress', { completed, total: steps.length })}
-      </p>
-      <div className="onboarding-checklist-list">
-        {steps.map((step) => (
-          <button
-            key={step.key}
-            type="button"
-            className={step.done ? 'onboarding-checklist-step is-done' : 'onboarding-checklist-step'}
-            onClick={step.action}
-            disabled={step.done}
-            data-testid={`onboarding-step-${step.key}`}
-          >
-            <i className={step.done ? 'pi pi-check-circle' : 'pi pi-circle'} aria-hidden="true" />
-            <span>{step.label}</span>
-          </button>
-        ))}
-      </div>
-    </CivicCard>
+      </span>
+      {nextStep && (
+        <button
+          type="button"
+          className="onboarding-checklist-next"
+          onClick={nextStep.action}
+          data-testid={`onboarding-step-${nextStep.key}`}
+        >
+          {nextStep.label}
+          <i className="pi pi-arrow-right" aria-hidden="true" />
+        </button>
+      )}
+    </div>
   );
 }

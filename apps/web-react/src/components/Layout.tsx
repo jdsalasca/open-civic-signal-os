@@ -7,7 +7,6 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useCommunityStore } from "../store/useCommunityStore";
 import { useTranslation } from "react-i18next";
 import apiClient from "../api/axios";
-import { ThemeWheel } from "./ui/ThemeWheel";
 import { NotificationBell } from "./ui/NotificationBell";
 import { toRoleLabel } from "../constants/roleLabels";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -43,6 +42,10 @@ export function Layout({ children, authMode = false }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const interfaceMode = useSettingsStore((state) => state.interfaceMode);
+  const theme = useSettingsStore((state) => state.theme);
+  const setTheme = useSettingsStore((state) => state.setTheme);
+  const textScale = useSettingsStore((state) => state.textScale);
+  const setTextScale = useSettingsStore((state) => state.setTextScale);
   const { isLoggedIn, activeRole, userName, logout } = useAuthStore();
   const {
     memberships,
@@ -149,7 +152,6 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.insights'), to: '/', icon: 'pi pi-th-large', visible: isLoggedIn },
     { label: t('nav.chat'), to: '/communities/rooms', icon: 'pi pi-comments', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
-    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
   ];
   const collaborationNav: NavItem[] = [
       { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn && showAdvancedTools },
@@ -159,9 +161,9 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.community_projects'), to: '/communities/projects', icon: 'pi pi-briefcase', visible: isLoggedIn && showAdvancedTools },
     { label: t('nav.community_governance'), to: '/communities/governance', icon: 'pi pi-book', visible: isLoggedIn && showAdvancedTools },
     { label: t('nav.community_open_data'), to: '/communities/open-data', icon: 'pi pi-database', visible: isLoggedIn && showAdvancedTools && Boolean(canAccessOpenData) },
-    { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn },
-    { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn },
-    { label: t('nav.community_activities'), to: '/communities/activities', icon: 'pi pi-calendar', visible: isLoggedIn },
+    { label: t('nav.public_blog'), to: '/communities/blog', icon: 'pi pi-megaphone', visible: isLoggedIn && showAdvancedTools },
+    { label: t('nav.dialogues'), to: '/communities/threads', icon: 'pi pi-comments', visible: isLoggedIn && showAdvancedTools },
+    { label: t('nav.community_activities'), to: '/communities/activities', icon: 'pi pi-calendar', visible: isLoggedIn && showAdvancedTools },
     { label: t('nav.community_resources'), to: '/communities/resources', icon: 'pi pi-building', visible: isLoggedIn && showAdvancedTools },
     { label: t('nav.community_integrations'), to: '/communities/integrations', icon: 'pi pi-send', visible: isLoggedIn && showAdvancedTools && Boolean(canAccessOpenData) },
   ];
@@ -201,7 +203,10 @@ export function Layout({ children, authMode = false }: Props) {
       : t("dashboard.focus_today")
     : null;
 
-  const mobileNav = primaryNav.filter((item) => item.visible);
+  const mobileNav = [
+    ...primaryNav,
+    { label: t('nav.my_contributions_short'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
+  ].filter((item) => item.visible);
 
   useEffect(() => {
     setDesktopMoreVisible(false);
@@ -307,7 +312,7 @@ export function Layout({ children, authMode = false }: Props) {
                   aria-expanded={desktopMoreVisible}
                   data-testid="desktop-more-toggle"
                 >
-                  {desktopMoreVisible ? t('nav.hide_more_tools') : t('nav.show_more_tools')}
+                  {desktopMoreVisible ? t('nav.hide_more_tools') : t('nav.more_short')}
                   <i className="pi pi-chevron-down text-xs" aria-hidden="true" />
                 </button>
                 {desktopMoreVisible && (
@@ -343,7 +348,6 @@ export function Layout({ children, authMode = false }: Props) {
             )}
 
             <NotificationBell />
-            <ThemeWheel />
             <div className="app-user-menu-wrap">
               <button
                 type="button"
@@ -365,6 +369,50 @@ export function Layout({ children, authMode = false }: Props) {
                     <i className={`pi ${interfaceMode === "simple" ? "pi-sparkles" : "pi-sliders-h"}`} aria-hidden="true"></i>
                     {interfaceMode === "simple" ? t("settings.interface_modes.simple") : t("settings.interface_modes.advanced")}
                   </span>
+                  <Link to="/mine" className="app-user-menu-link" onClick={() => setUserMenuOpen(false)}>
+                    <i className="pi pi-user" aria-hidden="true" />
+                    {t('nav.my_contributions')}
+                  </Link>
+                  <div className="app-user-menu-theme">
+                    <span>{t('settings.theme')}</span>
+                    <div>
+                      <button
+                        type="button"
+                        className={theme === 'light' ? 'is-active' : ''}
+                        onClick={() => setTheme('light')}
+                      >
+                        {t('settings.light')}
+                      </button>
+                      <button
+                        type="button"
+                        className={theme === 'dark' ? 'is-active' : ''}
+                        onClick={() => setTheme('dark')}
+                      >
+                        {t('settings.dark')}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="app-user-menu-theme">
+                    <span>{t('settings.text_scale')}</span>
+                    <div>
+                      <button
+                        type="button"
+                        className={textScale === 'normal' ? 'is-active' : ''}
+                        onClick={() => setTextScale('normal')}
+                        data-testid="text-scale-normal"
+                      >
+                        A
+                      </button>
+                      <button
+                        type="button"
+                        className={textScale === 'large' ? 'is-active' : ''}
+                        onClick={() => setTextScale('large')}
+                        data-testid="text-scale-large"
+                      >
+                        A+
+                      </button>
+                    </div>
+                  </div>
                   <Link to="/settings" className="app-user-menu-link" onClick={() => setUserMenuOpen(false)}>
                     <i className="pi pi-cog" aria-hidden="true" />
                     {t('nav.settings')}
