@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import { Avatar } from "primereact/avatar";
 import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator";
 import { useTranslation } from "react-i18next";
+import { useHashTarget } from "../utils/useHashTarget";
 import { CommunityMembership, CommunityThread, CommunityThreadMessage, PageResponse, ThreadSortBy, ThreadStatusFilter } from "../types";
 import { Layout } from "../components/Layout";
 import { useCommunityStore } from "../store/useCommunityStore";
@@ -54,6 +55,7 @@ export function CommunityThreads() {
   const [reportingMessage, setReportingMessage] = useState<CommunityThreadMessage | null>(null);
   const [reportingThreadTitle, setReportingThreadTitle] = useState("");
   const [submittingReport, setSubmittingReport] = useState(false);
+  useHashTarget(threads.length > 0);
 
   const threadTitleLength = newThreadTitle.trim().length;
 

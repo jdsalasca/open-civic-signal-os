@@ -59,6 +59,8 @@ export function Layout({ children, authMode = false }: Props) {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [desktopMoreVisible, setDesktopMoreVisible] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator === "undefined" ? true : navigator.onLine
   );
@@ -218,6 +220,31 @@ export function Layout({ children, authMode = false }: Props) {
     setUserMenuOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (!desktopMoreVisible && !userMenuOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (desktopMoreVisible && !moreMenuRef.current?.contains(target)) {
+        setDesktopMoreVisible(false);
+      }
+      if (userMenuOpen && !userMenuRef.current?.contains(target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setDesktopMoreVisible(false);
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [desktopMoreVisible, userMenuOpen]);
+
   /*
    * Public pages (landing, login, register, verify, backlog) skip the full shell, but the keyboard
    * contract must not skip with it: the first Tab lands on the skip link and Enter moves focus into
@@ -309,7 +336,7 @@ export function Layout({ children, authMode = false }: Props) {
                   {link.label}
                 </Link>
               ))}
-              <div className="app-topnav-more-wrap">
+              <div className="app-topnav-more-wrap" ref={moreMenuRef}>
                 <button
                   type="button"
                   className="app-topnav-link"
@@ -353,7 +380,7 @@ export function Layout({ children, authMode = false }: Props) {
             )}
 
             <NotificationBell />
-            <div className="app-user-menu-wrap">
+            <div className="app-user-menu-wrap" ref={userMenuRef}>
               <button
                 type="button"
                 className="app-user-menu-toggle"
@@ -384,6 +411,7 @@ export function Layout({ children, authMode = false }: Props) {
                       <button
                         type="button"
                         className={theme === 'light' ? 'is-active' : ''}
+                        aria-pressed={theme === 'light'}
                         onClick={() => setTheme('light')}
                       >
                         {t('settings.light')}
@@ -391,6 +419,7 @@ export function Layout({ children, authMode = false }: Props) {
                       <button
                         type="button"
                         className={theme === 'dark' ? 'is-active' : ''}
+                        aria-pressed={theme === 'dark'}
                         onClick={() => setTheme('dark')}
                       >
                         {t('settings.dark')}
@@ -403,6 +432,7 @@ export function Layout({ children, authMode = false }: Props) {
                       <button
                         type="button"
                         className={textScale === 'normal' ? 'is-active' : ''}
+                        aria-pressed={textScale === 'normal'}
                         onClick={() => setTextScale('normal')}
                         data-testid="text-scale-normal"
                       >
@@ -411,6 +441,7 @@ export function Layout({ children, authMode = false }: Props) {
                       <button
                         type="button"
                         className={textScale === 'large' ? 'is-active' : ''}
+                        aria-pressed={textScale === 'large'}
                         onClick={() => setTextScale('large')}
                         data-testid="text-scale-large"
                       >
@@ -424,6 +455,7 @@ export function Layout({ children, authMode = false }: Props) {
                       <button
                         type="button"
                         className={language === 'es' ? 'is-active' : ''}
+                        aria-pressed={language === 'es'}
                         onClick={() => {
                           setLanguage('es');
                           i18n.changeLanguage('es');
@@ -435,6 +467,7 @@ export function Layout({ children, authMode = false }: Props) {
                       <button
                         type="button"
                         className={language === 'en' ? 'is-active' : ''}
+                        aria-pressed={language === 'en'}
                         onClick={() => {
                           setLanguage('en');
                           i18n.changeLanguage('en');
@@ -534,6 +567,22 @@ export function Layout({ children, authMode = false }: Props) {
             </div>
             <p className="app-brand-copy m-0">{t('nav.mobile_drawer_guidance')}</p>
           </div>
+          {memberships.length > 0 && (
+            <label className="mobile-community-switch">
+              <span>{t('nav.active_community')}</span>
+              <select
+                value={activeCommunityId ?? memberships[0].communityId}
+                onChange={(event) => void handleCommunitySwitch(event.target.value)}
+                data-testid="community-switch-mobile"
+              >
+                {memberships.map((membership) => (
+                  <option key={membership.communityId} value={membership.communityId}>
+                    {membership.communityName}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <nav className="flex flex-column gap-4" aria-label={t('nav.main_navigation')}>
             <NavGroup title={t('nav.group_primary')} items={primaryNav} />
             <NavGroup title={t('nav.group_collaboration')} items={collaborationNav} />

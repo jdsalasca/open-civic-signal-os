@@ -50,6 +50,31 @@ test.describe('Signal detail speaks plain language', () => {
     await expect(page.getByTestId('signal-timeline-entry-0')).not.toContainText('IN_PROGRESS');
   });
 
+  test('a failed formula keeps the case and offers a retry', async ({ page }) => {
+    let failing = true;
+    await mockSignalDetail(page);
+    await page.route('**/api/signals/formula', (route) =>
+      failing
+        ? route.abort('failed')
+        : route.fulfill(json({
+            version: 'v1',
+            formula: '(Urgency * 30) + (Impact * 25) + min(People/10, 30) + min(Votes/5, 15)',
+            effectiveFrom: '2026-03-21',
+            weights: [],
+            cappedFactors: ['affectedPeople', 'communityVotes'],
+            changeNote: 'Initial published formula.',
+          })));
+
+    await page.goto(`/signal/${signalId}`);
+    await expect(page.getByTestId('signal-detail-location-label')).toBeVisible({ timeout: 30000 });
+    const formulaError = page.getByTestId('signal-formula-error');
+    await expect(formulaError).toBeVisible();
+
+    failing = false;
+    await formulaError.getByRole('button', { name: 'Retry' }).click();
+    await expect(page.getByTestId('signal-detail-formula-meta')).toBeVisible();
+  });
+
   test('a failed timeline keeps the case visible and offers a retry', async ({ page }) => {
     let failing = true;
     await mockSignalDetail(page);
