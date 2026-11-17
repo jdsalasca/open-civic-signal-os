@@ -235,17 +235,13 @@ a:hover {
 }
 
 .app-sidebar-brand {
-  padding: 1.5rem;
+  padding: 1rem 1.25rem 0.5rem;
 }
 
 .app-brand-panel {
   position: relative;
   isolation: isolate;
-  padding: 1.7rem 1.25rem 1.25rem;
-  border-radius: var(--radius-paper);
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-edge), var(--shadow-premium);
+  padding: 0;
   min-width: 0;
 }
 
@@ -274,30 +270,6 @@ a:hover {
   color: var(--text-secondary);
   font-size: 0.9rem;
   line-height: 1.5;
-  overflow-wrap: anywhere;
-  text-wrap: pretty;
-}
-
-.app-context-card {
-  border-radius: 1.25rem;
-  border: 1px solid var(--alpha-border-10);
-  background: var(--panel-soft-bg);
-  padding: 1rem;
-  min-width: 0;
-}
-
-.app-context-label {
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-label);
-  font-size: 0.65rem;
-  font-weight: 800;
-}
-
-.app-context-value {
-  color: var(--text-main);
-  font-weight: 800;
-  line-height: 1.4;
   overflow-wrap: anywhere;
   text-wrap: pretty;
 }
@@ -334,8 +306,8 @@ a:hover {
 }
 
 .app-nav-link.is-active {
-  background: linear-gradient(135deg, var(--brand-primary-alpha-10), var(--brand-accent-soft));
-  border-color: var(--alpha-border-20);
+  background: var(--alpha-surface-10);
+  border-color: var(--alpha-border-10);
   border-radius: var(--radius-paper-chip);
   color: var(--text-main);
   box-shadow: var(--shadow-edge), var(--shadow-premium);
@@ -1585,10 +1557,14 @@ a:hover {
 }
 
 .u-filter-chip.is-active {
-  background: var(--brand-primary);
-  border-color: var(--brand-primary);
-  color: var(--on-brand);
-  box-shadow: 0 10px 24px -18px var(--brand-primary-glow-strong);
+  background: var(--brand-primary-alpha-20);
+  border-color: var(--brand-primary-alpha-30);
+  color: var(--text-main);
+  box-shadow: none;
+}
+
+.u-filter-chip.is-active i {
+  color: var(--brand-primary);
 }
 
 .u-surface-chip {
@@ -1663,10 +1639,7 @@ a:hover {
 // One composer and one timeline. The old screen stacked eight navigation buttons before the
 // first post, which is the opposite of a feed.
 .social-feed-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 19rem;
-  gap: 1.5rem;
-  align-items: start;
+  display: block;
 }
 
 .social-feed-main,
@@ -1674,9 +1647,10 @@ a:hover {
   min-width: 0;
 }
 
-.social-feed-aside {
-  position: sticky;
-  top: 1rem;
+.social-feed-main {
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
 }
 
 .social-composer-card {
@@ -1768,6 +1742,97 @@ a:hover {
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-muted);
+}
+
+.social-feed-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.social-feed-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.social-feed-place i {
+  color: var(--brand-primary);
+}
+
+.social-feed-location-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--brand-primary-alpha-20);
+  border-radius: var(--radius-paper-sm);
+  background: var(--panel-soft-bg);
+}
+
+.social-feed-location-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.social-feed-location-copy strong {
+  color: var(--text-main);
+  font-size: 0.86rem;
+}
+
+.social-feed-location-copy span {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.social-feed-location-dismiss {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.social-feed-location-dismiss:hover {
+  background: var(--surface-soft);
+  color: var(--text-main);
+}
+
+.social-feed-trends-card {
+  margin-top: 1rem;
+}
+
+.social-feed-trending-inline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.social-feed-trending-inline li {
+  align-items: flex-start;
+  border-bottom: 0;
+  padding: 0.35rem 0;
+}
+
+@media (max-width: 780px) {
+  .social-feed-trending-inline {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .social-feed-list {
@@ -1880,8 +1945,7 @@ a:hover {
   margin-top: 0.75rem;
 }
 
-.social-feed-actions button,
-.social-feed-aside-links button {
+.social-feed-actions button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -1897,8 +1961,7 @@ a:hover {
   cursor: pointer;
 }
 
-.social-feed-actions button:hover,
-.social-feed-aside-links button:hover {
+.social-feed-actions button:hover {
   background: var(--surface-soft);
   color: var(--text-main);
 }
@@ -2082,20 +2145,6 @@ a:hover {
   cursor: default;
 }
 
-.social-feed-aside-links {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0.35rem;
-}
-
-.social-feed-aside-links button {
-  justify-content: flex-start;
-  border: 0;
-  border-radius: 0.65rem;
-  padding: 0.5rem 0.4rem;
-}
-
 .social-feed-skeleton {
   display: flex;
   flex-direction: column;
@@ -2120,12 +2169,8 @@ a:hover {
 }
 
 @media (max-width: 1100px) {
-  .social-feed-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .social-feed-aside {
-    position: static;
+  .social-feed-main {
+    max-width: none;
   }
 }
 
@@ -2424,13 +2469,13 @@ select:focus-visible,
   }
 
   &.p-button-primary {
-    background: var(--brand-primary) !important;
-    color: var(--on-brand) !important;
+    background: var(--brand-fill) !important;
+    color: var(--on-brand-fill) !important;
     border: none !important;
     box-shadow: none !important;
 
     &:hover {
-      background: var(--brand-primary-hover) !important;
+      background: var(--brand-fill-hover) !important;
       box-shadow: none !important;
     }
   }

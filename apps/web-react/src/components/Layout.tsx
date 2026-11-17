@@ -177,7 +177,6 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.help_center'), to: '/help', icon: 'pi pi-question-circle', visible: isLoggedIn },
     { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
   ];
-  const activeBreadcrumb = activeMembership?.breadcrumb ?? [];
   const navItems = [...primaryNav, ...collaborationNav, ...advancedNav];
   const matchedNavItem = navItems.find((item) => item.to === location.pathname);
   /*
@@ -272,7 +271,7 @@ export function Layout({ children, authMode = false }: Props) {
       <aside className="app-sidebar hidden lg:flex flex-column w-21rem border-right-1 border-subtle z-2">
         <div className="app-sidebar-brand">
           <div className="app-brand-panel motion-card">
-            <div className="flex align-items-center gap-3 mb-4">
+            <div className="flex align-items-center gap-3">
               <div className="u-logo-badge border-round-2xl flex align-items-center justify-content-center shadow-premium" style={{ width: '44px', height: '44px' }}>
                 <i className="pi pi-signal u-logo-icon text-xl"></i>
               </div>
@@ -285,27 +284,6 @@ export function Layout({ children, authMode = false }: Props) {
         </div>
 
         <nav className="flex-grow-1 px-3 py-4 overflow-y-auto" aria-label={t('nav.main_navigation')}>
-          {activeMembership && (
-            <div className="app-context-card mb-5 mx-3 motion-card" data-testid="layout-community-context-card">
-              <span className="app-context-label">{t("nav.active_community")}</span>
-              <div className="app-context-value mt-2">{activeMembership.communityName}</div>
-              {activeBreadcrumb.length > 1 && (
-                <p className="text-xs text-muted mt-2 mb-0 line-height-3">
-                  {activeBreadcrumb.map((item) => item.name).join(" / ")}
-                </p>
-              )}
-              <div className="flex flex-wrap align-items-center gap-2 mt-3">
-                <span className="u-pill white-space-nowrap">
-                  <i className="pi pi-users text-brand-primary"></i>
-                  {toRoleLabel(activeMembership.role, t)}
-                </span>
-                <span className="u-pill white-space-nowrap" data-testid="interface-mode-badge">
-                  <i className={`pi ${interfaceMode === "simple" ? "pi-sparkles" : "pi-sliders-h"} text-brand-primary`}></i>
-                  {interfaceMode === "simple" ? t("settings.interface_modes.simple") : t("settings.interface_modes.advanced")}
-                </span>
-              </div>
-            </div>
-          )}
           <NavGroup title={t('nav.group_primary')} items={primaryNav} />
           <div className="mb-6">
             <div className="px-2">
@@ -341,6 +319,10 @@ export function Layout({ children, authMode = false }: Props) {
                 <span className="text-sm font-black text-main app-user-name">{userName}</span>
                 <span className="text-xs font-bold text-muted nav-clearance-label app-user-role">
                   {t('nav.clearance')}: {toRoleLabel(activeRole, t)}
+                </span>
+                <span className="u-pill white-space-nowrap mt-2" data-testid="interface-mode-badge">
+                  <i className={`pi ${interfaceMode === "simple" ? "pi-sparkles" : "pi-sliders-h"} text-brand-primary`}></i>
+                  {interfaceMode === "simple" ? t("settings.interface_modes.simple") : t("settings.interface_modes.advanced")}
                 </span>
               </div>
             </div>

@@ -445,7 +445,8 @@ public class CommunityCollaborationService {
                 viewerReactions.get(signal.getId()),
                 authorName(authors.get(signal.getAuthorId())),
                 authorRole(authors.get(signal.getAuthorId())),
-                commentCounts.getOrDefault(signal.getId(), 0L)
+                commentCounts.getOrDefault(signal.getId(), 0L),
+                null
             ))
             .toList();
     }
@@ -479,7 +480,8 @@ public class CommunityCollaborationService {
                 viewerReactions.get(post.getId()),
                 authorName(authors.get(post.getAuthorId())),
                 authorRole(authors.get(post.getAuthorId())),
-                commentCounts.getOrDefault(post.getId(), 0L)
+                commentCounts.getOrDefault(post.getId(), 0L),
+                null
             ))
             .toList();
     }
@@ -492,39 +494,51 @@ public class CommunityCollaborationService {
         UUID viewerId
     ) {
         List<CommunityThread> threads = threadRepository.findFeedPage(communityId, since, before, limited);
+        List<UUID> threadIds = threads.stream().map(CommunityThread::getId).toList();
         // One query for the first message of every thread in the page, not their whole history.
-        Map<UUID, String> firstMessageByThread = messageRepository
-            .findEarliestByThreadIds(threads.stream().map(CommunityThread::getId).toList())
+        Map<UUID, CommunityThreadMessage> rootByThread = messageRepository
+            .findEarliestByThreadIds(threadIds)
             .stream()
             .collect(Collectors.toMap(
                 CommunityThreadMessage::getThreadId,
-                CommunityThreadMessage::getContent,
+                message -> message,
                 (first, ignored) -> first
             ));
-        Set<UUID> following = contentFollowService.followedIds(
-            viewerId,
-            "THREAD",
-            threads.stream().map(CommunityThread::getId).toList()
+        Map<UUID, String> rootViewerReactions = userReactionService.getViewerReactions(
+            "THREAD_MESSAGE",
+            rootByThread.values().stream().map(CommunityThreadMessage::getId).toList(),
+            viewerId
         );
+        Map<UUID, Long> replyTotals = messageRepository.countByThreadIds(threadIds).stream()
+            .collect(Collectors.toMap(
+                CommunityThreadMessageRepository.ThreadMessageCount::getThreadId,
+                CommunityThreadMessageRepository.ThreadMessageCount::getTotal
+            ));
+        Set<UUID> following = contentFollowService.followedIds(viewerId, "THREAD", threadIds);
         Map<UUID, User> authors = authorsById(threads.stream().map(CommunityThread::getCreatedBy).toList());
         return threads.stream()
-            .map(thread -> new CommunityFeedItemResponse(
-                "thread-update",
-                thread.getId(),
-                communityId,
-                thread.getTitle(),
-                summarizeText(firstMessageByThread.get(thread.getId())),
-                thread.getUpdatedAt(),
-                freshness(thread.getUpdatedAt()),
-                null,
-                null,
-                following.contains(thread.getId()),
-                Map.of(),
-                null,
-                authorName(authors.get(thread.getCreatedBy())),
-                authorRole(authors.get(thread.getCreatedBy())),
-                null
-            ))
+            .map(thread -> {
+                CommunityThreadMessage root = rootByThread.get(thread.getId());
+                long total = replyTotals.getOrDefault(thread.getId(), 1L);
+                return new CommunityFeedItemResponse(
+                    "thread-update",
+                    thread.getId(),
+                    communityId,
+                    thread.getTitle(),
+                    summarizeText(root == null ? null : root.getContent()),
+                    thread.getUpdatedAt(),
+                    freshness(thread.getUpdatedAt()),
+                    null,
+                    null,
+                    following.contains(thread.getId()),
+                    root == null ? Map.of() : root.getReactions(),
+                    root == null ? null : rootViewerReactions.get(root.getId()),
+                    authorName(authors.get(thread.getCreatedBy())),
+                    authorRole(authors.get(thread.getCreatedBy())),
+                    Math.max(0L, total - 1),
+                    root == null ? null : root.getId()
+                );
+            })
             .toList();
     }
 
