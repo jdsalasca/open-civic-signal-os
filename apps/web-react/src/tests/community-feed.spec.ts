@@ -49,10 +49,16 @@ const feed = [
 
 test.describe('Community social feed', () => {
   test('shows one timeline, filters it and publishes from the composer', async ({ page }) => {
-    await page.route('**/api/community/threads', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'new-thread' }) }));
-    await page.route('**/api/community/threads/new-thread/messages', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+    let publishPayload: Record<string, unknown> | null = null;
+    let threadMessageCalls = 0;
+    await page.route('**/api/community/threads', (route) => {
+      publishPayload = route.request().postDataJSON() as Record<string, unknown>;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'new-thread' }) });
+    });
+    await page.route('**/api/community/threads/new-thread/messages', (route) => {
+      threadMessageCalls += 1;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
     await page.route('**/api/community/threads/thread-1/messages', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
     await page.route('**/api/community/threads/thread-1?*', (route) =>
@@ -133,6 +139,12 @@ test.describe('Community social feed', () => {
     await expect(page.getByText('Published in the community feed.')).toBeVisible();
     await expect(page.locator('#feed-post-title')).toHaveCount(0);
     await expect(page.locator('.social-feed-item')).toHaveCount(3);
+    // Thread and body travel in one request: a second call could fail and leave an empty thread.
+    expect(publishPayload).toMatchObject({
+      title: 'A new community question',
+      initialMessage: 'This is the message body.',
+    });
+    expect(threadMessageCalls).toBe(0);
 
     // Follow a report, confirm it and reply to a conversation from the feed itself.
     const signalCard = page.locator('.social-feed-item').filter({ hasText: 'Unsafe crosswalk' });

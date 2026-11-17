@@ -35,37 +35,42 @@ export function SignalDetail() {
   const [signal, setSignal] = useState<Signal | null>(null);
   const [formula, setFormula] = useState<PrioritizationFormula | null>(null);
   const [history, setHistory] = useState<SignalStatusEntry[]>([]);
+  const [historyError, setHistoryError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
   const [assignmentUser, setAssignmentUser] = useState("");
   const [assigning, setAssigning] = useState(false);
 
   const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const [signalRes, historyRes, formulaRes] = await Promise.all([
-        apiClient.get(`signals/${id}`),
-        apiClient.get(`signals/${id}/history`),
-        apiClient.get("signals/formula").catch(() => null)
-      ]);
+    setLoading(true);
+    // The case is the page. A failed history or formula request must not take the reader away from
+    // it; only a failed case request has nothing left to show.
+    const [signalRes, historyRes, formulaRes] = await Promise.allSettled([
+      apiClient.get(`signals/${id}`),
+      apiClient.get(`signals/${id}/history`),
+      apiClient.get("signals/formula")
+    ]);
 
-      if (signalRes.status === 200) {
-        setSignal(signalRes.data);
-        setAssignmentUser(signalRes.data.assignedToUsername || "");
-      }
-      if (historyRes.status === 200) {
-        setHistory(historyRes.data || []);
-      }
-      if (formulaRes?.status === 200) {
-        setFormula(formulaRes.data);
-      }
-    } catch (err) {
-      const apiErr = err as ApiError;
+    if (signalRes.status === "rejected") {
+      const apiErr = signalRes.reason as ApiError;
       toast.error(apiErr.friendlyMessage || t('common.error'));
-      navigate("/");
-    } finally {
       setLoading(false);
+      navigate("/");
+      return;
     }
+    setSignal(signalRes.value.data);
+    setAssignmentUser(signalRes.value.data.assignedToUsername || "");
+
+    if (historyRes.status === "fulfilled") {
+      setHistory(historyRes.value.data || []);
+      setHistoryError(false);
+    } else {
+      setHistoryError(true);
+    }
+    if (formulaRes.status === "fulfilled") {
+      setFormula(formulaRes.value.data);
+    }
+    setLoading(false);
   }, [id, navigate, t]);
 
   useEffect(() => {
@@ -256,6 +261,22 @@ export function SignalDetail() {
 
             <CivicCard title={t("signals.timeline_title")} padding="none" className="mb-8" data-testid="signal-detail-timeline">
               <div className="flex flex-column gap-px bg-surface-soft">
+                {historyError && (
+                  <div className="signal-feed-error m-3" role="alert" data-testid="signal-history-error">
+                    <i className="pi pi-exclamation-circle" aria-hidden="true" />
+                    <div className="signal-feed-error__copy">
+                      <strong>{t("signals.timeline_error_title")}</strong>
+                      <span>{t("signals.timeline_error_desc")}</span>
+                    </div>
+                    <CivicButton
+                      type="button"
+                      variant="secondary"
+                      size="small"
+                      label={t("common.retry")}
+                      onClick={() => void fetchData()}
+                    />
+                  </div>
+                )}
                 {history.map((entry, idx) => (
                   <div key={entry.id} className="bg-surface p-5 hover:bg-surface-soft transition-colors flex gap-4" data-testid={`signal-timeline-entry-${idx}`}>
                     <div className="flex flex-column align-items-center gap-2">
