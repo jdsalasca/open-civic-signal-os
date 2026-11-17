@@ -118,8 +118,10 @@ export function App() {
   }, [textScale]);
 
   // Warm the chunks behind the actions a reader is most likely to take next, so the first click on
-  // Reportar, a case or Mi Actividad does not wait for a network round trip.
+  // Reportar, a case or Mi Actividad does not wait for a network round trip. Public visitors do not
+  // need authenticated views.
   useEffect(() => {
+    if (!isLoggedIn) return;
     const timer = window.setTimeout(() => {
       void import("./views/ReportSignal");
       void import("./views/SignalDetail");
@@ -127,7 +129,7 @@ export function App() {
       void import("./views/CommunityRooms");
     }, 1500);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     const html = document.documentElement;
