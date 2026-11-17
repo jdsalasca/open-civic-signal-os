@@ -10593,6 +10593,10 @@ components:
           format: uuid
         title:
           type: string
+        initialMessage:
+          type: string
+          maxLength: 2000
+          description: Optional first message, created in the same transaction as the thread.
     CreateCommunityThreadMessageRequest:
       type: object
       required: [sourceCommunityId, content]

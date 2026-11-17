@@ -147,11 +147,19 @@ public class CommunityCollaborationService {
         UUID targetCommunityId,
         UUID relatedSignalId,
         String title,
+        String initialMessage,
         String username
     ) {
         User user = accessService.getCurrentUser(username);
         accessService.requireScope(user.getId(), sourceCommunityId, CommunityPermissionScope.CREATE_THREAD);
         accessService.requireMembership(user.getId(), targetCommunityId);
+        String body = initialMessage == null ? "" : initialMessage.trim();
+        if (!body.isEmpty()) {
+            // The body is a message, so the same permission that allows posting under the thread
+            // applies here; creating an empty thread because only the second call was denied would
+            // be worse than rejecting the publish.
+            accessService.requireScope(user.getId(), sourceCommunityId, CommunityPermissionScope.ADD_THREAD_MESSAGE);
+        }
         CommunityThread thread = new CommunityThread();
         thread.setSourceCommunityId(sourceCommunityId);
         thread.setTargetCommunityId(targetCommunityId);
@@ -161,7 +169,20 @@ public class CommunityCollaborationService {
         thread.setCreatedAt(LocalDateTime.now());
         thread.setUpdatedAt(LocalDateTime.now());
         CommunityThread saved = threadRepository.save(thread);
-        return toThreadResponse(saved, List.of(), Map.of());
+        if (body.isEmpty()) {
+            return toThreadResponse(saved, List.of(), Map.of());
+        }
+        // Thread and body in one transaction: a failed publish leaves nothing half-created.
+        CommunityThreadMessage message = new CommunityThreadMessage();
+        message.setThreadId(saved.getId());
+        message.setAuthorId(user.getId());
+        message.setSourceCommunityId(sourceCommunityId);
+        message.setContent(body);
+        message.setCreatedAt(LocalDateTime.now());
+        CommunityThreadMessage savedMessage = messageRepository.save(message);
+        saved.setUpdatedAt(savedMessage.getCreatedAt());
+        threadRepository.save(saved);
+        return toThreadResponse(saved, List.of(savedMessage), Map.of());
     }
 
     @Transactional
@@ -471,10 +492,9 @@ public class CommunityCollaborationService {
         UUID viewerId
     ) {
         List<CommunityThread> threads = threadRepository.findFeedPage(communityId, since, before, limited);
-        // One query for every thread in the page, not one per thread. The first message is the post
-        // body a reader expects under the title.
+        // One query for the first message of every thread in the page, not their whole history.
         Map<UUID, String> firstMessageByThread = messageRepository
-            .findByThreadIdInOrderByThreadIdAscCreatedAtAsc(threads.stream().map(CommunityThread::getId).toList())
+            .findEarliestByThreadIds(threads.stream().map(CommunityThread::getId).toList())
             .stream()
             .collect(Collectors.toMap(
                 CommunityThreadMessage::getThreadId,
