@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencivic.signalos.domain.Community;
@@ -70,6 +71,9 @@ class CommunityHomeIT {
 
     @Autowired
     private UserNotificationRepository notificationRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private UUID communityId;
     private UUID userId;
@@ -213,6 +217,41 @@ class CommunityHomeIT {
             .andExpect(jsonPath("$.messages[0].content").value("Need better lighting near the stop"))
             .andExpect(jsonPath("$.messages[0].authorName").value("community_home_user"))
             .andExpect(jsonPath("$.messages[1].authorName").value("community_home_user"));
+    }
+
+    @Test
+    @WithMockUser(username = "community_home_user", roles = {"CITIZEN"})
+    void feedReturnsThePageOlderThanTheCursor() throws Exception {
+        // The test shares one transaction, so a managed entity still holds nanoseconds the column
+        // truncates. Read from the database first, or the cursor is more precise than its own row.
+        entityManager.flush();
+        entityManager.clear();
+        String firstBody = mockMvc.perform(
+                get("/api/community/feed")
+                    .param("communityId", communityId.toString())
+                    .param("days", "7")
+                    .param("size", "1")
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].type").value("thread-update"))
+            .andReturn().getResponse().getContentAsString();
+
+        // The cursor is the timestamp the API returned, not the entity's nanoseconds: the column
+        // rounds to microseconds and a more precise value would put the item after its own cursor.
+        String cursor = new com.fasterxml.jackson.databind.ObjectMapper()
+            .readTree(firstBody).get(0).get("happenedAt").asText();
+
+        mockMvc.perform(
+                get("/api/community/feed")
+                    .param("communityId", communityId.toString())
+                    .param("days", "7")
+                    .param("size", "1")
+                    .param("before", cursor)
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].type").value("blog"));
     }
 
     @Test

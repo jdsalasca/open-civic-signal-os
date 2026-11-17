@@ -3,6 +3,7 @@ package org.opencivic.signalos.web;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.opencivic.signalos.service.CommunityCollaborationService;
@@ -64,6 +65,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import org.opencivic.signalos.service.CivicEngagementService;
 import org.opencivic.signalos.web.dto.CivicCommentResponse;
@@ -285,9 +287,11 @@ public class CommunityCollaborationController {
     public List<CommunityFeedItemResponse> getFeed(
         @RequestParam UUID communityId,
         @RequestParam(defaultValue = "7") int days,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime before,
+        @RequestParam(defaultValue = "20") int size,
         Principal principal
     ) {
-        return collaborationService.getCommunityFeed(communityId, days, principal.getName());
+        return collaborationService.getCommunityFeed(communityId, days, before, size, principal.getName());
     }
 
     @GetMapping("/home")

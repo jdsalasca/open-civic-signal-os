@@ -268,6 +268,45 @@ class CommunityRoomsIT {
     }
 
     @Test
+    void aCallerCanPageOlderMessagesWithABeforeCursor() throws Exception {
+        String roomId = createRoomAsCoordinator();
+        for (int i = 0; i < 60; i++) {
+            postMessage(roomId, "Field note " + i);
+        }
+
+        var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        // Same reason as the feed cursor test: read the truncated column values, not the in-memory nanos.
+        entityManager.flush();
+        entityManager.clear();
+        String newestBody = mockMvc.perform(get("/api/community/rooms/{roomId}", roomId)
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString())
+                .queryParam("limit", "50"))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        var newest = mapper.readTree(newestBody);
+        org.junit.jupiter.api.Assertions.assertEquals(50, newest.get("messages").size());
+        org.junit.jupiter.api.Assertions.assertTrue(newest.get("hasMoreMessages").asBoolean());
+        String cursor = newest.get("messages").get(49).get("createdAt").asText();
+
+        String olderBody = mockMvc.perform(get("/api/community/rooms/{roomId}", roomId)
+                .with(user("rooms_coord").roles("CITIZEN"))
+                .queryParam("communityId", communityId.toString())
+                .queryParam("limit", "50")
+                .queryParam("before", cursor))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+        var older = mapper.readTree(olderBody);
+
+        // The cursor must move backwards through the room instead of refetching the newest page.
+        org.junit.jupiter.api.Assertions.assertEquals(10, older.get("messages").size());
+        org.junit.jupiter.api.Assertions.assertFalse(older.get("hasMoreMessages").asBoolean());
+        org.junit.jupiter.api.Assertions.assertEquals(60, older.get("messageCount").asInt());
+        org.junit.jupiter.api.Assertions.assertEquals(
+            "Field note 0", older.get("messages").get(9).get("body").asText());
+    }
+
+    @Test
     void aCallerCanAskForMoreOfABusyRoomAndTheCapIsRespected() throws Exception {
         String roomId = createRoomAsCoordinator();
         for (int i = 0; i < 60; i++) {

@@ -22,6 +22,7 @@ import { useCommunityStore } from "../store/useCommunityStore";
 import type {
   CommunityPermissionPolicy,
   CommunityRoomDetail,
+  CommunityRoomMessage,
   CommunityRoomWorkspace,
 } from "../types";
 
@@ -33,8 +34,6 @@ const MESSAGE_MAX = 2000;
  * anyway, and older messages are loaded in steps rather than all at once.
  */
 const ROOM_PAGE_SIZE = 50;
-const ROOM_PAGE_STEP = 50;
-const ROOM_PAGE_MAX = 200;
 
 type MessageForm = { body: string };
 type RoomForm = { name: string; topic: string };
@@ -132,7 +131,9 @@ export function CommunityRooms() {
     }
   }, [activeCommunityId, t]);
 
-  const [messageLimit, setMessageLimit] = useState(ROOM_PAGE_SIZE);
+  const [olderMessages, setOlderMessages] = useState<CommunityRoomMessage[]>([]);
+  const [olderStatus, setOlderStatus] = useState<"unloaded" | "more" | "done">("unloaded");
+  const [loadingOlder, setLoadingOlder] = useState(false);
 
   const loadRoom = useCallback(async () => {
     if (!activeCommunityId || !activeRoomId) {
@@ -141,10 +142,9 @@ export function CommunityRooms() {
     }
     setLoadingRoom(true);
     try {
-      // The limit is raised when a reader asks for older messages, so the screen is bounded on a
-      // phone without being a dead end for anyone who wants the rest of the conversation.
+      // The page size is fixed; older messages come from a cursor rather than a bigger refetch.
       const response = await apiClient.get<CommunityRoomDetail>(
-        `community/rooms/${activeRoomId}?communityId=${activeCommunityId}&limit=${messageLimit}`,
+        `community/rooms/${activeRoomId}?communityId=${activeCommunityId}&limit=${ROOM_PAGE_SIZE}`,
       );
       setRoom(response.data);
     } catch (err) {
@@ -154,7 +154,7 @@ export function CommunityRooms() {
     } finally {
       setLoadingRoom(false);
     }
-  }, [activeCommunityId, activeRoomId, messageLimit, t]);
+  }, [activeCommunityId, activeRoomId, t]);
 
   useEffect(() => {
     loadPolicies();
@@ -167,6 +167,48 @@ export function CommunityRooms() {
   useEffect(() => {
     loadRoom();
   }, [loadRoom]);
+
+  // Switching rooms resets the history pages; a refresh of the same room keeps what was loaded.
+  useEffect(() => {
+    setOlderMessages([]);
+    setOlderStatus("unloaded");
+  }, [activeRoomId]);
+
+  const messages = useMemo(
+    () => [...olderMessages, ...(room?.messages ?? [])],
+    [olderMessages, room]
+  );
+  const canLoadOlder =
+    olderMessages.length === 0 ? Boolean(room?.hasMoreMessages) : olderStatus === "more";
+
+  const loadOlder = async () => {
+    if (!activeCommunityId || !activeRoomId || !room || loadingOlder || !canLoadOlder) {
+      return;
+    }
+    // The page arrives newest first, so the oldest loaded message is the last one rendered.
+    const oldest = messages[messages.length - 1];
+    if (!oldest) {
+      return;
+    }
+    setLoadingOlder(true);
+    try {
+      const response = await apiClient.get<CommunityRoomDetail>(
+        `community/rooms/${activeRoomId}?communityId=${activeCommunityId}&limit=${ROOM_PAGE_SIZE}` +
+          `&before=${encodeURIComponent(oldest.createdAt)}`,
+      );
+      const page = response.data;
+      setOlderMessages((current) => {
+        const seen = new Set(current.map((message) => message.id));
+        return [...page.messages.filter((message) => !seen.has(message.id)), ...current];
+      });
+      setOlderStatus(page.hasMoreMessages ? "more" : "done");
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t("community_rooms.load_error"));
+    } finally {
+      setLoadingOlder(false);
+    }
+  };
 
   useEffect(() => {
     if (!activeCommunityId || !activeRoomId || !accessToken) {
@@ -535,7 +577,7 @@ export function CommunityRooms() {
                     />
                   </div>
 
-                  {room.messages.length === 0 ? (
+                  {messages.length === 0 ? (
                     <CivicEmptyState
                       icon="pi pi-comment"
                       title={t("community_rooms.room_messages_empty_title")}
@@ -549,31 +591,30 @@ export function CommunityRooms() {
                         with the wrong answer: "nothing since March" and "we fetched the last 50" are
                         different facts.
                       */}
-                      {room.hasMoreMessages && (
+                      {canLoadOlder && (
                         <div
                           className="flex align-items-center justify-content-between gap-3 flex-wrap text-sm text-secondary"
                           data-testid="community-rooms-history-note"
                         >
                           <span>
                             {t("community_rooms.history_truncated", {
-                              shown: room.messages.length,
+                              shown: messages.length,
                               total: room.messageCount,
                             })}
                           </span>
-                          {messageLimit < ROOM_PAGE_MAX && (
-                            <CivicButton
-                              type="button"
-                              variant="ghost"
-                              onClick={() => setMessageLimit((limit) => Math.min(limit + ROOM_PAGE_STEP, ROOM_PAGE_MAX))}
-                              data-testid="community-rooms-load-older"
-                            >
-                              {t("community_rooms.load_older")}
-                            </CivicButton>
-                          )}
+                          <CivicButton
+                            type="button"
+                            variant="ghost"
+                            loading={loadingOlder}
+                            onClick={() => void loadOlder()}
+                            data-testid="community-rooms-load-older"
+                          >
+                            {t("community_rooms.load_older")}
+                          </CivicButton>
                         </div>
                       )}
                       <div className="flex flex-column gap-3" data-testid="community-rooms-message-list">
-                        {room.messages.map((message) => (
+                        {messages.map((message) => (
                           <div
                             key={message.id}
                             className={`border-round-xl border-1 p-3 ${

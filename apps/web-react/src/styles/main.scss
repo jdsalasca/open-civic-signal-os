@@ -3161,3 +3161,16 @@ select:focus-visible,
     font-size: 1.35rem;
   }
 }
+
+.social-feed-load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.social-feed-window-note {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: center;
+}

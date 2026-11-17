@@ -24,6 +24,20 @@ public interface CommunityThreadRepository extends JpaRepository<CommunityThread
     @Query("""
         select t from CommunityThread t
         where (t.sourceCommunityId = :communityId or t.targetCommunityId = :communityId)
+          and t.updatedAt >= :since
+          and t.updatedAt < :before
+        order by t.updatedAt desc
+    """)
+    List<CommunityThread> findFeedPage(
+        @Param("communityId") UUID communityId,
+        @Param("since") LocalDateTime since,
+        @Param("before") LocalDateTime before,
+        Pageable pageable
+    );
+
+    @Query("""
+        select t from CommunityThread t
+        where (t.sourceCommunityId = :communityId or t.targetCommunityId = :communityId)
           and (
             :status is null
             or (:status = 'ACTIVE' and t.updatedAt >= :cutoff)

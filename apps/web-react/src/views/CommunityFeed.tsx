@@ -27,6 +27,7 @@ type ThreadMessageResponse = { id: string; content: string; createdAt: string; h
 
 const TITLE_LIMIT = 120;
 const BODY_LIMIT = 2000;
+const FEED_PAGE_SIZE = 20;
 
 const commentKey = (item: CommunityFeedItem) => `${item.type}:${item.id}`;
 
@@ -65,6 +66,8 @@ export function CommunityFeed() {
   const [commentsLoading, setCommentsLoading] = useState<string | null>(null);
   const [commentsError, setCommentsError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [alertsOn, setAlertsOn] = useState(false);
 
   const activeCommunityName = memberships.find((m) => m.communityId === activeCommunityId)?.communityName;
@@ -82,10 +85,11 @@ export function CommunityFeed() {
       setLoading(true);
       setLoadError(false);
       const res = await apiClient.get<CommunityFeedItem[]>(
-        `community/feed?communityId=${activeCommunityId}&days=30`,
+        `community/feed?communityId=${activeCommunityId}&days=30&size=${FEED_PAGE_SIZE}`,
         { signal }
       );
       setFeed(res.data ?? []);
+      setHasMore((res.data ?? []).length === FEED_PAGE_SIZE);
     } catch (err) {
       const apiErr = err as ApiError & { name?: string };
       if (apiErr.name === 'CanceledError' || apiErr.name === 'AbortError') return;
@@ -101,6 +105,30 @@ export function CommunityFeed() {
     void loadFeed(controller.signal);
     return () => controller.abort();
   }, [loadFeed]);
+
+  const loadMore = async () => {
+    if (!activeCommunityId || !feed.length || loadingMore || !hasMore) {
+      return;
+    }
+    setLoadingMore(true);
+    try {
+      const before = feed[feed.length - 1].happenedAt;
+      const res = await apiClient.get<CommunityFeedItem[]>(
+        `community/feed?communityId=${activeCommunityId}&days=30&size=${FEED_PAGE_SIZE}&before=${encodeURIComponent(before)}`
+      );
+      const next = res.data ?? [];
+      setFeed((current) => {
+        const seen = new Set(current.map((item) => `${item.type}:${item.id}`));
+        return [...current, ...next.filter((item) => !seen.has(`${item.type}:${item.id}`))];
+      });
+      setHasMore(next.length === FEED_PAGE_SIZE);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      toast.error(apiErr.friendlyMessage || t('community_feed.load_error'));
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
     if (!activeCommunityId) {
@@ -564,8 +592,9 @@ export function CommunityFeed() {
                   />
                 </CivicCard>
               ) : (
-                <div className="social-feed-list" data-testid="community-feed-timeline">
-                  {visibleItems.map((item) => (
+                <>
+                  <div className="social-feed-list" data-testid="community-feed-timeline">
+                    {visibleItems.map((item) => (
                     <article
                       key={`${item.type}-${item.id}`}
                       className="social-feed-item"
@@ -736,7 +765,21 @@ export function CommunityFeed() {
                       </div>
                     </article>
                   ))}
-                </div>
+                  </div>
+                  {hasMore && (
+                    <div className="social-feed-load-more">
+                      <CivicButton
+                        type="button"
+                        variant="secondary"
+                        label={t('community_feed.load_more')}
+                        loading={loadingMore}
+                        onClick={() => void loadMore()}
+                        data-testid="community-feed-load-more"
+                      />
+                    </div>
+                  )}
+                  <p className="social-feed-window-note">{t('community_feed.window_note')}</p>
+                </>
               )}
             </div>
 

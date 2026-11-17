@@ -368,32 +368,39 @@ public class CommunityCollaborationService {
         return toBlogResponse(blogPostRepository.save(post));
     }
 
-    public List<CommunityFeedItemResponse> getCommunityFeed(UUID communityId, int days, String username) {
+    public List<CommunityFeedItemResponse> getCommunityFeed(
+        UUID communityId,
+        int days,
+        LocalDateTime before,
+        int size,
+        String username
+    ) {
         User user = accessService.getCurrentUser(username);
         accessService.requireMembership(user.getId(), communityId);
         LocalDateTime since = LocalDateTime.now().minusDays(Math.max(1, days));
-        PageRequest limited = PageRequest.of(0, 50);
+        LocalDateTime cursor = before != null ? before : LocalDateTime.now();
+        int pageSize = Math.min(Math.max(size, 1), 50);
+        PageRequest limited = PageRequest.of(0, pageSize);
 
         List<CommunityFeedItemResponse> items = new ArrayList<>();
-        items.addAll(signalFeedItems(communityId, since, limited, user.getId()));
-        items.addAll(blogFeedItems(communityId, since, limited, user.getId()));
-        items.addAll(threadFeedItems(communityId, since, limited, user.getId()));
+        items.addAll(signalFeedItems(communityId, since, cursor, limited, user.getId()));
+        items.addAll(blogFeedItems(communityId, since, cursor, limited, user.getId()));
+        items.addAll(threadFeedItems(communityId, since, cursor, limited, user.getId()));
 
         return items.stream()
             .sorted(Comparator.comparing(CommunityFeedItemResponse::happenedAt).reversed())
-            .limit(100)
+            .limit(pageSize)
             .toList();
     }
 
     private List<CommunityFeedItemResponse> signalFeedItems(
         UUID communityId,
         LocalDateTime since,
+        LocalDateTime before,
         PageRequest limited,
         UUID viewerId
     ) {
-        List<Signal> signals = signalRepository.findByCommunityIdOrderByCreatedAtDesc(communityId, limited).stream()
-            .filter(signal -> signal.getCreatedAt() != null && signal.getCreatedAt().isAfter(since))
-            .toList();
+        List<Signal> signals = signalRepository.findFeedPage(communityId, since, before, limited);
         List<UUID> ids = signals.stream().map(Signal::getId).toList();
         Set<UUID> following = contentFollowService.followedIds(viewerId, "SIGNAL", ids);
         Set<UUID> confirmed = signalConfirmationService.confirmedByViewer(viewerId, ids);
@@ -425,13 +432,11 @@ public class CommunityCollaborationService {
     private List<CommunityFeedItemResponse> blogFeedItems(
         UUID communityId,
         LocalDateTime since,
+        LocalDateTime before,
         PageRequest limited,
         UUID viewerId
     ) {
-        List<CommunityBlogPost> posts = blogPostRepository.findActiveOfficialTimeline(communityId).stream()
-            .filter(post -> post.getPublishedAt() != null && post.getPublishedAt().isAfter(since))
-            .limit(limited.getPageSize())
-            .toList();
+        List<CommunityBlogPost> posts = blogPostRepository.findFeedPage(communityId, since, before, limited);
         List<UUID> ids = posts.stream().map(CommunityBlogPost::getId).toList();
         Set<UUID> following = contentFollowService.followedIds(viewerId, "BLOG", ids);
         Map<UUID, String> viewerReactions = userReactionService.getViewerReactions("BLOG", ids, viewerId);
@@ -461,14 +466,11 @@ public class CommunityCollaborationService {
     private List<CommunityFeedItemResponse> threadFeedItems(
         UUID communityId,
         LocalDateTime since,
+        LocalDateTime before,
         PageRequest limited,
         UUID viewerId
     ) {
-        List<CommunityThread> threads = threadRepository
-            .findBySourceCommunityIdOrTargetCommunityIdOrderByUpdatedAtDesc(communityId, communityId, limited)
-            .stream()
-            .filter(thread -> thread.getUpdatedAt() != null && thread.getUpdatedAt().isAfter(since))
-            .toList();
+        List<CommunityThread> threads = threadRepository.findFeedPage(communityId, since, before, limited);
         // One query for every thread in the page, not one per thread. The first message is the post
         // body a reader expects under the title.
         Map<UUID, String> firstMessageByThread = messageRepository

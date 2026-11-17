@@ -13,6 +13,7 @@ import org.opencivic.signalos.web.dto.CommunityRoomWorkspaceResponse;
 import org.opencivic.signalos.web.dto.CreateCommunityRoomRequest;
 import org.opencivic.signalos.web.dto.PostCommunityRoomMessageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,9 +52,11 @@ public class CommunityRoomController {
         @PathVariable UUID roomId,
         @RequestParam UUID communityId,
         @RequestParam(required = false) Integer limit,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        java.time.LocalDateTime before,
         Principal principal
     ) {
-        return roomService.getRoom(communityId, roomId, principal.getName(), limit);
+        return roomService.getRoom(communityId, roomId, principal.getName(), limit, before);
     }
 
     @PostMapping
