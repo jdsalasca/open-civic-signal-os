@@ -33,7 +33,7 @@ test.describe('Language follows the place, not the installer', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Lo que pasa en');
 
-    await page.getByTestId('theme-wheel-trigger').click();
+    await page.getByTestId('user-menu-toggle').click();
     await page.getByTestId('language-wheel-en').click();
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('What is happening in');

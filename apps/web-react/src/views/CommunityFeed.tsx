@@ -465,12 +465,6 @@ export function CommunityFeed() {
     return t('community_feed.type_thread');
   };
 
-  const itemIcon = (type: CommunityFeedItem['type']) => {
-    if (type === 'signal') return 'pi pi-bolt';
-    if (type === 'blog') return 'pi pi-megaphone';
-    return 'pi pi-comments';
-  };
-
   return (
     <Layout>
       <div className="animate-fade-up motion-page">
@@ -642,21 +636,18 @@ export function CommunityFeed() {
               </CivicCard>
 
               <div className="social-feed-toolbar">
-                <div className="social-feed-filters">
-                  {filterOptions.map((option) => (
-                    <button
-                      key={option.key}
-                      type="button"
-                      className={`u-filter-chip ${filter === option.key ? 'is-active' : ''}`}
-                      onClick={() => setFilter(option.key)}
-                      aria-pressed={filter === option.key}
-                      data-testid={`community-feed-filter-${option.key}`}
-                    >
-                      <i className={option.icon} aria-hidden="true" />
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+                <label className="social-feed-filter">
+                  <span>{t('community_feed.show')}</span>
+                  <select
+                    value={filter}
+                    onChange={(event) => setFilter(event.target.value as FeedFilter)}
+                    data-testid="community-feed-filter"
+                  >
+                    {filterOptions.map((option) => (
+                      <option key={option.key} value={option.key}>{option.label}</option>
+                    ))}
+                  </select>
+                </label>
                 <div className="social-feed-toolbar-actions">
                   {newest && (
                     <span className="social-feed-freshness">
@@ -664,15 +655,17 @@ export function CommunityFeed() {
                       {t('community_feed.updated', { time: formatRelativeTime(newest.happenedAt, i18n.language) })}
                     </span>
                   )}
-                  <CivicButton
+                  <button
                     type="button"
-                    size="small"
-                    variant={alertsOn ? 'secondary' : 'ghost'}
-                    icon={alertsOn ? 'pi pi-check' : 'pi pi-bell'}
-                    label={alertsOn ? t('community_feed.alerts_on') : t('community_feed.alerts_off')}
+                    className={`social-feed-alert-button ${alertsOn ? 'is-active' : ''}`}
                     onClick={toggleAlerts}
+                    aria-pressed={alertsOn}
+                    aria-label={alertsOn ? t('community_feed.alerts_on') : t('community_feed.alerts_off')}
+                    title={alertsOn ? t('community_feed.alerts_on') : t('community_feed.alerts_off')}
                     data-testid="community-alerts-toggle"
-                  />
+                  >
+                    <i className="pi pi-bell" aria-hidden="true" />
+                  </button>
                 </div>
               </div>
 
@@ -730,9 +723,6 @@ export function CommunityFeed() {
                       className="social-feed-item"
                       data-testid={`community-feed-item-${item.type}`}
                     >
-                      <div className="social-feed-icon" aria-hidden="true">
-                        <i className={itemIcon(item.type)} />
-                      </div>
                       <div className="social-feed-copy">
                         <div className="social-feed-meta">
                           <span className="social-feed-type">{itemLabel(item.type)}</span>
@@ -759,46 +749,37 @@ export function CommunityFeed() {
                           </p>
                         )}
                         <div className="social-feed-actions">
-                          {(['LIKE', 'CELEBRATE'] as const).map((reaction) => {
-                            const key =
-                              item.type === 'thread-update'
-                                ? reaction === 'LIKE'
-                                  ? '👍'
-                                  : '🙌'
-                                : reaction;
-                            const count = item.reactions?.[key] ?? 0;
-                            const active = item.viewerReaction === key;
-                            return (
-                              <button
-                                key={reaction}
-                                type="button"
-                                onClick={() => react(item, reaction)}
-                                aria-pressed={active}
-                                className={active ? 'is-active' : undefined}
-                                data-testid={`community-feed-react-${reaction.toLowerCase()}-${item.id}`}
-                              >
-                                <i
-                                  className={reaction === 'LIKE' ? 'pi pi-heart' : 'pi pi-star'}
-                                  aria-hidden="true"
-                                />
-                                {t(reaction === 'LIKE' ? 'community_feed.like' : 'community_feed.celebrate')}
-                                {count > 0 ? ` · ${count}` : ''}
-                              </button>
-                            );
-                          })}
+                          <button
+                            type="button"
+                            onClick={() => react(item, 'LIKE')}
+                            aria-pressed={item.viewerReaction === (item.type === 'thread-update' ? '👍' : 'LIKE')}
+                            className={
+                              item.viewerReaction === (item.type === 'thread-update' ? '👍' : 'LIKE')
+                                ? 'is-active'
+                                : undefined
+                            }
+                            data-testid={`community-feed-react-like-${item.id}`}
+                          >
+                            <i className="pi pi-heart" aria-hidden="true" />
+                            {t('community_feed.like')}
+                            {(item.reactions?.[item.type === 'thread-update' ? '👍' : 'LIKE'] ?? 0) > 0
+                              ? ` · ${item.reactions?.[item.type === 'thread-update' ? '👍' : 'LIKE']}`
+                              : ''}
+                          </button>
                           {item.type === 'signal' && (
                             <button
                               type="button"
+                              className="is-icon-only"
                               onClick={() => confirmSignal(item)}
                               aria-pressed={Boolean(item.viewerConfirmed)}
+                              aria-label={item.viewerConfirmed ? t('community_feed.confirmed') : t('community_feed.confirm')}
+                              title={item.viewerConfirmed ? t('community_feed.confirmed') : t('community_feed.confirm')}
+                              data-testid={`community-feed-confirm-${item.id}`}
                             >
                               <i className="pi pi-eye" aria-hidden="true" />
-                              {item.viewerConfirmed
-                                ? t('community_feed.confirmed')
-                                : t('community_feed.confirm')}
-                              {typeof item.confirmationCount === 'number' && item.confirmationCount > 0
-                                ? ` · ${item.confirmationCount}`
-                                : ''}
+                              {typeof item.confirmationCount === 'number' && item.confirmationCount > 0 && (
+                                <span>{item.confirmationCount}</span>
+                              )}
                             </button>
                           )}
                           <button
@@ -815,17 +796,17 @@ export function CommunityFeed() {
                           </button>
                           <button
                             type="button"
+                            className="is-icon-only"
                             onClick={() => toggleFollow(item)}
                             aria-pressed={Boolean(item.following)}
+                            aria-label={item.following ? t('community_feed.following') : t('community_feed.follow')}
+                            title={item.following ? t('community_feed.following') : t('community_feed.follow')}
                             data-testid={`community-feed-follow-${item.id}`}
                           >
                             <i
                               className={item.following ? 'pi pi-check' : 'pi pi-bell'}
                               aria-hidden="true"
                             />
-                            {item.following
-                              ? t('community_feed.following')
-                              : t('community_feed.follow')}
                           </button>
                         </div>
 
