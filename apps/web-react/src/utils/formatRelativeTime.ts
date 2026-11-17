@@ -1,3 +1,5 @@
+import { parseApiDate } from './parseApiDate';
+
 /**
  * A relative time in the reader's language, e.g. "hace 7 minutos" or "7 minutes ago".
  *
@@ -7,9 +9,8 @@
  * Date".
  */
 export function formatRelativeTime(value?: string | null, language = 'es'): string {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
+  const date = parseApiDate(value);
+  if (!date) return '';
 
   const diff = date.getTime() - Date.now();
   const abs = Math.abs(diff);

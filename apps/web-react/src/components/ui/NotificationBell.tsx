@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar } from 'primereact/avatar';
 import apiClient from '../../api/axios';
 import { UserNotification } from '../../types';
+import { parseApiDate } from '../../utils/parseApiDate';
 
 /** Personal inbox: unread count in the top bar, latest items in a compact panel. */
 export function NotificationBell() {
@@ -119,7 +120,8 @@ export function NotificationBell() {
   };
 
   const timeAgo = (value: string) => {
-    const timestamp = new Date(value).getTime();
+    const parsed = parseApiDate(value);
+    const timestamp = parsed ? parsed.getTime() : Date.now();
     const minutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
     if (minutes < 1) return t('notifications.just_now');
     if (minutes < 60) return t('notifications.minutes', { count: minutes });

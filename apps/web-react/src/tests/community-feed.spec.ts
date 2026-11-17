@@ -275,6 +275,22 @@ test.describe('Community social feed', () => {
     await expect(card.getByRole('button', { name: /Comment · 3/ })).toBeVisible();
   });
 
+  test('a post from five hours ago is not shown as in the future', async ({ page }) => {
+    const happenedAt = new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 19);
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ ...feed[1], happenedAt }]),
+      }));
+
+    await page.goto('/communities/feed');
+    const card = page.locator('.social-feed-item').first();
+    await expect(card.locator('.social-feed-time')).toContainText('5 hours ago');
+    await expect(card.locator('.social-feed-time')).not.toContainText('in 5 hours');
+  });
+
   test('turns a URL in a summary into a safe link', async ({ page }) => {
     await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
     await page.route('**/api/community/feed*', (route) =>
