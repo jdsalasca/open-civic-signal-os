@@ -31,7 +31,7 @@ type ApiError = Error & {
   response?: { status?: number; data?: { message?: string } };
 };
 
-const REACTION_TYPES = ["👍", "🔥", "🙌", "📍", "👏", "🆘"];
+const REACTION_TYPES = ["👍", "❤️", "😂", "😮", "😢"];
 
 export function CommunityThreads() {
   const navigate = useNavigate();
@@ -343,6 +343,26 @@ export function CommunityThreads() {
           )}
 
           <div className="mt-3 flex flex-wrap gap-2">
+            {(['UPVOTE', 'DOWNVOTE'] as const).map((vote) => (
+              <button
+                key={`${message.id}-${vote}`}
+                type="button"
+                onClick={() => reactToMessage(thread.id, message.id, vote)}
+                aria-label={t(vote === 'UPVOTE' ? 'community_feed.upvote' : 'community_feed.downvote')}
+                aria-pressed={message.viewerReaction === vote}
+                title={t(vote === 'UPVOTE' ? 'community_feed.upvote' : 'community_feed.downvote')}
+                disabled={Boolean(reactingByMessage[`${thread.id}:${message.id}`])}
+                className={`flex align-items-center gap-2 px-2 py-1 border-round-lg border-1 ${
+                  message.viewerReaction === vote
+                    ? "border-brand-primary-alpha-60 bg-brand-primary-alpha-20 shadow-1"
+                    : "border-surface-soft bg-surface-soft-strong hover:border-brand-primary-alpha-30"
+                }`}
+                data-testid={`thread-${vote.toLowerCase()}-${message.id}`}
+              >
+                <i className={vote === 'UPVOTE' ? 'pi pi-arrow-up' : 'pi pi-arrow-down'} aria-hidden="true" />
+                <span className="text-xs font-bold text-main">{message.reactions?.[vote] || 0}</span>
+              </button>
+            ))}
             {REACTION_TYPES.map((emoji) => (
               <button
                 key={`${message.id}-${emoji}`}

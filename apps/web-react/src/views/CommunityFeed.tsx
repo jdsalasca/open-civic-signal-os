@@ -15,6 +15,7 @@ import { CivicEmptyState } from '../components/ui/CivicEmptyState';
 import { CivicButton } from '../components/ui/CivicButton';
 import { CivicPageHeader } from '../components/ui/CivicPageHeader';
 import { LinkifiedText } from '../components/ui/LinkifiedText';
+import { FeedReactionBar } from '../components/feed/FeedReactionBar';
 import { OnboardingChecklist } from '../components/OnboardingChecklist';
 import { formatRelativeTime } from '../utils/formatRelativeTime';
 
@@ -36,7 +37,9 @@ const FEED_PAGE_SIZE = 20;
 const commentKey = (item: CommunityFeedItem) => `${item.type}:${item.id}`;
 
 const reactionTotal = (item: CommunityFeedItem) =>
-  Object.values(item.reactions ?? {}).reduce((sum, value) => sum + value, 0);
+  Object.entries(item.reactions ?? {})
+    .filter(([key]) => key !== 'UPVOTE' && key !== 'DOWNVOTE')
+    .reduce((sum, [, value]) => sum + value, 0);
 
 const itemHref = (item: CommunityFeedItem) => {
   if (item.type === 'signal') return `/signal/${item.id}`;
@@ -355,13 +358,12 @@ export function CommunityFeed() {
     }
   };
 
-  const react = async (item: CommunityFeedItem, reaction: 'LIKE' | 'CELEBRATE') => {
+  const react = async (item: CommunityFeedItem, reactionKey: string) => {
     if (item.type === 'thread-update' && !item.rootMessageId) return;
     const action = `react:${item.type}:${item.id}`;
     if (pendingActions[action]) return;
     setPendingActions((current) => ({ ...current, [action]: true }));
 
-    const reactionKey = item.type === 'thread-update' ? '👍' : reaction;
     const active = item.viewerReaction === reactionKey;
     const previousReactions = item.reactions;
     const previousViewer = item.viewerReaction;
@@ -377,7 +379,7 @@ export function CommunityFeed() {
       reactions: nextReactions,
       viewerReaction: active ? null : reactionKey,
     });
-    // Optimistic: the heart reacts on tap, not after the round trip.
+    // Optimistic: the vote or reaction lands on tap, not after the round trip.
     setFeed((current) =>
       current.map((entry) => (entry.id === item.id && entry.type === item.type ? apply(entry) : entry))
     );
@@ -920,23 +922,14 @@ export function CommunityFeed() {
                           </p>
                         )}
                         <div className="social-feed-actions">
-                          <button
-                            type="button"
-                            onClick={() => react(item, 'LIKE')}
-                            aria-pressed={item.viewerReaction === (item.type === 'thread-update' ? '👍' : 'LIKE')}
-                            className={
-                              item.viewerReaction === (item.type === 'thread-update' ? '👍' : 'LIKE')
-                                ? 'is-active'
-                                : undefined
-                            }
-                            data-testid={`community-feed-react-like-${item.id}`}
-                          >
-                            <i className="pi pi-heart" aria-hidden="true" />
-                            {t('community_feed.like')}
-                            {(item.reactions?.[item.type === 'thread-update' ? '👍' : 'LIKE'] ?? 0) > 0
-                              ? ` · ${item.reactions?.[item.type === 'thread-update' ? '👍' : 'LIKE']}`
-                              : ''}
-                          </button>
+                          <FeedReactionBar
+                            itemId={item.id}
+                            reactions={item.reactions}
+                            viewerReaction={item.viewerReaction}
+                            likeKey={item.type === 'thread-update' ? '👍' : 'LIKE'}
+                            onReact={(key) => void react(item, key)}
+                            onVote={(key) => void react(item, key)}
+                          />
                           {item.type === 'signal' && (
                             <button
                               type="button"
@@ -1020,10 +1013,11 @@ export function CommunityFeed() {
                             )}
                             <InputTextarea
                               value={replyText}
-                              rows={2}
+                              rows={3}
                               maxLength={1000}
                               autoResize
                               autoFocus
+                              className="w-full social-feed-reply-input"
                               onChange={(event) => setReplyText(event.target.value)}
                               onKeyDown={(event) => {
                                 if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
@@ -1033,7 +1027,6 @@ export function CommunityFeed() {
                               }}
                               placeholder={t('community_feed.reply_placeholder')}
                               aria-label={t('community_feed.comment')}
-                              className="w-full"
                               data-testid={`community-feed-reply-input-${item.id}`}
                             />
                             <span className="social-composer-count">{replyText.length}/1000</span>

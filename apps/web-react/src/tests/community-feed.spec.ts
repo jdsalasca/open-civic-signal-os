@@ -303,6 +303,7 @@ test.describe('Community social feed', () => {
     await page.route('**/api/signals/signal-1/react', (route) => route.abort('failed'));
 
     await page.goto('/communities/feed');
+    await page.getByTestId('community-feed-react-trigger-signal-1').click();
     await page.getByTestId('community-feed-react-like-signal-1').click();
     await expect(page.getByText('No connection. Check your internet and try again.')).toBeVisible();
   });
@@ -451,11 +452,12 @@ test.describe('Community social feed', () => {
 
     await page.goto('/communities/feed');
     const card = page.locator('.social-feed-item').filter({ hasText: 'clean the park' });
-    const like = card.getByTestId('community-feed-react-like-thread-1');
-    await expect(like).toContainText('· 2');
-    await like.click();
-    await expect(like).toContainText('· 3');
-    await expect(like).toHaveAttribute('aria-pressed', 'true');
+    const trigger = card.getByTestId('community-feed-react-trigger-thread-1');
+    await expect(trigger).toContainText('· 2');
+    await trigger.click();
+    await card.getByTestId('community-feed-react-like-thread-1').click();
+    await expect(trigger).toContainText('Like');
+    await expect(trigger).toContainText('· 3');
   });
 
   test('reacts on tap without waiting for the server', async ({ page }) => {
@@ -476,11 +478,13 @@ test.describe('Community social feed', () => {
     });
 
     await page.goto('/communities/feed');
+    const trigger = page.getByTestId('community-feed-react-trigger-signal-1');
+    await trigger.click();
     const like = page.getByTestId('community-feed-react-like-signal-1');
     await like.click();
     // The count and pressed state change before the request resolves.
-    await expect(like).toContainText('· 1');
-    await expect(like).toHaveAttribute('aria-pressed', 'true');
+    await expect(trigger).toContainText('· 1');
+    await expect(trigger).toContainText('Like');
     release();
   });
 
@@ -583,10 +587,41 @@ test.describe('Community social feed', () => {
 
     await page.goto('/communities/feed');
     const card = page.locator('.social-feed-item').filter({ hasText: 'Unsafe crosswalk' });
+    const trigger = card.getByTestId('community-feed-react-trigger-signal-1');
+    await trigger.click();
     const like = card.getByTestId('community-feed-react-like-signal-1');
-    await expect(like).toContainText('Like');
+    await expect(like).toContainText('0');
     await like.click();
-    await expect(like).toContainText('· 3');
-    await expect(like).toHaveAttribute('aria-pressed', 'true');
+    await expect(trigger).toContainText('· 3');
+    await expect(trigger).toContainText('Like');
+  });
+
+  test('votes up and down on a report', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+    await page.route('**/api/signals/signal-1/react', (route) => {
+      const type = (route.request().postDataJSON() as { type: string }).type;
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ reactions: { [type]: 1 }, viewerReaction: type }),
+      });
+    });
+
+    await page.goto('/communities/feed');
+    const card = page.locator('.social-feed-item').filter({ hasText: 'Unsafe crosswalk' });
+    const up = card.getByTestId('community-feed-upvote-signal-1');
+    const down = card.getByTestId('community-feed-downvote-signal-1');
+
+    await up.click();
+    await expect(up).toHaveAttribute('aria-pressed', 'true');
+    await expect(up).toContainText('1');
+
+    await down.click();
+    await expect(down).toHaveAttribute('aria-pressed', 'true');
+    await expect(down).toContainText('1');
+    await expect(up).toHaveAttribute('aria-pressed', 'false');
+    await expect(up).toContainText('0');
   });
 });
