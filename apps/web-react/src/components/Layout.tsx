@@ -38,7 +38,7 @@ const MEMBERSHIP_CACHE_TTL_MS = 5 * 60 * 1000;
 export function Layout({ children, authMode = false }: Props) {
   const mainContentId = "main-content";
   const mobileNavId = "mobile-navigation-drawer";
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const interfaceMode = useSettingsStore((state) => state.interfaceMode);
@@ -46,6 +46,8 @@ export function Layout({ children, authMode = false }: Props) {
   const setTheme = useSettingsStore((state) => state.setTheme);
   const textScale = useSettingsStore((state) => state.textScale);
   const setTextScale = useSettingsStore((state) => state.setTextScale);
+  const language = useSettingsStore((state) => state.language);
+  const setLanguage = useSettingsStore((state) => state.setLanguage);
   const { isLoggedIn, activeRole, userName, logout } = useAuthStore();
   const {
     memberships,
@@ -410,6 +412,33 @@ export function Layout({ children, authMode = false }: Props) {
                         data-testid="text-scale-large"
                       >
                         A+
+                      </button>
+                    </div>
+                  </div>
+                  <div className="app-user-menu-theme">
+                    <span>{t('settings.language')}</span>
+                    <div>
+                      <button
+                        type="button"
+                        className={language === 'es' ? 'is-active' : ''}
+                        onClick={() => {
+                          setLanguage('es');
+                          i18n.changeLanguage('es');
+                        }}
+                        data-testid="language-wheel-es"
+                      >
+                        ES
+                      </button>
+                      <button
+                        type="button"
+                        className={language === 'en' ? 'is-active' : ''}
+                        onClick={() => {
+                          setLanguage('en');
+                          i18n.changeLanguage('en');
+                        }}
+                        data-testid="language-wheel-en"
+                      >
+                        EN
                       </button>
                     </div>
                   </div>
