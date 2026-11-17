@@ -70,6 +70,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20261116-feed-authors-chat-resilience.md` (accepted)
 - `ADR-20261116-thread-read-follow-errors.md` (accepted)
 - `ADR-20261116-history-cursors.md` (accepted)
+- `ADR-20261116-atomic-publish-timeline-resilience.md` (accepted)
 - `ADR-20260321-duplicate-clustering-human-approval.md` (accepted)
 - `ADR-20260321-bias-diagnostics.md` (accepted)
 - `ADR-20260321-weekly-digest-snapshot.md` (accepted)
