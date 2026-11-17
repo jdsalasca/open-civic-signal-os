@@ -78,6 +78,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20261117-style-unification.md` (accepted)
 - `ADR-20261117-flow-without-friction.md` (accepted)
 - `ADR-20261117-audit-polish.md` (accepted)
+- `ADR-20261117-feed-votes-reactions.md` (accepted)
 - `ADR-20260321-duplicate-clustering-human-approval.md` (accepted)
 - `ADR-20260321-bias-diagnostics.md` (accepted)
 - `ADR-20260321-weekly-digest-snapshot.md` (accepted)
