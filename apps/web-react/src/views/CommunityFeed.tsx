@@ -22,6 +22,10 @@ type FeedFilter = 'all' | CommunityFeedItem['type'];
 type FeedComment = { id: string; author: string; content: string; createdAt?: string };
 type CommentResponse = { id: string; authorUsername: string; content: string; createdAt: string };
 type DetectedPlace = { city?: string; locality?: string; neighborhood?: string; region?: string; country?: string };
+
+// In-memory only: a revisit paints instantly while the fresh page loads in the background.
+// Keyed by user + community so one account never sees another's cached feed.
+const feedCache = new Map<string, CommunityFeedItem[]>();
 type ThreadMessageResponse = { id: string; content: string; createdAt: string; hidden?: boolean; authorName?: string | null };
 
 const TITLE_LIMIT = 120;
@@ -67,6 +71,7 @@ export function CommunityFeed() {
   const [loadError, setLoadError] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [pendingActions, setPendingActions] = useState<Record<string, boolean>>({});
   const [alertsOn, setAlertsOn] = useState(false);
   const [place, setPlace] = useState<DetectedPlace | null>(null);
   const [nearest, setNearest] = useState<Community | null>(null);
@@ -112,8 +117,15 @@ export function CommunityFeed() {
       setLoadError(false);
       return;
     }
-    try {
+    const cacheKey = `${userName ?? 'anon'}:${activeCommunityId}`;
+    const cached = feedCache.get(cacheKey);
+    if (cached) {
+      setFeed(cached);
+      setLoading(false);
+    } else {
       setLoading(true);
+    }
+    try {
       setLoadError(false);
       const res = await apiClient.get<CommunityFeedItem[]>(
         `community/feed?communityId=${activeCommunityId}&days=30&size=${FEED_PAGE_SIZE}`,
@@ -121,6 +133,7 @@ export function CommunityFeed() {
       );
       setFeed(res.data ?? []);
       setHasMore((res.data ?? []).length === FEED_PAGE_SIZE);
+      feedCache.set(cacheKey, res.data ?? []);
     } catch (err) {
       const apiErr = err as ApiError & { name?: string };
       if (apiErr.name === 'CanceledError' || apiErr.name === 'AbortError') return;
@@ -129,7 +142,7 @@ export function CommunityFeed() {
     } finally {
       setLoading(false);
     }
-  }, [activeCommunityId, t]);
+  }, [activeCommunityId, t, userName]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -311,6 +324,31 @@ export function CommunityFeed() {
 
   const react = async (item: CommunityFeedItem, reaction: 'LIKE' | 'CELEBRATE') => {
     if (item.type === 'thread-update' && !item.rootMessageId) return;
+    const action = `react:${item.type}:${item.id}`;
+    if (pendingActions[action]) return;
+    setPendingActions((current) => ({ ...current, [action]: true }));
+
+    const reactionKey = item.type === 'thread-update' ? '👍' : reaction;
+    const active = item.viewerReaction === reactionKey;
+    const previousReactions = item.reactions;
+    const previousViewer = item.viewerReaction;
+    const nextReactions = { ...(item.reactions ?? {}) };
+    const nextCount = Math.max(0, (nextReactions[reactionKey] ?? 0) + (active ? -1 : 1));
+    if (nextCount === 0) {
+      delete nextReactions[reactionKey];
+    } else {
+      nextReactions[reactionKey] = nextCount;
+    }
+    const apply = (entry: CommunityFeedItem) => ({
+      ...entry,
+      reactions: nextReactions,
+      viewerReaction: active ? null : reactionKey,
+    });
+    // Optimistic: the heart reacts on tap, not after the round trip.
+    setFeed((current) =>
+      current.map((entry) => (entry.id === item.id && entry.type === item.type ? apply(entry) : entry))
+    );
+
     try {
       const endpoint =
         item.type === 'signal'
@@ -320,8 +358,7 @@ export function CommunityFeed() {
             : `community/threads/${item.id}/messages/${item.rootMessageId}/react`;
       const { data } = await apiClient.post<{ reactions: Record<string, number>; viewerReaction: string | null }>(
         endpoint,
-        // Thread messages keep emoji keys; signals and posts use the LIKE/CELEBRATE vocabulary.
-        { type: item.type === 'thread-update' ? (reaction === 'LIKE' ? '👍' : '🙌') : reaction }
+        { type: reactionKey }
       );
       setFeed((current) =>
         current.map((entry) =>
@@ -331,8 +368,21 @@ export function CommunityFeed() {
         )
       );
     } catch (err) {
+      setFeed((current) =>
+        current.map((entry) =>
+          entry.id === item.id && entry.type === item.type
+            ? { ...entry, reactions: previousReactions, viewerReaction: previousViewer }
+            : entry
+        )
+      );
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('community_feed.reaction_error'));
+    } finally {
+      setPendingActions((current) => {
+        const next = { ...current };
+        delete next[action];
+        return next;
+      });
     }
   };
   const followType = (item: CommunityFeedItem) => {
@@ -342,25 +392,56 @@ export function CommunityFeed() {
   };
 
   const toggleFollow = async (item: CommunityFeedItem) => {
+    const action = `follow:${item.type}:${item.id}`;
+    if (pendingActions[action]) return;
+    setPendingActions((current) => ({ ...current, [action]: true }));
     const next = !item.following;
+    const previous = item.following;
+    setFeed((current) =>
+      current.map((entry) =>
+        entry.id === item.id && entry.type === item.type ? { ...entry, following: next } : entry
+      )
+    );
     try {
       await apiClient.request({
         url: `follows/${followType(item)}/${item.id}`,
         method: next ? 'post' : 'delete'
       });
-      setFeed((current) =>
-        current.map((entry) =>
-          entry.id === item.id && entry.type === item.type ? { ...entry, following: next } : entry
-        )
-      );
       toast.success(next ? t('community_feed.follow_success') : t('community_feed.unfollow_success'));
     } catch (err) {
+      setFeed((current) =>
+        current.map((entry) =>
+          entry.id === item.id && entry.type === item.type ? { ...entry, following: previous } : entry
+        )
+      );
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('community_feed.follow_error'));
+    } finally {
+      setPendingActions((current) => {
+        const nextPending = { ...current };
+        delete nextPending[action];
+        return nextPending;
+      });
     }
   };
 
   const confirmSignal = async (item: CommunityFeedItem) => {
+    const action = `confirm:${item.type}:${item.id}`;
+    if (pendingActions[action]) return;
+    setPendingActions((current) => ({ ...current, [action]: true }));
+    const previousCount = item.confirmationCount;
+    const previousViewer = item.viewerConfirmed;
+    setFeed((current) =>
+      current.map((entry) =>
+        entry.id === item.id && entry.type === item.type
+          ? {
+              ...entry,
+              confirmationCount: Math.max(0, (entry.confirmationCount ?? 0) + (entry.viewerConfirmed ? -1 : 1)),
+              viewerConfirmed: !entry.viewerConfirmed,
+            }
+          : entry
+      )
+    );
     try {
       const { data } = await apiClient.request<{ count: number; confirmedByViewer: boolean }>({
         url: `signals/${item.id}/confirmations`,
@@ -375,8 +456,21 @@ export function CommunityFeed() {
       );
       toast.success(data.confirmedByViewer ? t('community_feed.confirmed') : t('community_feed.unconfirmed'));
     } catch (err) {
+      setFeed((current) =>
+        current.map((entry) =>
+          entry.id === item.id && entry.type === item.type
+            ? { ...entry, confirmationCount: previousCount, viewerConfirmed: previousViewer }
+            : entry
+        )
+      );
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('community_feed.confirm_error'));
+    } finally {
+      setPendingActions((current) => {
+        const nextPending = { ...current };
+        delete nextPending[action];
+        return nextPending;
+      });
     }
   };
 
@@ -433,17 +527,39 @@ export function CommunityFeed() {
     }
     setPublishing(true);
     try {
-      await apiClient.post('community/threads', {
+      const { data } = await apiClient.post<CommunityThread>('community/threads', {
         sourceCommunityId: activeCommunityId,
         targetCommunityId: activeCommunityId,
         title: title.trim(),
         initialMessage: body.trim()
       });
+      const root = data.messages?.[0];
+      const newItem: CommunityFeedItem = {
+        type: 'thread-update',
+        id: data.id,
+        communityId: activeCommunityId,
+        title: data.title,
+        summary: body.trim(),
+        happenedAt: data.updatedAt ?? new Date().toISOString(),
+        freshness: '',
+        following: false,
+        reactions: root?.reactions ?? {},
+        viewerReaction: null,
+        authorName: userName ?? null,
+        authorRole: 'CITIZEN',
+        commentCount: Math.max(0, (data.messages?.length ?? 1) - 1),
+        rootMessageId: root?.id ?? null,
+      };
+      const cacheKey = `${userName ?? 'anon'}:${activeCommunityId}`;
+      const nextFeed = [newItem, ...feed];
+      setFeed(nextFeed);
+      feedCache.set(cacheKey, nextFeed);
       setTitle('');
       setBody('');
       setComposerOpen(false);
-      await loadFeed();
       toast.success(t('community_feed.published'));
+      // Reconcile in the background; the card is already visible.
+      void loadFeed();
     } catch (err) {
       const apiErr = err as ApiError;
       toast.error(apiErr.friendlyMessage || t('community_feed.publish_error'));

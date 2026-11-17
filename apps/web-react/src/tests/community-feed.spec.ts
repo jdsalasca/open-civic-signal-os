@@ -54,9 +54,50 @@ test.describe('Community social feed', () => {
   test('shows one timeline, filters it and publishes from the composer', async ({ page }) => {
     let publishPayload: Record<string, unknown> | null = null;
     let threadMessageCalls = 0;
+    let published = false;
+    const newThreadItem = {
+      type: 'thread-update',
+      id: 'new-thread',
+      communityId: cid,
+      title: 'A new community question',
+      summary: 'This is the message body.',
+      happenedAt: '2026-11-16T12:00:00',
+      freshness: '',
+      following: false,
+      reactions: {},
+      viewerReaction: null,
+      authorName: 'liaison',
+      authorRole: 'CITIZEN',
+      commentCount: 0,
+      rootMessageId: 'new-thread-message',
+    };
     await page.route('**/api/community/threads', (route) => {
       publishPayload = route.request().postDataJSON() as Record<string, unknown>;
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'new-thread' }) });
+      published = true;
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: 'new-thread',
+          title: 'A new community question',
+          updatedAt: '2026-11-16T12:00:00',
+          messages: [
+            {
+              id: 'new-thread-message',
+              threadId: 'new-thread',
+              authorId: 'u1',
+              authorName: 'liaison',
+              sourceCommunityId: cid,
+              content: 'This is the message body.',
+              depth: 0,
+              directReplyCount: 0,
+              hidden: false,
+              createdAt: '2026-11-16T12:00:00',
+              reactions: {},
+            },
+          ],
+        }),
+      });
     });
     await page.route('**/api/community/threads/new-thread/messages', (route) => {
       threadMessageCalls += 1;
@@ -98,7 +139,11 @@ test.describe('Community social feed', () => {
     await mockDashboardRoutes(page);
     // After the shared helper so these payloads win.
     await page.route('**/api/community/feed*', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(published ? [newThreadItem, ...feed] : feed),
+      }));
     await page.route('**/api/follows/**', (route) =>
       route.fulfill({
         status: 200,
@@ -144,7 +189,8 @@ test.describe('Community social feed', () => {
 
     await expect(page.getByText('Published in the community feed.')).toBeVisible();
     await expect(page.locator('#feed-post-title')).toHaveCount(0);
-    await expect(page.locator('.social-feed-item')).toHaveCount(3);
+    await expect(page.getByText('A new community question')).toBeVisible();
+    await expect(page.locator('.social-feed-item')).toHaveCount(4);
     // Thread and body travel in one request: a second call could fail and leave an empty thread.
     expect(publishPayload).toMatchObject({
       title: 'A new community question',
@@ -404,6 +450,32 @@ test.describe('Community social feed', () => {
     await like.click();
     await expect(like).toContainText('· 3');
     await expect(like).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('reacts on tap without waiting for the server', async ({ page }) => {
+    await seedAuthenticatedApp(page, 'CITIZEN', { communityId: cid });
+    await page.route('**/api/community/feed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(feed) }));
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route('**/api/signals/signal-1/react', async (route) => {
+      await gate;
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ reactions: { LIKE: 1 }, viewerReaction: 'LIKE' }),
+      });
+    });
+
+    await page.goto('/communities/feed');
+    const like = page.getByTestId('community-feed-react-like-signal-1');
+    await like.click();
+    // The count and pressed state change before the request resolves.
+    await expect(like).toContainText('· 1');
+    await expect(like).toHaveAttribute('aria-pressed', 'true');
+    release();
   });
 
   test('likes a report from the feed and updates the count', async ({ page }) => {

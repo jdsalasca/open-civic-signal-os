@@ -74,6 +74,7 @@ Create/update an ADR when any of the following changes:
 - `ADR-20261116-calm-feed-location.md` (accepted)
 - `ADR-20261116-monochrome-topnav.md` (accepted)
 - `ADR-20261117-fewer-controls.md` (accepted)
+- `ADR-20261117-optimistic-feed.md` (accepted)
 - `ADR-20260321-duplicate-clustering-human-approval.md` (accepted)
 - `ADR-20260321-bias-diagnostics.md` (accepted)
 - `ADR-20260321-weekly-digest-snapshot.md` (accepted)
