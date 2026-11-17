@@ -155,6 +155,9 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.chat'), to: '/communities/rooms', icon: 'pi pi-comments', visible: isLoggedIn },
     { label: t('nav.report'), to: '/report', icon: 'pi pi-plus-circle', visible: isLoggedIn, testId: 'report-issue-button' },
   ];
+  const personalNav: NavItem[] = [
+    { label: t('nav.my_contributions'), to: '/mine', icon: 'pi pi-user', visible: isLoggedIn },
+  ];
   const collaborationNav: NavItem[] = [
       { label: t('nav.community_trust'), to: '/communities/trust', icon: 'pi pi-chart-line', visible: isLoggedIn && showAdvancedTools },
       { label: t('nav.community_merge_review'), to: '/communities/merge-review', icon: 'pi pi-clone', visible: isLoggedIn && showAdvancedTools },
@@ -176,7 +179,7 @@ export function Layout({ children, authMode = false }: Props) {
     { label: t('nav.help_center'), to: '/help', icon: 'pi pi-question-circle', visible: isLoggedIn },
     { label: t('nav.settings'), to: '/settings', icon: 'pi pi-cog', visible: isLoggedIn },
   ];
-  const navItems = [...primaryNav, ...collaborationNav, ...advancedNav];
+  const navItems = [...primaryNav, ...personalNav, ...collaborationNav, ...advancedNav];
   const matchedNavItem = navItems.find((item) => item.to === location.pathname);
   /*
    * Detail routes are not navigation destinations, so an exact match can never find them and the
